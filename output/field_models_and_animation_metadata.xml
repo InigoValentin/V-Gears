@@ -1,0 +1,270 @@
+<metadata>
+	<!-- Renames functions/entities in scripts and script var names to something more readable -->
+	<scripts>
+		<!-- Used by PRTYE and other OpCodes -->
+		<CharacterIds>
+		    <char Id="0" Name="Cloud"/>
+			<char Id="1" Name="Barret"/>
+			<char Id="2" Name="Tifa"/>
+			<char Id="3" Name="Aeris"/>
+			<char Id="4" Name="Red XIII"/>
+			<char Id="5" Name="Yuffie"/>
+			<char Id="6" Name="Cait Sith"/>
+			<char Id="7" Name="Vincent"/>
+			<char Id="8" Name="Cid"/>
+			<char Id="9" Name="Young Cloud"/>
+			<char Id="10" Name="Sephiroth"/>
+			<char Id="11" Name="Chocobo"/>
+		</CharacterIds>
+	
+		<!-- Applies to all fields or any field that hasn't got field specific data -->
+		<var_names>
+			<var Bank="1" Address="3" Name="love_point_aeris"/>
+			<var Bank="1" Address="4" Name="love_point_tifa"/>
+			<var Bank="1" Address="5" Name="love_point_yuffie"/>
+			<var Bank="1" Address="6" Name="love_point_barret"/>
+			<var Bank="1" Address="20" Name="timer_hours"/>
+			<var Bank="1" Address="21" Name="timer_minutes"/>
+			<var Bank="1" Address="22" Name="timer_seconds"/>
+			<var Bank="1" Address="23" Name="timer_frames"/>
+			<var Bank="1" Address="36" Name="graveyard_item"/>
+			<var Bank="1" Address="48" Name="item_mask2"/>
+			<var Bank="1" Address="80" Name="battle_love_aeris"/>
+			<var Bank="1" Address="81" Name="battle_love_tifa"/>
+			<var Bank="1" Address="82" Name="battle_love_yuffie"/>
+			<var Bank="1" Address="83" Name="battle_love_barret"/>
+			<var Bank="1" Address="164" Name="graveyard_train"/>
+			<var Bank="1" Address="225" Name="act1_1_flags1"/>
+			<var Bank="1" Address="226" Name="act1_1_flags2"/>
+			
+			<var Bank="2" Address="0" Name="progress_game"/>
+			<var Bank="2" Address="28" Name="menu_appear"/>
+			<var Bank="2" Address="30" Name="menu_selectable"/>
+			
+			<var Bank="3" Address="66" Name="act1_1_flags3"/>
+			<var Bank="3" Address="111" Name="flower_flag"/>
+			<var Bank="3" Address="112" Name="act1_3_flags5"/>
+			<var Bank="3" Address="126" Name="act1_3_unknown"/>
+			<var Bank="3" Address="127" Name="tunnel_room"/>
+			<var Bank="3" Address="128" Name="act1_3_flags1"/>
+			<var Bank="3" Address="129" Name="act1_3_flags2"/>
+			<var Bank="3" Address="130" Name="act1_3_flags3"/>
+			<var Bank="3" Address="131" Name="act1_3_flags4"/>
+			<var Bank="3" Address="208" Name="act1_2_flags1"/>
+			<var Bank="3" Address="209" Name="act1_2_flags2"/>
+			<var Bank="3" Address="210" Name="act1_2_flags3"/>
+			<var Bank="3" Address="211" Name="act1_2_flags4"/>
+			<var Bank="3" Address="212" Name="act1_2_flags5"/>
+			<var Bank="3" Address="213" Name="act1_2_flags6"/>
+			<var Bank="3" Address="214" Name="act1_2_flags7"/>
+			<var Bank="3" Address="215" Name="act1_2_flags8"/>
+			<var Bank="3" Address="216" Name="act1_2_flags9"/>
+			<var Bank="3" Address="217" Name="act1_7_flags1"/>
+			<var Bank="3" Address="223" Name="act1_1_flags4"/>
+			
+			<var Bank="6" Address="0" Name="triangleId"/>
+			<var Bank="6" Address="6" Name="expectedTriangleId"/>
+			<var Bank="6" Address="9" Name="movieFrameNumber"/>
+			
+			<var Bank="5" Address="21" Name="bMoviePlaying"/>
+			<var Bank="5" Address="11" Name="bMoviePastFrame30"/>
+		
+			<var Bank="13" Address="30" Name="pointer"/>
+			<var Bank="13" Address="31" Name="materia_full"/>
+			<var Bank="13" Address="91" Name="save_flag"/>
+			
+			<var Bank="15" Address="32" Name="sector1_item"/>
+			<var Bank="15" Address="33" Name="sector5_item"/>
+			<var Bank="15" Address="80" Name="subway_item"/>
+		
+		</var_names>
+
+		<entity_names>
+     		<entity name="mapinit" new="Director"/>
+			<entity name="directr" new="Director"/>
+		    <entity name="produce" new="Director"/>
+			<entity name="init" new="Director"/>
+    		<entity name="dic" new="Director"/>
+			<entity name="dir" new="Director"/>
+			
+			<entity name="cloud" new="Cloud"/>
+			<entity name="cl" new="Cloud"/>
+			
+			<entity name="f_cloud" new="DressedCloud"/>
+
+			<entity name="ba" new="Barret"/>
+			<entity name="bal" new="Barret"/>
+			<entity name="ballet" new="Barret"/>
+			<entity name="balette" new="Barret"/>
+		
+			<entity name="earith" new="Aeris"/>
+			<entity name="ea" new="Aeris"/>
+			
+			<entity name="fearis" new="DressedAeris"/>
+			
+			<entity name="cid" new="Cid"/>
+			
+			<entity name="big" new="Biggs"/>
+			<entity name="bigs" new="Biggs"/>
+			<entity name="av_m" new="Biggs"/>
+			<entity name="av_b" new="Biggs"/>
+			<entity name="aval" new="Biggs"/>
+		
+			<entity name="je" new="Jessie"/>
+			<entity name="jecy" new="Jessie"/>
+			<entity name="jesy" new="Jessie"/>
+			<entity name="av_l" new="Jessie"/>
+			<entity name="av_c" new="Jessie"/>
+			<entity name="av_j" new="Jessie"/>
+			<entity name="avaw" new="Jessie"/>
+		
+			<entity name="wedge" new="Wedge"/>
+			<entity name="weadge" new="Wedge"/>
+			<entity name="av_s" new="Wedge"/>
+			<entity name="av_w" new="Wedge"/>
+			<entity name="avaf" new="Wedge"/>
+			
+			<entity name="ti" new="Tifa"/>
+			<entity name="tifa" new="Tifa"/>
+			
+			<entity name="fe0" new="Chest"/>
+		
+			<entity name="marine" new="Marlene"/>
+			
+			<entity name="drL" new="DoorLeft"/>
+			<entity name="drR" new="DoorRight"/>
+		
+			
+		</entity_names>
+		
+		<!-- Apply only to the given field, overrides the "global data -->
+		<field name="md1stin">
+				
+			<!-- TODO correct namess -->
+			<function entity_name="test" name="f1" new="action1" />
+			
+			<function entity_name="test" name="f2" new="action1" Comment="Barret run from train and invite Cloud" />
+			<function entity_name="test" name="f3" new="action2" Comment="Barret run to next field" />
+			
+		
+			<entity name="Hei0" new="Hei0" Comment="1st army man that attacks Cloud as we approach next field."/>
+			<function entity_name="test" name="f4" new="action1" Comment="Army man run from gate to Cloud." />
+
+			<entity name="Hei1" new="Hei1" Comment="2nd army man that attacks Cloud as we approach next field."/>
+			<function entity_name="test" name="f5" new="action1" Comment="Army man run from gate to Cloud." />
+
+
+			<function entity_name="test" name="f6" new="action1" Comment="This is all action that does Biggs. At first he jumps from train, then he throws guard and a bit later run to next map." />
+			<function entity_name="test" name="f7" new="action1" Comment="This is all action that does Jessie. At first she run from train, then she kicks guard and a bit later run to next map." />
+			<function entity_name="test" name="f8" new="action1" Comment="This is all action that does Wedge. At first he jumps from train, then he looks around and a bit later run to next map." />
+			
+			<entity name="Gu0" new="Gu0" Comment="One of two guards thas stays on train station at the very beginning.This one is closest to camera. Jessie takes him off." />
+			<function entity_name="test" name="f9" new="action1" Comment="This is what Gu0 do. First Gu0 look to Jessie and then run to her. Jessie kicks Gu0 away and then Gu0 stay on the ground." />
+			
+			<entity name="Gu1" new="Gu1" Comment="One of two guards thas stays on train station at the very beginning. This one stay far from camera. Biggs takes him off." />
+			<function entity_name="test" name="f10" new="action1" Comment="This is what Gu1 do after Biggs jumps from the train. First Gu1 look to Biggs and then run to him. Biggs throw Gu1 to the ground and then Gu1 stay on it." />
+			<function entity_name="test" name="f11" new="activate" Comment="his will activate Gu1 in place of Gu0. Don't know why it is done this way." />
+		
+			<entity name="GuAdd" new="GuAdd" Comment="Additional guard model used when script switch model. Don't know why it is dome this way." />
+			<function entity_name="test" name="f12" new="activate" Comment="We activate this entity after deactivation of Gu1. Don't know why we need to do this, but FFVII handle it this way. " />
+			
+			
+		</field>
+		
+		<field name="md1_1">
+			<!-- TODO not applied -->
+			<entity name="entity_8" new="Movie" />
+
+			<function entity_name="Cloud" name="script_3" new="scene_part_1" Comment="Move Cloud to talk position for the scene." />
+			<function entity_name="Cloud" name="script_5" new="scene_part_5" Comment="Cloud reply his name to Avalanche." />
+			<function entity_name="Cloud" name="script_6" new="scene_part_6" Comment="Cloud tells Biggs that he didn't care about names." />
+			<function entity_name="Cloud" name="script_7" new="scene_part_9" />
+			<function entity_name="Cloud" name="script_8" new="scene_part_14" />
+			<function entity_name="Cloud" name="script_9" new="scene_part_16" Comment="look at reactor and run after Barret and others." />
+			
+			<function entity_name="Barret" name="script_3" new="scene_part_8" />
+			<function entity_name="Barret" name="script_4" new="scene_part_13" />
+			<function entity_name="Barret" name="script_5" new="scene_part_15" />
+			
+			<function entity_name="Biggs" name="script_3" new="scene_part_2" Comment="Turn to Cloud and start talk to him." />
+			<function entity_name="Biggs" name="script_4" new="scene_part_4" Comment="Dialog with Jessie and Cloud. We input Cloud name during this scene and call Cloud reply." />
+			<function entity_name="Biggs" name="script_5" new="scene_part_7" />
+			<function entity_name="Biggs" name="script_6" new="scene_part_11" />
+		
+			<function entity_name="Jessie" name="script_3" new="scene_part_3" Comment="Stop breaking gate for a while and talk." />
+			<function entity_name="Jessie" name="script_4" new="scene_part_10" />
+			
+			<function entity_name="Wedge" name="script_3" new="scene_part_12" />
+			
+			<function entity_name="DoorLeft" name="script_3" new="open" />
+			<function entity_name="DoorRight" name="script_3" new="open" />
+			
+		</field>
+		
+	</scripts>
+
+	<!-- Renames for models to something more readable -->
+	<models>
+		<model name="aaaa" target="cloud"></model>
+		<model name="acgd" target="barret"></model>
+		<model name="aagb" target="tifa"></model>
+		<model name="abjb" target="yuffie"></model>
+		<model name="abda" target="cid"></model>
+		<model name="bxbe" target="wedge"></model>
+		<model name="bwfd" target="biggs"></model>
+		<model name="axdc" target="jessie"></model>
+		<model name="bwab" target="soldier"></model>
+		<model name="azhe" target="guard"></model>
+		<model name="adda" target="sd_red"></model>
+		<model name="byib" target="blue_materia"></model>
+		<model name="cahc" target="aerisflowers"></model>
+		<model name="cbfe" target="md8_2_midgar_woman"></model>
+		<!--<model name="ccbc" target="md8_2_midgar_man"></model>-->
+		<model name="cdja" target="shinra_train_conductor"></model>
+		<model name="awcb" target="shinra_train_employee"></model>
+		<model name="cfbb" target="midgar_beggar"></model>
+		<model name="cfha" target="market_usan"></model>
+		<model name="cgda" target="midgar_child_boy1"></model>
+		<model name="cgif" target="midgar_child_boy2"></model>
+		<model name="ched" target="midgar_child_girl"></model>
+		<model name="ciac" target="midgar_man14"></model>
+	</models>
+
+	<!-- Renames for animations to something more readable -->
+	<animations>
+		<animation name="acfe" target="Idle"></animation>
+		<animation name="aaff" target="Walk"></animation>
+		<animation name="aaga" target="Run"></animation>
+		<animation name="bvjf" target="JumpFromTrain"></animation>
+		<animation name="bxbb" target="JumpFromTrain"></animation>
+		<animation name="bxbc" target="Throw"></animation>
+		<animation name="bxbd" target="Kick"></animation>
+		<animation name="bxhc" target="Dead1"></animation>
+		<animation name="bxhd" target="LookBack"></animation>
+		<animation name="bxhe" target="Kicked"></animation>
+		<animation name="bxhf" target="Dead2"></animation>
+		<animation name="bxia" target="Throwed"></animation>
+	
+		<animation name="auee" target="LookAtPeople"></animation>
+		<animation name="ajdd" target="TalkNo"></animation>
+		<animation name="bxib" target="Idle"></animation>
+		<animation name="bxic" target="TalkGesture"></animation>
+		<animation name="bxid" target="BreakUp"></animation>
+		<animation name="bxie" target="BreakUpLookBack"></animation>
+		<animation name="bxif" target="BreakUpGetUp"></animation>
+		<animation name="bxja" target="LookAround"></animation>
+	
+		<animation name="bxjf" target="DoorIdle"></animation>
+	
+		
+		<animation name="adcb" target="Idle"></animation>
+		<animation name="adcc" target="Walk"></animation>
+		<animation name="adcd" target="Run"></animation>
+		<animation name="bwaa" target="Invitation"></animation>
+		
+		<animation name="aeae" target="Idle"></animation>
+		<animation name="aeaf" target="Walk"></animation>
+		<animation name="aeba" target="Run"></animation>
+	</animations>
+	
+</metadata>

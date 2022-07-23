@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<map>
+    <script file_name="maps/ffvii/field/elevtr1.lua" />
+    <background2d file_name="maps/ffvii/field/elevtr1_bg.xml" />
+    <walkmesh file_name="maps/ffvii/field/elevtr1_wm.xml" />
+    <text file_name="maps/ffvii/field/elevtr1_text.xml" />
+    <movement_rotation degree="-5.625" />
+
+    <entity_script name="Director" />
+    <entity_model name="Cloud" file_name="models/ffvii/field/units/cloud.mesh" position="-1.07813 0.4375 0.0390624" direction="0" />
+    <entity_model name="Barret" file_name="models/ffvii/field/units/barret.mesh" position="0 0 0.0390624" direction="0" />
+    <entity_script name="Elevator" />
+    <entity_script name="View" />
+    <entity_model name="Jessie" file_name="models/ffvii/field/units/jessie.mesh" position="0 0 0.0390624" direction="0" />
+
+    <entity_trigger name="Gateway0" point1="-1.47813 1 0.0390624" point2="-1.47813 -1 0.0390624" enabled="true" />
+	<entity_trigger name="Gateway1" point1="1 -10 3.83594" point2="-1 -10 3.83594" enabled="true" />
+    <entity_point name="Spawn_elevtr1_1f" position="-1.07813 0.4375 0.0390624" rotation="67.7647" />
+</map>
