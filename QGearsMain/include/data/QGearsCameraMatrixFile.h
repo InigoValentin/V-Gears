@@ -70,7 +70,7 @@ namespace QGears
     private:
         Ogre::Matrix3   m_matrix;
         Ogre::Vector3   m_position;
-        Pixel           m_offset;
+        Pixel           moffset_;
         Ogre::Real      m_focal_length;
         size_t          m_count;
     };

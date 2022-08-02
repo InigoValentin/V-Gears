@@ -326,11 +326,11 @@ ViewerModule::SetWalkmeshToLoad( const Ogre::String& name )
     Ogre::String file_name = xml.GetMapFileNameByName( name );
 
     XmlMapFile xml_map( "./data/" + file_name );
-    Ogre::String walkmesh_file_name = xml_map.GetWalkmeshFileName();
+    Ogre::String walkmeshfile_name_ = xml_map.GetWalkmeshFileName();
 
-    if( walkmesh_file_name != "" )
+    if( walkmeshfile_name_ != "" )
     {
-        XmlWalkmeshFile walkmesh_file( "./data/" + walkmesh_file_name );
+        XmlWalkmeshFile walkmesh_file( "./data/" + walkmeshfile_name_ );
         m_Walkmesh = new Walkmesh();
         walkmesh_file.Load( m_Walkmesh );
         //m_SceneNode->attachObject( m_Walkmesh );

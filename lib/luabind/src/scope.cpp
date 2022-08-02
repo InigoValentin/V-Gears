@@ -128,15 +128,15 @@ namespace luabind {
     
     module_::module_(lua_State* L, char const* name = 0)
         : m_state(L)
-        , m_name(name)
+        , name_(name)
     {
     }
 
     void module_::operator[](scope s)
     {
-        if (m_name)
+        if (name_)
         {
-            lua_pushstring(m_state, m_name);
+            lua_pushstring(m_state, name_);
             lua_gettable(m_state, LUA_GLOBALSINDEX);
 
             if (!lua_istable(m_state, -1))
@@ -144,7 +144,7 @@ namespace luabind {
                 lua_pop(m_state, 1);
 
                 lua_newtable(m_state);
-                lua_pushstring(m_state, m_name);
+                lua_pushstring(m_state, name_);
                 lua_pushvalue(m_state, -2);
                 lua_settable(m_state, LUA_GLOBALSINDEX);
             }
@@ -162,7 +162,7 @@ namespace luabind {
     struct namespace_::registration_ : detail::registration
     {
         registration_(char const* name)
-            : m_name(name)
+            : name_(name)
         {
         }
 
@@ -171,7 +171,7 @@ namespace luabind {
 			LUABIND_CHECK_STACK(L);
             assert(lua_gettop(L) >= 1);
 
-            lua_pushstring(L, m_name);
+            lua_pushstring(L, name_);
             lua_gettable(L, -2);
 
 			detail::stack_pop p(L, 1); // pops the table on exit
@@ -181,7 +181,7 @@ namespace luabind {
                 lua_pop(L, 1);
 
                 lua_newtable(L);
-                lua_pushstring(L, m_name);
+                lua_pushstring(L, name_);
                 lua_pushvalue(L, -2);
                 lua_settable(L, -4);
             }
@@ -189,7 +189,7 @@ namespace luabind {
             m_scope.register_(L);
         }
 
-        char const* m_name;
+        char const* name_;
         scope m_scope;
     };
 

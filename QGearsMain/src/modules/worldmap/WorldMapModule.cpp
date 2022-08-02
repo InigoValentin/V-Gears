@@ -18,7 +18,7 @@
 
 template<> QGears::WorldMapModule *Ogre::Singleton< QGears::WorldMapModule >::msSingleton = nullptr;
 
-BEGIN_QGEARS
+namespace QGears {
 
 using namespace Ogre;
 
@@ -582,4 +582,4 @@ void WorldMapModule::Init()
     CameraManager::getSingleton().EnableWireFrame(true);
 }
 
-END_QGEARS
+} // namespace QGears

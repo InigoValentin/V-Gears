@@ -7,7 +7,7 @@
 MovableTextArea::MovableTextArea(const Ogre::String& name):
     Ogre::TextAreaOverlayElement(name),
 
-    m_Position(0, 0, 0),
+    position_(0, 0, 0),
     m_AdditionalHeight(0)
 {
 }
@@ -23,7 +23,7 @@ MovableTextArea::~MovableTextArea()
 void
 MovableTextArea::Set3DPosition(const Ogre::Vector3& position)
 {
-    m_Position = position;
+    position_ = position;
 }
 
 
@@ -41,7 +41,7 @@ MovableTextArea::getWorldTransforms(Ogre::Matrix4 *xform) const
 {
     Ogre::Camera* camera = Ogre::Root::getSingleton().getAutoCreatedWindow()->getViewport(0)->getCamera();
 
-    Ogre::Vector3 p = m_Position;
+    Ogre::Vector3 p = position_;
     p.z = p.z + m_AdditionalHeight;
     p = camera->getProjectionMatrix() * camera->getViewMatrix() * p;
 

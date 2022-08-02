@@ -64,7 +64,7 @@ namespace QGears
     Background2DFile::unloadImpl()
     {
         m_texture_name.clear();
-        //m_range = 0; // IVV
+        //range_ = 0; // IVV
         m_position = Ogre::Vector3::ZERO;
         m_orientation = Ogre::Quaternion::IDENTITY;
         m_fov = 0;
@@ -110,14 +110,14 @@ namespace QGears
     void
     Background2DFile::setRange( const Ogre::Vector4 &range )
     {
-        m_range = range;
+        range_ = range;
     }
 
     //---------------------------------------------------------------------
     Ogre::Vector4
     Background2DFile::getRange() const
     {
-        return m_range;
+        return range_;
     }
 
     //---------------------------------------------------------------------

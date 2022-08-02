@@ -48,7 +48,7 @@ luabind::detail::class_rep::class_rep(type_id const& type
 	, lua_State* L
 )
 	: m_type(type)
-	, m_name(name)
+	, name_(name)
 	, m_class_type(cpp_class)
 	, m_operator_cache(0)
 {
@@ -82,7 +82,7 @@ luabind::detail::class_rep::class_rep(type_id const& type
 
 luabind::detail::class_rep::class_rep(lua_State* L, const char* name)
 	: m_type(typeid(null_type))
-	, m_name(name)
+	, name_(name)
 	, m_class_type(lua_class)
 	, m_operator_cache(0)
 {

@@ -303,10 +303,10 @@ ModelFile::LoadPoly010305_18( float*& pPos, float*& tPos, Ogre::RGBA*& cPos, con
     Ogre::ColourValue colour = Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f);
 
     Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-    Ogre::RGBA conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
+    Ogre::RGBA convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
 
     return 1;
 }
@@ -350,10 +350,10 @@ ModelFile::LoadPoly04_18(float*& pPos, float*& tPos, Ogre::RGBA*& cPos, const Me
     Ogre::ColourValue colour = Ogre::ColourValue(GetU8(m_PointerToTextureData + 0x0) / 255.0f, GetU8(m_PointerToTextureData + 0x1) / 255.0f, GetU8(m_PointerToTextureData + 0x2) / 255.0f, 1.0f);
 
     Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-    Ogre::RGBA conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
+    Ogre::RGBA convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
 
     return 1;
 }
@@ -445,13 +445,13 @@ ModelFile::LoadPoly090d_18(float*& pPos, float*& tPos, Ogre::RGBA*& cPos, const 
     Ogre::ColourValue colour = Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f);
 
     Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-    Ogre::RGBA conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
+    Ogre::RGBA convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
 
     return 1;
 }
@@ -508,13 +508,13 @@ ModelFile::LoadPoly0c_18(float*& pPos, float*& tPos, Ogre::RGBA*& cPos, const Me
     Ogre::ColourValue colour = Ogre::ColourValue(GetU8(m_PointerToTextureData + 0x0) / 255.0f, GetU8(m_PointerToTextureData + 0x1) / 255.0f, GetU8(m_PointerToTextureData + 0x2) / 255.0f, 1.0f);
 
     Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-    Ogre::RGBA conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
-    rs->convertColourValue(colour, &conv_colour); *cPos++ = conv_colour;
+    Ogre::RGBA convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
+    rs->convertColourValue(colour, &convcolour_); *cPos++ = convcolour_;
 
     return 1;
 }

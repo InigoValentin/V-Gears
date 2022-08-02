@@ -1,42 +1,62 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-17 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsStringUtil_H__
-#define __QGearsStringUtil_H__
+#pragma once
 
 #include "common/TypeDefine.h"
 
-namespace QGears
-{
-    class StringUtil : public Ogre::StringUtil
-    {
-    public:
-        static void splitPath( const String &qualifiedName, String &outPath );
-        static void splitBase( const String &qualifiedName, String &outBasename );
-        static void splitFull( const String &qualifiedName, String &outBasename );
+namespace QGears{
+
+    /**
+     * Static class for common string manipulations.
+     */
+    class StringUtil : public Ogre::StringUtil{
+
+        public:
+
+            /**
+             * Extract a file path.
+             *
+             * Extracts a file path from a fully qualified file name (i.e: full
+             * filepath + filename).
+             *
+             * @param nameame[in] Fully qualified file name.
+             * @param path[out] Path to the file, without the file name.
+             */
+            static void splitPath(const String &name, String &path);
+
+            /**
+             * Extract a file name without extension.
+             *
+             * Extracts a file name, without the file extension, from a fully
+             * qualified file name (i.e: full filepath + filename).
+             *
+             * @param name[in] Fully qualified file name.
+             * @param basename[out] File name, without extension.
+             */
+            static void splitBase(const String &name, String &basename);
+
+            /**
+             * Extract a file name without extension.
+             *
+             * Extracts a file name, without the file extension, from a full
+             * file name without path.
+             *
+             * @param name[in] File name.
+             * @param basename[out] File name, without extension.
+             */
+            static void splitFull(const String &name, String &basename);
     };
 }
-
-#endif // __QGearsStringUtil_H__

@@ -650,7 +650,7 @@ DatFile::DumpScript(const Ogre::String& export_path, const Field& field)
     for (u8 i = 0; i < number_of_entity; ++i)
     {
         // get entity name
-        Ogre::String name = Ogre::String(reinterpret_cast<char*>(m_Buffer)+offset_to_sector + 0x20 + i * 0x08);
+        Ogre::String name = Ogre::String(reinterpret_cast<char*>(buffer_)+offset_to_sector + 0x20 + i * 0x08);
         if (name == "")
         {
             name = "unnamed_" + IntToString(i);

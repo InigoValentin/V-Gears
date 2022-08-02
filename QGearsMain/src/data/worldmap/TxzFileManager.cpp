@@ -3,7 +3,7 @@
 
 template<> QGears::TxzFileManager* Ogre::Singleton<QGears::TxzFileManager>::msSingleton = nullptr;
 
-BEGIN_QGEARS
+namespace QGears {
 
 TxzFileManager* TxzFileManager::getSingletonPtr()
 {
@@ -39,4 +39,4 @@ Ogre::Resource* TxzFileManager::createImpl(
     return new TxzFile( this, name, handle, group, isManual, loader );
 }
 
-END_QGEARS
+} // namespace QGears

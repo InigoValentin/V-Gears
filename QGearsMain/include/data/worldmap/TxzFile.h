@@ -3,7 +3,7 @@
 
 #include "common/QGearsResource.h"
 
-BEGIN_QGEARS
+namespace QGears {
 
 class TxzFile : public Resource
 {
@@ -23,6 +23,6 @@ private:
 
 typedef Ogre::SharedPtr<TxzFile> TxzFilePtr;
 
-END_QGEARS
+} // namespace QGears
 
 #endif // _TXZ_FILE_H_

@@ -276,7 +276,7 @@ private:
 
 
 
-    File* m_Music;
+    File* music_;
 
 
 

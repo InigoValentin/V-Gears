@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( load )
     BOOST_CHECK_EQUAL( filename_1, entry.file_name );
     BOOST_CHECK_EQUAL( entry.file_name, lgp.list()->at( 0 ) );
     BOOST_CHECK_EQUAL( 0x00000050, entry.file_offset );
-    BOOST_CHECK_EQUAL( "FILENAME 1", entry.data_file_name );
+    BOOST_CHECK_EQUAL( "FILENAME 1", entry.datafile_name_ );
     BOOST_CHECK_EQUAL( 0x00000018, entry.data_size );
     BOOST_CHECK_EQUAL( 0x00000068, entry.data_offset );
 

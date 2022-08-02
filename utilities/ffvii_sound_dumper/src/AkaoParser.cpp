@@ -127,7 +127,7 @@ AkaoParser *AKAOPARSER = NULL;
 
 
 AkaoParser::AkaoParser():
-    m_Music( NULL )
+    music_( NULL )
 {
     memset( ( u8* )m_MusicChannelData, 0x00, sizeof( ChannelData ) * 24 );
 }
@@ -310,19 +310,19 @@ AkaoParser::UnloadInstruments()
 void
 AkaoParser::PlayMusic( const Ogre::String& file )
 {
-    if ( m_Music != NULL )
+    if ( music_ != NULL )
     {
-        delete m_Music;
+        delete music_;
     }
-    m_Music = new File( file );
+    music_ = new File( file );
 
 
 
-    if ( m_Music->GetU8( 0 ) == 0x41 && m_Music->GetU8( 1 ) == 0x4b && m_Music->GetU8( 2 ) == 0x41 && m_Music->GetU8( 3 ) == 0x4f) // AKAO
+    if ( music_->GetU8( 0 ) == 0x41 && music_->GetU8( 1 ) == 0x4b && music_->GetU8( 2 ) == 0x41 && music_->GetU8( 3 ) == 0x4f) // AKAO
     {
-        int music_id = m_Music->GetU16LE( 4 );
-        int length = m_Music->GetU16LE( 6 );
-        int reverb_mode = m_Music->GetU16LE( 8 );
+        int music_id = music_->GetU16LE( 4 );
+        int length = music_->GetU16LE( 6 );
+        int reverb_mode = music_->GetU16LE( 8 );
 
         //A0 = reverb_mode;
         //func29af0;
@@ -374,7 +374,7 @@ AkaoParser::PlayMusic( const Ogre::String& file )
 
 
         u16 offset_to_akao = 0;
-        m_MusicChannelConfig.active_channel_mask = m_Music->GetU32LE( 0x10 ) & 0x00ffffff;
+        m_MusicChannelConfig.active_channel_mask = music_->GetU32LE( 0x10 ) & 0x00ffffff;
         u32 channel_mask = m_MusicChannelConfig.active_channel_mask;
         int channel_id = 0;
         for ( u32 bit = 1; channel_mask != 0; bit <<= 1, channel_id += 1 )
@@ -383,7 +383,7 @@ AkaoParser::PlayMusic( const Ogre::String& file )
             {
                 channel_mask ^= bit;
 
-                m_MusicChannelData[ channel_id ].akao_sequence_pointer = 20 + offset_to_akao + 2 + m_Music->GetU16LE( 20 + offset_to_akao );
+                m_MusicChannelData[ channel_id ].akao_sequence_pointer = 20 + offset_to_akao + 2 + music_->GetU16LE( 20 + offset_to_akao );
                 offset_to_akao += 2;
                 //LOGGER->Log( "Init channel " + ToIntString( channel_id ) + " with offset to AKAO " + ToHexString( m_MusicChannelData[ channel_id ].akao_sequence_pointer, 4, '0' ) + "\n" );
 
@@ -770,7 +770,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
 
     for( ;; )
     {
-        opcode = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer );
+        opcode = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer );
 
         if( opcode < 0xa0 )
         {
@@ -780,7 +780,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xa1 ) // load instrument
         {
             LOGGER->Log( "    0xA1 [NOT COMPLETE] " );
-            int instrument_id = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
+            int instrument_id = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
             //LOGGER->Log( "Load instrument " + ToIntString( instrument_id ) + "with 0xA1.\n" );
 
 /*
@@ -835,7 +835,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xa2 ) // pause
         {
             LOGGER->Log( "    0xA2 " );
-            u8 value = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
+            u8 value = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
             channel_data[ channel_id ].pause_multiplier = 0;
             channel_data[ channel_id ].saved_pause = value;
             channel_data[ channel_id ].pause = ( value << 8 ) | value;
@@ -845,7 +845,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xa3 ) // set volume multiplier
         {
             LOGGER->Log( "    0xA3 " );
-            channel_data[ channel_id ].volume_multiplier = ( s8 )( m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) );
+            channel_data[ channel_id ].volume_multiplier = ( s8 )( music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) );
             channel_data[ channel_id ].spu_update_flags |= SPU_LEFT_VOLUME | SPU_RIGHT_VOLUME;
             //LOGGER->Log( "Set volume multiplier to 0x" + ToHexString( channel_data[ channel_id ].volume_multiplier, 2, '0' ) + ".\n" );
             channel_data[ channel_id ].akao_sequence_pointer += 2;
@@ -853,7 +853,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xa5 ) // set pitch correction
         {
             LOGGER->Log( "    0xA5 " );
-            channel_data[ channel_id ].pitch_correction = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
+            channel_data[ channel_id ].pitch_correction = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
             //LOGGER->Log( "Set pitch correction to 0x" + ToHexString( channel_data[ channel_id ].pitch_correction, 4, '0' ) + ".\n" );
             channel_data[ channel_id ].akao_sequence_pointer += 2;
         }
@@ -872,18 +872,18 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xa8 ) // set volume
         {
             LOGGER->Log( "    0xA8 " );
-            channel_data[ channel_id ].volume_multiplier = ( s8 )( m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) );
+            channel_data[ channel_id ].volume_multiplier = ( s8 )( music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) );
             channel_data[ channel_id ].spu_update_flags |= SPU_LEFT_VOLUME | SPU_RIGHT_VOLUME;
             channel_data[ channel_id ].volume_level_change_ticks = 0;
-            channel_data[ channel_id ].volume_level = ( s8 )( m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) ) << 0x17;
+            channel_data[ channel_id ].volume_level = ( s8 )( music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) ) << 0x17;
             //LOGGER->Log( "Set volume to 0x" + ToHexString(channel_data[ channel_id ].volume_level, 8, '0' ) + " and reset volume_level_change_ticks.\n" );
             channel_data[ channel_id ].akao_sequence_pointer += 2;
         }
         else if( opcode == 0xa9 ) // set volume increase/descrease
         {
             LOGGER->Log( "    0xA9 " );
-            u16 value1 = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
-            s8 value2 = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 2 );
+            u16 value1 = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
+            s8 value2 = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 2 );
             value1 = ( value1 == 0 ) ? 0x100 : value1;
             channel_data[ channel_id ].volume_level_change_ticks = value1;
             channel_data[ channel_id ].volume_level &= 0xffff0000;
@@ -896,7 +896,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         {
             LOGGER->Log( "    0xAA " );
             channel_data[ channel_id ].spu_update_flags |= SPU_LEFT_VOLUME | SPU_RIGHT_VOLUME;
-            channel_data[ channel_id ].volume_index = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) << 0x8;
+            channel_data[ channel_id ].volume_index = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) << 0x8;
             channel_data[ channel_id ].unknown_62 = 0;
             //LOGGER->Log( "Set volume pan to 0x" + ToHexString( channel_data[ channel_id ].volume_index, 4, '0' ) + ".\n" );
             channel_data[ channel_id ].akao_sequence_pointer += 2;
@@ -916,9 +916,9 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
             LOGGER->Log( "    0xB4 " );
             channel_data[ channel_id ].mirror_update_flags &= 0x00000001;
 
-            u16 value1 = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
-            u16 value2 = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 2 );
-            u16 value3 = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 3 );
+            u16 value1 = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
+            u16 value2 = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 2 );
+            u16 value3 = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 3 );
 
             if( channel_data[ channel_id ].unknown_54 != 0 )
             {
@@ -960,7 +960,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xb5 ) // set wave modifier
         {
             LOGGER->Log( "    0xB5 " );
-            channel_data[ channel_id ].wave1_modifier = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) << 0x8;
+            channel_data[ channel_id ].wave1_modifier = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 ) << 0x8;
             u16 pitch_base = channel_data[ channel_id ].pitch_base;
             if( ( channel_data[ channel_id ].wave1_modifier & 0x8000 ) == 0 )
             {
@@ -989,7 +989,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         {
             LOGGER->Log( "    0xC9 " );
 
-            u16 value = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
+            u16 value = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
             value = ( value == 0 ) ? 0x100 : value;
 
             u16 index = channel_data[ channel_id ].loop_index;
@@ -1036,7 +1036,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xe8 ) // set tempo
         {
             LOGGER->Log( "    0xE8 " );
-            channel_config.tempo = m_Music->GetU16LE( channel_data[ channel_id ].akao_sequence_pointer + 1 ) << 0x10;
+            channel_config.tempo = music_->GetU16LE( channel_data[ channel_id ].akao_sequence_pointer + 1 ) << 0x10;
             channel_config.tempo_increment_counter = 0;
             //LOGGER->Log( "Set tempo to 0x" + ToHexString( channel_config.tempo, 8, '0' ) + " and reset tempo increment counter to 0.\n" );
             channel_data[ channel_id ].akao_sequence_pointer += 3;
@@ -1045,7 +1045,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         {
             LOGGER->Log( "    0xEA " );
             channel_config.spu_update_flags |= SPU_REVERB;
-            channel_config.reverb_depth = m_Music->GetU16LE( channel_data[ channel_id ].akao_sequence_pointer + 1 ) << 0x10;
+            channel_config.reverb_depth = music_->GetU16LE( channel_data[ channel_id ].akao_sequence_pointer + 1 ) << 0x10;
             channel_config.reverb_depth_increment_counter = 0;
             //LOGGER->Log( "Set reverb depth to 0x" + ToHexString( channel_config.reverb_depth, 8, '0' ) + " and reset reverb depth increment counter to 0.\n" );
             channel_data[ channel_id ].akao_sequence_pointer += 3;
@@ -1073,7 +1073,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xf2 ) // load instrument
         {
             LOGGER->Log( "    0xF2 " );
-            int instrument_id = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
+            int instrument_id = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
             //LOGGER->Log( "Load instrument " + ToIntString( instrument_id ) + " with 0xF2.\n" );
 
             InstrumentData data = m_InstrumentData[ instrument_id ];
@@ -1109,10 +1109,10 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xfd ) // reset timers lower and upper
         {
             LOGGER->Log( "    0xFD Reset upper timer to 0 with bound " );
-            channel_config.upper_timer_top = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 2 );
+            channel_config.upper_timer_top = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 2 );
             //LOGGER->Log( ToHexString( channel_config.upper_timer_top, 4, '0' ) + " and lower timer to 0 with bound " );
             channel_config.upper_timer = 0;
-            channel_config.lower_timer_top = m_Music->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
+            channel_config.lower_timer_top = music_->GetU8( channel_data[ channel_id ].akao_sequence_pointer + 1 );
             //LOGGER->Log( ToHexString( channel_config.lower_timer_top, 4, '0' ) + ".\n" );
             channel_config.lower_timer = 0;
             channel_data[ channel_id ].akao_sequence_pointer += 3;
@@ -1120,7 +1120,7 @@ AkaoParser::UpdateSequence( ChannelData* channel_data, int channel_id, ChannelCo
         else if( opcode == 0xfe ) // reset timer top
         {
             LOGGER->Log( "    0xFE Reset top timer to " );
-            channel_config.top_timer = m_Music->GetU16LE( channel_data[ channel_id ].akao_sequence_pointer + 1 );
+            channel_config.top_timer = music_->GetU16LE( channel_data[ channel_id ].akao_sequence_pointer + 1 );
             //LOGGER->Log( ToHexString( channel_config.top_timer, 4, '0' ) + ".\n" );
             channel_data[ channel_id ].akao_sequence_pointer += 3;
         }
@@ -1452,7 +1452,7 @@ AkaoParser::NextSequenceHandle( ChannelData* channel_data, int channel_id, Chann
 
     while( true )
     {
-        u8 opcode = m_Music->GetU8( pointer );
+        u8 opcode = music_->GetU8( pointer );
 
         if( opcode < 0x9a )
         {
@@ -1478,7 +1478,7 @@ AkaoParser::NextSequenceHandle( ChannelData* channel_data, int channel_id, Chann
             {
                 case 0xc9:
                 {
-                    if( m_Music->GetU8( pointer + 1 ) == channel_data[ channel_id ].loop_count[ loop_index ] )
+                    if( music_->GetU8( pointer + 1 ) == channel_data[ channel_id ].loop_count[ loop_index ] )
                     {
                         pointer += 2;
                         loop_index = (loop_index - 1) & 3;
@@ -1512,16 +1512,16 @@ AkaoParser::NextSequenceHandle( ChannelData* channel_data, int channel_id, Chann
 
                 case 0xee:
                 {
-                    pointer += 3 + ( s16 )( m_Music->GetU16LE( pointer + 1 ) );
+                    pointer += 3 + ( s16 )( music_->GetU16LE( pointer + 1 ) );
                     continue;
                 }
                 break;
 
                 case 0xef:
                 {
-                    if( channel_config.conditional_value >= m_Music->GetU8( pointer + 1 ) )
+                    if( channel_config.conditional_value >= music_->GetU8( pointer + 1 ) )
                     {
-                        pointer += 4 + ( s16 )( m_Music->GetU16LE( pointer + 2 ) );
+                        pointer += 4 + ( s16 )( music_->GetU16LE( pointer + 2 ) );
                     }
                     else
                     {
@@ -1534,10 +1534,10 @@ AkaoParser::NextSequenceHandle( ChannelData* channel_data, int channel_id, Chann
                 case 0xf0:
                 case 0xf1:
                 {
-                    if( m_Music->GetU8( pointer + 1 ) == channel_data[ channel_id ].loop_count[ loop_index ] + 1 )
+                    if( music_->GetU8( pointer + 1 ) == channel_data[ channel_id ].loop_count[ loop_index ] + 1 )
                     {
                         loop_index = (loop_index - 1) & 3;
-                        pointer += 4 + ( s16 )( m_Music->GetU16LE( pointer + 2 ) );
+                        pointer += 4 + ( s16 )( music_->GetU16LE( pointer + 2 ) );
                     }
                     else
                     {
@@ -1800,19 +1800,19 @@ AkaoParser::DumpSequenceData( const Ogre::String& file )
 
     oF << std::setfill( '0' );
     oF << std::hex;
-    oF << "*** Frame ID: 0x" << std::setw( 4 ) << m_Music->GetU16LE( 4 ) << std::endl;
+    oF << "*** Frame ID: 0x" << std::setw( 4 ) << music_->GetU16LE( 4 ) << std::endl;
     oF << std::dec;
-    oF << "*** Frame Length: " << m_Music->GetU16LE( 6 ) << " bytes" << std::endl;
+    oF << "*** Frame Length: " << music_->GetU16LE( 6 ) << " bytes" << std::endl;
     oF << std::hex;
-    oF << "*** Reverb Mode: 0x" << std::setw( 4 ) << m_Music->GetU16LE( 8 ) << std::endl;
+    oF << "*** Reverb Mode: 0x" << std::setw( 4 ) << music_->GetU16LE( 8 ) << std::endl;
     oF << std::endl;
 
     oF << std::hex;
-    oF << "*** Channels mask: " <<std:: setw( 8 ) << m_Music->GetU32LE( 16 ) << std::endl << std::endl;
+    oF << "*** Channels mask: " <<std:: setw( 8 ) << music_->GetU32LE( 16 ) << std::endl << std::endl;
 
     for ( int i = 0; i < 24; ++i )
     {
-        if ( ( ( m_Music->GetU32LE( 16 ) ) & ( 1 << i ) ) == 0 )
+        if ( ( ( music_->GetU32LE( 16 ) ) & ( 1 << i ) ) == 0 )
         {
             continue;
         }
@@ -1825,11 +1825,11 @@ AkaoParser::DumpSequenceData( const Ogre::String& file )
         bool work = true;
         while ( work )
         {
-            u8 opcode = m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j );
+            u8 opcode = music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j );
             switch ( opcode )
             {
                 case 0xa0:
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 );
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 );
                     oF << std::endl;
                     work = false;
                     break;
@@ -1839,7 +1839,7 @@ AkaoParser::DumpSequenceData( const Ogre::String& file )
                 case 0xcd: case 0xd0: case 0xd1: case 0xd4: case 0xd5: case 0xd6: case 0xd7: case 0xdb:
                 case 0xe0: case 0xe1: case 0xe2: case 0xe3: case 0xe4: case 0xe5: case 0xe6: case 0xe7:
                 case 0xed: case 0xf3: case 0xf5: case 0xf9: case 0xfa: case 0xfb: case 0xfc: case 0xff:
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 );
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 );
                     oF << std::endl;
                     ++j;
                     break;
@@ -1848,32 +1848,32 @@ AkaoParser::DumpSequenceData( const Ogre::String& file )
                 case 0xae: case 0xaf: case 0xb1: case 0xb2: case 0xb5: case 0xb7: case 0xb9: case 0xbb:
                 case 0xbd: case 0xbf: case 0xc0: case 0xc1: case 0xc9: case 0xce: case 0xcf: case 0xd2:
                 case 0xd3: case 0xd8: case 0xd9: case 0xda: case 0xdc: case 0xf2: case 0xf6: case 0xf8:
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 ) << ' ';
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 1 );
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 ) << ' ';
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 1 );
                     oF << std::endl;
                     j += 2;
                     break;
                 // two parameters
                 case 0xa4: case 0xa9: case 0xab: case 0xb0: case 0xbc: case 0xdd: case 0xde: case 0xdf:
                 case 0xe8: case 0xea: case 0xec: case 0xee: case 0xf4: case 0xf7: case 0xfd: case 0xfe:
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 ) << ' ';
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 1 ) << ' ';
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 2 );
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 ) << ' ';
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 1 ) << ' ';
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 2 );
                     oF << std::endl;
                     j += 3;
                     break;
                 // three parameters
                 case 0xb4: case 0xb8: case 0xe9: case 0xeb: case 0xef: case 0xf0: case 0xf1:
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 ) << ' ';
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 1 ) << ' ';
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 2 ) << ' ';
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 3 );
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 ) << ' ';
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 1 ) << ' ';
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 2 ) << ' ';
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 3 );
                     oF << std::endl;
                     j += 4;
                     break;
                 default:
-                    oF << std::setw( 2 ) << ( int )m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 );
-                    if ( m_Music->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 1 ) < 0xa0)
+                    oF << std::setw( 2 ) << ( int )music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 0 );
+                    if ( music_->GetU8( m_MusicChannelData[ i ].akao_sequence_pointer + j + 1 ) < 0xa0)
                     {
                         oF << ' ';
                     }

@@ -4,7 +4,7 @@
 #include <sstream>
 #include <array>
 
-BEGIN_QGEARS
+namespace QGears {
 
 TxzFileSerializer::TxzFileSerializer()
 {
@@ -710,4 +710,4 @@ void TxzFileSerializer::extract_texture(const std::array<TxzFileSerializer::wm_t
 
 }
 
-END_QGEARS
+} // namespace QGears

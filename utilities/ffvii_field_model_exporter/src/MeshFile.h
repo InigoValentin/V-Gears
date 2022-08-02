@@ -35,8 +35,8 @@ private:
     int offset_to_4;
     int offset_to_5;
 
-    void         readQuad( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertexes, float* &pPos, u16* &index, u32 &cur_vertex, Ogre::RGBA* &cur_colour, bool multi_color );
-    void         readTriangle( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertexes, float* &pPos, u16* &index, u32 &cur_vertex, Ogre::RGBA* &cur_colour, bool multi_color );
+    void         readQuad( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertexes, float* &pPos, u16* &index, u32 &cur_vertex, Ogre::RGBA* &curcolour_, bool multi_color );
+    void         readTriangle( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertexes, float* &pPos, u16* &index, u32 &cur_vertex, Ogre::RGBA* &curcolour_, bool multi_color );
     void         readPart( const Ogre::String& name, const u32 i, const u32 offset_to_part, Ogre::MeshPtr mesh, VectorTexForGenBsx& textures );
 };
 

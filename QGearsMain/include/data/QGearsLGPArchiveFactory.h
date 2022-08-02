@@ -50,7 +50,7 @@ namespace QGears
                 return OGRE_NEW LGPArchive( name, ARCHIVE_TYPE );
             }
 
-            /// @copydoc FactoryObj::destroyInstance
+            /// @copydoc FactoryObj::DestroyInstance
             void destroyInstance( Ogre::Archive* arch ) override final
             {
                 OGRE_DELETE arch;

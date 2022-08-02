@@ -98,9 +98,9 @@ namespace QGears
         Ogre::DataStreamPtr section;
         for (size_t i(0); i < m_header.section_count; ++i)
         {
-            const size_t current_offset(stream->tell() - start_position);
-            const size_t section_gap(section_offsetsVec[i] - current_offset);
-            if (current_offset > section_offsetsVec[i])
+            const size_t currentoffset_(stream->tell() - start_position);
+            const size_t section_gap(section_offsetsVec[i] - currentoffset_);
+            if (currentoffset_ > section_offsetsVec[i])
             {
                 OGRE_EXCEPT(Ogre::Exception::ERR_INVALIDPARAMS
                     , "FLevel sections overlap"
@@ -150,7 +150,7 @@ namespace QGears
     //--------------------------------------------------------------------------
     void
     FLevelFileSerializer::readSectionData( Ogre::DataStreamPtr &stream
-                                          ,Ogre::DataStreamPtr &out_buffer,
+                                          ,Ogre::DataStreamPtr &outbuffer_,
                                           size_t sectionSize )
     {
         // This can be wrong, we read it so we're at the correct stream position
@@ -169,7 +169,7 @@ namespace QGears
 
         Ogre::MemoryDataStream *buffer(new Ogre::MemoryDataStream(sectionSize));
         stream->read(buffer->getPtr(), sectionSize);
-        out_buffer = Ogre::DataStreamPtr( buffer );
+        outbuffer_ = Ogre::DataStreamPtr( buffer );
     }
 
     //--------------------------------------------------------------------------

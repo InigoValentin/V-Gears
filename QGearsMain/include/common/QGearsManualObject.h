@@ -1,104 +1,277 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
-
-Copyright (c) 2013-08-14 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsManualObject_H__
-#define __QGearsManualObject_H__
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+#pragma once
 
 #include <OgreColourValue.h>
 #include <OgreMesh.h>
 #include <OgreSubMesh.h>
 #include <Ogre.h>
-
 #include "common/TypeDefine.h"
 
-namespace QGears
-{
-    /*
-     * When parsing files this is used to create the rendering engine object, e.g when we see a bone
-     * in the file we are parsing then call bone() to add one.
+namespace QGears{
+
+    /**
+     * A manually handled object.
+     *
+     * When parsing files this is used to create the rendering engine object.
+     * E.g. when a bone is found in the file being parsed, then bone() is
+     * called to add it.
      */
-    class ManualObject
-    {
+    class ManualObject{
+
         public:
-            explicit ManualObject( Ogre::Mesh *mesh );
+
+            /**
+             * Constructor.
+             *
+             * @param mesh[in] The object mesh
+             */
+            explicit ManualObject(Ogre::Mesh *mesh);
+
+            /**
+             * Destructor.
+             */
             virtual ~ManualObject();
 
-            enum BufferBinding
-            {
-                BB_POSITION
-              , BB_NORMAL
-              , BB_COLOUR
-              , BB_TEXTURE
-              , BINDING_COUNT
+            /**
+             * Buffer indexes for object properties.
+             */
+            enum BufferBinding{
+
+                /**
+                 * Object position.
+                 */
+                BB_POSITION,
+
+                /**
+                 * Object normal.
+                 */
+                BB_NORMAL,
+
+                /**
+                 * Object colour.
+                 */
+                BB_COLOUR,
+
+                /**
+                 * Object texture.
+                 */
+                BB_TEXTURE,
+
+                /**
+                 * Number of binds for the object.
+                 */
+                BINDING_COUNT
             };
 
-            virtual void begin( const String &name, const String &material_name
-                               ,size_t vertex_count, size_t index_count );
+            /**
+             * Begins creating a object section.
+             *
+             * It doesn't set position, normal or texture.
+             *
+             * @param name[in] Name for the object.
+             * @param material_name[in] Name of the object's material.
+             * @param vertex_count[in] Number of vertices in the object.
+             * @param index_count[in]
+             * @todo Undestand and document index_count.
+             */
+            virtual void begin(
+              const String &name, const String &material_name,
+              size_t vertex_count, size_t index_count
+            );
 
-            virtual void position( const Ogre::Vector3 &position );
-            virtual void normal( const Ogre::Vector3 &normal );
-            virtual void colour( const Ogre::ColourValue &colour );
-            virtual void textureCoord( const Ogre::Vector2 &texture_coordinate );
+            /**
+             * Sets the object position.
+             *
+             * @param position[in] Position vector.
+             * @todo It applies to the object or the current section?
+             */
+            virtual void position(const Ogre::Vector3 &position);
+
+            /**
+             * Sets the object normal vector.
+             *
+             * @param normal[in] Normal vector.
+             * @todo It applies to the object or the current section?
+             */
+            virtual void normal(const Ogre::Vector3 &normal);
+
+            /**
+             * Sets the object colour.
+             *
+             * @param colour Object colour.
+             * @todo It applies to the object or the current section?
+             */
+            virtual void colour(const Ogre::ColourValue &colour);
+
+            /**
+             * Sets the object texture coordinates.
+             *
+             * @param texture_coordinate[in] Coordinate vector.
+             * @todo It applies to the object or the current section?
+             */
+            virtual void textureCoord(const Ogre::Vector2 &texture_coordinate);
+
+            /**
+             * Sets the object index.
+             *
+             * @param idx[in] Object index.
+             * @todo It applies to the object or the current section?
+             */
             virtual void index( const uint32 idx );
-            virtual void bone( const uint32 idx, const uint16 bone_handle
-                              ,const Ogre::Real weight = 1 );
 
+            /**
+             * Adds a bone to the object.
+             *
+             * @param idx[in] Index of the vertex index to add the bone to.
+             * @param bone_handle[in] Index of the bone objct.
+             * @param weight[in] Bone weight. In most cases, 1 is ok.
+             * @todo It applies to the object or the current section?
+             */
+            virtual void bone(
+              const uint32 idx, const uint16 bone_handle,
+              const Ogre::Real weight = 1
+            );
+
+            /**
+             * End the current section.
+             *
+             * A section must have been started with {@see begin}
+             *
+             * @throws Ogre::Exception::ERR_INVALIDPARAMS if a section has not
+             * been started.
+             */
             virtual void end();
 
         protected:
-            template<typename BufferType>
-            BufferType*     createBuffer( const BufferBinding binding, Ogre::VertexElementType type, Ogre::VertexElementSemantic semantic);
-            virtual void    createPositionBuffer();
-            virtual void    createNormalBuffer();
-            virtual void    createColourBuffer();
-            virtual void    createTextureCoordinateBuffer();
-            virtual void    createIndexBuffer();
-            virtual void    resetBuffers();
 
+            /**
+             * Creates a buffer
+             *
+             * @param binding[in] Buffer binding.
+             * @param type[in] Type Buffer type.
+             * @param semantic[in] Buffer semantic.
+             * @todo I'm no really sure what this function does...
+             */
+            template<typename BufferType>
+            BufferType* createBuffer(
+              const BufferBinding binding, Ogre::VertexElementType type,
+              Ogre::VertexElementSemantic semantic
+            );
+
+            /**
+             * Creates a position buffer in {@see BB_POSITION}.
+             */
+            virtual void createPositionBuffer();
+
+            /**
+             * Creates a normal buffer in {@see BB_NORMAL}.
+             */
+            virtual void createNormalBuffer();
+
+            /**
+             * Creates a colour buffer in {@see BB_COLOUR}.
+             */
+            virtual void createColourBuffer();
+
+            /**
+             * Creates a texture coordinate buffer in {@see BB_TEXTURE}.
+             */
+            virtual void createTextureCoordinateBuffer();
+
+            /**
+             * Creates a index buffer in {@see BB_INDEX}.
+             */
+            virtual void createIndexBuffer();
+
+            /**
+             * Resets all buffers in {@see BufferBinding}.
+             */
+            virtual void resetBuffers();
+
+            /**
+             * Resets any of the buffers in {@see BufferBinding}.
+             *
+             * @param buffer Buffer to reset.
+             */
             template<typename BufferSharedPtr>
-                    void    resetBuffer( BufferSharedPtr &buffer ) const;
+            void resetBuffer(BufferSharedPtr &buffer) const;
 
         private:
-            Ogre::Mesh     *m_mesh;
-            Ogre::SubMesh  *m_section;
-
-            Ogre::AxisAlignedBox    m_bbox;
-            Ogre::Real              m_radius;
 
             typedef Ogre::HardwareVertexBufferSharedPtr VertexBuffer;
-            typedef Ogre::HardwareIndexBufferSharedPtr  IndexBuffer;
-            VertexBuffer    m_vertex_buffers[BINDING_COUNT];
-            IndexBuffer     m_index_buffer;
-            Ogre::Vector3  *m_position;
-            Ogre::Vector3  *m_normal;
-            uint32         *m_colour;
-            Ogre::Vector2  *m_texture_coordinate;
-            uint16         *m_index;
+            typedef Ogre::HardwareIndexBufferSharedPtr IndexBuffer;
 
-            const Ogre::VertexElementType colour_type;
+            /**
+             * The object mesh.
+             */
+            Ogre::Mesh *_mesh;
+
+            /**
+             * The currently open section.
+             */
+            Ogre::SubMesh *_section;
+
+            /**
+             * @todo
+             */
+            Ogre::AxisAlignedBox _bbox;
+
+            /**
+             * @todo
+             */
+            Ogre::Real _radius;
+
+            /**
+             * The object vetex buffer.
+             */
+            VertexBuffer _vertex_buffers[BINDING_COUNT];
+
+            /**
+             * The index buffer.
+             */
+            IndexBuffer _indexbuffer_;
+
+            /**
+             * The position buffer.
+             */
+            Ogre::Vector3 *_position;
+
+            /**
+             * The normal buffer.
+             */
+            Ogre::Vector3 *_normal;
+
+            /**
+             * The colour buffer.
+             */
+            uint32 *colour_;
+
+            /**
+             * The texture buffer.
+             */
+            Ogre::Vector2 *_texture_coordinate;
+
+            /**
+             * The object index.
+             */
+            uint16 *_index;
+
+            /**
+             * The colour type.
+             */
+            const Ogre::VertexElementType colour_type_;
     };
 }
-
-#endif // __QGearsManualObject_H__

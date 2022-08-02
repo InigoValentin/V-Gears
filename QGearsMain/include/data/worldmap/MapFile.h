@@ -3,7 +3,7 @@
 
 #include "common/QGearsResource.h"
 
-BEGIN_QGEARS
+namespace QGears {
 
 class WorldMapFile : public Resource
 {
@@ -24,6 +24,6 @@ private:
 
 typedef Ogre::SharedPtr<WorldMapFile> MapFilePtr;
 
-END_QGEARS
+} // namespace QGears
 
 #endif // _MAP_FILE_H_

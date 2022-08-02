@@ -1,132 +1,107 @@
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
 #include "common/LzsFile.h"
-//#include "common/Logger.h"
+#include "core/Logger.h"
 
-
-LzsFile::LzsFile(const Ogre::String& file):
-    File(file)
-{
+LzsFile::LzsFile(const Ogre::String& file): File(file){
     ExtractLzs();
 }
-
-
 
 LzsFile::LzsFile(File* pFile, u32 offset, u32 length):
-    File(pFile, offset, length)
+  File(pFile, offset, length)
 {
     ExtractLzs();
 }
-
-
 
 LzsFile::LzsFile(const u8* pBuffer, u32 offset, u32 length):
-    File(pBuffer, offset, length)
+  File(pBuffer, offset, length)
 {
     ExtractLzs();
 }
 
-
-
-LzsFile::LzsFile(File* pFile):
-    File(pFile)
-{
+LzsFile::LzsFile(File* pFile): File(pFile){
     ExtractLzs();
 }
 
+LzsFile::~LzsFile(){}
 
-
-LzsFile::~LzsFile()
-{
-}
-
-
-
-void
-LzsFile::ExtractLzs()
-{
+void LzsFile::ExtractLzs(){
     u32 input_length = GetU32LE(0) + 4;
-
-    if (input_length != m_BufferSize)
-    {
-        //LOGGER->Log("Warning: extract failed, this is not lzs!\n");
+    if (input_length != buffer_size_){
+        LOG_TRIVIAL("Warning: extract failed, this is not lzs!\n");
         return;
     }
-
-
-
-    u32 extract_size = (m_BufferSize + 255) & ~255;
-    u8* extract_buffer = (u8*)malloc(extract_size);
-
-
-
-    unsigned int input_offset = 4;
-    int output_offset = 0;
+    u32 extract_size = (buffer_size_ + 255) & ~255;
+    u8* extractbuffer_ = (u8*) malloc(extract_size);
+    unsigned int inputoffset_ = 4;
+    int outputoffset_ = 0;
     u8 control_byte = 0;
     u8 control_bit = 0;
-
-    while (input_offset < m_BufferSize)
-    {
-        if (control_bit == 0)
-        {
-            control_byte = ((u8*)m_Buffer)[input_offset++];
+    while (inputoffset_ < buffer_size_){
+        if (control_bit == 0){
+            control_byte = ((u8*) buffer_)[inputoffset_ ++];
             control_bit = 8;
         }
 
-        if (control_byte & 1)
-        {
-            ((u8*)extract_buffer)[output_offset++] = ((u8*)m_Buffer)[input_offset++];
-
-            if (output_offset == extract_size)
-            {
+        if (control_byte & 1){
+            ((u8*) extractbuffer_) [outputoffset_ ++] =
+              ((u8*) buffer_) [inputoffset_ ++];
+            if (outputoffset_ == extract_size){
                 extract_size += 256;
-                extract_buffer = (u8*)realloc(extract_buffer, extract_size);
+                extractbuffer_ = (u8*) realloc(extractbuffer_, extract_size);
             }
         }
-        else
-        {
-            u8 reference1 = ((u8*)m_Buffer)[input_offset++];
-            u8 reference2 = ((u8*)m_Buffer)[input_offset++];
-
-            u16 reference_offset = reference1 | ((reference2 & 0xF0) << 4);
-
+        else{
+            u8 reference1 = ((u8*) buffer_)[inputoffset_++];
+            u8 reference2 = ((u8*) buffer_)[inputoffset_++];
+            u16 referenceoffset_ = reference1 | ((reference2 & 0xF0) << 4);
             u8 reference_length = (reference2 & 0xF) + 3;
-
-            int real_offset = output_offset - ((output_offset - 18 - reference_offset) & 0xFFF);
-
-            for (int j = 0; j < reference_length; ++j)
-            {
-                if (real_offset < 0)
-                {
-                    ((u8*)extract_buffer)[output_offset++] = 0;
+            int realoffset_ =
+              outputoffset_
+              - ((outputoffset_ - 18 - referenceoffset_) & 0xFFF);
+            for (int j = 0; j < reference_length; ++ j){
+                if (realoffset_ < 0){
+                    ((u8*)extractbuffer_)[outputoffset_++] = 0;
                 }
-                else
-                {
-                    ((u8*)extract_buffer)[output_offset++] = ((u8*)extract_buffer)[real_offset];
+                else{
+                    ((u8*)extractbuffer_)[outputoffset_++] =
+                      ((u8*)extractbuffer_)[realoffset_];
                 }
-
-                if (output_offset == extract_size)
-                {
+                if (outputoffset_ == extract_size){
                     extract_size += 256;
-                    extract_buffer = (u8*)realloc(extract_buffer, extract_size);
+                    extractbuffer_ =
+                      (u8*) realloc(extractbuffer_, extract_size);
                 }
-
-                ++real_offset;
+                ++ realoffset_;
             }
         }
-
         control_byte >>= 1;
-        control_bit--;
+        control_bit --;
     }
-
-    free(m_Buffer);
+    free(buffer_);
     // the real buffer size and mBufferSize will be a bit different
-    m_Buffer = extract_buffer;
-    m_BufferSize = output_offset;
+    buffer_ = extractbuffer_;
+    buffer_size_ = outputoffset_;
 }
 
-/*static*/ std::vector<QGears::uint8> LzsBuffer::Decompress(const std::vector<QGears::uint8>& buffer)
-{
+std::vector<QGears::uint8> LzsBuffer::Decompress(
+  const std::vector<QGears::uint8>& buffer
+){
     LzsFile tmp(static_cast<const u8*>(buffer.data()), 0, buffer.size());
-    std::vector<QGears::uint8> ret(tmp.m_BufferSize);
-    ret.assign(tmp.m_Buffer, tmp.m_Buffer + tmp.m_BufferSize);
+    std::vector<QGears::uint8> ret(tmp.buffer_size_);
+    ret.assign(tmp.buffer_, tmp.buffer_ + tmp.buffer_size_);
     return ret;
 }

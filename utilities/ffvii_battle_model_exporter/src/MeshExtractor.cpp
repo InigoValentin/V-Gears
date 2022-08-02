@@ -301,22 +301,22 @@ MeshExtractor( const MeshData& mesh_data, const Ogre::String& material_name, Fil
         *tPos++ = ct.x; *tPos++ = ct.y;
         *tPos++ = bt.x; *tPos++ = bt.y;
 
-        Ogre::ColourValue a_colour = Ogre::ColourValue(file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x08) / 256.0f,
+        Ogre::ColourValue acolour_ = Ogre::ColourValue(file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x08) / 256.0f,
                                                        file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x09) / 256.0f,
                                                        file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x0a) / 256.0f,
                                                        file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x0b) / 256.0f);
-        Ogre::ColourValue b_colour = Ogre::ColourValue(file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x0c) / 256.0f,
+        Ogre::ColourValue bcolour_ = Ogre::ColourValue(file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x0c) / 256.0f,
                                                        file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x0d) / 256.0f,
                                                        file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x0e) / 256.0f,
                                                        file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x0f) / 256.0f);
-        Ogre::ColourValue c_colour = Ogre::ColourValue(file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x10) / 256.0f,
+        Ogre::ColourValue ccolour_ = Ogre::ColourValue(file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x10) / 256.0f,
                                                        file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x11) / 256.0f,
                                                        file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x12) / 256.0f,
                                                        file->GetU8(offset_to_triangle + 0x4 + j * 0x14 + 0x13) / 256.0f);
 
-        rs->convertColourValue(a_colour, colours + cur_index + 0);
-        rs->convertColourValue(c_colour, colours + cur_index + 1);
-        rs->convertColourValue(b_colour, colours + cur_index + 2);
+        rs->convertColourValue(acolour_, colours + cur_index + 0);
+        rs->convertColourValue(ccolour_, colours + cur_index + 1);
+        rs->convertColourValue(bcolour_, colours + cur_index + 2);
 
         idata[cur_index + 0] = cur_index + 0;
         idata[cur_index + 1] = cur_index + 1;
@@ -382,29 +382,29 @@ MeshExtractor( const MeshData& mesh_data, const Ogre::String& material_name, Fil
         *tPos++ = ct.x; *tPos++ = ct.y;
         *tPos++ = dt.x; *tPos++ = dt.y;
 
-        Ogre::ColourValue a_colour = Ogre::ColourValue(file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x08) / 256.0f,
+        Ogre::ColourValue acolour_ = Ogre::ColourValue(file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x08) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x09) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x0a) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x0b) / 256.0f);
-        Ogre::ColourValue b_colour = Ogre::ColourValue(file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x0c) / 256.0f,
+        Ogre::ColourValue bcolour_ = Ogre::ColourValue(file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x0c) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x0d) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x0e) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x0f) / 256.0f);
-        Ogre::ColourValue c_colour = Ogre::ColourValue(file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x10) / 256.0f,
+        Ogre::ColourValue ccolour_ = Ogre::ColourValue(file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x10) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x11) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x12) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x13) / 256.0f);
-        Ogre::ColourValue d_colour = Ogre::ColourValue(file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x14) / 256.0f,
+        Ogre::ColourValue dcolour_ = Ogre::ColourValue(file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x14) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x15) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x16) / 256.0f,
                                                        file->GetU8(offset_to_quad + 0x4 + j * 0x18 + 0x17) / 256.0f);
 
-        rs->convertColourValue(a_colour, colours + cur_index + 0);
-        rs->convertColourValue(c_colour, colours + cur_index + 1);
-        rs->convertColourValue(b_colour, colours + cur_index + 2);
-        rs->convertColourValue(b_colour, colours + cur_index + 3);
-        rs->convertColourValue(c_colour, colours + cur_index + 4);
-        rs->convertColourValue(d_colour, colours + cur_index + 5);
+        rs->convertColourValue(acolour_, colours + cur_index + 0);
+        rs->convertColourValue(ccolour_, colours + cur_index + 1);
+        rs->convertColourValue(bcolour_, colours + cur_index + 2);
+        rs->convertColourValue(bcolour_, colours + cur_index + 3);
+        rs->convertColourValue(ccolour_, colours + cur_index + 4);
+        rs->convertColourValue(dcolour_, colours + cur_index + 5);
 
         idata[cur_index + 0] = cur_index + 0;
         idata[cur_index + 1] = cur_index + 1;

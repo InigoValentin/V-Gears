@@ -67,8 +67,8 @@ BinGZipFile::ExtractGZip(u32 fileNumber)
     strm.zalloc    = Z_NULL;               /* used to allocate the internal state */
     strm.zfree     = Z_NULL;               /* used to free the internal state */
     strm.opaque    = Z_NULL;               /* private data object passed to zalloc and zfree */
-    strm.next_in   = m_Buffer + offset;     /* next input byte */
-    strm.avail_in  = m_BufferSize;          /* number of bytes available at next_in */
+    strm.next_in   = buffer_ + offset;     /* next input byte */
+    strm.avail_in  = buffer_size_;          /* number of bytes available at next_in */
     strm.next_out  = extract_buffer;       /* next output byte should be put there */
     strm.avail_out = extract_size;         /* remaining free space at next_out */
 
@@ -80,15 +80,15 @@ BinGZipFile::ExtractGZip(u32 fileNumber)
         {
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
-                LOGGER->Log("Warning: inflateInit2 - Z_MEM_ERROR in file " + m_FileName);
+                LOGGER->Log("Warning: inflateInit2 - Z_MEM_ERROR in file " + file_name_);
                 break;
             case Z_STREAM_ERROR:
                 inflateEnd(&strm);
-                LOGGER->Log("Warning: inflateInit2 - Z_STREAM_ERROR in file " + m_FileName);
+                LOGGER->Log("Warning: inflateInit2 - Z_STREAM_ERROR in file " + file_name_);
                 break;
             default:
                 inflateEnd(&strm);
-                LOGGER->Log("Warning: inflateInit2 - unknown error in file " + m_FileName);
+                LOGGER->Log("Warning: inflateInit2 - unknown error in file " + file_name_);
         }
         return NULL;
     }
@@ -98,7 +98,7 @@ BinGZipFile::ExtractGZip(u32 fileNumber)
         if (strm.next_out == NULL)
         {
             inflateEnd(&strm);
-            LOGGER->Log("Warning: strm.next_out == NULL in file " + m_FileName);
+            LOGGER->Log("Warning: strm.next_out == NULL in file " + file_name_);
             return NULL;
         }
 
@@ -109,15 +109,15 @@ BinGZipFile::ExtractGZip(u32 fileNumber)
         {
             case Z_NEED_DICT:
                 inflateEnd(&strm);
-                LOGGER->Log("Warning: inflate - Z_NEED_DICT in file " + m_FileName);
+                LOGGER->Log("Warning: inflate - Z_NEED_DICT in file " + file_name_);
                 return NULL;
             case Z_DATA_ERROR:
                 inflateEnd(&strm);
-                LOGGER->Log("Warning: inflate - Z_DATA_ERROR in file " + m_FileName);
+                LOGGER->Log("Warning: inflate - Z_DATA_ERROR in file " + file_name_);
                 return NULL;
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
-                LOGGER->Log("Warning: inflate - Z_MEM_ERROR in file " + m_FileName);
+                LOGGER->Log("Warning: inflate - Z_MEM_ERROR in file " + file_name_);
                 return NULL;
         }
 
@@ -128,7 +128,7 @@ BinGZipFile::ExtractGZip(u32 fileNumber)
             if (extract_buffer == NULL)
             {
                 inflateEnd(&strm);
-                LOGGER->Log("Warning: extract_buffer == NULL in file " + m_FileName);
+                LOGGER->Log("Warning: extract_buffer == NULL in file " + file_name_);
                 return NULL;
             }
 
@@ -144,7 +144,7 @@ BinGZipFile::ExtractGZip(u32 fileNumber)
 
     if (ret != Z_STREAM_END)
     {
-        LOGGER->Log("Warning: ret != Z_STREAM_END in file " + m_FileName);
+        LOGGER->Log("Warning: ret != Z_STREAM_END in file " + file_name_);
         return NULL;
     }
 
@@ -168,7 +168,7 @@ BinGZipFile::InnerGetNumberOfFiles()
 {
     m_NumberOfFiles = 0;
 
-    for (u32 pointer = 0; pointer < m_BufferSize;)
+    for (u32 pointer = 0; pointer < buffer_size_;)
     {
         u16 temp = GetU16LE(pointer);
         pointer += 6;
@@ -184,7 +184,7 @@ BinGZipFile::InnerGetNumberOfFiles()
 
     if (m_NumberOfFiles == 0)
     {
-        LOGGER->Log("Warning: " + m_FileName + " isn't archive. number_of_files == 0");
+        LOGGER->Log("Warning: " + file_name_ + " isn't archive. number_of_files == 0");
     }
 }
 
@@ -200,7 +200,7 @@ BinGZipFile::InnerGetFileOffset(u32 fileNumber)
 
     u32 current_file = 0;
 
-    for (u32 pointer = 0; pointer < m_BufferSize;)
+    for (u32 pointer = 0; pointer < buffer_size_;)
     {
         u16 temp = GetU16LE(pointer);
         pointer += 6;

@@ -1,65 +1,217 @@
-#ifndef PARTICLE_TECHNIQUE_H
-#define PARTICLE_TECHNIQUE_H
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include "ParticleEmitter.h"
 #include "ParticleRenderer.h"
 #include "ParticlePool.h"
 #include "ParticlePoolMap.h"
 
-
-
 class ParticleSystem;
 
+/**
+ * A particle technique.
+ */
+class ParticleTechnique{
 
+    public:
 
-class ParticleTechnique
-{
-public:
-    ParticleTechnique();
-    virtual ~ParticleTechnique();
+        /**
+         * Constructor.
+         */
+        ParticleTechnique();
 
-    void CopyAttributesTo(ParticleTechnique* technique);
+        /**
+         * Destructor.
+         */
+        virtual ~ParticleTechnique();
 
-    void SetParentSystem(ParticleSystem* parentSystem) {m_ParentSystem = parentSystem;};
-    ParticleSystem* GetParentSystem() const {return m_ParentSystem;};
+        /**
+         * Copy the technique attributes to another technique.
+         */
+        void CopyAttributesTo(ParticleTechnique* technique);
 
-    // this fucntion called from ParticleSystem which implements _updateRenderQueue from movable objects
-    void UpdateRenderQueue(Ogre::RenderQueue* queue);
+        /**
+         * Sets the parent system for the technique.
+         *
+         * @param
+         */
+        void SetParentSystem(ParticleSystem* parent_system){
+            parent_system_ = parent_system;
+        };
 
-    void Initialize();
-    void Update(Ogre::Real time_elapsed);
+        /**
+         * Retrieves the parent system.
+         *
+         * @return The parent system.
+         */
+        ParticleSystem* GetParentSystem() const {return parent_system_;};
 
-    ParticleRenderer* CreateRenderer(const Ogre::String& renderer_type);
-    void SetRenderer(ParticleRenderer* renderer);
-    void DestroyRenderer();
+        /**
+         * Adds the technique to the scene render queue.
+         *
+         * @param queue[in|out] The queue to update.
+         */
+        void UpdateRenderQueue(Ogre::RenderQueue* queue);
 
-    ParticleEmitter* CreateEmitter(const Ogre::String& emitter_type);
-    void AddEmitter(ParticleEmitter* emitter);
-    void DestroyAllEmitters();
-    int GetNumEmittableEmitters() const;
+        /**
+         * Initializes the tehnique.
+         */
+        void Initialize();
 
-    void EmissionChange();
+        /**
+         * Updates the technique.
+         *
+         * Updates the technique status based on the elapsed time.
+         *
+         * @param time_elapsed[in] The elapsed time.
+         */
+        void Update(Ogre::Real time_elapsed);
 
-    int GetVisualParticlesQuota() const {return m_VisualParticleQuota;};
-    void ExecuteEmitParticles(ParticleEmitter* emitter, int requested, Ogre::Real time_elapsed);
-    void ResetVisualParticles();
+        /**
+         * Creates a renderer.
+         *
+         * The renderer gets assigned to the technique.
+         *
+         * @param renderer_type[in] The type for the renderer.
+         * @return The newly created renderer.
+         */
+        ParticleRenderer* CreateRenderer(const Ogre::String& renderer_type);
 
-private:
-    ParticleSystem*                     m_ParentSystem;
+        /**
+         * Sets the renderer for the technique.
+         *
+         * @paramater renderer[in] Renderer for the technique.
+         */
+        void SetRenderer(ParticleRenderer* renderer);
 
-    ParticleRenderer*                   m_Renderer;
+        /**
+         * Destroys the technique renderer.
+         */
+        void DestroyRenderer();
 
-    int                                 m_VisualParticleQuota;
-    bool                                m_VisualParticlePoolIncreased;
-    ParticlePool<VisualParticle>        m_VisualParticlesPool;
-    std::vector<VisualParticle*>        m_VisualParticles;
+        /**
+         * Creates a particle emitter for the technique.
+         *
+         * The emitter gets added to the technique.
+         *
+         * @param emitter_type[in] The type for the emitter.
+         * @return The newly created emitter.
+         */
+        ParticleEmitter* CreateEmitter(const Ogre::String& emitter_type);
 
-    int                                 m_EmittedEmitterQuota;
-    bool                                m_ParticleEmitterPoolIncreased;
-    ParticlePoolMap<ParticleEmitter>    m_ParticleEmitterPool;
-    std::vector<ParticleEmitter*>       m_Emitters;
+        /**
+         * Adds a particle emitter to the technique
+         *
+         * @param emitter[in] The emitter to add to the technique.
+         */
+        void AddEmitter(ParticleEmitter* emitter);
+
+        /**
+         * Destroys all the technique's emitters.
+         */
+        void DestroyAllEmitters();
+
+        /**
+         * Counts the number of emitters assigned to the techniques.
+         *
+         * @return The number of emitters assigned to the techniques.
+         */
+        int GetNumEmittableEmitters() const;
+
+        /**
+         * Marks all emitters as emittables.
+         */
+        void EmissionChange();
+
+        /**
+         * Retrieves the visual particles quota
+         *
+         * @return The visual particles quota
+         * @todo What is the quta for? How is it set?
+         */
+        int GetVisualParticlesQuota() const {return visual_particle_quota_;};
+
+        /**
+         * Initializes the particles of an emitter for emission.
+         *
+         * @param eitter[in] The emited to mark.
+         * @param requested[in] The number of particles to emit.
+         * @param time_elapsed[in] Unused.
+         * @todo Understand and document properly.
+         */
+        void ExecuteEmitParticles(
+          ParticleEmitter* emitter, int requested, Ogre::Real time_elapsed
+        );
+
+        /**
+         * Locks all particles and removes all their additional data.
+         */
+        void ResetVisualParticles();
+
+    private:
+
+        /**
+         * The parent particle system.
+         */
+        ParticleSystem* parent_system_;
+
+        /**
+         * The technique renderer.
+         */
+        ParticleRenderer* renderer_;
+
+        /**
+         * The visual particle quota.
+         */
+        int visual_particle_quota_;
+
+        /**
+         * Indicates if the visual particle quota has been increased.
+         */
+        bool visual_particle_pool_increased_;
+
+        /**
+         * The visual particle pool.
+         */
+        ParticlePool<VisualParticle> visual_particles_pool_;
+
+        /**
+         * List of visual particles.
+         */
+        std::vector<VisualParticle*> visual_particles_;
+
+        /**
+         * The particle emitter quota.
+         */
+        int emitted_emitter_quota_;
+
+        /**
+         * Indicates if the particle emitte quota has been increased.
+         */
+        bool particle_emitter_pool_increased_;
+
+        /**
+         * Particle emitter pool.
+         */
+        ParticlePoolMap<ParticleEmitter> particle_emitter_pool_;
+
+        /**
+         * List of particle emitters.
+         */
+        std::vector<ParticleEmitter*> emitters_;
 };
 
-
-
-#endif // PARTICLE_TECHNIQUE_H

@@ -50,7 +50,7 @@ MeshFile::readColor( const u32 offset )
 
 //---------------------------------------------------------------------
 void
-MeshFile::readQuad( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertexes, float* &pPos, u16* &index, u32 &cur_vertex, Ogre::RGBA* &cur_colour, bool multi_color )
+MeshFile::readQuad( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertexes, float* &pPos, u16* &index, u32 &cur_vertex, Ogre::RGBA* &curcolour_, bool multi_color )
 {
     u8 i1( GetU8( offset_to_poly + 0x00 ) )
       ,i2( GetU8( offset_to_poly + 0x01 ) )
@@ -78,10 +78,10 @@ MeshFile::readQuad( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertex
     };
 
     Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-    rs->convertColourValue( col_a, cur_colour++ );
-    rs->convertColourValue( col_b, cur_colour++ );
-    rs->convertColourValue( col_c, cur_colour++ );
-    rs->convertColourValue( col_d, cur_colour++ );
+    rs->convertColourValue( col_a, curcolour_++ );
+    rs->convertColourValue( col_b, curcolour_++ );
+    rs->convertColourValue( col_c, curcolour_++ );
+    rs->convertColourValue( col_d, curcolour_++ );
 
     *(index++) = cur_vertex + 0;
     *(index++) = cur_vertex + 2;
@@ -95,7 +95,7 @@ MeshFile::readQuad( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertex
 
 //---------------------------------------------------------------------
 void
-MeshFile::readTriangle( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertexes, float* &pPos, u16* &index, u32 &cur_vertex, Ogre::RGBA* &cur_colour, bool multi_color )
+MeshFile::readTriangle( const u32 offset_to_poly, std::vector<Ogre::Vector3>& vertexes, float* &pPos, u16* &index, u32 &cur_vertex, Ogre::RGBA* &curcolour_, bool multi_color )
 {
     u8 i1( GetU8( offset_to_poly + 0x00 ) )
       ,i2( GetU8( offset_to_poly + 0x01 ) )
@@ -117,9 +117,9 @@ MeshFile::readTriangle( const u32 offset_to_poly, std::vector<Ogre::Vector3>& ve
     };
 
     Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-    rs->convertColourValue( col_a, cur_colour++ );
-    rs->convertColourValue( col_b, cur_colour++ );
-    rs->convertColourValue( col_c, cur_colour++ );
+    rs->convertColourValue( col_a, curcolour_++ );
+    rs->convertColourValue( col_b, curcolour_++ );
+    rs->convertColourValue( col_c, curcolour_++ );
     *(index++) = cur_vertex + 2;
     *(index++) = cur_vertex + 1;
     *(index++) = cur_vertex + 0;
@@ -223,7 +223,7 @@ MeshFile::readPart( const Ogre::String& name, const u32 i, const u32 offset_to_p
     std::vector<Ogre::RGBA> coloursVec(sub_mesh->vertexData->vertexCount);
     Ogre::RGBA* colours = coloursVec.data();
 
-    Ogre::RGBA* cur_colour( colours );
+    Ogre::RGBA* curcolour_( colours );
 
 
 
@@ -236,7 +236,7 @@ MeshFile::readPart( const Ogre::String& name, const u32 i, const u32 offset_to_p
     // add textured quad
     for( u32 j = 0; j < number_of_quad_t; ++j )
     {
-        readQuad( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, cur_colour, true );
+        readQuad( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, curcolour_, true );
         TexForGenBsx texture;
         AddTexture( texture, textures );
 
@@ -281,7 +281,7 @@ MeshFile::readPart( const Ogre::String& name, const u32 i, const u32 offset_to_p
     // add textured triangle
     for (u32 j = 0; j < number_of_triangle_t; ++j)
     {
-        readTriangle( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, cur_colour, true );
+        readTriangle( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, curcolour_, true );
 
         TexForGenBsx texture;
         AddTexture( texture, textures );
@@ -318,7 +318,7 @@ MeshFile::readPart( const Ogre::String& name, const u32 i, const u32 offset_to_p
     // add textured monochrome quad
     for (u32 j = 0; j < number_of_quad_t2; ++j)
     {
-        readQuad( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, cur_colour, false );
+        readQuad( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, curcolour_, false );
 
         TexForGenBsx texture;
         AddTexture( texture, textures );
@@ -363,7 +363,7 @@ MeshFile::readPart( const Ogre::String& name, const u32 i, const u32 offset_to_p
     // add textured monochrome triangle
     for (u32 j = 0; j < number_of_triangle_t2; ++j)
     {
-        readTriangle( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, cur_colour, false );
+        readTriangle( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, curcolour_, false );
 
         TexForGenBsx texture;
         AddTexture( texture, textures );
@@ -400,7 +400,7 @@ MeshFile::readPart( const Ogre::String& name, const u32 i, const u32 offset_to_p
     // add monochrome triangle
     for (u32 j = 0; j < number_of_triangle_m; ++j)
     {
-        readTriangle( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, cur_colour, false );
+        readTriangle( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, curcolour_, false );
 
         Ogre::Vector2 at(0.99f, 0.99f);
         Ogre::Vector2 bt(0.99f, 0.99f);
@@ -415,7 +415,7 @@ MeshFile::readPart( const Ogre::String& name, const u32 i, const u32 offset_to_p
     // add monochrome quad
     for (u32 j = 0; j < number_of_quad_m; ++j)
     {
-        readQuad( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, cur_colour, false );
+        readQuad( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, curcolour_, false );
 
         Ogre::Vector2 at(0.99f, 0.99f);
         Ogre::Vector2 bt(0.99f, 0.99f);
@@ -432,7 +432,7 @@ MeshFile::readPart( const Ogre::String& name, const u32 i, const u32 offset_to_p
     // add color triangle
     for (u32 j = 0; j < number_of_triangle; ++j)
     {
-        readTriangle( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, cur_colour, true );
+        readTriangle( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, curcolour_, true );
 
         Ogre::Vector2 at(0.99f, 0.99f);
         Ogre::Vector2 bt(0.99f, 0.99f);
@@ -447,7 +447,7 @@ MeshFile::readPart( const Ogre::String& name, const u32 i, const u32 offset_to_p
     // add color quad
     for (u32 j = 0; j < number_of_quads; ++j)
     {
-        readQuad( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, cur_colour, true );
+        readQuad( offset_to_poly, vertexes, pPos, cur_index, cur_vertex, curcolour_, true );
 
         Ogre::Vector2 a(0.99f, 0.99f);
         Ogre::Vector2 b(0.99f, 0.99f);

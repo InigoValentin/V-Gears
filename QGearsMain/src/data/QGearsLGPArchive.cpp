@@ -109,7 +109,7 @@ namespace QGears
             {
                 if( it->file_name == filename )
                 {
-                    m_lgp_file->seek( it->data_offset );
+                    m_lgp_file->seek( it->dataoffset_ );
                     size_t length( it->data_size );
                     buffer = new Ogre::MemoryDataStream( length );
                     m_lgp_file->read( buffer->getPtr(), length );

@@ -5,7 +5,7 @@
 #include "common/TypeDefine.h"
 #include "QGearsPrerequisites.h"
 
-BEGIN_QGEARS
+namespace QGears {
 
 class WorldMapFile;
 
@@ -30,6 +30,6 @@ private:
             const Ogre::NameValuePairList *createParams ) override final;
 };
 
-END_QGEARS
+} // namespace QGears
 
 #endif // _MAP_FILE_MANAGER_H_

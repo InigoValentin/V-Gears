@@ -89,7 +89,7 @@ namespace luabind {
 
     private:
         lua_State* m_state;
-        char const* m_name;
+        char const* name_;
     };
 
     inline module_ module(lua_State* L, char const* name = 0)

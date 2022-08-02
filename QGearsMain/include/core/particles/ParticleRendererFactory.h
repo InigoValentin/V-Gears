@@ -1,38 +1,74 @@
-#ifndef PARTICLE_RENDERER_FACTORY_H
-#define PARTICLE_RENDERER_FACTORY_H
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include "ParticleRenderer.h"
 
+/**
+ * A particle renderer factory.
+ */
+class ParticleRendererFactory{
 
+    public:
 
-class ParticleRendererFactory
-{
-public:
-    ParticleRendererFactory(){};
-    virtual ~ParticleRendererFactory(){};
+        /**
+         * Constructor.
+         */
+        ParticleRendererFactory(){};
 
-    virtual Ogre::String GetRendererType() const = 0;
+        /**
+         * Destructor.
+         */
+        virtual ~ParticleRendererFactory(){};
 
-    virtual ParticleRenderer* CreateRenderer() = 0;
+        /**
+         * Retrieves the renderer type.
+         *
+         * @return Renderer type.
+         */
+        virtual Ogre::String GetRendererType() const = 0;
 
-    void DestroyRenderer (ParticleRenderer* renderer)
-    {
-        if (renderer != NULL)
-        {
-            delete renderer;
-        }
-    };
+        /**
+         * Creates a rendered.
+         *
+         * @return Pointer to the new renderer.
+         */
+        virtual ParticleRenderer* CreateRenderer() = 0;
 
-protected:
-    template <class T>
-    ParticleRenderer* _createRenderer()
-    {
-        ParticleRenderer* particle_renderer = new T();
-        particle_renderer->SetRendererType(GetRendererType());
-        return particle_renderer;
-    };
+        /**
+         * Destroys a renderer.
+         *
+         * @param renderer[in|out] The renderer to destroy.
+         */
+        void DestroyRenderer (ParticleRenderer* renderer){
+            if (renderer != NULL) delete renderer;
+        };
+
+    protected:
+
+        /**
+         * Creates a particle renderer.
+         *
+         * @tparam T The particle renderer type.
+         * @return The new particle renderer.
+         */
+        template <class T>
+        ParticleRenderer* _createRenderer(){
+            ParticleRenderer* particle_renderer = new T();
+            particle_renderer->SetRendererType(GetRendererType());
+            return particle_renderer;
+        };
 };
-
-
-
-#endif // PARTICLE_RENDERER_FACTORY_H

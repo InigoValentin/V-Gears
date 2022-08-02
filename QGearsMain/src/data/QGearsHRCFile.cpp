@@ -85,26 +85,26 @@ namespace QGears
         serializer.importHRCFile( stream, this );
 
 
-        const String skeleton_file_name( getSkeletonFileName() );
+        const String skeletonfile_name_( getSkeletonFileName() );
         Ogre::SkeletonManager &skeleton_manager( Ogre::SkeletonManager::getSingleton() );
-        m_skeleton = skeleton_manager.getByName( skeleton_file_name, mGroup );
+        m_skeleton = skeleton_manager.getByName( skeletonfile_name_, mGroup );
         if (m_skeleton == nullptr)
         {
             assert( m_skeleton_loader == nullptr );
             m_skeleton_loader = new HRCSkeletonLoader( *this );
-            m_skeleton = skeleton_manager.create( skeleton_file_name, mGroup, true, m_skeleton_loader );
+            m_skeleton = skeleton_manager.create( skeletonfile_name_, mGroup, true, m_skeleton_loader );
         }
 
-        const String mesh_file_name( getMeshFileName() );
+        const String meshfile_name_( getMeshFileName() );
         Ogre::LogManager::getSingleton().stream()
-                << "HRC::loadImpl(): mesh_file_name: " << mesh_file_name;
+                << "HRC::loadImpl(): meshfile_name_: " << meshfile_name_;
         Ogre::MeshManager &mesh_manager( Ogre::MeshManager::getSingleton() );
-        m_mesh = mesh_manager.getByName( mesh_file_name, mGroup );
+        m_mesh = mesh_manager.getByName( meshfile_name_, mGroup );
         if (m_mesh == nullptr)
         {
             assert( m_mesh_loader == nullptr );
             m_mesh_loader = new HRCMeshLoader( *this );
-            m_mesh = mesh_manager.create( mesh_file_name, mGroup, true, m_mesh_loader );
+            m_mesh = mesh_manager.create( meshfile_name_, mGroup, true, m_mesh_loader );
         }
     }
 

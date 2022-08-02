@@ -77,7 +77,7 @@ namespace QGears
     private:
         String              m_texture_name;
         Ogre::Vector2       m_clip;
-        Ogre::Vector4       m_range;
+        Ogre::Vector4       range_;
         Ogre::Vector3       m_position;
         Ogre::Quaternion    m_orientation;
         Ogre::Radian        m_fov;

@@ -1,7 +1,7 @@
 #include "data/worldmap/MapFileSerializer.h"
 #include "common/LzsFile.h"
 
-BEGIN_QGEARS
+namespace QGears {
 
 const int kWorldMapBlockSize = 0xB800;
 
@@ -143,4 +143,4 @@ void MapFileSerializer::importMapFile( Ogre::DataStreamPtr& stream, WorldMapFile
     }
 }
 
-END_QGEARS
+} // namespace QGears

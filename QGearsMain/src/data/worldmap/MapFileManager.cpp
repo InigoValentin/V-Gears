@@ -3,7 +3,7 @@
 
 template<> QGears::MapFileManager* Ogre::Singleton<QGears::MapFileManager>::msSingleton = nullptr;
 
-BEGIN_QGEARS
+namespace QGears {
 
 MapFileManager *MapFileManager::getSingletonPtr()
 {
@@ -39,4 +39,4 @@ Ogre::Resource* MapFileManager::createImpl(
     return new WorldMapFile( this, name, handle, group, isManual, loader );
 }
 
-END_QGEARS
+} // namespace QGears

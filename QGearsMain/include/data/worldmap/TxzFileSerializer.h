@@ -5,7 +5,7 @@
 #include "data/QGearsSerializer.h"
 #include <array>
 
-BEGIN_QGEARS
+namespace QGears {
 
 class TxzFile;
 
@@ -113,6 +113,6 @@ private:
 static_assert(sizeof(TxzFileSerializer::wm_texture)==4, "wm_texture is not packed");
 static_assert(sizeof(TxzFileSerializer::psx_pixel)==2, "psx_pixel is not packed");
 
-END_QGEARS
+} // namespace QGears
 
 #endif // _TXZ_FILE_SERIALIZER_H_

@@ -64,8 +64,8 @@ namespace QGears
     {
         m_matrix = Ogre::Matrix3::ZERO;
         m_position = Ogre::Vector3::ZERO;
-        m_offset.x = 0;
-        m_offset.y = 0;
+        moffset_.x = 0;
+        moffset_.y = 0;
         m_focal_length = 0;
         m_count = 0;
     }
@@ -115,14 +115,14 @@ namespace QGears
     const Pixel&
     CameraMatrixFile::getOffset() const
     {
-        return m_offset;
+        return moffset_;
     }
 
     //---------------------------------------------------------------------
     void
     CameraMatrixFile::setOffset( const Pixel& offset )
     {
-        m_offset = offset;
+        moffset_ = offset;
     }
 
     //---------------------------------------------------------------------

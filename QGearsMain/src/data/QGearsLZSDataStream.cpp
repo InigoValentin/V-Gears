@@ -89,11 +89,11 @@ namespace QGears
         size_t  read_total( 0 );
         while( count && !eof() )
         {
-            if( !m_buffer.avail() )
+            if( !mbuffer_.avail() )
             {
                 decompressChunk();
             }
-            size_t read( m_buffer.read( static_cast<uint8*>( buf ) + read_total, count ) );
+            size_t read( mbuffer_.read( static_cast<uint8*>( buf ) + read_total, count ) );
             count -= read;
             read_total += read;
         }
@@ -115,7 +115,7 @@ namespace QGears
         }
 
         uint8   data, control_byte, ref[2];
-        uint16  ref_offset;
+        uint16  refoffset_;
         m_available_compressed -= m_compressed_stream->read( &control_byte, sizeof( control_byte ) );
 
         for( uint8 control_bit( 8 )
@@ -125,7 +125,7 @@ namespace QGears
             if( control_byte & 1 )
             {
                 m_available_compressed -= m_compressed_stream->read( &data, sizeof( data ) );
-                m_buffer.write( &data );
+                mbuffer_.write( &data );
             }
             else if( m_available_compressed < 2 )
             {
@@ -136,11 +136,11 @@ namespace QGears
             else
             {
                 m_available_compressed -= m_compressed_stream->read( &ref, sizeof( ref ) );
-                ref_offset = 18 + ( ((ref[1] & 0xF0) << 4) | ref[0] );
+                refoffset_ = 18 + ( ((ref[1] & 0xF0) << 4) | ref[0] );
                 for( uint8 ref_length( (ref[1] & 0xF ) + 3 ); ref_length--; )
                 {
-                    data = m_buffer.get( ref_offset++ );
-                    m_buffer.write( &data );
+                    data = mbuffer_.get( refoffset_++ );
+                    mbuffer_.write( &data );
                 }
             }
         }
@@ -169,7 +169,7 @@ namespace QGears
     LZSDataStream::eof( void ) const
     {
         return !m_available_compressed
-            && !m_buffer.avail();
+            && !mbuffer_.avail();
     }
 
     //---------------------------------------------------------------------

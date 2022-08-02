@@ -4,7 +4,7 @@
 #include "common/TypeDefine.h"
 #include "data/QGearsSerializer.h"
 
-BEGIN_QGEARS
+namespace QGears {
 
 class WorldMapFile;
 
@@ -182,6 +182,6 @@ public:
     std::vector<SBlock> mBlocks;
 };
 
-END_QGEARS
+} // namespace QGears
 
 #endif // _MAP_FILE_SERIALIZER_H_

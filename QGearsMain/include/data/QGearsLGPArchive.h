@@ -80,14 +80,14 @@ namespace QGears
             struct FileEntry
             {
                 String file_name;
-                uint32 file_offset;
+                uint32 fileoffset_;
                 uint8  unknown1;
                 uint16 unknown2;
 
-                String data_file_name;
+                String datafile_name_;
                 uint32 data_size;
 
-                uint32 data_offset;
+                uint32 dataoffset_;
             };
 
             typedef std::vector<FileEntry> FileList;

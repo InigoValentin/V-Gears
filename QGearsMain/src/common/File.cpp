@@ -1,144 +1,113 @@
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
 #include <cassert>
 #include <string.h>
-
 #include "common/File.h"
 #include "common/FileSystem.h"
 #include "core/Logger.h"
 
-
-
-//-------------------------------------------------------------------------
 File::File(const Ogre::String& file):
-  m_FileName(file),
-  m_Buffer(nullptr),
-  m_BufferSize(0)
+  file_name_(file),
+  buffer_(nullptr),
+  buffer_size_(0)
 {
-    LOG_TRIVIAL("Loading file: " + m_FileName + "\n");
-    m_BufferSize = FileSystem::GetFileSize(m_FileName);
-
-    m_Buffer = (u8*)malloc(sizeof(u8) * m_BufferSize);
-
-    if (!FileSystem::ReadFile(m_FileName, m_Buffer, 0, m_BufferSize))
-    {
-        LOG_TRIVIAL("Warning: " + m_FileName + " not found!\n");
+    LOG_TRIVIAL("Loading file: " + file_name_ + "\n");
+    buffer_size_ = FileSystem::GetFileSize(file_name_);
+    buffer_ = (u8*) malloc(sizeof(u8) * buffer_size_);
+    if (!FileSystem::ReadFile(file_name_, buffer_, 0, buffer_size_)){
+        LOG_TRIVIAL("Warning: " + file_name_ + " not found!\n");
     }
 }
 
-//-------------------------------------------------------------------------
-File::File(const File* pFile, u32 offset, u32 length):
-  m_Buffer(nullptr),
-  m_BufferSize(length)
+File::File(const File* file, u32 offset, u32 length):
+  buffer_(nullptr),
+  buffer_size_(length)
 {
-    assert(pFile != nullptr);
+    assert(file != nullptr);
 
-    m_FileName = pFile->GetFileName();
+    file_name_ = file->GetFileName();
 
-    m_Buffer = (u8 *)malloc(sizeof(u8) * m_BufferSize);
-    pFile->GetFileBuffer(m_Buffer, offset, m_BufferSize);
+    buffer_ = (u8 *) malloc(sizeof(u8) * buffer_size_);
+    file->GetFileBuffer(buffer_, offset, buffer_size_);
 }
 
-//-------------------------------------------------------------------------
-File::File(const u8* pBuffer, u32 offset, u32 length):
-  m_FileName("BUFFER"),
-  m_Buffer(nullptr),
-  m_BufferSize(length)
+File::File(const u8* buffer, u32 offset, u32 length):
+  file_name_("BUFFER"),
+  buffer_(nullptr),
+  buffer_size_(length)
 {
-    assert(pBuffer != nullptr);
-
-    m_Buffer = (u8*)malloc(sizeof(u8) * m_BufferSize);
-    memcpy(m_Buffer, pBuffer + offset, m_BufferSize);
+    assert(buffer != nullptr);
+    buffer_ = (u8*) malloc(sizeof(u8) * buffer_size_);
+    memcpy(buffer_, buffer + offset, buffer_size_);
 }
 
-//-------------------------------------------------------------------------
-File::File(const File* pFile)
-{
-    assert(pFile != nullptr);
-
-    m_BufferSize = pFile->GetFileSize();
-    m_FileName   = pFile->GetFileName();
-
-    m_Buffer = (u8*)malloc(sizeof(u8) * m_BufferSize);
-    pFile->GetFileBuffer(m_Buffer, 0, m_BufferSize);
+File::File(const File* file){
+    assert(file != nullptr);
+    buffer_size_ = file->GetFileSize();
+    file_name_   = file->GetFileName();
+    buffer_ = (u8*) malloc(sizeof(u8) * buffer_size_);
+    file->GetFileBuffer(buffer_, 0, buffer_size_);
 }
 
-//-------------------------------------------------------------------------
-File::~File()
-{
-    free(m_Buffer);
+File::~File(){
+    free(buffer_);
 }
 
-//-------------------------------------------------------------------------
-void
-File::WriteFile(const Ogre::String& file) const
-{
-  FileSystem::WriteNewFile(file, m_Buffer, m_BufferSize);
+void File::WriteFile(const Ogre::String& file) const{
+  FileSystem::WriteNewFile(file, buffer_, buffer_size_);
 }
 
-//-------------------------------------------------------------------------
-const Ogre::String&
-File::GetFileName() const
-{
-    return m_FileName;
+const Ogre::String& File::GetFileName() const{return file_name_;}
+
+u32 File::GetFileSize() const{return buffer_size_;}
+
+void File::GetFileBuffer(
+  u8* buffer, const u32 &start, const u32 &length
+) const{
+    memcpy(buffer, buffer_ + start, length);
 }
 
-//-------------------------------------------------------------------------
-u32
-File::GetFileSize() const
-{
-    return m_BufferSize;
+u8 File::GetU8(u32 offset) const{return *(buffer_ + offset);}
+
+u16 File::GetU16LE(u32 offset) const{
+    return (buffer_ + offset)[0] | ((buffer_ + offset)[1] << 8);
 }
 
-//-------------------------------------------------------------------------
-void
-File::GetFileBuffer(u8* pBuffer, const u32 &start, const u32 &length) const
-{
-    memcpy(pBuffer, m_Buffer + start, length);
+u32 File::GetU32LE(u32 offset) const{
+    return
+      (buffer_ + offset)[0]
+      | ((buffer_ + offset)[1] << 8)
+      | ((buffer_ + offset)[2] << 16)
+      | ((buffer_ + offset)[3] << 24);
 }
 
-//-------------------------------------------------------------------------
-u8
-File::GetU8(u32 offset) const
-{
-    return *(m_Buffer + offset);
-}
-
-//-------------------------------------------------------------------------
-u16
-File::GetU16LE(u32 offset) const
-{
-    return (m_Buffer + offset)[0] | ((m_Buffer + offset)[1] << 8);
-}
-
-//-------------------------------------------------------------------------
-u32
-File::GetU32LE(u32 offset) const
-{
-    return (m_Buffer + offset)[0] | ((m_Buffer + offset)[1] << 8) | ((m_Buffer + offset)[2] << 16) | ((m_Buffer + offset)[3] << 24);
-}
-
-//-------------------------------------------------------------------------
-u8
-File::readU8()
-{
-    return GetU8( m_offset++ );
-}
-
-//-------------------------------------------------------------------------
-u16
-File::readU16LE()
-{
-    u16 data( GetU16LE(m_offset) );
-    m_offset += 2;
+u8 File::readU8(){
+    u8 data(GetU8(offset_));
+    offset_ += 1;
     return data;
 }
 
-//-------------------------------------------------------------------------
-u32
-File::readU32LE()
-{
-    u32 data( GetU32LE(m_offset) );
-    m_offset += 4;
+u16 File::readU16LE(){
+    u16 data(GetU16LE(offset_));
+    offset_ += 2;
     return data;
 }
 
-//-------------------------------------------------------------------------
+u32 File::readU32LE(){
+    u32 data(GetU32LE(offset_));
+    offset_ += 4;
+    return data;
+}

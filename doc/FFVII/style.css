@@ -28,3 +28,20 @@ ul.no_bullet li span.index_num{
     color: #999;
     font-weight: bold;
 }
+
+table#kernel-functionality{
+    margin: auto;
+    border-collapse: collapse;
+}
+
+table#kernel-functionality td{
+    border: 2px solid #ffffff;
+    text-align: center;
+}
+
+table#kernel-functionality td span#kernel-psyq{
+    display: block;
+    margin: 0.5em 0.5em 0.2em 4.2em;
+    padding: 0.2em;
+    border: 2px solid #ffffff;
+}

@@ -61,7 +61,7 @@ UiContainer.MainMenu = {
         local location    = ui_manager:get_widget( "MainMenu.Container.Location" )
 
         ui_manager:get_widget( "MainMenu.Container.Menu.PHSText" ):set_visible( false )
-        ui_manager:get_widget( "MainMenu.Container.Menu.SaveText" ):set_colour( 0.4, 0.4, 0.4 )
+        ui_manager:get_widget( "MainMenu.Container.Menu.SaveText" ):setcolour_( 0.4, 0.4, 0.4 )
 
         characters:play_animation_stop( "Appear" )
         menu:play_animation_stop( "Appear" )

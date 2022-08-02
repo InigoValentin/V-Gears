@@ -4,7 +4,7 @@
 #include <OgreSingleton.h>
 #include "common/TypeDefine.h"
 
-BEGIN_QGEARS
+namespace QGears {
 
 class WorldMapModule : public Ogre::Singleton< WorldMapModule >
 {
@@ -12,6 +12,6 @@ public:
     void Init();
 };
 
-END_QGEARS
+} // namespace QGears
 
 #endif // _WORLD_MAP_MODULE_H_

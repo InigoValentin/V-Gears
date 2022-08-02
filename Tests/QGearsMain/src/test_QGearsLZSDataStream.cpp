@@ -59,10 +59,10 @@ const unsigned char hexData[] = {
 
 BOOST_AUTO_TEST_CASE( read_file )
 {
-    const char* in_file_name( "reference_lzs.compressed" );
-    const char* out_file_name( "test_lzs.decompressed" );
-    std::ifstream *ifs(  OGRE_NEW_T( std::ifstream, Ogre::MEMCATEGORY_GENERAL )( in_file_name, std::ifstream::binary ) );
-    std::ofstream ofs( out_file_name, std::ifstream::binary );
+    const char* infile_name_( "reference_lzs.compressed" );
+    const char* outfile_name_( "test_lzs.decompressed" );
+    std::ifstream *ifs(  OGRE_NEW_T( std::ifstream, Ogre::MEMCATEGORY_GENERAL )( infile_name_, std::ifstream::binary ) );
+    std::ofstream ofs( outfile_name_, std::ifstream::binary );
     BOOST_REQUIRE( ifs->is_open() );
     BOOST_REQUIRE( ofs.is_open() );
     Ogre::DataStreamPtr         file_stream( OGRE_NEW Ogre::FileStreamDataStream( ifs ) );
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE( read_file )
     file_stream.reset();
     ofs.close();
 
-    std::ifstream actual( out_file_name );
+    std::ifstream actual( outfile_name_ );
     std::ifstream expected( "reference_lzs.decompressed" );
 
     std::istream_iterator<char> it_actual  ( actual   ), end_actual;

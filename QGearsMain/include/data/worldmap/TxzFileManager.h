@@ -5,7 +5,7 @@
 #include "common/TypeDefine.h"
 #include "QGearsPrerequisites.h"
 
-BEGIN_QGEARS
+namespace QGears {
 
 class _QGearsExport TxzFileManager
         : public Ogre::ResourceManager,
@@ -28,6 +28,6 @@ private:
             const Ogre::NameValuePairList *createParams ) override final;
 };
 
-END_QGEARS
+} // namespace QGears
 
 #endif // _TXZ_FILE_MANAGER_H_

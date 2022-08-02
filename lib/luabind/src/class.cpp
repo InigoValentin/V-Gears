@@ -64,7 +64,7 @@ namespace luabind { namespace detail {
 
         void register_(lua_State* L) const;
 
-        const char* m_name;
+        const char* name_;
 
         mutable std::map<const char*, int, detail::ltstr> m_static_constants;
 
@@ -84,7 +84,7 @@ namespace luabind { namespace detail {
 
     class_registration::class_registration(char const* name)
     {
-        m_name = name;
+        name_ = name;
     }
 
     void class_registration::register_(lua_State* L) const
@@ -93,7 +93,7 @@ namespace luabind { namespace detail {
 
         assert(lua_type(L, -1) == LUA_TTABLE);
 
-        lua_pushstring(L, m_name);
+        lua_pushstring(L, name_);
 
         detail::class_rep* crep;
 
@@ -110,7 +110,7 @@ namespace luabind { namespace detail {
 
         new(crep) detail::class_rep(
             m_type
-            , m_name
+            , name_
             , L
 		);
 
@@ -270,7 +270,7 @@ namespace luabind { namespace detail {
 
     const char* class_base::name() const 
     { 
-        return m_registration->m_name; 
+        return m_registration->name_; 
     }
 
     void class_base::add_static_constant(const char* name, int val)

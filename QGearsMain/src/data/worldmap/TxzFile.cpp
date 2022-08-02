@@ -1,7 +1,7 @@
 #include "data/worldmap/TxzFile.h"
 #include "data/worldmap/TxzFileSerializer.h"
 
-BEGIN_QGEARS
+namespace QGears {
 
 /*static*/ const String TxzFile::RESOURCE_TYPE( "QGearsWorldMapTxzFile" );
 
@@ -22,4 +22,4 @@ void TxzFile::unloadImpl()
 
 }
 
-END_QGEARS
+} // namespace QGears

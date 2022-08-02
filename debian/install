@@ -1,4 +1,4 @@
-q-gears.desktop /usr/share/applications
-q-gears.png /usr/share/pixmaps
-q-gears-launcher /usr/bin
-output/resources.cfg /usr/share/q-gears
+v-gears.desktop /usr/share/applications
+v-gears.png /usr/share/pixmaps
+v-gears-launcher /usr/bin
+output/resources.cfg /usr/share/v-gears

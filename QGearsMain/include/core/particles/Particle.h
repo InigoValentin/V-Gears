@@ -1,60 +1,196 @@
-#ifndef PARTICLE_H
-#define PARTICLE_H
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include <OgrePrerequisites.h>
 #include <Ogre.h>
 
 #include "ParticleAdditionalData.h"
 
-
-
 class ParticleEmitter;
 
+/**
+ * A particle.
+ *
+ * Particles are emitted by one {@see ParticleEmitter}.
+ */
+class Particle{
 
+    public:
 
-class Particle
-{
-public:
-    enum ParticleType
-    {
-        PT_VISUAL,
-        PT_EMITTER
-    };
+        /**
+         * Types of particles.
+         */
+        enum ParticleType{
 
-    Particle();
-    virtual ~Particle() = 0;
+            /**
+             * A visual particle.
+             */
+            PT_VISUAL,
 
-    virtual void InitForEmission() {};
-    virtual void InitForExpiration() {};
+            /**
+             * @todo Document.
+             */
+            PT_EMITTER
+        };
 
-    virtual void Update(Ogre::Real time_elapsed);
+        /**
+         * Constructor.
+         */
+        Particle();
 
-    virtual void CopyAttributesTo(Particle* particle);
+        /**
+         * Destructor.
+         */
+        virtual ~Particle() = 0;
 
-    ParticleType GetParticleType() const {return m_ParticleType;};
+        /**
+         * Initializes the particle.
+         *
+         * It makes it ready for emission.
+         */
+        virtual void InitForEmission(){};
 
-    void SetParentEmitter(ParticleEmitter* parent_emitter) {m_ParentEmitter = parent_emitter;};
-    ParticleEmitter* GetParentEmitter() const {return m_ParentEmitter;};
+        /**
+         * Initializes the particle.
+         *
+         * It makes it ready for expiration.
+         * @todo: Document this properly.
+         */
+        virtual void InitForExpiration(){};
 
-    void SetEnabled(bool enabled) {m_Enabled = enabled;};
-    bool IsEnabled() const {return m_Enabled;};
+        /**
+         * Updates the particle.
+         *
+         * Updates it position based on the time lived by the particle.
+         *
+         * @param time_elapsed[in] Time lived by the particle.
+         */
+        virtual void Update(Ogre::Real time_elapsed);
 
-    void SetEmittable(bool emittable) {m_Emittable = emittable;};
-    bool IsEmittable() const {return m_Emittable;};
+        /**
+         * Copies the particle attributes to another particle.
+         *
+         * @param particle[out] The particl to copy the atttributes to.
+         */
+        virtual void CopyAttributesTo(Particle* particle);
 
-    ParticleAdditionalData* additional_data;
-    Ogre::Vector3           position;
-    Ogre::Vector3           direction;
-    float                   time_to_live;
-    float                   total_time_to_live;
+        /**
+         * Retrieves the particle type.
+         *
+         * @return The particle type.
+         */
+        ParticleType GetParticleType() const {return particle_type_;};
 
-protected:
-    ParticleEmitter*    m_ParentEmitter;
-    ParticleType        m_ParticleType;
-    bool                m_Enabled;
-    bool                m_Emittable;
+        /**
+         * Sets the particle emitter.
+         *
+         * @param parent_emitter[in] The emitter for the particle.
+         * @todo Check if parent_emitter is an in or out parameter.
+         */
+        void SetParentEmitter(ParticleEmitter* parent_emitter){
+            parent_emitter_ = parent_emitter;
+        };
+
+        /**
+         * Retrieves the particle emitter.
+         *
+         * @return The emitter.
+         */
+        ParticleEmitter* GetParentEmitter() const {return parent_emitter_;};
+
+        /**
+         * Enables or disables the particle
+         *
+         * @param enabled[in] True to enable the particle, false to disable it.
+         */
+        void SetEnabled(bool enabled) {enabled_ = enabled;};
+
+        /**
+         * Checks if the particle is enabled.
+         *
+         * @return True if the particle is enabled, false otherwise.
+         */
+        bool IsEnabled() const {return enabled_;};
+
+        /**
+         * Toggles the particle emitability.
+         *
+         * @param emittable[in] True to make the particle emittable, false to
+         * prevent it to be emitted.
+         */
+        void SetEmittable(bool emittable) {emittable_ = emittable;};
+
+        /**
+         * Checks if the particle can be emitted.
+         *
+         * @return True if the particle can be emitted, false if it can't.
+         */
+        bool IsEmittable() const {return emittable_;};
+
+        /**
+         * Additional data for the particle.
+         */
+        ParticleAdditionalData* additional_data;
+
+        /**
+         * The particle position.
+         */
+        Ogre::Vector3 position;
+
+        /**
+         * The direction that the particle is or will be emitted to.
+         */
+        Ogre::Vector3 direction;
+
+        /**
+         * The particle duration.
+         *
+         * @todo Seconds? Milliseconds? Frames?
+         * @todo Differenche with total_time_to_live?
+         */
+        float time_to_live;
+
+        /**
+         * The particle duration.
+         *
+         * @todo Seconds? Milliseconds? Frames?
+         * @todo Differenche with time_to_live?
+         */
+        float total_time_to_live;
+
+    protected:
+
+        /**
+         * The particle emitter.
+         */
+        ParticleEmitter* parent_emitter_;
+
+        /**
+         * The particle type.
+         */
+        ParticleType particle_type_;
+
+        /**
+         * Indicates if the particle is enabled.
+         */
+        bool enabled_;
+
+        /**
+         * Indicates if the particl can be emitted.
+         */
+        bool emittable_;
 };
-
-
-
-#endif // PARTICLE_H

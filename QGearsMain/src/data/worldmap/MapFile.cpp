@@ -1,7 +1,7 @@
 #include "data/worldmap/MapFile.h"
 #include "data/worldmap/MapFileSerializer.h"
 
-BEGIN_QGEARS
+namespace QGears {
 
 /*static*/ const String WorldMapFile::RESOURCE_TYPE( "QGearsWorldMap7File" );
 
@@ -22,4 +22,4 @@ void WorldMapFile::unloadImpl()
 
 }
 
-END_QGEARS
+} // namespace QGears

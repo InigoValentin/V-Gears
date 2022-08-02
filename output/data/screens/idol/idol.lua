@@ -48,10 +48,10 @@ UiContainer.Idol = {
                     ui_manager:get_widget( "Idol.ArrowLeft" ):play_animation( "Press" )
                     self.picture_current = self.picture_current + 1
                     if self.picture_current == self.picture_number then
-                        ui_manager:get_widget( "Idol.ArrowLeft" ):set_colour( 0.5, 0.5, 0.5 )
+                        ui_manager:get_widget( "Idol.ArrowLeft" ):setcolour_( 0.5, 0.5, 0.5 )
                         ui_manager:get_widget( "Idol.ArrowLeft" ):set_alpha( 0.5 )
                     end
-                    ui_manager:get_widget( "Idol.ArrowRight" ):set_colour( 1, 1, 1 )
+                    ui_manager:get_widget( "Idol.ArrowRight" ):setcolour_( 1, 1, 1 )
                     ui_manager:get_widget( "Idol.ArrowRight" ):set_alpha( 1 )
 
                     for i = 1, self.picture_number, 1 do
@@ -81,10 +81,10 @@ UiContainer.Idol = {
                     ui_manager:get_widget( "Idol.ArrowRight" ):play_animation( "Press" )
                     self.picture_current = self.picture_current - 1
                     if self.picture_current == 1 then
-                        ui_manager:get_widget( "Idol.ArrowRight" ):set_colour( 0.5, 0.5, 0.5 )
+                        ui_manager:get_widget( "Idol.ArrowRight" ):setcolour_( 0.5, 0.5, 0.5 )
                         ui_manager:get_widget( "Idol.ArrowRight" ):set_alpha( 0.5 )
                     end
-                    ui_manager:get_widget( "Idol.ArrowLeft" ):set_colour( 1, 1, 1 )
+                    ui_manager:get_widget( "Idol.ArrowLeft" ):setcolour_( 1, 1, 1 )
                     ui_manager:get_widget( "Idol.ArrowLeft" ):set_alpha( 1 )
 
                     for i = 1, self.picture_number, 1 do

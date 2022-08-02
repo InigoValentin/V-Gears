@@ -64,7 +64,7 @@ namespace QGears
     protected:
         void    readFileHeader( Ogre::DataStreamPtr &stream );
 
-        void    readSectionData(Ogre::DataStreamPtr &stream, Ogre::DataStreamPtr &out_buffer, size_t sectionSize);
+        void    readSectionData(Ogre::DataStreamPtr &stream, Ogre::DataStreamPtr &outbuffer_, size_t sectionSize);
         virtual void    readSection( Ogre::DataStreamPtr &stream, FLevelFile* pDest, const size_t section_index );
 
         template<typename ResourceManagerType>

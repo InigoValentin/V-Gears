@@ -58,7 +58,7 @@ CreateTextureFromVram( const Ogre::PixelBox& pb, Vram* vram, const int start_x, 
 
 
 void
-CreateTexture( Vram* vram, const MeshData& mesh_data, const Ogre::String& texture_file_name, const VectorTexForGen& textures )
+CreateTexture( Vram* vram, const MeshData& mesh_data, const Ogre::String& texturefile_name_, const VectorTexForGen& textures )
 {
     Ogre::TexturePtr ptex;
     Ogre::HardwarePixelBufferSharedPtr buffer;
@@ -75,7 +75,7 @@ CreateTexture( Vram* vram, const MeshData& mesh_data, const Ogre::String& textur
 
     Ogre::Image image;
     image.loadDynamicImage( ( Ogre::uchar* )pb.data, mesh_data.tex_width, mesh_data.tex_height, Ogre::PF_R8G8B8A8 );
-    image.save( texture_file_name );
+    image.save( texturefile_name_ );
     buffer->unlock();
 
     return;
@@ -84,7 +84,7 @@ CreateTexture( Vram* vram, const MeshData& mesh_data, const Ogre::String& textur
 
 
 void
-CreateMaterial( const Ogre::String& material_name, const Ogre::String& material_file_name, const Ogre::String& texture_name, const Ogre::String& vertex_program, const Ogre::String& fragment_program )
+CreateMaterial( const Ogre::String& material_name, const Ogre::String& materialfile_name_, const Ogre::String& texture_name, const Ogre::String& vertex_program, const Ogre::String& fragment_program )
 {
     Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(material_name, "General");
     Ogre::Technique* tech = material->getTechnique(0);
@@ -112,7 +112,7 @@ CreateMaterial( const Ogre::String& material_name, const Ogre::String& material_
     }
 
     Ogre::MaterialSerializer mat;
-    mat.exportMaterial(material, material_file_name);
+    mat.exportMaterial(material, materialfile_name_);
 }
 
 

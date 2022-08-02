@@ -56,10 +56,10 @@ namespace QGears
         FileList::const_iterator it_end( files.end() );
         while( it != it_end )
         {
-            stream->seek( it->file_offset );
-            it->data_file_name = readString( stream, FILE_NAME_LENGTH );
+            stream->seek( it->fileoffset_ );
+            it->datafile_name_ = readString( stream, FILE_NAME_LENGTH );
             readUInt32( stream, it->data_size );
-            it->data_offset = stream->tell();
+            it->dataoffset_ = stream->tell();
             ++it;
         }
     }
@@ -78,7 +78,7 @@ namespace QGears
                                      ,FileEntry& file_entry )
     {
         file_entry.file_name = readString( stream, FILE_NAME_LENGTH );
-        readUInt32( stream, file_entry.file_offset );
+        readUInt32( stream, file_entry.fileoffset_ );
         stream->read( &file_entry.unknown1, sizeof( file_entry.unknown1 ) );
         readShort( stream, file_entry.unknown2 );
 
@@ -87,7 +87,7 @@ namespace QGears
         {
             Ogre::LogManager::getSingleton().stream()
                 << "file_name: " << file_entry.file_name
-                << " file_offset: " << file_entry.file_offset
+                << " fileoffset_: " << file_entry.fileoffset_
                 << " unknown1: " << (uint16)file_entry.unknown1
                 << " unknown2: " << file_entry.unknown2
                 ;

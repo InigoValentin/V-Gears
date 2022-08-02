@@ -18,7 +18,7 @@ protected:
     void                        getWorldTransforms(Ogre::Matrix4 *xform) const;
 
 private:
-    Ogre::Vector3    m_Position;
+    Ogre::Vector3    position_;
     float            m_AdditionalHeight;
 };
 

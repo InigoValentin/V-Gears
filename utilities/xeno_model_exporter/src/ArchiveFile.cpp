@@ -104,7 +104,7 @@ ArchiveFile::Extract()
         }
     }
 
-    free( m_Buffer );
-    m_Buffer = decomp_buffer;
-    m_BufferSize = decomp_length;
+    free( buffer_ );
+    buffer_ = decomp_buffer;
+    buffer_size_ = decomp_length;
 }

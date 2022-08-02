@@ -25,7 +25,7 @@ public:
 
 protected:
     template <class T>
-    ParticleEmitter* _createEmitter()
+    ParticleEmitter* CreateEmitter_()
     {
         ParticleEmitter* particle_emitter = new T();
         particle_emitter->SetEmitterType(GetEmitterType());

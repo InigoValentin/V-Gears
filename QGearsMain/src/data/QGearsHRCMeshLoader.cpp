@@ -79,19 +79,19 @@ namespace QGears
         const String &bone_name( bone.name );
         RSDNameList::const_iterator it( bone.rsd_names.begin() );
         RSDNameList::const_iterator end( bone.rsd_names.end() );
-        String rsd_base, rsd_file_name, p_file_name;
+        String rsd_base, rsdfile_name_, pfile_name_;
         while( it != end )
         {
             rsd_base = path + *it;
             StringUtil::toLowerCase( rsd_base );
-            rsd_file_name = rsd_base + EXT_RSD;
-            RSDFilePtr rsd_file = RSDFileManager::getSingleton().load( rsd_file_name, m_hrc_file.getGroup() ).staticCast<RSDFile>();
+            rsdfile_name_ = rsd_base + EXT_RSD;
+            RSDFilePtr rsd_file = RSDFileManager::getSingleton().load( rsdfile_name_, m_hrc_file.getGroup() ).staticCast<RSDFile>();
             assert(rsd_file != nullptr);
 
-            p_file_name = path + rsd_file->getPolygonName();
-            StringUtil::toLowerCase( p_file_name );
-            p_file_name = StringUtil::replaceAll( p_file_name, EXT_PLY, EXT_P );
-            PFilePtr p_file =  PFileManager::getSingleton().load( p_file_name, m_hrc_file.getGroup() ).staticCast<PFile>();
+            pfile_name_ = path + rsd_file->getPolygonName();
+            StringUtil::toLowerCase( pfile_name_ );
+            pfile_name_ = StringUtil::replaceAll( pfile_name_, EXT_PLY, EXT_P );
+            PFilePtr p_file =  PFileManager::getSingleton().load( pfile_name_, m_hrc_file.getGroup() ).staticCast<PFile>();
             assert(p_file != nullptr);
 
             p_file->addGroups( mesh, bone_name, rsd_file );

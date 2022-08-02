@@ -220,7 +220,7 @@ void
 MimFile::InnerGetImage()
 {
     // get number of clut
-    MimHeader* mim_header = ( MimHeader* )m_Buffer;
+    MimHeader* mim_header = ( MimHeader* )buffer_;
 
     mClutVramPositionX = mim_header->x;
     mClutVramPositionY = mim_header->y;
@@ -239,7 +239,7 @@ MimFile::InnerGetImage()
 
 
     // set image buffer
-    MimHeader2* mim_header2 = ( MimHeader2* )( ( u8* )m_Buffer + mim_header->header2_offset );
+    MimHeader2* mim_header2 = ( MimHeader2* )( ( u8* )buffer_ + mim_header->header2_offset );
     mImageVramPositionX = mim_header2->x * 2;
     mImageVramPositionY = mim_header2->y;
     mImageWidth         = mim_header2->width * 2;
@@ -259,9 +259,9 @@ MimFile::InnerGetImage()
     // add to image buffer
     u32 data_3_offset = mim_header->header2_offset + mim_header2->data_size;
 
-    if( m_BufferSize > data_3_offset )
+    if( buffer_size_ > data_3_offset )
     {
-        MimHeader2* mim_header3 = ( MimHeader2* )( ( u8* )m_Buffer + data_3_offset );
+        MimHeader2* mim_header3 = ( MimHeader2* )( ( u8* )buffer_ + data_3_offset );
 
         if (mim_header3->data_size > 0)
         {

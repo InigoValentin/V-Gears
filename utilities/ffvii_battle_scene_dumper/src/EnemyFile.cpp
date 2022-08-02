@@ -171,7 +171,7 @@ EnemyFile::DumpData()
 
         FFVIIString name;
         name.resize( 32 );
-        std::copy( m_Buffer + enemy_data_offset + k * 184, m_Buffer + enemy_data_offset + k * 184 + 0x20, name.begin() );
+        std::copy( buffer_ + enemy_data_offset + k * 184, buffer_ + enemy_data_offset + k * 184 + 0x20, name.begin() );
         Ogre::String r_name = FFVIIStringToString( name );
 
         export_text->Log( "-- " + Ogre::String( r_name.c_str() ) + "(" + IntToString( GetU16LE( k * 0x02 ) ) + ")\n" );
@@ -1250,7 +1250,7 @@ EnemyFile::DumpData()
         {
             FFVIIString name;
             name.resize(32);
-            std::copy( m_Buffer + attack_names_offset + k * 0x20, m_Buffer + attack_names_offset + 0x20 + k * 0x20, name.begin() );
+            std::copy( buffer_ + attack_names_offset + k * 0x20, buffer_ + attack_names_offset + 0x20 + k * 0x20, name.begin() );
 
             export_text->Log( "-- " + Ogre::String( FFVIIStringToString( name ).c_str() ) + " (" + IntToString( GetU16LE( attack_id_offset + k * 0x02 ) ) + ")\n" );
 
