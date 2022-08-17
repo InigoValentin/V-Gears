@@ -17,4 +17,4 @@ output/share
 output/include
 output/lib
 CMakeLists.txt.user
-
+doc/FFVII/RAW/

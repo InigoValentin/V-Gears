@@ -1,85 +1,89 @@
-#include "core/DebugDraw.h"
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
 #include <OgreFontManager.h>
 #include <OgreHardwareBufferManager.h>
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
 #include <OgreViewport.h>
-
+#include "core/DebugDraw.h"
 #include "core/CameraManager.h"
 #include "core/DebugDraw.h"
 #include "core/Logger.h"
 #include "core/UiTextArea.h"
 
-
 template<>DebugDraw *Ogre::Singleton<DebugDraw>::msSingleton = nullptr;
 
-
 DebugDraw::DebugDraw():
-    m_Colour(1, 1, 1, 1),
-    m_ScreenSpace(true),
-    m_Z(0),
-    m_FadeStartSquare(999999),
-    m_FadeEndSquare(999999),
-    m_FontHeight(16),
-    m_LineMaxVertexCount(0),
-    m_Line3dMaxVertexCount(0),
-    m_QuadMaxVertexCount(0),
-    m_TextMaxVertexCount(0)
+  colour_(1, 1, 1, 1),
+  screen_space_(true),
+  z_coordinate_(0),
+  fade_start_square_(999999),
+  fade_end_square_(999999),
+  font_height_(16),
+  line_max_vertex_(0),
+  line_3d_max_vertex_(0),
+  quad_max_vertex_(0),
+  text_max_vertex_(0)
 {
-    m_SceneManager = Ogre::Root::getSingleton().getSceneManager("Scene");
-    m_RenderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
-
+    scene_manager_ = Ogre::Root::getSingleton().getSceneManager("Scene");
+    render_system_ = Ogre::Root::getSingletonPtr()->getRenderSystem();
     CreateLineVertexBuffer();
     CreateLine3dVertexBuffer();
     CreateTriangle3dVertexBuffer();
     CreateQuadVertexBuffer();
     CreateTextVertexBuffer();
-
-    m_Material = Ogre::MaterialManager::getSingleton().create("DebugDraw", "General");
-    Ogre::Pass* pass = m_Material->getTechnique(0)->getPass(0);
+    material_
+      = Ogre::MaterialManager::getSingleton().create("DebugDraw", "General");
+    Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
     pass->setCullingMode(Ogre::CULL_NONE);
     pass->setDepthCheckEnabled(true);
     pass->setDepthWriteEnabled(true);
     pass->setLightingEnabled(false);
     pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-
-    m_Material3d = Ogre::MaterialManager::getSingleton().create("DebugDraw3d", "General");
-    pass = m_Material3d->getTechnique( 0 )->getPass(0);
+    material_3d_
+      = Ogre::MaterialManager::getSingleton().create("DebugDraw3d", "General");
+    pass = material_3d_->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
     pass->setCullingMode(Ogre::CULL_NONE);
     pass->setDepthCheckEnabled(true);
     pass->setDepthWriteEnabled(true);
     pass->setLightingEnabled(false);
     pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-
-    m_Font = Ogre::FontManager::getSingleton().getByName("CourierNew");
-    if(m_Font == nullptr)
-    {
+    font_ = Ogre::FontManager::getSingleton().getByName("CourierNew");
+    if (font_ == nullptr){
         LOG_ERROR("Could not find font \"CourierNew\" for debug draw.");
         throw std::runtime_error("Font load failure");
     }
-
-    m_Font->load();
-    pass = m_Font->getMaterial()->getTechnique(0)->getPass(0);
+    font_->load();
+    pass = font_->getMaterial()->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
     pass->setCullingMode(Ogre::CULL_NONE);
     pass->setDepthCheckEnabled(true);
     pass->setDepthWriteEnabled(true);
     pass->setLightingEnabled(false);
     pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-
     //Ogre::MaterialSerializer mat;
-    //mat.exportMaterial( m_Font->getMaterial(), "font.material" );
-
-    m_SceneManager->addRenderQueueListener(this);
+    //mat.exportMaterial(font_->getMaterial(), "font.material");
+    scene_manager_->addRenderQueueListener(this);
 }
 
 
-DebugDraw::~DebugDraw()
-{
-    m_SceneManager->removeRenderQueueListener(this);
-
+DebugDraw::~DebugDraw(){
+    scene_manager_->removeRenderQueueListener(this);
     DestroyLineVertexBuffer();
     DestroyLine3dVertexBuffer();
     DestroyTriangle3dVertexBuffer();
@@ -87,385 +91,354 @@ DebugDraw::~DebugDraw()
     DestroyTextVertexBuffer();
 }
 
+void DebugDraw::SetColour(const Ogre::ColourValue& colour){colour_ = colour;}
 
-void
-DebugDraw::SetColour(const Ogre::ColourValue& colour)
-{
-    m_Colour = colour;
+void DebugDraw::SetScreenSpace(const bool screen_space){
+    screen_space_ = screen_space;
 }
 
+void DebugDraw::SetZ(const float z){z_coordinate_ = z;}
 
-void
-DebugDraw::SetScreenSpace(const bool screen_space)
-{
-    m_ScreenSpace = screen_space;
+void DebugDraw::SetFadeDistance(const float fade_s, const float fade_e){
+    fade_start_square_ = fade_s * fade_s;
+    fade_end_square_ = fade_e * fade_e;
 }
 
-
-void
-DebugDraw::SetZ(const float z)
-{
-    m_Z = z;
+void DebugDraw::SetTextAlignment(TextAlignment alignment){
+    text_alignment_ = alignment;
 }
 
-
-void
-DebugDraw::SetFadeDistance(const float fade_s, const float fade_e)
-{
-    m_FadeStartSquare = fade_s * fade_s;
-    m_FadeEndSquare = fade_e * fade_e;
-}
-
-
-void
-DebugDraw::SetTextAlignment(TextAlignment alignment)
-{
-    m_TextAlignment = alignment;
-}
-
-
-void
-DebugDraw::Line(const float x1, const float y1, const float x2, const float y2)
-{
-    if(m_LineRenderOp.vertexData->vertexCount + 2 > m_LineMaxVertexCount)
-    {
-        LOG_ERROR("Max number of lines reached. Can't create more than " + Ogre::StringConverter::toString( m_LineMaxVertexCount / 2 ) + " lines.");
+void DebugDraw::Line(
+  const float x1, const float y1, const float x2, const float y2
+){
+    if (line_render_operation_.vertexData->vertexCount + 2 > line_max_vertex_){
+        LOG_ERROR(
+          "Max number of lines reached. Can't create more than "
+          + Ogre::StringConverter::toString(line_max_vertex_ / 2) + " lines."
+        );
         return;
     }
-
     Ogre::Viewport *viewport(CameraManager::getSingleton().getViewport());
     float width = static_cast<float>(viewport->getActualWidth());
     float height = static_cast<float>(viewport->getActualHeight());
+    float new_x1 = (screen_space_ == true) ?  ((int) x1 / width) * 2 - 1 : x1;
+    float new_y1
+      = (screen_space_ == true) ? -(((int) y1 / height) * 2 - 1) : y1;
+    float new_x2 = (screen_space_ == true) ?  ((int) x2 / width) * 2 - 1 : x2;
+    float new_y2
+      = (screen_space_ == true) ? -(((int) y2 / height) * 2 - 1) : y2;
 
-    float new_x1 = (m_ScreenSpace == true) ?  ((int) x1 / width) * 2 - 1 : x1;
-    float new_y1 = (m_ScreenSpace == true) ? -(((int) y1 / height) * 2 - 1) : y1;
-    float new_x2 = (m_ScreenSpace == true) ?  ((int) x2 / width) * 2 - 1 : x2;
-    float new_y2 = (m_ScreenSpace == true) ? -(((int) y2 / height) * 2 - 1) : y2;
-
-    float* writeIterator = (float*) m_LineVertexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-    writeIterator += m_LineRenderOp.vertexData->vertexCount * 7;
+    float* write_iterator =
+      (float*) line_vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    write_iterator += line_render_operation_.vertexData->vertexCount * 7;
 
     // TODO: This and the method below could be refactored
-    *writeIterator++ = new_x1;
-    *writeIterator++ = new_y1;
-    *writeIterator++ = m_Z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    *writeIterator++ = new_x2;
-    *writeIterator++ = new_y2;
-    *writeIterator++ = m_Z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    m_LineRenderOp.vertexData->vertexCount += 2;
-
-    m_LineVertexBuffer->unlock();
+    *write_iterator ++ = new_x1;
+    *write_iterator ++ = new_y1;
+    *write_iterator ++ = z_coordinate_;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    *write_iterator ++ = new_x2;
+    *write_iterator ++ = new_y2;
+    *write_iterator ++ = z_coordinate_;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    line_render_operation_.vertexData->vertexCount += 2;
+    line_vertex_buffer_->unlock();
 }
 
 
-void
-DebugDraw::Line3d(const Ogre::Vector3& point1, const Ogre::Vector3& point2)
-{
-    if(m_Line3dRenderOp.vertexData->vertexCount + 2 > m_Line3dMaxVertexCount)
-    {
-        LOG_ERROR("Max number of 3d lines reached. Can't create more than " + Ogre::StringConverter::toString(m_Line3dMaxVertexCount / 2) + " 3d lines.");
+void DebugDraw::Line3d(
+  const Ogre::Vector3& point1, const Ogre::Vector3& point2
+){
+    if (
+      line_3d_render_operation_.vertexData->vertexCount + 2
+      > line_3d_max_vertex_
+    ){
+        LOG_ERROR(
+          "Max number of 3d lines reached. Can't create more than "
+          + Ogre::StringConverter::toString(line_3d_max_vertex_ / 2)
+          + " 3d lines."
+        );
         return;
     }
-
-    float* writeIterator = (float*) m_Line3dVertexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-    writeIterator += m_Line3dRenderOp.vertexData->vertexCount * 7;
-
-    *writeIterator++ = point1.x;
-    *writeIterator++ = point1.y;
-    *writeIterator++ = point1.z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    *writeIterator++ = point2.x;
-    *writeIterator++ = point2.y;
-    *writeIterator++ = point2.z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    m_Line3dRenderOp.vertexData->vertexCount += 2;
-
-    m_Line3dVertexBuffer->unlock();
+    float* write_iterator
+      = (float*) line_3d_vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    write_iterator += line_3d_render_operation_.vertexData->vertexCount * 7;
+    *write_iterator ++ = point1.x;
+    *write_iterator ++ = point1.y;
+    *write_iterator ++ = point1.z;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    *write_iterator ++ = point2.x;
+    *write_iterator ++ = point2.y;
+    *write_iterator ++ = point2.z;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    line_3d_render_operation_.vertexData->vertexCount += 2;
+    line_3d_vertex_buffer_->unlock();
 }
 
 
-void
-DebugDraw::Triangle3d(const Ogre::Vector3& point1, const Ogre::Vector3& point2, const Ogre::Vector3& point3)
-{
-    if(m_Triangle3dRenderOp.vertexData->vertexCount + 3 > m_Triangle3dMaxVertexCount)
-    {
-        LOG_ERROR("Max number of 3d triangles reached. Can't create more than " + Ogre::StringConverter::toString(m_Triangle3dMaxVertexCount / 3) + " 3d triangles.");
+void DebugDraw::Triangle3d(
+  const Ogre::Vector3& point1, const Ogre::Vector3& point2,
+  const Ogre::Vector3& point3
+){
+    if (
+      triangle_3d_render_operation_.vertexData->vertexCount + 3
+      > triangle_3d_max_vertex_
+    ){
+        LOG_ERROR(
+          "Max number of 3d triangles reached. Can't create more than "
+          + Ogre::StringConverter::toString(triangle_3d_max_vertex_ / 3)
+          + " 3d triangles."
+        );
         return;
     }
-
-    float* writeIterator = (float*) m_Triangle3dVertexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-    writeIterator += m_Triangle3dRenderOp.vertexData->vertexCount * 7;
-
-    *writeIterator++ = point1.x;
-    *writeIterator++ = point1.y;
-    *writeIterator++ = point1.z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    *writeIterator++ = point2.x;
-    *writeIterator++ = point2.y;
-    *writeIterator++ = point2.z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    *writeIterator++ = point3.x;
-    *writeIterator++ = point3.y;
-    *writeIterator++ = point3.z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    m_Triangle3dRenderOp.vertexData->vertexCount += 3;
-
-    m_Triangle3dVertexBuffer->unlock();
+    float* write_iterator
+      = (float*) triangle_3d_vertex_buffer_->lock(
+        Ogre::HardwareBuffer::HBL_NORMAL
+    );
+    write_iterator += triangle_3d_render_operation_.vertexData->vertexCount * 7;
+    *write_iterator ++ = point1.x;
+    *write_iterator ++ = point1.y;
+    *write_iterator ++ = point1.z;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    *write_iterator ++ = point2.x;
+    *write_iterator ++ = point2.y;
+    *write_iterator ++ = point2.z;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    *write_iterator ++ = point3.x;
+    *write_iterator ++ = point3.y;
+    *write_iterator ++ = point3.z;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    triangle_3d_render_operation_.vertexData->vertexCount += 3;
+    triangle_3d_vertex_buffer_->unlock();
 }
 
-
-void
-DebugDraw::Quad(const float x1, const float y1, const float x2, const float y2, const float x3, const float y3, const float x4, const float y4)
-{
-    if(m_QuadRenderOp.vertexData->vertexCount + 6 > m_QuadMaxVertexCount)
-    {
-        LOG_ERROR("Max number of quads reached. Can't create more than " + Ogre::StringConverter::toString( m_QuadMaxVertexCount / 6 ) + " quads.");
+void DebugDraw::Quad(
+  const float x1, const float y1, const float x2, const float y2,
+  const float x3, const float y3, const float x4, const float y4
+){
+    if (quad_render_operation_.vertexData->vertexCount + 6 > quad_max_vertex_){
+        LOG_ERROR(
+          "Max number of quads reached. Can't create more than "
+          + Ogre::StringConverter::toString(quad_max_vertex_ / 6) + " quads."
+        );
         return;
     }
-
     Ogre::Viewport *viewport(CameraManager::getSingleton().getViewport());
     float width = static_cast<float>(viewport->getActualWidth());
     float height = static_cast<float>(viewport->getActualHeight());
-
-    float new_x1 = (m_ScreenSpace == true) ?  ((int) x1 / width) * 2 - 1 : x1;
-    float new_y1 = (m_ScreenSpace == true) ? -(((int) y1 / height) * 2 - 1) : y1;
-    float new_x2 = (m_ScreenSpace == true) ?  ((int) x2 / width) * 2 - 1 : x2;
-    float new_y2 = (m_ScreenSpace == true) ? -((y2 / height) * 2 - 1) : y2;
-    float new_x3 = (m_ScreenSpace == true) ?  ((int) x3 / width) * 2 - 1 : x3;
-    float new_y3 = (m_ScreenSpace == true) ? -(((int) y3 / height) * 2 - 1) : y3;
-    float new_x4 = (m_ScreenSpace == true) ?  ((int) x4 / width) * 2 - 1 : x4;
-    float new_y4 = (m_ScreenSpace == true) ? -(((int) y4 / height) * 2 - 1) : y4;
-
-    float* writeIterator = (float*) m_QuadVertexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-    writeIterator += m_QuadRenderOp.vertexData->vertexCount * 7;
-
-    *writeIterator++ = new_x1;
-    *writeIterator++ = new_y1;
-    *writeIterator++ = m_Z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    *writeIterator++ = new_x2;
-    *writeIterator++ = new_y2;
-    *writeIterator++ = m_Z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    *writeIterator++ = new_x3;
-    *writeIterator++ = new_y3;
-    *writeIterator++ = m_Z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    *writeIterator++ = new_x1;
-    *writeIterator++ = new_y1;
-    *writeIterator++ = m_Z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    *writeIterator++ = new_x3;
-    *writeIterator++ = new_y3;
-    *writeIterator++ = m_Z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    *writeIterator++ = new_x4;
-    *writeIterator++ = new_y4;
-    *writeIterator++ = m_Z;
-    *writeIterator++ = m_Colour.r;
-    *writeIterator++ = m_Colour.g;
-    *writeIterator++ = m_Colour.b;
-    *writeIterator++ = m_Colour.a;
-
-    m_QuadRenderOp.vertexData->vertexCount += 6;
-
-    m_QuadVertexBuffer->unlock();
+    float new_x1 = (screen_space_ == true) ?  ((int) x1 / width) * 2 - 1 : x1;
+    float new_y1
+      = (screen_space_ == true) ? -(((int) y1 / height) * 2 - 1) : y1;
+    float new_x2 = (screen_space_ == true) ?  ((int) x2 / width) * 2 - 1 : x2;
+    float new_y2 = (screen_space_ == true) ? -((y2 / height) * 2 - 1) : y2;
+    float new_x3 = (screen_space_ == true) ?  ((int) x3 / width) * 2 - 1 : x3;
+    float new_y3
+      = (screen_space_ == true) ? -(((int) y3 / height) * 2 - 1) : y3;
+    float new_x4 = (screen_space_ == true) ?  ((int) x4 / width) * 2 - 1 : x4;
+    float new_y4
+      = (screen_space_ == true) ? -(((int) y4 / height) * 2 - 1) : y4;
+    float* write_iterator
+      = (float*) quad_vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    write_iterator += quad_render_operation_.vertexData->vertexCount * 7;
+    *write_iterator ++ = new_x1;
+    *write_iterator ++ = new_y1;
+    *write_iterator ++ = z_coordinate_;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    *write_iterator ++ = new_x2;
+    *write_iterator ++ = new_y2;
+    *write_iterator ++ = z_coordinate_;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    *write_iterator ++ = new_x3;
+    *write_iterator ++ = new_y3;
+    *write_iterator ++ = z_coordinate_;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    *write_iterator ++ = new_x1;
+    *write_iterator ++ = new_y1;
+    *write_iterator ++ = z_coordinate_;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    *write_iterator ++ = new_x3;
+    *write_iterator ++ = new_y3;
+    *write_iterator ++ = z_coordinate_;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    *write_iterator ++ = new_x4;
+    *write_iterator ++ = new_y4;
+    *write_iterator ++ = z_coordinate_;
+    *write_iterator ++ = colour_.r;
+    *write_iterator ++ = colour_.g;
+    *write_iterator ++ = colour_.b;
+    *write_iterator ++ = colour_.a;
+    quad_render_operation_.vertexData->vertexCount += 6;
+    quad_vertex_buffer_->unlock();
 }
 
 
-void
-DebugDraw::Text(const float x, const float y, const Ogre::String& text)
-{
-    if(m_TextRenderOp.vertexData->vertexCount + text.size() * 6 > m_TextMaxVertexCount)
-    {
-        LOG_ERROR("Max number of text reached. Can't add text \"" + text + "\". Max number of letters is " +
-                   Ogre::StringConverter::toString( m_TextMaxVertexCount / 6 ) + ".");
+void DebugDraw::Text(const float x, const float y, const Ogre::String& text){
+    if (
+      text_render_operation_.vertexData->vertexCount + text.size() * 6
+      > text_max_vertex_
+    ){
+        LOG_ERROR(
+          "Max number of text reached. Can't add text \"" + text
+          + "\". Max number of letters is "
+          + Ogre::StringConverter::toString(text_max_vertex_ / 6) + "."
+        );
         return;
     }
-
-    float* writeIterator = (float*) m_TextVertexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-    writeIterator += m_TextRenderOp.vertexData->vertexCount * 9;
-
+    float* write_iterator
+      = (float*) text_vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    write_iterator += text_render_operation_.vertexData->vertexCount * 9;
     Ogre::Viewport *viewport(CameraManager::getSingleton().getViewport());
     float width = static_cast<float>(viewport->getActualWidth());
     float height = static_cast<float>(viewport->getActualHeight());
-
     float length = 0;
-    if(m_TextAlignment != LEFT)
-    {
-        for(auto &c : text)
-        {
-            length += ((m_Font->getGlyphAspectRatio(c) * m_FontHeight) / width) * 2;
+    if (text_alignment_ != LEFT){
+        for (auto &c : text){
+            length
+              += ((font_->getGlyphAspectRatio(c) * font_height_) / width) * 2;
         }
-
-        if(m_TextAlignment == CENTER)
-        {
-            length /= 2;
-        }
+        if (text_alignment_ == CENTER) length /= 2;
     }
 
-    float current_x = (m_ScreenSpace == true) ? ((int) x / width) * 2 - 1 : x;
+    float current_x = (screen_space_ == true) ? ((int) x / width) * 2 - 1 : x;
     current_x -= length;
-    float current_y =  (m_ScreenSpace == true) ? -(((int) y / height) * 2 - 1) : y;
-    float char_height = -(m_FontHeight / height) * 2;
-
-    for( unsigned int i = 0; i < text.size(); ++i )
-    {
-        float char_width = ( ( m_Font->getGlyphAspectRatio( text[ i ] ) * m_FontHeight ) / width ) * 2;
-
+    float current_y
+      = (screen_space_ == true) ? -(((int) y / height) * 2 - 1) : y;
+    float char_height = -(font_height_ / height) * 2;
+    for (unsigned int i = 0; i < text.size(); ++ i){
+        float char_width
+          = ((font_->getGlyphAspectRatio(text[i]) * font_height_) / width) * 2;
         float new_x1 = current_x;
         float new_y1 = current_y;
-
         float new_x2 = current_x + char_width;
         float new_y2 = current_y;
-
         float new_x3 = current_x + char_width;
         float new_y3 = current_y + char_height;
-
         float new_x4 = current_x;
         float new_y4 = current_y + char_height;
-
         current_x += char_width;
-
-        const Ogre::Font::UVRect& uv = m_Font->getGlyphTexCoords( text[ i ] );
-
-        *writeIterator++ = new_x1;
-        *writeIterator++ = new_y1;
-        *writeIterator++ = m_Z;
-        *writeIterator++ = m_Colour.r;
-        *writeIterator++ = m_Colour.g;
-        *writeIterator++ = m_Colour.b;
-        *writeIterator++ = m_Colour.a;
-        *writeIterator++ = uv.left;
-        *writeIterator++ = uv.top;
-
-        *writeIterator++ = new_x2;
-        *writeIterator++ = new_y2;
-        *writeIterator++ = m_Z;
-        *writeIterator++ = m_Colour.r;
-        *writeIterator++ = m_Colour.g;
-        *writeIterator++ = m_Colour.b;
-        *writeIterator++ = m_Colour.a;
-        *writeIterator++ = uv.right;
-        *writeIterator++ = uv.top;
-
-        *writeIterator++ = new_x3;
-        *writeIterator++ = new_y3;
-        *writeIterator++ = m_Z;
-        *writeIterator++ = m_Colour.r;
-        *writeIterator++ = m_Colour.g;
-        *writeIterator++ = m_Colour.b;
-        *writeIterator++ = m_Colour.a;
-        *writeIterator++ = uv.right;
-        *writeIterator++ = uv.bottom;
-
-        *writeIterator++ = new_x1;
-        *writeIterator++ = new_y1;
-        *writeIterator++ = m_Z;
-        *writeIterator++ = m_Colour.r;
-        *writeIterator++ = m_Colour.g;
-        *writeIterator++ = m_Colour.b;
-        *writeIterator++ = m_Colour.a;
-        *writeIterator++ = uv.left;
-        *writeIterator++ = uv.top;
-
-        *writeIterator++ = new_x3;
-        *writeIterator++ = new_y3;
-        *writeIterator++ = m_Z;
-        *writeIterator++ = m_Colour.r;
-        *writeIterator++ = m_Colour.g;
-        *writeIterator++ = m_Colour.b;
-        *writeIterator++ = m_Colour.a;
-        *writeIterator++ = uv.right;
-        *writeIterator++ = uv.bottom;
-
-        *writeIterator++ = new_x4;
-        *writeIterator++ = new_y4;
-        *writeIterator++ = m_Z;
-        *writeIterator++ = m_Colour.r;
-        *writeIterator++ = m_Colour.g;
-        *writeIterator++ = m_Colour.b;
-        *writeIterator++ = m_Colour.a;
-        *writeIterator++ = uv.left;
-        *writeIterator++ = uv.bottom;
-
-        m_TextRenderOp.vertexData->vertexCount += 6;
+        const Ogre::Font::UVRect& uv = font_->getGlyphTexCoords(text[i]);
+        *write_iterator ++ = new_x1;
+        *write_iterator ++ = new_y1;
+        *write_iterator ++ = z_coordinate_;
+        *write_iterator ++ = colour_.r;
+        *write_iterator ++ = colour_.g;
+        *write_iterator ++ = colour_.b;
+        *write_iterator ++ = colour_.a;
+        *write_iterator ++ = uv.left;
+        *write_iterator ++ = uv.top;
+        *write_iterator ++ = new_x2;
+        *write_iterator ++ = new_y2;
+        *write_iterator ++ = z_coordinate_;
+        *write_iterator ++ = colour_.r;
+        *write_iterator ++ = colour_.g;
+        *write_iterator ++ = colour_.b;
+        *write_iterator ++ = colour_.a;
+        *write_iterator ++ = uv.right;
+        *write_iterator ++ = uv.top;
+        *write_iterator ++ = new_x3;
+        *write_iterator ++ = new_y3;
+        *write_iterator ++ = z_coordinate_;
+        *write_iterator ++ = colour_.r;
+        *write_iterator ++ = colour_.g;
+        *write_iterator ++ = colour_.b;
+        *write_iterator ++ = colour_.a;
+        *write_iterator ++ = uv.right;
+        *write_iterator ++ = uv.bottom;
+        *write_iterator ++ = new_x1;
+        *write_iterator ++ = new_y1;
+        *write_iterator ++ = z_coordinate_;
+        *write_iterator ++ = colour_.r;
+        *write_iterator ++ = colour_.g;
+        *write_iterator ++ = colour_.b;
+        *write_iterator ++ = colour_.a;
+        *write_iterator ++ = uv.left;
+        *write_iterator ++ = uv.top;
+        *write_iterator ++ = new_x3;
+        *write_iterator ++ = new_y3;
+        *write_iterator ++ = z_coordinate_;
+        *write_iterator ++ = colour_.r;
+        *write_iterator ++ = colour_.g;
+        *write_iterator ++ = colour_.b;
+        *write_iterator ++ = colour_.a;
+        *write_iterator ++ = uv.right;
+        *write_iterator ++ = uv.bottom;
+        *write_iterator ++ = new_x4;
+        *write_iterator ++ = new_y4;
+        *write_iterator ++ = z_coordinate_;
+        *write_iterator ++ = colour_.r;
+        *write_iterator ++ = colour_.g;
+        *write_iterator ++ = colour_.b;
+        *write_iterator ++ = colour_.a;
+        *write_iterator ++ = uv.left;
+        *write_iterator ++ = uv.bottom;
+        text_render_operation_.vertexData->vertexCount += 6;
     }
 
-    m_TextVertexBuffer->unlock();
+    text_vertex_buffer_->unlock();
 }
 
-/**
- * Draws debug text.
- *
- * Draws text on the screen on debug mode.
- *
- * @param point[in] Starting point for the text (top left cornet).
- * @param x[in] Text width, in pixels.
- * @param y[in] Text height, in pixels.
- * @param text[in] Text to draw.
- */
-void DebugDraw::Text(const Ogre::Vector3& point, const float x, const float y, const Ogre::String& text){
-    Ogre::Vector3 point2d = CameraManager::getSingleton().ProjectPointToScreen(point);
-    if(point2d.z <= 0){
-        float dist_sq = point.squaredDistance(CameraManager::getSingleton().GetCurrentCamera()->getPosition());
+void DebugDraw::Text(
+  const Ogre::Vector3& point, const float x, const float y,
+  const Ogre::String& text
+){
+    Ogre::Vector3 point2d
+      = CameraManager::getSingleton().ProjectPointToScreen(point);
+    if (point2d.z <= 0){
+        float dist_sq = point.squaredDistance(
+          CameraManager::getSingleton().GetCurrentCamera()->getPosition()
+        );
         //std::cout << "[DEBUG TEXT ORIG]: " << dist_sq << "\n";
         // TODO: This always give fixed values
-        //dist_sq = point.squaredDistance(Ogre::Root::getSingleton().getSceneManager("Scene")->getRootSceneNode()->get->getPosition());
+        //dist_sq = point.squaredDistance(
+        //  Ogre::Root::getSingleton().getSceneManager("Scene")
+        //  ->getRootSceneNode()->get->getPosition()
+        //);
         //std::cout << "[DEBUG TEXT MODI]: " << dist_sq << "\n";
-        if(dist_sq < m_FadeEndSquare){
-            float a = (dist_sq > m_FadeStartSquare) ? (1.0f - (dist_sq - m_FadeStartSquare ) / ( m_FadeEndSquare - m_FadeStartSquare)) : 1.0f;
-            Ogre::ColourValue colour = m_Colour;
+        if (dist_sq < fade_end_square_){
+            float a
+              = (dist_sq > fade_start_square_)
+              ? (
+                1.0f - (dist_sq - fade_start_square_) /
+                (fade_end_square_ - fade_start_square_)
+              )
+              : 1.0f;
+            Ogre::ColourValue colour = colour_;
             colour.a = a;
             SetColour(colour);
             Text(point2d.x + x, point2d.y + y, text);
@@ -473,230 +446,284 @@ void DebugDraw::Text(const Ogre::Vector3& point, const float x, const float y, c
     }
 }
 
+void DebugDraw::renderQueueEnded(
+  Ogre::uint8 queueGroupId, const Ogre::String& invocation,
+  bool& repeatThisInvocation
+){
+    if (queueGroupId == Ogre::RENDER_QUEUE_OVERLAY){
+        render_system_->clearFrameBuffer(Ogre::FBT_DEPTH);
+        auto renderParams= render_system_->getFixedFunctionParams(
+          Ogre::TVC_NONE, Ogre::FOG_NONE
+        );
+        renderParams->setConstant(
+          Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY
+        );
+        renderParams->setConstant(
+          Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX,
+          Ogre::Matrix4::IDENTITY
+        );
+        renderParams->setConstant(
+          Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, Ogre::Matrix4::IDENTITY
+        );
+        render_system_->applyFixedFunctionParams(
+          renderParams, Ogre::GPV_GLOBAL
+        );
+        /*render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
+        render_system_->_setViewMatrix(Ogre::Matrix4::IDENTITY);
+        render_system_->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);*/
 
-void
-DebugDraw::renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation)
-{
-    if(queueGroupId == Ogre::RENDER_QUEUE_OVERLAY)
-    {
-        m_RenderSystem->clearFrameBuffer(Ogre::FBT_DEPTH);
-        auto renderParams = m_RenderSystem->getFixedFunctionParams(Ogre::TVC_NONE, Ogre::FOG_NONE);
-        renderParams->setConstant(Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY);
-        renderParams->setConstant(Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX, Ogre::Matrix4::IDENTITY);
-        renderParams->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, Ogre::Matrix4::IDENTITY);
-        m_RenderSystem->applyFixedFunctionParams(renderParams, Ogre::GPV_GLOBAL);
-        /*m_RenderSystem->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
-        m_RenderSystem->_setViewMatrix(Ogre::Matrix4::IDENTITY);
-        m_RenderSystem->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);*/
-
-        if(m_LineRenderOp.vertexData->vertexCount != 0)
-        {
-            m_SceneManager->_setPass(m_Material->getTechnique(0)->getPass(0), true, false);
-            m_RenderSystem->_render(m_LineRenderOp);
-            m_LineRenderOp.vertexData->vertexCount = 0;
+        if (line_render_operation_.vertexData->vertexCount != 0){
+            scene_manager_->_setPass(
+              material_->getTechnique(0)->getPass(0), true, false
+            );
+            render_system_->_render(line_render_operation_);
+            line_render_operation_.vertexData->vertexCount = 0;
         }
-
-        if(m_QuadRenderOp.vertexData->vertexCount != 0)
-        {
-            m_SceneManager->_setPass(m_Material->getTechnique(0)->getPass(0), true, false);
-            m_RenderSystem->_render(m_QuadRenderOp);
-            m_QuadRenderOp.vertexData->vertexCount = 0;
+        if (quad_render_operation_.vertexData->vertexCount != 0){
+            scene_manager_->_setPass(
+              material_->getTechnique(0)->getPass(0), true, false
+            );
+            render_system_->_render(quad_render_operation_);
+            quad_render_operation_.vertexData->vertexCount = 0;
         }
-
-        if(m_TextRenderOp.vertexData->vertexCount != 0)
-        {
-            m_SceneManager->_setPass(m_Font->getMaterial()->getTechnique(0)->getPass(0), true, false);
-            m_RenderSystem->_render(m_TextRenderOp);
-            m_TextRenderOp.vertexData->vertexCount = 0;
-        }
-    }
-    else if(queueGroupId == Ogre::RENDER_QUEUE_MAIN)
-    {
-        m_RenderSystem->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
-        m_RenderSystem->_setViewMatrix(CameraManager::getSingleton().GetCurrentCamera()->getViewMatrix());
-        m_RenderSystem->_setProjectionMatrix(CameraManager::getSingleton().GetCurrentCamera()->getProjectionMatrix());
-        // TODO: Debug this. Abode lines work, below ones dont render entities
-        /*m_RenderSystem->clearFrameBuffer(Ogre::FBT_DEPTH);
-        auto renderParams = m_RenderSystem->getFixedFunctionParams(Ogre::TVC_NONE, Ogre::FOG_NONE);
-        renderParams->setConstant(Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY);
-        renderParams->setConstant(Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX, CameraManager::getSingleton().GetCurrentCamera()->getProjectionMatrix());
-        renderParams->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, CameraManager::getSingleton().GetCurrentCamera()->getViewMatrix());
-        m_RenderSystem->applyFixedFunctionParams(renderParams, Ogre::GPV_GLOBAL);*/
-
-        if(m_Line3dRenderOp.vertexData->vertexCount != 0)
-        {
-            m_SceneManager->_setPass(m_Material3d->getTechnique(0)->getPass(0), true, false);
-            m_RenderSystem->_render(m_Line3dRenderOp);
-            m_Line3dRenderOp.vertexData->vertexCount = 0;
-        }
-
-        if(m_Triangle3dRenderOp.vertexData->vertexCount != 0)
-        {
-            m_SceneManager->_setPass(m_Material3d->getTechnique(0)->getPass(0), true, false);
-            m_RenderSystem->_render(m_Triangle3dRenderOp);
-            m_Triangle3dRenderOp.vertexData->vertexCount = 0;
+        if (text_render_operation_.vertexData->vertexCount != 0){
+            scene_manager_->_setPass(
+              font_->getMaterial()->getTechnique(0)->getPass(0), true, false
+            );
+            render_system_->_render(text_render_operation_);
+            text_render_operation_.vertexData->vertexCount = 0;
         }
     }
+    else if (queueGroupId == Ogre::RENDER_QUEUE_MAIN){
+        render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
+        render_system_->_setViewMatrix(
+          CameraManager::getSingleton().GetCurrentCamera()->getViewMatrix()
+        );
+        render_system_->_setProjectionMatrix(
+          CameraManager::getSingleton().GetCurrentCamera()
+          ->getProjectionMatrix()
+        );
+        // TODO: Debug this. Above lines work, below ones don't render entities
+        /*
+        render_system_->clearFrameBuffer(Ogre::FBT_DEPTH);
+        auto renderParams= render_system_->getFixedFunctionParams(
+          Ogre::TVC_NONE, Ogre::FOG_NONE
+        );
+        renderParams->setConstant(
+          Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY
+        );
+        renderParams->setConstant(
+          Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX,
+          CameraManager::getSingleton().GetCurrentCamera()
+            ->getProjectionMatrix()
+        );
+        renderParams->setConstant(
+          Ogre::GpuProgramParameters::ACT_VIEW_MATRIX,
+          CameraManager::getSingleton().GetCurrentCamera()->getViewMatrix()
+        );
+        render_system_->applyFixedFunctionParams(
+          renderParams, Ogre::GPV_GLOBAL
+        );
+        */
+        if (line_3d_render_operation_.vertexData->vertexCount != 0){
+            scene_manager_->_setPass(
+              material_3d_->getTechnique(0)->getPass(0), true, false
+            );
+            render_system_->_render(line_3d_render_operation_);
+            line_3d_render_operation_.vertexData->vertexCount = 0;
+        }
+
+        if (triangle_3d_render_operation_.vertexData->vertexCount != 0){
+            scene_manager_->_setPass(
+              material_3d_->getTechnique(0)->getPass(0), true, false
+            );
+            render_system_->_render(triangle_3d_render_operation_);
+            triangle_3d_render_operation_.vertexData->vertexCount = 0;
+        }
+    }
 }
 
+void DebugDraw::CreateLineVertexBuffer(){
+    line_max_vertex_ = 1024 * 2;
+    line_render_operation_.vertexData = new Ogre::VertexData;
+    line_render_operation_.vertexData->vertexStart = 0;
 
-void
-DebugDraw::CreateLineVertexBuffer()
-{
-    m_LineMaxVertexCount = 1024 * 2;
-    m_LineRenderOp.vertexData = new Ogre::VertexData;
-    m_LineRenderOp.vertexData->vertexStart = 0;
-
-    Ogre::VertexDeclaration* vDecl = m_LineRenderOp.vertexData->vertexDeclaration;
+    Ogre::VertexDeclaration* vertex_declaration
+      = line_render_operation_.vertexData->vertexDeclaration;
 
     size_t offset = 0;
-    vDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
+    vertex_declaration->addElement(
+      0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE
+    );
 
-    m_LineVertexBuffer = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(vDecl->getVertexSize(0), m_LineMaxVertexCount, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
+    line_vertex_buffer_
+      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+        vertex_declaration->getVertexSize(0), line_max_vertex_,
+        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
+    );
 
-    m_LineRenderOp.vertexData->vertexBufferBinding->setBinding(0, m_LineVertexBuffer);
-    m_LineRenderOp.operationType = Ogre::RenderOperation::OT_LINE_LIST;
-    m_LineRenderOp.useIndexes = false;
+    line_render_operation_.vertexData->vertexBufferBinding->setBinding(
+      0, line_vertex_buffer_
+    );
+    line_render_operation_.operationType = Ogre::RenderOperation::OT_LINE_LIST;
+    line_render_operation_.useIndexes = false;
 }
 
-
-void
-DebugDraw::DestroyLineVertexBuffer()
-{
-    delete m_LineRenderOp.vertexData;
-    m_LineRenderOp.vertexData = 0;
-    m_LineVertexBuffer.reset();
-    m_LineMaxVertexCount = 0;
+void DebugDraw::DestroyLineVertexBuffer(){
+    delete line_render_operation_.vertexData;
+    line_render_operation_.vertexData = 0;
+    line_vertex_buffer_.reset();
+    line_max_vertex_ = 0;
 }
 
+void DebugDraw::CreateLine3dVertexBuffer(){
+    line_3d_max_vertex_ = 1024 * 2;
+    line_3d_render_operation_.vertexData = new Ogre::VertexData;
+    line_3d_render_operation_.vertexData->vertexStart = 0;
 
-void
-DebugDraw::CreateLine3dVertexBuffer()
-{
-    m_Line3dMaxVertexCount = 1024 * 2;
-    m_Line3dRenderOp.vertexData = new Ogre::VertexData;
-    m_Line3dRenderOp.vertexData->vertexStart = 0;
-
-    Ogre::VertexDeclaration* vDecl = m_Line3dRenderOp.vertexData->vertexDeclaration;
+    Ogre::VertexDeclaration* vertex_declaration
+      = line_3d_render_operation_.vertexData->vertexDeclaration;
 
     size_t offset = 0;
-    vDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
+    vertex_declaration->addElement(
+      0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE
+    );
 
-    m_Line3dVertexBuffer = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(vDecl->getVertexSize( 0 ), m_Line3dMaxVertexCount, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
+    line_3d_vertex_buffer_
+      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+        vertex_declaration->getVertexSize(0), line_3d_max_vertex_,
+        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
+    );
 
-    m_Line3dRenderOp.vertexData->vertexBufferBinding->setBinding(0, m_Line3dVertexBuffer);
-    m_Line3dRenderOp.operationType = Ogre::RenderOperation::OT_LINE_LIST;
-    m_Line3dRenderOp.useIndexes = false;
+    line_3d_render_operation_.vertexData->vertexBufferBinding->setBinding(
+      0, line_3d_vertex_buffer_
+    );
+    line_3d_render_operation_.operationType
+      = Ogre::RenderOperation::OT_LINE_LIST;
+    line_3d_render_operation_.useIndexes = false;
 }
 
-
-void
-DebugDraw::DestroyLine3dVertexBuffer()
-{
-    delete m_Line3dRenderOp.vertexData;
-    m_Line3dRenderOp.vertexData = 0;
-    m_Line3dVertexBuffer.reset();
-    m_Line3dMaxVertexCount = 0;
+void DebugDraw::DestroyLine3dVertexBuffer(){
+    delete line_3d_render_operation_.vertexData;
+    line_3d_render_operation_.vertexData = 0;
+    line_3d_vertex_buffer_.reset();
+    line_3d_max_vertex_ = 0;
 }
 
+void DebugDraw::CreateTriangle3dVertexBuffer(){
+    triangle_3d_max_vertex_ = 128 * 3;
+    triangle_3d_render_operation_.vertexData = new Ogre::VertexData;
+    triangle_3d_render_operation_.vertexData->vertexStart = 0;
 
-void
-DebugDraw::CreateTriangle3dVertexBuffer()
-{
-    m_Triangle3dMaxVertexCount = 128 * 3;
-    m_Triangle3dRenderOp.vertexData = new Ogre::VertexData;
-    m_Triangle3dRenderOp.vertexData->vertexStart = 0;
-
-    Ogre::VertexDeclaration* vDecl = m_Triangle3dRenderOp.vertexData->vertexDeclaration;
+    Ogre::VertexDeclaration* vertex_declaration
+      = triangle_3d_render_operation_.vertexData->vertexDeclaration;
 
     size_t offset = 0;
-    vDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
+    vertex_declaration->addElement(
+      0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE
+    );
 
-    m_Triangle3dVertexBuffer = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(vDecl->getVertexSize(0), m_Triangle3dMaxVertexCount, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
+    triangle_3d_vertex_buffer_
+      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+        vertex_declaration->getVertexSize(0), triangle_3d_max_vertex_,
+        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
+    );
 
-    m_Triangle3dRenderOp.vertexData->vertexBufferBinding->setBinding(0, m_Triangle3dVertexBuffer);
-    m_Triangle3dRenderOp.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
-    m_Triangle3dRenderOp.useIndexes = false;
+    triangle_3d_render_operation_.vertexData->vertexBufferBinding->setBinding(
+      0, triangle_3d_vertex_buffer_
+    );
+    triangle_3d_render_operation_.operationType
+      = Ogre::RenderOperation::OT_TRIANGLE_LIST;
+    triangle_3d_render_operation_.useIndexes = false;
 }
 
-
-void
-DebugDraw::DestroyTriangle3dVertexBuffer()
-{
-    delete m_Triangle3dRenderOp.vertexData;
-    m_Triangle3dRenderOp.vertexData = 0;
-    m_Triangle3dVertexBuffer.reset();
-    m_Triangle3dMaxVertexCount = 0;
+void DebugDraw::DestroyTriangle3dVertexBuffer(){
+    delete triangle_3d_render_operation_.vertexData;
+    triangle_3d_render_operation_.vertexData = 0;
+    triangle_3d_vertex_buffer_.reset();
+    triangle_3d_max_vertex_ = 0;
 }
 
+void DebugDraw::CreateQuadVertexBuffer(){
+    quad_max_vertex_ = 128 * 6;
+    quad_render_operation_.vertexData = new Ogre::VertexData;
+    quad_render_operation_.vertexData->vertexStart = 0;
 
-void
-DebugDraw::CreateQuadVertexBuffer()
-{
-    m_QuadMaxVertexCount = 128 * 6;
-    m_QuadRenderOp.vertexData = new Ogre::VertexData;
-    m_QuadRenderOp.vertexData->vertexStart = 0;
-
-    Ogre::VertexDeclaration* vDecl = m_QuadRenderOp.vertexData->vertexDeclaration;
+    Ogre::VertexDeclaration* vertex_declaration
+      = quad_render_operation_.vertexData->vertexDeclaration;
 
     size_t offset = 0;
-    vDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertex_declaration->addElement(
+      0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION
+    );
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
+    vertex_declaration->addElement(
+      0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE
+    );
 
-    m_QuadVertexBuffer = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(vDecl->getVertexSize(0), m_QuadMaxVertexCount, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
+    quad_vertex_buffer_
+      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+        vertex_declaration->getVertexSize(0), quad_max_vertex_,
+        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
+    );
 
-    m_QuadRenderOp.vertexData->vertexBufferBinding->setBinding(0, m_QuadVertexBuffer);
-    m_QuadRenderOp.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
-    m_QuadRenderOp.useIndexes = false;
+    quad_render_operation_.vertexData->vertexBufferBinding->setBinding(
+      0, quad_vertex_buffer_
+    );
+    quad_render_operation_.operationType
+      = Ogre::RenderOperation::OT_TRIANGLE_LIST;
+    quad_render_operation_.useIndexes = false;
 }
 
-
-void
-DebugDraw::DestroyQuadVertexBuffer()
-{
-    delete m_QuadRenderOp.vertexData;
-    m_QuadRenderOp.vertexData = 0;
-    m_QuadVertexBuffer.reset();
-    m_QuadMaxVertexCount = 0;
+void DebugDraw::DestroyQuadVertexBuffer(){
+    delete quad_render_operation_.vertexData;
+    quad_render_operation_.vertexData = 0;
+    quad_vertex_buffer_.reset();
+    quad_max_vertex_ = 0;
 }
 
+void DebugDraw::CreateTextVertexBuffer(){
+    text_max_vertex_ = 4096 * 6;
+    text_render_operation_.vertexData = new Ogre::VertexData;
+    text_render_operation_.vertexData->vertexStart = 0;
 
-void
-DebugDraw::CreateTextVertexBuffer()
-{
-    m_TextMaxVertexCount = 4096 * 6;
-    m_TextRenderOp.vertexData = new Ogre::VertexData;
-    m_TextRenderOp.vertexData->vertexStart = 0;
-
-    Ogre::VertexDeclaration* vDecl = m_TextRenderOp.vertexData->vertexDeclaration;
+    Ogre::VertexDeclaration* vertex_declaration
+      = text_render_operation_.vertexData->vertexDeclaration;
 
     size_t offset = 0;
-    vDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
+    vertex_declaration->addElement(
+      0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE
+    );
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+    vertex_declaration->addElement(
+      0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES
+    );
 
-    m_TextVertexBuffer = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(vDecl->getVertexSize(0), m_TextMaxVertexCount, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
+    text_vertex_buffer_
+      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+        vertex_declaration->getVertexSize(0), text_max_vertex_,
+        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
+    );
 
-    m_TextRenderOp.vertexData->vertexBufferBinding->setBinding(0, m_TextVertexBuffer);
-    m_TextRenderOp.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
-    m_TextRenderOp.useIndexes = false;
+    text_render_operation_.vertexData->vertexBufferBinding->setBinding(
+      0, text_vertex_buffer_
+    );
+    text_render_operation_.operationType
+      = Ogre::RenderOperation::OT_TRIANGLE_LIST;
+    text_render_operation_.useIndexes = false;
 }
 
-
-void
-DebugDraw::DestroyTextVertexBuffer()
-{
-    delete m_TextRenderOp.vertexData;
-    m_TextRenderOp.vertexData = 0;
-    m_TextVertexBuffer.reset();
-    m_TextMaxVertexCount = 0;
+void DebugDraw::DestroyTextVertexBuffer(){
+    delete text_render_operation_.vertexData;
+    text_render_operation_.vertexData = 0;
+    text_vertex_buffer_.reset();
+    text_max_vertex_ = 0;
 }

@@ -145,7 +145,7 @@ main(int argc, char *argv[])
 
         if (exported_entity != NULL)
         {
-            entitys.push_back(exported_entity);
+            entities.push_back(exported_entity);
         }
     }
 
@@ -155,7 +155,7 @@ main(int argc, char *argv[])
         Ogre::Entity* exported_entity = effect.GetModel(effects_all[i]);
         if (exported_entity != NULL)
         {
-            entitys.push_back(exported_entity);
+            entities.push_back(exported_entity);
         }
     }
 
@@ -168,11 +168,11 @@ main(int argc, char *argv[])
 
         if (exported_entity != NULL)
         {
-            entitys.push_back(exported_entity);
+            entities.push_back(exported_entity);
         }
     }
 
-    entitys[ 0 ]->setVisible(true);
+    entities[ 0 ]->setVisible(true);
 
 
 

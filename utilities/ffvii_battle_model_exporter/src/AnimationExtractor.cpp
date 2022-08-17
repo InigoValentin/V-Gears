@@ -1,42 +1,60 @@
-#include "AnimationExtractor.h"
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
+#include "AnimationExtractor.h"
 #include "../../common/Logger.h"
 
-
-
-float
-ReadBitStream(File* file, const int offset, int &readed_bits, const int bit_to_read, const int real_size)
-{
+/**
+ * Reads a bit stream from a file.
+ *
+ * Used by {@see AnimationExtractor}.
+ *
+ * @param file[in] The file to read.
+ * @param offset[in] Offset at which to start reading the file.
+ * @param readed_bits[out] The number of bits read from the file.
+ * @param bit_to_read[in] Number of bits to read.
+ * @param real_size[in] @todo Understand and document.
+ * @return @todo Understand and document.
+ */
+float ReadBitStream(
+  File* file, const int offset, int &readed_bits,
+  const int bit_to_read, const int real_size
+){
     int ret = 0;
-
-    for (int i = 0; i < bit_to_read; ++i)
-    {
+    for (int i = 0; i < bit_to_read; ++ i){
         ret <<= 1;
-
-        // read new bit
+        // Read new bit.
         int byte = file->GetU8(offset + (readed_bits / 8));
-        //LOGGER->Log(LOGGER_INFO, "ReadBitStream data = %02x readed_bits = %02x", byte, readed_bits);
-        if ((byte >> (7 - (readed_bits & 7))) & 1)
-        {
-            ret |= 1;
-        }
-
+        //LOGGER->Log(
+        //  LOGGER_INFO,
+        //  "ReadBitStream data = %02x readed_bits = %02x", byte, readed_bits
+        //);
+        if ((byte >> (7 - (readed_bits & 7))) & 1) ret |= 1;
         readed_bits += 1;
     }
-
-    // force the sign bit to extend across the 32-bit boundary.
+    // Force the sign bit to extend across the 32-bit boundary.
     ret <<= (0x20 - bit_to_read);
     ret >>= (0x20 - bit_to_read);
-    // extend compressed value
+    // Fxtend compressed value.
     ret <<= (real_size - bit_to_read);
     return (float)ret;
 }
 
-
-
-float
-ReadDynamicFrameOffsetBits(File* file, const int offset, int &readed_bits)
-{
+float ReadDynamicFrameOffsetBits(
+  File* file, const int offset, int &readed_bits
+){
     int readed_bytes = readed_bits / 8;
     int bit_in_byte = readed_bits & 7;
     int data = (file->GetU8(offset + readed_bytes + 0) << 8) | file->GetU8(offset + readed_bytes + 1);
@@ -113,9 +131,10 @@ ReadEncryptedRotationBits(File* file, const int offset, int &readed_bits, const 
 
 
 
-void
-AnimationExtractor(File* file, const Ogre::SkeletonPtr& skeleton, const EnemyInfo& info, Skeleton& skeleton_data, bool with_weapon)
-{
+void AnimationExtractor(
+  File* file, const Ogre::SkeletonPtr& skeleton, const EnemyInfo& info,
+  Skeleton& skeleton_data, bool with_weapon
+){
     float weapon_tx, weapon_ty, weapon_tz, weapon_rx, weapon_ry, weapon_rz = 0;
 
     for (size_t i = 0; i < info.animations.size(); ++i)

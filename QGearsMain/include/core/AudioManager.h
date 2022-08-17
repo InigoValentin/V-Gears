@@ -1,5 +1,19 @@
-#ifndef AUDIO_MANAGER_H
-#define AUDIO_MANAGER_H
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include <OgreSingleton.h>
 #include <boost/thread.hpp>
@@ -14,86 +28,285 @@
     #include <AL/alc.h>
 #endif
 
+/**
+ * The audio manager.
+ *
+ * It handles all music and sounds in the application.
+ */
+class AudioManager : public Ogre::Singleton<AudioManager>{
 
-
-class AudioManager : public Ogre::Singleton< AudioManager >
-{
-public:
-    AudioManager();
-    virtual ~AudioManager();
-
-    // boost uses this
-    void operator()();
-
-    void Update();
-    void MusicPause();
-    void MusicPlay( const Ogre::String& name );
-    void MusicStop();
-
-    struct Music
-    {
-        Ogre::String name;
-        Ogre::String file;
-        float        loop;
-    };
-    void AddMusic( const AudioManager::Music& music );
-    AudioManager::Music* GetMusic( const Ogre::String& name );
-
-private:
-    const bool Init();
-    const char* ALError();
-    const char* ALCError( const ALCdevice* device );
-
-    class Player
-    {
     public:
-        Player( boost::recursive_mutex* mutex );
-        ~Player();
 
-        void Pause();
-        void Play( const Ogre::String& file );
-        void Stop();
+        /**
+         * Constructor.
+         */
+        AudioManager();
 
-        void SetLoop( const float loop );
+        /**
+         * Destructor
+         */
+        virtual ~AudioManager();
 
+        /**
+         * Used by boost libraries.
+         */
+        void operator()();
+
+        /**
+         * Updates the music player.
+         */
         void Update();
-        float GetPosition();
+
+        /**
+         * Pauses currently playing music.
+         *
+         * @todo How to resume it?
+         */
+        void MusicPause();
+
+        /**
+         * Plays a music track.
+         *
+         * @param name[in] Name of the track to play.
+         */
+        void MusicPlay(const Ogre::String& name);
+
+        /**
+         * Stops the currently playing music.
+         *
+         * Playback can't be resumed.
+         */
+        void MusicStop();
+
+        /**
+         * Music structure.
+         *
+         * Defines a music track.
+         */
+        struct Music{
+
+            /**
+             * The name of the track.
+             */
+            Ogre::String name;
+
+            /**
+             * Track filename
+             */
+            Ogre::String file;
+
+            /**
+             * Music loop location for continous playback.
+             *
+             * @todo How is a loop done with only one value? shouldn't it be
+             * start and end of loop?
+             */
+            float        loop;
+        };
+
+        /**
+         * Adds a music track to the audio manager.
+         *
+         * @param music[in] The track to add.
+         */
+        void AddMusic(const AudioManager::Music& music);
+
+        /**
+         * Retrieves a muisc track by name.
+         *
+         * @param name[in] The track name
+         * @return The music track, or nullptr if there is no track by that
+         * name.
+         */
+        AudioManager::Music* GetMusic(const Ogre::String& name);
 
     private:
-        boost::recursive_mutex* m_UpdateMutex;
-        float                   m_Loop;
-        OggVorbis_File          m_VorbisFile;
-        vorbis_info*            m_VorbisInfo;
-        int                     m_VorbisSection;
-        bool                    m_StreamFinished;
-        ALuint                  m_Source;
 
-        ALsizei FillBuffer();
-    };
+        /**
+         * Initializes the audio manager.
+         *
+         * @todo Verify this comment.
+         */
+        const bool Init();
 
+        /**
+         * Handles errors
+         *
+         * @return nullptr
+         * @todo Implement and get error info.
+         */
+        const char* ALError();
 
+        /**
+         * Handles errors
+         *
+         * @return nullptr
+         * @todo Implement and get error info.
+         */
+        const char* ALCError( const ALCdevice* device );
 
-private:
-    bool                   m_Initialized;
+        /**
+         * An audio player
+         */
+        class Player{
 
-    ALCdevice*             m_ALDevice;
-    ALCcontext*            m_ALContext;
-    char*                  m_Buffer;
+            public:
+                /**
+                 * Constructor.
+                 *
+                 * @param mutex[in] Mutex to handle concurrent updates.
+                 */
+                Player(boost::recursive_mutex* mutex);
 
-    boost::recursive_mutex m_UpdateMutex;
-    boost::thread*         m_UpdateThread;
-    bool                   m_ThreadContinue;
+                /**
+                 * Destructor.
+                 */
+                ~Player();
 
-    AudioManager::Player             m_Music;
-    std::list< AudioManager::Music > m_MusicList;
+                /**
+                 * Pauses the player.
+                 */
+                void Pause();
 
-    // allocate for every new player two 96Kb buffer chunks
-    // every chunk would buffer ~0.5 seconds of 44100Hz stereo 16-bit data
-    // in that case we can sleep updating buffers for 250ms
-    static ALsizei m_ChannelBufferSize;
-    static int m_ChannelBufferNumber;
+                /**
+                 * Plays an audio file.
+                 *
+                 * @param file[in] Path to the file to play
+                 */
+                void Play(const Ogre::String& file);
+
+                /**
+                 * Stops the audio player.
+                 */
+                void Stop();
+
+                /**
+                 * Sets the loop for the current track.
+                 *
+                 * @param loop[in] Loop point
+                 */
+                void SetLoop(const float loop);
+
+                /**
+                 * Updates the audio player.
+                 *
+                 * @param Understand and document.
+                 */
+                void Update();
+
+                /**
+                 * Get the playing position of the current track.
+                 *
+                 * @return Playing position.
+                 * @todo Is this in seconds?
+                 */
+                float GetPosition();
+
+            private:
+
+                /**
+                 * Mutex to handle concurrent update on the player.
+                 */
+                boost::recursive_mutex* update_mutex_;
+
+                /**
+                 * Loop point for the current track.
+                 */
+                float loop_;
+
+                /**
+                 * File played or to play.
+                 */
+                OggVorbis_File vorbis_file_;
+
+                /**
+                 * Info about the track.
+                 */
+                vorbis_info* vorbis_info_;
+
+                /**
+                 * Section of the track.
+                 */
+                int vorbis_section_;
+
+                /**
+                 * Indicates if the stream is finished.
+                 */
+                bool stream_finished_;
+
+                /**
+                 * Audio source.
+                 */
+                ALuint source_;
+
+                /**
+                 * Fills the audio buffer.
+                 *
+                 * @return Size of the data added to the buffer.
+                 */
+                ALsizei FillBuffer();
+        };
+
+    private:
+
+        /**
+         * Indicatesif the audio manager has been initialized.
+         */
+        bool initialized_;
+
+        /**
+         * Audio output device.
+         */
+        ALCdevice* al_device_;
+
+        /**
+         * Audio context.
+         */
+        ALCcontext* al_context_;
+
+        /**
+         * Audio buffer.
+         */
+        char* buffer_;
+
+        /**
+         * Mutex to handle concurrent operations.
+         */
+        boost::recursive_mutex update_mutex_;
+
+        /**
+         * Thread to handle consurrent operations.
+         */
+        boost::thread* update_thread_;
+
+        /**
+         * Flag to indicate if the playback must continue.
+         */
+        bool thread_continue_;
+
+        /**
+         * Music player
+         */
+        AudioManager::Player music_;
+
+        /**
+         * List of music.
+         */
+        std::list<AudioManager::Music> music_list_;
+
+        /**
+         * Size of a channel buffer.
+         *
+         * 96Kb are allocated for each channel. ~0.5 seconds of 44100Hz stereo
+         * 16-bit data can be allocated in each channel. This way, 250ms can
+         * pass between buffer updates.
+         */
+        static ALsizei channel_buffer_size_;
+
+        /**
+         * Number of buffers.
+         *
+         * 2 channels.
+         */
+        static int channel_buffer_number_;
 };
-
-
-
-#endif // AUDIO_MANAGER_H

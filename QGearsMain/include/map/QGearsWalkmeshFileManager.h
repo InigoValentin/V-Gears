@@ -1,46 +1,78 @@
 /*
------------------------------------------------------------------------------
-Copyright (c) 2013-09-05 Tobias Peters <tobias.peters@kreativeffekt.at>
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-This file is part of Q-Gears
-
-Q-Gears is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 2.0 (GPLv2) of the License.
-
-Q-Gears is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsWalkmeshFileManager_H__
-#define __QGearsWalkmeshFileManager_H__
+#pragma once
 
 #include <OgreResourceManager.h>
-
 #include "QGearsPrerequisites.h"
-
 #include "QGearsWalkmeshFile.h"
 
-namespace QGears
-{
-    class _QGearsExport WalkmeshFileManager : public Ogre::ResourceManager, public Ogre::Singleton<WalkmeshFileManager>
+namespace QGears{
+
+    /**
+     * A manager for walkmesh files.
+     */
+    class _QGearsExport WalkmeshFileManager :
+      public Ogre::ResourceManager, public Ogre::Singleton<WalkmeshFileManager>
     {
-    public:
-        WalkmeshFileManager();
-        virtual ~WalkmeshFileManager();
+        public:
 
-        static WalkmeshFileManager& getSingleton();
-        static WalkmeshFileManager* getSingletonPtr();
+            /**
+             * Constructor.
+             */
+            WalkmeshFileManager();
 
-    protected:
-        Ogre::Resource *createImpl( const Ogre::String &name, Ogre::ResourceHandle handle
-          , const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader
-          , const Ogre::NameValuePairList *createParams );
+            /**
+             * Destructor.
+             */
+            virtual ~WalkmeshFileManager();
 
-    private:
+            /**
+             * Retrieves a singleton to the manager.
+             */
+            static WalkmeshFileManager& GetSingleton();
+
+            /**
+             * Retrieves a pointer to the manager singleton.
+             */
+            static WalkmeshFileManager* GetSingletonPtr();
+
+        protected:
+
+            /**
+             * Loads the manager.
+             *
+             * @param name[in] The unique name of the manager.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can be
+             * null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper
+             * ManualResourceLoader instance is strongly recommended.
+             * @param create_params[in] Unused.
+             */
+            Ogre::Resource *createImpl(
+              const Ogre::String &name, Ogre::ResourceHandle handle,
+              const Ogre::String &group, bool is_manual,
+              Ogre::ManualResourceLoader *loader,
+              const Ogre::NameValuePairList *create_params
+            );
     };
 }
-
-#endif // __QGearsWalkmeshFileManager_H__

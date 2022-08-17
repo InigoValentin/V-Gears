@@ -1,117 +1,85 @@
 /*
------------------------------------------------------------------------------
-Copyright (c) 07.10.2013 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-This file is part of Q-Gears
-
-Q-Gears is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 2.0 (GPLv2) of the License.
-
-Q-Gears is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
------------------------------------------------------------------------------
-*/
-#include "data/FF7ModelListFileSerializer.h"
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
 #include <OgreLogManager.h>
 #include <OgreException.h>
+#include "data/FF7ModelListFileSerializer.h"
 
-namespace QGears
-{
-    namespace FF7
-    {
-        //----------------------------------------------------------------------
-        ModelListFileSerializer::ModelListFileSerializer() :
-            Serializer()
-        {
-        }
+namespace QGears{
 
-        //----------------------------------------------------------------------
-        ModelListFileSerializer::~ModelListFileSerializer()
-        {
-        }
+    namespace FF7{
 
-        //----------------------------------------------------------------------
-        template<typename ValueType>
-        void
-        ModelListFileSerializer::readVector( Ogre::DataStreamPtr &stream
-                                            ,std::vector<ValueType> &pDest
-                                            ,size_t count )
-        {
-            pDest.clear();
-            pDest.reserve( count );
-            for( size_t i( count ); i--; )
-            {
+        ModelListFileSerializer::ModelListFileSerializer() : Serializer(){}
+
+        ModelListFileSerializer::~ModelListFileSerializer(){}
+
+        template<typename ValueType> void ModelListFileSerializer::ReadVector(
+          Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
+          size_t count
+        ){
+            dest.clear();
+            dest.reserve(count);
+            for (size_t i(count); i-- ;){
                 ValueType in_tmp;
-                readObject( stream, in_tmp );
-                pDest.push_back( in_tmp );
+                readObject(stream, in_tmp);
+                dest.push_back(in_tmp);
             }
         }
 
-        //----------------------------------------------------------------------
-        void
-        ModelListFileSerializer::importModelListFile( Ogre::DataStreamPtr &stream
-                                                     ,ModelListFile *pDest )
-        {
-            stream->skip( 2 ); // uint16 unused
-
+        void ModelListFileSerializer::ImportModelListFile(
+          Ogre::DataStreamPtr &stream, ModelListFile *dest){
+            stream->skip(2); // uint16 unused.
             uint16 model_count;
-            readShort( stream, model_count );
-
+            ReadShort(stream, model_count);
             uint16 model_scale;
-            readShort( stream, model_scale );
-            pDest->setScale( model_scale );
-
-            readVector( stream, pDest->getModels(), model_count );
+            ReadShort(stream, model_scale);
+            dest->SetScale(model_scale);
+            ReadVector(stream, dest->GetModels(), model_count);
         }
 
-        //----------------------------------------------------------------------
-        void
-        ModelListFileSerializer::readObject( Ogre::DataStreamPtr &stream
-                                            ,ModelListFileSerializer::ModelDescription &pDest )
-        {
+        void ModelListFileSerializer::readObject(
+          Ogre::DataStreamPtr &stream,
+          ModelListFileSerializer::ModelDescription &dest
+        ){
             uint16 name_length;
-            readShort( stream, name_length );
-            pDest.name = readString( stream, name_length );
-
+            ReadShort(stream, name_length);
+            dest.name = readString(stream, name_length);
             uint16 type;
-            readShort( stream, type );
-            pDest.type = ModelListFile::UNKNOWN;
-            if ( type == ModelListFile::PLAYER )
-            {
-                pDest.type = ModelListFile::PLAYER;
-            }
-            else if ( type == ModelListFile::NPC )
-            {
-                pDest.type = ModelListFile::NPC;
-            }
-
-            pDest.hrc_name = readString( stream, HRC_NAME_LENGTH );
-            pDest.scale = readString( stream, SCALE_LENGTH );
-
+            ReadShort(stream, type);
+            dest.type = ModelListFile::UNKNOWN;
+            if (type == ModelListFile::PLAYER)
+                dest.type = ModelListFile::PLAYER;
+            else if (type == ModelListFile::NPC) dest.type = ModelListFile::NPC;
+            dest.hrc_name = readString(stream, HRC_NAME_LENGTH);
+            dest.scale = readString(stream, SCALE_LENGTH);
             uint16 animation_count;
-            readShort( stream, animation_count );
-
-            stream->skip( 3 * (3 + 6) + 3 ); // 3 *( 3 uint8 + 3 uint16 ) + 3 uint8 light colors
-
-            readVector( stream, pDest.animations, animation_count );
+            ReadShort(stream, animation_count);
+            // 3 *(3 uint8 + 3 uint16) + 3 uint8 light colors
+            stream->skip(3 * (3 + 6) + 3);
+            ReadVector(stream, dest.animations, animation_count);
         }
 
-        //----------------------------------------------------------------------
-        void
-        ModelListFileSerializer::readObject( Ogre::DataStreamPtr &stream
-                                            ,ModelListFileSerializer::AnimationDescription &pDest )
-        {
+        void ModelListFileSerializer::readObject(
+          Ogre::DataStreamPtr &stream,
+          ModelListFileSerializer::AnimationDescription &dest
+        ){
             uint16 name_length;
-            readShort( stream, name_length );
-            pDest.name = readString( stream, name_length );
-
-            readShort( stream, pDest.unknown );
+            ReadShort(stream, name_length);
+            dest.name = readString(stream, name_length);
+            ReadShort(stream, dest.unknown);
         }
 
-        //----------------------------------------------------------------------
     }
 }

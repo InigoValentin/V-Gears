@@ -1,29 +1,78 @@
-#ifndef _MAP_FILE_H_
-#define _MAP_FILE_H_
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include "common/QGearsResource.h"
 
 namespace QGears {
 
-class WorldMapFile : public Resource
-{
-public:
-    static const String RESOURCE_TYPE;
-    WorldMapFile(Ogre::ResourceManager* creator, const Ogre::String& name, Ogre::ResourceHandle handle,
-        const Ogre::String& group, bool isManual = false, Ogre::ManualResourceLoader* loader = 0)
-        : Resource(creator, name, handle, group, isManual, loader)
-    {
+    /**
+     * Handles a world map file.
+     */
+    class WorldMapFile : public Resource{
 
-    }
+        public:
 
-    virtual ~WorldMapFile();
-private:
-    virtual void loadImpl() override final;
-    virtual void unloadImpl() override final;
-};
+            /**
+             * The type of resource.
+             */
+            static const String RESOURCE_TYPE;
 
-typedef Ogre::SharedPtr<WorldMapFile> MapFilePtr;
+            /**
+             * Constructor.
+             *
+             * @param creator[in] Pointer to the ResourceManager that is
+             * creating this resource.
+             * @param name[in] The unique name of the resource.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can be
+             * null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper
+             * ManualResourceLoader instance is strongly recommended.
+             */
+            WorldMapFile(
+              Ogre::ResourceManager* creator, const Ogre::String& name,
+              Ogre::ResourceHandle handle, const Ogre::String& group,
+              bool is_manual = false, Ogre::ManualResourceLoader* loader = 0
+            );
 
-} // namespace QGears
+            /**
+             * Destructor.
+             */
+            virtual ~WorldMapFile();
 
-#endif // _MAP_FILE_H_
+        private:
+
+            /**
+             * Loads the map file.
+             */
+            virtual void loadImpl() override final;
+
+            /**
+             * Unloads the map file.
+             */
+            virtual void unloadImpl() override final;
+    };
+
+    typedef Ogre::SharedPtr<WorldMapFile> MapFilePtr;
+
+}

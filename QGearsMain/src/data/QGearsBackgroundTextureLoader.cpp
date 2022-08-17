@@ -1,57 +1,35 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
-
-Copyright (c) 2013-08-24 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#include "data/QGearsBackgroundTextureLoader.h"
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
 #include <OgreTexture.h>
-
+#include "data/QGearsBackgroundTextureLoader.h"
 #include "data/QGearsBackgroundFile.h"
 
-namespace QGears
-{
-    //-------------------------------------------------------------------------
-    BackgroundTextureLoader::BackgroundTextureLoader( BackgroundFile &background_file ) :
-        m_background_file( background_file )
-    {
+namespace QGears{
+
+    BackgroundTextureLoader::BackgroundTextureLoader(
+      BackgroundFile &background_file
+    ) : background_file_( background_file ){}
+
+    BackgroundTextureLoader::~BackgroundTextureLoader(){}
+
+    void BackgroundTextureLoader::loadResource(Ogre::Resource *resource){
+        Ogre::Texture *texture(static_cast<Ogre::Texture *>(resource));
+        assert(texture);
+        background_file_.load();
+        texture->_notifyOrigin(background_file_.getName());
     }
 
-    //-------------------------------------------------------------------------
-    BackgroundTextureLoader::~BackgroundTextureLoader()
-    {
-    }
-
-    //-------------------------------------------------------------------------
-    void
-    BackgroundTextureLoader::loadResource( Ogre::Resource *resource )
-    {
-        Ogre::Texture *texture( static_cast<Ogre::Texture *>(resource) );
-        assert( texture );
-
-        m_background_file.load();
-        texture->_notifyOrigin( m_background_file.getName() );
-    }
-
-    //-------------------------------------------------------------------------
 }

@@ -1,136 +1,145 @@
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
 #include <OgreEntity.h>
 #include <OgreRoot.h>
-
 #include "core/EntityModel.h"
 #include "core/Logger.h"
 #include "core/Timer.h"
 
-
-EntityModel::EntityModel(const Ogre::String& name, const Ogre::String file_name, Ogre::SceneNode* node):
-    Entity(name, node),
-    m_AnimationCurrent(nullptr)
+EntityModel::EntityModel(
+  const Ogre::String& name, const Ogre::String file_name, Ogre::SceneNode* node
+):
+  Entity(name, node), animation_current_(nullptr)
 {
     Ogre::SceneManager* scene_manager;
     scene_manager = Ogre::Root::getSingleton().getSceneManager("Scene");
-    m_Model = scene_manager->createEntity(m_Name, file_name);
-    m_Model->setVisible(true);
-
-    PlayAnimation(m_AnimationDefault, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1);
-
-    m_ModelNode->attachObject(m_Model);
+    model_ = scene_manager->createEntity(name_, file_name);
+    model_->setVisible(true);
+    PlayAnimation(
+      animation_default_, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1
+    );
+    model_node_->attachObject(model_);
 }
 
-
-EntityModel::~EntityModel()
-{
-    Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(m_Model);
+EntityModel::~EntityModel(){
+    Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(model_);
 }
 
-
-void
-EntityModel::Update()
-{
-    if(m_AnimationAutoPlay == true)
-    {
+void EntityModel::Update(){
+    if (animation_auto_play_ == true)
         UpdateAnimation(Timer::getSingleton().GetGameTimeDelta());
-    }
-
     Entity::Update();
 }
 
-
-void
-EntityModel::SetVisible(const bool visible)
-{
-    m_Model->setVisible(visible);
-}
+void EntityModel::SetVisible(const bool visible){model_->setVisible(visible);}
 
 
-bool
-EntityModel::IsVisible() const
-{
-    return m_Model->isVisible();
-}
+bool EntityModel::IsVisible() const{return model_->isVisible();}
 
+void EntityModel::PlayAnimation(
+  const Ogre::String& animation, Entity::AnimationState state,
+  Entity::AnimationPlayType play_type, const float start, const float end
+){
+    if (animation_current_ != nullptr) animation_current_->setEnabled(false);
 
-void
-EntityModel::PlayAnimation(const Ogre::String& animation, Entity::AnimationState state, Entity::AnimationPlayType play_type, const float start, const float end)
-{
-    if(m_AnimationCurrent != nullptr)
-    {
-        m_AnimationCurrent->setEnabled(false);
+    if (model_->getAllAnimationStates()->hasAnimationState(animation) == true){
+        animation_current_name_ = animation;
+        animation_current_ = model_->getAnimationState(animation);
+        animation_current_->setLoop(
+          (play_type == Entity::PLAY_LOOPED) ? true : false
+        );
+        animation_current_->setEnabled(true);
+        animation_current_->setTimePosition(
+          (start == -1) ? animation_current_->getLength() : start
+        );
+        animation_end_time_
+          = (end == -1) ? animation_current_->getLength() : end;
+        animation_state_ = state;
+        animation_play_type_ = play_type;
     }
-
-    if(m_Model->getAllAnimationStates()->hasAnimationState(animation) == true)
-    {
-        m_AnimationCurrentName = animation;
-        m_AnimationCurrent = m_Model->getAnimationState(animation);
-        m_AnimationCurrent->setLoop((play_type == Entity::PLAY_LOOPED) ? true : false);
-        m_AnimationCurrent->setEnabled(true);
-        m_AnimationCurrent->setTimePosition((start == -1) ? m_AnimationCurrent->getLength() : start);
-
-        m_AnimationEndTime = (end == -1) ? m_AnimationCurrent->getLength() : end;
-        m_AnimationState = state;
-        m_AnimationPlayType = play_type;
-    }
-    else
-    {
-        // Idle is hard coded to the default animation, so don't spam crazy amounts of errors if its not found.
-        if (animation != "Idle")
-        {
-            LOG_ERROR("Animation '" + animation + "' doesn't exist in model '" + m_Model->getName() + "'.");
+    else{
+        // Idle is hard coded to the default animation,
+        // so don't spam crazy amounts of errors if its not found.
+        if (animation != "Idle"){
+            LOG_ERROR(
+              "Animation '" + animation + "' doesn't exist in model '"
+              + model_->getName() + "'."
+            );
         }
     }
 }
 
-
-void
-EntityModel::PlayAnimationContinue(const Ogre::String& animation)
-{
-    if(m_AnimationCurrent == nullptr ||                                                 // if animation isn't played
-        (m_Model->getAllAnimationStates()->hasAnimationState(animation) == true && // and we want to play animation that exist (use this to avoid exception)
-          (m_AnimationCurrent != m_Model->getAnimationState(animation) ||          // and animation we want is not animation that currently playing
-            m_AnimationPlayType != Entity::PLAY_LOOPED)))                                       // or now playing animation we want but it doesn't looped
+void EntityModel::PlayAnimationContinue(const Ogre::String& animation){
+    if (
+      // If animation isn't being played...
+      animation_current_ == nullptr
+      // ... the animatio to play exists (use this to avoid exception)...
+      || (model_->getAllAnimationStates()->hasAnimationState(animation) == true
+      && (
+        // and (the requested animation is not currently playing...
+        animation_current_ != model_->getAnimationState(animation)
+        // or it's currently playing  but it's not looped)
+        || animation_play_type_ != Entity::PLAY_LOOPED)))
     {
-        PlayAnimation(animation, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1);
+        PlayAnimation(
+          animation, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1
+        );
     }
 }
 
+void EntityModel::UpdateAnimation(const float delta){
+    if (animation_current_ != nullptr){
+        float delta_mod = delta * animation_speed_;
+        bool stop_check
+          = (animation_current_->hasEnded() == true)
+          || (
+            animation_current_->getTimePosition() + delta_mod
+            >= animation_end_time_
+          );
 
-void
-EntityModel::UpdateAnimation(const float delta)
-{
-    if(m_AnimationCurrent != nullptr)
-    {
-        float delta_mod = delta * m_AnimationSpeed;
-
-        bool stop_check = (m_AnimationCurrent->hasEnded() == true) || (m_AnimationCurrent->getTimePosition() + delta_mod >= m_AnimationEndTime);
-
-        if(stop_check == true)
-        {
-            //LOG_TRIVIAL("Animation finished for entity \"" + m_Name + "\".");
-            for(size_t i = 0; i < m_AnimationSync.size(); ++i)
-            {
-                ScriptManager::getSingleton().ContinueScriptExecution(m_AnimationSync[i]);
+        if (stop_check == true){
+            //LOG_TRIVIAL("Animation finished for entity \"" + name_ + "\".");
+            for (size_t i = 0; i < animation_sync_.size(); ++ i){
+                ScriptManager::getSingleton().ContinueScriptExecution(
+                  animation_sync_[i]
+                );
             }
-            m_AnimationSync.clear();
+            animation_sync_.clear();
 
-            if(m_AnimationPlayType == Entity::PLAY_DEFAULT)
-            {
-                float time = (m_AnimationCurrent->hasEnded() != true) ? m_AnimationCurrent->getTimePosition() : 0;
-                PlayAnimation(m_AnimationDefault, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, time, -1);
-                m_AnimationCurrent->addTime(delta_mod);
+            if (animation_play_type_ == Entity::PLAY_DEFAULT){
+                float time = (animation_current_->hasEnded() != true)
+                  ? animation_current_->getTimePosition() : 0;
+                PlayAnimation(
+                  animation_default_, Entity::AUTO_ANIMATION,
+                  Entity::PLAY_LOOPED, time, -1
+                );
+                animation_current_->addTime(delta_mod);
             }
-            else if(m_AnimationPlayType == Entity::PLAY_LOOPED)
-            {
-                float time = (m_AnimationCurrent->hasEnded() != true) ? m_AnimationCurrent->getTimePosition() : m_AnimationCurrent->getTimePosition() - m_AnimationCurrent->getLength();
-                PlayAnimation(m_AnimationCurrentName, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, time, -1);
-                m_AnimationCurrent->addTime(delta_mod);
+            else if (animation_play_type_ == Entity::PLAY_LOOPED){
+                float time = (animation_current_->hasEnded() != true)
+                  ? animation_current_->getTimePosition()
+                  : animation_current_->getTimePosition()
+                    - animation_current_->getLength();
+                PlayAnimation(
+                  animation_current_name_, Entity::AUTO_ANIMATION,
+                  Entity::PLAY_LOOPED, time, -1
+                );
+                animation_current_->addTime(delta_mod);
             }
         }
-        else
-        {
-            m_AnimationCurrent->addTime(delta_mod);
-        }
+        else animation_current_->addTime(delta_mod);
     }
 }

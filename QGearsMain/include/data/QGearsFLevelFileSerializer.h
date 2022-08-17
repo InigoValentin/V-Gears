@@ -1,94 +1,248 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-24 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsFLevelFileSerializer_H__
-#define __QGearsFLevelFileSerializer_H__
+#pragma once
 
 #include "common/TypeDefine.h"
-
 #include "QGearsFLevelFile.h"
 #include "QGearsSerializer.h"
 
-namespace QGears
-{
-    class FLevelFileSerializer : public Serializer
-    {
-    public:
-                        FLevelFileSerializer();
-        virtual        ~FLevelFileSerializer();
+namespace QGears{
 
-        virtual void    importFLevelFile( Ogre::DataStreamPtr &stream, FLevelFile* pDest );
+    /**
+     * Handles the serialization of flevel files.
+     */
+    class FLevelFileSerializer : public Serializer{
 
-        enum
-        {
-            SECTION_SCRIPT
-           ,SECTION_CAMERA_MATRIX
-           ,SECTION_MODEL_LOADER
-           ,SECTION_PALETTE
-           ,SECTION_WALKMESH
-           ,SECTION_TILE_MAP
-           ,SECTION_ENCOUNTER
-           ,SECTION_TRIGGER
-           ,SECTION_BACKGROUND
-           ,SECTION_COUNT
-        };
+        public:
 
-        struct Header
-        {
-            uint16 version;
-            uint32 section_count;
-        };
+            /**
+             * Constructor.
+             */
+            FLevelFileSerializer();
 
-    protected:
-        void    readFileHeader( Ogre::DataStreamPtr &stream );
+            /**
+             * Destructor.
+             */
+            virtual ~FLevelFileSerializer();
 
-        void    readSectionData(Ogre::DataStreamPtr &stream, Ogre::DataStreamPtr &outbuffer_, size_t sectionSize);
-        virtual void    readSection( Ogre::DataStreamPtr &stream, FLevelFile* pDest, const size_t section_index );
+            virtual void ImportFLevelFile(
+              Ogre::DataStreamPtr &stream, FLevelFile* dest
+            );
 
-        template<typename ResourceManagerType>
-        Ogre::ResourcePtr createResource( FLevelFile *pDest, const String &extension );
+            enum{
 
-        void    readCameraMatrix( Ogre::DataStreamPtr &stream, FLevelFile* pDest );
-        void    readModelList   ( Ogre::DataStreamPtr &stream, FLevelFile* pDest );
-        void    readPalette     ( Ogre::DataStreamPtr &stream, FLevelFile* pDest );
-        void    readWalkmesh    ( Ogre::DataStreamPtr &stream, FLevelFile* pDest );
-        void    readBackground  ( Ogre::DataStreamPtr &stream, FLevelFile* pDest );
-        void    readTriggers    (Ogre::DataStreamPtr &stream, FLevelFile* pDest);
+                /**
+                 * Scripts section.
+                 */
+                SECTION_SCRIPT,
 
-        void    readEnd( Ogre::DataStreamPtr &stream );
+                /**
+                 * Camera matrix section/
+                 */
+                SECTION_CAMERA_MATRIX,
 
-        template<typename ValueType> void
-        readVector( Ogre::DataStreamPtr &stream, std::vector<ValueType> &pDest, size_t count );
+                /**
+                 * Model section.
+                 */
+                SECTION_MODEL_LOADER,
 
-        virtual String  getBaseName        ( const FLevelFile* pDest ) const;
+                /**
+                 * Color palette section/
+                 */
+                SECTION_PALETTE,
 
-        static const String     TAG_FILE_END;
+                /**
+                 * Walkmesh section.
+                 */
+                SECTION_WALKMESH,
 
-    private:
-        Header  m_header;
+                /**
+                 * Tile map section.
+                 */
+                SECTION_TILE_MAP,
+
+                /**
+                 * Battle encounter section.
+                 */
+                SECTION_ENCOUNTER,
+
+                /**
+                 * Triggers section.
+                 */
+                SECTION_TRIGGER,
+
+                /**
+                 * Background section.
+                 */
+                SECTION_BACKGROUND,
+
+                /**
+                 * @todo Count of what?
+                 */
+                SECTION_COUNT
+            };
+
+            /**
+             * A flevel file header.
+             */
+            struct Header{
+
+                /**
+                 * File format version.
+                 */
+                uint16 version;
+
+                /**
+                 * Number of sections in the file.
+                 */
+                uint32 section_count;
+            };
+
+        protected:
+
+            /**
+             * Reads the file header and sets instance data..
+             *
+             * @param stream[in] Contents of the file.
+             */
+            void ReadFileHeader(Ogre::DataStreamPtr &stream);
+
+            /**
+             * Reads a section data.
+             *
+             * @param stream[in] Contents of the file.
+             * @param out_buffer[out] The contents of the section are loaded
+             * here.
+             * @param section_size[in] Size of the section to read, in bytes.
+             */
+            void ReadSectionData(
+              Ogre::DataStreamPtr &stream, Ogre::DataStreamPtr &out_buffer,
+              size_t section_size
+            );
+
+            /**
+             * Reads a file section.
+             *
+             * @param stream[in] Contents of the file.
+             * @param dest[out] The section data will be loaded here.
+             * @param section_index[in] Index of the section to read.
+             */
+            virtual void ReadSection(
+              Ogre::DataStreamPtr &stream, FLevelFile* dest,
+              const size_t section_index
+            );
+
+            /**
+             * Creates a resource.
+             *
+             * @param dest[out] The crteated resource.
+             * @param extension[in] The resource file extension.
+             */
+            template<typename ResourceManagerType>
+              Ogre::ResourcePtr CreateResource(
+                FLevelFile *dest, const String &extension
+              );
+
+            /**
+             * Reads camera matrix data from a flevel file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The data will be set on this file.
+             */
+            void ReadCameraMatrix(
+              Ogre::DataStreamPtr &stream, FLevelFile* dest
+            );
+
+            /**
+             * Reads model list data from a flevel file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The data will be set on this file.
+             */
+            void ReadModelList(Ogre::DataStreamPtr &stream, FLevelFile* dest);
+
+            /**
+             * Reads color palette data from a flevel file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The data will be set on this file.
+             */
+            void ReadPalette(Ogre::DataStreamPtr &stream, FLevelFile* dest);
+
+            /**
+             * Reads walkmesh data from a flevel file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The data will be set on this file.
+             */
+            void ReadWalkmesh(Ogre::DataStreamPtr &stream, FLevelFile* dest);
+
+            /**
+             * Reads background data from a flevel file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The data will be set on this file.
+             */
+            void ReadBackground(Ogre::DataStreamPtr &stream, FLevelFile* dest);
+
+            /**
+             * Reads trigger data from a flevel file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The data will be set on this file.
+             */
+            void ReadTriggers(Ogre::DataStreamPtr &stream, FLevelFile* dest);
+
+            /**
+             * @todo Understand and document.
+             *
+             * @param stream[in] Input stream.
+             */
+            void ReadEnd(Ogre::DataStreamPtr &stream);
+
+            /**
+             * Reads a stream as a vector.
+             *
+             * @param stream[in] The input stream.
+             * @param dest[out] The vector data will be loaded here.
+             * @param count[in] Data units to copy.
+             */
+            template<typename ValueType> void ReadVector(
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
+              size_t count
+            );
+
+            /**
+             * Retrieves the base name of a flevel file.
+             *
+             * @param dest[in] Flevel file.
+             * @return The filename, without path or extension.
+             */
+            virtual String GetBaseName(const FLevelFile* dest) const;
+
+            /**
+             * End-of-file tag.
+             */
+            static const String TAG_FILE_END;
+
+        private:
+
+            /**
+             * The file header.
+             */
+            Header header_;
     };
 }
-
-#endif // __QGearsFLevelFileSerializer_H__

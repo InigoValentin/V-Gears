@@ -1,143 +1,414 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-19 Tobias Peters <tobias.peters@kreativeffekt.at>
+#pragma once
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsBackgroundFile_H__
-#define __QGearsBackgroundFile_H__
-
+#include <array>
 #include <OgreResource.h>
 #include <OgreImage.h>
 #include <Ogre.h>
-
 #include "common/TypeDefine.h"
 #include "data/QGearsPaletteFile.h"
 
-#include <array>
+namespace QGears{
 
-namespace QGears
-{
-    // TODO inherit from Qgears Ressource
-    class BackgroundFile : public Ogre::Resource
-    {
-    public:
+    // TODO inherit from QGears Resource.
 
-        BackgroundFile( Ogre::ResourceManager *creator, const String &name
-              ,Ogre::ResourceHandle handle, const String &group
-              ,bool isManual = false, Ogre::ManualResourceLoader *loader = NULL );
+    /**
+     * A background file representation.
+     */
+    class BackgroundFile : public Ogre::Resource{
 
-        virtual ~BackgroundFile();
+        public:
 
-        static const String RESOURCE_TYPE;
+            /**
+             * Constructor.
+             *
+             * @param creator[in] Pointer to the ResourceManager that is
+             * creating this resource.
+             * @param name[in] The unique name of the resource.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can be
+             * null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper
+             * ManualResourceLoader instance is strongly recommended.
+             */
+            BackgroundFile(
+              Ogre::ResourceManager *creator, const String &name,
+              Ogre::ResourceHandle handle, const String &group,
+              bool is_manual = false, Ogre::ManualResourceLoader *loader = NULL
+            );
 
-        enum {
-            PAGE_DATA_WIDTH     = 256
-           ,PAGE_DATA_HEIGHT    = PAGE_DATA_WIDTH
-           ,PAGE_DATA_SIZE      = PAGE_DATA_WIDTH * PAGE_DATA_HEIGHT
-           ,SPRITE_WIDTH        = 16
-           ,SPRITE_HEIGHT       = SPRITE_WIDTH
-           ,SPRITE_PIXEL_COUNT  = SPRITE_WIDTH * SPRITE_HEIGHT
-           ,LAYER_COUNT         = 4
-           ,PALETTE_ENTRY_COUNT = 20
-           ,PAGE_COUNT          = 42
-        };
+            /**
+             * Destructor.
+             */
+            virtual ~BackgroundFile();
 
-        struct SpriteData
-        {
-            Pixel dst;
-            uint16 unknown_04[2]; // Unused
-            Pixel src;
-            Pixel src2; // used for special effects pages, when data_page2 != 0, it must be used instead of src
-            uint16 width;
-            uint16 height;
+            /**
+             * The type of resource.
+             */
+            static const String RESOURCE_TYPE;
 
-            uint16 palette_page;
-            uint16 depth; // <=> Z
-            uint8  animation_id;
-            uint8  animation_frame;
-            bool   has_blending[2];
-            uint16 blending;
-            uint16 data_page;
-            uint16 data_page2; // used for special effects pages, when data_page2 != 0, it must be used instead of data_page
-            uint16 colour_depth; // Use texture page depth instead
-            Ogre::Vector3 src_big; // For PC use (z = unknown, x = srcX / 16 * 625000, y = srcY / 16 * 625000)
-        };
+            enum {
 
+                /**
+                 * Width of the background page, in pixels.
+                 *
+                 * Same as {@see PAGE_DATAH_EIGHT}.
+                 */
+                PAGE_DATA_WIDTH = 256,
 
-        typedef std::vector<SpriteData> SpriteList;
-        typedef std::vector<SpriteData*> SpritePtrList;
+                /**
+                 * Height of the background page, in pixels.
+                 *
+                 * Same as {@see PAGE_DATA_WIDTH}.
+                 */
+                PAGE_DATA_HEIGHT = PAGE_DATA_WIDTH,
 
-        struct Layer
-        {
-            bool enabled;
-            uint16 width;
-            uint16 height;
-            // uint16 sprite_count only read in serializer
-            uint16 unknown_06; // unused in layer0
-            uint16 unknown_08[3]; // layer 1,2,3
-            uint16 unknown_0E[4]; // layer   2,3
-            SpriteList sprites;
-        };
+                /**
+                 * Size of the background page, in pixels.
+                 *
+                 * Same as {@see PAGE_DATA_WIDTH} * {@see PAGE_DATA_HEIGHT}.
+                 */
+                PAGE_DATA_SIZE = PAGE_DATA_WIDTH * PAGE_DATA_HEIGHT,
 
-        typedef PaletteFile::Color Color;
+                /**
+                 * Width of sprites, in pixels.
+                 *
+                 * Same as {@see SPRITE_HEIGHT}.
+                 */
+                SPRITE_WIDTH = 16,
 
-        typedef std::vector<uint8> Buffer;
-        typedef std::vector<Color> Colors;
+                /**
+                 * Height of sprites, in pixels.
+                 *
+                 * Same as {@see SPRITE_WIDTH}.
+                 */
+                SPRITE_HEIGHT = SPRITE_WIDTH,
 
-        struct Page
-        {
-            bool enabled; // only read further if this is > 0
-            uint16 unknown_02;
-            uint16 value_size;
-            // uint8 if value_size == 1, uint16 if value_size == 2
-            //uint8 data[PAGE_DATA_WIDTH][PAGE_DATA_HEIGHT];
-            Buffer data;
-            Colors colors;
-        };
+                /**
+                 * Size of sprites, in pixels.
+                 *
+                 * Same as {@see SPRITE_WIDTH} * {@see SPRITE_HEIGHT}.
+                 */
+                SPRITE_PIXEL_COUNT = SPRITE_WIDTH * SPRITE_HEIGHT,
 
-        std::array<Layer, LAYER_COUNT>& getLayers(void) { return m_layers; }
-        std::array<uint8, PALETTE_ENTRY_COUNT>& getPalette(void) { return m_palette; }
-        std::array<Page, PAGE_COUNT>&  getPages(void) { return m_pages; }
+                /**
+                 * Number of layers in a background.
+                 */
+                LAYER_COUNT = 4,
 
-        Ogre::Image*        createImage     ( const PaletteFilePtr &palette );
+                /**
+                 * Number of palettes in a background.
+                 */
+                PALETTE_ENTRY_COUNT = 20,
 
-        void addAllSprites( SpritePtrList& sprites ) ;
+                /**
+                 * Number of pages in a background.
+                 *
+                 * @todo What are pages?
+                 */
+                PAGE_COUNT = 42
+            };
 
-    protected:
-        virtual void loadImpl();
-        virtual void unloadImpl();
-        virtual size_t calculateSize() const;
-        virtual size_t calculateSize( const Layer &layer ) const;
-        virtual size_t calculateSize( const Page  &page  ) const;
+            /**
+             * Data for sprites.
+             */
+            struct SpriteData{
 
-    private:
-        std::array<Layer, LAYER_COUNT> m_layers;
-        std::array<uint8, PALETTE_ENTRY_COUNT> m_palette;
+                /**
+                 * Pixel destination.
+                 */
+                Pixel dst;
 
-        std::array<Page, PAGE_COUNT> m_pages;
+                /**
+                 * Unused data.
+                 */
+                uint16 unknown_04[2];
+
+                /**
+                 * Pixel source.
+                 */
+                Pixel src;
+
+                /**
+                 * Pixel alternate source.
+                 *
+                 * Used for special effects pages, when data_page2 != 0, it
+                 * must be used instead of {@see src}.
+                 */
+                Pixel src2;
+
+                /**
+                 * Sprite width.
+                 */
+                uint16 width;
+
+                /**
+                 * Sprite height.
+                 */
+                uint16 height;
+
+                /**
+                 * Palete page for the sprite
+                 */
+                uint16 palette_page;
+
+                /**
+                 * Sprite depth (Z-index).
+                 */
+                uint16 depth;
+
+                /**
+                 * Animation ID of the sprite.
+                 */
+                uint8 animation_id;
+
+                /**
+                 * Animation frame of the sprite.
+                 */
+                uint8 animation_frame;
+
+                /**
+                 * Indicates if the sprite uses color blending.
+                 */
+                bool has_blending[2];
+
+                /**
+                 * The type of blending used.
+                 */
+                uint16 blending;
+
+                /**
+                 * The page with the sprite data.
+                 */
+                uint16 data_page;
+
+                /**
+                 * Page with alternate sprite data.
+                 *
+                 * Used for special effects pages. When data_page2 != 0, it
+                 * must be used instead of {@see data_page}.
+                 */
+                uint16 data_page2;
+
+                /**
+                 * Color depth.
+                 *
+                 * Do not use. Use texture page depth instead.
+                 */
+                uint16 colour_depth;
+
+                /**
+                 * Sprite source.
+                 *
+                 * For PC use only.
+                 * z = unknown, x = srcX / 16 * 625000, y = srcY / 16 * 625000
+                 */
+                Ogre::Vector3 src_big;
+            };
+
+            typedef std::vector<SpriteData> SpriteList;
+
+            typedef std::vector<SpriteData*> SpritePtrList;
+
+            /**
+             * A layer of a background.
+             */
+            struct Layer{
+
+                /**
+                 * Indicates if the layer is used.
+                 */
+                bool enabled;
+
+                /**
+                 * Layer width.
+                 */
+                uint16 width;
+
+                /**
+                 * Layer height.
+                 */
+                uint16 height;
+                /**
+                 * Unknown.
+                 *
+                 * uint16 sprite_count only read in serializer. Unused in layer
+                 * 0.
+                 */
+                uint16 unknown_06;
+
+                /**
+                 * Unknown.
+                 *
+                 * Used in layers 1, 2 and 3
+                 */
+                uint16 unknown_08[3];
+
+                /**
+                 * Unknown.
+                 *
+                 * Used in layers 2 and 3
+                 */
+                uint16 unknown_0E[4];
+
+                /**
+                 * List of sprites in the layer.
+                 */
+                SpriteList sprites;
+            };
+
+            typedef PaletteFile::Color Color;
+
+            typedef std::vector<uint8> Buffer;
+
+            typedef std::vector<Color> Colors;
+
+            /**
+             * A background page/
+             */
+            struct Page{
+
+                /**
+                 * Indicates if the page is used.
+                 */
+                bool enabled;
+
+                /**
+                 * Unknown data.
+                 */
+                uint16 unknown_02;
+
+                /**
+                 * @todo Understand and document.
+                 */
+                uint16 value_size;
+
+                // //uint8 if value_size == 1, uint16 if value_size == 2
+                // uint8 data[PAGE_DATA_WIDTH][PAGE_DATA_HEIGHT];
+
+                /**
+                 * Data buffer.
+                 */
+                Buffer data;
+
+                /**
+                 * Background color list.
+                 */
+                Colors colors;
+            };
+
+            /**
+             * Retrieves the background layers.
+             *
+             * @return The list of layers.
+             */
+            std::array<Layer, LAYER_COUNT>& GetLayers(void) {return layers_;}
+
+            /**
+             * Retrieves the background palette.
+             *
+             * @return The palette.
+             */
+            std::array<uint8, PALETTE_ENTRY_COUNT>& GetPalette(void) {
+                return palette_;
+            }
+
+            /**
+             * Retrieves the background pages.
+             *
+             * @return The background pages.
+             */
+            std::array<Page, PAGE_COUNT>& GetPages(void){return pages_;}
+
+            /**
+             * Creates an image from a palette.
+             *
+             * @param palette[in] The color palette for the image.
+             * @return The image.
+             */
+            Ogre::Image* CreateImage(const PaletteFilePtr &palette);
+
+            /**
+             * Adds all sprites to the background.
+             *
+             * @param sprites[in] The list of sprites to add.
+             */
+            void AddAllSprites(SpritePtrList& sprites) ;
+
+        protected:
+
+            /**
+             * Loads the file.
+             */
+            virtual void loadImpl() override final;
+
+            /**
+             * Unloads the file.
+             */
+            virtual void unloadImpl() override final;
+
+            /**
+             * Calculates the size of the background.
+             *
+             * It includes all layers and pages.
+             *
+             * @return The total size of the background, in bytes.
+             */
+            virtual size_t CalculateSize() const;
+
+            /**
+             * Calculates the size of a background layer.
+             *
+             * @param layer[in] The layer to calculate size from.
+             * @return The total size of the background layer, in bytes.
+             */
+            virtual size_t CalculateSize(const Layer &layer) const;
+
+            /**
+             * Calculates the size of a background page.
+             *
+             * @param page[in] The layer to calculate size from.
+             * @return The total size of the background page, in bytes.
+             */
+            virtual size_t CalculateSize(const Page &page) const;
+
+        private:
+
+            /**
+             * The list of layers.
+             */
+            std::array<Layer, LAYER_COUNT> layers_;
+
+            /**
+             * The color palette.
+             */
+            std::array<uint8, PALETTE_ENTRY_COUNT> palette_;
+
+            /**
+             * The background pages.
+             */
+            std::array<Page, PAGE_COUNT> pages_;
     };
 
     typedef Ogre::SharedPtr<BackgroundFile> BackgroundFilePtr;
 }
-
-#endif // __QGearsBackgroundFile_H__

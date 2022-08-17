@@ -1,33 +1,21 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
-
-Copyright (c) 2013-08-24 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#include "data/QGearsFLevelFile.h"
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
 #include <OgreLogManager.h>
 #include <OgreTextureManager.h>
-
+#include "data/QGearsFLevelFile.h"
 #include "common/FF7NameLookup.h"
 #include "common/QGearsStringUtil.h"
 #include "data/QGearsAFileManager.h"
@@ -39,256 +27,185 @@ THE SOFTWARE.
 #include "FF7Common.h"
 #include "core/Logger.h"
 
-namespace QGears
-{
-    //---------------------------------------------------------------------
-    const String    FLevelFile::RESOURCE_TYPE( "QGearsFLevelFile" );
-    const String    FLevelFile::SUFFIX_BACKGROUND_TEXTURE( "/texture" );
-    const String    FLevelFile::SUFFIX_BACKGROUND_2D     ( "/background_2d" );
+namespace QGears{
 
-    //--------------------------------------------------------------------------
-    FLevelFile::FLevelFile( Ogre::ResourceManager *creator
-                 ,const String &name, Ogre::ResourceHandle handle
-                 ,const String &group, bool isManual
-                 ,Ogre::ManualResourceLoader *loader ) :
-        Resource( creator, name, handle, group, isManual, loader )
-       ,m_background_texture_loader( nullptr )
-       ,m_background_2d_loader( nullptr )
-    {
-        createParamDictionary( getResourceType() );
-    }
+    const String FLevelFile::RESOURCE_TYPE("QGearsFLevelFile");
 
-    //--------------------------------------------------------------------------
-    FLevelFile::~FLevelFile()
-    {
-        if( m_background_texture_loader )
-        {
-            assert(m_background_texture != nullptr);
-            Ogre::TextureManager::getSingleton().remove( m_background_texture->getHandle() );
-            delete m_background_texture_loader;
-            m_background_texture_loader = nullptr;
+    const String FLevelFile::SUFFIX_BACKGROUND_TEXTURE("/texture");
+
+    const String FLevelFile::SUFFIX_BACKGROUND_2D("/background_2d");
+
+    FLevelFile::FLevelFile(
+      Ogre::ResourceManager *creator, const String &name,
+      Ogre::ResourceHandle handle, const String &group, bool is_manual,
+      Ogre::ManualResourceLoader *loader
+    ) :
+      Resource(creator, name, handle, group, is_manual, loader),
+      background_texture_loader_(nullptr), background_2d_loader_(nullptr)
+    {createParamDictionary(GetResourceType());}
+
+    FLevelFile::~FLevelFile(){
+        if (background_texture_loader_){
+            assert(background_texture_ != nullptr);
+            Ogre::TextureManager::getSingleton().remove(
+              background_texture_->getHandle()
+            );
+            delete background_texture_loader_;
+            background_texture_loader_ = nullptr;
         }
-        m_background_texture.reset();
-
-        if( m_background_2d_loader )
-        {
-            assert(m_background_2d != nullptr);
-            Background2DFileManager::getSingleton().remove( m_background_2d->getHandle() );
-            delete m_background_2d_loader;
-            m_background_2d_loader = nullptr;
+        background_texture_.reset();
+        if (background_2d_loader_){
+            assert(background_2d_ != nullptr);
+            Background2DFileManager::getSingleton().remove(
+              background_2d_->getHandle()
+            );
+            delete background_2d_loader_;
+            background_2d_loader_ = nullptr;
         }
-        m_background_2d.reset();
-
+        background_2d_.reset();
         unload();
     }
 
-    //--------------------------------------------------------------------------
-    void
-    FLevelFile::loadImpl()
-    {
+    void FLevelFile::loadImpl(){
         FLevelFileSerializer serializer;
-        Ogre::DataStreamPtr stream( openResource() );
-        if (stream == nullptr)
-        {
-            LOG_ERROR("Failed to open resource");
+        Ogre::DataStreamPtr stream(openResource());
+        if (stream == nullptr) LOG_ERROR("Failed to open resource");
+        serializer.ImportFLevelFile(stream, this);
+        String background_texture_name(GetBackgroundTextureName());
+        if (background_texture_loader_ == nullptr){
+            background_texture_loader_ = new FLevelTextureLoader(*this);
+            background_texture_ = Ogre::TextureManager::getSingleton().create(
+              background_texture_name, mGroup, true, background_texture_loader_
+            );
         }
-
-        serializer.importFLevelFile( stream, this );
-
-        String background_texture_name( getBackgroundTextureName() );
-        if( m_background_texture_loader == nullptr )
-        {
-            m_background_texture_loader = new FLevelTextureLoader( *this );
-            m_background_texture = Ogre::TextureManager::getSingleton().create( background_texture_name, mGroup, true, m_background_texture_loader );
-        }
-
-        String background_2d_name( getBackground2DName() );
-        if( m_background_2d_loader == nullptr )
-        {
-            m_background_2d_loader = new FLevelBackground2DLoader( *this );
-            m_background_2d = Background2DFileManager::getSingleton().createResource( background_2d_name, mGroup, true, m_background_2d_loader ).staticCast<Background2DFile>();
+        String background_2d_name(GetBackground2DName());
+        if (background_2d_loader_ == nullptr){
+            background_2d_loader_ = new FLevelBackground2DLoader(*this);
+            background_2d_
+              = Background2DFileManager::getSingleton().createResource(
+                background_2d_name, mGroup, true,
+                background_2d_loader_
+              ).staticCast<Background2DFile>();
         }
     }
 
-    //--------------------------------------------------------------------------
-    void FLevelFile::loadModels()
-    {
-        HRCFileManager &hrc_mgr( HRCFileManager::getSingleton() );
-        ModelList      &models( m_model_list->getModels() );
-        ModelList::const_iterator it    ( models.begin() )
-                                , it_end( models.end()   );
-        while( it != it_end )
-        {
-            String hrc_name( it->hrc_name );
-            Ogre::LogManager::getSingleton().stream()
-                << "Loading Model: " << hrc_name;
-            StringUtil::toLowerCase( hrc_name );
-            HRCFilePtr  hrc =  hrc_mgr.load( hrc_name, mGroup ).staticCast<HRCFile>();
-            loadAnimations( hrc, it->animations );
-            m_hrc_files.push_back( hrc );
-            ++it;
+    void FLevelFile::LoadModels(){
+        HRCFileManager &hrc_mgr(HRCFileManager::getSingleton());
+        ModelList &models(model_list_->GetModels());
+        ModelList::const_iterator it(models.begin()), it_end(models.end());
+        while (it != it_end){
+            String hrc_name(it->hrc_name);
+            Ogre::LogManager::getSingleton().stream() << "Loading Model: "
+              << hrc_name;
+            StringUtil::toLowerCase(hrc_name);
+            HRCFilePtr hrc
+              = hrc_mgr.load(hrc_name, mGroup).staticCast<HRCFile>();
+            LoadAnimations(hrc, it->animations);
+            hrc_files_.push_back(hrc);
+            ++ it;
         }
     }
 
-    //--------------------------------------------------------------------------
-    void
-    FLevelFile::loadAnimations( const HRCFilePtr &model, const AnimationList &animations )
-    {
-        AFileManager    &a_mgr( AFileManager::getSingleton() );
-        AnimationList::const_iterator it    ( animations.begin() )
-                                    , it_end( animations.end()   );
-        while( it != it_end )
-        {
+    void FLevelFile::LoadAnimations(
+      const HRCFilePtr &model, const AnimationList &animations
+    ){
+        AFileManager &a_mgr(AFileManager::getSingleton());
+        AnimationList::const_iterator
+          it(animations.begin()), it_end(animations.end());
+        while (it != it_end){
             String animation_name;
-            StringUtil::splitBase( it->name, animation_name );
-            StringUtil::toLowerCase( animation_name );
-            String animation_filename( animation_name + FF7::EXT_A );
-            AFilePtr animation = a_mgr.load( animation_filename, model->getGroup() ).staticCast<AFile>();
-            animation_name = FF7::NameLookup::animation( animation_name );
-            Ogre::LogManager::getSingleton().stream()
-                << " Adding Animation: " << animation_name;
-            animation->addTo( model->getSkeleton(), animation_name );
-            ++it;
+            StringUtil::splitBase(it->name, animation_name);
+            StringUtil::toLowerCase(animation_name);
+            String animation_filename(animation_name + FF7::EXT_A);
+            AFilePtr animation
+              = a_mgr.load(
+                animation_filename, model->getGroup()
+              ).staticCast<AFile>();
+            animation_name = FF7::NameLookup::Animation(animation_name);
+            Ogre::LogManager::getSingleton().stream() << " Adding Animation: "
+              << animation_name;
+            animation->AddTo(model->GetSkeleton(), animation_name);
+            ++ it;
         }
     }
 
-    //--------------------------------------------------------------------------
-    void
-    FLevelFile::unloadImpl()
-    {
-        m_background.reset();
-        m_camera_matrix.reset();
-        m_palette.reset();
-        m_model_list.reset();
-        m_walkmesh.reset();
-        m_hrc_files.clear();
-        m_triggers.reset();
+    void FLevelFile::unloadImpl(){
+        background_.reset();
+        camera_matrix_.reset();
+        palette_.reset();
+        model_list_.reset();
+        walkmesh_.reset();
+        hrc_files_.clear();
+        triggers_.reset();
     }
 
-    //--------------------------------------------------------------------------
-    const String&
-    FLevelFile::getResourceType( void ) const
-    {
-        return RESOURCE_TYPE;
-    }
+    const String& FLevelFile::GetResourceType(void) const{return RESOURCE_TYPE;}
 
-    //--------------------------------------------------------------------------
-    size_t
-    FLevelFile::calculateSize() const
-    {
-        // data is only stored in section resources
+    size_t FLevelFile::calculateSize() const{
+        // Data is only stored in section resources
         return 0;
     }
 
-    const std::vector<u8>& FLevelFile::getRawScript() const
-    {
-        return m_rawScript;
+    const std::vector<u8>& FLevelFile::GetRawScript() const{return raw_script_;}
+
+    const BackgroundFilePtr& FLevelFile::GetBackground(void) const{
+        return background_;
     }
 
-    //--------------------------------------------------------------------------
-    const BackgroundFilePtr&
-    FLevelFile::getBackground( void ) const
-    {
-        return m_background;
+    void FLevelFile::SetRawScript(const std::vector<u8>& script_data){
+        raw_script_ = script_data;
     }
 
-    void FLevelFile::setRawScript(const std::vector<u8>& scriptData)
-    {
-        m_rawScript = scriptData;
+    void FLevelFile::SetBackground(const BackgroundFilePtr &background){
+        background_ = background;
     }
 
-    //--------------------------------------------------------------------------
-    void
-    FLevelFile::setBackground( const BackgroundFilePtr &background )
-    {
-        m_background = background;
+    const CameraMatrixFilePtr& FLevelFile::GetCameraMatrix(void) const{
+        return camera_matrix_;
     }
 
-    //--------------------------------------------------------------------------
-    const CameraMatrixFilePtr&
-    FLevelFile::getCameraMatrix( void ) const
-    {
-        return m_camera_matrix;
+    void FLevelFile::SetCameraMatrix(const CameraMatrixFilePtr &camera_matrix){
+        camera_matrix_ = camera_matrix;
     }
 
-    //--------------------------------------------------------------------------
-    void
-    FLevelFile::setCameraMatrix( const CameraMatrixFilePtr &camera_matrix )
-    {
-        m_camera_matrix = camera_matrix;
+    const PaletteFilePtr& FLevelFile::GetPalette(void) const{return palette_;}
+
+    void FLevelFile::SetPalette(const PaletteFilePtr &palette){
+        palette_ = palette;
     }
 
-    //--------------------------------------------------------------------------
-    const PaletteFilePtr&
-    FLevelFile::getPalette( void ) const
-    {
-        return m_palette;
+    const ModelListFilePtr& FLevelFile::GetModelList() const{
+        return model_list_;
     }
 
-    //--------------------------------------------------------------------------
-    void
-    FLevelFile::setPalette( const PaletteFilePtr &palette )
-    {
-        m_palette = palette;
+    void FLevelFile::SetModelList(const ModelListFilePtr &model_list){
+        model_list_ = model_list;
     }
 
-    //--------------------------------------------------------------------------
-    const ModelListFilePtr&
-    FLevelFile::getModelList() const
-    {
-        return m_model_list;
+    const WalkmeshFilePtr& FLevelFile::GetWalkmesh() const{return walkmesh_;}
+
+    const TriggersFilePtr& FLevelFile::GetTriggers() const{return triggers_;}
+
+    void FLevelFile::SetWalkmesh(const WalkmeshFilePtr &walkmesh){
+        walkmesh_ = walkmesh;
     }
 
-    //--------------------------------------------------------------------------
-    void
-    FLevelFile::setModelList(const ModelListFilePtr &model_list)
-    {
-        m_model_list = model_list;
+    void FLevelFile::SetTriggers(const TriggersFilePtr& triggers){
+        triggers_ = triggers;
     }
 
-    //--------------------------------------------------------------------------
-    const WalkmeshFilePtr&
-    FLevelFile::getWalkmesh() const
-    {
-        return m_walkmesh;
-    }
-
-    const TriggersFilePtr& FLevelFile::getTriggers() const
-    {
-        return m_triggers;
-    }
-
-    //--------------------------------------------------------------------------
-    void
-    FLevelFile::setWalkmesh( const WalkmeshFilePtr &walkmesh )
-    {
-        m_walkmesh = walkmesh;
-    }
-
-    void FLevelFile::setTriggers(const TriggersFilePtr& triggers)
-    {
-        m_triggers = triggers;
-    }
-
-    //--------------------------------------------------------------------------
-    String
-    FLevelFile::getBackgroundTextureName( void ) const
-    {
+    String FLevelFile::GetBackgroundTextureName(void) const{
         String base_name;
-        StringUtil::splitFull( getName(), base_name );
+        StringUtil::splitFull(getName(), base_name);
         base_name += SUFFIX_BACKGROUND_TEXTURE;
         return base_name;
     }
 
-    //--------------------------------------------------------------------------
-    String
-    FLevelFile::getBackground2DName( void ) const
-    {
+    String FLevelFile::GetBackground2DName(void) const{
         String base_name;
-        StringUtil::splitFull( getName(), base_name );
+        StringUtil::splitFull(getName(), base_name);
         base_name += SUFFIX_BACKGROUND_2D;
         return base_name;
     }
 
-    //--------------------------------------------------------------------------
 }

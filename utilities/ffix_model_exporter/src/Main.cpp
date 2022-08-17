@@ -96,11 +96,11 @@ main( int argc, char* argv[] )
             if (fields[f].units[i].name != "")
             {
                 Ogre::Entity* entity = NULL;
-                for (int j = 0; j < entitys.size(); ++j)
+                for (int j = 0; j < entities.size(); ++j)
                 {
-                    if (fields[f].units[i].name == entitys[j]->getName())
+                    if (fields[f].units[i].name == entities[j]->getName())
                     {
-                        entity = entitys[j];
+                        entity = entities[j];
                     }
                 }
 
@@ -111,13 +111,13 @@ main( int argc, char* argv[] )
 
                 if (exported_entity != NULL)
                 {
-                    entitys.push_back(exported_entity);
+                    entities.push_back(exported_entity);
                 }
             }
         }
     }
 
-    entitys[ 0 ]->setVisible(true);
+    entities[ 0 ]->setVisible(true);
 */
 
 
@@ -128,8 +128,8 @@ main( int argc, char* argv[] )
     Ogre::Entity* exported_entity = model.GetModel( models[ 0 ] );
     if( exported_entity != NULL )
     {
-        entitys.push_back( exported_entity );
-        entitys[ 0 ]->setVisible( true );
+        entities.push_back( exported_entity );
+        entities[ 0 ]->setVisible( true );
     }
 
 

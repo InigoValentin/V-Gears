@@ -1,185 +1,144 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
-
-Copyright (c) 2013-08-26 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#include "data/QGearsXMLSerializer.h"
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
 #include <OgreException.h>
 #include <OgreLogManager.h>
 #include <OgreStringConverter.h>
+#include "data/QGearsXMLSerializer.h"
 
-namespace QGears
-{
-    //--------------------------------------------------------------------------
-    XMLSerializer::XMLSerializer()
-    {
+namespace QGears{
+    XMLSerializer::XMLSerializer(){}
+
+    XMLSerializer::~XMLSerializer(){}
+
+    void XMLSerializer::Parse(Ogre::DataStreamPtr &stream, TiXmlDocument &dest){
+        dest.Parse(stream->getAsString().c_str());
     }
 
-    //--------------------------------------------------------------------------
-    XMLSerializer::~XMLSerializer()
-    {
+    const String* XMLSerializer::ReadAttribute(
+      TiXmlNode &node, const String &attribute
+    ){
+        assertElement(node);
+        return node.ToElement()->Attribute(attribute);
     }
 
-    //--------------------------------------------------------------------------
-    void
-    XMLSerializer::parse( Ogre::DataStreamPtr &stream, TiXmlDocument &pDest )
-    {
-        pDest.Parse( stream->getAsString().c_str() );
-    }
-
-    //--------------------------------------------------------------------------
-    const String*
-    XMLSerializer::readAttribute( TiXmlNode &node, const String &attribute )
-    {
-        assertElement( node );
-        return node.ToElement()->Attribute( attribute );
-    }
-
-    //--------------------------------------------------------------------------
-    bool
-    XMLSerializer::readAttribute( TiXmlNode &node, const String &attribute, bool &pDest, const bool &pDefault)
-    {
-        const String *value( readAttribute( node, attribute ) );
-        if( value == nullptr )
-        {
-            pDest = pDefault;
+    bool XMLSerializer::ReadAttribute(
+      TiXmlNode &node, const String &attribute, bool &dest, const bool &def
+    ){
+        const String *value(ReadAttribute(node, attribute));
+        if (value == nullptr){
+            dest = def;
             return false;
         }
-        pDest = Ogre::StringConverter::parseBool( *value );
+        dest = Ogre::StringConverter::parseBool(*value);
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    bool
-    XMLSerializer::readAttribute( TiXmlNode &node, const String &attribute, int &pDest, const int &pDefault)
-    {
-        const String *value( readAttribute( node, attribute ) );
-        if( value == nullptr )
-        {
-            pDest = pDefault;
+    bool XMLSerializer::ReadAttribute(
+      TiXmlNode &node, const String &attribute, int &dest, const int &def
+    ){
+        const String *value(ReadAttribute(node, attribute));
+        if (value == nullptr){
+            dest = def;
             return false;
         }
-        pDest = Ogre::StringConverter::parseInt( *value );
+        dest = Ogre::StringConverter::parseInt(*value);
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    bool
-    XMLSerializer::readAttribute( TiXmlNode &node, const String &attribute
-                                , String &pDest, const String &pDefault )
-    {
-        const String *value( readAttribute( node, attribute ) );
-        if( value == nullptr )
-        {
-            pDest = pDefault;
+    bool XMLSerializer::ReadAttribute(TiXmlNode &node, const String &attribute
+                                , String &dest, const String &def){
+        const String *value(ReadAttribute(node, attribute));
+        if (value == nullptr){
+            dest = def;
             return false;
         }
-        pDest = *value;
+        dest = *value;
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    bool
-    XMLSerializer::readAttribute(TiXmlNode &node, const String &attribute, Ogre::Real &pDest, const Ogre::Real &pDefault)
-    {
-        const String *value( readAttribute( node, attribute ) );
-        if( value == nullptr )
-        {
-            pDest = pDefault;
+    bool XMLSerializer::ReadAttribute(
+      TiXmlNode &node, const String &attribute, Ogre::Real &dest,
+      const Ogre::Real &def
+    ){
+        const String *value(ReadAttribute(node, attribute));
+        if (value == nullptr){
+            dest = def;
             return false;
         }
-        pDest = Ogre::StringConverter::parseReal( *value );
+        dest = Ogre::StringConverter::parseReal(*value);
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    bool
-    XMLSerializer::readAttribute(TiXmlNode &node, const String &attribute, Ogre::Vector2 &pDest, const Ogre::Vector2 &pDefault)
-    {
-        const String *value( readAttribute( node, attribute ) );
-        if( value == nullptr )
-        {
-            pDest = pDefault;
+    bool XMLSerializer::ReadAttribute(
+      TiXmlNode &node, const String &attribute, Ogre::Vector2 &dest,
+      const Ogre::Vector2 &def
+    ){
+        const String *value(ReadAttribute(node, attribute));
+        if (value == nullptr){
+            dest = def;
             return false;
         }
-        pDest = Ogre::StringConverter::parseVector2( *value );
+        dest = Ogre::StringConverter::parseVector2(*value);
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    bool
-    XMLSerializer::readAttribute(TiXmlNode &node, const String &attribute, Ogre::Vector3 &pDest, const Ogre::Vector3 &pDefault)
-    {
-        const String *value( readAttribute( node, attribute ) );
-        if( value == nullptr )
-        {
-            pDest = pDefault;
+    bool XMLSerializer::ReadAttribute(
+      TiXmlNode &node, const String &attribute, Ogre::Vector3 &dest,
+      const Ogre::Vector3 &def
+    ){
+        const String *value(ReadAttribute(node, attribute));
+        if (value == nullptr){
+            dest = def;
             return false;
         }
-        pDest = Ogre::StringConverter::parseVector3( *value );
+        dest = Ogre::StringConverter::parseVector3(*value);
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    bool
-    XMLSerializer::readAttribute(TiXmlNode &node, const String &attribute, Ogre::Vector4 &pDest, const Ogre::Vector4 &pDefault)
-    {
-        const String *value( readAttribute( node, attribute ) );
-        if( value == nullptr )
-        {
-            pDest = pDefault;
+    bool XMLSerializer::ReadAttribute(
+      TiXmlNode &node, const String &attribute, Ogre::Vector4 &dest,
+      const Ogre::Vector4 &def
+    ){
+        const String *value(ReadAttribute(node, attribute));
+        if (value == nullptr){
+            dest = def;
             return false;
         }
-        pDest = Ogre::StringConverter::parseVector4( *value );
+        dest = Ogre::StringConverter::parseVector4(*value);
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    bool
-    XMLSerializer::readAttribute(TiXmlNode &node, const String &attribute, Ogre::Quaternion &pDest, const Ogre::Quaternion &pDefault)
-    {
-        const String *value( readAttribute( node, attribute ) );
-        if( value == nullptr )
-        {
-            pDest = pDefault;
+    bool XMLSerializer::ReadAttribute(
+      TiXmlNode &node, const String &attribute, Ogre::Quaternion &dest,
+      const Ogre::Quaternion &def
+    ){
+        const String *value(ReadAttribute(node, attribute));
+        if (value == nullptr){
+            dest = def;
             return false;
         }
-        pDest = Ogre::StringConverter::parseQuaternion( *value );
+        dest = Ogre::StringConverter::parseQuaternion(*value);
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    TiXmlNode*
-    XMLSerializer::findChildNode( TiXmlNode &node, const String &tag )
-    {
-        TiXmlNode* child( node.FirstChild() );
-        while( child != nullptr && child->ValueStr() != tag )
-        {
+    TiXmlNode* XMLSerializer::FindChildNode(TiXmlNode &node, const String &tag){
+        TiXmlNode* child(node.FirstChild());
+        while (child != nullptr && child->ValueStr() != tag)
             child = child->NextSibling();
-        }
         return child;
     }
 
-    //--------------------------------------------------------------------------
 }

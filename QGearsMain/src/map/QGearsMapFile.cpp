@@ -1,142 +1,80 @@
 /*
------------------------------------------------------------------------------
-Copyright (c) 27.10.2013 Tobias Peters <tobias.peters@kreativeffekt.at>
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-This file is part of Q-Gears
-
-Q-Gears is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 2.0 (GPLv2) of the License.
-
-Q-Gears is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
------------------------------------------------------------------------------
-*/
 #include "map/QGearsMapFile.h"
-
 #include "map/QGearsMapFileXMLSerializer.h"
 
-namespace QGears
-{
-    //--------------------------------------------------------------------------
-    const String    MapFile::RESOURCE_TYPE( "QGearsMapFile" );
-    
-    //--------------------------------------------------------------------------
-    MapFile::MapFile( Ogre::ResourceManager *creator
-                      ,const String &name, Ogre::ResourceHandle handle
-                      ,const String &group, bool isManual
-                      ,Ogre::ManualResourceLoader *loader ) :
-        Resource( creator, name, handle, group, isManual, loader )
-    {
-    }
-    
-    //--------------------------------------------------------------------------
-    MapFile::~MapFile()
-    {
-        unload();
-    }
+namespace QGears{
 
-    //--------------------------------------------------------------------------
-    void
-    MapFile::loadImpl()
-    {
+    const String MapFile::RESOURCE_TYPE("QGearsMapFile");
+
+    MapFile::MapFile(
+      Ogre::ResourceManager *creator, const String &name,
+      Ogre::ResourceHandle handle, const String &group, bool is_manual,
+      Ogre::ManualResourceLoader *loader
+    ) : Resource(creator, name, handle, group, is_manual, loader){}
+
+    MapFile::~MapFile(){unload();}
+
+    void MapFile::loadImpl(){
         MapFileXMLSerializer serializer;
-        Ogre::DataStreamPtr stream( openResource() );
-        serializer.importMapFile( stream, this );
-    }
-    
-    //--------------------------------------------------------------------------
-    void
-    MapFile::unloadImpl()
-    {
-        m_script_name.clear();
-        m_background2d_name.clear();
-        m_walkmesh_name.clear();
-        m_forward_direction = 0;
-    }
-    
-    //--------------------------------------------------------------------------
-    size_t
-    MapFile::calculateSize() const
-    {
-        return m_script_name.size()
-             + m_background2d_name.size()
-             + m_walkmesh_name.size()
-             + sizeof( m_forward_direction );
-    }
-    
-    //--------------------------------------------------------------------------
-    const String&
-    MapFile::getScriptName() const
-    {
-        return m_script_name;
+        Ogre::DataStreamPtr stream(openResource());
+        serializer.ImportMapFile(stream, this);
     }
 
-    //--------------------------------------------------------------------------
-    const String&
-    MapFile::getBackground2dName() const
-    {
-        return m_background2d_name;
+    void MapFile::unloadImpl(){
+        script_name_.clear();
+        background_2d_name.clear();
+        walkmesh_name_.clear();
+        forward_direction_ = 0;
     }
 
-    //--------------------------------------------------------------------------
-    const String&
-    MapFile::getWalkmeshName() const
-    {
-        return m_walkmesh_name;
+    size_t MapFile::calculateSize() const{
+        return
+          script_name_.size() + background_2d_name.size()
+          + walkmesh_name_.size() + sizeof(forward_direction_);
     }
 
-    //--------------------------------------------------------------------------
-    const Ogre::Real&
-    MapFile::getForwardDirection() const
-    {
-        return m_forward_direction;
+    const String& MapFile::GetScriptName() const{return script_name_;}
+
+    const String& MapFile::GetBackground2dName() const{
+        return background_2d_name;
     }
 
-    //--------------------------------------------------------------------------
-    MapFile::PointList&
-    MapFile::getPoints()
-    {
-        return m_points;
+    const String& MapFile::GetWalkmeshName() const{return walkmesh_name_;}
+
+    const Ogre::Real& MapFile::GetForwardDirection() const{
+        return forward_direction_;
+    }
+    MapFile::PointList& MapFile::GetPoints(){return points_;}
+
+    MapFile::TriggerList& MapFile::GetTriggers(){return triggers_;}
+
+    void MapFile::SetScriptName(const String &script_name){
+        script_name_ = script_name;
+    }
+    void MapFile::SetBackground2dName(const String &background2d_name){
+        background_2d_name = background2d_name;
     }
 
-    //--------------------------------------------------------------------------
-    MapFile::TriggerList&
-    MapFile::getTriggers()
-    {
-        return m_triggers;
+    void MapFile::SetWalkmeshName(const String &walkmesh_name){
+        walkmesh_name_ = walkmesh_name;
     }
 
-    //--------------------------------------------------------------------------
-    void
-    MapFile::setScriptName( const String &script_name )
-    {
-        m_script_name = script_name;
+    void MapFile::SetForwardDirection(const Ogre::Real &forward_direction){
+        forward_direction_ = forward_direction;
     }
-
-    //--------------------------------------------------------------------------
-    void
-    MapFile::setBackground2dName( const String &background2d_name )
-    {
-        m_background2d_name = background2d_name;
-    }
-
-    //--------------------------------------------------------------------------
-    void
-    MapFile::setWalkmeshName( const String &walkmesh_name )
-    {
-        m_walkmesh_name = walkmesh_name;
-    }
-
-    //--------------------------------------------------------------------------
-    void
-    MapFile::setForwardDirection( const Ogre::Real &forward_direction )
-    {
-        m_forward_direction = forward_direction;
-    }
-
-    //--------------------------------------------------------------------------
 }
 

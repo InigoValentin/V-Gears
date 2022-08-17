@@ -1,173 +1,88 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
-
-Copyright (c) 2013-08-26 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#include "map/QGearsBackground2DFile.h"
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
 #include <OgreLogManager.h>
 #include <OgreResourceGroupManager.h>
-
+#include "map/QGearsBackground2DFile.h"
 #include "map/QGearsBackground2DFileXMLSerializer.h"
 
-namespace QGears
-{
-    //---------------------------------------------------------------------
-    const String    Background2DFile::RESOURCE_TYPE( "QGearsBackground2DFile" );
+namespace QGears{
 
-    //---------------------------------------------------------------------
-    Background2DFile::Background2DFile( Ogre::ResourceManager *creator
-                 ,const String &name, Ogre::ResourceHandle handle
-                 ,const String &group, bool isManual
-                 ,Ogre::ManualResourceLoader *loader ) :
-        Resource( creator, name, handle, group, isManual, loader )
-    {
-    }
+    const String Background2DFile::RESOURCE_TYPE("QGearsBackground2DFile");
 
-    //---------------------------------------------------------------------
-    Background2DFile::~Background2DFile()
-    {
-        unload();
-    }
 
-    //---------------------------------------------------------------------
-    void
-    Background2DFile::loadImpl()
-    {
+    Background2DFile::Background2DFile(
+      Ogre::ResourceManager *creator, const String &name,
+      Ogre::ResourceHandle handle, const String &group, bool is_manual,
+      Ogre::ManualResourceLoader *loader
+    ) : Resource(creator, name, handle, group, is_manual, loader){}
+
+    Background2DFile::~Background2DFile(){unload();}
+
+    void Background2DFile::loadImpl(){
         Background2DFileXMLSerializer serializer;
-        Ogre::DataStreamPtr stream( openResource() );
-        serializer.importBackground2DFile( stream, this );
+        Ogre::DataStreamPtr stream(openResource());
+        serializer.ImportBackground2DFile(stream, this);
     }
 
-    //---------------------------------------------------------------------
-    void
-    Background2DFile::unloadImpl()
-    {
-        m_texture_name.clear();
-        //range_ = 0; // IVV
-        m_position = Ogre::Vector3::ZERO;
-        m_orientation = Ogre::Quaternion::IDENTITY;
-        m_fov = 0;
-        m_tiles.clear();
+    void Background2DFile::unloadImpl(){
+        texture_name_.clear();
+        // GCC error:
+        // error: no match for ‘operator=’ (operand types are ‘Ogre::Vector4’
+        // {aka ‘Ogre::Vector<4, float>’} and ‘int’)
+        //range_ = 0;
+        position_ = Ogre::Vector3::ZERO;
+        orientation_ = Ogre::Quaternion::IDENTITY;
+        fov_ = 0;
+        tiles_.clear();
     }
 
-    //---------------------------------------------------------------------
-    size_t
-    Background2DFile::calculateSize() const
-    {
-        return 0;
+    size_t Background2DFile::calculateSize() const{return 0;}
+
+    void Background2DFile::SetTextureName(const String &texture_name){
+        texture_name_ = texture_name;
     }
 
-    //---------------------------------------------------------------------
-    void
-    Background2DFile::setTextureName( const String &texture_name )
-    {
-        m_texture_name = texture_name;
+    String Background2DFile::GetTextureName() const{ return texture_name_;}
+
+    void Background2DFile::SetClip(const Ogre::Vector2 &clip){clip_ = clip;}
+
+    Ogre::Vector2 Background2DFile::GetClip() const{return clip_;}
+
+    void Background2DFile::SetRange(const Ogre::Vector4 &range){range_ = range;}
+
+    Ogre::Vector4 Background2DFile::GetRange() const{return range_;}
+
+    void Background2DFile::SetPosition(const Ogre::Vector3 &position){
+        position_ = position;
     }
 
-    //---------------------------------------------------------------------
-    String
-    Background2DFile::getTextureName() const
-    {
-        return m_texture_name;
+    Ogre::Vector3 Background2DFile::GetPosition() const{return position_;}
+
+    void Background2DFile::SetOrientation(const Ogre::Quaternion &orientation){
+        orientation_ = orientation;
     }
 
-    //---------------------------------------------------------------------
-    void
-    Background2DFile::setClip( const Ogre::Vector2 &clip )
-    {
-        m_clip = clip;
+    Ogre::Quaternion Background2DFile::GetOrientation() const{
+        return orientation_;
     }
 
-    //---------------------------------------------------------------------
-    Ogre::Vector2
-    Background2DFile::getClip() const
-    {
-        return m_clip;
-    }
+    void Background2DFile::SetFov(const Ogre::Radian &fov){fov_ = fov;}
 
-    //---------------------------------------------------------------------
-    void
-    Background2DFile::setRange( const Ogre::Vector4 &range )
-    {
-        range_ = range;
-    }
+    Ogre::Radian Background2DFile::GetFov() const{return fov_;}
 
-    //---------------------------------------------------------------------
-    Ogre::Vector4
-    Background2DFile::getRange() const
-    {
-        return range_;
-    }
+    Background2DFile::TileList& Background2DFile::GetTiles(){return tiles_;}
 
-    //---------------------------------------------------------------------
-    void
-    Background2DFile::setPosition( const Ogre::Vector3 &position )
-    {
-        m_position = position;
-    }
-
-    //---------------------------------------------------------------------
-    Ogre::Vector3
-    Background2DFile::getPosition() const
-    {
-        return m_position;
-    }
-
-    //---------------------------------------------------------------------
-    void
-    Background2DFile::setOrientation( const Ogre::Quaternion &orientation )
-    {
-        m_orientation = orientation;
-    }
-
-    //---------------------------------------------------------------------
-    Ogre::Quaternion
-    Background2DFile::getOrientation() const
-    {
-        return m_orientation;
-    }
-
-    //---------------------------------------------------------------------
-    void
-    Background2DFile::setFov( const Ogre::Radian &fov )
-    {
-        m_fov = fov;
-    }
-
-    //---------------------------------------------------------------------
-    Ogre::Radian
-    Background2DFile::getFov() const
-    {
-        return m_fov;
-    }
-
-    //---------------------------------------------------------------------
-    Background2DFile::TileList&
-    Background2DFile::getTiles( void )
-    {
-        return m_tiles;
-    }
-
-    //---------------------------------------------------------------------
 }

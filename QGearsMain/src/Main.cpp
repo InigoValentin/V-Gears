@@ -32,7 +32,7 @@
 #include "core/Console.h"
 #include "core/DebugDraw.h"
 #include "core/EntityManager.h"
-#include "core/GameFrameListner.h"
+#include "../include/core/GameFrameListener.h"
 #include "core/InputManager.h"
 #include "core/Logger.h"
 #include "core/ScriptManager.h"

@@ -1,107 +1,243 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-09-22 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsLGPArchive_H__
-#define __QGearsLGPArchive_H__
+#pragma once
 
 #include <OgreArchive.h>
-
 #include "common/TypeDefine.h"
 
-namespace QGears
-{
-    class LGPArchive : public Ogre::Archive
-    {
+namespace QGears{
+
+    /**
+     * Handles LZS compressed archives.
+     */
+    class LGPArchive : public Ogre::Archive{
+
         public:
-            LGPArchive( const String &name, const String &archType );
+
+            /**
+             * Constructor.
+             *
+             * @param name[in] Name for the archive.
+             * @param arch_type[in] Archive type code.
+             */
+            LGPArchive(const String &name, const String &arch_type);
+
+            /**
+             * Destructor.
+             */
             virtual ~LGPArchive();
 
-            /// @copydoc Ogre::Archive::isCaseSensitive
-            bool isCaseSensitive(void) const { return true; }
+            /**
+             * Checks whether this archive is case sensitive.
+             *
+             * @return Always true.
+             */
+            bool isCaseSensitive() const{return true;}
 
-            /// @copydoc Ogre::Archive::load
+            /**
+             * Loads the archive.
+             */
             void load();
 
-            /// @copydoc Ogre::Archive::unload
+            /**
+             * Unloads the archive.
+             */
             void unload();
 
-            /// @copydoc Ogre::Archive::open
-            Ogre::DataStreamPtr open(const String& filename, bool readOnly = true) const;
+            /**
+             * Opens a stream on a LGP compressed file.
+             *
+             * @param filename[in] Path to open the stream on.
+             * @param readOnly[in] TRue to open the stream in read-only mode,
+             * false to allow writting.
+             */
+            Ogre::DataStreamPtr open(
+              const String& filename, bool readOnly = true
+            ) const;
 
-            /// @copydoc Archive::create
+            /**
+             * Creates a new file (or overwrite one already there).
+             *
+             * If the archive is read-only then this method will fail.
+             *
+             * @param filename[in] Path to the file.
+             */
             Ogre::DataStreamPtr create(const String& filename) const;
 
-            /// @copydoc Archive::remove
+            /**
+             * Deletes a named file.
+             *
+             * Not possible on read-only archives
+             *
+             * @param filename[in] Path to the file.
+             */
             void remove(const String& filename) const;
 
-            /// @copydoc Archive::list
-            Ogre::StringVectorPtr list(bool recursive = true, bool dirs = false) const;
+            /**
+             * Lists all file names in the archive.
+             *
+             * @param rercursive[in] Whether all paths of the archive are
+             * to be searched (if the archive has a concept of that).
+             * @param dirs[in] True to list only directories, false to list
+             * only files.
+             * @return A list of filenames matching the criteria, all fully
+             * qualified.
+             */
+            Ogre::StringVectorPtr list(
+              bool recursive = true, bool dirs = false
+            ) const;
 
-            /// @copydoc Archive::listFileInfo
-            Ogre::FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false) const;
+            /**
+             * Lists all files in the archive with accompanying information.
+             *
+             * @param rercursive[in] Whether all paths of the archive are
+             * to be searched (if the archive has a concept of that).
+             * @param dirs[in] True to list only directories, false to list
+             * only files.
+             * @return A list of structures detailing quite a lot of
+             * information about all the files in the archive.
+             */
+            Ogre::FileInfoListPtr listFileInfo(
+              bool recursive = true, bool dirs = false
+            ) const;
 
-            /// @copydoc Archive::find
-            Ogre::StringVectorPtr find(const String& pattern, bool recursive = true,
-                bool dirs = false) const;
+            /**
+             * Finds all file or directory names matching a given pattern in the
+             * archive.
+             *
+             * @param pattern[in] The pattern to search for; wildcards (*) are
+             * allowed
+             * @param recursive[in ]Whether all paths of the archive are
+             * searched (if the archive has a concept of that).
+             * @param dirs[in] True to list only directories, false to list
+             * only files.
+             * @return A list of filenames matching the criteria, all fully
+             * qualified.
+             */
+            Ogre::StringVectorPtr find(
+              const String& pattern, bool recursive = true, bool dirs = false
+            ) const;
 
-            /// @copydoc Archive::findFileInfo
-            Ogre::FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
-                bool dirs = false) const;
+            /**
+             * Finds all files or directories matching a given pattern in this
+             * archive and get some detailed information about them.
+             *
+             * @param pattern[in] The pattern to search for; wildcards (*) are
+             * allowed
+             * @param recursive[in ]Whether all paths of the archive are
+             * searched (if the archive has a concept of that).
+             * @param dirs[in] True to list only directories, false to list
+             * only files.
+             * @return A list of file information structures for all files
+             * matching the criteria.
+             */
+            Ogre::FileInfoListPtr findFileInfo(
+              const String& pattern, bool recursive = true, bool dirs = false
+            ) const;
 
-            /// @copydoc Archive::exists
+            /**
+             * checks if the named file exists.
+             *
+             * @param filename[in] Fully qualified filename.
+             * @return True if FILENAME exists in the archive, false otherwise.
+             */
             bool exists(const String& filename) const;
 
-            /// @copydoc Archive::getModifiedTime
+            /**
+             * Retrieve the modification time of a given file.
+             *
+             * @param filename[in] Fully qualified filename.
+             * @return Last-modified timestamp.
+             */
             time_t getModifiedTime(const String& filename) const;
 
+            /**
+             * A file in a LGP archive.
+             */
+            struct FileEntry{
 
-            struct FileEntry
-            {
+                /**
+                 * The file name.
+                 */
                 String file_name;
-                uint32 fileoffset_;
+
+                /**
+                 * The file offset from the beginning of the archive.
+                 */
+                uint32 file_offset;
+
+                /**
+                 * Unknown data.
+                 */
                 uint8  unknown1;
+
+                /**
+                 * Unknown data.
+                 */
                 uint16 unknown2;
 
-                String datafile_name_;
+                /**
+                 * NAme of the data file
+                 */
+                String datafile_name;
+
+                /**
+                 * Size of the data, in bytes.
+                 */
                 uint32 data_size;
 
-                uint32 dataoffset_;
+                /**
+                 * Data offset.
+                 */
+                uint32 data_offset;
             };
 
             typedef std::vector<FileEntry> FileList;
 
-            virtual FileList& getFiles( void );
+            /**
+             * Retrieves the files in the archive.
+             *
+             * @return The list of files.
+             */
+            virtual FileList& GetFiles();
 
         protected:
-            void load( Ogre::DataStream* lgp );
+
+            /**
+             * Loads a LGP archive.
+             *
+             * @param lgp[in] The contents of the archive.
+             */
+            void Load(Ogre::DataStream* lgp);
 
         private:
-            FileList            m_files;
-            Ogre::DataStreamPtr m_lgp_file;
-            Ogre::FileInfoList  m_file_infos;
+
+            /**
+             * List of file sin the archive.
+             */
+            FileList files_;
+
+            /**
+             * The LGP archive file.
+             */
+            Ogre::DataStreamPtr lgp_file_;
+
+            /**
+             * List of information blocks about about the files in the LGP.
+             */
+            Ogre::FileInfoList file_infos_;
     };
 }
-
-#endif // __QGearsLGPArchive_H__

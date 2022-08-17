@@ -1,109 +1,270 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-10 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsBackgroundFileSerializer_H__
-#define __QGearsBackgroundFileSerializer_H__
+#pragma once
 
 #include "common/TypeDefine.h"
-
 #include "data/QGearsBackgroundFile.h"
 #include "data/QGearsSerializer.h"
 
-namespace QGears
-{
-    class BackgroundFileSerializer : public Serializer
-    {
-    public:
-                        BackgroundFileSerializer();
-        virtual        ~BackgroundFileSerializer();
+namespace QGears{
 
-        void    importBackgroundFile( Ogre::DataStreamPtr &stream, BackgroundFile *pDest );
+    /**
+     * Handles the serialization of background files.
+     */
+    class BackgroundFileSerializer : public Serializer{
 
-        enum {
-            BIT_MASK_RED    = 0xF800
-           ,BIT_MASK_GREEN  = 0x07C0
-           ,BIT_MASK_BLUE   = 0x001F
-           ,BIT_SIZE        = 0x001F
-           ,BIT_MASK_RGB    = BIT_MASK_BLUE | BIT_MASK_GREEN | BIT_MASK_RED
-           ,SPRITE_DST_MAX      = 1024
-        };
+        public:
 
-        struct Header
-        {
-            uint16 unused;
-            uint16 sort_sprites_by_palette;
-        };
+            /**
+             * Constructor.
+             */
+            BackgroundFileSerializer();
 
-        typedef BackgroundFile::Layer       Layer;
-        typedef BackgroundFile::SpriteData  SpriteData;
-        typedef BackgroundFile::SpriteList  SpriteList;
-        typedef BackgroundFile::Page        Page;
-        typedef BackgroundFile::Color       Color;
+            /**
+             * Destructor.
+             */
+            virtual ~BackgroundFileSerializer();
 
-    protected:
-        virtual void 	readFileHeader( Ogre::DataStreamPtr &stream );
-        virtual void    readSectionHeader( Ogre::DataStreamPtr &stream, const String &section_name );
+            /**
+             * Imports a background file.
+             *
+             * @param stream[in] The contents of the background file.
+             * @param dest[out] The background file.
+             */
+            void ImportBackgroundFile(
+              Ogre::DataStreamPtr &stream, BackgroundFile *dest
+          );
 
-        virtual void    readPallete( Ogre::DataStreamPtr &stream, BackgroundFile *pDest );
-        virtual void    readBackground( Ogre::DataStreamPtr &stream, BackgroundFile *pDest );
-        virtual void    readTexture( Ogre::DataStreamPtr &stream, BackgroundFile *pDest );
-        virtual void    readEnd( Ogre::DataStreamPtr &stream );
+            enum {
 
-        virtual void    readLayer( Ogre::DataStreamPtr &stream, Layer *pDest, size_t layer_index  );
+                /**
+                 * Bitmask for red colour.
+                 */
+                BIT_MASK_RED = 0xF800,
 
-        virtual void    readObject( Ogre::DataStreamPtr &stream, SpriteData &pDest  );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, Color &pDest  );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, Page &pDest  );
-        using Serializer::readObject;
+                /**
+                 * Bitmask for green colour.
+                 */
+                BIT_MASK_GREEN = 0x07C0,
 
-        template<typename ValueType> void
-        readVector( Ogre::DataStreamPtr &stream, std::vector<ValueType> &pDest, size_t count )
-        {
-            pDest.clear();
-            pDest.reserve( count );
-            for( size_t i( count ); i--; )
-            {
-                ValueType in_tmp;
-                readObject( stream, in_tmp );
-                pDest.push_back( in_tmp );
+                /**
+                 * Bitmask for blue colour.
+                 */
+                BIT_MASK_BLUE = 0x001F,
+
+                /**
+                 * @todo Understand and document.
+                 */
+                BIT_SIZE = 0x001F,
+
+                /**
+                 * Bitmask for RGB colour.
+                 */
+                BIT_MASK_RGB = BIT_MASK_BLUE | BIT_MASK_GREEN | BIT_MASK_RED,
+
+                /**
+                 * @todo Understand and document.
+                 */
+                SPRITE_DST_MAX = 1024
+            };
+
+            /**
+             * A background file header.
+             */
+            struct Header{
+
+                /**
+                 * Unused data.
+                 */
+                uint16 unused;
+
+                /**
+                 * @todo Understand and document.
+                 */
+                uint16 sort_sprites_by_palette;
+            };
+
+            typedef BackgroundFile::Layer Layer;
+
+            typedef BackgroundFile::SpriteData SpriteData;
+
+            typedef BackgroundFile::SpriteList SpriteList;
+
+            typedef BackgroundFile::Page Page;
+
+            typedef BackgroundFile::Color Color;
+
+        protected:
+
+            /**
+             * Reads a background file header.
+             *
+             * @param stream[in] The contents of the header.
+             */
+            virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
+
+            /**
+             * Reads a section of a background file header.
+             *
+             * @param stream[in] The contents of the header.
+             * @param section_name[in] The name of the section to read.
+             */
+            virtual void ReadSectionHeader(
+              Ogre::DataStreamPtr &stream, const String &section_name
+           );
+
+            /**
+             * Reads pallete data from a background file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The data will be set on this file.
+             */
+            virtual void ReadPallete(
+              Ogre::DataStreamPtr &stream, BackgroundFile *dest
+            );
+
+            /**
+             * Reads background data from a background file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The data will be set on this file.
+             */
+            virtual void ReadBackground(
+              Ogre::DataStreamPtr &stream, BackgroundFile *dest
+            );
+
+            /**
+             * Reads texture data from a background file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The data will be set on this file.
+             */
+            virtual void ReadTexture(
+              Ogre::DataStreamPtr &stream, BackgroundFile *dest
+            );
+
+            /**
+             * @todo Understand and document.
+             *
+             * @param stream[in] Input stream.
+             */
+            virtual void ReadEnd(Ogre::DataStreamPtr &stream);
+
+            /**
+             * Reads a layer from a background file.
+             *
+             * @param stream[in] Input stream.
+             * @param dest[out] The layer info will be loaded here.
+             * @param layer_index[in] Index of the layer to read.
+             */
+            virtual void ReadLayer(
+              Ogre::DataStreamPtr &stream, Layer *dest, size_t layer_index
+            );
+
+            /**
+             * Reads an object as a sprite.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed sprite.
+             */
+            virtual void readObject(
+              Ogre::DataStreamPtr &stream, SpriteData &dest
+            );
+
+            /**
+             * Reads an object as colour data.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed colour data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Color &dest);
+
+            /**
+             * Reads an object as a background page.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed page.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Page &dest);
+
+            using Serializer::readObject;
+
+            /**
+             * Reads a stream as a vector.
+             *
+             * @param stream[in] The input stream.
+             * @param dest[out] The vector data will be loaded here.
+             * @param count[in] Data units to copy.
+             */
+            template<typename ValueType> void ReadVector(
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
+              size_t count
+            ){
+                dest.clear();
+                dest.reserve(count);
+                for(size_t i(count); i --;){
+                    ValueType in_tmp;
+                    readObject(stream, in_tmp);
+                    dest.push_back(in_tmp);
+                }
             }
-        }
 
+            /**
+             * Name of the palette section in the file.
+             */
+            static const String SECTION_NAME_PALETTE;
 
-        static const String     SECTION_NAME_PALETTE;
-        static const String     SECTION_NAME_BACK;
-        static const String     SECTION_NAME_TEXTURE;
-        static const String     TAG_FILE_END;
-        static const Ogre::Real src_big_SCALE;
+            /**
+             * Name of the back section in the file.
+             */
+            static const String SECTION_NAME_BACK;
 
-    private:
-        void removeBuggySprites( SpriteList &sprites );
+            /**
+             * Name of the texture section in the file.
+             */
+            static const String SECTION_NAME_TEXTURE;
 
-        Header  m_header;
-        size_t m_layer_index;
+            /**
+             * End-of-file tag.
+             */
+            static const String TAG_FILE_END;
+
+            /**
+             * @todo Understand and document.
+             */
+            static const Ogre::Real SRC_BIG_SCALE;
+
+        private:
+
+            /**
+             * Removes malformed sprites from the map.
+             *
+             * @param[in|out] The list from which to remove malformed sprites.
+             * @todo Why are they malformed?
+             */
+            void RemoveBuggySprites(SpriteList &sprites);
+
+            /**
+             * The file header.
+             */
+            Header  header_;
+
+            /**
+             * @todo Understand and document.
+             */
+            size_t layer_index_;
     };
 }
-
-#endif // __QGearsBackgroundFileSerializer_H__

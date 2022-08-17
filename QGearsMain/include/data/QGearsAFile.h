@@ -1,73 +1,166 @@
 /*
------------------------------------------------------------------------------
-Copyright (c) 15.1.2013 Tobias Peters <tobias.peters@kreativeffekt.at>
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-This file is part of Q-Gears
-
-Q-Gears is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 2.0 (GPLv2) of the License.
-
-Q-Gears is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsAFile_H__
-#define __QGearsAFile_H__
+#pragma once
 
 #include <OgreSkeleton.h>
 #include <Ogre.h>
-
 #include "common/TypeDefine.h"
 #include "common/QGearsResource.h"
 
-namespace QGears
-{
-    class AFile : public Resource
-    {
-    public:
+namespace QGears{
 
-        AFile( Ogre::ResourceManager *creator, const String &name
-              ,Ogre::ResourceHandle handle, const String &group
-              ,bool isManual = false, Ogre::ManualResourceLoader *loader = NULL );
+    /**
+     * Handles A files.
+     *
+     * A files are files with skeleton animation data.
+     */
+    class AFile : public Resource{
 
-        virtual ~AFile();
+        public:
 
-        static const Ogre::Real FRAME_DURATION;
-        static const String     RESOURCE_TYPE;
+            /**
+             * Constructor.
+             *
+             * @param creator[in] Pointer to the ResourceManager that is
+             * creating this resource.
+             * @param name[in] The unique name of the resource.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can be
+             * null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper
+             * ManualResourceLoader instance is strongly recommended.
+             */
+            AFile(
+              Ogre::ResourceManager *creator, const String &name,
+              Ogre::ResourceHandle handle, const String &group,
+              bool is_manual = false, Ogre::ManualResourceLoader *loader = NULL
+            );
 
-        void addTo( Ogre::SkeletonPtr skeleton, const String &name ) const;
+            /**
+             * Destructor.
+             */
+            virtual ~AFile();
 
-        typedef std::vector<Ogre::Vector3>  BoneRotationList;
+            /**
+             * Duration of a frame.
+             */
+            static const Ogre::Real FRAME_DURATION;
 
-        struct Frame
-        {
-            Ogre::Vector3       root_rotation;
-            Ogre::Vector3       root_translation;
-            BoneRotationList    bone_rotations;
-        };
+            /**
+             * The type of resource.
+             */
+            static const String RESOURCE_TYPE;
 
-        typedef std::vector<Frame>  FrameList;
-        FrameList&  getFrames() { return m_frames; }
+            /**
+             * Adds an animation to an skeleton.
+             *
+             * @parma skeleton[in|out] Skeleton to add the animation to.
+             * @param name[in] Animation name.
+             */
+            void AddTo(Ogre::SkeletonPtr skeleton, const String &name) const;
 
-        void    setBoneCount( const uint32 bone_count );
+            typedef std::vector<Ogre::Vector3> BoneRotationList;
 
-    protected:
-        virtual void loadImpl() override final;
-        virtual void unloadImpl() override final;
-        size_t calculateSize() const;
+            /**
+             * A frame in an animation.
+             */
+            struct Frame{
 
-        void    setFrameRotation( Ogre::TransformKeyFrame *key_frame
-                                         ,const Ogre::Vector3 &rotation ) const;
+                /**
+                 * The rotation of the whole skeleton in the frame.
+                 */
+                Ogre::Vector3 root_rotation;
 
-    private:
-        uint32      m_bone_count;
-        FrameList   m_frames;
+                /**
+                 * The translation of the whole skeleton in the frame.
+                 */
+                Ogre::Vector3 root_translation;
+
+                /**
+                 * The list of individual bone rotations in the frame.
+                 */
+                BoneRotationList bone_rotations;
+            };
+
+            typedef std::vector<Frame> FrameList;
+
+            /**
+             * Retrieves the list of frames in the file.
+             *
+             * @return The list of frames.
+             */
+            FrameList& GetFrames(){return frames_;}
+
+            /**
+             * Sets the number of bones.
+             *
+             * @param bone_count[in] The number of bones.
+             */
+            void SetBoneCount(const uint32 bone_count);
+
+        protected:
+
+            /**
+             * Loads the file.
+             */
+            virtual void loadImpl() override final;
+
+            /**
+             * Unloads the file.
+             */
+            virtual void unloadImpl() override final;
+
+            /**
+             * Calculates the size of the file.
+             *
+             * @return The size of the file.
+             * @todo Units?
+             */
+            size_t CalculateSize() const;
+
+            /**
+             * Sets the rotation for a frame.
+             *
+             * @param key_frame[in] The frame.
+             * @param rotation[in] The rotation for the frame
+             */
+            void SetFrameRotation(
+              Ogre::TransformKeyFrame *key_frame,
+              const Ogre::Vector3 &rotation
+            ) const;
+
+        private:
+
+            /**
+             * The number of bones.
+             */
+            uint32 bone_count_;
+
+            /**
+             * The list of frames.
+             */
+            FrameList frames_;
     };
 
     typedef Ogre::SharedPtr<AFile> AFilePtr;
 }
 
-#endif // __QGearsAFile_H__

@@ -1,47 +1,79 @@
 /*
------------------------------------------------------------------------------
-Copyright (c) 27.10.2013 Tobias Peters <tobias.peters@kreativeffekt.at>
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-This file is part of Q-Gears
-
-Q-Gears is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 2.0 (GPLv2) of the License.
-
-Q-Gears is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsMapFileManager_H__
-#define __QGearsMapFileManager_H__
+#pragma once
 
 #include <OgreResourceManager.h>
-
 #include "QGearsPrerequisites.h"
-
 #include "QGearsMapFile.h"
 
-namespace QGears
-{
-    class _QGearsExport MapFileManager : public Ogre::ResourceManager, public Ogre::Singleton<MapFileManager>
+namespace QGears{
+
+    /**
+     * A manager for map files.
+     */
+    class _QGearsExport MapFileManager :
+      public Ogre::ResourceManager, public Ogre::Singleton<MapFileManager>
     {
-    public:
-        MapFileManager();
-        virtual ~MapFileManager();
+        public:
         
-        static MapFileManager &getSingleton();
-        static MapFileManager *getSingletonPtr();
-        
-    protected:
-        Ogre::Resource *createImpl( const Ogre::String &name, Ogre::ResourceHandle handle
-                                    , const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader
-                                    , const Ogre::NameValuePairList *createParams );
-        
-    private:
+            /**
+             * Constructor.
+             */
+            MapFileManager();
+
+            /**
+             * Destructor.
+             */
+            virtual ~MapFileManager();
+
+            /**
+             * Retrieves a singleton to the manager.
+             */
+            static MapFileManager& GetSingleton();
+
+            /**
+             * Retrieves a pointer to the manager singleton.
+             */
+            static MapFileManager *GetSingletonPtr();
+
+        protected:
+
+            /**
+             * Loads the manager.
+             *
+             * @param name[in] The unique name of the manager.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can be
+             * null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper
+             * ManualResourceLoader instance is strongly recommended.
+             * @param create_params[in] Unused.
+             */
+            Ogre::Resource *createImpl(
+              const Ogre::String &name, Ogre::ResourceHandle handle,
+              const Ogre::String &group, bool is_manual,
+              Ogre::ManualResourceLoader *loader,
+              const Ogre::NameValuePairList *create_params
+            );
+
     };
 }
-
-#endif // __QGearsMapFileManager_H__
-

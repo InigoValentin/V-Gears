@@ -1,95 +1,191 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-22 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsPaletteFileSerializer_H__
-#define __QGearsPaletteFileSerializer_H__
+#pragma once
 
 #include <OgrePixelFormat.h>
-
 #include "common/TypeDefine.h"
-
 #include "QGearsPaletteFile.h"
 #include "QGearsSerializer.h"
 
-namespace QGears
-{
-    class PaletteFileSerializer : public Serializer
-    {
-    public:
-                        PaletteFileSerializer();
-        virtual        ~PaletteFileSerializer();
+namespace QGears{
 
-        virtual void 	importPaletteFile( Ogre::DataStreamPtr &stream, PaletteFile* pDest );
+    /**
+     * Handles the serialization of colour palette files.
+     */
+    class PaletteFileSerializer : public Serializer{
 
-        enum {
-            BIT_MASK_RED    = 0x001F
-           ,BIT_MASK_GREEN  = 0x03E0
-           ,BIT_MASK_BLUE   = 0x7C00
-           ,BIT_SIZE        = 0x001F
-           ,BIT_MASK_RGB    = BIT_MASK_BLUE | BIT_MASK_GREEN | BIT_MASK_RED
-           ,BIT_MASK_ALPHA  = 0x8000
-        };
+        public:
 
-        struct Header
-        {
-            uint32 file_size;
-            uint16 pal_x;
-            uint16 pal_y;
-            uint16 colors_per_page;
-            uint16 page_count;
-        };
+            /**
+             * Constructor.
+             */
+            PaletteFileSerializer();
 
-        typedef PaletteFile::Color  Color;
-        typedef PaletteFile::Page   Page;
+            /**
+             * Destructor.
+             */
+            virtual ~PaletteFileSerializer();
 
-    protected:
-        virtual void 	readFileHeader( Ogre::DataStreamPtr &stream );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, Color &pDest );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, Page &pDest );
-        using Serializer::readObject;
+            /**
+             * Imports a colour palette file.
+             *
+             * @param stream[in] The contents of the palette file.
+             * @param dest[out] The formed palette file.
+             */
+            virtual void ImportPaletteFile(
+              Ogre::DataStreamPtr &stream, PaletteFile* dest
+            );
 
-        virtual void    convertColour( uint16 &colour ) const;
+            enum {
 
-        static const Ogre::PixelFormat  PIXEL_FORMAT;
+                /**
+                 * Bitmask for red colour.
+                 */
+                BIT_MASK_RED = 0x001F,
 
-        template<typename ValueType> void
-        readVector( Ogre::DataStreamPtr &stream, std::vector<ValueType> &pDest, size_t count )
-        {
-            pDest.clear();
-            pDest.reserve( count );
-            for( size_t i( count ); i--; )
-            {
-                ValueType in_tmp;
-                readObject( stream, in_tmp );
-                pDest.push_back( in_tmp );
+                /**
+                 * Bitmask for green colour.
+                 */
+                BIT_MASK_GREEN = 0x03E0,
+
+                /**
+                 * Bitmask for blie colour.
+                 */
+                BIT_MASK_BLUE = 0x7C00,
+
+                /**
+                 * Bitmask for palette size.
+                 */
+                BIT_SIZE = 0x001F,
+
+                /**
+                 * Bitmask for RGB colour.
+                 */
+                BIT_MASK_RGB = BIT_MASK_BLUE | BIT_MASK_GREEN | BIT_MASK_RED,
+
+                /**
+                 * Bitmask for alpha component.
+                 */
+                BIT_MASK_ALPHA  = 0x8000
+            };
+
+            /**
+             * A colour palette file header.
+             */
+            struct Header{
+
+                /**
+                 * The size of the file.
+                 */
+                uint32 file_size;
+
+                /**
+                 * The X coordinate of the palette.
+                 *
+                 * @todo Units?
+                 */
+                uint16 pal_x;
+
+                /**
+                 * The Y coordinate of the palette.
+                 *
+                 * @todo Units?
+                 */
+                uint16 pal_y;
+
+                /**
+                 * The number of colurs per palette page.
+                 */
+                uint16 colors_per_page;
+
+                /**
+                 * The number of palette pages.
+                 */
+                uint16 page_count;
+            };
+
+            typedef PaletteFile::Color Color;
+
+            typedef PaletteFile::Page Page;
+
+        protected:
+
+            /**
+             * Reads a file header and sets the instance data.
+             *
+             * @param stream[in] The contents of the HRC file.
+             */
+            virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
+
+            /**
+             * Reads an object as a colour.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed colour data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Color &dest);
+
+            /**
+             * Reads an object as a palette page.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed page data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Page &dest);
+
+            using Serializer::readObject;
+
+            /**
+             * Converts a colour.
+             *
+             * @param [in|out] Colour to convert.
+             * @todo What kind of conversion is it doing?
+             */
+            virtual void ConvertColour(uint16 &colour) const;
+
+            /**
+             * A pixel format.
+             */
+            static const Ogre::PixelFormat PIXEL_FORMAT;
+
+            /**
+             * Reads a stream as a vector.
+             *
+             * @param stream[in] The input stream.
+             * @param dest[out] The vector data will be loaded here.
+             * @param count[in] Data units to copy.
+             */
+            template<typename ValueType> void ReadVector(
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
+              size_t count
+            ){
+                dest.clear();
+                dest.reserve(count);
+                for (size_t i(count); i --;){
+                    ValueType in_tmp;
+                    readObject(stream, in_tmp);
+                    dest.push_back(in_tmp);
+                }
             }
-        }
 
-    private:
-        Header  m_header;
+        private:
+
+            /**
+             * The file header.
+             */
+            Header header_;
     };
 }
-
-#endif // __QGearsPaletteFileSerializer_H__

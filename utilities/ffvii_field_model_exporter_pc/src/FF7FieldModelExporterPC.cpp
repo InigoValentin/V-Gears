@@ -20,24 +20,20 @@ namespace QGears
 {
     namespace FF7
     {
-        //----------------------------------------------------------------------
         FieldModelExporterPC::FieldModelExporterPC( int argc, char *argv[] ) :
             Utility( argc, argv )
         {
         }
 
-        //----------------------------------------------------------------------
         FieldModelExporterPC::~FieldModelExporterPC()
         {
         }
 
-        //----------------------------------------------------------------------
         String
         FieldModelExporterPC::getWindowTitle() const
         {
             return "FFVII Field Model Exporter PC";
         }
 
-        //----------------------------------------------------------------------
     }
 }

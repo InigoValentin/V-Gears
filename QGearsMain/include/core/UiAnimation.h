@@ -1,87 +1,292 @@
-#ifndef UI_ANIMATION_H
-#define UI_ANIMATION_H
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include <OgreString.h>
 #include <Ogre.h>
 #include <vector>
 
-
-
 class UiWidget;
 
+/**
+ * A keyframe value.
+ */
+struct UiKeyFrameFloat{
 
-
-struct UiKeyFrameFloat
-{
+    /**
+     * Keyframe time, in seconds.
+     */
     float time;
+
+    /**
+     * Value for the keyframe.
+     */
     float value;
 };
 
+/**
+ * Coordinate keyframe.
+ */
+struct UiKeyFrameVector2{
 
-
-struct UiKeyFrameVector2
-{
+    /**
+     * Keyframe time, in seconds.
+     */
     float time;
+
+    /**
+     * Position for the keyframe.
+     */
     Ogre::Vector2 value;
 };
 
+/**
+ * An UI element animation.
+ */
+class UiAnimation{
 
+    public:
 
-class UiAnimation
-{
-public:
-    UiAnimation( const Ogre::String& name, UiWidget* widget );
-    virtual ~UiAnimation();
+        /**
+         * Constructor.
+         *
+         * @param name[in] Animation name.
+         * @param widget[in] Widget to animate.
+         */
+        UiAnimation(const Ogre::String& name, UiWidget* widget);
 
-    enum State
-    {
-        DEFAULT,
-        ONCE
-    };
+        /**
+         * Destructor.
+         */
+        virtual ~UiAnimation();
 
-    void AddTime( const float time );
+        /**
+         * Animation state.
+         */
+        enum State{
 
-    const Ogre::String& GetName() const;
+            /**
+             * @todo Understand and document.
+             */
+            DEFAULT,
 
-    void SetTime( const float time );
-    float GetTime() const;
-    void SetLength( const float time );
-    float GetLength() const;
-    void AddScaleKeyFrame( const UiKeyFrameVector2& key_frame );
-    void AddXKeyFrame( const UiKeyFrameVector2& key_frame );
-    void AddYKeyFrame( const UiKeyFrameVector2& key_frame );
-    void AddWidthKeyFrame( const UiKeyFrameVector2& key_frame );
-    void AddHeightKeyFrame( const UiKeyFrameVector2& key_frame );
-    void AddRotationKeyFrame( const UiKeyFrameFloat& key_frame );
-    void AddAlphaKeyFrame( const UiKeyFrameFloat& key_frame );
-    void AddScissorKeyFrame( const UiKeyFrameVector2& x1, const UiKeyFrameVector2& y1, const UiKeyFrameVector2& x2, const UiKeyFrameVector2& y2 );
+            /**
+             * Animate only once.
+             */
+            ONCE
+        };
 
-private:
-    UiAnimation();
+        /**
+         * Adds time to the animation and updates it.
+         *
+         * @param time[in] Time to add, in seconds.
+         */
+        void AddTime(const float time);
 
-    float KeyFrameGetValue( std::vector< UiKeyFrameFloat >& data );
-    Ogre::Vector2 KeyFrameGetValue( std::vector< UiKeyFrameVector2 >& data );
+        /**
+         * Retrieves the animation name.
+         *
+         * @return The animation name.
+         */
+        const Ogre::String& GetName() const;
 
-    Ogre::String m_Name;
-    UiWidget*    m_Widget;
+        /**
+         * Sets the time of the animation and updates it.
+         *
+         * @param time[i] The time of the animation.
+         */
+        void SetTime(const float time);
 
-    float        m_Time;
-    float        m_Length;
+        /**
+         * Retrieves the animation current time.
+         *
+         * @return The animation current time.
+         */
+        float GetTime() const;
 
-    std::vector< UiKeyFrameVector2 > m_Scale;
-    std::vector< UiKeyFrameVector2 > m_X;
-    std::vector< UiKeyFrameVector2 > m_Y;
-    std::vector< UiKeyFrameVector2 > m_Width;
-    std::vector< UiKeyFrameVector2 > m_Height;
-    std::vector< UiKeyFrameFloat >   m_Rotation;
-    std::vector< UiKeyFrameFloat >   m_Alpha;
+        /**
+         * Sets the animation length.
+         *
+         * @param time[in] The animation length, in seconds.
+         */
+        void SetLength(const float time);
 
-    std::vector< UiKeyFrameVector2 > m_ScissorXTop;
-    std::vector< UiKeyFrameVector2 > m_ScissorYLeft;
-    std::vector< UiKeyFrameVector2 > m_ScissorXBottom;
-    std::vector< UiKeyFrameVector2 > m_ScissorYRight;
+        /**
+         * Retrieves the animation length.
+         *
+         * @return The animation length, in seconds.
+         */
+        float GetLength() const;
+
+        /**
+         * Adds a scale keyframe to the animation.
+         *
+         * @param key_frame[in] The keyframe to add.
+         */
+        void AddScaleKeyFrame(const UiKeyFrameVector2& key_frame);
+
+        /**
+         * Adds a X position keyframe to the animation.
+         *
+         * @param key_frame[in] The keyframe to add.
+         */
+        void AddXKeyFrame(const UiKeyFrameVector2& key_frame);
+
+        /**
+         * Adds a Y position keyframe to the animation.
+         *
+         * @param key_frame[in] The keyframe to add.
+         */
+        void AddYKeyFrame(const UiKeyFrameVector2& key_frame);
+
+        /**
+         * Adds a width keyframe to the animation.
+         *
+         * @param key_frame[in] The keyframe to add.
+         */
+        void AddWidthKeyFrame(const UiKeyFrameVector2& key_frame);
+
+        /**
+         * Adds a height keyframe to the animation.
+         *
+         * @param key_frame[in] The keyframe to add.
+         */
+        void AddHeightKeyFrame(const UiKeyFrameVector2& key_frame);
+
+        /**
+         * Adds a rotation keyframe to the animation.
+         *
+         * @param key_frame[in] The keyframe to add.
+         */
+        void AddRotationKeyFrame(const UiKeyFrameFloat& key_frame);
+
+        /**
+         * Adds an alpha keyframe to the animation.
+         *
+         * @param key_frame[in] The keyframe to add.
+         */
+        void AddAlphaKeyFrame(const UiKeyFrameFloat& key_frame);
+
+        /**
+         * Adds an scissor keyframe to the animation.
+         *
+         * @param x1[in] @todo Understand and document.
+         * @param y1[in] @todo Understand and document.
+         * @param x2[in] @todo Understand and document.
+         * @param y2[in] @todo Understand and document.
+         * @todo What is an scissor keyframe?.
+         */
+        void AddScissorKeyFrame(
+          const UiKeyFrameVector2& x1, const UiKeyFrameVector2& y1,
+          const UiKeyFrameVector2& x2, const UiKeyFrameVector2& y2
+        );
+
+    private:
+
+        /**
+         * Constructor.
+         */
+        UiAnimation();
+
+        /**
+         * Gets the value from a @{see UiKeyFrameFloat}.
+         *
+         * @return The value of the keyframe.
+         */
+        float KeyFrameGetValue(std::vector<UiKeyFrameFloat>& data);
+
+        /**
+         * Gets the value from a @{see UiKeyFrameVector2}.
+         *
+         * @return The value of the keyframe.
+         */
+        Ogre::Vector2 KeyFrameGetValue(std::vector<UiKeyFrameVector2>& data);
+
+        /**
+         * The UI animation name.
+         */
+        Ogre::String name_;
+
+        /**
+         * The UI widget.
+         */
+        UiWidget* widget_;
+
+        /**
+         * The animation's current time.
+         */
+        float time_;
+
+        /**
+         * The animation length.
+         */
+        float length_;
+
+        /**
+         * List of scale keyframes.
+         */
+        std::vector<UiKeyFrameVector2> scale_;
+
+        /**
+         * List of X position keyframes.
+         */
+        std::vector<UiKeyFrameVector2> x_;
+
+        /**
+         * List of Y position keyframes.
+         */
+        std::vector<UiKeyFrameVector2> y_;
+
+        /**
+         * List of width keyframes.
+         */
+        std::vector<UiKeyFrameVector2> width_;
+
+        /**
+         * List of height keyframes.
+         */
+        std::vector<UiKeyFrameVector2> height_;
+
+        /**
+         * List of rotation keyframes.
+         */
+        std::vector<UiKeyFrameFloat> rotation_;
+
+        /**
+         * List of alpha keyframes.
+         */
+        std::vector<UiKeyFrameFloat> alpha_;
+
+        /**
+         * @todo Understand and document.
+         */
+        std::vector<UiKeyFrameVector2> scissor_x_top_;
+
+        /**
+         * @todo Understand and document.
+         */
+        std::vector<UiKeyFrameVector2> scissor_y_left_;
+
+        /**
+         * @todo Understand and document.
+         */
+        std::vector<UiKeyFrameVector2> scissor_x_bottom_;
+
+        /**
+         * @todo Understand and document.
+         */
+        std::vector<UiKeyFrameVector2> scissor_y_right_;
 };
-
-
-
-#endif // UI_ANIMATION_H

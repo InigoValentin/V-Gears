@@ -1,55 +1,71 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-17 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsHRCSkeletonLoader_H__
-#define __QGearsHRCSkeletonLoader_H__
+#pragma once
 
 #include <OgreResource.h>
-
 #include "common/TypeDefine.h"
 
-namespace QGears
-{
+namespace QGears{
     class HRCFile;
 
-    class HRCSkeletonLoader : public Ogre::ManualResourceLoader
-    {
-    public:
-        explicit HRCSkeletonLoader( HRCFile &hrc_file );
-        virtual ~HRCSkeletonLoader();
+    /**
+     * A loader for skeletons.
+     */
+    class HRCSkeletonLoader : public Ogre::ManualResourceLoader{
 
-        virtual void loadResource( Ogre::Resource *resource );
+        public:
 
-    protected:
-        static const String             ROOT_BONE_NAME;
-        static const Ogre::Quaternion   ROOT_ORIENTATION;
-        static       Ogre::Quaternion   createRootOrientation();
+            /**
+             * Constructor.
+             *
+             * @param hrc_file[in] The HRC file to load from.
+             */
+            explicit HRCSkeletonLoader(HRCFile &hrc_file);
 
-    private:
-        HRCFile  &m_hrc_file;
+            /**
+             * Destructor.
+             */
+            virtual ~HRCSkeletonLoader();
+
+            /**
+             * Loads a resource.
+             *
+             * @param resource[in] The resource to load.
+             */
+            virtual void loadResource( Ogre::Resource *resource );
+
+        protected:
+
+            /**
+             * The name of the root bone.
+             */
+            static const String ROOT_BONE_NAME;
+
+            /**
+             * The root orientation
+             */
+            static const Ogre::Quaternion ROOT_ORIENTATION;
+
+            /**
+             * Creates a base orientation for the skeleton.
+             */
+            static Ogre::Quaternion CreateRootOrientation();
+
+        private:
+
+            HRCFile  &hrc_file_;
     };
 }
-
-#endif // __QGearsHRCSkeletonLoader_H__

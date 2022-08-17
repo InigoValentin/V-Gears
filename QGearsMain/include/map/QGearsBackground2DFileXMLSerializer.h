@@ -1,101 +1,172 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-26 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsBackground2DFileXMLSerializer_H__
-#define __QGearsBackground2DFileXMLSerializer_H__
+#pragma once
 
 #include "common/TypeDefine.h"
 #include "data/QGearsXMLSerializer.h"
-
 #include "QGearsBackground2DFile.h"
 
-namespace QGears
-{
-    class Background2DFileXMLSerializer : public XMLSerializer
-    {
-    public:
-        Background2DFileXMLSerializer();
-        virtual        ~Background2DFileXMLSerializer();
+namespace QGears{
 
-        virtual void    importBackground2DFile( Ogre::DataStreamPtr &stream, Background2DFile *pDest );
+    /**
+     * Handles the serialization of 2D background XML files.
+     */
+    class Background2DFileXMLSerializer : public XMLSerializer{
 
-    protected:
-        virtual void    readHeader( TiXmlNode *node );
-        virtual bool    readAttribute( TiXmlNode &node, const String &attribute, Blending &pDest, const Blending &pDefault );
-        using XMLSerializer::readAttribute;
+        public:
 
-        virtual void    readObject( TiXmlNode &node, Tile &pDest );
-        virtual void    readObject( TiXmlNode &node, Animation &pDest );
-        virtual void    readObject( TiXmlNode &node, KeyFrame &pDest );
+            /**
+             * Constructor.
+             */
+            Background2DFileXMLSerializer();
 
-        static const String BLENDING_ALPHA;
-        static const String BLENDING_ADD;
-        static const String BLENDING_SUBTRACT;
+            /**
+             * Destructor.
+             */
+            virtual  ~Background2DFileXMLSerializer();
 
-        template<typename ValueType> void
-        readVector( TiXmlNode &node, const String &tag, std::vector<ValueType> &pDest )
-        {
-            pDest.clear();
+            /**
+             * Imports a 2D background XML file.
+             *
+             * @param stream[in] The contents of the background file.
+             * @param dest[out] The formed background file.
+             */
+            virtual void ImportBackground2DFile(
+              Ogre::DataStreamPtr &stream, Background2DFile *dest
+            );
 
-            TiXmlNode* child( node.FirstChild() );
-            while( child != NULL )
-            {
-                if( child->Type() == TiXmlNode::TINYXML_ELEMENT && child->ValueStr() == tag )
-                {
-                    ValueType in_tmp;
-                    readObject( *child, in_tmp );
-                    pDest.push_back( in_tmp );
-                }
-                child = child->NextSibling();
-            }
-        }
+        protected:
 
-        template<typename KeyType, typename ValueType> void
-        readMap( TiXmlNode& node, const String& tag, const String& key_attribute, std::map< KeyType, ValueType > &pDest )
-        {
-            pDest.clear();
+            /**
+             * Reads a file header and sets the instance data.
+             *
+             * @param stream[in] The contents of the HRC file.
+             */
+            virtual void ReadHeader(TiXmlNode *node);
 
-            TiXmlNode* child( node.FirstChild() );
-            while( child != NULL )
-            {
-                if( child->Type() == TiXmlNode::TINYXML_ELEMENT && child->ValueStr() == tag )
-                {
-                    KeyType key;
-                    if( readAttribute( *child, key_attribute, key ) )
-                    {
+            /**
+             * Reads an XMl node attribute as tile blending information.
+             *
+             * @param node[in] The XML node.
+             * @param attribute[in] The name of the attribute to read.
+             * @param dest[out] The value of the specified attribute. If the
+             * attribute doesn't exists, the value of def will be set here.
+             * @return True if the attribute was actually read, false if it
+             * didn't exist and the default value was loaded into dest.
+             */
+            virtual bool ReadAttribute(
+              TiXmlNode &node, const String &attribute, Blending &dest,
+              const Blending &def
+            );
+
+            using XMLSerializer::ReadAttribute;
+
+            /**
+             * Reads an XML node as a tile.
+             *
+             * @param node[in] The XML node to read.
+             * @param dest[out] The formed tile data.
+             */
+            virtual void readObject(TiXmlNode &node, Tile &dest);
+
+            /**
+             * Reads an XML node as an animation.
+             *
+             * @param node[in] The XML node to read.
+             * @param dest[out] The formed animation data.
+             */
+            virtual void readObject(TiXmlNode &node, Animation &dest);
+
+            /**
+             * Reads an XML node as a key frame.
+             *
+             * @param node[in] The XML node to read.
+             * @param dest[out] The formed key frame data.
+             */
+            virtual void readObject(TiXmlNode &node, KeyFrame &dest);
+
+            /**
+             * Alpha-type blending key.
+             */
+            static const String BLENDING_ALPHA;
+
+            /**
+             * Add-type blending key.
+             */
+            static const String BLENDING_ADD;
+
+            /**
+             * Substract-type blending key.
+             */
+            static const String BLENDING_SUBTRACT;
+
+            /**
+             * Reads a XML node as a vector.
+             *
+             * @param node[in] The XML node to read.
+             * @param tag[in] XML tag to read.
+             * @param dest[out] The vector data will be loaded here.
+             */
+            template<typename ValueType> void ReadVector(
+              TiXmlNode &node, const String &tag, std::vector<ValueType> &dest
+            ){
+                dest.clear();
+                TiXmlNode* child(node.FirstChild());
+                while (child != NULL){
+                    if (
+                      child->Type() == TiXmlNode::TINYXML_ELEMENT
+                      && child->ValueStr() == tag
+                    ){
                         ValueType in_tmp;
-                        readObject( *child, in_tmp );
-                        pDest[key] = in_tmp;
+                        readObject(*child, in_tmp);
+                        dest.push_back(in_tmp);
                     }
+                    child = child->NextSibling();
                 }
-                child = child->NextSibling();
             }
-        }
 
-    private:
+            /**
+             * Reads a XML node as a map.
+             *
+             * @param node[in] The XML node to read.
+             * @param tag[in] XML tag to read.
+             * @param key_attribute[in] @todo Understand and document.
+             * @param dest[out] The map data will be loaded here.
+             */
+            template<typename KeyType, typename ValueType> void ReadMap(
+              TiXmlNode& node, const String& tag, const String& key_attribute,
+              std::map<KeyType, ValueType> &dest
+            ){
+                dest.clear();
+                TiXmlNode* child(node.FirstChild());
+                while (child != NULL){
+                    if (
+                      child->Type() == TiXmlNode::TINYXML_ELEMENT
+                      && child->ValueStr() == tag
+                    ){
+                        KeyType key;
+                        if (ReadAttribute(*child, key_attribute, key)){
+                            ValueType in_tmp;
+                            readObject(*child, in_tmp);
+                            dest[key] = in_tmp;
+                        }
+                    }
+                    child = child->NextSibling();
+                }
+            }
+
     };
 }
-
-#endif // __QGearsBackground2DFileXMLSerializer_H__

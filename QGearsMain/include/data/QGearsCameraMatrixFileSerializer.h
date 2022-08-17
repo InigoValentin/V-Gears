@@ -1,59 +1,82 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-09-02 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsCameraMatrixFileSerializer_H__
-#define __QGearsCameraMatrixFileSerializer_H__
+#pragma once
 
 #include "common/TypeDefine.h"
-
 #include "QGearsCameraMatrixFile.h"
 #include "QGearsSerializer.h"
 
-namespace QGears
-{
-    class CameraMatrixFileSerializer : public Serializer
-    {
-    public:
-                        CameraMatrixFileSerializer();
-        virtual        ~CameraMatrixFileSerializer();
+namespace QGears{
 
-        enum
-        {
-            CAMERA_MATRIX_ROW_COUNT     = 3
-           ,CAMERA_MATRIX_COL_COUNT     = CAMERA_MATRIX_ROW_COUNT
-           ,CAMERA_MATRIX_ENTRY_COUNT   = CAMERA_MATRIX_ROW_COUNT * CAMERA_MATRIX_COL_COUNT
-           ,TOTAL_DATA_SIZE             = 0x26
-        };
+    /**
+     * Handles the serialization of camera matrix files.
+     */
+    class CameraMatrixFileSerializer : public Serializer{
 
-        virtual void    importCameraMatrixFile( Ogre::DataStreamPtr &stream, CameraMatrixFile* pDest );
+        public:
 
-    protected:
+            /**
+             * Constructor.
+             */
+            CameraMatrixFileSerializer();
 
-    private:
-        // http://en.wikipedia.org/wiki/Angle_of_view
+            /**
+             * Destructor.
+             */
+            virtual ~CameraMatrixFileSerializer();
+
+            enum{
+
+                /**
+                 * Rows in a camera matrix.
+                 *
+                 * Same as {@see CAMERA_MATRIX_COL_COUNT}.
+                 */
+                CAMERA_MATRIX_ROW_COUNT = 3,
+
+                /**
+                 * Columns in a camera matrix.
+                 *
+                 * Same as {@see CAMERA_MATRIX_ROW_COUNT}.
+                 */
+                CAMERA_MATRIX_COL_COUNT = CAMERA_MATRIX_ROW_COUNT,
+
+                /**
+                 * Elements in a camera matrix.
+                 *
+                 * Same as {@see CAMERA_MATRIX_ROW_COUNT} *
+                 * {@see CAMERA_MATRIX_COL_COUNT}.
+                 */
+                CAMERA_MATRIX_ENTRY_COUNT
+                  = CAMERA_MATRIX_ROW_COUNT * CAMERA_MATRIX_COL_COUNT,
+
+                /**
+                 * Total size of a camera matrix.
+                 */
+                TOTAL_DATA_SIZE = 0x26,
+            };
+
+            /**
+             * Imports an camera matrix file.
+             *
+             * @param stream[in] The contents of the file.
+             * @param dest[out] The formad camera matrix file.
+             */
+            virtual void ImportCameraMatrixFile(
+              Ogre::DataStreamPtr &stream, CameraMatrixFile* dest
+            );
     };
 }
-
-#endif // __QGearsCameraMatrixFileSerializer_H__

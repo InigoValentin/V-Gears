@@ -1,55 +1,80 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-24 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsLZSFLevelFileManager_H__
-#define __QGearsLZSFLevelFileManager_H__
+#pragma once
 
 #include <OgreResourceManager.h>
-
 #include "QGearsPrerequisites.h"
-
 #include "QGearsLZSFLevelFile.h"
 
-namespace QGears
-{
-    class _QGearsExport LZSFLevelFileManager : public Ogre::ResourceManager, public Ogre::Singleton<LZSFLevelFileManager>
+namespace QGears{
+
+    /**
+     * A manager for LZS compressed flevel files.
+     */
+    class _QGearsExport LZSFLevelFileManager :
+      public Ogre::ResourceManager, public Ogre::Singleton<LZSFLevelFileManager>
     {
-    public:
-        LZSFLevelFileManager();
-        virtual ~LZSFLevelFileManager();
 
-        static LZSFLevelFileManager& getSingleton();
-        static LZSFLevelFileManager* getSingletonPtr();
+        public:
 
-    protected:
-        Ogre::Resource *createImpl( const Ogre::String &name, Ogre::ResourceHandle handle
-          , const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader
-          , const Ogre::NameValuePairList *createParams );
+            /**
+             * Constructor.
+             */
+            LZSFLevelFileManager();
 
-    private:
+            /**
+             * Destructor.
+             */
+            virtual ~LZSFLevelFileManager();
+
+            /**
+             * Retrieves a singleton to the manager.
+             */
+            static LZSFLevelFileManager& GetSingleton();
+
+            /**
+             * Retrieves a pointer to the manager singleton.
+             */
+            static LZSFLevelFileManager* GetSingletonPtr();
+
+        protected:
+
+            /**
+             * Loads the manager.
+             *
+             * @param name[in] The unique name of the manager.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can be
+             * null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper
+             * ManualResourceLoader instance is strongly recommended.
+             * @param create_params[in] Unused.
+             */
+            Ogre::Resource *createImpl(
+              const Ogre::String &name, Ogre::ResourceHandle handle,
+              const Ogre::String &group, bool is_manual,
+              Ogre::ManualResourceLoader *loader,
+              const Ogre::NameValuePairList *create_params
+            );
+
     };
 }
-
-#endif // __QGearsLZSFLevelFileManager_H__

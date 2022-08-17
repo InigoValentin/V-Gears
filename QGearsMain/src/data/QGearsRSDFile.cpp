@@ -1,225 +1,158 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
-
-Copyright (c) 2013-08-16 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#include "data/QGearsRSDFile.h"
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
 #include <OgreMaterialManager.h>
 #include <OgrePass.h>
 #include <OgreTechnique.h>
-
+#include "data/QGearsRSDFile.h"
 #include "common/QGearsStringUtil.h"
 #include "data/QGearsRSDFileSerializer.h"
 
-namespace QGears
-{
+namespace QGears{
 
-    //---------------------------------------------------------------------
-    const Ogre::String  RSDFile::RESOURCE_TYPE( "QGearsRSDFile" );
+    const Ogre::String  RSDFile::RESOURCE_TYPE("QGearsRSDFile");
 
-    //---------------------------------------------------------------------
-    RSDFile::RSDFile( Ogre::ResourceManager *creator
-                     ,const Ogre::String &name, Ogre::ResourceHandle handle
-                     ,const Ogre::String &group, bool isManual
-                     ,Ogre::ManualResourceLoader *loader ) :
-        Ogre::Resource( creator, name, handle, group, isManual, loader )
-    {
-        createParamDictionary( RESOURCE_TYPE );
-    }
 
-    //---------------------------------------------------------------------
-    RSDFile::~RSDFile()
-    {
-        unload();
-    }
+    RSDFile::RSDFile(
+      Ogre::ResourceManager *creator, const Ogre::String &name,
+      Ogre::ResourceHandle handle, const Ogre::String &group, bool is_manual,
+      Ogre::ManualResourceLoader *loader
+    ) : Ogre::Resource(creator, name, handle, group, is_manual, loader)
+    {createParamDictionary(RESOURCE_TYPE);}
 
-    //---------------------------------------------------------------------
-    void
-    RSDFile::loadImpl()
-    {
+    RSDFile::~RSDFile(){unload();}
+
+    void RSDFile::loadImpl(){
         RSDFileSerializer serializer;
-        Ogre::DataStreamPtr stream( Ogre::ResourceGroupManager::getSingleton().openResource( mName, mGroup, true, this ) );
-        serializer.importRSDFile( stream, this );
-
-        Ogre::MaterialManager &material_manager( Ogre::MaterialManager::getSingleton() );
-
-        const String material_base_name( getMaterialBaseName() );
+        Ogre::DataStreamPtr stream(
+          Ogre::ResourceGroupManager::getSingleton().openResource(
+            mName, mGroup, true, this
+          )
+        );
+        serializer.ImportRSDFile(stream, this);
+        Ogre::MaterialManager &material_manager(
+          Ogre::MaterialManager::getSingleton()
+        );
+        const String material_base_name(GetMaterialBaseName());
         Ogre::MaterialPtr material;
-        for( size_t i(0); i <= getTextureNameCount(); ++i )
-        {
-            Ogre::String material_name( material_base_name + "/" + Ogre::StringConverter::toString( i ) );
-            material = material_manager.getByName( material_name, mGroup );
-            if (material == nullptr)
-            {
+        for (size_t i(0); i <= GetTextureNameCount(); ++ i){
+            Ogre::String material_name(
+              material_base_name + "/" + Ogre::StringConverter::toString(i)
+            );
+            material = material_manager.getByName(material_name, mGroup);
+            if (material == nullptr){
 #ifndef NDEBUG
                 Ogre::LogManager::getSingleton().stream()
-                        << " creating Material for RSDFile"
-                        << " '" << material_name << "'";
+                   << " creating Material for RSDFile"
+                   << " '" << material_name << "'";
 #endif
-                material = material_manager.create( material_name, mGroup );
-                material->_notifyOrigin( getName() );
-                m_materials.push_back( material );
-                Ogre::Pass *pass( material->getTechnique( 0 )->getPass( 0 ) );
-                pass->setVertexColourTracking( Ogre::TVC_AMBIENT );
-                if( i > 0 )
-                {
-                    addTexture( pass, i - 1 );
-                }
+                material = material_manager.create(material_name, mGroup);
+                material->_notifyOrigin(getName());
+                materials_.push_back(material);
+                Ogre::Pass *pass(material->getTechnique(0)->getPass(0));
+                pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
+                if (i > 0) AddTexture(pass, i - 1);
             }
         }
     }
 
-    //---------------------------------------------------------------------
-    void
-    RSDFile::unloadImpl()
-    {
-        // clear data here
-        m_polygon_name.clear();
-        m_material_name.clear();
-        m_group_name.clear();
-        m_texture_names.clear();
-        for( MaterialList::iterator it( m_materials.begin() )
-            ;it != m_materials.end()
-            ;++it )
-        {
-            Ogre::MaterialManager::getSingleton().remove( (*it)->getHandle() );
+    void RSDFile::unloadImpl(){
+        polygon_name_.clear();
+        material_name_.clear();
+        group_name_.clear();
+        texture_names_.clear();
+        for (
+          MaterialList::iterator it(materials_.begin());
+          it != materials_.end();
+          ++ it
+        ){
+            Ogre::MaterialManager::getSingleton().remove((*it)->getHandle());
         }
-        m_materials.clear();
+        materials_.clear();
     }
 
-    //---------------------------------------------------------------------
-    size_t
-    RSDFile::calculateSize() const
-    {
-        size_t size_texture_names( 0 );
-        for( TextureNameList::const_iterator it( m_texture_names.begin() )
-            ;it != m_texture_names.end()
-            ;++it )
-        {
+    size_t RSDFile::calculateSize() const{
+        size_t size_texture_names(0);
+        for (
+          TextureNameList::const_iterator it(texture_names_.begin());
+          it != texture_names_.end();
+          ++ it
+        ){
             size_texture_names += it->size();
         }
-
-        return m_polygon_name.size()
-              +m_material_name.size()
-              +m_group_name.size()
-              +size_texture_names;
+        return
+          polygon_name_.size() + material_name_.size()
+          + group_name_.size() + size_texture_names;
     }
 
-    //---------------------------------------------------------------------
-    String
-    RSDFile::getMaterialBaseName( void ) const
-    {
+    String RSDFile::GetMaterialBaseName() const{
         String base_name, ext, path;
-        StringUtil::splitPath( getName(), path );
-        StringUtil::splitBase( m_material_name, base_name );
-        StringUtil::toLowerCase( base_name );
+        StringUtil::splitPath(getName(), path);
+        StringUtil::splitBase(material_name_, base_name);
+        StringUtil::toLowerCase(base_name);
         return path + base_name;
     }
 
-    //---------------------------------------------------------------------
-    void
-    RSDFile::addTexture( Ogre::Pass *pass, const size_t index ) const
-    {
+    void RSDFile::AddTexture(Ogre::Pass *pass, const size_t index) const{
         String texture_name;
-        StringUtil::splitPath( getName(), texture_name );
-        texture_name += m_texture_names[ index ];
-
-        if ( StringUtil::endsWith( texture_name, EXT_TIM ) )
-        {
-            StringUtil::toLowerCase( texture_name );
-            if( !Ogre::ResourceGroupManager::getSingleton().resourceExists( mGroup, texture_name ) )
-            {
-                texture_name = StringUtil::replaceAll( texture_name, EXT_TIM, EXT_TEX );
+        StringUtil::splitPath(getName(), texture_name);
+        texture_name += texture_names_[ index ];
+        if (StringUtil::endsWith(texture_name, EXT_TIM)){
+            StringUtil::toLowerCase(texture_name);
+            if (
+              !Ogre::ResourceGroupManager::getSingleton().resourceExists(
+                mGroup, texture_name
+              )
+            ){
+                texture_name = StringUtil::replaceAll(
+                  texture_name, EXT_TIM, EXT_TEX
+                );
             }
         }
-
-        if( !texture_name.empty() )
-        {
-            pass->setAlphaRejectFunction( Ogre::CMPF_GREATER );
-            pass->setAlphaRejectValue( 0 );
-            Ogre::TextureUnitState *texture_unit( pass->createTextureUnitState() );
-            texture_unit->setTextureName( texture_name );
-            texture_unit->setNumMipmaps( 0 );
-            texture_unit->setTextureFiltering( Ogre::TFO_NONE );
+        if (!texture_name.empty()){
+            pass->setAlphaRejectFunction(Ogre::CMPF_GREATER);
+            pass->setAlphaRejectValue(0);
+            Ogre::TextureUnitState *texture_unit(
+              pass->createTextureUnitState()
+            );
+            texture_unit->setTextureName(texture_name);
+            texture_unit->setNumMipmaps(0);
+            texture_unit->setTextureFiltering(Ogre::TFO_NONE);
         }
     }
 
-    //---------------------------------------------------------------------
-    void
-    RSDFile::setPolygonName( const String &polygon_name )
-    {
-        m_polygon_name = polygon_name;
+    void RSDFile::SetPolygonName(const String &polygon_name){
+        polygon_name_ = polygon_name;
     }
 
-    //---------------------------------------------------------------------
-    void
-    RSDFile::setMaterialName( const String &material_name )
-    {
-        m_material_name = material_name;
+    void RSDFile::SetMaterialName(const String &material_name){
+        material_name_ = material_name;
     }
 
-    //---------------------------------------------------------------------
-    void
-    RSDFile::setGroupName( const String &group_name )
-    {
-        m_group_name = group_name;
+    void RSDFile::SetGroupName(const String &group_name){
+        group_name_ = group_name;
     }
 
-    //---------------------------------------------------------------------
-    const String&
-    RSDFile::getPolygonName( void ) const
-    {
-        return m_polygon_name;
-    }
+    const String& RSDFile::GetPolygonName() const{return polygon_name_;}
 
-    //---------------------------------------------------------------------
-    const String&
-    RSDFile::getMaterialName( void ) const
-    {
-        return m_material_name;
-    }
+    const String&RSDFile::GetMaterialName() const{return material_name_;}
 
-    //---------------------------------------------------------------------
-    const String&
-    RSDFile::getGroupName( void ) const
-    {
-        return m_group_name;
-    }
+    const String& RSDFile::GetGroupName() const{return group_name_;}
 
-    //---------------------------------------------------------------------
-    size_t
-    RSDFile::getTextureNameCount( void ) const
-    {
-        return m_texture_names.size();
-    }
+    size_t RSDFile::GetTextureNameCount() const{return texture_names_.size();}
 
-    //---------------------------------------------------------------------
-    RSDFile::TextureNameList&
-    RSDFile::getTextureNames( void )
-    {
-        return m_texture_names;
-    }
+    RSDFile::TextureNameList& RSDFile::GetTextureNames(){return texture_names_;}
 
-    //---------------------------------------------------------------------
 }

@@ -1,86 +1,69 @@
 /*
------------------------------------------------------------------------------
-Copyright (c) 26.10.2013 Tobias Peters <tobias.peters@kreativeffekt.at>
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-This file is part of Q-Gears
-
-Q-Gears is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 2.0 (GPLv2) of the License.
-
-Q-Gears is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
------------------------------------------------------------------------------
-*/
 #include "QGearsUtility.h"
 
 namespace QGears
 {
-    //--------------------------------------------------------------------------
     Utility::Utility(int argc, char *argv[]) :
-        Application( argc, argv )
-      , m_frame_listener( NULL )
-      , m_scene_manager( NULL )
-      , m_camera( NULL )
-      , m_viewport( NULL )
-    {
-    }
+      Application(argc, argv),
+      frame_listener_(NULL),
+      scene_manager_(NULL),
+      camera_(NULL),
+      viewport_(NULL)
+    {}
 
-    //--------------------------------------------------------------------------
-    Utility::~Utility()
-    {
-    }
+    Utility::~Utility(){}
 
-    //--------------------------------------------------------------------------
-    Ogre::Camera*
-    Utility::getCamera()
-    {
-        return m_camera;
-    }
+    Ogre::Camera* Utility::GetCamera(){return camera_;}
 
-    //--------------------------------------------------------------------------
-    void
-    Utility::initComponents()
-    {
+    void Utility::InitComponents(){
         Application::initComponents();
-        Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-
-        Ogre::Root         *root( getRoot() );
-
-        m_scene_manager = root->createSceneManager( Ogre::ST_GENERIC, "Scene" );
-        m_scene_manager->clearScene();
-        m_scene_manager->setAmbientLight( Ogre::ColourValue( 0.5, 0.5, 0.5 ) );
-        Ogre::Light* directionalLight = m_scene_manager->createLight("directionalLight");
-        directionalLight->setType( Ogre::Light::LT_DIRECTIONAL );
-        directionalLight->setDiffuseColour( Ogre::ColourValue( 0.5, 0.5, 0.5) );
-        directionalLight->setSpecularColour( Ogre::ColourValue( 0.5, 0.5, 0.5) );
-        directionalLight->setDirection( Ogre::Vector3( 0, 0, -1 ) );
-
-        m_camera = m_scene_manager->createCamera( "Camera" );
-        m_camera->setNearClipDistance( 0.01f );
-        m_camera->setPosition( 0, 5, 10 );
-        m_camera->lookAt( 0, 0, 0 );
-
-        Ogre::RenderWindow *window( getRenderWindow() );
-        m_viewport = window->addViewport( m_camera );
-        m_viewport->setBackgroundColour( Ogre::ColourValue( 0.0f, 0.4f, 0.0f ) );
-        m_camera->setAspectRatio( Ogre::Real( m_viewport->getActualWidth() ) / Ogre::Real( m_viewport->getActualHeight() ) );
-
-        m_frame_listener = new DisplayFrameListener( window );
-        m_frame_listener->setCamera( m_camera );
-        root->addFrameListener( m_frame_listener );
+        Ogre::ResourceGroupManager::getSingleton()
+          .initialiseAllResourceGroups();
+        Ogre::Root *root(getRoot());
+        scene_manager_ = root->createSceneManager(Ogre::ST_GENERIC, "Scene");
+        scene_manager_->clearScene();
+        scene_manager_->setAmbientLight(Ogre::ColourValue(0.5, 0.5, 0.5));
+        Ogre::Light* directional_light = scene_manager_->createLight(
+          "directional_light"
+        );
+        directional_light->setType(Ogre::Light::LT_DIRECTIONAL);
+        directional_light->setDiffuseColour(Ogre::ColourValue(0.5, 0.5, 0.5));
+        directional_light->setSpecularColour(Ogre::ColourValue(0.5, 0.5, 0.5));
+        directional_light->setDirection(Ogre::Vector3(0, 0, -1));
+        camera_ = scene_manager_->createCamera("Camera");
+        camera_->setNearClipDistance(0.01f);
+        camera_->setPosition(0, 5, 10);
+        camera_->lookAt(0, 0, 0);
+        Ogre::RenderWindow *window(getRenderWindow());
+        viewport_ = window->addViewport(camera_);
+        viewport_->setBackgroundColour(Ogre::ColourValue(0.0f, 0.4f, 0.0f));
+        camera_->setAspectRatio(
+          Ogre::Real(viewport_->getActualWidth())
+          / Ogre::Real(viewport_->getActualHeight())
+        );
+        frame_listener_ = new DisplayFrameListener(window);
+        frame_listener_->setCamera(camera_);
+        root->addFrameListener(frame_listener_);
     }
 
-    //--------------------------------------------------------------------------
-    void
-    Utility::destroyComponents()
-    {
-        delete m_frame_listener;
-        m_frame_listener = NULL;
+    void Utility::DestroyComponents(){
+        delete frame_listener_;
+        frame_listener_ = NULL;
         Application::destroyComponents();
     }
 
-    //--------------------------------------------------------------------------
 }

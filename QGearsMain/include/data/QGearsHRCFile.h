@@ -1,93 +1,225 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-11 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsHRCFile_H__
-#define __QGearsHRCFile_H__
+#pragma once
 
 #include <OgreResource.h>
 #include <OgreMesh.h>
 #include <OgreSkeleton.h>
-
 #include "common/TypeDefine.h"
 
-namespace QGears
-{
+namespace QGears{
+
     class HRCMeshLoader;
+
     class HRCSkeletonLoader;
 
-    class HRCFile : public Ogre::Resource
-    {
-    public:
-        static const float kDownScaler;
+    /**
+     * Handles HRC files.
+     *
+     * HRC files describe bone hierarchy in an skeleton.
+     */
+    class HRCFile : public Ogre::Resource{
 
-        HRCFile( Ogre::ResourceManager *creator, const String &name
-                ,Ogre::ResourceHandle handle, const String &group
-                ,bool isManual = false, Ogre::ManualResourceLoader *loader = NULL );
+        public:
 
-        virtual ~HRCFile();
+            /**
+             * Scale down constant.
+             */
+            static const float DOWN_SCALER;
 
-        typedef std::vector<String> RSDNameList;
+            /**
+             * Constructor.
+             *
+             * @param creator[in] Pointer to the ResourceManager that is
+             * creating this resource.
+             * @param name[in] The unique name of the resource.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can be
+             * null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper
+             * ManualResourceLoader instance is strongly recommended.
+             */
+            HRCFile(
+              Ogre::ResourceManager *creator, const String &name,
+              Ogre::ResourceHandle handle, const String &group,
+              bool is_manual = false, Ogre::ManualResourceLoader *loader = NULL
+            );
 
-        struct Bone
-        {
-            String      name;
-            String      parent;
-            Ogre::Real  length;
-            RSDNameList rsd_names;
-        };
+            /**
+             * Destructor.
+             */
+            virtual ~HRCFile();
 
-        typedef std::vector<Bone> BoneList;
+            typedef std::vector<String> RSDNameList;
 
-        virtual void            setSkeletonName( const String& name );
-        virtual const String&   getSkeletonName( void )     const { return m_skeleton_name; }
-        virtual       String    getSkeletonFileName( void ) const;
-        virtual       String    getMeshFileName( void )     const;
-        virtual       BoneList& getBones( void )       { return m_bones; }
-        virtual const BoneList& getBones( void ) const { return m_bones; }
+            /**
+             * A bone in a skeleton.
+             */
+            struct Bone{
 
-        virtual Ogre::SkeletonPtr   getSkeleton( void ) const;
+                /**
+                 * Bone name.
+                 */
+                String name;
 
-        static const String RESOURCE_TYPE;
+                /**
+                 * Parent bone name.
+                 */
+                String parent;
 
-    protected:
-        virtual void loadImpl();
-        virtual void unloadImpl();
-        virtual size_t calculateSize() const;
-        virtual size_t calculateSize( const Bone &bone ) const;
+                /**
+                 * Bone length
+                 *
+                 * @todo In pixels?
+                 */
+                Ogre::Real length;
 
-    private:
-        String      m_skeleton_name;
-        BoneList    m_bones;
+                /**
+                 * List of RDS file assigned to the bone.
+                 *
+                 * RSD are Resource Data Files.
+                 */
+                RSDNameList rsd_names;
+            };
 
-        HRCMeshLoader      *m_mesh_loader;
-        HRCSkeletonLoader  *m_skeleton_loader;
-        Ogre::SkeletonPtr   m_skeleton;
-        Ogre::MeshPtr       m_mesh;
+            typedef std::vector<Bone> BoneList;
+
+            /**
+             * Sets a name for the skelenton.
+             *
+             * @param name[in] The name for the skeleton.
+             */
+            virtual void SetSkeletonName(const String& name);
+
+            /**
+             * Retrieves the skeleton name.
+             *
+             * @return The skeleton name.
+             */
+            virtual const String& GetSkeletonName() const{
+                return skeleton_name_;
+            }
+
+            /**
+             * Retrieves the skeleton file name.
+             *
+             * @return The skeleton file name.
+             */
+            virtual String GetSkeletonFileName() const;
+
+            /**
+             * Retrieves the file name of the mesh assigned to the skeleton.
+             *
+             * @return The mesh file name.
+             */
+            virtual String GetMeshFileName() const;
+
+            /**
+             * Retrieves the list of bones in the skeleton.
+             *
+             * @return The list of bones.
+             */
+            virtual BoneList& GetBones(){return bones_;}
+
+            /**
+             * Retrieves the list of bones in the skeleton.
+             *
+             * @return The list of bones.
+             */
+            virtual const BoneList& GetBones() const{return bones_;}
+
+            /**
+             * Retrieves the skeleton.
+             *
+             * @return The skeleton.
+             */
+            virtual Ogre::SkeletonPtr GetSkeleton() const;
+
+            /**
+             * The type of resource.
+             */
+            static const String RESOURCE_TYPE;
+
+        protected:
+
+            /**
+             * Loads the file.
+             */
+            virtual void loadImpl() override final;
+
+            /**
+             * Unloads the file.
+             */
+            virtual void unloadImpl() override final;
+
+            /**
+             * Calculates the size of the skeleton.
+             *
+             * @return The size of the skeleton.
+             * @todo Units?
+             */
+            virtual size_t CalculateSize() const;
+
+            /**
+             * Calculates the size of a bone.
+             *
+             * @param bone[in] The bone whose size to calculate.
+             * @return The size of the bone.
+             * @todo Units?
+             */
+            virtual size_t CalculateSize(const Bone &bone) const;
+
+        private:
+
+            /**
+             * The skeleton name.
+             */
+            String skeleton_name_;
+
+            /**
+             * The bones in the skeleton.
+             */
+            BoneList bones_;
+
+            /**
+             * The mesh loader.
+             */
+            HRCMeshLoader *mesh_loader_;
+
+            /**
+             * The skeleton loader.
+             */
+            HRCSkeletonLoader *skeleton_loader_;
+
+            /**
+             * The skeleton.
+             */
+            Ogre::SkeletonPtr skeleton_;
+
+            /**
+             * The mesh assigned to the skeleton.
+             */
+            Ogre::MeshPtr mesh_;
     };
 
     typedef Ogre::SharedPtr<HRCFile> HRCFilePtr;
 }
-
-#endif // __QGearsHRCFile_H__

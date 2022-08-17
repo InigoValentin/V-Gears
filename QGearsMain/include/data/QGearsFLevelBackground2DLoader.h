@@ -1,57 +1,69 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-29 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsFLevelBackground2DLoader_H__
-#define __QGearsFLevelBackground2DLoader_H__
+#pragma once
 
 #include <OgreResource.h>
-
 #include "data/QGearsBackgroundFile.h"
 #include "map/QGearsBackground2DFile.h"
 
-namespace QGears
-{
+namespace QGears{
+
     class FLevelFile;
 
-    class FLevelBackground2DLoader : public Ogre::ManualResourceLoader
-    {
-    public:
-        explicit FLevelBackground2DLoader( FLevelFile& flevel_file );
-        virtual ~FLevelBackground2DLoader();
+    /**
+     * Handles 2D background loading.
+     */
+    class FLevelBackground2DLoader : public Ogre::ManualResourceLoader{
 
-        virtual void loadResource( Ogre::Resource *resource );
+        public:
 
-    protected:
-        typedef Background2DFile::TileList  TileList;
-        typedef BackgroundFile::Layer       Layer;
-        typedef BackgroundFile::SpriteData  SpriteData;
-        typedef BackgroundFile::SpriteList  SpriteList;
+            /**
+             * Constructor.
+             *
+             * @param flevel_file[in] Level file.
+             */
+            explicit FLevelBackground2DLoader(FLevelFile& flevel_file);
 
-    private:
-        FLevelFile  &m_flevel_file;
+            /**
+             * Destructor.
+             */
+            virtual ~FLevelBackground2DLoader();
+
+            /**
+             * Loads a resource.
+             *
+             * @param resource[in] The resource to load.
+             */
+            virtual void loadResource(Ogre::Resource *resource);
+
+        protected:
+
+            typedef Background2DFile::TileList TileList;
+
+            typedef BackgroundFile::Layer Layer;
+
+            typedef BackgroundFile::SpriteData SpriteData;
+
+            typedef BackgroundFile::SpriteList SpriteList;
+
+        private:
+
+            /**
+             * The flevel file.
+             */
+            FLevelFile  &flevel_file_;
     };
 }
-
-#endif // __QGearsFLevelBackground2DLoader_H__

@@ -83,11 +83,11 @@ main( int argc, char *argv[] )
             if( fields[ f ].units[ i ].name != "" )
             {
                 Ogre::Entity* entity = NULL;
-                for( size_t j = 0; j < entitys.size(); ++j )
+                for( size_t j = 0; j < entities.size(); ++j )
                 {
-                    if( fields[ f ].units[ i ].name == entitys[ j ]->getName() )
+                    if( fields[ f ].units[ i ].name == entities[ j ]->getName() )
                     {
-                        entity = entitys[ j ];
+                        entity = entities[ j ];
                     }
                 }
 
@@ -98,13 +98,13 @@ main( int argc, char *argv[] )
 
                 if( exported_entity != NULL )
                 {
-                    entitys.push_back( exported_entity );
+                    entities.push_back( exported_entity );
                 }
             }
         }
     }
 
-    entitys[ 0 ]->setVisible(true);
+    entities[ 0 ]->setVisible(true);
 
 
 

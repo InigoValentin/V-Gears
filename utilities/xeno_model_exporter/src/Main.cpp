@@ -78,8 +78,8 @@ main( int argc, char* argv[] )
 
         if( exported_entity != NULL )
         {
-            entitys.push_back( exported_entity );
-            entitys[ 0 ]->setVisible( true );
+            entities.push_back( exported_entity );
+            entities[ 0 ]->setVisible( true );
         }
     }
 

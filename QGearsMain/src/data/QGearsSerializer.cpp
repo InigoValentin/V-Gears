@@ -1,205 +1,146 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-10 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#include "data/QGearsSerializer.h"
 
 #include <OgreLogManager.h>
+#include "data/QGearsSerializer.h"
 
-namespace QGears
-{
-    typedef Ogre::StringUtil        StringUtil;
+namespace QGears{
 
-    //---------------------------------------------------------------------
-    const String Serializer::TAG_COMMENT( "#" );
+    typedef Ogre::StringUtil StringUtil;
 
-    //---------------------------------------------------------------------
-    Serializer::Serializer()
-    {
-        determineEndianness( Ogre::Serializer::ENDIAN_LITTLE );
+    const String Serializer::TAG_COMMENT("#");
+
+    Serializer::Serializer(){
+        determineEndianness(Ogre::Serializer::ENDIAN_LITTLE);
     }
 
-    //---------------------------------------------------------------------
-    Serializer::~Serializer()
-    {
-    }
+    Serializer::~Serializer(){}
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::readObject( Ogre::DataStreamPtr &stream
-                           ,Ogre::Vector2 &pDest )
-    {
+    void Serializer::readObject(
+      Ogre::DataStreamPtr &stream, Ogre::Vector2 &dest
+    ){
         float v[2];
-        readFloats( stream, v, 2 );
-        pDest.x = v[0];
-        pDest.y = v[1];
+        readFloats(stream, v, 2);
+        dest.x = v[0];
+        dest.y = v[1];
     }
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::readObject( Ogre::DataStreamPtr &stream
-                           ,Ogre::Vector3 &pDest )
-    {
+    void Serializer::readObject(
+      Ogre::DataStreamPtr &stream, Ogre::Vector3 &dest
+    ){
         float tmp[3];
-        readFloats( stream, tmp, 3 );
-        pDest.x = tmp[0];
-        pDest.y = tmp[1];
-        pDest.z = tmp[2];
+        readFloats(stream, tmp, 3);
+        dest.x = tmp[0];
+        dest.y = tmp[1];
+        dest.z = tmp[2];
     }
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::readObject( Ogre::DataStreamPtr &stream
-                           ,Ogre::AxisAlignedBox &pDest )
-    {
+    void Serializer::readObject(
+      Ogre::DataStreamPtr &stream, Ogre::AxisAlignedBox &dest
+    ){
         Ogre::Vector3 tmp;
-        readObject( stream, tmp );
-        pDest.setMaximum( tmp );
-
-        readObject( stream, tmp );
-        pDest.setMinimum( tmp );
+        readObject(stream, tmp);
+        dest.setMaximum(tmp);
+        readObject(stream, tmp);
+        dest.setMinimum(tmp);
     }
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::readObject( Ogre::DataStreamPtr &stream, Pixel &pDest )
-    {
-        stream->read( &pDest, sizeof( pDest ) );
-        flipFromLittleEndian( &pDest, 2, 2 );
+    void Serializer::readObject(Ogre::DataStreamPtr &stream, Pixel &dest){
+        stream->read(&dest, sizeof(dest));
+        flipFromLittleEndian(&dest, 2, 2);
     }
 
-    void Serializer::readChars(Ogre::DataStreamPtr& stream, char* pDest, size_t count)
-    {
-        stream->read(pDest, count);
-    }
+    void Serializer::ReadChars(
+      Ogre::DataStreamPtr& stream, char* dest, size_t count
+    ){stream->read(dest, count);}
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::read1ByteBool( Ogre::DataStreamPtr &stream, bool &pDest )
-    {
+    void Serializer::Read1ByteBool(Ogre::DataStreamPtr &stream, bool &dest){
         uint8 enabled;
-        stream->read( &enabled, 1 );
-        pDest = enabled > 0;
+        stream->read(&enabled, 1);
+        dest = enabled > 0;
     }
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::read2ByteBool( Ogre::DataStreamPtr &stream, bool &pDest )
-    {
+    void Serializer::Read2ByteBool(Ogre::DataStreamPtr &stream, bool &dest){
         uint16 enabled;
-        readShort( stream, enabled );
-        pDest = enabled > 0;
+        ReadShort(stream, enabled);
+        dest = enabled > 0;
     }
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::readShort( Ogre::DataStreamPtr &stream, uint16 &pDest )
-    {
-        readShorts( stream, &pDest, 1 );
+    void Serializer::ReadShort(Ogre::DataStreamPtr &stream, uint16 &dest){
+        readShorts(stream, &dest, 1);
     }
 
-    void Serializer::readInt16( Ogre::DataStream &stream, sint16 &pDest )
-    {
-        stream.read( &pDest, sizeof(sint16) );
+    void Serializer::ReadInt16(Ogre::DataStream &stream, sint16 &dest){
+        stream.read(&dest, sizeof(sint16));
     }
 
-    void Serializer::readUInt16( Ogre::DataStream &stream, uint16 &pDest )
-    {
-        stream.read( &pDest, sizeof(uint16) );
+    void Serializer::ReadUInt16(Ogre::DataStream &stream, uint16 &dest){
+        stream.read(&dest, sizeof(uint16));
     }
 
-    void Serializer::readInt16( Ogre::DataStreamPtr &stream, sint16 &pDest )
-    {
-        stream->read( &pDest, sizeof(sint16) );
+    void Serializer::ReadInt16(Ogre::DataStreamPtr &stream, sint16 &dest){
+        stream->read(&dest, sizeof(sint16));
     }
 
-    void Serializer::readUInt16( Ogre::DataStreamPtr &stream, uint16 &pDest )
-    {
-        readShorts( stream, &pDest, 1 );
+    void Serializer::ReadUInt16(Ogre::DataStreamPtr &stream, uint16 &dest){
+        readShorts(stream, &dest, 1);
     }
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::readUInt32( Ogre::DataStreamPtr &stream, uint32 &pDest )
-    {
-        readInts( stream, &pDest, 1 );
+    void Serializer::ReadUInt32(Ogre::DataStreamPtr &stream, uint32 &dest){
+        readInts(stream, &dest, 1);
     }
 
-    void Serializer::readSInt32(Ogre::DataStreamPtr &stream, sint32 &pDest)
-    {
-        stream->read(&pDest, sizeof(sint32));
+    void Serializer::ReadSInt32(Ogre::DataStreamPtr &stream, sint32 &dest){
+        stream->read(&dest, sizeof(sint32));
     }
 
-    void Serializer::readUInt32( Ogre::DataStream &stream, uint32 &pDest )
-    {
-        stream.read(&pDest,sizeof(uint32));
+    void Serializer::ReadUInt32(Ogre::DataStream &stream, uint32 &dest){
+        stream.read(&dest,sizeof(uint32));
     }
 
-    void Serializer::readUInt8( Ogre::DataStream& stream, uint8 &pDest )
-    {
-        stream.read(&pDest,1);
+    void Serializer::ReadUInt8(Ogre::DataStream& stream, uint8 &dest){
+        stream.read(&dest,1);
     }
 
-    void Serializer::readUInt8( Ogre::DataStreamPtr &stream, uint8 &pDest )
-    {
-        stream->read(&pDest,1);
+    void Serializer::ReadUInt8(Ogre::DataStreamPtr &stream, uint8 &dest){
+        stream->read(&dest,1);
     }
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::readFloat( Ogre::DataStreamPtr &stream, float &pDest )
-    {
-        readFloats( stream, &pDest, 1 );
+    void Serializer::ReadFloat(Ogre::DataStreamPtr &stream, float &dest){
+        readFloats(stream, &dest, 1);
     }
 
-    //---------------------------------------------------------------------
-    String
-    Serializer::getLine( Ogre::DataStreamPtr &stream ) const
-    {
+    String Serializer::GetLine(Ogre::DataStreamPtr &stream) const{
         String line("");
-        do
-        {
+        do{
             line = stream->getLine();
-
-        } while( StringUtil::startsWith( line, TAG_COMMENT ) );
-
+        } while(StringUtil::startsWith(line, TAG_COMMENT));
         return line;
     }
 
-    //---------------------------------------------------------------------
-    void
-    Serializer::readEndString( Ogre::DataStreamPtr &stream, const String &end_text )
-    {
-        String actual( readString( stream, end_text.size() ) );
-        if( actual != end_text )
-        {
+    void Serializer::ReadEndString(
+      Ogre::DataStreamPtr &stream, const String &end_text
+    ){
+        String actual(readString(stream, end_text.size()));
+        if (actual != end_text){
             Ogre::LogManager::getSingleton().stream()
-                << "Warning: File didn't end with"
-                << " expected String '" << end_text << "'"
-                << " actual was '" << actual << "'";
+              << "Warning: File didn't end with"
+              << " expected String '" << end_text << "'"
+              << " actual was '" << actual << "'";
         }
     }
 
-    //---------------------------------------------------------------------
 }

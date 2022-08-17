@@ -1,90 +1,224 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-26 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsBackground2DFile_H__
-#define __QGearsBackground2DFile_H__
+#pragma once
 
 #include <OgreQuaternion.h>
 #include <Ogre.h>
-
 #include "common/QGearsResource.h"
-
 #include "QGearsTile.h"
 
-namespace QGears
-{
-    class Background2DFile : public Resource
-    {
-    public:
+namespace QGears{
 
-        Background2DFile( Ogre::ResourceManager *creator, const String &name
-              ,Ogre::ResourceHandle handle, const String &group
-              ,bool isManual = false, Ogre::ManualResourceLoader *loader = NULL );
+    /**
+     * Handles 2D background files
+     *
+     * @todo Whats the difference with QGearsBackgroundFile.h?
+     */
+    class Background2DFile : public Resource{
+        public:
 
-        virtual ~Background2DFile();
+            /**
+             * Constructor.
+             *
+             * @param creator[in] Pointer to the ResourceManager that is
+             * creating this resource.
+             * @param name[in] The unique name of the resource.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can be
+             * null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper
+             * ManualResourceLoader instance is strongly recommended.
+             */
+            Background2DFile(
+              Ogre::ResourceManager* creator, const String &name,
+              Ogre::ResourceHandle handle, const String& group,
+              bool is_manual = false,
+              Ogre::ManualResourceLoader* loader = nullptr
+            );
 
-        static const String RESOURCE_TYPE;
+            /**
+            * Destructor.
+            */
+            virtual ~Background2DFile();
 
-        typedef std::vector< Tile >     TileList;
+            /**
+             * The type of resource.
+             */
+            static const String RESOURCE_TYPE;
 
-        virtual void   setTextureName( const String &texture_name );
-        virtual String getTextureName( void ) const;
+            typedef std::vector<Tile> TileList;
 
-        virtual void            setRange( const Ogre::Vector4& range );
-        virtual Ogre::Vector4   getRange( void ) const;
+            /**
+             * Sets the texture name.
+             *
+             * @param[in] The name of the texture.
+             */
+            virtual void SetTextureName(const String &texture_name);
 
-        virtual void            setClip( const Ogre::Vector2& clip );
-        virtual Ogre::Vector2   getClip( void ) const;
+            /**
+             * Retrieves the texture name.
+             *
+             * @return The texture name.
+             */
+            virtual String GetTextureName() const;
 
-        virtual void            setPosition( const Ogre::Vector3 &position );
-        virtual Ogre::Vector3   getPosition( void ) const;
+            /**
+             * Sets the background range.
+             *
+             * @param[in] Range vector.
+             * @todo What is this range?
+             */
+            virtual void SetRange(const Ogre::Vector4& range);
 
-        virtual void                setOrientation( const Ogre::Quaternion &orientation );
-        virtual Ogre::Quaternion    getOrientation( void ) const;
+            /**
+             * Retrieves the background range.
+             *
+             * @return 4-dimensional vector with the background range.
+             * @todo What is this range?
+             */
+            virtual Ogre::Vector4 GetRange() const;
 
-        virtual void            setFov( const Ogre::Radian &fov );
-        virtual Ogre::Radian    getFov( void ) const;
+            /**
+             * Sets the background clip.
+             *
+             * @param[in] Clip vector.
+             * @todo What is this clip?
+             */
+            virtual void SetClip(const Ogre::Vector2& clip);
 
-        virtual TileList& getTiles( void );
+            /**
+             * Retrieves the background clip.
+             *
+             * @return 4-dimensional vector with the background clip.
+             * @todo What is this clip?
+             */
+            virtual Ogre::Vector2 GetClip() const;
 
-    protected:
-        virtual void loadImpl( void );
-        virtual void unloadImpl( void );
-        virtual size_t calculateSize( void ) const;
+            /**
+             * Sets the background position.
+             *
+             * @param[in] Position vector.
+             */
+            virtual void SetPosition(const Ogre::Vector3 &position);
 
-    private:
-        String              m_texture_name;
-        Ogre::Vector2       m_clip;
-        Ogre::Vector4       range_;
-        Ogre::Vector3       m_position;
-        Ogre::Quaternion    m_orientation;
-        Ogre::Radian        m_fov;
-        TileList            m_tiles;
+            /**
+             * Retrieves the background clip.
+             *
+             * @return 4-dimensional vector with the background clip.
+             * @todo What is this clip?
+             */
+            virtual Ogre::Vector3 GetPosition() const;
+
+            /**
+             * Sets the background orientation.
+             *
+             * @param orientation[in] The new orientation.
+             */
+            virtual void SetOrientation(const Ogre::Quaternion &orientation);
+
+            /**
+             * Retrieves the background orientation.
+             *
+             * @return The background orientation quaternion.
+             */
+            virtual Ogre::Quaternion GetOrientation() const;
+
+            /**
+             * Sets the background field of view.
+             *
+             * @param fow[in] Field of view angle.
+             */
+            virtual void SetFov(const Ogre::Radian &fov);
+
+            /**
+             * Retrieves the background field of view.
+             *
+             * @return The field of view angle.
+             */
+            virtual Ogre::Radian GetFov() const;
+
+            /**
+             * Retrieves the list of tiles.
+             */
+            virtual TileList& GetTiles();
+
+        protected:
+
+
+            /**
+             * Loads the file.
+             */
+            virtual void loadImpl() override;
+
+            /**
+             * Unloads the file.
+             */
+            virtual void unloadImpl() override;
+
+            /**
+             * Calculates the size of the background.
+             *
+             * @return The size of the background.
+             * @todo Units?
+             */
+            virtual size_t calculateSize() const override;
+
+        private:
+
+            /**
+             * The texture name.
+             */
+            String texture_name_;
+
+            /**
+             * The background clip.
+             */
+            Ogre::Vector2 clip_;
+
+            /**
+             * The background range.
+             */
+            Ogre::Vector4 range_;
+
+            /**
+             * The background position.
+             */
+            Ogre::Vector3 position_;
+
+            /**
+             * The background orientation.
+             */
+            Ogre::Quaternion orientation_;
+
+            /**
+             * The background field of view.
+             */
+            Ogre::Radian fov_;
+
+            /**
+             * The list of tiles.
+             */
+            TileList tiles_;
     };
 
     typedef Ogre::SharedPtr<Background2DFile> Background2DFilePtr;
 }
-
-#endif // __QGearsBackground2DFile_H__

@@ -50,7 +50,7 @@ void attachMesh( Ogre::MeshPtr &mesh )
    // root_node->attachObject( entity );
     entity->setVisible( true );
 
-    entitys.push_back( entity );
+    entities.push_back( entity );
 }
 
 void exportMesh( const Ogre::MeshPtr &mesh )
@@ -101,18 +101,18 @@ int main( int argc, char *argv[] )
 
 
         a = afl_mgr.load("aeae.a", "FFVII").staticCast<QGears::AFile>();
-        a->addTo(skeleton, "Idle");
+        a->AddTo(skeleton, "Idle");
         a = afl_mgr.load("aeaf.a", "FFVII").staticCast<QGears::AFile>();
-        a->addTo(skeleton, "Walk");
+        a->AddTo(skeleton, "Walk");
         a = afl_mgr.load("aeba.a", "FFVII").staticCast<QGears::AFile>();
-        a->addTo(skeleton, "Run");
+        a->AddTo(skeleton, "Run");
 
 
         attachMesh(mesh);
         exportMesh(mesh);
 
 
-        entitys[0]->setVisible(true);
+        entities[0]->setVisible(true);
 
         QGears::LZSFLevelFileManager   &fmgr(QGears::LZSFLevelFileManager::getSingleton());
         // QGears::FLevelFilePtr           f = fmgr.load( "ancnt1", "FFVII" ).staticCast<QGears::FLevelFile>();
@@ -143,9 +143,9 @@ int main( int argc, char *argv[] )
         // Attach background to the scene
         Ogre::SceneNode* node = scene_manager->getRootSceneNode()->createChildSceneNode("Background");
 
-        node->attachObject(entitys[0]);
+        node->attachObject(entities[0]);
 
-        //   node->attachObject( entitys[0] );
+        //   node->attachObject( entities[0] );
 
         Ogre::Root::getSingleton().startRendering();
         skeleton.reset();

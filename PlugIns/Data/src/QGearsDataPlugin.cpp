@@ -32,25 +32,25 @@ using Ogre::String;
 namespace QGears {
     const String DataPlugin::ms_plugin_name( "Plugin for Various FFVII File Formats" );
 
-    //---------------------------------------------------------------------
+
     DataPlugin::DataPlugin()
     {
     }
 
-    //---------------------------------------------------------------------
+
     const String& DataPlugin::getName() const
     {
         return ms_plugin_name;
     }
 
-    //---------------------------------------------------------------------
+
     void DataPlugin::install()
     {
         //install called - create stuff here
         TexCodec::install();
     }
 
-    //---------------------------------------------------------------------
+
     void DataPlugin::initialise()
     {
         //intialise called - register stuff here
@@ -62,7 +62,7 @@ namespace QGears {
         //background_manager  = new BackgroundFileManager();
     }
 
-    //---------------------------------------------------------------------
+
     void DataPlugin::shutdown()
     {
         //shutdown called - unregister stuff here
@@ -74,7 +74,7 @@ namespace QGears {
         //delete background_manager;
     }
 
-    //---------------------------------------------------------------------
+
     void DataPlugin::uninstall()
     {
         //uninstall called - delete stuff here

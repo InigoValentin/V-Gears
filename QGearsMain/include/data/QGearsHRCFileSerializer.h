@@ -1,72 +1,132 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-10 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsHRCFileSerializer_H__
-#define __QGearsHRCFileSerializer_H__
+#pragma once
 
 #include "QGearsHRCFile.h"
 #include "QGearsSerializer.h"
 
-namespace QGears
-{
-    class HRCFileSerializer : public Serializer
-    {
-    public:
-                        HRCFileSerializer();
-        virtual        ~HRCFileSerializer();
+namespace QGears{
 
-        virtual void    importHRCFile( Ogre::DataStreamPtr &stream, HRCFile* pDest );
+    /**
+     * Handles the serialization of HRC files.
+     */
+    class HRCFileSerializer : public Serializer{
 
-    protected:
-        static const String TAG_COMMENT;
-        static const String TAG_VERSION;
-        static const String TAG_NAME;
-        static const String TAG_BONE_COUNT;
+        public:
 
-        typedef std::vector<String> Block;
-        typedef HRCFile::Bone       Bone;
+            /**
+             * Constructor.
+             */
+            HRCFileSerializer();
 
-        virtual void    readFileHeader( Ogre::DataStreamPtr &stream );
-        virtual void    readBlock( Ogre::DataStreamPtr &stream, Block& pDest );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, Bone &pDest );
+            /**
+             * Destructor.
+             */
+            virtual ~HRCFileSerializer();
 
-        template<typename ValueType>
-                void    readVector( Ogre::DataStreamPtr &stream
-                                   ,std::vector<ValueType> &pDest
-                                   ,size_t count );
+            /**
+             * Imports a HRC file.
+             *
+             * @param stream[in] The contents of the HRC file.
+             * @param dest[out] The formed HRC file.
+             */
+            virtual void ImportHRCFile(
+              Ogre::DataStreamPtr &stream, HRCFile* dest
+            );
 
-        struct Header
-        {
-            long    version;
-            long    bone_count;
-            String  name;
-        };
+        protected:
 
-    private:
-        Header  m_header;
+            /**
+             * A comment tag.
+             */
+            static const String TAG_COMMENT;
+
+            /**
+             * File version tag.
+             */
+            static const String TAG_VERSION;
+
+            /**
+             * The name tag.
+             */
+            static const String TAG_NAME;
+
+            /**
+             * The bone count tag.
+             */
+            static const String TAG_BONE_COUNT;
+
+            typedef std::vector<String> Block;
+
+            typedef HRCFile::Bone Bone;
+
+            /**
+             * Reads a file header and sets the instance data.
+             *
+             * @param stream[in] The contents of the HRC file.
+             */
+            virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
+
+            /**
+             * Reads an object as a block.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed block data.
+             */
+            virtual void ReadBlock(Ogre::DataStreamPtr &stream, Block& dest);
+
+            /**
+             * Reads an object as a bone.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed bone data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Bone &dest);
+
+            template<typename ValueType> void ReadVector(
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
+              size_t count
+            );
+
+            /**
+             * An HRC file header.
+             */
+            struct Header{
+
+                /**
+                 * File format version.
+                 */
+                long version;
+
+                /**
+                 * Number of bones in the file.
+                 */
+                long bone_count;
+
+                /**
+                 * Name of the skeleton in the file.
+                 */
+                String name;
+            };
+
+        private:
+
+            /**
+             * The file header.
+             */
+            Header  header_;
     };
 }
-
-#endif // __QGearsHRCFileSerializer_H__

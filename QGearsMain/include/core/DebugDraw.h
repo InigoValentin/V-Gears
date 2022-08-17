@@ -1,5 +1,19 @@
-#ifndef DEBUG_DRAW_H
-#define DEBUG_DRAW_H
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreRenderQueueListener.h>
@@ -7,92 +21,378 @@
 #include <OgreSingleton.h>
 #include <OgreFont.h>
 
-
-class DebugDraw : public Ogre::RenderQueueListener, public Ogre::Singleton< DebugDraw >
+class DebugDraw :
+  public Ogre::RenderQueueListener, public Ogre::Singleton<DebugDraw>
 {
-public:
-    DebugDraw();
-    virtual ~DebugDraw();
+    public:
 
-    void SetColour( const Ogre::ColourValue& colour );
-    void SetScreenSpace( const bool screen_space );
-    void SetZ( const float z );
-    void SetFadeDistance( const float fade_s, const float fade_e );
+        /**
+         * Constructor.
+         */
+        DebugDraw();
 
-    enum TextAlignment
-    {
-        LEFT,
-        RIGHT,
-        CENTER
-    };
-    void SetTextAlignment( TextAlignment alignment );
+        /**
+         * Destructor.
+         */
+        virtual ~DebugDraw();
 
-    void Line( const float x1, const float y1, const float x2, const float y2 );
-    void Line3d( const Ogre::Vector3& point1, const Ogre::Vector3& point2 );
-    void Triangle3d( const Ogre::Vector3& point1, const Ogre::Vector3& point2, const Ogre::Vector3& point3 );
-    void Quad( const float x1, const float y1, const float x2, const float y2, const float x3, const float y3, const float x4, const float y4 );
-    void Text( const float x1, const float y1, const Ogre::String& text );
-    void Text( const Ogre::Vector3& point, const float x, const float y, const Ogre::String& text );
+        /**
+         * Sets the colour of the element to draw.
+         *
+         * @param colour[in] The color to apply.
+         */
+        void SetColour(const Ogre::ColourValue& colour);
 
-    void renderQueueEnded( Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation );
+        /**
+         * Sets the screen space.
+         *
+         * @param screen_space[in] The screen space.
+         * @todo Understand and document properly.
+         */
+        void SetScreenSpace(const bool screen_space);
 
-private:
-    void CreateLineVertexBuffer();
-    void DestroyLineVertexBuffer();
-    void CreateLine3dVertexBuffer();
-    void DestroyLine3dVertexBuffer();
-    void CreateTriangle3dVertexBuffer();
-    void DestroyTriangle3dVertexBuffer();
-    void CreateQuadVertexBuffer();
-    void DestroyQuadVertexBuffer();
-    void CreateTextVertexBuffer();
-    void DestroyTextVertexBuffer();
+        /**
+         * Set the Z coordinate.
+         *
+         * @param z[in] The Z coordinate.
+         */
+        void SetZ(const float z);
 
-private:
-    Ogre::SceneManager* m_SceneManager;
-    Ogre::RenderSystem* m_RenderSystem;
+        /**
+         * Sets the fade distance for text.
+         *
+         * @param fade_s[in] The text starts fading at this distance.
+         * @param fade_e[in] The text has faded completely at this distance.
+         */
+        void SetFadeDistance(const float fade_s, const float fade_e);
 
-    // line
-    Ogre::RenderOperation               m_LineRenderOp;
-    Ogre::HardwareVertexBufferSharedPtr m_LineVertexBuffer;
-    unsigned int                        m_LineMaxVertexCount;
+        /**
+         * Text alignment modes.
+         */
+        enum TextAlignment{
 
-    // line3d
-    Ogre::RenderOperation               m_Line3dRenderOp;
-    Ogre::HardwareVertexBufferSharedPtr m_Line3dVertexBuffer;
-    unsigned int                        m_Line3dMaxVertexCount;
+            /**
+             * Left aligned text.
+             */
+            LEFT,
 
-    // triangle3d
-    Ogre::RenderOperation               m_Triangle3dRenderOp;
-    Ogre::HardwareVertexBufferSharedPtr m_Triangle3dVertexBuffer;
-    unsigned int                        m_Triangle3dMaxVertexCount;
+            /**
+             * Right aligned text.
+             */
+            RIGHT,
 
-    // quad
-    Ogre::RenderOperation               m_QuadRenderOp;
-    Ogre::HardwareVertexBufferSharedPtr m_QuadVertexBuffer;
-    unsigned int                        m_QuadMaxVertexCount;
+            /**
+             * Center aligned text.
+             */
+            CENTER
+        };
+        void SetTextAlignment(TextAlignment alignment);
 
-    // text
-    Ogre::RenderOperation               m_TextRenderOp;
-    Ogre::HardwareVertexBufferSharedPtr m_TextVertexBuffer;
-    unsigned int                        m_TextMaxVertexCount;
-    Ogre::FontPtr                       m_Font;
-    int                                 m_FontHeight;
-    TextAlignment                       m_TextAlignment;
+        /**
+         * Draws a line in 2D space.
+         *
+         * If the debug vertex limit has been reached or if it would be
+         * exceeded by drawing the line, a warning message will be printed and
+         * nothing will be done.
+         *
+         * @param x1[in] X coordinate of the starting point.
+         * @param y1[in] Y coordinate of the starting point.
+         * @param x2[in] X coordinate of the ending point.
+         * @param y2[in] Y coordinate of the ending point.
+         */
+        void Line(
+          const float x1, const float y1, const float x2, const float y2
+        );
 
-    Ogre::MaterialPtr                   m_Material;
-    Ogre::MaterialPtr                   m_Material3d;
-    Ogre::ColourValue                   m_Colour;
-    bool                                m_ScreenSpace;
-    float                               m_Z;
-    float                               m_FadeStartSquare; // text start fading from this distance
-    float                               m_FadeEndSquare; // text fully faded from this distance
+        /**
+         * Draws a line in 3D space.
+         *
+         * If the debug vertex limit has been reached or if it would be
+         * exceeded by drawing the line, a warning message will be printed and
+         * nothing will be done.
+         *
+         * @param point1[in] Starting point.
+         * @param point2[in] Ending point.
+         */
+        void Line3d(const Ogre::Vector3& point1, const Ogre::Vector3& point2);
+
+        /**
+         * Draws a triangle in 3D space.
+         *
+         * If the debug vertex limit has been reached or if it would be
+         * exceeded by drawing the triangle, a warning message will be printed
+         * and nothing will be done.
+         *
+         * @param point1[in] A triangle vertex point.
+         * @param point2[in] A triangle vertex point.
+         * @param point3[in] A triangle vertex point.
+         */
+        void Triangle3d(
+          const Ogre::Vector3& point1, const Ogre::Vector3& point2,
+          const Ogre::Vector3& point3
+        );
+
+        /**
+         * Draws a quad in 2D space.
+         *
+         * If the debug vertex limit has been reached or if it would be
+         * exceeded by drawing the quad, a warning message will be printed and
+         * nothing will be done.
+         *
+         * @param x1[in] X coordinate of the first point.
+         * @param y1[in] Y coordinate of the first point.
+         * @param x2[in] X coordinate of the second point.
+         * @param y2[in] Y coordinate of the second point.
+         * @param x3[in] X coordinate of the third point.
+         * @param y3[in] Y coordinate of the third point.
+         * @param x4[in] X coordinate of the fourth point.
+         * @param y4[in] Y coordinate of the fourth point.
+         */
+        void Quad(
+          const float x1, const float y1, const float x2, const float y2,
+          const float x3, const float y3, const float x4, const float y4
+        );
+
+        /**
+         * Writes debug text on the game screen.
+         *
+         * The text won't be warped automatically. If the maximum number of
+         * debug letters has been written, or if it would be exceeded by
+         * writing, a warning message will be printed to console and nothing
+         * will be done.
+         *
+         * @param x[in] Left position of the text in the screen.
+         * @param y[in] Left position of the text in the screen.
+         * @param text[in] The text to write.
+         */
+        void Text(const float x, const float y, const Ogre::String& text);
+
+        /**
+         * Writes debug text on the game screen.
+         *
+         * The text will be warped automatically. If the maximum number of
+         * debug letters has been written, or if it would be exceeded by
+         * writing, a warning message will be printed to console and nothing
+         * will be done.
+         *
+         * @param point[in] Top left point of the screen where the text will be
+         * written.
+         * @param x[in] Text width.
+         * @param y[in] Text height.
+         * @param text[in] The text to write.
+         */
+        void Text(
+          const Ogre::Vector3& point, const float x, const float y,
+          const Ogre::String& text
+        );
+
+        /**
+         * Ends the render queue.
+         *
+         * @param queueGroupId[in] The group id of the queue to end.
+         * @param invocation[in]
+         * @param repeatThisInvocation[in]
+         * @todo Understand and document.
+         */
+        void renderQueueEnded(
+          Ogre::uint8 queueGroupId, const Ogre::String& invocation,
+          bool& repeatThisInvocation
+        );
+
+    private:
+
+        /**
+         * Creates a 2D line vertex buffer (2 vertices).
+         */
+        void CreateLineVertexBuffer();
+
+        /**
+         * Destroys a 2D line vertex buffer (2 vertices).
+         */
+        void DestroyLineVertexBuffer();
+
+        /**
+         * Creates a 3D line vertex buffer (2 vertices).
+         */
+        void CreateLine3dVertexBuffer();
+
+        /**
+         * Destroys a 3D line vertex buffer (2 vertices).
+         */
+        void DestroyLine3dVertexBuffer();
+
+        /**
+         * Creates a 3D triangle vertex buffer (3 vertices).
+         */
+        void CreateTriangle3dVertexBuffer();
+
+        /**
+         * Destroys a 3D triangle vertex buffer (3 vertices).
+         */
+        void DestroyTriangle3dVertexBuffer();
+
+        /**
+         * Creates a quad vertex buffer (4 vertices).
+         */
+        void CreateQuadVertexBuffer();
+
+        /**
+         * Destroys a quad vertex buffer (4 vertices).
+         */
+        void DestroyQuadVertexBuffer();
+
+        /**
+         * Creates a text vertex buffer.
+         */
+        void CreateTextVertexBuffer();
+
+        /**
+         * Destroys a text vertex buffer.
+         */
+        void DestroyTextVertexBuffer();
+
+        /**
+         * The scene manager.
+         */
+        Ogre::SceneManager* scene_manager_;
+
+        /**
+         * The render system.
+         */
+        Ogre::RenderSystem* render_system_;
+
+        /**
+         * A 2D line render operation.
+         */
+        Ogre::RenderOperation line_render_operation_;
+
+        /**
+         * A 2D line vertex buffer (2 vertices).
+         */
+        Ogre::HardwareVertexBufferSharedPtr line_vertex_buffer_;
+
+        /**
+         * Maximum number of vertices for debug 2D lines.
+         */
+        unsigned int line_max_vertex_;
+
+        /**
+         * A 3D line render operation.
+         */
+        Ogre::RenderOperation line_3d_render_operation_;
+
+        /**
+         * A 3D line vertex buffer (2 vertices).
+         */
+        Ogre::HardwareVertexBufferSharedPtr line_3d_vertex_buffer_;
+
+        /**
+         * Maximum number of vertices for debug 3D lines.
+         */
+        unsigned int line_3d_max_vertex_;
+
+        /**
+         * A 3D triangle render operation.
+         */
+        Ogre::RenderOperation triangle_3d_render_operation_;
+
+        /**
+         * A 3D triangle vertex buffer (3 vertices).
+         */
+        Ogre::HardwareVertexBufferSharedPtr triangle_3d_vertex_buffer_;
+
+        /**
+         * Maximum number of vertices for debug 3D triangles.
+         */
+        unsigned int triangle_3d_max_vertex_;
+
+        /**
+         * A quad render operation.
+         */
+        Ogre::RenderOperation quad_render_operation_;
+
+        /**
+         * A quad vertex buffer (4 vertices).
+         */
+        Ogre::HardwareVertexBufferSharedPtr quad_vertex_buffer_;
+
+        /**
+         * Maximum number of vertices for debug quads.
+         */
+        unsigned int quad_max_vertex_;
+
+        /**
+         * A text render operation.
+         */
+        Ogre::RenderOperation text_render_operation_;
+
+        /**
+         * A text vertex buffer.
+         *
+         * @todo Confirm if it's 6 vertices per letter.
+         */
+        Ogre::HardwareVertexBufferSharedPtr text_vertex_buffer_;
+
+        /**
+         * Maximum number of vertices for debug text.
+         *
+         * @todo Confirm if it's 6 vertices per letter.
+         */
+        unsigned int text_max_vertex_;
+
+        /**
+         * Font to use for debug text.
+         */
+        Ogre::FontPtr font_;
+
+        /**
+         * Font height for the debug text.
+         */
+        int font_height_;
+
+        /**
+         * Alignment for debug text.
+         */
+        TextAlignment text_alignment_;
+
+        /**
+         * Material for a 2D object.
+         */
+        Ogre::MaterialPtr material_;
+
+        /**
+         * Material for a 3D object.
+         */
+        Ogre::MaterialPtr material_3d_;
+
+        /**
+         * Color for the debug object or text.
+         */
+        Ogre::ColourValue colour_;
+
+        /**
+         * The screen space.
+         */
+        bool screen_space_;
+
+        /**
+         * Z coordinate for the debug object.
+         */
+        float z_coordinate_;
+
+        /**
+         * For text fading. The text start fading from this distance.
+         */
+        float fade_start_square_;
+
+        /**
+         * For text fading. The text fully fades at this distance.
+         */
+        float fade_end_square_;
 };
 
-
-
+/**
+ * Shortcut for a DebugDraw singleton.
+ */
 #define DEBUG_DRAW DebugDraw::getSingleton()
 
-
-
-#endif // DEBUG_DRAW_H

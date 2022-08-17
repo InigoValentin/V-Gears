@@ -69,7 +69,7 @@ set(HEADER_FILES
   include/core/EntityPoint.h
   include/core/EntityTrigger.h
   include/core/Event.h
-  include/core/GameFrameListner.h
+  include/core/GameFrameListener.h
   include/core/InputManager.h
   include/core/InputManagerCommands.h
   include/core/Logger.h
@@ -250,7 +250,7 @@ set(SOURCE_FILES
   src/core/EntityModel.cpp
   src/core/EntityPoint.cpp
   src/core/EntityTrigger.cpp
-  src/core/GameFrameListner.cpp
+  src/core/GameFrameListener.cpp
   src/core/InputManager.cpp
   src/core/ScriptManager.cpp
   src/core/Timer.cpp

@@ -1,62 +1,120 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
-
-Copyright (c) 2013-08-13 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __FFVIICharacter_H__
-#define __FFVIICharacter_H__
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
 #include "common/TypeDefine.h"
 
-namespace FFVII
-{
-    class Character
-    {
-    public:
-                    Character();
-        virtual    ~Character();
+namespace FFVII{
 
-        enum CharacterId
-        {
-            CLOUD   = 0
-           ,TIFA    = 1
-           ,AERIS   = 2
-           ,BARRET  = 3
-           ,RED     = 4
-           ,CID     = 5
-           ,VINCENT = 6
-           ,YUVI    = 7
-           ,KETCY   = 8
-           ,UNKNOWN = 9
-        };
+    /**
+     * A playable character.
+     */
+    class Character{
 
-        static CharacterId getIdByName( const QGears::String& name );
+        public:
 
-    private:
-        typedef std::map<QGears::String, CharacterId> ChracterIdLookupMap;
+            /**
+             * Constructor.
+             */
+            Character();
 
-        static          ChracterIdLookupMap createLookupMap();
-        static const    ChracterIdLookupMap ms_character_id_lookups;
+            /**
+             * Destructor.
+             */
+            virtual ~Character();
+
+            /**
+             * List of character IDs.
+             */
+            enum CharacterId{
+
+                /**
+                 * Cloud's ID.
+                 */
+                CLOUD   = 0,
+
+                /**
+                 * Tifa's ID.
+                 */
+                TIFA = 1,
+
+                /**
+                 * Aerith's ID.
+                 */
+                AERIS = 2,
+
+                /**
+                 * Barret's ID.
+                 */
+                BARRET = 3,
+
+                /**
+                 * Red XIII's ID.
+                 */
+                RED = 4,
+
+                /**
+                 * Cid's ID.
+                 */
+                CID = 5,
+
+                /**
+                 * Vincent's ID.
+                 */
+                VINCENT = 6,
+
+                /**
+                 * Yuffie's ID.
+                 */
+                YUVI = 7,
+
+                /**
+                 * Cait Sith's ID.
+                 */
+                KETCY = 8,
+
+                /**
+                 * Unknown character ID.
+                 */
+                UNKNOWN = 9
+            };
+
+            /**
+             * Retrieves a character ID from it's name.
+             *
+             * @param name[in] Chaarcter name.
+             * @return ID of the character with the specified name, or {@see
+             * UNKNOWN} if the character doesn't exist.
+             */
+            static CharacterId GetIdByName( const QGears::String& name );
+
+        private:
+
+            typedef std::map<QGears::String, CharacterId> CharacterIdLookupMap;
+
+            /**
+             * Creates a lookup map for character names.
+             *
+             * Names frequently used in the field scripts for the playable
+             * characters are included in the lookup map.
+             *
+             * @return The character name lookup map.
+             */
+            static CharacterIdLookupMap CreateLookupMap();
+
+
+            static const CharacterIdLookupMap character_id_lookup_;
     };
 }
 

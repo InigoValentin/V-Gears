@@ -1,4 +1,4 @@
--- create containers for all script entitys
+-- create containers for all script entities
 System = {}
 EntityContainer = {}
 UiContainer = {}

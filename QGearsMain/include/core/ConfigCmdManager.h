@@ -1,38 +1,113 @@
-#ifndef CONFIG_CMD_MANAGER_H
-#define CONFIG_CMD_MANAGER_H
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include <OgreSingleton.h>
 #include <vector>
 #include <memory>
 #include "ConfigCmd.h"
 
+/**
+ * A manager for configuration commands.
+ */
+class ConfigCmdManager : public Ogre::Singleton<ConfigCmdManager>{
 
+    public:
 
-class ConfigCmdManager : public Ogre::Singleton< ConfigCmdManager >
-{
-public:
-    ConfigCmdManager();
-    ~ConfigCmdManager();
+        /**
+         * Constructor.
+         */
+        ConfigCmdManager();
 
-    void AddCommand( const Ogre::String& name, const Ogre::String& description, const Ogre::String& params_description, ConfigCmdHandler handler, ConfigCmdCompletion completion );
+        /**
+         * Destructor.
+         */
+        ~ConfigCmdManager();
 
-    void ExecuteString( const Ogre::String& cmd_string );
+        /**
+         * Adds a command to the manager.
+         *
+         * @param name[in] Command name.
+         * @param description[in] Command description.
+         * @param params_description[in] Command parameters description.
+         * @param handler[in] Command handler.
+         * @param completion[in] Command completion.
+         */
+        void AddCommand(
+          const Ogre::String& name, const Ogre::String& description,
+          const Ogre::String& params_description, ConfigCmdHandler handler,
+          ConfigCmdCompletion completion
+        );
 
-    // return command with specified name
-    ConfigCmd* Find( const Ogre::String& name ) const;
-    int GetConfigCmdNumber();
-    ConfigCmd* GetConfigCmd( unsigned int i ) const;
+        /**
+         * Executes a command.
+         *
+         * @param cmd_string[in] The command, in string format.
+         */
+        void ExecuteString( const Ogre::String& cmd_string );
 
-private:
-    // forbid copy
-    ConfigCmdManager( const ConfigCmdManager& rhs ) = delete;
-    ConfigCmdManager operator =( const ConfigCmdManager& rhs ) = delete;
+        /**
+         * Finds a command by name.
+         *
+         * @param name[in] Name of the command.
+         * @return The command by the name, or nullptr if there is none.
+         */
+        ConfigCmd* Find(const Ogre::String& name) const;
 
-    void InitCmd();
+        /**
+         * Counts the commands in the manager.
+         *
+         * @return The total number of commands
+         */
+        int GetConfigCmdNumber();
 
-    std::vector< std::unique_ptr<ConfigCmd> > m_Commands;
+        /**
+         * Retrieves a command by index.
+         *
+         * A command index is the position at which it was added to the
+         * manager.
+         */
+        ConfigCmd* GetConfigCmd(unsigned int i) const;
+
+    private:
+
+        /**
+         * Forbidden copy constructor.
+         *
+         * @param rhs[in] Manager to not copy.
+         */
+        ConfigCmdManager(const ConfigCmdManager& rhs) = delete;
+
+        /**
+         * Forbidden copy constructor.
+         *
+         * @param rhs[in] Manager to not copy.
+         */
+        ConfigCmdManager operator =(const ConfigCmdManager& rhs) = delete;
+
+        /**
+         * Initializes the command.
+         *
+         * Must be called from the constructor.
+         */
+        void InitCmd();
+
+        /**
+         * List of command in the manager.
+         */
+        std::vector<std::unique_ptr<ConfigCmd>> commands_;
 };
 
-
-
-#endif // CONFIG_CMD_MANAGER_H

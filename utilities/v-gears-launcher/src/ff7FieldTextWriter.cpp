@@ -1,13 +1,28 @@
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
 #include "ff7FieldTextWriter.h"
 #include "common/QGearsStringUtil.h"
 
-// TODO: Refactor me - this is based on/copied from DatFile::DumpText
+// TODO: Refactor: this is based on/copied from DatFile::DumpText.
 
-
-
-//////////////////////////////////////////////
-static const unsigned char english_chars[256] = {
-    // 0    1       2       3       4       5       6       7       8       9       A       B       C       D       E       F
+/**
+ * Table of English characters.
+ */
+static const unsigned char ENGLISH_CHARS[256] = {
+    // 0  1     2     3     4     5     6     7     8     9     A     B     C     D     E     F
     0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, // 0x00 - 0x0F
     0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, // 0x10 - 0x1F
     0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, // 0x20 - 0x2F
@@ -26,6 +41,9 @@ static const unsigned char english_chars[256] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // 0xF0 - 0xFF
 };
 
+/**
+ *  First table of Japanese characters.
+ */
 static const unsigned short japanese_chars[256] = {
     // 0    1       2       3       4       5       6       7       8       9       A       B       C       D       E       F
     0xD030, 0x7030, 0xD330, 0x7330, 0xD630, 0x7630, 0xD930, 0x0000, 0xDC30, 0x7C30, 0xAC30, 0x4C30, 0xAE30, 0x4E30, 0xB030, 0x5030, // 0x00 - 0x0F
@@ -46,9 +64,10 @@ static const unsigned short japanese_chars[256] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0xF0 - 0xFF
 };
 
-
-
-static const unsigned short japanese_chars_fa[256] = {
+/**
+ * Second table of Japanese characters.
+ */
+static const unsigned short JAPANESE_CHARS_FA[256] = {
     // 0    1       2       3       4       5       6       7       8       9       A       B       C       D       E       F
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x2759, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0x00 - 0x0F
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0x10 - 0x1F
@@ -68,9 +87,10 @@ static const unsigned short japanese_chars_fa[256] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0xF0 - 0xFF
 };
 
-
-
-static const unsigned short japanese_chars_fb[256] = {
+/**
+ * Third table of Japanese characters.
+ */
+static const unsigned short JAPANESE_CHARS_FB[256] = {
     // 0    1       2       3       4       5       6       7       8       9       A       B       C       D       E       F
     0x0000, 0x0000, 0xB182, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0B4E, 0x0000, 0x6551, 0x4851, 0x0D4E, 0x505B, 0x9B4F, 0x4B5C, // 0x00 - 0x0F
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8E96, 0x0000, 0x0000, 0xE890, 0x0000, 0x3458, 0x0000, 0xF24E, 0x9395, 0x0000, 0x0000, // 0x10 - 0x1F
@@ -90,9 +110,10 @@ static const unsigned short japanese_chars_fb[256] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0xF0 - 0xFF
 };
 
-
-
-static const unsigned short japanese_chars_fc[256] = {
+/**
+ * Fourth table of Japanese characters.
+ */
+static const unsigned short JAPANESE_CHARS_FC[256] = {
     // 0    1       2       3       4       5       6       7       8       9       A       B       C       D       E       F
     0x0000, 0x0000, 0x188A, 0x0000, 0x7890, 0x6A75, 0x5788, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0x00 - 0x0F
     0x9358, 0xC35F, 0x0000, 0x0000, 0x0000, 0x0000, 0x5390, 0x0000, 0x0000, 0x0000, 0x0000, 0xFB5D, 0x0000, 0x0000, 0x0000, 0x0000, // 0x10 - 0x1F
@@ -112,9 +133,10 @@ static const unsigned short japanese_chars_fc[256] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0xF0 - 0xFF
 };
 
-
-
-static const unsigned short japanese_chars_fd[256] = {
+/**
+ * Fifth table of Japanese characters.
+ */
+static const unsigned short JAPANESE_CHARS_FD[256] = {
     // 0    1       2       3       4       5       6       7       8       9       A       B       C       D       E       F
     0x0000, 0x1D4F, 0x0000, 0xA263, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0x00 - 0x0F
     0xE682, 0x0000, 0xF056, 0x0000, 0x0000, 0x0000, 0x0000, 0xA25B, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0x10 - 0x1F
@@ -134,9 +156,10 @@ static const unsigned short japanese_chars_fd[256] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0xF0 - 0xFF
 };
 
-
-
-static const unsigned short japanese_chars_fe[256] = {
+/**
+ * Sixth table of Japanese characters.
+ */
+static const unsigned short JAPANESE_CHARS_FE[256] = {
     // 0    1       2       3       4       5       6       7       8       9       A       B       C       D       E       F
     0x0000, 0x0000, 0x0000, 0x667D, 0x0000, 0x0000, 0x0000, 0xAD65, 0x0000, 0x0000, 0xB96C, 0x0000, 0xD550, 0x585B, 0x0000, 0x0000, // 0x00 - 0x0F
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0x10 - 0x1F
@@ -156,375 +179,310 @@ static const unsigned short japanese_chars_fe[256] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0xF0 - 0xFF
 };
 
-void FF7FieldTextWriter::Begin(std::string fileName)
-{
-    mData.clear();
-    mLogger.reset(new Logger(fileName));
+void FF7FieldTextWriter::Begin(std::string file_name){
+    data_.clear();
+    logger_.reset(new Logger(file_name));
 
     // Write BOM
-    /* FIX ME - need to write data as UTF8
+    /* FIX ME - It needs to write data as UTF8.
     std::vector< unsigned char > bomBytes;
     bomBytes.push_back(0xFF);
     bomBytes.push_back(0xFE);
-    mLogger->Log(bomBytes);
+    logger_->Log(bomBytes);
     */
-    mTagOpen = false;
-    mLogger->Log("<texts>\n");
+    tag_open_ = false;
+    logger_->Log("<texts>\n");
 }
 
-u16 FF7FieldTextWriter::GetU16LE(u32 offset)
-{
-    if (offset+1 >= mData.size())
-    {
-        throw std::out_of_range("");
-    }
-    return *reinterpret_cast<u16*>(&mData[offset]);
+u16 FF7FieldTextWriter::GetU16LE(u32 offset){
+    if (offset+1 >= data_.size()) throw std::out_of_range("");
+    return *reinterpret_cast<u16*>(&data_[offset]);
 }
 
-u8 FF7FieldTextWriter::GetU8(u32 offset)
-{
-    if (offset >= mData.size())
-    {
-        throw std::out_of_range("");
-    }
-    return mData[offset];
+u8 FF7FieldTextWriter::GetU8(u32 offset){
+    if (offset >= data_.size()) throw std::out_of_range("");
+    return data_[offset];
 }
 
-void FF7FieldTextWriter::Write(const std::vector<u8>& scriptSectionBuffer, std::string fieldName, bool english /*= true*/)
-{
-    mData = scriptSectionBuffer;
-
-
-    // get sector 1 offset (scripts and dialog)
-    u32 offset_to_sector = 0; // Our buffer IS the start of scripts and dialog
+void FF7FieldTextWriter::Write(
+  const std::vector<u8>& script_section_buffer, std::string field_name,
+  bool english
+){
+    data_ = script_section_buffer;
+    // Get sector 1 offset (scripts and dialog).
+    u32 offset_to_sector = 0; // Our buffer IS the start of scripts and dialog.
     /*
-    u16 unknown1;			// Always 0x0502
-    char nEntities;			// Number of entities
-    char nModels;			// Number of models
-    u16 wStringOffset;			// Offset to strings code below extracts this offset
+    u16 unknown1; // Always 0x0502.
+    char nEntities; // Number of entities.
+    char nModels; // Number of models.
+    u16 wStringOffset; // Offset to strings code below extracts this offset.
     */
     u16 offset_to_dialogs = GetU16LE(offset_to_sector + 0x04);
-
     std::vector< unsigned char > dialog; // text line to write out
-
-    // HACK: if this func throws then this iteration generates invalid XML
-    // so close the unclosed XML tag - this func should be made thread safe and/or
-    // fix the fields that fail to convert correctly
-    if (mTagOpen)
-    {
-        mLogger->Log("[ERROR exception]");
-        mLogger->Log("</dialog>\n");
+    // HACK: If this function throws then this iteration generates invalid XML
+    // so close the unclosed XML tag - this function should be made thread safe
+    // and/or fix the fields that fail to convert correctly.
+    if (tag_open_){
+        logger_->Log("[ERROR exception]");
+        logger_->Log("</dialog>\n");
     }
-
     const u16 dialogCount = GetU16LE(offset_to_sector + offset_to_dialogs);
-    for (u16 i = 0; i <dialogCount; ++i)
-    {
-     
-        // get offset of string data
-        u32 offset = offset_to_sector + offset_to_dialogs + GetU16LE(
-            offset_to_sector + 
-            offset_to_dialogs
+    for (u16 i = 0; i <dialogCount; + +i){
+        // gGt offset of string data.
+        u32 offset
+          = offset_to_sector + offset_to_dialogs + GetU16LE(
+            offset_to_sector + offset_to_dialogs
             + 0x02 +  // +2 to skip dialog count
-            i * 0x02); // *2 because each char is 2 bytes
-
+            i * 0x02 // *2 because each char is 2 bytes
+          );
         AddText(dialog);
-        mLogger->Log("<dialog name=\"" + fieldName + "_" + std::to_string(i) + "\">");
-        mTagOpen = true;
-
-        for (unsigned char temp = 0x00;; ++offset)
-        {
+        logger_->Log(
+          "<dialog name=\"" + field_name + "_" + std::to_string(i) + "\">"
+        );
+        tag_open_ = true;
+        for (unsigned char temp = 0x00;; ++ offset){
             temp = GetU8(offset);
-            if (temp == 0xFF)
-            {
-                break;
+            if (temp == 0xFF) break;
+            if (temp == 0xE0 && english == true){
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
             }
-
-            if (temp == 0xE0 && english == true)
-            {
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
+            else if (temp == 0xE1 && english == true){
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
             }
-            else if (temp == 0xE1 && english == true)
-            {
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
-                dialog.push_back(english_chars[0x00]);
+            else if (temp == 0xE2 && english == true){
+                dialog.push_back(ENGLISH_CHARS[0x0C]);
+                dialog.push_back(ENGLISH_CHARS[0x00]);
             }
-            else if (temp == 0xE2 && english == true)
-            {
-                dialog.push_back(english_chars[0x0C]);
-                dialog.push_back(english_chars[0x00]);
-            }
-            else if (temp == 0xE8)
-            {
+            else if (temp == 0xE8){
                 AddText(dialog);
-                mLogger->Log("<next_page />");
+                logger_->Log("<next_page />");
             }
-            else if (temp == 0xEA)
-            {
+            else if (temp == 0xEA){
                 AddText(dialog);
-                mLogger->Log("<include name=\"char_cloud\" />");
+                logger_->Log("<include name=\"char_cloud\" />");
             }
-            else if (temp == 0xEB)
-            {
+            else if (temp == 0xEB){
                 AddText(dialog);
-                mLogger->Log("<include name=\"char_barret\" />");
+                logger_->Log("<include name=\"char_barret\" />");
             }
-            else if (temp == 0xEC)
-            {
+            else if (temp == 0xEC){
                 AddText(dialog);
-                mLogger->Log("<character id=\"2\" />");
+                logger_->Log("<character id=\"2\" />");
             }
-            else if (temp == 0xED)
-            {
+            else if (temp == 0xED){
                 AddText(dialog);
-                mLogger->Log("<character id=\"3\" />");
+                logger_->Log("<character id=\"3\" />");
             }
-            else if (temp == 0xEE)
-            {
+            else if (temp == 0xEE){
                 AddText(dialog);
-                mLogger->Log("<character id=\"4\" />");
+                logger_->Log("<character id=\"4\" />");
             }
-            else if (temp == 0xEF)
-            {
+            else if (temp == 0xEF){
                 AddText(dialog);
-                mLogger->Log("<character id=\"5\" />");
+                logger_->Log("<character id=\"5\" />");
             }
-            else if (temp == 0xF0)
-            {
+            else if (temp == 0xF0){
                 AddText(dialog);
-                mLogger->Log("<character id=\"6\" />");
+                logger_->Log("<character id=\"6\" />");
             }
-            else if (temp == 0xF1)
-            {
+            else if (temp == 0xF1){
                 AddText(dialog);
-                mLogger->Log("<character id=\"7\" />");
+                logger_->Log("<character id=\"7\" />");
             }
-            else if (temp == 0xF2)
-            {
+            else if (temp == 0xF2){
                 AddText(dialog);
-                mLogger->Log("<character id=\"8\" />");
+                logger_->Log("<character id=\"8\" />");
             }
-            else if (temp == 0xF3)
-            {
+            else if (temp == 0xF3){
                 AddText(dialog);
-                mLogger->Log("<character party_id=\"0\" />");
+                logger_->Log("<character party_id=\"0\" />");
             }
-            else if (temp == 0xF4)
-            {
+            else if (temp == 0xF4){
                 AddText(dialog);
-                mLogger->Log("<character party_id=\"1\" />");
+                logger_->Log("<character party_id=\"1\" />");
             }
-            else if (temp == 0xF5)
-            {
+            else if (temp == 0xF5){
                 AddText(dialog);
-                mLogger->Log("<character party_id=\"2\" />");
+                logger_->Log("<character party_id=\"2\" />");
             }
-            else if (temp == 0xF6)
-            {
+            else if (temp == 0xF6){
                 AddText(dialog);
-                mLogger->Log("<image sprite=\"ButtonCircle\" />");
+                logger_->Log("<image sprite=\"ButtonCircle\" />");
             }
-            else if (temp == 0xF7)
-            {
+            else if (temp == 0xF7){
                 AddText(dialog);
-                mLogger->Log("<image sprite=\"ButtonTriangle\" />");
+                logger_->Log("<image sprite=\"ButtonTriangle\" />");
             }
-            else if (temp == 0xF8)
-            {
+            else if (temp == 0xF8){
                 AddText(dialog);
-                mLogger->Log("<image sprite=\"ButtonSquare\" />");
+                logger_->Log("<image sprite=\"ButtonSquare\" />");
             }
-            else if (temp == 0xF9)
-            {
+            else if (temp == 0xF9){
                 AddText(dialog);
-                mLogger->Log("<image sprite=\"ButtonCross\" />");
+                logger_->Log("<image sprite=\"ButtonCross\" />");
             }
-            else if ((temp == 0xFA || temp == 0xFB || temp == 0xFC || temp == 0xFD) && english == false)
-            {
-                ++offset;
+            else if (
+              (temp == 0xFA || temp == 0xFB || temp == 0xFC || temp == 0xFD)
+              && english == false
+            ){
+                ++ offset;
+                unsigned char temp2 = GetU8(offset);
+                if (temp == 0xFA){
+                    if (JAPANESE_CHARS_FA[temp2] != 0x0000){
+                        dialog.push_back(JAPANESE_CHARS_FA[temp2] >> 8);
+                        dialog.push_back(JAPANESE_CHARS_FA[temp2] & 0xFF);
+                    }
+                    else{
+                        AddText(dialog);
+                        logger_->Log(
+                          "[MISSING 0xFA " + HexToString(temp2, 2, '0') + "]"
+                        );
+                    }
+                }
+                else if (temp == 0xFB){
+                    if (JAPANESE_CHARS_FB[temp2] != 0x0000){
+                        dialog.push_back(JAPANESE_CHARS_FB[temp2] >> 8);
+                        dialog.push_back(JAPANESE_CHARS_FB[temp2] & 0xFF);
+                    }
+                    else{
+                        AddText(dialog);
+                        logger_->Log(
+                          "[MISSING 0xFB " + HexToString(temp2, 2, '0') + "]"
+                        );
+                    }
+                }
+                else if (temp == 0xFC){
+                    if (JAPANESE_CHARS_FC[temp2] != 0x0000){
+                        dialog.push_back(JAPANESE_CHARS_FC[temp2] >> 8);
+                        dialog.push_back(JAPANESE_CHARS_FC[temp2] & 0xFF);
+                    }
+                    else{
+                        AddText(dialog);
+                        logger_->Log(
+                          "[MISSING 0xFC " + HexToString(temp2, 2, '0') + "]"
+                        );
+                    }
+                }
+                else if (temp == 0xFD){
+                    if (JAPANESE_CHARS_FD[temp2] != 0x0000){
+                        dialog.push_back(JAPANESE_CHARS_FD[temp2] >> 8);
+                        dialog.push_back(JAPANESE_CHARS_FD[temp2] & 0xFF);
+                    }
+                    else{
+                        AddText(dialog);
+                        logger_->Log(
+                          "[MISSING 0xFD " + HexToString(temp2, 2, '0') + "]"
+                        );
+                    }
+                }
+            }
+            else if (temp == 0xFE){
+                ++ offset;
                 unsigned char temp2 = GetU8(offset);
 
-                if (temp == 0xFA)
-                {
-                    if (japanese_chars_fa[temp2] != 0x0000)
-                    {
-                        dialog.push_back(japanese_chars_fa[temp2] >> 8); dialog.push_back(japanese_chars_fa[temp2] & 0xFF);
-                    }
-                    else
-                    {
-                        AddText(dialog);
-                        mLogger->Log("[MISSING 0xFA " + HexToString(temp2, 2, '0') + "]");
-                    }
-                }
-                else if (temp == 0xFB)
-                {
-                    if (japanese_chars_fb[temp2] != 0x0000)
-                    {
-                        dialog.push_back(japanese_chars_fb[temp2] >> 8); dialog.push_back(japanese_chars_fb[temp2] & 0xFF);
-                    }
-                    else
-                    {
-                        AddText(dialog);
-                        mLogger->Log("[MISSING 0xFB " + HexToString(temp2, 2, '0') + "]");
-                    }
-                }
-                else if (temp == 0xFC)
-                {
-                    if (japanese_chars_fc[temp2] != 0x0000)
-                    {
-                        dialog.push_back(japanese_chars_fc[temp2] >> 8); dialog.push_back(japanese_chars_fc[temp2] & 0xFF);
-                    }
-                    else
-                    {
-                        AddText(dialog);
-                        mLogger->Log("[MISSING 0xFC " + HexToString(temp2, 2, '0') + "]");
-                    }
-                }
-                else if (temp == 0xFD)
-                {
-                    if (japanese_chars_fd[temp2] != 0x0000)
-                    {
-                        dialog.push_back(japanese_chars_fd[temp2] >> 8); dialog.push_back(japanese_chars_fd[temp2] & 0xFF);
-                    }
-                    else
-                    {
-                        AddText(dialog);
-                        mLogger->Log("[MISSING 0xFD " + HexToString(temp2, 2, '0') + "]");
-                    }
-                }
-            }
-            else if (temp == 0xFE)
-            {
-                ++offset;
-
-                unsigned char temp2 = GetU8(offset);
-
-                // TODO: I think value must be RGB?
-
-                // TODO: anfrst fails to terminate a colour breaking all of the XML, so colours turned off for now
-                if (temp2 == 0xD4)
-                {
+                // TODO: Maybe value must be RGB?
+                // TODO: anfrst map fails to terminate a colour breaking all of
+                // the XML, so colours turned off for now.
+                if (temp2 == 0xD4){
                     AddText(dialog);
-                   // mLogger->Log("<colour value=\"red\">");
+                   // logger_->Log("<colour value=\"red\">");
                 }
-                else if (temp2 == 0xD5)
-                {
+                else if (temp2 == 0xD5){
                     AddText(dialog);
-                   // mLogger->Log("<colour value=\"purple\" >");
+                   // logger_->Log("<colour value=\"purple\" >");
                 }
-                else if (temp2 == 0xD6)
-                {
+                else if (temp2 == 0xD6){
                     AddText(dialog);
-                    //mLogger->Log("<colour value=\"green\" >");
+                    //logger_->Log("<colour value=\"green\" >");
                 }
-                else if (temp2 == 0xD7)
-                {
+                else if (temp2 == 0xD7){
                     AddText(dialog);
-                   // mLogger->Log("<colour value=\"cyan\" >");
+                   // logger_->Log("<colour value=\"cyan\" >");
                 }
-                else if (temp2 == 0xD8)
-                {
+                else if (temp2 == 0xD8){
                     AddText(dialog);
-                   // mLogger->Log("<colour value=\"yellow\">");
+                   // logger_->Log("<colour value=\"yellow\">");
                 }
-                else if (temp2 == 0xD9)
-                {
+                else if (temp2 == 0xD9){
                     AddText(dialog);
-                   // mLogger->Log("</colour>");
+                   // logger_->Log("</colour>");
                 }
-                else if (temp2 == 0xDC)
-                {
+                else if (temp2 == 0xDC){
                     AddText(dialog);
-                   // mLogger->Log("<pause_ok >");
+                   // logger_->Log("<pause_ok >");
                 }
-                else if (temp2 == 0xDD)
-                {
+                else if (temp2 == 0xDD){
                     u16 wait = GetU16LE(offset + 1);
-                    ++offset;
-                    ++offset;
+                    ++ offset;
+                    ++ offset;
                     AddText(dialog);
-                    mLogger->Log("<pause time=\"" + IntToString(wait) + "\" />");
+                    logger_->Log(
+                      "<pause time=\"" + IntToString(wait) + "\" />"
+                    );
                 }
-                else
-                {
-                    if (japanese_chars_fe[temp2] != 0x0000 && english == false)
-                    {
-                        dialog.push_back(japanese_chars_fe[temp2] >> 8); dialog.push_back(japanese_chars_fe[temp2] & 0xFF);
+                else{
+                    if (JAPANESE_CHARS_FE[temp2] != 0x0000 && english == false){
+                        dialog.push_back(JAPANESE_CHARS_FE[temp2] >> 8);
+                        dialog.push_back(JAPANESE_CHARS_FE[temp2] & 0xFF);
                     }
-                    else
-                    {
+                    else{
                         AddText(dialog);
-                        mLogger->Log("[MISSING 0xFE " + HexToString(temp2, 2, '0') + "]");
+                        logger_->Log(
+                          "[MISSING 0xFE " + HexToString(temp2, 2, '0') + "]"
+                        );
                     }
                 }
             }
-            else
-            {
-                if (japanese_chars[temp] != 0x0000 && english == false)
-                {
+            else{
+                if (japanese_chars[temp] != 0x0000 && english == false){
                    // dialog.push_back(japanese_chars[temp]);
                 }
-                else if (english_chars[temp] != 0x0000 && english == true)
-                {
-                    dialog.push_back(english_chars[temp]);
+                else if (ENGLISH_CHARS[temp] != 0x0000 && english == true){
+                    dialog.push_back(ENGLISH_CHARS[temp]);
                 }
-                else
-                {
+                else{
                     AddText(dialog);
-                    if (temp == 0xa9)
-                    {
-                        // I think this one is "..." ?
-                        mLogger->Log("...");
-                    }
-                    else
-                    {
-                        mLogger->Log("[MISSING CHAR " + HexToString(temp, 2, '0') + "]");
+                    if (temp == 0xa9) logger_->Log("..."); // TODO Verify.
+                    else{
+                        logger_->Log(
+                          "[MISSING CHAR " + HexToString(temp, 2, '0') + "]"
+                        );
                     }
                 }
             }
         }
-
         AddText(dialog);
-        mLogger->Log("</dialog>\n\n");
-        mTagOpen = false;
+        logger_->Log("</dialog>\n\n");
+        tag_open_ = false;
     }
 
 }
 
-void FF7FieldTextWriter::End()
-{
-    if (mLogger)
-    {
-        mLogger->Log("</texts>\n");
-    }
-    mLogger.reset();
+void FF7FieldTextWriter::End(){
+    if (logger_) logger_->Log("</texts>\n");
+    logger_.reset();
 }
 
-void FF7FieldTextWriter::AddText(std::vector< unsigned char >& text)
-{
-    if (text.empty())
-    {
-        return;
-    }
-
+void FF7FieldTextWriter::AddText(std::vector< unsigned char >& text){
+    if (text.empty()) return;
     std::string str(reinterpret_cast<char*>(text.data()), text.size());
-
     str = Ogre::StringUtil::replaceAll(str, "&", "&amp;");
     str = Ogre::StringUtil::replaceAll(str, "\"", "&quot;");
     str = Ogre::StringUtil::replaceAll(str, "'", "&apos;");
     str = Ogre::StringUtil::replaceAll(str, "<", "&lt;");
     str = Ogre::StringUtil::replaceAll(str, ">", "&gt;");
-  
-    mLogger->Log(str);
+    logger_->Log(str);
     text.clear();
 }

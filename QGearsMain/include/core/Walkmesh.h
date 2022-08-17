@@ -1,60 +1,174 @@
-#ifndef WALKMESH_H
-#define WALKMESH_H
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include <Ogre.h>
 #include <vector>
 
-struct WalkmeshTriangle
-{
+/**
+ * A triangle of a walkmesh.
+ */
+struct WalkmeshTriangle{
+
+    /**
+     * Constructor.
+     */
     WalkmeshTriangle():
-        a( 0, 0, 0 ),
-        b( 0, 0, 0 ),
-        c( 0, 0, 0 ),
-        locked( false )
+      a(0, 0, 0),
+      b(0, 0, 0),
+      c(0, 0, 0),
+      locked(false)
     {
-        access_side[ 0 ] = -1;
-        access_side[ 1 ] = -1;
-        access_side[ 2 ] = -1;
+        access_side[0] = -1;
+        access_side[1] = -1;
+        access_side[2] = -1;
     }
 
+    /**
+     * A side of the triangle.
+     */
     Ogre::Vector3 a;
+
+    /**
+     * A side of the triangle.
+     */
     Ogre::Vector3 b;
+
+    /**
+     * A side of the triangle.
+     */
     Ogre::Vector3 c;
 
-    int           access_side[ 3 ];
-    bool          locked;
+    /**
+     * @todo Understand and document.
+     */
+    int access_side[3];
+
+    /**
+     * Indicates if the triangle is locked (if it's walkable).
+     */
+    bool locked;
 };
 
-namespace QGears
-{
+namespace QGears{
     typedef Ogre::SharedPtr<class WalkmeshFile> WalkmeshFilePtr;
 }
 
-class Walkmesh
-{
-public:
-    Walkmesh();
-    virtual ~Walkmesh();
+class Walkmesh{
 
-    void UpdateDebug();
-    void Clear();
+    public:
 
-    void AddTriangle( const WalkmeshTriangle& triangle );
+        /**
+         * Constructor.
+         */
+        Walkmesh();
 
-    int GetAccessSide( unsigned int triangle_id, unsigned char side ) const;
-    const Ogre::Vector3& GetA( unsigned int triangle_id ) const;
-    const Ogre::Vector3& GetB( unsigned int triangle_id ) const;
-    const Ogre::Vector3& GetC( unsigned int triangle_id ) const;
-    int GetNumberOfTriangles() const;
-    void LockWalkmesh( unsigned int triangle_id, bool lock );
-    bool IsLocked( unsigned int triangle_id ) const;
+        /**
+         * Destructor.
+         */
+        virtual ~Walkmesh();
 
-    virtual void load( const QGears::WalkmeshFilePtr &walkmesh );
+        /**
+         * Updates the walkmesh with debug information.
+         */
+        void UpdateDebug();
 
-private:
-    std::vector< WalkmeshTriangle > m_Triangles;
+        /**
+         * Deletes all the triangles in the walkmesh.
+         */
+        void Clear();
+
+        /**
+         * Adds a triangle to the walkmesh.
+         *
+         * @param triangle[in] Triangle to add.
+         */
+        void AddTriangle(const WalkmeshTriangle& triangle);
+
+        /**
+         * @todo Understand and document.
+         *
+         * @param triangle[in] Triangle.
+         * @param side[in] The side index in the triangle.
+         * @return @todo.
+         */
+        int GetAccessSide(unsigned int triangle_id, unsigned char side) const;
+
+        /**
+         * Retrieves the first side of a triangle.
+         *
+         * @param triangle_id[in] ID of the triangle.
+         * @return The side of the triangle. Ogre::Vector3::ZERO if the
+         * triangle doesn't exist.
+         */
+        const Ogre::Vector3& GetA(unsigned int triangle_id) const;
+
+        /**
+         * Retrieves the second side of a triangle.
+         *
+         * @param triangle_id[in] ID of the triangle.
+         * @return The side of the triangle. Ogre::Vector3::ZERO if the
+         * triangle doesn't exist.
+         */
+        const Ogre::Vector3& GetB(unsigned int triangle_id) const;
+
+        /**
+         * Retrieves the third side of a triangle.
+         *
+         * @param triangle_id[in] ID of the triangle.
+         * @return The side of the triangle. Ogre::Vector3::ZERO if the
+         * triangle doesn't exist.
+         */
+        const Ogre::Vector3& GetC(unsigned int triangle_id) const;
+
+        /**
+         * Counts the triangles in the walkmesh.
+         *
+         * @return The number of triangles in the walkmesh.
+         */
+        int GetNumberOfTriangles() const;
+
+        /**
+         * Locks or unlocks a triangle.
+         *
+         * @param triangle_id[in] ID of the triangle.
+         * @param lock[in] True to lock, false to unlock.
+         */
+        void LockWalkmesh(unsigned int triangle_id, bool lock);
+
+        /**
+         * Checks if a triangle is locked.
+         *
+         * @param triangle_id[in] ID of the trinagle.
+         * @return True if the triangle is locked, false otherwise.
+         */
+        bool IsLocked(unsigned int triangle_id) const;
+
+        /**
+         * Loads a walkmesh from a file.
+         *
+         * @param walkmesh[in] Walkmesh file.
+         */
+        virtual void load(const QGears::WalkmeshFilePtr &walkmesh);
+
+    private:
+
+        /**
+         * The list of triangles.
+         */
+        std::vector<WalkmeshTriangle> triangles_;
 };
 
-
-
-#endif // WALKMESH_H

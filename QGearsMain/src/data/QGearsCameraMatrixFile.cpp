@@ -1,164 +1,89 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
-
-Copyright (c) 2013-09-02 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#include "data/QGearsCameraMatrixFile.h"
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
 #include <OgreLogManager.h>
-
+#include "data/QGearsCameraMatrixFile.h"
 #include "data/QGearsCameraMatrixFileSerializer.h"
 
-namespace QGears
-{
-    //---------------------------------------------------------------------
-    const String    CameraMatrixFile::RESOURCE_TYPE( "QGearsCameraMatrixFile" );
+namespace QGears{
 
-    //---------------------------------------------------------------------
-    CameraMatrixFile::CameraMatrixFile( Ogre::ResourceManager *creator
-                 ,const String &name, Ogre::ResourceHandle handle
-                 ,const String &group, bool isManual
-                 ,Ogre::ManualResourceLoader *loader ) :
-        Resource( creator, name, handle, group, isManual, loader )
-    {
-    }
+    const String CameraMatrixFile::RESOURCE_TYPE("QGearsCameraMatrixFile");
 
-    //---------------------------------------------------------------------
-    CameraMatrixFile::~CameraMatrixFile()
-    {
-        unload();
-    }
+    CameraMatrixFile::CameraMatrixFile(
+      Ogre::ResourceManager *creator, const String &name,
+      Ogre::ResourceHandle handle, const String &group, bool is_manual,
+      Ogre::ManualResourceLoader *loader
+    ) : Resource(creator, name, handle, group, is_manual, loader){}
 
-    //---------------------------------------------------------------------
-    void
-    CameraMatrixFile::loadImpl()
-    {
+    CameraMatrixFile::~CameraMatrixFile(){unload();}
+
+    void CameraMatrixFile::loadImpl(){
         CameraMatrixFileSerializer serializer;
-        Ogre::DataStreamPtr stream( openResource() );
-        serializer.importCameraMatrixFile( stream, this );
+        Ogre::DataStreamPtr stream(openResource());
+        serializer.ImportCameraMatrixFile(stream, this);
     }
 
-    //---------------------------------------------------------------------
-    void
-    CameraMatrixFile::unloadImpl()
-    {
-        m_matrix = Ogre::Matrix3::ZERO;
-        m_position = Ogre::Vector3::ZERO;
-        moffset_.x = 0;
-        moffset_.y = 0;
-        m_focal_length = 0;
-        m_count = 0;
+    void CameraMatrixFile::unloadImpl(){
+        matrix_ = Ogre::Matrix3::ZERO;
+        position_ = Ogre::Vector3::ZERO;
+        offset_.x = 0;
+        offset_.y = 0;
+        focal_length_ = 0;
+        count_ = 0;
     }
 
-    //---------------------------------------------------------------------
-    size_t
-    CameraMatrixFile::calculateSize() const
-    {
+    size_t CameraMatrixFile::CalculateSize() const{
+        // TODO: Here something should probably get counted. But what?
         return 0;
     }
 
-    //---------------------------------------------------------------------
-    Ogre::Quaternion
-    CameraMatrixFile::getOrientation() const
-    {
-        return Ogre::Quaternion( m_matrix );
-    }
-    //---------------------------------------------------------------------
-    const Ogre::Matrix3&
-    CameraMatrixFile::getMatrix() const
-    {
-        return m_matrix;
+    Ogre::Quaternion CameraMatrixFile::GetOrientation() const{
+        return Ogre::Quaternion(matrix_);
     }
 
-    //---------------------------------------------------------------------
-    void
-    CameraMatrixFile::setMatrix( const Ogre::Matrix3& matrix )
-    {
-        m_matrix = matrix;
+    const Ogre::Matrix3& CameraMatrixFile::GetMatrix() const{return matrix_;}
+
+    void CameraMatrixFile::SetMatrix(const Ogre::Matrix3& matrix){
+        matrix_ = matrix;
     }
 
-    //---------------------------------------------------------------------
-    const Ogre::Vector3&
-    CameraMatrixFile::getPosition() const
-    {
-        return m_position;
+    const Ogre::Vector3& CameraMatrixFile::GetPosition() const{
+        return position_;
     }
 
-    //---------------------------------------------------------------------
-    void
-    CameraMatrixFile::setPosition( const Ogre::Vector3& position )
-    {
-        m_position = position;
+    void CameraMatrixFile::SetPosition(const Ogre::Vector3& position){
+        position_ = position;
     }
 
-    //---------------------------------------------------------------------
-    const Pixel&
-    CameraMatrixFile::getOffset() const
-    {
-        return moffset_;
+    const Pixel& CameraMatrixFile::GetOffset() const{return offset_;}
+
+    void CameraMatrixFile::SetOffset(const Pixel& offset){offset_ = offset;}
+
+    const size_t& CameraMatrixFile::GetCount() const{return count_;}
+
+    void CameraMatrixFile::SetCount(const size_t count){count_ = count;}
+
+    const Ogre::Real& CameraMatrixFile::GetFocalLength() const{
+        return focal_length_;
     }
 
-    //---------------------------------------------------------------------
-    void
-    CameraMatrixFile::setOffset( const Pixel& offset )
-    {
-        moffset_ = offset;
+    void CameraMatrixFile::SetFocalLength(const Ogre::Real focal_length){
+        focal_length_ = focal_length;
     }
 
-    //---------------------------------------------------------------------
-    const size_t&
-    CameraMatrixFile::getCount() const
-    {
-        return m_count;
+    Ogre::Radian CameraMatrixFile::GetFov(Ogre::Real width) const{
+        return 2 * Ogre::Math::ATan(width / (2 * focal_length_));
     }
-
-    //---------------------------------------------------------------------
-    void
-    CameraMatrixFile::setCount( const size_t count )
-    {
-        m_count = count;
-    }
-
-    //---------------------------------------------------------------------
-    const Ogre::Real&
-    CameraMatrixFile::getFocalLength() const
-    {
-        return m_focal_length;
-    }
-
-    //---------------------------------------------------------------------
-    void
-    CameraMatrixFile::setFocalLength( const Ogre::Real focal_length )
-    {
-        m_focal_length = focal_length;
-    }
-
-    //---------------------------------------------------------------------
-    Ogre::Radian
-    CameraMatrixFile::getFov( Ogre::Real width ) const
-    {
-        return 2 * Ogre::Math::ATan( width / (2 * m_focal_length ) );
-    }
-
-    //---------------------------------------------------------------------
 }

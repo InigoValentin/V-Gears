@@ -1,5 +1,19 @@
-#ifndef UI_TEXT_AREA_H
-#define UI_TEXT_AREA_H
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
 
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreRenderQueueListener.h>
@@ -12,34 +26,62 @@
 
 class UiSprite;
 
-enum TextState
-{
+/**
+ * The textarea state.
+ */
+enum TextState{
+
+    /**
+     * The text is displayed.
+     */
     TS_SHOW_TEXT,
+
+    /**
+     * The text is scrolling.
+     */
     TS_SCROLL_TEXT,
+
+    /**
+     * The text is paused waiting for input.
+     */
     TS_PAUSE_OK,
+
+    /**
+     * The text is paused waiting for time to pass.
+     */
     TS_PAUSE_TIME,
+
+    /**
+     * The textarea is done with.
+     */
     TS_DONE,
+
+    /**
+     * The text is overflowing.
+     */
     TS_OVERFLOW,
+
+    /**
+     * The text is changing pages.
+     */
     TS_NEXT_PAGE,
 };
 
 
 
-struct TextChar
-{
+struct TextChar{
     TextChar():
-        char_code( 0 ),
-        colour( Ogre::ColourValue::White ),
-        skip( false ),
-        variable( "" ),
-        variable_len( 0 ),
-        pause_ok( false ),
-        pause_time( 0.0f ),
-        next_page( false ),
-        sprite( NULL ),
-        sprite_y( 0 )
-    {
-    }
+      char_code(0),
+      colour(Ogre::ColourValue::White),
+      skip(false),
+      variable(""),
+      variable_len(0),
+      pause_ok(false),
+      pause_time(0.0f),
+      next_page(false),
+      sprite(NULL),
+      sprite_y(0)
+    {}
 
     int char_code;
     Ogre::ColourValue colour;
@@ -68,125 +110,397 @@ struct TextVariable
  * It may be any window used to represent text: a diaog window, a menu panel,
  * a choice selection...
  */
-class UiTextArea : public UiWidget
-{
-public:
+class UiTextArea : public UiWidget{
 
-    /**
-     * Creates a UiTextArea.
-     *
-     * @param name[name] Name for the textarea.
-     */
-    UiTextArea( const Ogre::String& name );
+    public:
 
-    /**
-     * Creates a UiTextArea.
-     *
-     * @param name[in] Name for the textarea.
-     * @param path_name[in] Path for the widget.
-     * @param parent[in] Poinbter to the widget that will parent the UiTextArea.
-     */
-    UiTextArea( const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent );
+        /**
+         * Creates a UiTextArea.
+         *
+         * @param name[in] Name for the textarea.
+         */
+        UiTextArea(const Ogre::String& name);
 
-    /**
-     * Destroys the UiTextArea.
-     */
-    virtual ~UiTextArea();
+        /**
+         * Creates a UiTextArea.
+         *
+         * @param name[in] Name for the textarea.
+         * @param path_name[in] Path for the widget.
+         * @param parent[in] Pointer to the widget that will parent the
+         * UiTextArea.
+         */
+        UiTextArea(
+          const Ogre::String& name, const Ogre::String& path_name,
+          UiWidget* parent
+        );
 
-    /**
-     * Sets default values for the UiTextArea.
-     *
-     * It's automatically called when the UiTextArea is created.
-     */
-    void Initialise();
+        /**
+         * Destroys the UiTextArea.
+         */
+        virtual ~UiTextArea();
 
-    /**
-     * Updates the UiTextArea.
-     */
-    virtual void Update();
+        /**
+         * Sets default values for the UiTextArea.
+         *
+         * It's automatically called when the UiTextArea is created.
+         */
+        void Initialise();
 
-    /**
-     * Renders the UiTextArea on the screen.
-     */
-    virtual void Render();
+        /**
+         * Updates the UiTextArea.
+         */
+        virtual void Update();
 
-    /**
-     *
-     */
-    virtual void UpdateTransformation();
+        /**
+         * Renders the UiTextArea on the screen.
+         */
+        virtual void Render();
 
-    void UpdateGeometry();
+        /**
+         * Updates the UiTextArea.
+         */
+        virtual void UpdateTransformation();
 
-    void InputPressed();
-    void InputRepeated();
+        /**
+         * Updates the UiTextArea geometry.
+         */
+        void UpdateGeometry();
 
-    enum TextAlign
-    {
-        LEFT,
-        RIGHT,
-        CENTER
-    };
-    void SetTextAlign( const TextAlign align );
-    void SetPadding( const float top, const float right, const float bottom, const float left );
-    void SetText( const Ogre::UTFString& text );
-    void SetText( TiXmlNode* text );
-    void TextClear();
-    void RemoveSpritesFromText( const unsigned int end );
-    void SetFont( const Ogre::String& font );
-    const UiFont* GetFont() const;
-    void SetTextPrintSpeed( const float speed );
-    void SetTextScrollTime( const float time );
-    void SetVariable( const Ogre::String& name, const Ogre::UTFString& value );
-    Ogre::UTFString GetVariable( const Ogre::String& name ) const;
-    TextState GetTextState() const;
-    float GetTextLimit() const;
-    unsigned int GetTextSize() const;
-    float GetPauseTime() const;
+        /**
+         * Handles a keypress.
+         */
+        void InputPressed();
 
-private:
-    float GetTextWidth() const;
-    void PrepareTextFromNode( TiXmlNode* node, const Ogre::ColourValue& colour );
-    void PrepareTextFromText( const Ogre::UTFString& text, const Ogre::ColourValue& colour );
+        /**
+         * Handles a key being hold.
+         */
+        void InputRepeated();
 
-    UiTextArea();
-    void CreateVertexBuffer();
-    void DestroyVertexBuffer();
+        /**
+         * Text alignment in the text area.
+         */
+        enum TextAlign{
 
-private:
-    Ogre::MaterialPtr                   m_Material;
-    Ogre::SceneManager*                 m_SceneManager;
-    Ogre::RenderSystem*                 m_RenderSystem;
+            /**
+             * Left aligned text.
+             */
+            LEFT,
 
-    unsigned int                        m_MaxLetters;
-    Ogre::RenderOperation               m_RenderOp;
-    Ogre::HardwareVertexBufferSharedPtr m_VertexBuffer;
+            /**
+             * Right aligned text.
+             */
+            RIGHT,
 
-    UiFont*                             m_Font;
-    TextAlign                           m_TextAlign;
+            /**
+             * Horizontally centered text.
+             */
+            CENTER
+        };
 
-    std::vector< TextChar >             m_Text;
-    float                               m_TextLimit;
-    float                               m_TextPrintSpeed;
-    float                               m_TextPrintSpeedMod;
-    TextState                           m_TextState;
-    std::vector< TextVariable >         m_TextVariable;
+        /**
+         * Sets the text alignment in the text area.
+         *
+         * @param align[in] The text alignment.
+         */
+        void SetTextAlign(const TextAlign align);
 
-    float                               m_TextScrollTime;
-    float                               m_TextYOffset;
-    float                               m_TextYOffsetTarget;
-    float                               m_PauseTime;
-    unsigned int                        m_NextPageStart;
+        /**
+         * Sets the paddings in the text area.
+         *
+         * @param top[in] Padding from the top, in pixels.
+         * @param right[in] Padding from the right, in pixels.
+         * @param bottom[in] Padding from the bottom, in pixels.
+         * @param left[in] Padding from the left, in pixels.
+         */
+        void SetPadding(
+          const float top, const float right,
+          const float bottom, const float left
+        );
 
-    bool                                m_NextPressed;
-    bool                                m_NextRepeated;
+        /**
+         * Sets the text from a string.
+         *
+         * @param text[in] Text to set.
+         */
+        void SetText(const Ogre::UTFString& text);
 
-    float                               m_PaddingTop;
-    float                               m_PaddingRight;
-    float                               m_PaddingBottom;
-    float                               m_PaddingLeft;
+        /**
+         * Sets the text from an XML node.
+         *
+         * @param text[in] XML node with the text to set.
+         */
+        void SetText(TiXmlNode* text);
 
-    bool                                m_Timer;
-    int                                 m_TimerTime;
+        /**
+         * Removes the text from the text area.
+         */
+        void TextClear();
+
+        /**
+         * @todo Understand and document.
+         *
+         * @param end[in] @todo Understand and document.
+         */
+        void RemoveSpritesFromText(const unsigned int end);
+
+        /**
+         * Set the font for the text.
+         *
+         * @param font[in] The font to set.
+         */
+        void SetFont(const Ogre::String& font);
+
+        /**
+         * Retrieves the font.
+         *
+         * @return The font used for the text in the textarea.
+         */
+        const UiFont* GetFont() const;
+
+        /**
+         * Sets the printing speed.
+         *
+         * @param speed[in] The text speed. -1 for instant text.
+         * @todo Explain units or references.
+         */
+        void SetTextPrintSpeed(const float speed);
+
+        /**
+         * Sets the scroll duration.
+         *
+         * @param time[in] Time to scroll a line.
+         * @todo Units or references.
+         */
+        void SetTextScrollTime(const float time);
+
+        /**
+         * Sets a variable in the text.
+         *
+         * @param name[in] Variable name.
+         * @param value[in] Variable value.
+         */
+        void SetVariable(
+          const Ogre::String& name, const Ogre::UTFString& value
+        );
+
+        /**
+         * Gets the value of a variable in the text.
+         *
+         * @param name[in] The variable name.
+         * @return The variable value, in string format, or an empty string if
+         * there is no such variable.
+         */
+        Ogre::UTFString GetVariable(const Ogre::String& name) const;
+
+        /**
+         * Checks the text state.
+         *
+         * @return The text state.
+         */
+        TextState GetTextState() const;
+
+        /**
+         * Gets the text limit.
+         *
+         * @return The text limit.
+         * @todo The limit is the max number of letters per text area? Does it
+         * include multiple pages?
+         */
+        float GetTextLimit() const;
+
+        /**
+         * Gets the text size.
+         *
+         * @return The number of characters in the text.
+         */
+        unsigned int GetTextSize() const;
+
+        /**
+         * Retrieves the pause time of the text.
+         *
+         * @return The time the text must still remain paused, in second.
+         */
+        float GetPauseTime() const;
+
+    private:
+
+        /**
+         * Retrieves the text width.
+         *
+         * @return The text width, in pixels.
+         */
+        float GetTextWidth() const;
+
+        /**
+         * Prepares text from a XML node.
+         *
+         * @param node[in] The XML node to get the text from.
+         * @param colour[in] The text colour.
+         * @todo Does this call setText?
+         */
+        void PrepareTextFromNode(
+          TiXmlNode* node, const Ogre::ColourValue& colour
+        );
+
+        /**
+         * Prepares text from a string.
+         *
+         * @param text[in] The text to prepare.
+         * @param colour[in] The text colour.
+         * @todo Does this call setText?
+         */
+        void PrepareTextFromText(
+          const Ogre::UTFString& text, const Ogre::ColourValue& colour
+        );
+
+        /**
+         * Constructor.
+         */
+        UiTextArea();
+
+        /**
+         * Creates a vertex buffer for the textarea.
+         */
+        void CreateVertexBuffer();
+
+        /**
+         * Destroys a vertex buffer for the textarea.
+         */
+        void DestroyVertexBuffer();
+
+        /**
+         * Material for the text area.
+         */
+        Ogre::MaterialPtr material_;
+
+        /**
+         * The scene manager.
+         */
+        Ogre::SceneManager* scene_manager_;
+
+        /**
+         * The render system.
+         */
+        Ogre::RenderSystem* render_system_;
+
+        /**
+         * Max letter per textarea.
+         */
+        unsigned int max_letters_;
+
+        /**
+         * The render operation.
+         */
+        Ogre::RenderOperation render_operation_;
+
+        /**
+         * The text area vertext buffer.
+         */
+        Ogre::HardwareVertexBufferSharedPtr vertex_buffer_;
+
+        /**
+         * The font for the text.
+         */
+        UiFont* font_;
+
+        /**
+         * The text alignment.
+         */
+        TextAlign text_align_;
+
+        /**
+         * The text.
+         */
+        std::vector<TextChar> text_;
+
+        /**
+         * The text limit.
+         */
+        float text_limit_;
+
+        /**
+         * The text printing speed.
+         */
+        float text_print_speed_;
+
+        /**
+         * @todo Understand and document.
+         */
+        float text_print_speed_mod_;
+
+        /**
+         * The state of the text.
+         */
+        TextState text_state_;
+
+        /**
+         * Variables in the text.
+         */
+        std::vector<TextVariable> text_variable_;
+
+        /**
+         * Time to scroll the text.
+         */
+        float text_scroll_time_;
+
+        /**
+         * @todo Understand and document.
+         */
+        float text_y_offset_;
+
+        /**
+         * @todo Understand and document.
+         */
+        float text_y_offset_target_;
+
+        /**
+         * The time to pause the text.
+         */
+        float pause_time_;
+
+        /**
+         * @todo Understand and document.
+         */
+        unsigned int next_page_start_;
+
+        /**
+         * Indicates if the 'next' button has been pressed.
+         */
+        bool next_pressed_;
+
+        /**
+         * Indicates if the 'next' button is being held down.
+         */
+        bool next_repeated_;
+
+        /**
+         * The top padding.
+         */
+        float padding_top_;
+
+        /**
+         * The right padding.
+         */
+        float padding_right_;
+
+        /**
+         * The bottom padding.
+         */
+        float padding_bottom_;
+
+        /**
+         * The left padding.
+         */
+        float padding_left_;
+
+        /**
+         * @todo Understand and document.
+         */
+        bool timer_;
+
+        /**
+         * @todo Understand and document.
+         */
+        int timer_time_;
 };
 
-#endif // UI_TEXT_AREA_H

@@ -1,142 +1,129 @@
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
 #include <OgreHardwareBufferManager.h>
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
-
 #include "core/Logger.h"
 #include "core/UiSprite.h"
 
 
 UiSprite::UiSprite(const Ogre::String& name):
-    UiWidget(name)
-{
-    Initialise();
-}
+  UiWidget(name)
+{Initialise();}
 
 
-UiSprite::UiSprite(const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent):
-    UiWidget(name, path_name, parent)
-{
-    Initialise();
-}
+UiSprite::UiSprite(
+  const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent
+):
+  UiWidget(name, path_name, parent)
+{Initialise();}
 
+UiSprite::~UiSprite(){DestroyVertexBuffer();}
 
-UiSprite::~UiSprite()
-{
-    DestroyVertexBuffer();
-}
-
-
-void
-UiSprite::Initialise()
-{
-    m_SceneManager = Ogre::Root::getSingleton().getSceneManager("Scene");
-    m_RenderSystem = Ogre::Root::getSingletonPtr()->getRenderSystem();
-
-    m_Material = Ogre::MaterialManager::getSingleton().create("UiMaterials." + m_PathName, "General");
-    Ogre::Pass* pass = m_Material->getTechnique(0)->getPass(0);
+void UiSprite::Initialise(){
+    scene_manager_ = Ogre::Root::getSingleton().getSceneManager("Scene");
+    render_system_ = Ogre::Root::getSingletonPtr()->getRenderSystem();
+    material_ = Ogre::MaterialManager::getSingleton().create(
+      "UiMaterials." + path_name_, "General"
+    );
+    Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
     pass->setCullingMode(Ogre::CULL_NONE);
     pass->setDepthCheckEnabled(true);
     pass->setDepthWriteEnabled(true);
     pass->setLightingEnabled(false);
     pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-
     pass->setAlphaRejectFunction(Ogre::CMPF_GREATER);
     pass->setAlphaRejectValue(0);
     Ogre::TextureUnitState* tex = pass->createTextureUnitState();
     tex->setTextureName("system/blank.png");
     tex->setNumMipmaps(-1);
     tex->setTextureFiltering(Ogre::TFO_NONE);
-
     CreateVertexBuffer();
 }
 
+void UiSprite::Update(){UiWidget::Update();}
 
-void
-UiSprite::Update()
-{
-    UiWidget::Update();
-}
-
-
-void
-UiSprite::Render()
-{
-    if(m_Visible == true)
-    {
-        if(m_RenderOp.vertexData->vertexCount != 0)
-        {
-            m_RenderSystem->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
-            m_RenderSystem->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
-            m_RenderSystem->_setViewMatrix(Ogre::Matrix4::IDENTITY);
-
-            m_SceneManager->_setPass(m_Material->getTechnique(0)->getPass(0), true, false);
-
-            m_RenderSystem->setScissorTest(true, m_ScissorLeft, m_ScissorTop, m_ScissorRight, m_ScissorBottom);
-            m_RenderSystem->_render(m_RenderOp);
-            m_RenderSystem->setScissorTest(false);
+void UiSprite::Render(){
+    if(visible_ == true){
+        if(render_operation_.vertexData->vertexCount != 0){
+            render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
+            render_system_->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
+            render_system_->_setViewMatrix(Ogre::Matrix4::IDENTITY);
+            scene_manager_->_setPass(
+              material_->getTechnique(0)->getPass(0), true, false
+            );
+            render_system_->setScissorTest(
+              true, scissor_left_, scissor_top_, scissor_right_, scissor_bottom_
+            );
+            render_system_->_render(render_operation_);
+            render_system_->setScissorTest(false);
         }
     }
-
     UiWidget::Render();
 }
 
-
-void
-UiSprite::UpdateTransformation()
-{
+void UiSprite::UpdateTransformation(){
     UiWidget::UpdateTransformation();
     UpdateGeometry();
 }
 
-
-void
-UiSprite::SetImage(const Ogre::String& image)
-{
-    Ogre::Pass* pass = m_Material->getTechnique(0)->getPass(0);
+void UiSprite::SetImage(const Ogre::String& image){
+    Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);
     Ogre::TextureUnitState* tex = pass->getTextureUnitState(0);
     tex->setTextureName(image);
 }
 
-
-void
-UiSprite::SetVertexShader(const Ogre::String& shader)
-{
-    Ogre::Pass* pass = m_Material->getTechnique(0)->getPass(0);
+void UiSprite::SetVertexShader(const Ogre::String& shader){
+    Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);
     pass->setVertexProgram(shader, true);
     pass->getVertexProgram()->load();
 }
 
-
-void
-UiSprite::SetFragmentShader(const Ogre::String& shader)
-{
-    Ogre::Pass* pass = m_Material->getTechnique(0)->getPass(0);
+void UiSprite::SetFragmentShader(const Ogre::String& shader){
+    Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);
     pass->setFragmentProgram(shader, true);
     pass->getFragmentProgram()->load();
 }
 
-
-void
-UiSprite::UpdateGeometry()
-{
-    float local_x1 = -m_FinalOrigin.x;
-    float local_y1 = -m_FinalOrigin.y;
-    float local_x2 = m_FinalSize.x + local_x1;
-    float local_y2 = m_FinalSize.y + local_y1;
-    float x = m_FinalTranslate.x;
-    float y = m_FinalTranslate.y;
-
+void UiSprite::UpdateGeometry(){
+    float local_x1 = -final_origin_.x;
+    float local_y1 = -final_origin_.y;
+    float local_x2 = final_size_.x + local_x1;
+    float local_y2 = final_size_.y + local_y1;
+    float x = final_translate_.x;
+    float y = final_translate_.y;
     int x1, y1, x2, y2, x3, y3, x4, y4;
+    //LOG_ERROR(
+    //  name_ + ", rotation = " + Ogre::StringConverter::toString(rotation)
+    //);
+    //LOG_ERROR(
+    //  "local_x1 = " + Ogre::StringConverter::toString(local_x1)
+    //  + ", local_y1 = " + Ogre::StringConverter::toString(local_y1)
+    //);
+    //LOG_ERROR(
+    //  "local_x2 = " + Ogre::StringConverter::toString(local_x2)
+    //  + ", local_y2 = " + Ogre::StringConverter::toString(local_y2)
+    //);
 
-    //LOG_ERROR(m_Name + ", rotation = " + Ogre::StringConverter::toString(rotation));
-    //LOG_ERROR("local_x1 = " + Ogre::StringConverter::toString(local_x1) + ", local_y1 = " + Ogre::StringConverter::toString(local_y1));
-    //LOG_ERROR("local_x2 = " + Ogre::StringConverter::toString(local_x2) + ", local_y2 = " + Ogre::StringConverter::toString(local_y2));
-
-    if(m_FinalRotation != 0)
-    {
-        float cos = Ogre::Math::Cos(Ogre::Radian(Ogre::Degree(m_FinalRotation)));
-        float sin = Ogre::Math::Sin(Ogre::Radian(Ogre::Degree(m_FinalRotation)));
+    if(final_rotation_ != 0){
+        float cos
+          = Ogre::Math::Cos(Ogre::Radian(Ogre::Degree(final_rotation_)));
+        float sin
+          = Ogre::Math::Sin(Ogre::Radian(Ogre::Degree(final_rotation_)));
 
         x1 = static_cast<int>(local_x1 * cos - local_y1 * sin + x);
         y1 = static_cast<int>(local_x1 * sin + local_y1 * cos + y);
@@ -147,8 +134,7 @@ UiSprite::UpdateGeometry()
         x4 = static_cast<int>(local_x1 * cos - local_y2 * sin + x);
         y4 = static_cast<int>(local_x1 * sin + local_y2 * cos + y);
     }
-    else
-    {
+    else{
         x1 = static_cast<int>(local_x1 + x);
         y1 = static_cast<int>(local_y1 + y);
         x2 = static_cast<int>(local_x2 + x);
@@ -159,115 +145,132 @@ UiSprite::UpdateGeometry()
         y4 = static_cast<int>(local_y2 + y);
     }
 
-    //LOG_ERROR("x1 = " + Ogre::StringConverter::toString(x1) + ", y1 = " + Ogre::StringConverter::toString(y1));
-    //LOG_ERROR("x2 = " + Ogre::StringConverter::toString(x2) + ", y2 = " + Ogre::StringConverter::toString(y2));
-    //LOG_ERROR("x3 = " + Ogre::StringConverter::toString(x3) + ", y3 = " + Ogre::StringConverter::toString(y3));
-    //LOG_ERROR("x4 = " + Ogre::StringConverter::toString(x4) + ", y4 = " + Ogre::StringConverter::toString(y4));
+    //LOG_ERROR(
+    //  "x1 = " + Ogre::StringConverter::toString(x1) + ", y1 = "
+    // + Ogre::StringConverter::toString(y1)
+    //);
+    //LOG_ERROR(
+    //  "x2 = " + Ogre::StringConverter::toString(x2) + ", y2 = "
+    //  + Ogre::StringConverter::toString(y2)
+    //);
+    //LOG_ERROR(
+    //  "x3 = " + Ogre::StringConverter::toString(x3) + ", y3 = "
+    //  + Ogre::StringConverter::toString(y3)
+    //);
+    //LOG_ERROR(
+    //  "x4 = " + Ogre::StringConverter::toString(x4) + ", y4 = "
+    //  + Ogre::StringConverter::toString(y4)
+    //);
 
-    float new_x1 = (x1 / m_ScreenWidth) * 2 - 1;
-    float new_y1 = -((y1 / m_ScreenHeight) * 2 - 1);
-    float new_x2 = (x2 / m_ScreenWidth) * 2 - 1;
-    float new_y2 = -((y2 / m_ScreenHeight) * 2 - 1);
-    float new_x3 = (x3 / m_ScreenWidth) * 2 - 1;
-    float new_y3 = -((y3 / m_ScreenHeight) * 2 - 1);
-    float new_x4 = (x4 / m_ScreenWidth) * 2 - 1;
-    float new_y4 = -((y4 / m_ScreenHeight) * 2 - 1);
+    float new_x1 = (x1 / screen_width_) * 2 - 1;
+    float new_y1 = -((y1 / screen_height_) * 2 - 1);
+    float new_x2 = (x2 / screen_width_) * 2 - 1;
+    float new_y2 = -((y2 / screen_height_) * 2 - 1);
+    float new_x3 = (x3 / screen_width_) * 2 - 1;
+    float new_y3 = -((y3 / screen_height_) * 2 - 1);
+    float new_x4 = (x4 / screen_width_) * 2 - 1;
+    float new_y4 = -((y4 / screen_height_) * 2 - 1);
 
-    float* writeIterator = (float*) m_VertexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    float* write_iterator
+      = (float*) vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL);
     // TODO: use WriteGlyph (should probably rename and move to utils)
-    *writeIterator++ = new_x1;
-    *writeIterator++ = new_y1;
-    *writeIterator++ = m_FinalZ;
-    *writeIterator++ = m_Colour1.r;
-    *writeIterator++ = m_Colour1.g;
-    *writeIterator++ = m_Colour1.b;
-    *writeIterator++ = m_Colour1.a;
-    *writeIterator++ = 0;
-    *writeIterator++ = 0;
+    *write_iterator ++ = new_x1;
+    *write_iterator ++ = new_y1;
+    *write_iterator ++ = final_z_;
+    *write_iterator ++ = colour_1_.r;
+    *write_iterator ++ = colour_1_.g;
+    *write_iterator ++ = colour_1_.b;
+    *write_iterator ++ = colour_1_.a;
+    *write_iterator ++ = 0;
+    *write_iterator ++ = 0;
 
-    *writeIterator++ = new_x2;
-    *writeIterator++ = new_y2;
-    *writeIterator++ = m_FinalZ;
-    *writeIterator++ = m_Colour2.r;
-    *writeIterator++ = m_Colour2.g;
-    *writeIterator++ = m_Colour2.b;
-    *writeIterator++ = m_Colour2.a;
-    *writeIterator++ = 1;
-    *writeIterator++ = 0;
+    *write_iterator ++ = new_x2;
+    *write_iterator ++ = new_y2;
+    *write_iterator ++ = final_z_;
+    *write_iterator ++ = colour_2_.r;
+    *write_iterator ++ = colour_2_.g;
+    *write_iterator ++ = colour_2_.b;
+    *write_iterator ++ = colour_2_.a;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 0;
 
-    *writeIterator++ = new_x3;
-    *writeIterator++ = new_y3;
-    *writeIterator++ = m_FinalZ;
-    *writeIterator++ = m_Colour3.r;
-    *writeIterator++ = m_Colour3.g;
-    *writeIterator++ = m_Colour3.b;
-    *writeIterator++ = m_Colour3.a;
-    *writeIterator++ = 1;
-    *writeIterator++ = 1;
+    *write_iterator ++ = new_x3;
+    *write_iterator ++ = new_y3;
+    *write_iterator ++ = final_z_;
+    *write_iterator ++ = colour_3_.r;
+    *write_iterator ++ = colour_3_.g;
+    *write_iterator ++ = colour_3_.b;
+    *write_iterator ++ = colour_3_.a;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
 
-    *writeIterator++ = new_x1;
-    *writeIterator++ = new_y1;
-    *writeIterator++ = m_FinalZ;
-    *writeIterator++ = m_Colour1.r;
-    *writeIterator++ = m_Colour1.g;
-    *writeIterator++ = m_Colour1.b;
-    *writeIterator++ = m_Colour1.a;
-    *writeIterator++ = 0;
-    *writeIterator++ = 0;
+    *write_iterator ++ = new_x1;
+    *write_iterator ++ = new_y1;
+    *write_iterator ++ = final_z_;
+    *write_iterator ++ = colour_1_.r;
+    *write_iterator ++ = colour_1_.g;
+    *write_iterator ++ = colour_1_.b;
+    *write_iterator ++ = colour_1_.a;
+    *write_iterator ++ = 0;
+    *write_iterator ++ = 0;
 
-    *writeIterator++ = new_x3;
-    *writeIterator++ = new_y3;
-    *writeIterator++ = m_FinalZ;
-    *writeIterator++ = m_Colour3.r;
-    *writeIterator++ = m_Colour3.g;
-    *writeIterator++ = m_Colour3.b;
-    *writeIterator++ = m_Colour3.a;
-    *writeIterator++ = 1;
-    *writeIterator++ = 1;
+    *write_iterator ++ = new_x3;
+    *write_iterator ++ = new_y3;
+    *write_iterator ++ = final_z_;
+    *write_iterator ++ = colour_3_.r;
+    *write_iterator ++ = colour_3_.g;
+    *write_iterator ++ = colour_3_.b;
+    *write_iterator ++ = colour_3_.a;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
 
-    *writeIterator++ = new_x4;
-    *writeIterator++ = new_y4;
-    *writeIterator++ = m_FinalZ;
-    *writeIterator++ = m_Colour4.r;
-    *writeIterator++ = m_Colour4.g;
-    *writeIterator++ = m_Colour4.b;
-    *writeIterator++ = m_Colour4.a;
-    *writeIterator++ = 0;
-    *writeIterator++ = 1;
+    *write_iterator ++ = new_x4;
+    *write_iterator ++ = new_y4;
+    *write_iterator ++ = final_z_;
+    *write_iterator ++ = colour_4_.r;
+    *write_iterator ++ = colour_4_.g;
+    *write_iterator ++ = colour_4_.b;
+    *write_iterator ++ = colour_4_.a;
+    *write_iterator ++ = 0;
+    *write_iterator ++ = 1;
 
-    m_RenderOp.vertexData->vertexCount = 6;
+    render_operation_.vertexData->vertexCount = 6;
 
-    m_VertexBuffer->unlock();
+    vertex_buffer_->unlock();
 }
 
-
-void
-UiSprite::CreateVertexBuffer()
-{
-    m_RenderOp.vertexData = new Ogre::VertexData;
-    m_RenderOp.vertexData->vertexStart = 0;
-
-    Ogre::VertexDeclaration* vDecl = m_RenderOp.vertexData->vertexDeclaration;
+void UiSprite::CreateVertexBuffer(){
+    render_operation_.vertexData = new Ogre::VertexData;
+    render_operation_.vertexData->vertexStart = 0;
+    Ogre::VertexDeclaration* vertex_declaration
+      = render_operation_.vertexData->vertexDeclaration;
 
     size_t offset = 0;
-    vDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
+    vertex_declaration->addElement(
+      0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE
+    );
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+    vertex_declaration->addElement(
+      0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES
+    );
 
-    m_VertexBuffer = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(vDecl->getVertexSize(0), 6, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
+    vertex_buffer_
+      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+        vertex_declaration->getVertexSize(0), 6,
+        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
+        );
 
-    m_RenderOp.vertexData->vertexBufferBinding->setBinding(0, m_VertexBuffer);
-    m_RenderOp.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
-    m_RenderOp.useIndexes = false;
+    render_operation_.vertexData->vertexBufferBinding->setBinding(
+      0, vertex_buffer_
+    );
+    render_operation_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
+    render_operation_.useIndexes = false;
 }
 
-
-void
-UiSprite::DestroyVertexBuffer()
-{
-    delete m_RenderOp.vertexData;
-    m_RenderOp.vertexData = 0;
-    m_VertexBuffer.reset();
+void UiSprite::DestroyVertexBuffer(){
+    delete render_operation_.vertexData;
+    render_operation_.vertexData = 0;
+    vertex_buffer_.reset();
 }

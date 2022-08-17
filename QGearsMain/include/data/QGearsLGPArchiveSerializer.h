@@ -1,71 +1,99 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-09-22 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsLGPArchiveSerializer_H__
-#define __QGearsLGPArchiveSerializer_H__
+#pragma once
 
 #include "QGearsSerializer.h"
 #include "QGearsLGPArchive.h"
 
-namespace QGears
-{
-    class LGPArchiveSerializer : public Serializer
-    {
-    public:
-                        LGPArchiveSerializer();
-        virtual        ~LGPArchiveSerializer();
+namespace QGears{
 
-        virtual void    importLGPArchive( Ogre::DataStreamPtr &stream, LGPArchive* pDest );
+    /**
+     * Manages LGP archives serialization.
+     */
+    class LGPArchiveSerializer : public Serializer{
 
-        enum {
-            MAGIC_STRING_LENGTH = 10
-          , FILE_NAME_LENGTH    = 20
-        };
+        public:
 
-        typedef LGPArchive::FileEntry FileEntry;
-        typedef LGPArchive::FileList  FileList;
+            /**
+             * Constructor.
+             */
+            LGPArchiveSerializer();
 
-    protected:
-        virtual void    readFileHeader( Ogre::DataStreamPtr &stream );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, FileEntry& file_entry );
+            /**
+             * Destructor.
+             */
+            virtual ~LGPArchiveSerializer();
 
-        template<typename ValueType> void
-        readVector( Ogre::DataStreamPtr &stream, std::vector<ValueType> &pDest, size_t count )
-        {
-            pDest.clear();
-            pDest.reserve( count );
-            for( size_t i( count ); i--; )
-            {
-                ValueType in_tmp;
-                readObject( stream, in_tmp );
-                pDest.push_back( in_tmp );
+            /**
+             * Imports an A file.
+             *
+             * @param stream[in] The contents of the archive.
+             * @param dest[out] The formed LGP archive file.
+             */
+            virtual void ImportLGPArchive(
+              Ogre::DataStreamPtr &stream, LGPArchive* dest
+            );
+
+            enum {
+                /**
+                 * Magic MIME string length.
+                 */
+                MAGIC_STRING_LENGTH = 10,
+
+                /**
+                 * Max file name length.
+                 */
+                FILE_NAME_LENGTH = 20
+            };
+
+            typedef LGPArchive::FileEntry FileEntry;
+
+            typedef LGPArchive::FileList  FileList;
+
+        protected:
+
+            /**
+             * Reads an archive header and sets the instance data.
+             *
+             * @param stream[in] The contents of the LGP archive.
+             */
+            virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
+
+            /**
+             * Reads an object as a LGP archive.
+             *
+             * @param stream[in] Input data.
+             * @param file_entry[out] The formed LGP archive.
+             */
+            virtual void readObject(
+              Ogre::DataStreamPtr &stream, FileEntry& file_entry
+            );
+
+            template<typename ValueType> void ReadVector(
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
+              size_t count
+            ){
+                dest.clear();
+                dest.reserve( count );
+                for (size_t i(count); i --;){
+                    ValueType in_tmp;
+                    readObject(stream, in_tmp);
+                    dest.push_back(in_tmp);
+                }
             }
-        }
 
-    private:
     };
 }
-
-#endif // __QGearsLGPArchiveSerializer_H__

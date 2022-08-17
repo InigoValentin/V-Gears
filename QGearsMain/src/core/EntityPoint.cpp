@@ -8,9 +8,9 @@ ConfigVar cv_debug_point("debug_point", "Draw point debug info", "false");
 
 
 EntityPoint::EntityPoint(const Ogre::String& name):
-    m_Name(name),
-    m_Position(Ogre::Vector3::ZERO),
-    m_Rotation(0)
+    name_(name),
+    position_(Ogre::Vector3::ZERO),
+    rotation_(0)
 {
 }
 
@@ -26,14 +26,14 @@ EntityPoint::UpdateDebug()
     if(cv_debug_point.GetB() == true)
     {
         DEBUG_DRAW.SetColour(Ogre::ColourValue::White);
-        Ogre::Vector3 point1 = m_Position;
+        Ogre::Vector3 point1 = position_;
         point1.z += 0.5f;
-        Ogre::Vector3 point2 = m_Position;
+        Ogre::Vector3 point2 = position_;
         point2.z -= 0.5f;
         DEBUG_DRAW.Line3d(point1, point2);
         DEBUG_DRAW.SetTextAlignment(DEBUG_DRAW.CENTER);
         DEBUG_DRAW.SetFadeDistance(30, 40);
-        DEBUG_DRAW.Text(m_Position, 0, 0, m_Name);
+        DEBUG_DRAW.Text(position_, 0, 0, name_);
     }
 }
 
@@ -41,14 +41,14 @@ EntityPoint::UpdateDebug()
 const Ogre::String&
 EntityPoint::GetName() const
 {
-    return m_Name;
+    return name_;
 }
 
 
 void
 EntityPoint::SetPosition(const Ogre::Vector3& point)
 {
-    m_Position = point;
+    position_ = point;
 
 }
 
@@ -56,35 +56,35 @@ EntityPoint::SetPosition(const Ogre::Vector3& point)
 const Ogre::Vector3&
 EntityPoint::GetPosition() const
 {
-    return m_Position;
+    return position_;
 }
 
 
 void
 EntityPoint::ScriptGetPosition() const
 {
-    ScriptManager::getSingleton().AddValueToStack(m_Position.x);
-    ScriptManager::getSingleton().AddValueToStack(m_Position.y);
-    ScriptManager::getSingleton().AddValueToStack(m_Position.z);
+    ScriptManager::getSingleton().AddValueToStack(position_.x);
+    ScriptManager::getSingleton().AddValueToStack(position_.y);
+    ScriptManager::getSingleton().AddValueToStack(position_.z);
 }
 
 
 void
 EntityPoint::SetRotation(const float rotation)
 {
-    m_Rotation = rotation;
+    rotation_ = rotation;
 }
 
 
 float
 EntityPoint::GetRotation() const
 {
-    return m_Rotation;
+    return rotation_;
 }
 
 
 float
 EntityPoint::ScriptGetRotation() const
 {
-    return m_Rotation;
+    return rotation_;
 }

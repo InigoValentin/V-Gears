@@ -1,75 +1,168 @@
 /*
------------------------------------------------------------------------------
-Copyright (c) 2013-09-05 Tobias Peters <tobias.peters@kreativeffekt.at>
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-This file is part of Q-Gears
-
-Q-Gears is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 2.0 (GPLv2) of the License.
-
-Q-Gears is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
------------------------------------------------------------------------------
-*/
-
-#ifndef __FF7WalkmeshFileSerializer_H__
-#define __FF7WalkmeshFileSerializer_H__
+#pragma once
 
 #include "common/TypeDefine.h"
 #include "data/QGearsSerializer.h"
 #include "map/QGearsWalkmeshFile.h"
 
-namespace QGears
-{
-    namespace FF7
-    {
-        class WalkmeshFileSerializer : public Serializer
-        {
-        public:
-                            WalkmeshFileSerializer();
-            virtual        ~WalkmeshFileSerializer();
+namespace QGears{
 
-            virtual void    importWalkmeshFile( Ogre::DataStreamPtr &stream, WalkmeshFile *pDest );
+    namespace FF7{
 
-            typedef WalkmeshFile::Triangle      WalkmeshTriangle;
-            typedef WalkmeshFile::TriangleList  WalkmeshTriangleList;
+        /**
+         * Handles the serialization of walkmesh files.
+         */
+        class WalkmeshFileSerializer : public Serializer{
 
-            enum {
-                VERTEX_PADDING_COUNT    = 1
-               ,VERTEX_COMPONENT_COUNT  = 3 + VERTEX_PADDING_COUNT
-               ,ACCESS_COMPONENT_COUNT  = 3
-            };
+            public:
 
-            struct Triangle
-            {
-                Ogre::Vector3 a, b, c;
-            };
+                /**
+                 * Constructor.
+                 */
+                WalkmeshFileSerializer();
 
-            struct Access
-            {
-                sint16 a, b, c;
-            };
+                /**
+                 * Destructor.
+                 */
+                virtual ~WalkmeshFileSerializer();
 
-            typedef std::vector<Triangle>   TriangleList;
-            typedef std::vector<Access>     AccessList;
+                /**
+                 * Imports a walkmesh file.
+                 *
+                 * @param stream[in] The contents of the walkmesh file.
+                 * @param dest[out] The formed walkmesh file.
+                 */
+                virtual void ImportWalkmeshFile(
+                  Ogre::DataStreamPtr &stream, WalkmeshFile *dest
+                );
 
-        protected:
-            virtual void    readObject( Ogre::DataStreamPtr &stream, Triangle &pDest );
-            virtual void    readObject( Ogre::DataStreamPtr &stream, Ogre::Vector3 &pDest );
-            virtual void    readObject( Ogre::DataStreamPtr &stream, Access &pDest );
-            using Serializer::readObject;
+                typedef WalkmeshFile::Triangle WalkmeshTriangle;
+                typedef WalkmeshFile::TriangleList WalkmeshTriangleList;
 
-            template<typename ValueType>
-                    void    readVector( Ogre::DataStreamPtr &stream
-                                       ,std::vector<ValueType> &pDest
-                                       ,size_t count );
+                /**
+                 * @todo Understand and document.
+                 */
+                enum{
 
-        private:
+                    /**
+                     * @todo Understand and document.
+                     */
+                    VERTEX_PADDING_COUNT = 1,
+
+                    /**
+                     * @todo Understand and document.
+                     */
+                    VERTEX_COMPONENT_COUNT = 3 + VERTEX_PADDING_COUNT,
+
+                    /**
+                     * @todo Understand and document.
+                     */
+                    ACCESS_COMPONENT_COUNT = 3
+                };
+
+                /**
+                 * A walkmesh triangle.
+                 */
+                struct Triangle{
+
+                    /**
+                     * A side of the triangle.
+                     */
+                    Ogre::Vector3 a;
+
+                    /**
+                     * A side of the triangle.
+                     */
+                    Ogre::Vector3 b;
+
+                    /**
+                     * A side of the triangle.
+                     */
+                    Ogre::Vector3 c;
+                };
+
+                /**
+                 * Defines the access to a triangle.
+                 */
+                struct Access{
+                    /**
+                     * @todo Understand and document.
+                     */
+                    sint16 a;
+                    /**
+                     * @todo Understand and document.
+                     */
+                    sint16 b;
+                    /**
+                     * @todo Understand and document.
+                     */
+                    sint16 c;
+                };
+
+                typedef std::vector<Triangle> TriangleList;
+
+                typedef std::vector<Access> AccessList;
+
+            protected:
+
+                /**
+                 * Reads an object as a walkmesh triangle.
+                 *
+                 * @param stream[in] Input data.
+                 * @param dest[out] The formed triangle data.
+                 */
+                virtual void readObject(
+                  Ogre::DataStreamPtr &stream, Triangle &dest
+                );
+
+                /**
+                 * Reads an object as a 3-dimensional vector.
+                 *
+                 * @param stream[in] Input data.
+                 * @param dest[out] The formed vector data.
+                 */
+                virtual void readObject(
+                  Ogre::DataStreamPtr &stream, Ogre::Vector3 &dest
+                );
+
+                /**
+                 * Reads an object as a triangle access point.
+                 *
+                 * @param stream[in] Input data.
+                 * @param dest[out] The formed access point data.
+                 */
+                virtual void readObject(
+                  Ogre::DataStreamPtr &stream, Access &dest
+                );
+
+                using Serializer::readObject;
+
+                /**
+                 * Reads an object as a vector.
+                 *
+                 * @param stream[in] Input data.
+                 * @param dest[out] The formed vector data.
+                 * @param count[in] The size of the data to read.
+                 */
+                template<typename ValueType> void ReadVector(
+                  Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
+                  size_t count
+                );
+
         };
     }
 }
-
-#endif // __FF7WalkmeshFileSerializer_H__

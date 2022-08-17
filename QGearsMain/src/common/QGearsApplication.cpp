@@ -91,7 +91,6 @@ namespace QGears{
         assert(default_log);
         default_log->setLogDetail(Ogre::LL_BOREME);
 
-        //-------------------------------------------------------------------------
         // configure
         // Show the configuration dialog and initialise the system
         // You can skip this and use root.restoreConfig() to load configuration

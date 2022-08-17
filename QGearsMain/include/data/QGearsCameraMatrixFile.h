@@ -1,81 +1,198 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-09-02 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsCameraMatrixFile_H__
-#define __QGearsCameraMatrixFile_H__
+#pragma once
 
 #include <OgreMatrix3.h>
-
 #include "common/QGearsResource.h"
 
-namespace QGears
-{
-    class CameraMatrixFile : public Resource
-    {
-    public:
+namespace QGears{
 
-        CameraMatrixFile( Ogre::ResourceManager *creator, const String &name
-              ,Ogre::ResourceHandle handle, const String &group
-              ,bool isManual = false, Ogre::ManualResourceLoader *loader = NULL );
+    /**
+     * Handles camera matrix files.
+     */
+    class CameraMatrixFile : public Resource{
 
-        virtual ~CameraMatrixFile();
+        public:
 
-        static const String RESOURCE_TYPE;
+            /**
+             * Constructor.
+             *
+             * @param creator[in] Pointer to the ResourceManager that is
+             * creating this resource.
+             * @param name[in] The unique name of the resource.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can be
+             * null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper
+             * ManualResourceLoader instance is strongly recommended.
+             */
+            CameraMatrixFile(
+              Ogre::ResourceManager *creator, const String &name,
+              Ogre::ResourceHandle handle, const String &group,
+              bool is_manual = false, Ogre::ManualResourceLoader *loader = NULL
+           );
 
-        const Ogre::Matrix3&    getMatrix() const;
-        void                    setMatrix( const Ogre::Matrix3& matrix );
+            /**
+             * Destructor.
+             */
+            virtual ~CameraMatrixFile();
 
-        const Ogre::Vector3&    getPosition() const;
-        void                    setPosition( const Ogre::Vector3& position );
+            /**
+             * The type of resource.
+             */
+            static const String RESOURCE_TYPE;
 
-        const Pixel&            getOffset() const;
-        void                    setOffset( const Pixel& offset );
+            /**
+             * Retrieves the camera matrix in the file.
+             *
+             * @return The camera matrix.
+             */
+            const Ogre::Matrix3& GetMatrix() const;
 
-        const size_t&           getCount() const;
-        void                    setCount( const size_t count );
+            /**
+             * Sets the camera matrix.
+             *
+             * @param matrix[in] The camera matrix.
+             */
+            void SetMatrix(const Ogre::Matrix3& matrix);
 
-        const Ogre::Real&       getFocalLength() const;
-        void                    setFocalLength( const Ogre::Real );
+            /**
+             * Retrieves the camera position.
+             *
+             * @return The camera position.
+             */
+            const Ogre::Vector3& GetPosition() const;
 
-        Ogre::Quaternion        getOrientation() const;
-        Ogre::Radian            getFov( Ogre::Real width ) const;
+            /**
+             * Sets the camera position.
+             *
+             * @param position[in] The camera position.
+             */
+            void SetPosition(const Ogre::Vector3& position);
 
-    protected:
-        virtual void loadImpl( void );
-        virtual void unloadImpl( void );
-        virtual size_t calculateSize( void ) const;
+            /**
+             * Retrieves the camera offset.
+             *
+             * @return The camera offset, as a {@see Pixel}.
+             */
+            const Pixel& GetOffset() const;
 
-    private:
-        Ogre::Matrix3   m_matrix;
-        Ogre::Vector3   m_position;
-        Pixel           moffset_;
-        Ogre::Real      m_focal_length;
-        size_t          m_count;
+            /**
+             * Sets the camera offset.
+             *
+             * @param offset[in] The camera offset, as a {@see Pixel}.
+             */
+            void SetOffset(const Pixel& offset);
+
+            /**
+             * Counts the ???
+             *
+             * @return The number of ???
+             * @todo What does this count?
+             */
+            const size_t& GetCount() const;
+
+            /**
+             * Sets the number of ???
+             *
+             * @param count[in] The number of ???
+             * @todo What is this number?
+             */
+            void SetCount(const size_t count);
+
+            /**
+             * Retrieves the focal length.
+             *
+             * @return The focal length.
+             */
+            const Ogre::Real& GetFocalLength() const;
+
+            /**
+             * Sets the focal length.
+             *
+             * @param focal_length[in] The focal length.
+             */
+            void SetFocalLength(const Ogre::Real focal_length);
+
+            /**
+             * Retrieves the camera orientation.
+             *
+             * @return The camera orientation.
+             */
+            Ogre::Quaternion GetOrientation() const;
+
+            /**
+             * Retrieves the camera field of view.
+             *
+             * @return The field of view.
+             */
+            Ogre::Radian GetFov(Ogre::Real width) const;
+
+        protected:
+
+            /**
+             * Loads the file.
+             */
+            virtual void loadImpl(void);
+
+            /**
+             * Unloads the file.
+             */
+            virtual void unloadImpl(void);
+
+            /**
+             * Calculates the file size
+             *
+             * @return Always 0.
+             */
+            virtual size_t CalculateSize(void) const;
+
+        private:
+
+            /**
+             * The camera matrix.
+             */
+            Ogre::Matrix3 matrix_;
+
+            /**
+             * The position of the camera.
+             */
+            Ogre::Vector3 position_;
+
+            /**
+             * The camera offset.
+             */
+            Pixel offset_;
+
+            /**
+             * The focal length.
+             */
+            Ogre::Real focal_length_;
+
+            /**
+             * The number of @todo what?
+             */
+            size_t count_;
     };
 
     typedef Ogre::SharedPtr<CameraMatrixFile> CameraMatrixFilePtr;
 }
-
-#endif // __QGearsCameraMatrixFile_H__

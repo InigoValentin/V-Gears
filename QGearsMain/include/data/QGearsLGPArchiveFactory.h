@@ -1,64 +1,78 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-09-22 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsLGPArchiveFactory_H__
-#define __QGearsLGPArchiveFactory_H__
+#pragma once
 
 #include <OgreArchiveFactory.h>
-
 #include "QGearsLGPArchive.h"
 
-namespace QGears
-{
-    class LGPArchiveFactory : public Ogre::ArchiveFactory
-    {
+namespace QGears{
+
+    /**
+     * A factory for LGP archives.
+     */
+    class LGPArchiveFactory : public Ogre::ArchiveFactory{
+
+        // TODO: Move implemented methods to cpp file.
+
         public:
+
+            /**
+             * Constructor.
+             */
             LGPArchiveFactory();
+
+            /**
+             * Destructor.
+             */
             virtual ~LGPArchiveFactory();
 
-            /// @copydoc FactoryObj::getType
-            const String& getType(void) const
-            {
-                return ARCHIVE_TYPE;
+            /**
+             * Retrieves the factory type.
+             *
+             * @return The factory type.
+             */
+            const String& getType(void) const{return ARCHIVE_TYPE;}
+
+            /**
+             * Creates a new LGP archive.
+             *
+             * @param name[in] Name of the archive to create.
+             * @param readOnly[in] True to make the archive read-only, false to
+             * enable writting.
+             * @return A new LGP archive.
+             */
+            Ogre::Archive* createInstance(
+              const String& name, bool readOnly
+            ) override final{
+                return OGRE_NEW LGPArchive(name, ARCHIVE_TYPE);
             }
 
-            /// @copydoc FactoryObj::createInstance
-            Ogre::Archive* createInstance( const String& name, bool readOnly ) override final
-            {
-                return OGRE_NEW LGPArchive( name, ARCHIVE_TYPE );
-            }
-
-            /// @copydoc FactoryObj::DestroyInstance
-            void destroyInstance( Ogre::Archive* arch ) override final
-            {
+            /**
+             * Destroys a LGP archive created by this factory.
+             *
+             * @param arch[in] The archive to destroy.
+             */
+            void destroyInstance( Ogre::Archive* arch ) override final{
                 OGRE_DELETE arch;
             }
+
+            /**
+             * The archive type.
+             */
             static const String ARCHIVE_TYPE;
 
-        private:
     };
 }
-
-#endif // __QGearsLGPArchiveFactory_H__

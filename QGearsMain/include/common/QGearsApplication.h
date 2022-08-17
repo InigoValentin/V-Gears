@@ -20,11 +20,11 @@
 #include <memory>
 #include "TypeDefine.h"
 
-/**
- * The V-Gears main applicacion
- */
 namespace QGears{
 
+    /**
+     * The V-Gears main applicacion
+     */
     class Application : public Ogre::Singleton<Application>{
 
         public:

@@ -1,80 +1,55 @@
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
 #include "core/ConfigVar.h"
 #include "core/Timer.h"
 
+ConfigVar cv_timer_scale_game(
+  "timer_scale_game", "Timer speed for game related things", "1"
+);
 
-ConfigVar cv_timer_scale_game("timer_scale_game", "Timer speed for game related things", "1");
 template<>Timer *Ogre::Singleton<Timer>::msSingleton = nullptr;
 
 
 Timer::Timer():
-    m_SystemTimeTotal(0),
-    m_SystemTimeDelta(0),
-    m_GameTimeTotal(0),
-    m_GameTimeDelta( 0 ),
-    m_GameTimer( 0 )
-{
-}
+  system_time_total_(0),
+  system_time_delta_(0),
+  game_time_total_(0),
+  game_time_delta_( 0 ),
+  game_timer_( 0 )
+{}
 
+float Timer::GetSystemTimeTotal(){return system_time_total_;}
 
-float
-Timer::GetSystemTimeTotal()
-{
-    return m_SystemTimeTotal;
-}
+float Timer::GetSystemTimeDelta(){return system_time_delta_;}
 
+float Timer::GetGameTimeTotal(){return game_time_total_;}
 
-float
-Timer::GetSystemTimeDelta()
-{
-    return m_SystemTimeDelta;
-}
+float Timer::GetGameTimeDelta(){return game_time_delta_;}
 
-
-float
-Timer::GetGameTimeTotal()
-{
-    return m_GameTimeTotal;
-}
-
-
-float
-Timer::GetGameTimeDelta()
-{
-    return m_GameTimeDelta;
-}
-
-
-void
-Timer::AddTime( const float time )
-{
-    m_SystemTimeDelta = time;
-    m_SystemTimeTotal += m_SystemTimeDelta;
-
-    m_GameTimeDelta = time * cv_timer_scale_game.GetF();
-    m_GameTimeTotal += m_GameTimeDelta;
-
-    if( m_GameTimer > 0 )
-    {
-        m_GameTimer -= time;
-        if( m_GameTimer < 0 )
-        {
-            m_GameTimer = 0;
-        }
+void Timer::AddTime( const float time ){
+    system_time_delta_ = time;
+    system_time_total_ += system_time_delta_;
+    game_time_delta_ = time * cv_timer_scale_game.GetF();
+    game_time_total_ += game_time_delta_;
+    if (game_timer_ > 0){
+        game_timer_ -= time;
+        if (game_timer_ < 0) game_timer_ = 0;
     }
 }
 
+void Timer::SetGameTimer(const float timer){game_timer_ = timer;}
 
-
-void
-Timer::SetGameTimer( const float timer )
-{
-    m_GameTimer = timer;
-}
-
-
-
-int
-Timer::GetGameTimer() const
-{
-    return (int) m_GameTimer;
-}
+int Timer::GetGameTimer() const{return (int) game_timer_;}

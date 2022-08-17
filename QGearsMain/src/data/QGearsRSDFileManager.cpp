@@ -1,80 +1,63 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-16 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
 #include "data/QGearsRSDFileManager.h"
 
-template<> QGears::RSDFileManager *Ogre::Singleton<QGears::RSDFileManager>::msSingleton = nullptr;
+template<> QGears::RSDFileManager
+ *Ogre::Singleton<QGears::RSDFileManager>::msSingleton = nullptr;
 
-namespace QGears
-{
-    //-------------------------------------------------------------------------
-    RSDFileManager *RSDFileManager::getSingletonPtr()
-    {
-        return msSingleton;
-    }
+namespace QGears{
 
-    //-------------------------------------------------------------------------
-    RSDFileManager &RSDFileManager::getSingleton()
-    {
+    RSDFileManager *RSDFileManager::GetSingletonPtr(){return msSingleton;}
+
+    RSDFileManager &RSDFileManager::GetSingleton(){
         assert( msSingleton );
         return(*msSingleton );
     }
-     //-------------------------------------------------------------------------
-    RSDFileManager::RSDFileManager()
-    {
+
+    RSDFileManager::RSDFileManager(){
         mResourceType = RSDFile::RESOURCE_TYPE;
-
-        // low, because it will likely reference other resources
+        // Low, because it will likely reference other resources.
         mLoadOrder = 30.0f;
-
-        // this is how we register the ResourceManager with OGRE
-        Ogre::ResourceGroupManager::getSingleton()._registerResourceManager( mResourceType, this );
+        // This is how the ResourceManager registers with OGRE.
+        Ogre::ResourceGroupManager::getSingleton()._registerResourceManager(
+          mResourceType, this
+        );
     }
 
-    //-------------------------------------------------------------------------
-    RSDFileManager::~RSDFileManager()
-    {
-        Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager( mResourceType );
+    RSDFileManager::~RSDFileManager(){
+        Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(
+          mResourceType
+        );
     }
 
-    //-------------------------------------------------------------------------
-    void
-    RSDFileManager::parseScript( Ogre::DataStreamPtr &stream, const String &groupName )
-    {
-        RSDFilePtr  rsd = createResource( stream->getName(), groupName ).staticCast<RSDFile>();
+    void RSDFileManager::ParseScript(
+      Ogre::DataStreamPtr &stream, const String &group_name
+    ){
+        RSDFilePtr rsd = createResource(stream->getName(), group_name)
+          .staticCast<RSDFile>();
         rsd->load();
     }
 
-    //-------------------------------------------------------------------------
-    Ogre::Resource *RSDFileManager::createImpl( const Ogre::String &name
-      , Ogre::ResourceHandle handle, const Ogre::String &group, bool isManual
-      , Ogre::ManualResourceLoader *loader
-      , const Ogre::NameValuePairList *createParams )
-    {
-        return new RSDFile( this, name, handle, group, isManual, loader );
+    Ogre::Resource *RSDFileManager::createImpl(
+      const Ogre::String &name, Ogre::ResourceHandle handle,
+      const Ogre::String &group, bool is_manual,
+      Ogre::ManualResourceLoader *loader,
+      const Ogre::NameValuePairList *create_params
+    ){
+        return new RSDFile(this, name, handle, group, is_manual, loader);
     }
 
-    //-------------------------------------------------------------------------
 }

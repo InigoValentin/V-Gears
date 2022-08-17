@@ -1,66 +1,118 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-10 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsAFileSerializer_H__
-#define __QGearsAFileSerializer_H__
+#pragma once
 
 #include "common/TypeDefine.h"
 #include "QGearsAFile.h"
 #include "QGearsSerializer.h"
 
-namespace QGears
-{
-    class AFileSerializer : public Serializer
-    {
-    public:
-                        AFileSerializer();
-        virtual        ~AFileSerializer();
+namespace QGears{
 
-        void    importAFile( Ogre::DataStreamPtr &stream, AFile* pDest );
+    /**
+     * Handles the serialization of A files.
+     */
+    class AFileSerializer : public Serializer{
 
-        struct Header
-        {
-            uint32 version;
-            uint32 frame_count;
-            uint32 bone_count;
-            uint32 rotation_order;
-            uint32 runtime_data[5];
+        public:
+
+            /**
+             * Constructor.
+             */
+            AFileSerializer();
+
+            /**
+             * Destructor.
+             */
+            virtual ~AFileSerializer();
+
+            /**
+             * Imports an A file.
+             *
+             * @param stream[in] The contents of the A file.
+             * @param dest[out] The A file.
+             */
+            void ImportAFile(Ogre::DataStreamPtr &stream, AFile* dest);
+
+            /**
+             * An A file header.
+             */
+            struct Header{
+
+                /**
+                 * The file type version.
+                 */
+                uint32 version;
+
+                /**
+                 * The frame count.
+                 */
+                uint32 frame_count;
+
+                /**
+                 * The number of bones.
+                 */
+                uint32 bone_count;
+
+                /**
+                 * The axis rotation order.
+                 */
+                uint32 rotation_order;
+
+                /**
+                 * @todo Understand and document.
+                 */
+                uint32 runtime_data[5];
+            };
+
+        protected:
+
+            /**
+             * Reads a file header and sets the instance data.
+             *
+             * @param stream[in] The contents of the A file.
+             */
+            virtual void ReadFileHeader(Ogre::DataStreamPtr &stream) final;
+
+            /**
+             * Reads an object as an A file.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed A file.
+             */
+            void readObject(Ogre::DataStreamPtr &stream, AFile::Frame &dest);
+
+            using Serializer::readObject;
+
+            /**
+             * Reads a stream as a vector.
+             *
+             * @param stream[in] The input stream.
+             * @param dest[out] The vector data will be loaded here.
+             * @param count[in] Data units to copy.
+             */
+            template<typename ValueType> void ReadVector(
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
+              size_t count
+            );
+
+        private:
+
+            /**
+             * The file header.
+             */
+            Header header_;
         };
-
-    protected:
-        virtual void    readFileHeader( Ogre::DataStreamPtr &stream ) final;
-        void    readObject( Ogre::DataStreamPtr &stream, AFile::Frame &pDest );
-        using Serializer::readObject;
-
-        template<typename ValueType>
-        void readVector( Ogre::DataStreamPtr &stream
-                        ,std::vector<ValueType> &pDest, size_t count );
-
-    private:
-        Header  m_header;
-    };
 }
-
-#endif // __QGearsAFileSerializer_H__

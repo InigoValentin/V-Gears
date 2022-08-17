@@ -1,48 +1,82 @@
 /*
------------------------------------------------------------------------------
-Copyright (c) 07.10.2013 Tobias Peters <tobias.peters@kreativeffekt.at>
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-This file is part of Q-Gears
-
-Q-Gears is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 2.0 (GPLv2) of the License.
-
-Q-Gears is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
------------------------------------------------------------------------------
-*/
-#ifndef __FF7ModelListFileManager_H__
-#define __FF7ModelListFileManager_H__
+#pragma once
 
 #include <OgreResourceManager.h>
-
 #include "QGearsPrerequisites.h"
-
 #include "FF7ModelListFile.h"
 
-namespace QGears
-{
-    namespace FF7
-    {
-        class _QGearsExport ModelListFileManager : public Ogre::ResourceManager, public Ogre::Singleton<ModelListFileManager>
+namespace QGears{
+
+    namespace FF7{
+
+        /**
+         * A manager for model list files.
+         */
+        class _QGearsExport ModelListFileManager :
+          public Ogre::ResourceManager,
+          public Ogre::Singleton<ModelListFileManager>
         {
-        public:
-            ModelListFileManager();
-            virtual ~ModelListFileManager();
+            public:
 
-            static ModelListFileManager &getSingleton();
-            static ModelListFileManager *getSingletonPtr();
+                /**
+                 * Constructor.
+                 */
+                ModelListFileManager();
 
-        protected:
-            Ogre::Resource *createImpl( const Ogre::String &name, Ogre::ResourceHandle handle
-                                        , const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader
-                                        , const Ogre::NameValuePairList *createParams );
+                /**
+                 * Destructor.
+                 */
+                virtual ~ModelListFileManager();
 
-        private:
+                /**
+                 * Retrieves a singleton to the manager.
+                 */
+                static ModelListFileManager& GetSingleton();
+
+                /**
+                 * Retrieves a pointer to the manager singleton.
+                 */
+                static ModelListFileManager *GetSingletonPtr();
+
+            protected:
+
+                /**
+                 * Loads the manager.
+                 *
+                 * @param name[in] The unique name of the manager.
+                 * @param handle[in] @todo Understand and document.
+                 * @param group[in] The name of the resource group to which this
+                 * resource belong.
+                 * @param is_manual[in] True if the resource is manually loaded,
+                 * false otherwise.
+                 * @param loader[in] Pointer to a ManualResourceLoader
+                 * implementation which will be called when the Resource wishes to
+                 * load (should be supplied if is_manual is set to true). It can be
+                 * null, but the Resource will never be able to reload if anything
+                 * ever causes it to unload. Therefore provision of a proper
+                 * ManualResourceLoader instance is strongly recommended.
+                 * @param create_params[in] Unused.
+                 */
+                Ogre::Resource *createImpl(
+                  const Ogre::String &name, Ogre::ResourceHandle handle,
+                  const Ogre::String &group, bool is_manual,
+                  Ogre::ManualResourceLoader *loader,
+                  const Ogre::NameValuePairList *create_params
+                );
         };
     }
 }
-#endif // __FF7ModelListFileManager_H__

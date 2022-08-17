@@ -1,91 +1,226 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-08-10 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsPFileSerializer_H__
-#define __QGearsPFileSerializer_H__
+#pragma once
 
 #include "common/TypeDefine.h"
-
 #include "QGearsPFile.h"
 #include "QGearsSerializer.h"
 
-namespace QGears
-{
-    class PFileSerializer : public Serializer
-    {
-    public:
-                        PFileSerializer();
-        virtual        ~PFileSerializer();
+namespace QGears{
 
-        virtual void    importPFile( Ogre::DataStreamPtr &stream, PFile* pDest );
+    /**
+     * Handles the serialization of P files.
+     */
+    class PFileSerializer : public Serializer{
 
-        struct Header
-        {
-            uint32 version;
-            uint32 unknown_04;
-            uint32 vertex_type;
-            uint32 num_vertices;
-            uint32 num_normals;
-            uint32 num_unknown1;
-            uint32 num_texture_coordinates;
-            uint32 num_vertex_colors;
-            uint32 num_edges;
-            uint32 num_polygons;
-            uint32 num_unknown2;
-            uint32 num_unknown3;
-            uint32 num_materials;
-            uint32 num_groups;
-            uint32 num_bboxes;
-            uint32 norm_index_table_flag;
-            uint32 runtime_data[0x10];
-        };
+        public:
 
-        typedef PFile::BBoxEntry            BBoxEntry;
-        typedef PFile::Edge                 Edge;
-        typedef PFile::Group                Group;
-        typedef PFile::MaterialInformation  MaterialInformation;
-        typedef PFile::PolygonDefinition    PolygonDefinition;
-        typedef PFile::Colour               Colour;
+            /**
+             * Constructor.
+             */
+            PFileSerializer();
 
-    protected:
-        virtual void    readFileHeader( Ogre::DataStreamPtr &stream );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, Colour &pDest );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, Edge &pDest );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, PolygonDefinition &pDest );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, Group &pDest );
-        virtual void    readObject( Ogre::DataStreamPtr &stream, BBoxEntry &pDest );
-        using Serializer::readObject;
+            /**
+             * Destructor.
+             */
+            virtual ~PFileSerializer();
 
-        template<typename ValueType>
-                void    readVector( Ogre::DataStreamPtr &stream
-                                   ,std::vector<ValueType> &pDest
-                                   ,size_t count );
+            /**
+             * Imports a P file.
+             *
+             * @param stream[in] The contents of the P file.
+             * @param dest[out] The formed P file.
+             */
+            virtual void ImportPFile(Ogre::DataStreamPtr &stream, PFile* dest);
 
-    private:
-        Header  m_header;
+            /**
+             * The header of a P file.
+             */
+            struct Header{
+
+                /**
+                 * The file format version.
+                 */
+                uint32 version;
+
+                /**
+                 * Unknown data.
+                 */
+                uint32 unknown_04;
+
+                /**
+                 * Type of vertices.
+                 */
+                uint32 vertex_type;
+
+                /**
+                 * The number of vertices.
+                 */
+                uint32 num_vertices;
+
+                /**
+                 * The number of normals.
+                 */
+                uint32 num_normals;
+
+                /**
+                 * Number of unknown data blocks.
+                 */
+                uint32 num_unknown1;
+
+                /**
+                 * Number of texture coordinates.
+                 */
+                uint32 num_texture_coordinates;
+
+                /**
+                 * Number of vertex colours.
+                 */
+                uint32 num_vertex_colors;
+
+                /**
+                 * Number of edges.
+                 */
+                uint32 num_edges;
+
+                /**
+                 * Number of polygons.
+                 */
+                uint32 num_polygons;
+
+                /**
+                 * Number of unknown data blocks.
+                 */
+                uint32 num_unknown2;
+
+                /**
+                 * Number of unknown data blocks.
+                 */
+                uint32 num_unknown3;
+
+                /**
+                 * Number of materials.
+                 */
+                uint32 num_materials;
+
+                /**
+                 * Number of groups.
+                 */
+                uint32 num_groups;
+
+                /**
+                 * Number of bounding boxes.
+                 */
+                uint32 num_bboxes;
+
+                /**
+                 * @todo Understand and document.
+                 */
+                uint32 norm_index_table_flag;
+
+                /**
+                 * @todo Understand and document.
+                 */
+                uint32 runtime_data[0x10];
+            };
+
+            typedef PFile::BBoxEntry BBoxEntry;
+
+            typedef PFile::Edge Edge;
+
+            typedef PFile::Group Group;
+
+            typedef PFile::MaterialInformation MaterialInformation;
+
+            typedef PFile::PolygonDefinition PolygonDefinition;
+
+            typedef PFile::Colour Colour;
+
+        protected:
+
+            /**
+             * Reads a file header and sets the instance data.
+             *
+             * @param stream[in] The contents of the P file.
+             */
+            virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
+
+            /**
+             * Reads an object as a colour.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed colour data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Colour &dest);
+
+            /**
+             * Reads an object as an edge.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed edge data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Edge &dest);
+
+            /**
+             * Reads an object as a polygon definition.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed poligon definition data.
+             */
+            virtual void readObject(
+              Ogre::DataStreamPtr &stream, PolygonDefinition &dest
+            );
+
+            /**
+             * Reads an object as a group.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed group data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Group &dest);
+
+            /**
+             * Reads an object as a bounding box.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed bounding box data.
+             */
+            virtual void readObject(
+              Ogre::DataStreamPtr &stream, BBoxEntry &dest
+            );
+
+            using Serializer::readObject;
+
+            /**
+             * Reads a stream as a vector.
+             *
+             * @param stream[in] The input stream.
+             * @param dest[out] The vector data will be loaded here.
+             * @param count[in] Data units to copy.
+             */
+            template<typename ValueType> void ReadVector(
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
+              size_t count
+            );
+
+        private:
+
+            /**
+             * The file header.
+             */
+            Header header_;
     };
 }
-
-#endif // __QGearsPFileSerializer_H__
