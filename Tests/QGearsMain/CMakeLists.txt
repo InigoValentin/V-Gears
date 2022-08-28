@@ -2,12 +2,12 @@ file(COPY misc DESTINATION .)
 
 include_directories(
     ${VGears_INCLUDE_DIRS}
-    ${QGearsMain_SOURCE_DIR}/include
+    ${V-Gears_SOURCE_DIR}/include
 )
 
 set(LIBRARIES
     ${VGears_TEST_LIBRARIES}
-    QGearsMain
+    V-Gears
 	v-gears-data
 )
 

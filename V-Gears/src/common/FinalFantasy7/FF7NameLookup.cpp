@@ -13,25 +13,4 @@
  * GNU General Public License for more details.
  */
 
-#include <OgreRoot.h>
-#include "QGearsDataPlugin.h"
-
-#ifndef QGEARS_STATIC_LIB
-
-namespace QGears{
-
-    DataPlugin* data_plugin(NULL);
-
-    extern "C" void _QGearsExport dllStartPlugin( void ){
-        data_plugin = new DataPlugin();
-        // Register.
-        Ogre::Root::getSingleton().installPlugin(data_plugin);
-    }
-    extern "C" void _QGearsExport dllStopPlugin( void ){
-        Ogre::Root::getSingleton().uninstallPlugin(data_plugin);
-        delete data_plugin;
-        data_plugin = NULL;
-    }
-}
-
-#endif
+#include "common/FinalFantasy7/FF7NameLookup.h"

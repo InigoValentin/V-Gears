@@ -2,14 +2,14 @@ file(COPY misc DESTINATION .)
 
 include_directories(
     ${VGears_INCLUDE_DIRS}
-    ${QGearsMain_SOURCE_DIR}/include
+    ${V-Gears_SOURCE_DIR}/include
     ${VGears_SOURCE_DIR}/SupportedGames/FinalFantasy7/include
 )
 
 set(LIBRARIES
     ${VGears_TEST_LIBRARIES}
     FinalFantasy7
-	QGearsMain
+	V-Gears
 	v-gears-data
 )
 

@@ -38,7 +38,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/vgears_version.h
   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake
   DEPENDS
     ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake
-    ${CMAKE_CURRENT_SOURCE_DIR}/QGearsMain/include/vgears_version.h.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/vgears_version.h.in
   COMMENT "Configuring vgears_version.h"
   VERBATIM)
 add_custom_target(configure_vgears_version ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/vgears_version.h)
@@ -63,7 +63,7 @@ set(OGRE_FRAMEWORK_INCLUDES
 )
 
 option(VGears_BUILD_PLUGINS     "Build the plugins"     TRUE)
-option(VGears_BUILD_UTILITIES   "Build the utilities"   TRUE)
+option(VGears_BUILD_UTILITIES   "Build the V-Gears-Installer"   TRUE)
 option(VGears_BUILD_TESTS       "Build the unit tests"  FALSE)
 option(VGears_MULTITHREADING    "Enable multithreading" FALSE)
 option(VGears_SOUND             "Enable Sound"          TRUE)
@@ -195,7 +195,7 @@ endif()
 
 set(VGears_INCLUDE_DIRS
     ${VGears_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/QGearsMain/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/
     ${OIS_INCLUDE_DIRS}
     #/usr/include/luabind # TODO: Autofind
     #/usr/include/lua5.2
@@ -231,15 +231,15 @@ endif()
 
 add_definitions(-DTIXML_USE_STL)
 add_subdirectory(lib)
-add_subdirectory(QGearsMain)
-add_subdirectory(SupportedGames)
+add_subdirectory(V-Gears)
+#add_subdirectory(SupportedGames)
 
 if(VGears_BUILD_PLUGINS)
     add_subdirectory(PlugIns)
 endif()
 
 if(VGears_BUILD_UTILITIES)
-    add_subdirectory(utilities)
+    add_subdirectory(V-Gears-Installer)
 endif()
 
 if(VGears_BUILD_TESTS)

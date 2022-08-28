@@ -21,7 +21,7 @@ set(SOURCE_FILES
 
 include_directories(
     ${VGears_INCLUDE_DIRS}
-    ${VGears_SOURCE_DIR}/QGearsMain/include
+    ${VGears_SOURCE_DIR}/V-Gears/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
@@ -34,7 +34,7 @@ SET_PROPERTY(TARGET FinalFantasy7 PROPERTY FOLDER "q-gears")
 set(LIBRARIES
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
-    QGearsMain
+    V-Gears
 )
 
 target_link_libraries(FinalFantasy7 ${LIBRARIES})

@@ -1,83 +1,52 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-07-30 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
 #include "QGearsDataPlugin.h"
-
 #include "data/QGearsTexCodec.h"
 
 using Ogre::String;
 
 namespace QGears {
-    const String DataPlugin::ms_plugin_name( "Plugin for Various FFVII File Formats" );
 
+    const String DataPlugin::ms_plugin_name(
+      "Plugin for Various FFVII File Formats"
+    );
 
-    DataPlugin::DataPlugin()
-    {
-    }
+    DataPlugin::DataPlugin(){}
 
+    const String& DataPlugin::getName() const{return ms_plugin_name;}
 
-    const String& DataPlugin::getName() const
-    {
-        return ms_plugin_name;
-    }
+    void DataPlugin::install(){TexCodec::install();}
 
-
-    void DataPlugin::install()
-    {
-        //install called - create stuff here
-        TexCodec::install();
-    }
-
-
-    void DataPlugin::initialise()
-    {
-        //intialise called - register stuff here
+    void DataPlugin::initialise(){
         TexCodec::initialise();
-        p_manager           = new PFileManager();
-        hrc_manager         = new HRCFileManager();
-        rsd_manager         = new RSDFileManager();
-        //palette_manager     = new PaletteFileManager();
-        //background_manager  = new BackgroundFileManager();
+        p_manager_           = new PFileManager();
+        hrc_manager_         = new HRCFileManager();
+        rsd_manager_         = new RSDFileManager();
+        //palette_manager_     = new PaletteFileManager();
+        //background_manager_  = new BackgroundFileManager();
     }
 
-
-    void DataPlugin::shutdown()
-    {
-        //shutdown called - unregister stuff here
+    void DataPlugin::shutdown(){
         TexCodec::shutdown();
-        delete p_manager;
-        delete hrc_manager;
-        delete rsd_manager;
-        //delete palette_manager;
-        //delete background_manager;
+        delete p_manager_;
+        delete hrc_manager_;
+        delete rsd_manager_;
+        //delete palette_manager_;
+        //delete background_manager_;
     }
 
-
-    void DataPlugin::uninstall()
-    {
-        //uninstall called - delete stuff here
-        TexCodec::uninstall();
-    }
+    void DataPlugin::uninstall(){TexCodec::uninstall();}
 }

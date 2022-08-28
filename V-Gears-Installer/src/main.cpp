@@ -13,25 +13,19 @@
  * GNU General Public License for more details.
  */
 
-#include <OgreRoot.h>
-#include "QGearsDataPlugin.h"
+#include <QtWidgets/QApplication>
+#include "../include/mainwindow.h"
 
-#ifndef QGEARS_STATIC_LIB
-
-namespace QGears{
-
-    DataPlugin* data_plugin(NULL);
-
-    extern "C" void _QGearsExport dllStartPlugin( void ){
-        data_plugin = new DataPlugin();
-        // Register.
-        Ogre::Root::getSingleton().installPlugin(data_plugin);
-    }
-    extern "C" void _QGearsExport dllStopPlugin( void ){
-        Ogre::Root::getSingleton().uninstallPlugin(data_plugin);
-        delete data_plugin;
-        data_plugin = NULL;
-    }
+/**
+ * Installer main function.
+ *
+ * @param argc[in] Number of arguments passed to the application.
+ * @param argv[in] List of arguments passed to the application.
+ * @return The application return code. 0 is OK.
+ */
+int main(int argc, char *argv[]){
+    QApplication application(argc, argv);
+    MainWindow window;
+    window.show();
+    return application.exec();
 }
-
-#endif

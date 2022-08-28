@@ -1,17 +1,17 @@
-set(QGearsMain_SOURCE_DIR ../../QGearsMain)
+set(V-Gears_SOURCE_DIR ../../V-Gears)
 
 # define header and source files for the library
 set(HEADER_FILES
-  ${QGearsMain_SOURCE_DIR}/include/QGearsPrerequisites.h
-  ${QGearsMain_SOURCE_DIR}/include/common/QGearsManualObject.h
-  ${QGearsMain_SOURCE_DIR}/include/common/QGearsStringUtil.h
-  ${QGearsMain_SOURCE_DIR}/include/common/TypeDefine.h
+  ${V-Gears_SOURCE_DIR}/include/QGearsPrerequisites.h
+  ${V-Gears_SOURCE_DIR}/include/common/QGearsManualObject.h
+  ${V-Gears_SOURCE_DIR}/include/common/QGearsStringUtil.h
+  ${V-Gears_SOURCE_DIR}/include/common/TypeDefine.h
   include/QGearsDataPlugin.h
 )
 set(SOURCE_FILES
-  ${QGearsMain_SOURCE_DIR}/src/common/QGearsManualObject.cpp
-  ${QGearsMain_SOURCE_DIR}/src/common/QGearsStringUtil.cpp
-  ${QGearsMain_SOURCE_DIR}/src/common/TypeDefine.cpp
+  ${V-Gears_SOURCE_DIR}/src/common/QGearsManualObject.cpp
+  ${V-Gears_SOURCE_DIR}/src/common/QGearsStringUtil.cpp
+  ${V-Gears_SOURCE_DIR}/src/common/TypeDefine.cpp
   src/QGearsDataPlugin.cpp
   src/QGearsDataPluginDll.cpp
 )
@@ -20,7 +20,7 @@ include_directories(
     ${OIS_INCLUDE_DIRS}
     ${OGRE_INCLUDE_DIRS}
     ${OGRE_SAMPLES_INCLUDEPATH}
-    ${QGearsMain_SOURCE_DIR}/include
+    ${V-Gears_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../../lib
 )
@@ -41,7 +41,7 @@ set_target_properties(DataPlugin PROPERTIES
 
 set(LIBRARIES
   ${OGRE_LIBRARIES} 
-  FinalFantasy7
+  #FinalFantasy7
   v-gears-data
 )
 

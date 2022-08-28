@@ -1,30 +1,19 @@
 /*
------------------------------------------------------------------------------
-The MIT License (MIT)
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
 
-Copyright (c) 2013-07-30 Tobias Peters <tobias.peters@kreativeffekt.at>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
------------------------------------------------------------------------------
-*/
-#ifndef __QGearsTexPlugin_H__
-#define __QGearsTexPlugin_H__
+#pragma once
 
 #include <OgrePlugin.h>
 
@@ -37,36 +26,71 @@ THE SOFTWARE.
 
 namespace QGears {
 
-	/** Plugin instance for various FFVII Data Formats */
-    class DataPlugin : public Ogre::Plugin
-    {
-    public:
-        DataPlugin();
+    /**
+     * Plugin instance for various FFVII Data Formats
+     */
+    class DataPlugin : public Ogre::Plugin{
 
-        /// @copydoc Ogre::Plugin::getName
-        const Ogre::String& getName() const;
+        public:
 
-        /// @copydoc Ogre::Plugin::install
-        void install();
+            DataPlugin();
 
-        /// @copydoc Ogre::Plugin::initialise
-        void initialise();
+            /**
+             * Retrieves the name fo the plugin.
+             */
+            const Ogre::String& getName() const;
 
-        /// @copydoc Ogre::Plugin::shutdown
-        void shutdown();
+            /**
+             * Perform the plugin initial installation sequence.
+             */
+            void install();
 
-        /// @copydoc Ogre::Plugin::uninstall
-        void uninstall();
+            /**
+             * Perform any tasks the plugin needs on system initialization.
+             */
+            void initialise();
 
-        static const Ogre::String ms_plugin_name;
+            /**
+             * Perform any tasks the plugin needs on system shut down.
+             */
+            void shutdown();
 
-    private:
-        PFileManager           *p_manager;
-        HRCFileManager         *hrc_manager;
-        RSDFileManager         *rsd_manager;
-        PaletteFileManager     *palette_manager;
-        BackgroundFileManager  *background_manager;
+            /**
+             * Perform the final plugin uninstallation sequence.
+             */
+            void uninstall();
+
+            /**
+             * The plugin name.
+             */
+            static const Ogre::String ms_plugin_name;
+
+        private:
+
+            /**
+             * The .P file manager.
+             */
+            PFileManager *p_manager_;
+
+            /**
+             * The HRC file manager.
+             */
+            HRCFileManager *hrc_manager_;
+
+            /**
+             * The RSD file manager.
+             */
+            RSDFileManager *rsd_manager_;
+
+            /**
+             * The palette file manager.
+             */
+            PaletteFileManager *palette_manager_;
+
+            /**
+             * The background file manager.
+             */
+            BackgroundFileManager *background_manager_;
 
     };
 }
-#endif // __QGearsTexPlugin_H__
