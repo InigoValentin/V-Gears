@@ -1,5 +1,4 @@
 # cotire example project
-
 cmake_minimum_required(VERSION 2.8.12)
 
 if (POLICY CMP0058)

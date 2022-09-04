@@ -13,7 +13,6 @@
  * GNU General Public License for more details.
  */
 
-
 #include <OgreException.h>
 #include "data/QGearsLZSDataStream.h"
 

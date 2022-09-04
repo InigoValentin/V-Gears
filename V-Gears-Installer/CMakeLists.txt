@@ -50,6 +50,8 @@ add_subdirectory(flevel)
 add_subdirectory(lzs)
 #add_subdirectory(v-gears-launcher)
 
+#DEBUG, no optimizations
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O0")
 
 find_package ( Qt5Widgets REQUIRED )
 #include ( ${QT_USE_FILE} )

@@ -98,18 +98,25 @@ int FF7DataInstaller::Progress(){
               "TEX", "FFVIITextures"
             );
             // TODO: DEBUG
+            std::cout << "[INS] -> SPAWN_POINTS_AND_SCALE_FACTORS_INIT" << std::endl;
             installation_state_ = SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
             //installation_state_ = CONVERT_FIELD_MODELS;
             return CalcProgress();
         case SPAWN_POINTS_AND_SCALE_FACTORS_INIT:
             write_output_line("Collecting spawn points and scale factors");
+            std::cout << "[INS][PRE] InitCollectSpawnAndScaleFactors" << std::endl;
             InitCollectSpawnAndScaleFactors();
+            std::cout << "[INS][POST] InitCollectSpawnAndScaleFactors" << std::endl;
             return CalcProgress();
         case SPAWN_POINTS_AND_SCALE_FACTORS:
+            std::cout << "[INS][PRE] CollectSpawnAndScaleFactors" << std::endl;
             CollectionFieldSpawnAndScaleFactors();
+            std::cout << "[INS][POST] CollectSpawnAndScaleFactors" << std::endl;
             return CalcProgress();
         case CONVERT_FIELDS:
+            std::cout << "[INS][PRE] ConvertFieldsIteration" << std::endl;
             ConvertFieldsIteration();
+            std::cout << "[INS][POST] ConvertFieldsIteration" << std::endl;
             return CalcProgress();
         case WRITE_MAPS_INIT:
             write_output_line("Write fields");
@@ -1355,7 +1362,7 @@ void FF7DataInstaller::InitCollectSpawnAndScaleFactors(){
     );
     // Load the map list field.
     QGears::MapListFilePtr map_list
-      = QGears::MapListFileManager::getSingleton().load(
+      = QGears::MapListFileManager::GetSingleton().load(
         "maplist", "FFVIIFields"
       ).staticCast<QGears::MapListFile>();
     map_list_ = map_list->GetMapList();
@@ -1371,12 +1378,12 @@ void FF7DataInstaller::CollectionFieldSpawnAndScaleFactors(){
         auto resource_name = (*flevel_file_list_)[iterator_counter_];
         // Exclude things that are not fields.
         if (IsAFieldFile(resource_name) /*&& IsTestField(resourceName)*/){
-            conversion_step_++;
+            conversion_step_ ++;
             if (conversion_step_ == 1){
-                field_ = QGears::LZSFLevelFileManager::getSingleton().load(
-                        resource_name, "FFVIIFields"
+                field_ = QGears::LZSFLevelFileManager::GetSingleton().load(
+                  resource_name, "FFVIIFields"
                 ).staticCast<QGears::FLevelFile>();
-                //write_output_line("Load field " + resourceName);
+                //write_output_line("Load field " + resource_name);
                 return;
             }
             if (conversion_step_ == 2){
@@ -1388,11 +1395,11 @@ void FF7DataInstaller::CollectionFieldSpawnAndScaleFactors(){
                 //write_output_line("Read scale factor");
                 CollectFieldScaleFactors(field_, scale_factors_, map_list_);
                 conversion_step_ = 0;
-                iterator_counter_++;
+                iterator_counter_ ++;
                 return;
             }
         }
-        else iterator_counter_++;
+        else iterator_counter_ ++;
     }
     else{
         field_.reset();
@@ -1409,7 +1416,7 @@ void FF7DataInstaller::ConvertFieldsIteration(){
     progress_step_num_elements_ = flevel_file_list_->size();
     if (iterator_counter_ < flevel_file_list_->size()){
         auto resource_name = (*flevel_file_list_)[iterator_counter_];
-        // Exclude things that are not fields
+        // Exclude things that are not fields.
         if (IsAFieldFile(resource_name)){
             if (/*IsTestField(resource_name) &&*/ !WillCrash(resource_name)){
                 //write_output_line("Converting field " + resource_name);
@@ -1417,7 +1424,7 @@ void FF7DataInstaller::ConvertFieldsIteration(){
                 //  << std::endl;
                 CreateDir(FieldMapDir() + "/" + resource_name);
                 QGears::FLevelFilePtr field
-                  = QGears::LZSFLevelFileManager::getSingleton().load(
+                  = QGears::LZSFLevelFileManager::GetSingleton().load(
                     resource_name, "FFVIIFields"
                   ).staticCast<QGears::FLevelFile>();
                 FF7PcFieldToQGearsField(
@@ -1445,7 +1452,7 @@ void FF7DataInstaller::ConvertFieldsIteration(){
 }
 
 void FF7DataInstaller::WriteMapsXmlBegin(){
-    // Write out maps.xml .
+    // Write out maps.xml.
     progress_step_num_elements_ = 1;
     doc_ = std::make_unique<TiXmlDocument>();
     element_ = std::make_unique<TiXmlElement>("maps");
@@ -1509,7 +1516,7 @@ void FF7DataInstaller::ConvertFieldModelsIteration(){
         else{
             try{
                 Ogre::ResourcePtr hrc
-                  = QGears::HRCFileManager::getSingleton().load(
+                  = QGears::HRCFileManager::GetSingleton().load(
                     model_animation_map_iterator_->first, "FFVII"
                   );
                 Ogre::String base_name;
@@ -1525,7 +1532,7 @@ void FF7DataInstaller::ConvertFieldModelsIteration(){
                 Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
                 for (auto& anim : model_animation_map_iterator_->second){
                     QGears::AFileManager &afl_mgr(
-                      QGears::AFileManager::getSingleton()
+                      QGears::AFileManager::GetSingleton()
                     );
                     QGears::AFilePtr a
                       = afl_mgr.load(anim, "FFVII").staticCast<QGears::AFile>();

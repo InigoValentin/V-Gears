@@ -75,7 +75,7 @@ namespace QGears{
     }
 
     void PFileSerializer::ImportPFile(Ogre::DataStreamPtr &stream, PFile* dest){
-        readFileHeader(stream);
+        ReadFileHeader(stream);
         ReadVector(stream, dest->GetVertices(), header_.num_vertices);
         ReadVector(stream, dest->GetNormals(), header_.num_normals);
         ReadVector(stream, dest->GetUnknown1(), header_.num_unknown1);

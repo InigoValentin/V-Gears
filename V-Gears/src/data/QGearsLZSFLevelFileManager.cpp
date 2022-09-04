@@ -25,8 +25,8 @@ namespace QGears{
     }
 
     LZSFLevelFileManager &LZSFLevelFileManager::GetSingleton(){
-        assert( msSingleton );
-        return(*msSingleton );
+        assert(msSingleton);
+        return(*msSingleton);
     }
 
     LZSFLevelFileManager::LZSFLevelFileManager(){
@@ -50,8 +50,6 @@ namespace QGears{
       const Ogre::String &group, bool is_manual,
       Ogre::ManualResourceLoader *loader,
       const Ogre::NameValuePairList *create_params
-    ){
-        return new LZSFLevelFile(this, name, handle, group, is_manual, loader);
-    }
+    ){return new LZSFLevelFile(this, name, handle, group, is_manual, loader);}
 
 }

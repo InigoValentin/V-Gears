@@ -47,7 +47,7 @@ namespace QGears{
             OGRE_EXCEPT(
               Ogre::Exception::ERR_INVALIDPARAMS,
               "First line in RSD File should start with " + TAG_HEADER,
-              "RSDFileSerializer::readFileHeader"
+              "RSDFileSerializer::ReadFileHeader"
             );
         }
     }
@@ -117,7 +117,7 @@ namespace QGears{
     ){
         texture_count_ = 0;
         has_texture_count_ = false;
-        readFileHeader(stream);
+        ReadFileHeader(stream);
         while (!stream->eof()) ParseLine(GetLine(stream), dest);
         if (!has_texture_count_){
             Ogre::LogManager::getSingleton().stream()

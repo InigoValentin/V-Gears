@@ -229,6 +229,9 @@ if (UNIX AND $ENV{COVERAGE}==1)
       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage") # enabling coverage
 endif()
 
+#DEBUG, no optimizations
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O0")
+
 add_definitions(-DTIXML_USE_STL)
 add_subdirectory(lib)
 add_subdirectory(V-Gears)

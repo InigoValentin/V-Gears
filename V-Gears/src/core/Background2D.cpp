@@ -709,23 +709,34 @@ void Background2D::renderQueueEnded(
   Ogre::uint8 queue_group_id, const Ogre::String& invocation,
   bool& repeat_this_invocation
 ){
-    /*
-     * TODO: Something in this function is responsible for the black screen
-     * glitching (I think).
-     */
     if (cv_show_background2d.GetB() == false) return;
-    if(queue_group_id == Ogre::RENDER_QUEUE_MAIN){
-        render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
-        render_system_->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
+    if (queue_group_id == Ogre::RENDER_QUEUE_MAIN){
+        Ogre::GpuProgramParametersPtr rs_params
+          = render_system_->getFixedFunctionParams(
+            Ogre::TVC_NONE, Ogre::FOG_NONE
+          );
+        rs_params->setConstant(
+          Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY
+        );
+        rs_params->setConstant(
+          Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX,
+          Ogre::Matrix4::IDENTITY
+        );
         Ogre::Viewport *viewport(CameraManager::getSingleton().getViewport());
         float width = static_cast<float>(viewport->getActualWidth());
         float height = static_cast<float>(viewport->getActualHeight());
         Ogre::Matrix4 view;
         view.makeTrans(
-          Ogre::Vector3(position_real_.x * 2 / width,
-          -position_real_.y * 2 / height, 0)
+          Ogre::Vector3(position_real_.x /* * 2*/ / width,
+          -position_real_.y /* * 2*/ / height, 0)
         );
+        // TODO This is deprecated, but if not done , the background image
+        // disappears.
         render_system_->_setViewMatrix(view);
+        rs_params->setConstant(
+          Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view
+        );
+        render_system_->applyFixedFunctionParams(rs_params, Ogre::GPV_GLOBAL);
         if (alpha_render_op_.vertexData->vertexCount != 0){
             scene_manager_->_setPass(
               alpha_material_->getTechnique(0)->getPass(0), true, false
@@ -744,6 +755,7 @@ void Background2D::renderQueueEnded(
             );
             render_system_->_render(subtract_render_op_);
         }
+
     }
 }
 

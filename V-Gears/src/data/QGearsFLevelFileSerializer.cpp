@@ -50,7 +50,7 @@ namespace QGears{
     ){
         // Read header.
         const size_t start_position(stream->tell());
-        readFileHeader(stream);
+        ReadFileHeader(stream);
         // Read section offsets.
         std::vector<uint32> section_offsetsVec(header_.section_count);
         std::vector<uint32> section_sizesVec(header_.section_count);

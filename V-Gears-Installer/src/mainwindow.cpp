@@ -75,12 +75,12 @@ void MainWindow::InitSettings(void){
     if(settings_->value("ConfigDir").isNull()){
         if (win){
             settings_->setValue(
-              "ConfigDir", QString("%1/q-gears").arg(QDir::homePath())
+              "ConfigDir", QString("%1/v-gears").arg(QDir::homePath())
             );
         }
         else{
           settings_->setValue(
-            "ConfigDir", QString("%1/.q-gears").arg(QDir::homePath())
+            "ConfigDir", QString("%1/.v-gears").arg(QDir::homePath())
           );
         }
     }
@@ -88,12 +88,12 @@ void MainWindow::InitSettings(void){
     if(settings_->value("DataDir").isNull()){
         if (win){
             settings_->setValue(
-              "DataDir",QString("%1/q-gears/data").arg(QDir::homePath())
+              "DataDir",QString("%1/v-gears/data").arg(QDir::homePath())
             );
         }
         else{
             settings_->setValue(
-              "DataDir",QString("%1/.q-gears/data").arg(QDir::homePath())
+              "DataDir",QString("%1/.v-gears/data").arg(QDir::homePath())
             );
         }
     }
@@ -101,7 +101,7 @@ void MainWindow::InitSettings(void){
     if (settings_->value("QGearsEXE").isNull()){
         if (win){
             settings_->setValue(
-              "QGearsEXE",QString("%1/q-gears.exe").arg(
+              "QGearsEXE",QString("%1/v-gears.exe").arg(
                  QCoreApplication::applicationDirPath()
                )
             );

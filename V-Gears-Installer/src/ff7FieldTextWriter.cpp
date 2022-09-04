@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include "../include/ff7FieldTextWriter.h"
 #include "common/QGearsStringUtil.h"
 
@@ -227,7 +228,7 @@ void FF7FieldTextWriter::Write(
         logger_->Log("</dialog>\n");
     }
     const u16 dialogCount = GetU16LE(offset_to_sector + offset_to_dialogs);
-    for (u16 i = 0; i <dialogCount; + +i){
+    for (u16 i = 0; i <dialogCount; ++ i){
         // gGt offset of string data.
         u32 offset
           = offset_to_sector + offset_to_dialogs + GetU16LE(

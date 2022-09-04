@@ -39,6 +39,9 @@ add_library(Utility STATIC
   ${SOURCE_FILES}
 )
 
+#DEBUG, no optimizations
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O0")
+
 target_link_libraries(Utility
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}

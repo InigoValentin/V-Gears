@@ -57,7 +57,7 @@ namespace QGears{
             OGRE_EXCEPT(
               Ogre::Exception::ERR_INVALIDPARAMS,
               "Empty file",
-              "HRCFileSerializer::readFileHeader"
+              "HRCFileSerializer::ReadFileHeader"
             );
         }
         Block header_block;
@@ -73,7 +73,7 @@ namespace QGears{
                 OGRE_EXCEPT(
                   Ogre::Exception::ERR_INVALIDPARAMS,
                   "Header directive does not have a value",
-                  "HRCFileSerializer::readFileHeader"
+                  "HRCFileSerializer::ReadFileHeader"
                 );
             }
             if(parts[0] == TAG_VERSION)
@@ -121,7 +121,7 @@ namespace QGears{
     void HRCFileSerializer::ImportHRCFile(
       Ogre::DataStreamPtr &stream, HRCFile* dest
     ){
-        readFileHeader(stream);
+        ReadFileHeader(stream);
         if(header_.bone_count == 0) header_.bone_count = 1;
         dest->SetSkeletonName(header_.name);
         ReadVector(stream, dest->GetBones(), header_.bone_count);
