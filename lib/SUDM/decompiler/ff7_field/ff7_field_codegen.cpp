@@ -90,6 +90,7 @@ void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/)
             }
         }
 
+        std::string last_instruction = "";
         for (auto instruction = function->second.begin(); instruction != function->second.end(); ++instruction)
         {
             auto label = labels.find((*instruction)->_address);
@@ -139,6 +140,9 @@ void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/)
             }
             // else, was already output'd
         }
+
+        if ("return 0" != mLines.at(mLines.size() - 1)._line)
+            addOutputLine("return 0 -- Missing original return", false, false);
 
         onEndFunction(function->first);
     }

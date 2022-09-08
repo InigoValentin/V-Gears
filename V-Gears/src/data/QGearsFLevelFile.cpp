@@ -142,7 +142,7 @@ namespace QGears{
     const String& FLevelFile::GetResourceType(void) const{return RESOURCE_TYPE;}
 
     size_t FLevelFile::calculateSize() const{
-        // Data is only stored in section resources
+        // Data is only stored in section resources.
         return 0;
     }
 

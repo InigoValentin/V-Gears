@@ -389,7 +389,7 @@ namespace QGears {
 
         // TODO: Get correct path
         // TODO: What is this file? Where does it come from?
-        const char* file_name = "~/.gears/data/wm/wm0.txz";
+        const char* file_name = "data/wm/wm0.txz";
         std::ifstream ifs(file_name, std::ifstream::binary);
         Ogre::DataStreamPtr stream(
           OGRE_NEW Ogre::FileStreamDataStream(&ifs, false)
@@ -425,12 +425,11 @@ namespace QGears {
                  */
                 TestFile() : QGears::WorldMapFile(nullptr, "", 0, "") {}
         };
-
-        const char* file_name = "~/.gears/data/wm/WM0.MAP";
+        const char* file_name = "data/wm/WM0.MAP";
         std::ifstream ifs(file_name, std::ifstream::binary);
         if (!ifs.is_open()){
             LogManager::getSingleton().logMessage(
-              "ERROR: Failed to open ~/.gears/data/wm/WM0.MAP"
+              "ERROR: Failed to open data/wm/WM0.MAP"
             );
             return;
         }

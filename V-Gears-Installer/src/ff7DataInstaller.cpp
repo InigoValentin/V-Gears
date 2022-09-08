@@ -39,6 +39,7 @@
 #include "data/QGearsPaletteFileManager.h"
 #include "data/QGearsPFileManager.h"
 #include "data/QGearsRSDFileManager.h"
+#include "data/QGearsTexFile.h"
 #include "data/QGearsTexCodec.h"
 #include "map/QGearsBackground2DFileManager.h"
 #include "map/QGearsWalkmeshFileManager.h"
@@ -93,33 +94,22 @@ int FF7DataInstaller::Progress(){
               application_.getRoot(), input_dir_ + "field/flevel.lgp",
               "LGP", "FFVIIFields"
             );
-            textures_lgp_ = std::make_unique<ScopedLgp>(
-              application_.getRoot(), input_dir_ + "field/flevel.lgp",
-              "TEX", "FFVIITextures"
-            );
-            // TODO: DEBUG
-            std::cout << "[INS] -> SPAWN_POINTS_AND_SCALE_FACTORS_INIT" << std::endl;
             installation_state_ = SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
-            //installation_state_ = CONVERT_FIELD_MODELS;
+            // TODO: DEBUG:
+            //installation_state_ = CONVERT_FIELDS;
             return CalcProgress();
         case SPAWN_POINTS_AND_SCALE_FACTORS_INIT:
-            write_output_line("Collecting spawn points and scale factors");
-            std::cout << "[INS][PRE] InitCollectSpawnAndScaleFactors" << std::endl;
+            write_output_line("Collecting spawn points and scale factors...");
             InitCollectSpawnAndScaleFactors();
-            std::cout << "[INS][POST] InitCollectSpawnAndScaleFactors" << std::endl;
             return CalcProgress();
         case SPAWN_POINTS_AND_SCALE_FACTORS:
-            std::cout << "[INS][PRE] CollectSpawnAndScaleFactors" << std::endl;
             CollectionFieldSpawnAndScaleFactors();
-            std::cout << "[INS][POST] CollectSpawnAndScaleFactors" << std::endl;
             return CalcProgress();
         case CONVERT_FIELDS:
-            std::cout << "[INS][PRE] ConvertFieldsIteration" << std::endl;
             ConvertFieldsIteration();
-            std::cout << "[INS][POST] ConvertFieldsIteration" << std::endl;
             return CalcProgress();
         case WRITE_MAPS_INIT:
-            write_output_line("Write fields");
+            write_output_line("Writing fields...");
             WriteMapsXmlBegin();
             return CalcProgress();
         case WRITE_MAPS:
@@ -129,15 +119,13 @@ int FF7DataInstaller::Progress(){
             EndWriteMapsXml();
             return CalcProgress();
         case CONVERT_FIELD_MODELS_INIT:
-            write_output_line("Converting field models");
+            write_output_line("Converting field models...");
             ConvertFieldModelsBegin();
             return CalcProgress();
         case CONVERT_FIELD_MODELS:
             ConvertFieldModelsIteration();
             return CalcProgress();
         case DONE:
-            write_output_line("Installation done");
-            std::cout << "[INSTALL STEP] DONE" << std::endl;
         default:
             return 100;
     }
@@ -146,6 +134,49 @@ int FF7DataInstaller::Progress(){
 static std::string FieldModelDir(){return "models/ffvii/field/units";}
 
 std::vector<std::string> materials_;
+
+/**
+ * Converts a tex file to png.
+ *
+ * The image is saved in data/models/ffvii/field/units/
+ *
+ * @param name[in] Path to the tex file to convert.
+ */
+void TexToPng(const std::string name){
+    Ogre::DataStreamPtr stream(
+      Ogre::ResourceGroupManager::getSingleton().openResource(
+        name, "FFVIITextures", true, NULL
+      )
+    );
+    QGears::TexFile* tex = new QGears::TexFile();
+    tex->Read(stream);
+    Ogre::ImageCodec::ImageData* image_data = tex->GetImageData();
+    Ogre::Image* image = new Ogre::Image(
+      Ogre::PF_R8G8B8A8_UINT, image_data->width, image_data->height
+    );
+    for (int y = 0; y < image_data->height; y ++){
+        for (int x = 0; x < image_data->width; x ++){
+            // This is the position from which to read from the tex file colour
+            // data
+            // TODO: It doesn't work for non-square images. For example, the
+            // lower part of bxje is all wrong.
+            int i = (image_data->height * y) + x;
+            image->setColourAt(
+              Ogre::ColourValue(
+                tex->image_data_[i].comp.red / 255.0f,
+                tex->image_data_[i].comp.green / 255.0f,
+                tex->image_data_[i].comp.blue / 255.0f,
+                tex->image_data_[i].comp.alpha),
+              x, y, 0
+            );
+        }
+    }
+    Ogre::String base_name;
+    QGears::StringUtil::splitBase(name, base_name);
+    // TODO: Detect path
+    image->save("data/models/ffvii/field/units/" + base_name + ".png");
+
+}
 
 /**
  * Exports a mesh to a file.
@@ -160,9 +191,7 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
     // TODO: Share function with pc model exporter
     QGears::String base_mesh_name;
     QGears::StringUtil::splitFull(mesh->getName(), base_mesh_name);
-
     Ogre::MeshSerializer mesh_serializer;
-
     Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
     Ogre::SkeletonSerializer skeleton_serializer;
     skeleton_serializer.exportSkeleton(
@@ -204,10 +233,11 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
                                   unit
                                   && unit->getTextureName().empty() == false
                                 ){
+                                    // Convert the texture from .tex to .png.
+                                    TexToPng(unit->getTextureName());
                                     // Ensure the output material script
                                     // references png files rather than tex
                                     // files.
-                                    textures.insert(unit->getTextureName());
                                     Ogre::String base_name;
                                     QGears::StringUtil::splitBase(
                                       unit->getTextureName(), base_name
@@ -216,12 +246,20 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
                                       FieldModelDir() + "/" + base_mesh_name
                                       + "_" + base_name + ".png"
                                     );
-                                    std::cout << "[TEXTURE] "
-                                      << unit->getTextureName() << " | "
-                                      << (
-                                        FieldModelDir() + "/" + base_mesh_name
-                                        + "_" + base_name + ".png"
-                                      ) << std::endl;
+                                    // Copy subtexture (xxxx.png) to
+                                    // model_xxxx.png
+                                    // TODO: obtain the "data" folder
+                                    // programatically.
+                                    boost::filesystem::copy_file(
+                                      "data/" + FieldModelDir() + "/"
+                                        + base_name + ".png",
+                                      "data/" + FieldModelDir() + "/"
+                                        + base_mesh_name + "_"
+                                        + base_name + ".png",
+                                        boost::filesystem::copy_option
+                                          ::overwrite_if_exists
+                                    );
+                                    textures.insert(unit->getTextureName());
                                 }
                             }
                         }
@@ -239,51 +277,29 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
                 mat_ser.queueForExport(mat);
                 materials_.push_back(sub_mesh->getMaterialName());
             }
-            /*
-            else{
-                std::cout << "[MATERIAL] Not rewritting material "
-                  << sub_mesh->getMaterialName() << std::endl;
-            }
-            */
+
         }
         ++ i;
     }
     mat_ser.exportQueued(outdir + base_mesh_name + QGears::EXT_MATERIAL);
     for (auto& texture_name : textures){
-        //std::cout << "    [EXPORTMESH] Texture " << texture_name.c_str()
-        //  << std::endl;
         std::string tex_name = texture_name.c_str();
-        std::cout << "[EXPORTMESH] Texture name " << tex_name << std::endl;
         try{
             Ogre::TexturePtr texture_ptr
               = Ogre::TextureManager::getSingleton().load(
                 tex_name, "FFVIITextures" //"FFVII"
               );
-            //Ogre::TexturePtr texture_ptr =
-            //  Ogre::TextureManager::getSingleton().create(
-            //  tex_name, "FFVIITextures" //"FFVII"
-            //);
-            std::cout << "    [EXPORTMESH] Texture loaded" << std::endl;
+
             Ogre::Image image;
             texture_ptr->convertToImage(image);
-            //image.load()
-            std::cout << "    [EXPORTMESH] Texture converted" << std::endl;
             Ogre::String base_name;
             QGears::StringUtil::splitBase(texture_name, base_name);
-            std::cout << "    [EXPORTMESH] name split: "
-              << base_name << std::endl;
-            std::cout << "    [EXPORTMESH] saving: " << (
-              outdir + base_mesh_name + "_" + base_name + ".png"
-            ) << std::endl;
             image.save(outdir + base_mesh_name + "_" + base_name + ".png");
-            std::cout << "    [EXPORTMESH] Texture saved" << std::endl;
         }
         catch (std::exception const& ex){
             std::cerr << "[ERROR] Exception: " << ex.what() << std::endl;
         }
     }
-    //std::cout << "[EXPORTMESH] END TEXTURE LOOP "<< std::endl;
-    //std::cout << "[EXPORTMESH] END "<< std::endl;
 }
 
 /**
@@ -493,13 +509,13 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
               static_cast<unsigned int>(char_id)
               >= model_loader_->GetModels().size()
             ){
-                std::cout << "FF7FieldScriptFormatter::AnimationName ERROR:"
+                std::cerr << "FF7FieldScriptFormatter::AnimationName ERROR:"
                   << "Char ID " << char_id << " out of bounds" << std::endl;
                 return std::to_string(id);
             }
             const auto& model_info = model_loader_->GetModels().at(char_id);
             if (static_cast<unsigned int>(id) >= model_info.animations.size()){
-                std::cout << "FF7FieldScriptFormatter::AnimationName ERROR:"
+                std::cerr << "FF7FieldScriptFormatter::AnimationName ERROR:"
                   << "In field " << field_name_ << " the model "
                   << model_info.name << " animation with ID " << id
                   << " is out of bounds (" << model_info.animations.size() << ")"
@@ -673,14 +689,18 @@ static void FF7PcFieldToQGearsField(
             }
         }
         else{
-            write_output_line("[ERROR] Failed to open script file for writing");
-            std::cerr << "[ERROR] Failed to open script file for writing"
-              << std::endl;
+            write_output_line(
+              "[ERROR] Failed to open script file from field "
+              + field->getName() + " for writing."
+            );
+            std::cerr << "[ERROR] Failed to open script file from field "
+              << field->getName() << "for writing." << std::endl;
         }
     }
     catch (const ::InternalDecompilerError& ex){
         write_output_line(
           "[ERROR] Internal decompiler error in field " + field->getName()
+          + ": " + ex.what()
         );
         std::cerr << "[ERROR] Internal decompiler error in field "
           << field->getName() << ": " << ex.what() << std::endl;
@@ -786,7 +806,15 @@ static void FF7PcFieldToQGearsField(
                 if (
                   triangle_index >= field->GetWalkmesh()->GetTriangles().size()
                 ){
-                    std::cout << "[WARNING] In field " << field->getName()
+                    write_output_line(
+                      "[WARNING] In field " + field->getName()
+                      + ": Map jump triangle ("
+                      + std::to_string(triangle_index) + ") out of bounds ("
+                      + std::to_string(
+                        field->GetWalkmesh()->GetTriangles().size()
+                      ) + ")"
+                    );
+                    std::cerr << "[WARNING] In field " << field->getName()
                       << ": Map jump triangle (" << triangle_index
                       << ") out of bounds ("
                       << field->GetWalkmesh()->GetTriangles().size() << ")"
@@ -1033,17 +1061,13 @@ static void FF7PcFieldToQGearsField(
                       + Ogre::StringConverter::toString(u1) + " "
                       + Ogre::StringConverter::toString(v1)
                     );
-
-                    // TODO: Figure out how to scale this value correctly.
-                    /*
                     xml_element->SetAttribute(
                       "depth",
                       Ogre::StringConverter::toString(
-                        static_cast<float>(sprite.depth) / (4096.0f/10.0f)
+                        // TODO: It works (on FFVII PC), but why this number?
+                        static_cast<float>(sprite.depth) * (0.03125f) // ??
                       )
                     );
-                    */
-                    xml_element->SetAttribute("depth", "999");
                     // TODO: Copied from DatFile::AddTile.
                     // Add to common method.
                     Ogre::String blending_str = "";
@@ -1052,10 +1076,8 @@ static void FF7PcFieldToQGearsField(
                     else if (sprite.blending == 1 || sprite.blending == 3)
                         blending_str = "add";
                     else if (sprite.blending == 2) blending_str = "subtract";
-                    else{
-                        // TODO: Should probably throw to fail conversion.
-                        blending_str = "unknown";
-                    }
+                    // TODO: Should probably throw to fail conversion:
+                    else blending_str = "unknown";
                     xml_element->SetAttribute("blending", blending_str);
                     element->LinkEndChild(xml_element.release());
                 }
@@ -1436,10 +1458,10 @@ void FF7DataInstaller::ConvertFieldsIteration(){
             else{
                 write_output_line(
                   "[ERROR] Skip field " + resource_name
-                  + " due to crash or hang issue"
+                  + " due to crash or hang issue."
                 );
-                std::cout << "[ERROR] Skip field: " << resource_name
-                  << " as it has a crash or hang issue" << std::endl;
+                std::cerr << "[ERROR] Skip field: " << resource_name
+                  << " due to crash or hang issue." << std::endl;
             }
         }
         iterator_counter_ ++;
@@ -1488,7 +1510,6 @@ void FF7DataInstaller::EndWriteMapsXml(){
 }
 
 void FF7DataInstaller::ConvertFieldModelsBegin(){
-    std::cout << "[INSTALL] Step: ConvertFieldModels" << std::endl;
     // TODO: Convert models and animations in model_animation_db.
     progress_step_num_elements_ = 1;
     field_models_lgp_ = std::make_unique<ScopedLgp>(
@@ -1551,16 +1572,16 @@ void FF7DataInstaller::ConvertFieldModelsIteration(){
                   "[ERROR] Ogre exception converting model "
                   + model_animation_map_iterator_->first + ": " + ex.what()
                 );
-                std::cout << "[ERROR] Exception converting model "
+                std::cerr << "[ERROR] Ogre exception converting model "
                   << model_animation_map_iterator_->first <<": " << ex.what()
                   << std::endl;
             }
             catch (const std::exception& ex){
                 write_output_line(
-                  "[ERROR] Ogre exception converting model "
+                  "[ERROR] Exception converting model "
                   + model_animation_map_iterator_->first + ": " + ex.what()
                 );
-                std::cout << "[ERROR] Exception converting model "
+                std::cerr << "[ERROR] Exception converting model "
                   << model_animation_map_iterator_->first << ": " << ex.what()
                   << std::endl;
             }
@@ -1570,10 +1591,8 @@ void FF7DataInstaller::ConvertFieldModelsIteration(){
         }
     }
     else{
-        std::cout << "[INSTALL] Finished" << std::endl;
-        write_output_line("[INSTALL] Finished");
+        std::cout << "Installation finished." << std::endl;
+        write_output_line("Installation finished.");
         installation_state_ = DONE;
     }
-    //std::cout << "ConvertFieldModelsIteration: " << iterator_counter_
-    //  << "/" << used_models_and_anims_.map.size() << "\n";
 }

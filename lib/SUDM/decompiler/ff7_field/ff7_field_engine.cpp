@@ -280,7 +280,8 @@ void FF7::FF7CondJumpInstruction::processInst(Function&, ValueStack &stack, Engi
 
     case 9:
     {
-        op = "hasbit("+ source + ", bit(" + destination + "))";
+        op = "bit(" + _params[0]->getString() + ", " + _params[2]->getString()
+          + ", " + destination + ") == 1";
         ValuePtr v = new UnqotedStringValue(op);
         stack.push(v);
     }
@@ -288,7 +289,8 @@ void FF7::FF7CondJumpInstruction::processInst(Function&, ValueStack &stack, Engi
 
     case 0xA:
     {
-        op = "not hasbit(" + source + ", bit(" + destination + "))";
+        op = "bit(" + _params[0]->getString() + ", " + _params[2]->getString()
+          + ", " + destination + ") == 0";
         ValuePtr v = new UnqotedStringValue(op);
         stack.push(v);
     }
@@ -418,7 +420,7 @@ void FF7::FF7ControlFlowInstruction::processInst(Function& func, ValueStack&, En
     {
     case eOpcodes::RET:
         // TODO: Lua won't allow return if not followeb by end;
-        codeGen->addOutputLine("return 0"); // Seems all our functions must return zero
+        codeGen->addOutputLine("do return 0 end"); // Seems all our functions must return zero
         //codeGen->addOutputLine("do return end");
         //codeGen->addOutputLine("-- do return end");
         break;
@@ -1503,7 +1505,8 @@ void FF7::FF7ModelInstruction::processInst(Function& func, ValueStack&, Engine* 
         break;
 
     case eOpcodes::OFST:
-    {
+        processOFST(codeGen, md.EntityName());
+    //{
         /* TODO: Implement me
         FF7SimpleCodeGenerator* cg = static_cast<FF7SimpleCodeGenerator*>(codeGen);
 
@@ -1532,13 +1535,14 @@ void FF7::FF7ModelInstruction::processInst(Function& func, ValueStack&, Engine* 
             ((type == 2) ? "Entity.SMOOTH" : "Entity.LINEAR") + ", " +
             ParseGetVariable(GetU8(script + 2) & 0x0F, GetU16LE(script + 10), 0, 30.0f) + " )\n");
             */
-        WriteTodo(codeGen, md.EntityName(), "OFST");
+       // WriteTodo(codeGen, md.EntityName(), "OFST");
       
-    }
+    //}
         break;
 
     case eOpcodes::OFSTW:
-        codeGen->addOutputLine(md.EntityName() + ":offset_sync()");
+        //codeGen->addOutputLine(md.EntityName() + ":offset_sync()");
+        codeGen->addOutputLine("self." + md.EntityName() + ":offset_sync()");
         break;
 
     case eOpcodes::TALKR:
@@ -1765,6 +1769,45 @@ void FF7::FF7ModelInstruction::processCC(CodeGenerator* codeGen, const FF7FieldE
 void FF7::FF7ModelInstruction::processSOLID(CodeGenerator* codeGen, const std::string& entity)
 {
     codeGen->addOutputLine((boost::format("self.%1%:set_solid( %2% )") % entity % FF7CodeGeneratorHelpers::FormatInvertedBool(_params[0]->getUnsigned())).str());
+}
+
+void FF7::FF7ModelInstruction::processOFST(CodeGenerator* codeGen, const std::string& entity){
+    // IVV TODO
+    FF7SimpleCodeGenerator* cg = static_cast<FF7SimpleCodeGenerator*>(codeGen);
+    float x = atoi(
+      FF7CodeGeneratorHelpers::FormatValueOrVariable(
+        cg->mFormatter, _params[0]->getUnsigned(), _params[5]->getSigned()
+      ).c_str()
+    );
+    float y = atoi(
+      FF7CodeGeneratorHelpers::FormatValueOrVariable(
+        cg->mFormatter, _params[1]->getUnsigned(),_params[6]->getSigned()
+      ).c_str()
+    );
+    float z = atoi(
+      FF7CodeGeneratorHelpers::FormatValueOrVariable(
+        cg->mFormatter, _params[2]->getUnsigned(), _params[7]->getSigned()
+      ).c_str()
+    );
+    float speed = atoi(
+      FF7CodeGeneratorHelpers::FormatValueOrVariable(
+        cg->mFormatter, _params[3]->getUnsigned(), _params[8]->getUnsigned()
+      ).c_str()
+    );
+    // Spatial coordinates need to be scaled down
+    // TODO: This number is empirically deducted. Why this number?
+    x *= 0.00390f;
+    y *= 0.00390f;
+    z *= 0.00390f;
+    // Speed needs to be scaled down by the frame rate.
+    speed /= 30.0f;
+    codeGen->addOutputLine(
+      (
+        boost::format("self.%1%:offset_to_position( %2%, %3%, %4%, %5%, %6%)")
+          % entity % x % y % z
+          % (_params[4]->getUnsigned() ? "Entity.SMOOTH" : "Entity.LINEAR")
+          % speed
+      ).str());
 }
 
 void FF7::FF7WalkmeshInstruction::processInst(Function& func, ValueStack&, Engine* /*engine*/, CodeGenerator *codeGen)
