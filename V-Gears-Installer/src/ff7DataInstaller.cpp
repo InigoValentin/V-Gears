@@ -66,8 +66,7 @@ FF7DataInstaller::FF7DataInstaller(
     output_dir_(output_dir),
     write_output_line(write_output_line)
 {
-    if (!application_.initOgre(true))
-        throw std::runtime_error("Ogre init failure");
+    if (!application_.initOgre(true)) throw std::runtime_error("Ogre init failure");
     Ogre::Log* default_log( Ogre::LogManager::getSingleton().getDefaultLog());
     assert( default_log );
     default_log->setLogDetail(Ogre::LL_LOW);
@@ -144,9 +143,7 @@ std::vector<std::string> materials_;
  */
 void TexToPng(const std::string name){
     Ogre::DataStreamPtr stream(
-      Ogre::ResourceGroupManager::getSingleton().openResource(
-        name, "FFVIITextures", true, NULL
-      )
+      Ogre::ResourceGroupManager::getSingleton().openResource(name, "FFVIITextures", true, NULL)
     );
     QGears::TexFile* tex = new QGears::TexFile();
     tex->Read(stream);
@@ -156,10 +153,9 @@ void TexToPng(const std::string name){
     );
     for (int y = 0; y < image_data->height; y ++){
         for (int x = 0; x < image_data->width; x ++){
-            // This is the position from which to read from the tex file colour
-            // data
-            // TODO: It doesn't work for non-square images. For example, the
-            // lower part of bxje is all wrong.
+            // This is the position from which to read from the tex file colour data
+            // TODO: It doesn't work for non-square images. For example, the lower part of bxje is
+            // all wrong.
             int i = (image_data->height * y) + x;
             image->setColourAt(
               Ogre::ColourValue(
@@ -209,34 +205,24 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
           sub_mesh->getMaterialName())
         );
         if (mat != nullptr){
-            for (
-              size_t techs = 0; techs < mat->getNumTechniques(); techs ++
-            ){
+            for (size_t techs = 0; techs < mat->getNumTechniques(); techs ++){
                 Ogre::Technique* tech = mat->getTechnique(techs);
                 if (tech){
-                    for (
-                      size_t pass_num = 0;
-                      pass_num < tech->getNumPasses();
-                      pass_num ++
-                    ){
+                    for (size_t pass_num = 0; pass_num < tech->getNumPasses(); pass_num ++){
                         Ogre::Pass* pass = tech->getPass(pass_num);
                         if (pass){
                             for (
                               size_t texture_unit_num = 0;
-                              texture_unit_num
-                                < pass->getNumTextureUnitStates();
+                              texture_unit_num < pass->getNumTextureUnitStates();
                               texture_unit_num ++
                             ){
                                 Ogre::TextureUnitState* unit
                                   = pass->getTextureUnitState(texture_unit_num);
-                                if (
-                                  unit
-                                  && unit->getTextureName().empty() == false
-                                ){
+                                if (unit && unit->getTextureName().empty() == false){
                                     // Convert the texture from .tex to .png.
                                     TexToPng(unit->getTextureName());
-                                    // Ensure the output material script
-                                    // references png files rather than tex
+                                    // Ensure the output material script references png files
+                                    // rather than tex
                                     // files.
                                     Ogre::String base_name;
                                     QGears::StringUtil::splitBase(
@@ -251,13 +237,10 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
                                     // TODO: obtain the "data" folder
                                     // programatically.
                                     boost::filesystem::copy_file(
+                                      "data/" + FieldModelDir() + "/" + base_name + ".png",
                                       "data/" + FieldModelDir() + "/"
-                                        + base_name + ".png",
-                                      "data/" + FieldModelDir() + "/"
-                                        + base_mesh_name + "_"
-                                        + base_name + ".png",
-                                        boost::filesystem::copy_option
-                                          ::overwrite_if_exists
+                                        + base_mesh_name + "_" + base_name + ".png",
+                                      boost::filesystem::copy_option::overwrite_if_exists
                                     );
                                     textures.insert(unit->getTextureName());
                                 }
@@ -266,12 +249,7 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
                     }
                 }
             }
-            if (
-              std::count(
-                materials_.begin(), materials_.end(),
-                sub_mesh->getMaterialName()
-              ) == 0
-            ){
+            if (std::count(materials_.begin(), materials_.end(), sub_mesh->getMaterialName()) == 0){
                 //std::cout << "[MATERIAL] Writting material "
                 // << sub_mesh->getMaterialName() << std::endl;
                 mat_ser.queueForExport(mat);
@@ -286,10 +264,7 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
         std::string tex_name = texture_name.c_str();
         try{
             Ogre::TexturePtr texture_ptr
-              = Ogre::TextureManager::getSingleton().load(
-                tex_name, "FFVIITextures" //"FFVII"
-              );
-
+              = Ogre::TextureManager::getSingleton().load(tex_name, "FFVIITextures" /*"FFVII"*/);
             Ogre::Image image;
             texture_ptr->convertToImage(image);
             Ogre::String base_name;
@@ -313,7 +288,6 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
 static std::string FieldName(const std::string& name){return "ffvii_" + name;}
 
 void FF7DataInstaller::CreateDir(const std::string& path){
-
     QString target = QString::fromStdString(output_dir_ + path);
     QDir dir(target);
     if (!dir.mkpath(".")) throw std::runtime_error("Failed to mkpath");
@@ -341,12 +315,10 @@ class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
          * @param spawn_points[in] The list of spawn points.
          */
         BaseFF7FieldScriptFormatter(
-          const std::string& field_name,
-          const std::vector<std::string>& field_id_to_name_lookup,
+          const std::string& field_name, const std::vector<std::string>& field_id_to_name_lookup,
           FieldSpawnPointsMap& spawn_points
         ) :
-          field_name_(field_name),
-          field_id_to_name_lookup_(field_id_to_name_lookup),
+          field_name_(field_name), field_id_to_name_lookup_(field_id_to_name_lookup),
           spawn_points_(spawn_points)
         {}
 
@@ -367,8 +339,7 @@ class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
           const std::string& function_name, unsigned int address
         ) override{
             return
-              field_name_ + "_" + entity + "_" + function_name
-              + "_addr_" + std::to_string(address);
+              field_name_ + "_" + entity + "_" + function_name + "_addr_" + std::to_string(address);
         }
 
         /**
@@ -487,9 +458,7 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
           const std::vector<std::string>& field_id_to_name_lookup,
           FieldSpawnPointsMap& spawn_points
         ) :
-          BaseFF7FieldScriptFormatter(
-            field_name, field_id_to_name_lookup, spawn_points
-          ),
+          BaseFF7FieldScriptFormatter(field_name, field_id_to_name_lookup, spawn_points),
           model_loader_(models)
         {}
 
@@ -505,10 +474,7 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
         virtual std::string AnimationName(int char_id, int id) override{
             // Get the animation file name, then look up the friendly name of
             // the "raw" animation.
-            if (
-              static_cast<unsigned int>(char_id)
-              >= model_loader_->GetModels().size()
-            ){
+            if (static_cast<unsigned int>(char_id) >= model_loader_->GetModels().size()){
                 std::cerr << "FF7FieldScriptFormatter::AnimationName ERROR:"
                   << "Char ID " << char_id << " out of bounds" << std::endl;
                 return std::to_string(id);
@@ -516,10 +482,9 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
             const auto& model_info = model_loader_->GetModels().at(char_id);
             if (static_cast<unsigned int>(id) >= model_info.animations.size()){
                 std::cerr << "FF7FieldScriptFormatter::AnimationName ERROR:"
-                  << "In field " << field_name_ << " the model "
-                  << model_info.name << " animation with ID " << id
-                  << " is out of bounds (" << model_info.animations.size() << ")"
-                  << std::endl;
+                  << "In field " << field_name_ << " the model " << model_info.name
+                  << " animation with ID " << id << " is out of bounds ("
+                  << model_info.animations.size() << ")" << std::endl;
                 return std::to_string(id);
             }
             const auto raw_name = model_info.animations.at(id).name;
@@ -650,21 +615,17 @@ static void FF7PcFieldToQGearsField(
     for (size_t i = 0; i < gateways.size(); i ++){
         const QGears::TriggersFile::Gateway& gateway = gateways[i];
         if (gateway.destination_field_id != INACTIVE_GATEWAY_ID){
-            const std::string gateway_entity_name
-              = "Gateway" + std::to_string(i);
+            const std::string gateway_entity_name = "Gateway" + std::to_string(i);
             gateway_script_data += CreateGateWayScript(
               gateway_entity_name,
-              FieldName(field_id_to_name_lookup.at(
-                gateway.destination_field_id
-              )),
+              FieldName(field_id_to_name_lookup.at(gateway.destination_field_id)),
               "Spawn_" + field->getName() + "_" + std::to_string(i)
             );
         }
     }
     const QGears::ModelListFilePtr& models = field->GetModelList();
     SUDM::FF7::Field::DecompiledScript decompiled;
-    FF7FieldScriptFormatter formatter(
-      field->getName(), models, field_id_to_name_lookup, spawn_map);
+    FF7FieldScriptFormatter formatter(field->getName(), models, field_id_to_name_lookup, spawn_map);
     try{
         // Get the raw script bytes.
         const std::vector<u8> raw_field_data = field->GetRawScript();
@@ -681,8 +642,7 @@ static void FF7PcFieldToQGearsField(
             try{field_text_writter.Write(raw_field_data, field->getName());}
             catch (const std::out_of_range& ex){
                 write_output_line(
-                  "[ERROR] Failed to read texts from field " + field->getName()
-                  + ": " + ex.what()
+                  "[ERROR] Failed to read texts from field " + field->getName() + ": " + ex.what()
                 );
                 std::cerr << "[ERROR] Failed to read texts from field "
                   << field->getName() << ": " << ex.what() << std::endl;
@@ -690,8 +650,7 @@ static void FF7PcFieldToQGearsField(
         }
         else{
             write_output_line(
-              "[ERROR] Failed to open script file from field "
-              + field->getName() + " for writing."
+              "[ERROR] Failed to open script file from field " + field->getName() + " for writing."
             );
             std::cerr << "[ERROR] Failed to open script file from field "
               << field->getName() << "for writing." << std::endl;
@@ -699,82 +658,62 @@ static void FF7PcFieldToQGearsField(
     }
     catch (const ::InternalDecompilerError& ex){
         write_output_line(
-          "[ERROR] Internal decompiler error in field " + field->getName()
-          + ": " + ex.what()
+          "[ERROR] Internal decompiler error in field " + field->getName() + ": " + ex.what()
         );
         std::cerr << "[ERROR] Internal decompiler error in field "
           << field->getName() << ": " << ex.what() << std::endl;
     }
-    // Write out the map file which links all the other files together for a
-    // given field.
+    // Write out the map file which links all the other files together for a given field.
     {
         TiXmlDocument doc;
         std::unique_ptr<TiXmlElement> element(new TiXmlElement("map"));
         // Script.
-        std::unique_ptr<TiXmlElement> xml_script_element(
-          new TiXmlElement("script")
-        );
+        std::unique_ptr<TiXmlElement> xml_script_element(new TiXmlElement("script"));
         xml_script_element->SetAttribute(
           "file_name", FieldMapDir() + "/" + field->getName() + "/script.lua"
         );
         element->LinkEndChild(xml_script_element.release());
         // Background.
-        std::unique_ptr<TiXmlElement> xml_background_2d(
-          new TiXmlElement("background2d")
-        );
+        std::unique_ptr<TiXmlElement> xml_background_2d(new TiXmlElement("background2d"));
         xml_background_2d->SetAttribute(
           "file_name", FieldMapDir() + "/" + field->getName() + "/bg.xml"
         );
         element->LinkEndChild(xml_background_2d.release());
         // Walkmesh.
-        std::unique_ptr<TiXmlElement> xml_walkmesh(
-          new TiXmlElement("walkmesh")
-        );
+        std::unique_ptr<TiXmlElement> xml_walkmesh(new TiXmlElement("walkmesh"));
         xml_walkmesh->SetAttribute(
           "file_name", FieldMapDir() + "/" + field->getName() + "/wm.xml"
         );
         element->LinkEndChild(xml_walkmesh.release());
         // Forward direction (angle player moves when "up" is pressed)
-        std::unique_ptr<TiXmlElement> xml_forward_direction(
-          new TiXmlElement("movement_rotation")
-        );
+        std::unique_ptr<TiXmlElement> xml_forward_direction(new TiXmlElement("movement_rotation"));
         xml_forward_direction->SetAttribute(
           "degree", std::to_string(triggers->MovementRotation())
         );
         element->LinkEndChild(xml_forward_direction.release());
         // Get this fields Id.
-        const size_t this_field_id = FieldId(
-          field->getName(), field_id_to_name_lookup
-        );
-        // Use the ID to find the pre-computed list of gateways in all other
-        // fields that link to this field.
+        const size_t this_field_id = FieldId(field->getName(), field_id_to_name_lookup);
+        // Use the ID to find the pre-computed list of gateways in all other fields that link to
+        // this field.
         auto spawn_iterator = spawn_map.find(this_field_id);
         Ogre::Vector3 first_entity_point = Ogre::Vector3::ZERO;
 
-        // If none found it probably just means no other fields have doors
-        // to this one.
+        // If none found it probably just means no other fields have doors to this one.
         if (spawn_iterator != std::end(spawn_map)){
             const std::vector<SpawnPointDb::Record>& spawn_point_records
               = spawn_iterator->second.gateways_to_this_field;
             for (size_t i = 0; i < spawn_point_records.size(); i ++){
-                const QGears::TriggersFile::Gateway& gateway
-                  = spawn_point_records[i].gateway;
+                const QGears::TriggersFile::Gateway& gateway = spawn_point_records[i].gateway;
                 // Entity_point:
-                std::unique_ptr<TiXmlElement> xml_entity_point(
-                  new TiXmlElement("entity_point")
-                );
+                std::unique_ptr<TiXmlElement> xml_entity_point(new TiXmlElement("entity_point"));
                 if (spawn_point_records[i].from_script){
                     // Spawn points from map jumps have a another algorithm.
                     xml_entity_point->SetAttribute(
                       "name",
                       field_id_to_name_lookup.at(
-                        spawn_point_records[i].field_id) + "_"
-                        + spawn_point_records[i].entity_name + "_"
-                        + spawn_point_records[i].script_function_name + "_addr_"
-                        + std::to_string(
-                          spawn_point_records[i]
-                            .gateway_index_or_map_jump_address
-                        )
+                        spawn_point_records[i].field_id) + "_" + spawn_point_records[i].entity_name
+                        + "_" + spawn_point_records[i].script_function_name + "_addr_"
+                        + std::to_string(spawn_point_records[i].gateway_index_or_map_jump_address)
                       );
                 }
                 else{
@@ -783,65 +722,45 @@ static void FF7PcFieldToQGearsField(
                     xml_entity_point->SetAttribute(
                       "name",
                       "Spawn_"
-                      + field_id_to_name_lookup.at(
-                        spawn_point_records[i].field_id
-                      )
-                      + "_"
-                      + std::to_string(
-                        spawn_point_records[i].gateway_index_or_map_jump_address
-                      )
+                        + field_id_to_name_lookup.at(spawn_point_records[i].field_id)
+                        + "_"
+                        + std::to_string(spawn_point_records[i].gateway_index_or_map_jump_address)
                     );
                 }
                 const float downscaler_next = 128.0f * FieldScaleFactor(
                   scale_factor_map, gateway.destination_field_id
                 );
 
-                // Position Z is actually the target walkmesh triangle ID, so
-                // this is tiny bit more complex. Now "get the Z value of the
-                // triangle with that ID". Note that ID actually just means
-                // index.
-                unsigned int triangle_index = static_cast<unsigned int>(
-                  gateway.destination.z
-                );
+                // Position Z is actually the target walkmesh triangle ID, so this is tiny bit more
+                // complex. Now "get the Z value of the triangle with that ID". Note that ID
+                // actually just means index.
+                unsigned int triangle_index = static_cast<unsigned int>(gateway.destination.z);
                 if (
                   triangle_index >= field->GetWalkmesh()->GetTriangles().size()
                 ){
                     write_output_line(
-                      "[WARNING] In field " + field->getName()
-                      + ": Map jump triangle ("
+                      "[WARNING] In field " + field->getName() + ": Map jump triangle ("
                       + std::to_string(triangle_index) + ") out of bounds ("
-                      + std::to_string(
-                        field->GetWalkmesh()->GetTriangles().size()
-                      ) + ")"
+                      + std::to_string(field->GetWalkmesh()->GetTriangles().size()) + ")"
                     );
                     std::cerr << "[WARNING] In field " << field->getName()
-                      << ": Map jump triangle (" << triangle_index
-                      << ") out of bounds ("
-                      << field->GetWalkmesh()->GetTriangles().size() << ")"
-                      << std::endl;
+                      << ": Map jump triangle (" << triangle_index << ") out of bounds ("
+                      << field->GetWalkmesh()->GetTriangles().size() << ")" << std::endl;
                     triangle_index = 0;
                 }
                 const float z_of_triangle_with_id
                   = field->GetWalkmesh()->GetTriangles().at(triangle_index).a.z;
                 const Ogre::Vector3 position(
-                  gateway.destination.x / downscaler_next,
-                  gateway.destination.y / downscaler_next,
+                  gateway.destination.x / downscaler_next, gateway.destination.y / downscaler_next,
                   z_of_triangle_with_id
                 );
-                if (
-                  position != Ogre::Vector3::ZERO
-                  && first_entity_point == Ogre::Vector3::ZERO
-                ){
+                if (position != Ogre::Vector3::ZERO && first_entity_point == Ogre::Vector3::ZERO)
                     first_entity_point = position;
-                }
                 xml_entity_point->SetAttribute(
                   "position", Ogre::StringConverter::toString(position)
                 );
-                const float rotation
-                  = (360.0f * static_cast<float>(gateway.dir)) / 255.0f;
-                xml_entity_point->SetAttribute(
-                  "rotation", std::to_string(rotation)
-                );
+                const float rotation = (360.0f * static_cast<float>(gateway.dir)) / 255.0f;
+                xml_entity_point->SetAttribute("rotation", std::to_string(rotation));
                 element->LinkEndChild(xml_entity_point.release());
             }
         }
@@ -850,75 +769,57 @@ static void FF7PcFieldToQGearsField(
             if (char_id != -1){
                 const QGears::ModelListFile::ModelDescription& desc
                   = models->GetModels().at(char_id);
-                auto& animations = model_animation_db.ModelAnimations(
-                  desc.hrc_name
-                );
-                for (auto& anim : desc.animations){
-                    animations.insert(
-                      model_animation_db.NormalizeAnimationName(anim.name)
-                    );
-                }
-                std::unique_ptr<TiXmlElement> xml_entity_script(
-                  new TiXmlElement("entity_model")
-                );
+                auto& animations = model_animation_db.ModelAnimations(desc.hrc_name);
+                for (auto& anim : desc.animations)
+                    animations.insert(model_animation_db.NormalizeAnimationName(anim.name));
+                std::unique_ptr<TiXmlElement> xml_entity_script(new TiXmlElement("entity_model"));
                 xml_entity_script->SetAttribute("name", it.first);
-                // TODO: Add to list of HRC's to convert, obtain name of target
-                // converted .mesh file
+                // TODO: Add to list of HRC's to convert, obtain name of converted .mesh file.
                 auto lower_case_hrc_name = desc.hrc_name;
                 QGears::StringUtil::toLowerCase(lower_case_hrc_name);
                 xml_entity_script->SetAttribute(
                   "file_name",
-                  FieldModelDir() + "/"
-                  + model_animation_db.ModelMetaDataName(lower_case_hrc_name)
+                  FieldModelDir() + "/" + model_animation_db.ModelMetaDataName(lower_case_hrc_name)
                 );
                 if (desc.type == QGears::ModelListFile::PLAYER){
-                    // For player models the position is set manually  in the
-                    // xml because if a map is loaded manually this is where
-                    // the player will end up. Hence we set the position to the
-                    // first entity_point that we have.
+                    // For player models the position is set manually in the xml because if a map
+                    // is loaded manually this is where the player will end up. Hence we set the
+                    // position to the first entity_point that we have.
                     xml_entity_script->SetAttribute(
-                      "position",
-                      Ogre::StringConverter::toString(first_entity_point)
+                      "position", Ogre::StringConverter::toString(first_entity_point)
                     );
                 }
                 else{
                     xml_entity_script->SetAttribute(
-                      "position",
-                      Ogre::StringConverter::toString(Ogre::Vector3::ZERO)
+                      "position", Ogre::StringConverter::toString(Ogre::Vector3::ZERO)
                     );
                 }
                 xml_entity_script->SetAttribute("direction", "0");
                 // TODO: This isn't quite right, the models animation
                 // translation seems to be inverted?
+                xml_entity_script->SetAttribute("scale", "0.03125 0.03125 0.03125");
                 xml_entity_script->SetAttribute(
-                  "scale", "0.03125 0.03125 0.03125"
-                );
-                xml_entity_script->SetAttribute(
-                  "root_orientation",
-                  "0.7071067811865476 0.7071067811865476 0 0"
+                  "root_orientation", "0.7071067811865476 0.7071067811865476 0 0"
                 );
                 element->LinkEndChild(xml_entity_script.release());
             }
             else{
-                std::unique_ptr<TiXmlElement> xml_entity_script(
-                  new TiXmlElement("entity_script")
-                );
+                // TODO: Lines go here.
+                std::unique_ptr<TiXmlElement> xml_entity_script(new TiXmlElement("entity_script"));
                 xml_entity_script->SetAttribute("name", it.first);
                 element->LinkEndChild(xml_entity_script.release());
             }
         }
-        const float downscaler_this = 128.0f * FieldScaleFactor(
-          scale_factor_map, this_field_id
-        );
+        const float downscaler_this = 128.0f * FieldScaleFactor(scale_factor_map, this_field_id);
         const auto& gateways = triggers->GetGateways();
         for (size_t i = 0; i < gateways.size(); i ++){
             const QGears::TriggersFile::Gateway& gateway = gateways[i];
             // If non-inactive gateway:
             if (gateway.destination_field_id != INACTIVE_GATEWAY_ID){
-                std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));
-                xml_entity_trigger->SetAttribute(
-                  "name", "Gateway" + std::to_string(i)
+                std::unique_ptr<TiXmlElement> xml_entity_trigger(
+                  new TiXmlElement("entity_trigger")
                 );
+                xml_entity_trigger->SetAttribute("name", "Gateway" + std::to_string(i));
                 xml_entity_trigger->SetAttribute(
                   "point1",
                   Ogre::StringConverter::toString(
@@ -943,21 +844,15 @@ static void FF7PcFieldToQGearsField(
             }
         }
         doc.LinkEndChild(element.release());
-        doc.SaveFile(
-          out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/map.xml"
-        );
+        doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/map.xml");
         const QGears::PaletteFilePtr& pal = field->GetPalette();
         const QGears::BackgroundFilePtr& bg = field->GetBackground();
         std::unique_ptr<Ogre::Image> bg_image(bg->CreateImage(pal));
         bg_image->encode("png");
-        bg_image->save(
-          out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/tiles.png"
-        );
+        bg_image->save(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/tiles.png");
         {
             TiXmlDocument doc;
-            std::unique_ptr<TiXmlElement> element(
-              new TiXmlElement("background2d")
-            );
+            std::unique_ptr<TiXmlElement> element(new TiXmlElement("background2d"));
             // Magic constants.
             const int BG_SCALE_UP_FACTOR = 3;
             const int BG_PSX_SCREEN_WIDTH = 320;
@@ -965,35 +860,20 @@ static void FF7PcFieldToQGearsField(
             // Get texture atlas size.
             const int width = bg_image->getWidth();
             const int height = bg_image->getHeight();
-            const QGears::CameraMatrixFilePtr& camera_matrix
-              = field->GetCameraMatrix();
+            const QGears::CameraMatrixFilePtr& camera_matrix = field->GetCameraMatrix();
             const Ogre::Vector3 position
-              = camera_matrix->GetPosition()
-                / FieldScaleFactor(scale_factor_map, this_field_id);
-            const Ogre::Quaternion orientation
-              = camera_matrix->GetOrientation();
+              = camera_matrix->GetPosition() / FieldScaleFactor(scale_factor_map, this_field_id);
+            const Ogre::Quaternion orientation = camera_matrix->GetOrientation();
             const Ogre::Degree fov
               = camera_matrix->GetFov(static_cast<float>(BG_PSX_SCREEN_HEIGHT));
-            const int min_x
-              = triggers->GetCameraRange().left * BG_SCALE_UP_FACTOR;
-            const int min_y
-              = triggers->GetCameraRange().top * BG_SCALE_UP_FACTOR;
-            const int max_x
-              = triggers->GetCameraRange().right * BG_SCALE_UP_FACTOR;
-            const int max_y
-              = triggers->GetCameraRange().bottom * BG_SCALE_UP_FACTOR;
-            element->SetAttribute(
-              "image", FieldMapDir() + "/" + field->getName() + "/tiles.png"
-            );
-            element->SetAttribute(
-              "position", Ogre::StringConverter::toString(position)
-            );
-            element->SetAttribute(
-              "orientation", Ogre::StringConverter::toString(orientation)
-            );
-            element->SetAttribute(
-              "fov", Ogre::StringConverter::toString(fov)
-            );
+            const int min_x = triggers->GetCameraRange().left * BG_SCALE_UP_FACTOR;
+            const int min_y = triggers->GetCameraRange().top * BG_SCALE_UP_FACTOR;
+            const int max_x = triggers->GetCameraRange().right * BG_SCALE_UP_FACTOR;
+            const int max_y = triggers->GetCameraRange().bottom * BG_SCALE_UP_FACTOR;
+            element->SetAttribute("image", FieldMapDir() + "/" + field->getName() + "/tiles.png");
+            element->SetAttribute("position", Ogre::StringConverter::toString(position));
+            element->SetAttribute("orientation", Ogre::StringConverter::toString(orientation));
+            element->SetAttribute("fov", Ogre::StringConverter::toString(fov));
             element->SetAttribute(
               "range",
               std::to_string(min_x) + " " + std::to_string(min_y) + " "
@@ -1006,54 +886,31 @@ static void FF7PcFieldToQGearsField(
             );
             // Write out the *_BG.XML data.
             auto& layers = bg->GetLayers();
-            for (const auto& layer : layers)
-            {
-                // TODO: Should only the tiles to construct enabled layers be
-                // outputted?
+            for (const auto& layer : layers){
+                // TODO: Should only the tiles to construct enabled layers be outputted?
                 //  if (layer.enabled){
 
-                for (
-                  const QGears::BackgroundFile::SpriteData& sprite
-                    : layer.sprites
-                ){
-                    std::unique_ptr<TiXmlElement> xml_element(
-                      new TiXmlElement("tile")
-                    );
+                for (const QGears::BackgroundFile::SpriteData& sprite : layer.sprites){
+                    std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("tile"));
                     xml_element->SetAttribute(
                       "destination",
-                      Ogre::StringConverter::toString(
-                        sprite.dst.x * BG_SCALE_UP_FACTOR
-                      ) + " "
-                      + Ogre::StringConverter::toString(
-                        sprite.dst.y * BG_SCALE_UP_FACTOR
-                      )
+                      Ogre::StringConverter::toString(sprite.dst.x * BG_SCALE_UP_FACTOR) + " "
+                      + Ogre::StringConverter::toString(sprite.dst.y * BG_SCALE_UP_FACTOR)
                     );
                     xml_element->SetAttribute(
-                      "width",
-                      Ogre::StringConverter::toString(
-                        sprite.width * BG_SCALE_UP_FACTOR
-                      )
+                      "width", Ogre::StringConverter::toString(sprite.width * BG_SCALE_UP_FACTOR)
                     );
                     xml_element->SetAttribute(
-                      "height",
-                      Ogre::StringConverter::toString(
-                        sprite.height * BG_SCALE_UP_FACTOR
-                      )
+                      "height", Ogre::StringConverter::toString(sprite.height * BG_SCALE_UP_FACTOR)
                     );
-                    // Each tile is added to a big texture atlas with hard
-                    // coded size of 1024x1024, convert UV's to the 0.0f to
-                    // 1.0f range.
-                    const float u0
-                      = static_cast<float>(sprite.src.x) / bg_image->getWidth();
-                    const float v0
-                      = static_cast<float>(sprite.src.y)
-                        / bg_image->getHeight();
+                    // Each tile is added to a big texture atlas with hard coded size of 1024x1024,
+                    // convert UV's to the 0.0f to 1.0f range.
+                    const float u0 = static_cast<float>(sprite.src.x) / bg_image->getWidth();
+                    const float v0 = static_cast<float>(sprite.src.y) / bg_image->getHeight();
                     const float u1
-                      = static_cast<float>(sprite.src.x + sprite.width)
-                        / bg_image->getWidth();
+                      = static_cast<float>(sprite.src.x + sprite.width) / bg_image->getWidth();
                     const float v1
-                      = static_cast<float>(sprite.src.y + sprite.height)
-                        / bg_image->getHeight();
+                      = static_cast<float>(sprite.src.y + sprite.height) / bg_image->getHeight();
                     xml_element->SetAttribute(
                       "uv",
                       Ogre::StringConverter::toString(u0) + " "
@@ -1061,20 +918,17 @@ static void FF7PcFieldToQGearsField(
                       + Ogre::StringConverter::toString(u1) + " "
                       + Ogre::StringConverter::toString(v1)
                     );
+                    // TODO: It works (on FFVII PC), but why this number?
                     xml_element->SetAttribute(
                       "depth",
-                      Ogre::StringConverter::toString(
-                        // TODO: It works (on FFVII PC), but why this number?
-                        static_cast<float>(sprite.depth) * (0.03125f) // ??
-                      )
+                      Ogre::StringConverter::toString(static_cast<float>(sprite.depth) * (0.03125f))
                     );
                     // TODO: Copied from DatFile::AddTile.
                     // Add to common method.
                     Ogre::String blending_str = "";
                     if (sprite.blending == 0) blending_str = "alpha";
                     // 3 is source + 0.25 * destination:
-                    else if (sprite.blending == 1 || sprite.blending == 3)
-                        blending_str = "add";
+                    else if (sprite.blending == 1 || sprite.blending == 3) blending_str = "add";
                     else if (sprite.blending == 2) blending_str = "subtract";
                     // TODO: Should probably throw to fail conversion:
                     else blending_str = "unknown";
@@ -1084,9 +938,7 @@ static void FF7PcFieldToQGearsField(
                 //}
             }
             doc.LinkEndChild(element.release());
-            doc.SaveFile(
-              out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/bg.xml"
-            );
+            doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/bg.xml");
         }
     }
     {
@@ -1095,33 +947,17 @@ static void FF7PcFieldToQGearsField(
         TiXmlDocument doc;
         std::unique_ptr<TiXmlElement> element(new TiXmlElement("walkmesh"));
         for (QGears::WalkmeshFile::Triangle& tri : walkmesh->GetTriangles()){
-            std::unique_ptr<TiXmlElement> xml_element(
-              new TiXmlElement("triangle")
-            );
-            xml_element->SetAttribute(
-              "a", Ogre::StringConverter::toString(tri.a)
-            );
-            xml_element->SetAttribute(
-              "b", Ogre::StringConverter::toString(tri.b)
-            );
-            xml_element->SetAttribute(
-              "c", Ogre::StringConverter::toString(tri.c)
-            );
-            xml_element->SetAttribute(
-              "a_b", std::to_string(tri.access_side[0])
-            );
-            xml_element->SetAttribute(
-              "b_c", std::to_string(tri.access_side[1])
-            );
-            xml_element->SetAttribute(
-              "c_a", std::to_string(tri.access_side[2])
-            );
+            std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("triangle"));
+            xml_element->SetAttribute("a", Ogre::StringConverter::toString(tri.a));
+            xml_element->SetAttribute("b", Ogre::StringConverter::toString(tri.b));
+            xml_element->SetAttribute("c", Ogre::StringConverter::toString(tri.c));
+            xml_element->SetAttribute("a_b", std::to_string(tri.access_side[0]));
+            xml_element->SetAttribute("b_c", std::to_string(tri.access_side[1]));
+            xml_element->SetAttribute("c_a", std::to_string(tri.access_side[2]));
             element->LinkEndChild(xml_element.release());
         }
         doc.LinkEndChild(element.release());
-        doc.SaveFile(
-          out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/wm.xml"
-        );
+        doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/wm.xml");
     }
     maps.insert(field->getName());
 }
@@ -1139,13 +975,10 @@ class FF7FieldScriptGatewayCollector : public BaseFF7FieldScriptFormatter{
          * Cosntructor.
          */
         FF7FieldScriptGatewayCollector(
-          const std::string& field_name,
-          const std::vector<std::string>& field_id_to_name_lookup,
+          const std::string& field_name, const std::vector<std::string>& field_id_to_name_lookup,
           FieldSpawnPointsMap& spawn_points, size_t this_field_id
         ) :
-          BaseFF7FieldScriptFormatter(
-            field_name,field_id_to_name_lookup, spawn_points
-          ),
+          BaseFF7FieldScriptFormatter(field_name,field_id_to_name_lookup, spawn_points),
           field_id_(this_field_id)
         {}
 
@@ -1166,9 +999,8 @@ class FF7FieldScriptGatewayCollector : public BaseFF7FieldScriptFormatter{
          * @param angle[in] Orientation at which to spawn.
          */
         virtual void AddSpawnPoint(
-          unsigned int map_id, const std::string& entity,
-          const std::string& function_name, unsigned int address,
-          int x, int y, int z, int angle
+          unsigned int map_id, const std::string& entity, const std::string& function_name,
+          unsigned int address, int x, int y, int z, int angle
         ) override {
             auto it = spawn_points_.find(map_id);
             QGears::TriggersFile::Gateway gw = {};
@@ -1178,8 +1010,7 @@ class FF7FieldScriptGatewayCollector : public BaseFF7FieldScriptFormatter{
             gw.destination.z = z;
             gw.dir = angle;
             if (it != std::end(spawn_points_)){
-                // Add to the list of gateways that link to
-                // destination_field_id.
+                // Add to the list of gateways that link to destination_field_id.
                 SpawnPointDb::Record rec;
                 rec.from_script = true;
                 rec.field_id = field_id_;
@@ -1227,15 +1058,12 @@ class FF7FieldScriptGatewayCollector : public BaseFF7FieldScriptFormatter{
  * of this map.
  */
 static void CollectSpawnPoints(
-  QGears::FLevelFilePtr& field,
-  const std::vector<std::string>& field_id_to_name_lookup,
+  QGears::FLevelFilePtr& field, const std::vector<std::string>& field_id_to_name_lookup,
   FieldSpawnPointsMap& spawn_points
 ){
-    const size_t this_field_id = FieldId(
-      field->getName(), field_id_to_name_lookup
-    );
-    // Decompile the script just so the MAPJUMPs can be collected. This is
-    // needed to construct the full list of entries to each field.
+    const size_t this_field_id = FieldId(field->getName(), field_id_to_name_lookup);
+    // Decompile the script just so the MAPJUMPs can be collected. This is needed to construct the
+    // full list of entries to each field.
     try{
         // Get the raw script bytes.
         SUDM::FF7::Field::DecompiledScript decompiled;
@@ -1245,13 +1073,11 @@ static void CollectSpawnPoints(
           field->getName(), field_id_to_name_lookup, spawn_points, this_field_id
         );
         decompiled = SUDM::FF7::Field::Decompile(
-          field->getName(), raw_field_data, formatter,
-          "", "EntityContainer = {}\n\n"
+          field->getName(), raw_field_data, formatter, "", "EntityContainer = {}\n\n"
         );
     }
     catch (const ::InternalDecompilerError& ex){
-        std::cerr << "CollectSpawnPoints: InternalDecompilerError: "
-          << ex.what() << std::endl;
+        std::cerr << "CollectSpawnPoints: InternalDecompilerError: " << ex.what() << std::endl;
     }
     const QGears::TriggersFilePtr& triggers = field->GetTriggers();
     const auto& gateways = triggers->GetGateways();
@@ -1379,9 +1205,7 @@ void FF7DataInstaller::InitCollectSpawnAndScaleFactors(){
     CreateDir(FieldMapDir());
     CreateDir(FieldModelDir());
     // List what's in the LGP archive.
-    flevel_file_list_ = application_.ResMgr()->listResourceNames(
-      "FFVIIFields", "*"
-    );
+    flevel_file_list_ = application_.ResMgr()->listResourceNames("FFVIIFields", "*");
     // Load the map list field.
     QGears::MapListFilePtr map_list
       = QGears::MapListFileManager::GetSingleton().load(
@@ -1427,9 +1251,7 @@ void FF7DataInstaller::CollectionFieldSpawnAndScaleFactors(){
         field_.reset();
         iterator_counter_ = 0;
         installation_state_ = CONVERT_FIELDS;
-        field_text_writer_.Begin(
-          output_dir_ + "/texts/english/dialogs_mission1.xml"
-        );
+        field_text_writer_.Begin(output_dir_ + "/texts/english/dialogs_mission1.xml");
     }
 }
 
@@ -1441,24 +1263,23 @@ void FF7DataInstaller::ConvertFieldsIteration(){
         // Exclude things that are not fields.
         if (IsAFieldFile(resource_name)){
             if (/*IsTestField(resource_name) &&*/ !WillCrash(resource_name)){
+            // TODO: DEBUG: Only test fields
+            //if (IsTestField(resource_name) && !WillCrash(resource_name)){
                 //write_output_line("Converting field " + resource_name);
-                //std::cout << " - Converting field: " << resource_name
-                //  << std::endl;
+                //std::cout << " - Converting field: " << resource_name << std::endl;
                 CreateDir(FieldMapDir() + "/" + resource_name);
                 QGears::FLevelFilePtr field
                   = QGears::LZSFLevelFileManager::GetSingleton().load(
                     resource_name, "FFVIIFields"
                   ).staticCast<QGears::FLevelFile>();
                 FF7PcFieldToQGearsField(
-                  field_text_writer_, field, output_dir_, map_list_,
-                  spawn_points_, scale_factors_, used_models_and_anims_,
-                  converted_map_list_, write_output_line
+                  field_text_writer_, field, output_dir_, map_list_, spawn_points_, scale_factors_,
+                  used_models_and_anims_, converted_map_list_, write_output_line
                 );
             }
             else{
                 write_output_line(
-                  "[ERROR] Skip field " + resource_name
-                  + " due to crash or hang issue."
+                  "[ERROR] Skip field " + resource_name + " due to crash or hang issue."
                 );
                 std::cerr << "[ERROR] Skip field: " << resource_name
                   << " due to crash or hang issue." << std::endl;
@@ -1492,9 +1313,7 @@ void FF7DataInstaller::WriteMapsXmlIteration(){
         write_output_line("Writing field " + FieldName(map));
         std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("map"));
         xml_element->SetAttribute("name", FieldName(map));
-        xml_element->SetAttribute(
-          "file_name", FieldMapDir() + "/" + map + "/map.xml"
-        );
+        xml_element->SetAttribute("file_name", FieldMapDir() + "/" + map + "/map.xml");
         element_->LinkEndChild(xml_element.release());
         iterator_counter_++;
         converted_map_list_iterator_++;
@@ -1515,9 +1334,7 @@ void FF7DataInstaller::ConvertFieldModelsBegin(){
     field_models_lgp_ = std::make_unique<ScopedLgp>(
       application_.getRoot(), input_dir_ + "field/char.lgp", "LGP", "FFVII"
     );
-    field_model_file_list_ = application_.ResMgr()->listResourceNames(
-      "FFVII", "*"
-    );
+    field_model_file_list_ = application_.ResMgr()->listResourceNames("FFVII", "*");
     iterator_counter_ = 0;
     installation_state_ = CONVERT_FIELD_MODELS;
     iterator_counter_ = 0;
@@ -1529,41 +1346,26 @@ void FF7DataInstaller::ConvertFieldModelsIteration(){
     progress_step_num_elements_ = used_models_and_anims_.map.size();
     if (model_animation_map_iterator_ != used_models_and_anims_.map.end()){
         if (conversion_step_ == 0){
-            write_output_line(
-              "Converting model " + model_animation_map_iterator_->first
-            );
+            write_output_line("Converting model " + model_animation_map_iterator_->first);
             conversion_step_++;
         }
         else{
             try{
-                Ogre::ResourcePtr hrc
-                  = QGears::HRCFileManager::GetSingleton().load(
+                Ogre::ResourcePtr hrc = QGears::HRCFileManager::GetSingleton().load(
                     model_animation_map_iterator_->first, "FFVII"
                   );
                 Ogre::String base_name;
-                QGears::StringUtil::splitBase(
-                  model_animation_map_iterator_->first, base_name
-                );
-                auto mesh_name
-                  = QGears::FF7::NameLookup::model(base_name) + ".mesh";
-
-                Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(
-                  mesh_name, "FFVII"
-                ));
+                QGears::StringUtil::splitBase(model_animation_map_iterator_->first, base_name);
+                auto mesh_name = QGears::FF7::NameLookup::model(base_name) + ".mesh";
+                Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
                 Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
                 for (auto& anim : model_animation_map_iterator_->second){
-                    QGears::AFileManager &afl_mgr(
-                      QGears::AFileManager::GetSingleton()
-                    );
-                    QGears::AFilePtr a
-                      = afl_mgr.load(anim, "FFVII").staticCast<QGears::AFile>();
-                    // Convert the FF7 name to a more readable name set in the
-                    // meta data.
+                    QGears::AFileManager &afl_mgr(QGears::AFileManager::GetSingleton());
+                    QGears::AFilePtr a = afl_mgr.load(anim, "FFVII").staticCast<QGears::AFile>();
+                    // Convert the FF7 name to a more readable name set in the meta data.
                     Ogre::String base_name;
                     QGears::StringUtil::splitBase(anim, base_name);
-                    a->AddTo(
-                      skeleton, QGears::FF7::NameLookup::Animation(base_name)
-                    );
+                    a->AddTo(skeleton, QGears::FF7::NameLookup::Animation(base_name));
                 }
                 ExportMesh(output_dir_ + "/" + FieldModelDir() + "/", mesh);
             }
@@ -1573,8 +1375,7 @@ void FF7DataInstaller::ConvertFieldModelsIteration(){
                   + model_animation_map_iterator_->first + ": " + ex.what()
                 );
                 std::cerr << "[ERROR] Ogre exception converting model "
-                  << model_animation_map_iterator_->first <<": " << ex.what()
-                  << std::endl;
+                  << model_animation_map_iterator_->first <<": " << ex.what() << std::endl;
             }
             catch (const std::exception& ex){
                 write_output_line(
@@ -1582,8 +1383,7 @@ void FF7DataInstaller::ConvertFieldModelsIteration(){
                   + model_animation_map_iterator_->first + ": " + ex.what()
                 );
                 std::cerr << "[ERROR] Exception converting model "
-                  << model_animation_map_iterator_->first << ": " << ex.what()
-                  << std::endl;
+                  << model_animation_map_iterator_->first << ": " << ex.what() << std::endl;
             }
             iterator_counter_++;
             model_animation_map_iterator_++;

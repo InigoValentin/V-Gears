@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <cmath>
 #include <OgreEntity.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
@@ -1322,7 +1323,10 @@ void EntityManager::SetNextOffsetStep(Entity* entity){
     Ogre::Vector3 start = entity->GetOffsetPositionStart();
     Ogre::Vector3 end = entity->GetOffsetPositionEnd();
     float x = current / total;
-    float smooth_modifier = (type == AT_SMOOTH) ? -2 * x * x * x + 3 * x * x : x;
+    // Prevent division by 0:
+    if (std::isnan(x)) x = 0.0f;
+    float smooth_modifier
+      = (type == AT_SMOOTH) ? -2 * x * x * x + 3 * x * x : x;
     Ogre::Vector3 offset = start + (end - start) * smooth_modifier;
     entity->SetOffset(offset);
     if (current == total) entity->UnsetOffset();
@@ -1338,7 +1342,8 @@ void EntityManager::SetNextTurnStep(Entity* entity){
     Ogre::Degree start = entity->GetTurnDirectionStart();
     Ogre::Degree end = entity->GetTurnDirectionEnd();
     float x = current / total;
-    float smooth_modifier = (type == AT_SMOOTH) ? -2 * x * x * x + 3 * x * x : x;
+    float smooth_modifier
+      = (type == AT_SMOOTH) ? -2 * x * x * x + 3 * x * x : x;
     Ogre::Degree rotation = start + (end - start) * smooth_modifier;
     entity->SetRotation(rotation);
     if (current == total) entity->UnsetTurn();

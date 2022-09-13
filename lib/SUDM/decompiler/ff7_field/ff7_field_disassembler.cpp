@@ -175,8 +175,11 @@ static int FindId(uint32 startAddr, uint32 endAddr, const InstVec& insts)
     return -1;
 }
 
-void FF7::FF7Disassembler::AddFunc(std::string entityName, size_t entityIndex, size_t scriptIndex, uint32 nextScriptEntryPoint, const bool isStart, bool isEnd, bool toReturnOnly, std::string funcName)
-{
+void FF7::FF7Disassembler::AddFunc(
+  std::string entityName, size_t entityIndex, size_t scriptIndex,
+  uint32 nextScriptEntryPoint, const bool isStart, bool isEnd,
+  bool toReturnOnly, std::string funcName
+){
 
     const auto kScriptEntryPoint = mStream->Position();
 
@@ -286,6 +289,9 @@ void FF7::FF7Disassembler::DisassembleIndivdualScript(std::string entityName,
 
         // Read the init script, which means stop at the first return
         AddFunc(entityName, entityIndex, scriptIndex, nextScriptEntryPoint, isStart, isEnd, true, "on_start");
+
+        // TODO: Delete the last return in the "init" function before
+        // concatenating the main function starting with.
 
         // Not at the end of this script? Then the remaining data is the "main" script
         auto streamPos = mStream->Position();

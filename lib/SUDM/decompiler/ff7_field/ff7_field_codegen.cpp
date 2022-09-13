@@ -8,7 +8,7 @@ void FF7::FF7CodeGenerator::onBeforeStartFunction(const Function& func)
     FunctionMetaData metaData(func._metadata);
     if (metaData.IsStart())
     {
-        addOutputLine("EntityContainer[ \"" + metaData.EntityName() + "\" ] = {", false, true);
+        addOutputLine("EntityContainer[\"" + metaData.EntityName() + "\"] = {", false, true);
         if (metaData.CharacterId() != -1)
         {
             addOutputLine(metaData.EntityName() + " = nil,");
@@ -48,117 +48,128 @@ void FF7::FF7CodeGenerator::onEndFunction(const Function& func)
 std::string FF7::FF7CodeGenerator::constructFuncSignature(const Function &func)
 {
     // Generate name
-    return func._name + " = function( self )";
+    return func._name + " = function(self)";
 }
 
-void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/)
-{
-    // TODO: yes, this is a big monolithic whatever. it's also WIP and i will be breaking it into digestable chunks when it's ready :D
+void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/){
+    // TODO: Break into parts
 
     auto instruction = insts.begin();
     
-    std::vector<std::pair<Function&, InstVec>> functionsWithBodies;
-    for (auto function = _engine->_functions.begin(); function != _engine->_functions.end(); ++function)
-    {
+    std::vector<std::pair<Function&, InstVec>> functions_with_bodies;
+    for (
+      auto function = _engine->_functions.begin();
+      function != _engine->_functions.end();
+      ++ function
+    ){
         InstVec body;
         for (size_t i = 0; i < function->second.mNumInstructions; ++i, ++instruction)
-        {
             body.push_back(*instruction);
-        }
-        functionsWithBodies.push_back(std::pair<Function&, InstVec> { function->second, body });
+        functions_with_bodies.push_back(std::pair<Function&, InstVec> {function->second, body});
     }
 
-    for (auto function = functionsWithBodies.begin(); function != functionsWithBodies.end(); ++function)
-    {
+    for (
+      auto function = functions_with_bodies.begin();
+      function != functions_with_bodies.end();
+      ++ function
+    ){
         onBeforeStartFunction(function->first);
         auto signature = constructFuncSignature(function->first);
         addOutputLine(signature, false, true);
         onStartFunction(function->first);
         
+        // Comment with original instructions.
         std::unordered_map<uint32, InstVec> labels;
-        for (auto instruction = function->second.begin(); instruction != function->second.end(); ++instruction)
-        {
-            if ((*instruction)->isCondJump() || (*instruction)->isUncondJump())
-            {
+        for (
+          auto instruction = function->second.begin();
+          instruction != function->second.end();
+          ++ instruction
+        ){
+            if ((*instruction)->isCondJump() || (*instruction)->isUncondJump()){
                 auto targetAddr = (*instruction)->getDestAddress();
                 auto label = labels.find(targetAddr);
-                if (label == labels.end())
-                {
-                    labels.insert({ targetAddr, InstVec() });
-                }
+                if (label == labels.end()) labels.insert({targetAddr, InstVec()});
                 labels[targetAddr].push_back(*instruction);
             }
         }
 
-        std::string last_instruction = "";
-        for (auto instruction = function->second.begin(); instruction != function->second.end(); ++instruction)
-        {
+        // Implemented instructions.
+        for (
+          auto instruction = function->second.begin();
+          instruction != function->second.end();
+          ++instruction
+        ){
             auto label = labels.find((*instruction)->_address);
-            if (label != labels.end())
-            {
-                bool needLabel = false, needNewline = false;
-                for (auto origin = label->second.begin(); origin != label->second.end(); ++origin)
-                {
-                    if ((*origin)->isCondJump())
-                    {
+            if (label != labels.end()){
+                bool needs_label = false;
+                bool needs_new_line = false;
+                for (auto origin = label->second.begin(); origin != label->second.end(); ++ origin){
+                    if ((*origin)->isCondJump()){
                         addOutputLine("end", true, false);
-                        needNewline = true;
+                        needs_new_line = true;
                     }
-                    else
-                    {
-                        needLabel = true;
-                    }
+                    else needs_label = true;
                 }
 
-                if (needNewline)
-                {
-                    addOutputLine("");
-                }
-                
-                if (needLabel)
-                {
+                if (needs_new_line) addOutputLine("");
+                if (needs_label)
                     addOutputLine((boost::format("::label_0x%1$X::") % label->first).str());
-                }
             }
 
             ValueStack stack;
             (*instruction)->processInst(function->first, stack, _engine, this);
 
-            if ((*instruction)->isCondJump())
-            {
-                addOutputLine((boost::format("if (%s) then") % stack.pop()->getString()).str(), false, true);
+            if ((*instruction)->isCondJump()){
+                addOutputLine(
+                  (boost::format("if (%s) then") % stack.pop()->getString()).str(), false, true
+                );
 
-                // If there are no more instructions then ensure end is outputted
-                if (instruction + 1 == std::end(function->second))
-                {
+                // If there are no more instructions then ensure end is outputted.
+                if (instruction + 1 == std::end(function->second)){
                     addOutputLine("end", true, false);
                 }
             }
-            else if ((*instruction)->isUncondJump())
-            {
-                addOutputLine((boost::format("goto label_0x%1$X") % (*instruction)->getDestAddress()).str());
+            else if ((*instruction)->isUncondJump()){
+                // If destination address is outside the functions, turn goto into a return.
+                if ((*instruction)->getDestAddress() > function->first.mEndAddr){
+                    addOutputLine(
+                      "-- Overflowed jump to "
+                      + (boost::format("0x%1$X") % (*instruction)->getDestAddress()).str()
+                      + " (last address in function is "
+                      + (boost::format("0x%1$X)") % function->first.mEndAddr).str()
+                    );
+                    addOutputLine("do return 0 end");
+                }
+                else{
+                    addOutputLine(
+                      (boost::format("goto label_0x%1$X") % (*instruction)->getDestAddress()).str()
+                    );
+                }
             }
-            // else, was already output'd
+            // Else, already output'd.
         }
 
-        if ("return 0" != mLines.at(mLines.size() - 1)._line)
-            addOutputLine("return 0 -- Missing original return", false, false);
-
+        if (
+          "return 0" != mLines.at(mLines.size() - 1)._line
+          && "do return 0 end" != mLines.at(mLines.size() - 1)._line
+        ){
+            /*if (function->first._name == "Init"){
+                addOutputLine("--do return 0 end -- INIT return, omit.", false, false);
+            }
+            addOutputLine("-- " + function->first._name + ": Missing original RET", false, false);
+            addOutputLine("--LAST --" + mLines.at(mLines.size() - 1)._line + "--", false, false);*/
+            addOutputLine("do return 0 end", false, false);
+        }
         onEndFunction(function->first);
     }
 
-    for (auto i = mLines.begin(); i != mLines.end(); ++i)
-    {
-        if (i->_unindentBefore)
-        {
+    for (auto i = mLines.begin(); i != mLines.end(); ++i){
+        if (i->_unindentBefore){
             assert(_indentLevel > 0);
-            _indentLevel--;
+            _indentLevel --;
         }
         _output << indentString(i->_line) << std::endl;
-        if (i->_indentAfter)
-        {
-            _indentLevel++;
-        }
+        if (i->_indentAfter) _indentLevel++;
     }
 }
 
@@ -178,7 +189,7 @@ void FF7::FF7SimpleCodeGenerator::onBeforeStartFunction(const Function& func)
     FunctionMetaData metaData(func._metadata);
     if (metaData.IsStart())
     {
-        addOutputLine("EntityContainer[ \"" + metaData.EntityName() + "\" ] = {", false, true);
+        addOutputLine("EntityContainer[\"" + metaData.EntityName() + "\"] = {", false, true);
         if (metaData.CharacterId() != -1)
         {
             addOutputLine(metaData.EntityName() + " = nil,\n");
@@ -235,7 +246,7 @@ std::string FF7::FF7SimpleCodeGenerator::constructFuncSignature(const Function &
 {
     // Generate name
     FunctionMetaData metaData(func._metadata);
-    return mFormatter.FunctionName(metaData.EntityName(), func._name) + " = function( self )";
+    return mFormatter.FunctionName(metaData.EntityName(), func._name) + " = function(self)";
 }
 
 const std::string FF7::FF7CodeGeneratorHelpers::FormatInstructionNotImplemented(const std::string& entity, uint32 address, uint32 opcode)
@@ -254,7 +265,7 @@ const std::string FF7::FF7CodeGeneratorHelpers::FormatInstructionNotImplemented(
         }
         parameterList << *i;
     }
-    return (boost::format("-- log:log(\"In entity \\\"%1%\\\", address 0x%2$08x: instruction %3%( %4% ) not implemented\")") % entity % address % instruction._name % parameterList.str()).str();
+    return (boost::format("-- log:log(\"In entity \\\"%1%\\\", address 0x%2$08x: instruction %3%(%4%) not implemented\")") % entity % address % instruction._name % parameterList.str()).str();
 }
 
 const std::string FF7::FF7CodeGeneratorHelpers::FormatBool(uint32 value)

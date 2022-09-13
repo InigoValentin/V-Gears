@@ -75,8 +75,10 @@ void DialogsManager::Initialise(){
         data->widget = widget;
         data->window = widget->GetChild("Window");
         data->text_area = text_area;
-        data->text_area->SetTextPrintSpeed(256);
-        data->text_area->SetTextScrollTime(0.267f);
+        //data->text_area->SetTextPrintSpeed(256);
+        data->text_area->SetTextPrintSpeed(25);
+        //data->text_area->SetTextScrollTime(0.267f);
+        data->text_area->SetTextScrollTime(0.1f);
         data->cursor = widget->GetChild("Cursor");
         if (data->cursor != NULL)
             data->cursor->GetY(data->cursor_percent_y, data->cursor_y);

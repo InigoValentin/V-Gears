@@ -324,7 +324,14 @@ namespace FF7
             bool isStart,
             bool isEnd);
 
-        void AddFunc(std::string entityName, size_t entityIndex, size_t scriptIndex, uint32 nextScriptEntryPoint, const bool isStart, const bool isEnd, bool toReturnOnly, std::string funcName);
+        /**
+         * Adds a function to
+         */
+        void AddFunc(
+          std::string entityName, size_t entityIndex, size_t scriptIndex,
+          uint32 nextScriptEntryPoint, const bool isStart, const bool isEnd,
+          bool toReturnOnly, std::string funcName
+        );
 
         void ReadOpCodesToPositionOrReturn(size_t endPos);
         std::unique_ptr<Function> StartFunction(size_t scriptIndex);
