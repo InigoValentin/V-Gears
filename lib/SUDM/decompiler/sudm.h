@@ -50,10 +50,20 @@ namespace SUDM
             // Entities list, with entity type of
             // entity_script
             // entity_model, which somehow links to model loader
+
+            struct Line{
+                std::string name;
+                std::vector<float> point_a;
+                float ax, ay, az;
+                float bx, by, bz;
+            };
+
             struct DecompiledScript
             {
                 std::string luaScript;
                 std::map<std::string, int> entities;
+                //std::map<size_t, FF7FieldEngine::Entity> entity_map;
+                std::vector<Line> lines;
             };
 
             float ScaleFactor(const std::vector<unsigned char>& scriptBytes);

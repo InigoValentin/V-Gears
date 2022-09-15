@@ -1,3 +1,4 @@
+#include <vector>
 #include "ff7_field_disassembler.h"
 #include "ff7_field_engine.h"
 #include "decompiler_engine.h"
@@ -176,82 +177,71 @@ static int FindId(uint32 startAddr, uint32 endAddr, const InstVec& insts)
 }
 
 void FF7::FF7Disassembler::AddFunc(
-  std::string entityName, size_t entityIndex, size_t scriptIndex,
-  uint32 nextScriptEntryPoint, const bool isStart, bool isEnd,
-  bool toReturnOnly, std::string funcName
+  std::string entity_name, size_t entity_index, size_t script_index, uint32 next_script_entry_point,
+  const bool is_start, bool is_end, bool to_return_only, std::string func_name
 ){
 
-    const auto kScriptEntryPoint = mStream->Position();
+    bool is_line = false;
+    std::vector<float> point_a = {0, 0, 0};
+    std::vector<float> point_b = {0, 0, 0};
+    const auto SCRIPT_ENTRY_POINT = mStream->Position();
 
-    // Read each block of opcodes up to a return
-    const size_t oldNumInstructions = _insts.size();
-
-    auto func = StartFunction(scriptIndex);
-    if (toReturnOnly)
-    {
-        // Read opcodes to the end or bail at the first return
-        ReadOpCodesToPositionOrReturn(nextScriptEntryPoint + kSectionPointersSize);
-        auto streamPos = mStream->Position();
-        const size_t endPos = nextScriptEntryPoint + kSectionPointersSize;
-        if (streamPos != endPos)
-        {
-            // Can't be the end if there is more data
-            isEnd = false;
+    // Read each block of opcodes up to a return.
+    const size_t old_num_instructions = _insts.size();
+    auto func = StartFunction(script_index);
+    if (to_return_only){
+        // Read opcodes to the end or bail at the first return.
+        is_line = ReadOpCodesToPositionOrReturn(
+          next_script_entry_point + kSectionPointersSize, point_a, point_b
+        );
+        auto stream_pos = mStream->Position();
+        const size_t endPos = next_script_entry_point + kSectionPointersSize;
+        // Can't be the end if there is more data:
+        if (stream_pos != endPos) is_end = false;
+    }
+    else{
+        // Keep going till we have all of the script, i.e if we bail at a
+        // return then call again till we have everything
+        while (mStream->Position() != next_script_entry_point + kSectionPointersSize){
+            is_line = ReadOpCodesToPositionOrReturn(
+              next_script_entry_point + kSectionPointersSize, point_a, point_b
+            );
         }
     }
-    else
-    {
-        while (mStream->Position() != nextScriptEntryPoint + kSectionPointersSize)
-        {
-            // Keep going till we have all of the script, i.e if we bail at a return then call
-            // again till we have everything
-            ReadOpCodesToPositionOrReturn(nextScriptEntryPoint + kSectionPointersSize);
-        }
-    }
 
-    std::string metaData;
-    if (isStart && isEnd)
-    {
-        metaData = "start_end_";
-    }
-    else if (isStart)
-    {
-        metaData = "start_";
-    }
-    else if (isEnd)
-    {
-        metaData = "end_";
-    }
+    // Read metadata, mark start and/or end.
+    std::string meta_data;
+    if (is_start && is_end) meta_data = "start_end_";
+    else if (is_start) meta_data = "start_";
+    else if (is_end) meta_data = "end_";
 
-
-    const size_t newNumInstructions = _insts.size();
-    func->mNumInstructions = newNumInstructions - oldNumInstructions;
+    const size_t new_num_instructions = _insts.size();
+    func->mNumInstructions = new_num_instructions - old_num_instructions;
     func->mEndAddr = _insts.back()->_address;
-    if (!funcName.empty())
-    {
-        func->_name = funcName;
-    }
-
+    if (!func_name.empty()) func->_name = func_name;
     int id = FindId(func->mStartAddr, func->mEndAddr, _insts);
-    // If there is no ID check if there was an ID for this entity in any of its other functions and use that instead
-    if (id == -1)
-    {
-        for (auto& func : mEngine->_functions)
-        {
-            FunctionMetaData metaData(func.second._metadata);
-            if (metaData.EntityName() == entityName && metaData.CharacterId() != -1)
-            {
-                id = metaData.CharacterId();
+
+    // If there is no ID check if there was an ID for this entity in any of
+    // its other functions and use that instead.
+    if (id == -1){
+        for (auto& func : mEngine->_functions){
+            FunctionMetaData func_meta_data(func.second._metadata);
+            if (func_meta_data.EntityName() == entity_name && func_meta_data.CharacterId() != -1){
+                id = func_meta_data.CharacterId();
                 break;
             }
         }
     }
 
-    metaData += std::to_string(id) + "_" + entityName;
-    func->_metadata = metaData;
+    meta_data += std::to_string(id) + "_" + entity_name;
+    func->_metadata = meta_data;
 
-    mEngine->_functions[kScriptEntryPoint] = *func;
-    mEngine->AddEntityFunction(entityName, entityIndex, func->_name, scriptIndex);
+    mEngine->_functions[SCRIPT_ENTRY_POINT] = *func;
+    mEngine->AddEntityFunction(entity_name, entity_index, func->_name, script_index);
+
+    // If the entity is a line, mark it as so.
+    if (is_line) mEngine->MarkEntityAsLine(entity_index, true, point_a, point_b);
+
 
 }
 
@@ -289,9 +279,6 @@ void FF7::FF7Disassembler::DisassembleIndivdualScript(std::string entityName,
 
         // Read the init script, which means stop at the first return
         AddFunc(entityName, entityIndex, scriptIndex, nextScriptEntryPoint, isStart, isEnd, true, "on_start");
-
-        // TODO: Delete the last return in the "init" function before
-        // concatenating the main function starting with.
 
         // Not at the end of this script? Then the remaining data is the "main" script
         auto streamPos = mStream->Position();
@@ -334,54 +321,17 @@ std::map<std::string, const FF7::TInstructRecord*> FF7::FieldInstructions()
     return mnemonicToInstructionRecords;
 }
 
-void FF7::FF7Disassembler::ReadOpCodesToPositionOrReturn(size_t endPos)
-{
-    /* Need all opcodes in the array before this will work
-    // Convert the array to a map that we can query on by opcode
-    std::map<unsigned int, const TInstructRecord*> opcodeToInstructionRecords;
-    for (size_t i = 0; i < boost::size(kOpcodes); i++)
-    {
-        opcodeToInstructionRecords[kOpcodes[i].mOpCode] = &kOpcodes[i];
-    }
+bool FF7::FF7Disassembler::ReadOpCodesToPositionOrReturn(
+  size_t end_pos, std::vector<float>& point_a, std::vector<float>& point_b
+){
 
-    while (mStream->Position() < endPos)
-    {
-        // See if the next data is a 1 byte opcode
-        uint16 opcode = mStream->ReadU8();
-        auto it = opcodeToInstructionRecords.find(opcode);
-        _address++;
-        if (it == std::end(opcodeToInstructionRecords))
-        {
-            // No, is it a 2 byte opcode?
-            opcode = (mStream->ReadU8() << 8) + opcode;
-            _address++;
-            it = opcodeToInstructionRecords.find(opcode);
-            if (it == std::end(opcodeToInstructionRecords))
-            {
-                // There are no instructions bigger than 2 bytes, so fail
-                throw UnknownSubOpcodeException(_address, opcode);
-            }
-        }
-
-        InstPtr inst = it->second->mFactoryFunc();
-        inst->_opcode = opcode;
-        inst->_address = _address;
-        inst->_stackChange = 0;
-        inst->_name = it->second->mMnemonic;
-        readParams(inst, it->second->mArgumentFormat);
-        _insts.push_back(inst);
-    }
-    */
-
+    bool is_line = false;
     std::vector<unsigned int> exitAddrs;
-
-    while (mStream->Position() < endPos)
-    {
+    while (mStream->Position() < end_pos){
         uint8 opcode = mStream->ReadU8();
         uint32 full_opcode = 0;
         std::string opcodePrefix;
-        switch (opcode)
-        {
+        switch (opcode){
             // Flow
             OPCODE(eOpcodes::IFUB, "IFUB", FF7CondJumpInstruction, 0, "NBBBB");
             OPCODE(eOpcodes::RET, "RET", FF7ControlFlowInstruction, 0, "");
@@ -549,21 +499,60 @@ void FF7::FF7Disassembler::ReadOpCodesToPositionOrReturn(size_t endPos)
                 opcode = this->mStream->ReadU8();
                 switch (opcode)
                 {
-                    OPCODE(eKawaiOpcodes::EYETX, "EYETX", FF7ModelInstruction, 0, parameters.c_str()); // was BBBB
-                    OPCODE(eKawaiOpcodes::TRNSP, "TRNSP", FF7ModelInstruction, 0, parameters.c_str()); // was B
-                    OPCODE(eKawaiOpcodes::AMBNT, "AMBNT", FF7ModelInstruction, 0, parameters.c_str()); // was BBBBBBB
-                    OPCODE(eKawaiOpcodes::Unknown03, "Unknown03", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::Unknown04, "Unknown04", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::Unknown05, "Unknown05", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::LIGHT, "LIGHT", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::Unknown07, "Unknown07", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::Unknown08, "Unknown08", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::Unknown09, "Unknown09", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::SBOBJ, "SBOBJ", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::Unknown0B, "Unknown0B", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::Unknown0C, "Unknown0C", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::SHINE, "SHINE", FF7ModelInstruction, 0, parameters.c_str());
-                    OPCODE(eKawaiOpcodes::RESET, "RESET", FF7ModelInstruction, 0, parameters.c_str());
+                    OPCODE(
+                      eKawaiOpcodes::EYETX, "EYETX", FF7ModelInstruction, 0, parameters.c_str()
+                    ); // was BBBB
+                    OPCODE(
+                      eKawaiOpcodes::TRNSP, "TRNSP", FF7ModelInstruction, 0, parameters.c_str()
+                    ); // was B
+                    OPCODE(
+                      eKawaiOpcodes::AMBNT, "AMBNT", FF7ModelInstruction, 0, parameters.c_str()
+                    ); // was BBBBBBB
+                    OPCODE(
+                      eKawaiOpcodes::Unknown03, "Unknown03",
+                      FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::Unknown04, "Unknown04",
+                      FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::Unknown05, "Unknown05",
+                      FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::LIGHT, "LIGHT",FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::Unknown07, "Unknown07",
+                      FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::Unknown08, "Unknown08",
+                      FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::Unknown09, "Unknown09",
+                      FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::SBOBJ, "SBOBJ",
+                      FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::Unknown0B, "Unknown0B",
+                      FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::Unknown0C, "Unknown0C",
+                      FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::SHINE, "SHINE", FF7ModelInstruction, 0, parameters.c_str()
+                    );
+                    OPCODE(
+                      eKawaiOpcodes::RESET, "RESET", FF7ModelInstruction, 0, parameters.c_str()
+                    );
                 default:
                     throw UnknownSubOpcodeException(this->_address, opcode);
                 }
@@ -628,9 +617,27 @@ void FF7::FF7Disassembler::ReadOpCodesToPositionOrReturn(size_t endPos)
             OPCODE(eOpcodes::SLIP, "SLIP", FF7WalkmeshInstruction, 0, "B");
             OPCODE(eOpcodes::UC, "UC", FF7WalkmeshInstruction, 0, "B");
             OPCODE(eOpcodes::IDLCK, "IDLCK", FF7WalkmeshInstruction, 0, "wB");
-            OPCODE(eOpcodes::LINE, "LINE", FF7WalkmeshInstruction, 0, "ssssss");
             OPCODE(eOpcodes::LINON, "LINON", FF7WalkmeshInstruction, 0, "B");
             OPCODE(eOpcodes::SLINE, "SLINE", FF7WalkmeshInstruction, 0, "NNNssssss");
+            //OPCODE(eOpcodes::LINE, "LINE", FF7WalkmeshInstruction, 0, "ssssss");
+            // LINE is done like this to save opcode params to the function out params.
+            case eOpcodes::LINE:
+                is_line = true;
+                full_opcode = (full_opcode << 8) + eOpcodes::LINE;
+                this->_insts.push_back(new FF7WalkmeshInstruction());
+                (this->_insts.back())->_opcode = full_opcode;
+                (this->_insts.back())->_address = this->_address;
+                (this->_insts.back())->_stackChange = 0;
+                (this->_insts.back())->_name = opcodePrefix + std::string("LINE");
+                (this->_insts.back())->_codeGenData = "";
+                this->readParams((this->_insts.back()), "ssssss");
+                point_a[0] = this->_insts.back()->_params[0]->getSigned();
+                point_a[1] = this->_insts.back()->_params[1]->getSigned();
+                point_a[2] = this->_insts.back()->_params[2]->getSigned();
+                point_b[0] = this->_insts.back()->_params[3]->getSigned();
+                point_b[1] = this->_insts.back()->_params[4]->getSigned();
+                point_b[2] = this->_insts.back()->_params[5]->getSigned();
+                break;
 
             // Backgnd
             OPCODE(eOpcodes::BGPDH, "BGPDH", FF7BackgroundInstruction, 0, "NBs");
@@ -694,29 +701,19 @@ void FF7::FF7Disassembler::ReadOpCodesToPositionOrReturn(size_t endPos)
             OPCODE(eOpcodes::GETX, "GETX", FF7UncategorizedInstruction, 0, "BBBBBB");
             OPCODE(eOpcodes::SEARCHX, "SEARCHX", FF7UncategorizedInstruction, 0, "BBBBBBBBBB");
 
-        default:
-            throw UnknownOpcodeException(this->_address, opcode);
+            default:
+                throw UnknownOpcodeException(this->_address, opcode);
         }
         INC_ADDR;
 
-        // Are we within an "if" statement tracking
+        // Is it within an "if" statement tracking?
         InstPtr i = this->_insts.back();
-        if (i->isCondJump())
-        {
-            exitAddrs.push_back(i->getDestAddress());
-        }
+        if (i->isCondJump()) exitAddrs.push_back(i->getDestAddress());
         if (!exitAddrs.empty())
-        {
-            if (i->_address == exitAddrs.back())
-            {
-                exitAddrs.pop_back();
-            }
-        }
+            if (i->_address == exitAddrs.back()) exitAddrs.pop_back();
 
-        // Only bail if its the first RET that isn't within an "if" block
-        if (full_opcode == eOpcodes::RET && exitAddrs.empty())
-        {
-            return;
-        }
+        // Only bail if its the first RET that isn't within an "if" block.
+        if (full_opcode == eOpcodes::RET && exitAddrs.empty()) return is_line;
     }
+    return is_line;
 }

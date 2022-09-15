@@ -53,6 +53,8 @@
 #include <QtCore/QDir>
 #include "common/make_unique.h"
 
+float FF7DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
+
 FF7DataInstaller::FF7DataInstaller(
   std::string input_dir, std::string output_dir,
   std::function<void(std::string)> write_output_line
@@ -764,7 +766,39 @@ static void FF7PcFieldToQGearsField(
                 element->LinkEndChild(xml_entity_point.release());
             }
         }
+
+        // Get lines. Add them to a list, so they aren't processed later as regular entities.
+        std::cout << "Processing lines..." << std::endl;
+        std::vector<std::string> line_entities;
+        for (SUDM::FF7::Field::Line line : decompiled.lines){
+            std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));
+            line_entities.push_back(line.name);
+            xml_entity_trigger->SetAttribute("name", line.name);
+            xml_entity_trigger->SetAttribute(
+              "point1",
+              std::to_string(line.ax * FF7DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.ay * FF7DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.az * FF7DataInstaller::LINE_SCALE_FACTOR)
+            );
+            xml_entity_trigger->SetAttribute(
+              "point2",
+              std::to_string(line.bx * FF7DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.by * FF7DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.bz * FF7DataInstaller::LINE_SCALE_FACTOR)
+            );
+            xml_entity_trigger->SetAttribute("enabled", "true");
+            element->LinkEndChild(xml_entity_trigger.release());
+        }
+
+        // Get entities.
         for (const auto& it : decompiled.entities){
+            // If the entity has been added as a line, skip.
+            if (line_entities.size() > 0){
+                if (*std::find(line_entities.begin(), line_entities.end(), it.first) == it.first) {
+                    continue;
+                }
+            }
+
             const int char_id = it.second;
             if (char_id != -1){
                 const QGears::ModelListFile::ModelDescription& desc
@@ -804,7 +838,6 @@ static void FF7PcFieldToQGearsField(
                 element->LinkEndChild(xml_entity_script.release());
             }
             else{
-                // TODO: Lines go here.
                 std::unique_ptr<TiXmlElement> xml_entity_script(new TiXmlElement("entity_script"));
                 xml_entity_script->SetAttribute("name", it.first);
                 element->LinkEndChild(xml_entity_script.release());
@@ -1223,7 +1256,9 @@ void FF7DataInstaller::CollectionFieldSpawnAndScaleFactors(){
     if (iterator_counter_ < flevel_file_list_->size()){
         auto resource_name = (*flevel_file_list_)[iterator_counter_];
         // Exclude things that are not fields.
-        if (IsAFieldFile(resource_name) /*&& IsTestField(resourceName)*/){
+        //if (IsAFieldFile(resource_name) /*&& IsTestField(resource_name)*/){
+        // TODO: DEBUG: Only testing fields.
+        if (IsAFieldFile(resource_name) && IsTestField(resource_name)){
             conversion_step_ ++;
             if (conversion_step_ == 1){
                 field_ = QGears::LZSFLevelFileManager::GetSingleton().load(
@@ -1262,11 +1297,11 @@ void FF7DataInstaller::ConvertFieldsIteration(){
         auto resource_name = (*flevel_file_list_)[iterator_counter_];
         // Exclude things that are not fields.
         if (IsAFieldFile(resource_name)){
-            if (/*IsTestField(resource_name) &&*/ !WillCrash(resource_name)){
+            //if (/*IsTestField(resource_name) &&*/ !WillCrash(resource_name)){
             // TODO: DEBUG: Only test fields
-            //if (IsTestField(resource_name) && !WillCrash(resource_name)){
+            if (IsTestField(resource_name) && !WillCrash(resource_name)){
                 //write_output_line("Converting field " + resource_name);
-                //std::cout << " - Converting field: " << resource_name << std::endl;
+                std::cout << " - Converting field: " << resource_name << std::endl;
                 CreateDir(FieldMapDir() + "/" + resource_name);
                 QGears::FLevelFilePtr field
                   = QGears::LZSFLevelFileManager::GetSingleton().load(

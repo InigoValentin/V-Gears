@@ -227,7 +227,11 @@ class ModelsAndAnimationsDb{
  * The data installer.
  */
 class FF7DataInstaller{
+
     public:
+
+        static float LINE_SCALE_FACTOR;
+
         /**
          * Installer constructor
          *

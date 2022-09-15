@@ -79,7 +79,7 @@ namespace FF7{
                      *
                      * @param name[in] Entity name.
                      */
-                    Entity(const std::string& name): mName(name){}
+                    Entity(const std::string& name): mName(name), is_line_(false){}
 
                     /**
                      * Retrieves the entity name.
@@ -121,6 +121,26 @@ namespace FF7{
                     void AddFunction(const std::string& name, size_t index){
                         mFunctions[index] = name;
                     }
+
+                    /**
+                     * Indicates if the entity is a line.
+                     * @TODO: Make private.
+                     */
+                    bool is_line_;
+
+                    /**
+                     * The first point of the line.
+                     * @TODO: Make private.
+                     */
+                    std::vector<float> point_a_;
+
+                    /**
+                     * The first point of the line.
+                     * @TODO: Make private.
+                     */
+                    std::vector<float> point_b_;
+
+                    float ax, ay, az, bx, by, bz;
 
                 private:
 
@@ -197,6 +217,22 @@ namespace FF7{
             std::map<std::string, int> GetEntities() const;
 
             /**
+             * Retrieves all line entities in the map.
+             *
+             * @param A list of line entities.
+             */
+            std::vector<SUDM::FF7::Field::Line> GetLineList() const;
+
+            /**
+             * Retrieves all entities in the map.
+             *
+             * @return A map of entities, with the name and index.
+             */
+            std::map<size_t, Entity> GetEntityIndexMap() const{
+                return mEntityIndexMap;
+            }
+
+            /**
              * Adds a function to an entity.
              *
              * @param entityName Name of the entity.
@@ -207,6 +243,22 @@ namespace FF7{
             void AddEntityFunction(
               const std::string& entityName, size_t entityIndex,
               const std::string& funcName, size_t funcIndex
+            );
+
+            /**
+             * Marks an entity as a line.
+             *
+             * @param entity_index Index of the entity.
+             * @param line[in] True to mark the entity as a line, false to
+             * unmark it.
+             * @param point_a[in] First point of the line. Can be null if line
+             * is false.
+             * @param point_b[in] Second point of the line. Can be null if
+             * line is false.
+             */
+            void MarkEntityAsLine(
+                size_t entity_index, bool line,
+                std::vector<float> point_a, std::vector<float> point_b
             );
 
             /**
@@ -827,6 +879,9 @@ namespace FF7{
          * offset can be set; the greater the number, the slower the object
          * moves to its target offset. Script execution may also be halted
          * until the gradual offset has been completed. For this, see OFSTW.
+         *
+         * @param codeGen The code generator.
+         * @param entity[in] The entity name.
          */
         void processOFST(CodeGenerator* codegen, const std::string& entity);
     };
@@ -835,8 +890,45 @@ namespace FF7{
     {
     public:
         virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
+
     private:
         void processUC(CodeGenerator* codeGen);
+
+        /**
+         * Processes a LINE opcode.
+         *
+         * Opcode: 0xD0
+         * Short name: LINE
+         * Long name: Line definition
+         *
+         * Memory layout (7 bytes)
+         * |0xD0|XA|YA|ZA|XB|YB|ZB|
+         *
+         * Arguments:
+         * - const Short XA: X-coordinate of the first point of the line.
+         * - const Short YA: Y-coordinate of the first point of the line.
+         * - const Short ZA: Z-coordinate of the first point of the line.
+         * - const Short XB: X-coordinate of the second point of the line.
+         * - const Short YB: Y-coordinate of the second point of the line.
+         * - const Short ZB: Z-coordinate of the second point of the line.
+         *
+         * Defines a line on the walkmesh that, when crossed by a playable
+         * character, causes one of the entity's scripts to be executed. These
+         * are similar to the triggers in Section 8. All the lines in the
+         * current field can be turned on or off by using the LINON opcode.
+         *
+         * There are generally 6 scripts (other than the init and main) if the entity is a LINE.
+         * - script index 2 -> S1 - [OK].
+         * - script index 3 -> S2 - Move.
+         * - script index 4 -> S3 - Move.
+         * - script index 5 -> S4 - Go.
+         * - script index 6 -> S5 - Go 1x.
+         * - script index 7 -> S6 - Go away.
+         *
+         * @param codeGen The code generator.
+         * @param entity[in] The entity name.
+         */
+        void processLINE(CodeGenerator* codeGen, const std::string& entity);
     };
 
     class FF7BackgroundInstruction : public KernelCallInstruction

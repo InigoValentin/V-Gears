@@ -59,7 +59,8 @@ public:
 	 * @param endIt Index of the instruction immediately after the function, similar to end() on STL containers.
 	 */
 //	Function(InstIterator startIt, InstIterator endIt) : _startIt(startIt), _endIt(endIt) {}
-    Function(uint32 startAddr, uint32 endAddr) : mStartAddr(startAddr), mEndAddr(endAddr) {}
+    Function(uint32 startAddr, uint32 endAddr) : mStartAddr(startAddr), mEndAddr(endAddr){
+    }
 };
 
 /**

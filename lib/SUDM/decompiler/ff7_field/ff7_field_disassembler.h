@@ -318,22 +318,51 @@ namespace FF7
     private:
         void DisassembleIndivdualScript(std::string entityName,
             size_t entityIndex,
-            size_t scriptIndex,
             size_t scriptEntryPoint,
+            size_t scriptIndex,
             uint32 nextScriptEntryPoint,
             bool isStart,
             bool isEnd);
 
         /**
-         * Adds a function to
+         * Adds a function to the engine.
+         *
+         * @param entity_name[in] Name of the entity that owns the function.
+         * @param entity_index[in] Index of the entity that owns the function.
+         * @param script_index[in] Index of the script within the entity.
+         * @param next_script_entry_point[in] Start position of the next
+         * script (or the ending position of this one, plus one).
+         * @param is_start[in] @todo Understand and document.
+         * @param is_end[in] @todo Understand and document.
+         * @param to_return_only[in] True to read the script only until the
+         * first return.
+         * @param func_name[in] Name of the function.
          */
         void AddFunc(
-          std::string entityName, size_t entityIndex, size_t scriptIndex,
-          uint32 nextScriptEntryPoint, const bool isStart, const bool isEnd,
-          bool toReturnOnly, std::string funcName
+          std::string entity_name, size_t entity_index, size_t script_index,
+          uint32 next_script_entry_point, const bool is_start, const bool is_end,
+          bool to_return_only, std::string func_name
         );
 
-        void ReadOpCodesToPositionOrReturn(size_t endPos);
+        /**
+         * Reads opcodes from a script, and detects lines.
+         *
+         * It stops when it reaches the ending position or a RET opcode,
+         * whatever comes first. It also detects if one of the read opcodes
+         * LINE, which means that the entity is a line
+         *
+         * @param end_pos[in] The last position to read. Opcodes will be read
+         * until this, or until a RET is found.
+         * @param point_a[out] If a LINE opcode is found, the first point will
+         * be saved here.
+         * @param point_b[out] If a LINE opcode is found, the second point
+         * will be saved here.
+         * @return True if LINE opcode found, false if not.
+         */
+        bool ReadOpCodesToPositionOrReturn(
+          size_t end_pos, std::vector<float>& point_a, std::vector<float>& point_b
+        );
+
         std::unique_ptr<Function> StartFunction(size_t scriptIndex);
 
         FF7FieldEngine* mEngine;

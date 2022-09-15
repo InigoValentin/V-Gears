@@ -50,6 +50,18 @@ namespace SUDM
 
                 //disassembler->dumpDisassembly(std::cout);
 
+                // Check if the script contains the opcode LINE.
+                /*bool is_line = false;
+                for(InstPtr inst : insts){
+                    if ("LINE" == inst->_name){
+                        std::cout << " INSTRUCTION: " << inst->_name << " (" << scriptName << ")" << std::endl;
+                        disassembler->dumpDisassembly(std::cout);
+                        std::cout << " INSTRUCTION END" << std::endl;
+                        is_line = true;
+                        break;
+                    }
+                }*/
+
                 // Create CFG
                 auto controlFlow = std::make_unique<ControlFlow>(insts, engine);
                 controlFlow->createGroups();
@@ -67,6 +79,11 @@ namespace SUDM
                 cg->generate(insts, graph);
                 ds.luaScript = textToPrepend + output.str() + textToAppend;
                 ds.entities = engine.GetEntities();
+                for (auto line : engine.GetLineList()){
+                    ds.lines.push_back(line);
+                }
+
+                ds.lines = engine.GetLineList();
                 return ds;
             }
         }

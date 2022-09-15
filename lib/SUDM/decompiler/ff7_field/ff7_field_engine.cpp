@@ -93,12 +93,30 @@ std::map<std::string, int> FF7::FF7FieldEngine::GetEntities() const
                 it->second = meta.CharacterId();
             }
         }
-        else
-        {
+        else{
+            // TODO: Don't add lines.
             r[meta.EntityName()] = meta.CharacterId();
         }
     }
     return r;
+}
+
+std::vector<SUDM::FF7::Field::Line> FF7::FF7FieldEngine::GetLineList() const{
+    std::vector<SUDM::FF7::Field::Line> lines;
+    for (auto entity: mEntityIndexMap){
+        if (entity.second.is_line_ == true){
+            SUDM::FF7::Field::Line line;
+            line.name = entity.second.Name();
+            line.ax = entity.second.ax;
+            line.ay = entity.second.ay;
+            line.az = entity.second.az;
+            line.bx = entity.second.bx;
+            line.by = entity.second.by;
+            line.bz = entity.second.bz;
+            lines.push_back(line);
+        }
+    }
+    return lines;
 }
 
 void FF7::FF7FieldEngine::AddEntityFunction(const std::string& entityName, size_t entityIndex, const std::string& funcName, size_t funcIndex)
@@ -113,6 +131,22 @@ void FF7::FF7FieldEngine::AddEntityFunction(const std::string& entityName, size_
         Entity e(entityName);
         e.AddFunction(funcName, funcIndex);
         mEntityIndexMap.insert(std::make_pair(entityIndex, e));
+    }
+}
+
+void FF7::FF7FieldEngine::MarkEntityAsLine(
+  size_t entity_index, bool line,
+  std::vector<float> point_a, std::vector<float> point_b
+){
+    auto it = mEntityIndexMap.find(entity_index);
+    if (it != std::end(mEntityIndexMap)){
+        (*it).second.is_line_ = line;
+        (*it).second.ax = point_a[0];
+        (*it).second.ay = point_a[1];
+        (*it).second.az = point_a[2];
+        (*it).second.bx = point_b[0];
+        (*it).second.by = point_b[1];
+        (*it).second.bz = point_b[2];
     }
 }
 
@@ -1752,7 +1786,6 @@ void FF7::FF7ModelInstruction::processSOLID(CodeGenerator* codeGen, const std::s
 }
 
 void FF7::FF7ModelInstruction::processOFST(CodeGenerator* codeGen, const std::string& entity){
-    // IVV TODO
     FF7SimpleCodeGenerator* cg = static_cast<FF7SimpleCodeGenerator*>(codeGen);
     float x = atoi(
       FF7CodeGeneratorHelpers::FormatValueOrVariable(
@@ -1815,7 +1848,8 @@ void FF7::FF7WalkmeshInstruction::processInst(Function& func, ValueStack&, Engin
         break;
 
     case eOpcodes::LINE:
-        WriteTodo(codeGen, md.EntityName(), "LINE");
+        // The entity is a line!
+        processLINE(codeGen, md.EntityName());
         break;
 
     case eOpcodes::LINON:
@@ -1834,6 +1868,63 @@ void FF7::FF7WalkmeshInstruction::processInst(Function& func, ValueStack&, Engin
 void FF7::FF7WalkmeshInstruction::processUC(CodeGenerator* codeGen)
 {
     codeGen->addOutputLine((boost::format("entity_manager:player_lock(%1%)") % FF7CodeGeneratorHelpers::FormatBool(_params[0]->getUnsigned())).str());
+}
+
+void FF7::FF7WalkmeshInstruction::processLINE(CodeGenerator* codeGen, const std::string& entity){
+    float xa = _params[0]->getSigned();
+    float ya = _params[1]->getSigned();
+    float za = _params[2]->getSigned();
+    float xb = _params[3]->getSigned();
+    float yb = _params[4]->getSigned();
+    float zb = _params[5]->getSigned();
+    // Scale down. TODO: Why this number?
+    xa *= 0.00781249709639;
+    ya *= 0.00781249709639;
+    za *= 0.00781249709639;
+    xb *= 0.00781249709639;
+    yb *= 0.00781249709639;
+    zb *= 0.00781249709639;
+    // TODO: Don't translate the opcode, but add gateway functions.
+    codeGen->addOutputLine(
+      "-- LINE (" + std::to_string(xa) + ", " + std::to_string(ya) + ", " + std::to_string(za)
+      + ")-(" + std::to_string(xb) + ", " +std::to_string(yb) + ", " + std::to_string(zb) + ")"
+    );
+
+    // HACK:
+    //   on_enter_line executes on_update
+    //   on_move_to_line executes on_interact
+    //   on_cross_line executes script_4
+    //   on_leave_line executes script_5
+    // Indentation will be all wrong
+    codeGen->addOutputLine("do return 0 end");
+    codeGen->addOutputLine("end,");
+    codeGen->addOutputLine("");
+    codeGen->addOutputLine("on_enter_line = function(self, entity)");
+    codeGen->addOutputLine(
+      "    script:request(Script.ENTITY, \"" + entity + "\", \"on_update\", 6)"
+    );
+    codeGen->addOutputLine("    do return 0 end");
+    codeGen->addOutputLine("end,");
+    codeGen->addOutputLine("on_move_to_line = function(self, entity)");
+    codeGen->addOutputLine(
+      "    script:request(Script.ENTITY, \"" + entity + "\", \"on_interact\", 6)"
+    );
+    codeGen->addOutputLine("    do return 0 end");
+    codeGen->addOutputLine("end,");
+    codeGen->addOutputLine("on_cross_line = function(self, entity)");
+    codeGen->addOutputLine(
+      "    script:request(Script.ENTITY, \"" + entity + "\", \"script_4\", 6)"
+    );
+    codeGen->addOutputLine("    do return 0 end");
+    codeGen->addOutputLine("end,");
+    codeGen->addOutputLine("on_leave_line = function(self, entity)");
+    codeGen->addOutputLine(
+      "    script:request(Script.ENTITY, \"" + entity + "\", \"script_5\", 6)"
+    );
+    //codeGen->addOutputLine("    do return 0 end");
+    //codeGen->addOutputLine("end,");
+
+
 }
 
 void FF7::FF7BackgroundInstruction::processInst(Function& func, ValueStack&, Engine* /*engine*/, CodeGenerator *codeGen)
