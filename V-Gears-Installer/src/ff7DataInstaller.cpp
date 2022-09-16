@@ -768,7 +768,6 @@ static void FF7PcFieldToQGearsField(
         }
 
         // Get lines. Add them to a list, so they aren't processed later as regular entities.
-        std::cout << "Processing lines..." << std::endl;
         std::vector<std::string> line_entities;
         for (SUDM::FF7::Field::Line line : decompiled.lines){
             std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));

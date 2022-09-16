@@ -461,13 +461,9 @@ void FF7::FF7ControlFlowInstruction::processInst(Function& func, ValueStack&, En
         //     'main' return is kept, the code of 'main' is never executed.
         //     There are safeguards forfunctions without a return in the end,
         //     so it's OK not to include it here.
-        if (func._name != "on_start")
+        if (func._name != "on_start"){
             codeGen->addOutputLine("do return 0 end");
-        // TODO: Lua won't allow return if not followed by end;
-        //codeGen->addOutputLine("--RET : " + func._name); // Seems all our functions must return zero
-        //codeGen->addOutputLine("do return 0 end"); // Seems all our functions must return zero
-        //codeGen->addOutputLine("do return end");
-        //codeGen->addOutputLine("-- do return end");
+        }
         break;
 
     case eOpcodes::REQ:

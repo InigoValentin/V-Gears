@@ -73,6 +73,7 @@ void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/){
       function != functions_with_bodies.end();
       ++ function
     ){
+
         onBeforeStartFunction(function->first);
         auto signature = constructFuncSignature(function->first);
         addOutputLine(signature, false, true);
@@ -94,11 +95,13 @@ void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/){
         }
 
         // Implemented instructions.
+        bool end_needed = false;
         for (
           auto instruction = function->second.begin();
           instruction != function->second.end();
           ++instruction
         ){
+
             auto label = labels.find((*instruction)->_address);
             if (label != labels.end()){
                 bool needs_label = false;
@@ -110,7 +113,6 @@ void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/){
                     }
                     else needs_label = true;
                 }
-
                 if (needs_new_line) addOutputLine("");
                 if (needs_label)
                     addOutputLine((boost::format("::label_0x%1$X::") % label->first).str());
@@ -119,15 +121,21 @@ void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/){
             ValueStack stack;
             (*instruction)->processInst(function->first, stack, _engine, this);
 
+            if (end_needed){
+                addOutputLine("end -- end if", true, false);
+                end_needed = false;
+            }
+
             if ((*instruction)->isCondJump()){
                 addOutputLine(
                   (boost::format("if (%s) then") % stack.pop()->getString()).str(), false, true
                 );
 
-                // If there are no more instructions then ensure end is outputted.
-                if (instruction + 1 == std::end(function->second)){
-                    addOutputLine("end", true, false);
-                }
+                // If the next instruction is the last in the function, mark the next pass to
+                // add an 'end' after the instruction to clode the if.
+                if ((*(instruction + 1))->_address == (*(function->second.back()))._address)
+                    end_needed = true;
+
             }
             else if ((*instruction)->isUncondJump()){
                 // If destination address is outside the functions, turn goto into a return.
@@ -146,26 +154,22 @@ void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/){
                     );
                 }
             }
+
             // Else, already output'd.
         }
 
+        // Add missing return:
         if (
           "return 0" != mLines.at(mLines.size() - 1)._line
           && "do return 0 end" != mLines.at(mLines.size() - 1)._line
         ){
-            /*if (function->first._name == "Init"){
-                addOutputLine("--do return 0 end -- INIT return, omit.", false, false);
-            }
-            addOutputLine("-- " + function->first._name + ": Missing original RET", false, false);
-            addOutputLine("--LAST --" + mLines.at(mLines.size() - 1)._line + "--", false, false);*/
             addOutputLine("do return 0 end", false, false);
         }
         onEndFunction(function->first);
     }
 
     for (auto i = mLines.begin(); i != mLines.end(); ++i){
-        if (i->_unindentBefore){
-            assert(_indentLevel > 0);
+        if (i->_unindentBefore && _indentLevel > 0){
             _indentLevel --;
         }
         _output << indentString(i->_line) << std::endl;
