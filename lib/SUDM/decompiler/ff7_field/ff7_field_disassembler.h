@@ -336,7 +336,9 @@ namespace FF7
          * @param is_end[in] @todo Understand and document.
          * @param to_return_only[in] True to read the script only until the
          * first return.
-         * @param func_name[in] Name of the function.
+         * @param func_name[in] Name of the function. If the entity is a line,
+         * the provided name will be overridden and set to the standard line
+         * entity script names.
          */
         void AddFunc(
           std::string entity_name, size_t entity_index, size_t script_index,
@@ -363,7 +365,22 @@ namespace FF7
           size_t end_pos, std::vector<float>& point_a, std::vector<float>& point_b
         );
 
+        /**
+         * Initializes a function for a non-line entity.
+         *
+         * @param script_index[in] Index of the script.
+         */
         std::unique_ptr<Function> StartFunction(size_t scriptIndex);
+
+        /**
+         * Initializes a function for a line entity.
+         *
+         * The name is set according to the script index, using line standard
+         * names.
+         *
+         * @param script_index[in] Index of the script.
+         */
+        std::unique_ptr<Function> StartLineFunction(size_t script_index);
 
         FF7FieldEngine* mEngine;
 

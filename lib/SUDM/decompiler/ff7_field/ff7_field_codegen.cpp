@@ -148,6 +148,16 @@ void FF7::FF7SimpleCodeGenerator::generate(InstVec& insts, const Graph& /*g*/){
                     );
                     addOutputLine("do return 0 end");
                 }
+                // Prevent backward jumps in the on_start script.
+                else if (
+                  "on_start" == function->first._name
+                  && (*instruction)->getDestAddress() <= (*instruction)->_address
+                ){
+                    addOutputLine("-- No infinite loops in the on_start script.");
+                    addOutputLine((
+                      boost::format("-- goto label_0x%1$X") % (*instruction)->getDestAddress()
+                    ).str());
+                }
                 else{
                     addOutputLine(
                       (boost::format("goto label_0x%1$X") % (*instruction)->getDestAddress()).str()

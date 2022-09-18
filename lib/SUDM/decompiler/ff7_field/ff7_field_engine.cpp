@@ -150,6 +150,12 @@ void FF7::FF7FieldEngine::MarkEntityAsLine(
     }
 }
 
+bool FF7::FF7FieldEngine::EntityIsLine(size_t entity_index){
+    auto it = mEntityIndexMap.find(entity_index);
+    if (it != std::end(mEntityIndexMap)) return (*it).second.is_line_;
+    return false;
+}
+
 void FF7::FF7FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph g)
 {
     for (auto& f : _functions)
@@ -1886,6 +1892,7 @@ void FF7::FF7WalkmeshInstruction::processLINE(CodeGenerator* codeGen, const std:
       + ")-(" + std::to_string(xb) + ", " +std::to_string(yb) + ", " + std::to_string(zb) + ")"
     );
 
+    /*
     // HACK:
     //   on_enter_line executes on_update
     //   on_move_to_line executes on_interact
@@ -1919,7 +1926,7 @@ void FF7::FF7WalkmeshInstruction::processLINE(CodeGenerator* codeGen, const std:
     );
     //codeGen->addOutputLine("    do return 0 end");
     //codeGen->addOutputLine("end,");
-
+    */
 
 }
 

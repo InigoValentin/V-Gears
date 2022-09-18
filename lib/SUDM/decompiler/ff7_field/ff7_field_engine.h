@@ -114,12 +114,23 @@ namespace FF7{
                      *
                      * Must be added by name and index.
                      *
-                     * @param name[in] Function name.
+                     * @param name[in] Function name. If the entity is a line,
+                     * the name will be overridden.
                      * @param index[in] Function index.
                      * @todo What is a function here? An Opcode?
                      */
                     void AddFunction(const std::string& name, size_t index){
-                        mFunctions[index] = name;
+                        // TODO: Delete renaming and test. It should work.
+                        std::string new_name = name;
+                        if (is_line_){
+                            switch (index){
+                                case 2: new_name = "on_enter_line"; break;
+                                case 3: new_name = "on_move_to_line"; break;
+                                case 4: new_name = "on_cross_line"; break;
+                                case 5: new_name = "on_leave_line"; break;
+                            }
+                        }
+                        mFunctions[index] = new_name;
                     }
 
                     /**
@@ -260,6 +271,15 @@ namespace FF7{
                 size_t entity_index, bool line,
                 std::vector<float> point_a, std::vector<float> point_b
             );
+
+            /**
+             * Checks if an entity has been marked as a line.
+             *
+             * @param entity_index[in] Index of the entity to check.
+             * @return True if the entity is a line. False if it isn't, or if
+             * there is no such entity.
+             */
+            bool EntityIsLine(size_t entity_index);
 
             /**
              * Retrieves an entity.
