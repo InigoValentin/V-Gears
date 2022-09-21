@@ -112,8 +112,8 @@ std::unique_ptr<Function> FF7::FF7Disassembler::StartLineFunction(size_t script_
     func->_retVal = false;
     func->_args = 0;
     switch (script_index){
-        case 2: func->_name = "on_enter_line"; break;
-        case 3: func->_name = "on_move_to_line"; break;
+        case 0: func->_name = "on_enter_line"; break;
+        case 1: func->_name = "on_move_to_line"; break;
         case 4: func->_name = "on_cross_line"; break;
         case 5: func->_name = "on_leave_line"; break;
         default: func->_name = "script_" + std::to_string(script_index);
@@ -204,8 +204,12 @@ void FF7::FF7Disassembler::AddFunc(
     // Read each block of opcodes up to a return.
     const size_t old_num_instructions = _insts.size();
     std::unique_ptr<Function> func;
+
+    // Initialize the function.
     if (mEngine->EntityIsLine(entity_index)) func = StartLineFunction(script_index);
     else func = StartFunction(script_index);
+
+    // Read.
     if (to_return_only){
         // Read opcodes to the end or bail at the first return.
         is_line = ReadOpCodesToPositionOrReturn(
@@ -236,13 +240,15 @@ void FF7::FF7Disassembler::AddFunc(
     func->mNumInstructions = new_num_instructions - old_num_instructions;
     func->mEndAddr = _insts.back()->_address;
 
-
     if (!func_name.empty()) func->_name = func_name;
 
     // TODO: Remove and test. Should be applied in StartLineFunction
-    if (is_line){
+    // TODO: I dont know which one is OK. Check.
+    if (mEngine->EntityIsLine(entity_index)){
         switch (script_index){
-            case 2: func->_name = "on_enter_line"; break;
+            case 1:
+            case 2:
+                func->_name = "on_enter_line"; break;
             case 3: func->_name = "on_move_to_line"; break;
             case 4: func->_name = "on_cross_line"; break;
             case 5: func->_name = "on_leave_line"; break;

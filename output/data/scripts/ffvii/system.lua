@@ -124,7 +124,7 @@ FFVII.add_item = function( item, quantity )
 
     FFVII.ItemStorage[ item ] = old_quantity + quantity
 
-    if FFVII.ItemStorage[ item ] < 99 then
+    if FFVII.ItemStorage[ item ] > 99 then
         FFVII.ItemStorage[ item ] = 99
     end
 end

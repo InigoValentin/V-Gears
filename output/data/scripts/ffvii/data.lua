@@ -32,6 +32,11 @@ FFVII.Data = {
     m1_226 = false,
     m1_times_up = false,
     item_sector1_chest1 = false,
+
+    -- TODO: From here on, what are these for?
+    movieFrameNumber = 0,
+    temp_6_4 = 0,
+    expectedTriangleId = 0,
 }
 
 
@@ -59,3 +64,24 @@ FFVII.ItemStorage = {
 
 FFVII.Party = {
 }
+
+FFVII.Banks = {}
+for i = 1, 15 do
+    FFVII.Banks[i] = {}
+    for j = 1, 256 do
+        FFVII.Banks[i][j] = 0
+    end
+end
+
+FFVII.BitBanks = {}
+for i = 1, 16 do
+    FFVII.BitBanks[i] = {}
+    for j = 1, 256 do
+        FFVII.BitBanks[i][j] = {}
+        for k = 1, 8 do
+            FFVII.BitBanks[i][j][k] = 0
+        end
+    end
+end
+
+

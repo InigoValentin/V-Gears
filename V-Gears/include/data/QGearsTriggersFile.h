@@ -402,10 +402,7 @@ namespace QGears{
              * @return The movement rotation.
              */
             float MovementRotation() const{
-                return
-                  180.0f
-                  * (static_cast<float>(trigger_data_->control) - 128.0f)
-                  / 128.0f;
+                return 180.0f * (static_cast<float>(trigger_data_->control) - 128.0f) / 128.0f;
             }
 
             /**

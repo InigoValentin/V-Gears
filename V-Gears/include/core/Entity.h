@@ -1002,6 +1002,41 @@ class Entity{
          */
         int ScriptAnimationSync();
 
+        /**
+         * Assigns the entity as a character.
+         *
+         * Marks the entity as a character, and assigns a character name and
+         * ID.
+         *
+         * @param character_name[in] The character name.
+         */
+        void SetCharacter(const char* character_name);
+
+        /**
+         * Checks if the entity is a character.
+         *
+         * An entity is not a character until {@see SetCharacter} has been
+         * called.
+         *
+         * @return True if the entity is a character, false otherwise.
+         */
+        bool IsCharacter();
+
+        /**
+         * Retrieves the entity's character ID.
+         *
+         * @return The character ID, or 0 if the entity is not a character.
+         */
+        uint GetCharacterId();
+
+        /**
+         * Retrieves the entity's character name.
+         *
+         * @return The character name, or an empty string if the entity is not
+         * a character.
+         */
+        std::string GetCharacterName();
+
     protected:
 
         /**
@@ -1303,5 +1338,11 @@ class Entity{
          * @return Angular distance to the specified entity.
          */
         Ogre::Degree GetDirectionToEntity(Entity* entity) const;
+
+        bool is_character_;
+
+        uint character_id_;
+
+        std::string character_name_;
 };
 

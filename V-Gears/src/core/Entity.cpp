@@ -27,9 +27,9 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   scene_node_(node),
   height_(1.0f),
   solid_radius_(0.24f),
-  solid_(false),
+  solid_(true),
   talk_radius_(0.45f),
-  talkable_(false),
+  talkable_(true),
   state_(Entity::NONE),
   move_auto_speed_(0.7f),
   move_walk_speed_(0.7f),
@@ -64,7 +64,10 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   animation_speed_(1.0f),
   animation_default_("Idle"),
   animation_current_name_(""),
-  animation_auto_play_(true)
+  animation_auto_play_(true),
+  is_character_(false),
+  character_id_(0),
+  character_name_("")
 {
     model_root_node_ = scene_node_->createChildSceneNode();
     model_node_ = model_root_node_->createChildSceneNode();
@@ -730,6 +733,24 @@ int Entity::ScriptAnimationSync(){
     animation_sync_.push_back(script);
     return -1;
 }
+
+void Entity::SetCharacter(const char* character_name){
+    is_character_ = true;
+    character_name_ = character_name;
+    if (character_name_ == "Cloud") character_id_ = 0;
+    else if (character_name_ == "Barret") character_id_ = 1;
+    else if (character_name_ == "Tifa") character_id_ = 2;
+    else if (character_name_ == "Aeris") character_id_ = 3;
+    else if (character_name_ == "Red XIII") character_id_ = 4;
+    // TODO: Continue this list.
+    // TODO: Or better event, look IDs up somewhere.
+}
+
+bool Entity::IsCharacter(){return is_character_;}
+
+uint Entity::GetCharacterId(){return character_id_;}
+
+std::string Entity::GetCharacterName(){return character_name_;}
 
 Ogre::Degree Entity::GetDirectionToEntity(Entity* entity) const{
     Ogre::Vector3 current_point = GetPosition();

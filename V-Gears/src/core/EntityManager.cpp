@@ -246,6 +246,12 @@ void EntityManager::Update(){
             );
             player_entity_->SetState(Entity::WALKMESH);
         }
+
+        // HACK: If manually moving, make playable entity solid.
+        // Some scripts 'forget' to make the playable entity solid at the end
+        // of them, and if it remains non-solid, it can't interact with lines
+        // (i.e. it cant' use gateways).
+        player_entity_->SetSolid(true);
     }
 
     for (unsigned int i = 0; i < entity_.size(); ++ i){
@@ -494,6 +500,14 @@ Entity* EntityManager::GetEntity(const Ogre::String& name) const{
     return nullptr;
 }
 
+Entity* EntityManager::GetEntityFromCharacterId(const char* id) const{
+    for (unsigned int i = 0; i < entity_.size(); ++ i){
+        if (entity_[i]->IsCharacter() && entity_[i]->GetCharacterId() == atoi(id))
+            return entity_[i];
+    }
+    return nullptr;
+}
+
 Entity* EntityManager::ScriptGetEntity(const char* name) const{
     return GetEntity(Ogre::String(name));
 }
@@ -511,6 +525,8 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
         if (entity_[i]->GetName() == name) player_entity_ = entity_[i];
     }
 }
+
+Entity* EntityManager::ScriptGetPlayerEntity() const{return player_entity_;}
 
 void EntityManager::ScriptUnsetPlayerEntity(){player_entity_ = nullptr;}
 
@@ -544,6 +560,22 @@ void EntityManager::StartBattle(unsigned int formation){
     std::cout << "[BATTLE] Start battle ID " << formation << "\n";
 }
 
+bool EntityManager::IsKeyOn(unsigned int key_code){
+    // TODO: Translate keycodes to game key codes.
+    // For example 32 is standard for "Enter", but in game is "Circle/Action".
+    return InputManager::getSingleton().IsButtonPressed(key_code);
+}
+
+bool EntityManager::IsKeyOff(unsigned int key_code){return !IsKeyOn(key_code);}
+
+void EntityManager::SetEntityToCharacter(const char* entity_name, const char* character_name){
+    for (unsigned int i = 0; i < entity_.size(); ++ i){
+        if (entity_[i]->GetName() == entity_name){
+            entity_[i]->SetCharacter(character_name);
+        }
+    }
+}
+
 bool EntityManager::SetEntityOnWalkmesh(Entity* entity){
     Ogre::Vector3 position3 = entity->GetPosition();
     Ogre::Vector2 position2;
@@ -551,7 +583,7 @@ bool EntityManager::SetEntityOnWalkmesh(Entity* entity){
     position2.y = position3.y;
     std::vector<std::pair<int, float>> triangles;
 
-    // Search for posible triangles
+    // Search for possible triangles.
     for (int i = 0; i < walkmesh_.GetNumberOfTriangles(); ++ i){
         Ogre::Vector3 A3 = walkmesh_.GetA(i);
         Ogre::Vector3 B3 = walkmesh_.GetB(i);

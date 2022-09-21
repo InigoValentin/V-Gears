@@ -770,20 +770,21 @@ static void FF7PcFieldToQGearsField(
         // Get lines. Add them to a list, so they aren't processed later as regular entities.
         std::vector<std::string> line_entities;
         for (SUDM::FF7::Field::Line line : decompiled.lines){
+
             std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));
             line_entities.push_back(line.name);
             xml_entity_trigger->SetAttribute("name", line.name);
             xml_entity_trigger->SetAttribute(
               "point1",
-              std::to_string(line.ax * FF7DataInstaller::LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.ay * FF7DataInstaller::LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.az * FF7DataInstaller::LINE_SCALE_FACTOR)
+              std::to_string(line.point_a[0] * FF7DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.point_a[1] * FF7DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.point_a[2] * FF7DataInstaller::LINE_SCALE_FACTOR)
             );
             xml_entity_trigger->SetAttribute(
               "point2",
-              std::to_string(line.bx * FF7DataInstaller::LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.by * FF7DataInstaller::LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.bz * FF7DataInstaller::LINE_SCALE_FACTOR)
+              std::to_string(line.point_b[0] * FF7DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.point_b[1] * FF7DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.point_b[2] * FF7DataInstaller::LINE_SCALE_FACTOR)
             );
             xml_entity_trigger->SetAttribute("enabled", "true");
             element->LinkEndChild(xml_entity_trigger.release());

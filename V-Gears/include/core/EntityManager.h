@@ -186,6 +186,15 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         Entity* GetEntity(const Ogre::String& name) const;
 
         /**
+         * Retrieves an entity by it's assigned character ID.
+         *
+         * @param id[in] Character ID of the entity to retrieve.
+         * @return The entity assigned to the character, or nullptr if there
+         * is no one.
+         */
+        Entity* GetEntityFromCharacterId(const char* id) const;
+
+        /**
          * Retrieves an entity by name.
          *
          * @param name[in] Name of the entity to retrieve.
@@ -213,6 +222,13 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * @param name[in] Name of the entity to make playable.
          */
         void ScriptSetPlayerEntity(const char* name);
+
+        /**
+         * Retrieves the playable entity.
+         *
+         * @return The playable entity.
+         */
+        Entity* ScriptGetPlayerEntity() const;
 
         /**
          * Unsets any playable entities.
@@ -280,6 +296,31 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * @todo Implement
          */
         void StartBattle(unsigned int formation);
+
+        /**
+         * Checks if a key is being pressed.
+         *
+         * @param key_code[in] The code of the key to test.
+         * @return True if the key is being pressed, false otherwise.
+         */
+        bool IsKeyOn(unsigned int key_code);
+
+        /**
+         * Checks if a key is not being pressed.
+         *
+         * @param key_code[in] The code of the key to test.
+         * @return False if the key is being pressed, true otherwise.
+         */
+        bool IsKeyOn(unsigned int key_code);
+
+        /**
+         * Assigns a character to an entity.
+         *
+         * @param entity_name[in] The entity name.
+         * @param character name[in] The character name. Usually the same as
+         * the entity.
+         */
+        void SetEntityToCharacter(const char* entity_name, const char* character_name);
 
     private:
 
@@ -421,12 +462,16 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         Entity* player_entity_;
 
         /**
-         * @todo Understand and document.
+         * The playable entity current movement indicator.
+         *
+         * Applies only for manual movement.
          */
         Ogre::Vector3 player_move_;
 
         /**
-         * @todo Understand and document.
+         * The playable entity current movement turn indicator.
+         *
+         * Applies only for manual movement.
          */
         Ogre::Radian player_move_rotation_;
 
@@ -436,7 +481,9 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         bool player_lock_;
 
         /**
-         * @todo Understand and document.
+         * Indicates if the playable is being moved by running.
+         *
+         * Applies only for manual movement.
          */
         bool player_run_;
 

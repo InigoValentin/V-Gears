@@ -54,6 +54,7 @@ namespace SUDM
             struct Line{
                 std::string name;
                 std::vector<float> point_a;
+                std::vector<float> point_b;
                 float ax, ay, az;
                 float bx, by, bz;
             };

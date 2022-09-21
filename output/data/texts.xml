@@ -1,5 +1,5 @@
 <texts>
-    <language name="English">
+    <language name="english">
         <text file="texts/english/names.xml" />
         <text file="texts/english/menu.xml" />
         <text file="texts/english/dialogs_receiving.xml" />

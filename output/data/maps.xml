@@ -1,22 +1,16 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
 <maps>
-  
-    <map name="ffvii_startmap" file_name="maps/ffvii/field/startmap.xml" />
-    <map name="ffvii_md1stin" file_name="maps/ffvii/field/md1stin.xml" />
-    <map name="ffvii_md1_1" file_name="maps/ffvii/field/md1_1.xml" />
-    <map name="ffvii_md1_2" file_name="maps/ffvii/field/md1_2.xml" />
-    <map name="ffvii_nrthmk" file_name="maps/ffvii/field/nrthmk.xml" />
-    <map name="ffvii_nmkin_1" file_name="maps/ffvii/field/nmkin_1.xml" />
-    <map name="ffvii_elevtr1" file_name="maps/ffvii/field/elevtr1.xml" />
-    <map name="ffvii_nmkin_2" file_name="maps/ffvii/field/nmkin_2.xml" />
-    <map name="ffvii_nmkin_3" file_name="maps/ffvii/field/nmkin_3.xml" />
-    <map name="ffvii_tin_2" file_name="maps/ffvii/field/tin_2.xml" />
-
-    <map name="ffvii_battle_300" file_name="maps/ffvii/battle/300.xml" />
-    <map name="ffvii_battle_bridge_scene" file_name="maps/ffvii/battle/bridge.xml" />
-
-    <map name="debug" file_name="maps/test/debug.xml" />
-    <map name="test_1" file_name="maps/test/test_1.xml" />
-    <map name="test_2" file_name="maps/test/test_2.xml" />
-    <map name="test_3" file_name="maps/test/test_3.xml" />
+    <map name="ffvii_elevtr1" file_name="maps/ffvii/field/elevtr1/map.xml" />
+    <map name="ffvii_md1_1" file_name="maps/ffvii/field/md1_1/map.xml" />
+    <map name="ffvii_md1_2" file_name="maps/ffvii/field/md1_2/map.xml" />
+    <map name="ffvii_md1stin" file_name="maps/ffvii/field/md1stin/map.xml" />
+    <map name="ffvii_md8_1" file_name="maps/ffvii/field/md8_1/map.xml" />
+    <map name="ffvii_md8_4" file_name="maps/ffvii/field/md8_4/map.xml" />
+    <map name="ffvii_nmkin_1" file_name="maps/ffvii/field/nmkin_1/map.xml" />
+    <map name="ffvii_nmkin_2" file_name="maps/ffvii/field/nmkin_2/map.xml" />
+    <map name="ffvii_nmkin_3" file_name="maps/ffvii/field/nmkin_3/map.xml" />
+    <map name="ffvii_nrthmk" file_name="maps/ffvii/field/nrthmk/map.xml" />
+    <map name="ffvii_rootmap" file_name="maps/ffvii/field/rootmap/map.xml" />
+    <map name="ffvii_startmap" file_name="maps/ffvii/field/startmap/map.xml" />
+    <map name="ffvii_tin_1" file_name="maps/ffvii/field/tin_1/map.xml" />
+    <map name="ffvii_tin_2" file_name="maps/ffvii/field/tin_2/map.xml" />
 </maps>

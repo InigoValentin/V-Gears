@@ -229,7 +229,6 @@ font FFVIIFont
     glyph u255 0.953125 0.9375 0.984375 1
 }
 
-
 font CourierNew
 {
     type image

@@ -181,48 +181,63 @@ namespace FF7
         const std::string FormatInvertedBool(uint32 value);
  
         template<typename TValue>
-        const std::string FormatValueOrVariable(SUDM::IScriptFormatter& formatter, uint32 bank, TValue valueOrAddress, ValueType valueType = ValueType::Integer, float scale = 1.0f)
-        {
-            switch (bank)
-            {
-            case 0:
-                switch (valueType)
-                {
-                case ValueType::Float:
-                    // TODO: check for zero
-                    return std::to_string(valueOrAddress / scale);
-                case ValueType::Integer:
+
+        /**
+         * Formats a data access for a map script.
+         *
+         * If possible, it will look for friendly names for variables.
+         *
+         * @param formatter[in] Formatter to look up variable friendly names.
+         * @param bank[in] The memory bank to use.
+         * @param value_or_address[in] The value or memory address to use.
+         * When bank is 0, it will be considered as a value. When bank is non
+         * 0, it will be considered an address of the bank.
+         * @param value_type[in] Data type to use. Used only when getting
+         * a value, not a bank address.
+         * @param scale[in] Scale to scale values to. Used only when using
+         * float values, unused when type is integer or when using a bank
+         * address.
+         * @return String with the friendly variable name, value, or bank
+         * address.
+         */
+        const std::string FormatValueOrVariable(
+          SUDM::IScriptFormatter& formatter, uint32 bank, TValue valueOrAddress,
+          ValueType valueType = ValueType::Integer, float scale = 1.0f
+        ){
+            switch (bank){
+                case 0:
+                    switch (valueType){
+                        // TODO: check for zero
+                        case ValueType::Float: return std::to_string(valueOrAddress / scale);
+                        case ValueType::Integer: return std::to_string(valueOrAddress);
+                        default: return std::to_string(valueOrAddress);
+                    }
+                case 1:
+                case 2:
+                case 3:
+                case 13:
+                case 15:
+                    {
+                        const auto address = static_cast<uint32>(valueOrAddress) & 0xFF;
+                        const auto friendly_name = formatter.VarName(bank, valueOrAddress);
+                        if (friendly_name.empty())
+                            return (boost::format("FFVII.Banks[%1%][%2%]") % bank % address).str();
+                        return (boost::format("FFVII.Data.%1%") % friendly_name).str();
+                    }
+                case 5:
+                case 6:
+                    {
+                        const auto address = static_cast<uint32>(valueOrAddress)& 0xFF;
+                        const  auto friendly_name = formatter.VarName(bank, address);
+                        if (friendly_name.empty())
+                            return (boost::format("FFVII.Banks[%1%][%2%]") % bank % address).str();
+                        return "FFVII.Data." + friendly_name;
+                    }
                 default:
-                    return std::to_string(valueOrAddress);
-                }
-            case 1:
-            case 2:
-            case 3:
-            case 13:
-            case 15:
-            {
-                const auto address = static_cast<uint32>(valueOrAddress) & 0xFF;
-                const auto friendlyName = formatter.VarName(bank, valueOrAddress);
-                if (friendlyName.empty())
-                {
-                    return (boost::format("FFVII.Data.var_%1%_%2%") % bank % address).str();
-                }
-                return (boost::format("FFVII.Data.%1%") % friendlyName).str();
-            }
-            case 5:
-            case 6:
-            {
-                const auto address = static_cast<uint32>(valueOrAddress)& 0xFF;
-                const  auto friendlyName = formatter.VarName(bank, address);
-                if (friendlyName.empty())
-                {
-                    return (boost::format("FFVII.Data.temp_%1%_%2%") % bank % address).str();
-                }
-                return "FFVII.Data." + friendlyName;
-            }
-            default:
-                //throw UnknownBankException();
-                return (boost::format("FFVII.Data.unknown_%1%_%2%") % bank % (static_cast<uint32>(valueOrAddress) & 0xFF)).str();
+                    //throw UnknownBankException();
+                    return (boost::format(
+                      "FFVII.Banks[%1%][%2%]") % bank % (static_cast<uint32>(valueOrAddress) & 0xFF)
+                    ).str();
             }
         }
     }
