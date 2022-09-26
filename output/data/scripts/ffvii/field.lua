@@ -72,7 +72,7 @@ end
  @param br Direction the third character faces after the split, or address for the value if br_addr is non-zero.
  @param speed Speed at which the characters split.
 ]]
-split_party = function(ax_addr, ay_addr, ar_addr, bx_addr, by_addr, br_addr, ax, ay, ar, bx, by, br, speed)
+split_party = function(ax, ay, ar, bx, by, br, speed)
     local player = entity_manager:get_player_entity()
     local x, y, z = player:get_position()
     for c = 2, 3 do
@@ -153,6 +153,35 @@ end
 ]]
 KeyOn = function(key_code)
     return true;
+end
+
+--[[
+ Stores the coordinates and walkmesh triangle in memory.
+ Stores the values as in the original game, without scaling.
+ @param bx Bank at which to store the X coordinate.
+ @param by Bank at which to store the Y coordinate.
+ @param bz Bank at which to store the Z coordinate.
+ @param bt Bank at which to store the triangle.
+ @param id The entity ID.
+ @param ax Address at which to store the X coordinate.
+ @param ay Address at which to store the Y coordinate.
+ @param az Address at which to store the Z coordinate.
+ @param at Address at which to store the triangle.
+ @param scale Map scale to multiply values
+]]
+axyzi = function(bx, by, bz, bt, id, ax, ay, az, at, scale)
+    local entity = entity_manager:get_entity_from_index(id)
+    if entity == nil then
+        do return end
+    end
+    script:wait(0.666667)
+    local x, y, z = entity:get_position()
+    local t = entity:get_move_triangle_id()
+    FFVII.Banks[bx + 1][ax + 1] = math.floor(x * scale)
+    FFVII.Banks[by + 1][ay + 1] = math.floor(y * scale)
+    FFVII.Banks[bz + 1][az + 1] = math.floor(z * scale)
+    FFVII.Banks[bt + 1][at + 1] = t
+    return 0
 end
 
 System[ "MapChanger" ] = {

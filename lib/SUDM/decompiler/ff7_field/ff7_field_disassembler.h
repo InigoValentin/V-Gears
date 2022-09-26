@@ -366,21 +366,11 @@ namespace FF7
         );
 
         /**
-         * Initializes a function for a non-line entity.
+         * Initializes a function for an entity.
          *
          * @param script_index[in] Index of the script.
          */
         std::unique_ptr<Function> StartFunction(size_t scriptIndex);
-
-        /**
-         * Initializes a function for a line entity.
-         *
-         * The name is set according to the script index, using line standard
-         * names.
-         *
-         * @param script_index[in] Index of the script.
-         */
-        std::unique_ptr<Function> StartLineFunction(size_t script_index);
 
         FF7FieldEngine* mEngine;
 

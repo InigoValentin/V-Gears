@@ -235,6 +235,7 @@
 		<animation name="acfe" target="Idle"></animation>
 		<animation name="aaff" target="Walk"></animation>
 		<animation name="aaga" target="Run"></animation>
+		<animation name="bygc" target="Climb"></animation>
 		<animation name="bvjf" target="JumpFromTrain"></animation>
 		<animation name="bxbb" target="JumpFromTrain"></animation>
 		<animation name="bxbc" target="Throw"></animation>

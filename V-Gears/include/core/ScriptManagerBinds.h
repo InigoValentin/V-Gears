@@ -110,7 +110,8 @@ void ScriptManager::InitBinds(){
           .def(
             "linear_to_position",
             (void(Entity::*)(
-              const float, const float, const float, const LinearMovement, const char*
+              const float, const float, const float, const LinearMovement,
+              const char*, const float, const int
             )) &Entity::ScriptLinearToPosition
           )
           .def(
@@ -118,7 +119,7 @@ void ScriptManager::InitBinds(){
           )
           .def(
             "jump_to_position",
-            (void(Entity::*)(const float, const float, const float, const float))
+            (void(Entity::*)(const float, const float, const float, const float, const int))
               &Entity::ScriptJumpToPosition
           )
           .def("jump_sync", (int(Entity::*)()) &Entity::ScriptJumpSync, luabind::yield)
@@ -200,7 +201,8 @@ void ScriptManager::InitBinds(){
           .def(
              "add_entity",
              (void(EntityManager::*)(
-               const char*, const char*, const float, const float, const float, const float
+               const char*, const char*, const float,const float,
+               const float, const float, const int
              )) &EntityManager::ScriptAddEntity
           )
           .def(
@@ -210,6 +212,10 @@ void ScriptManager::InitBinds(){
           .def(
              "get_entity", (Entity*(EntityManager::*)(const char*)) &EntityManager::ScriptGetEntity
           )
+          .def(
+             "get_entity_from_index",
+             (Entity*(EntityManager::*)(const int)) &EntityManager::GetEntityFromIndex
+           )
           .def(
              "get_entity_from_character_id",
              (Entity*(EntityManager::*)(const char*)) &EntityManager::GetEntityFromCharacterId
@@ -223,9 +229,9 @@ void ScriptManager::InitBinds(){
              (void(EntityManager::*)(const char*)) &EntityManager::ScriptSetPlayerEntity
           )
           .def(
-               "get_player_entity",
-               (Entity*(EntityManager::*)()) &EntityManager::ScriptGetPlayerEntity
-            )
+             "get_player_entity",
+             (Entity*(EntityManager::*)()) &EntityManager::ScriptGetPlayerEntity
+          )
           .def(
             "unset_player_entity",
             (void(EntityManager::*)()) &EntityManager::ScriptUnsetPlayerEntity

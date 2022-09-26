@@ -107,21 +107,6 @@ std::unique_ptr<Function> FF7::FF7Disassembler::StartFunction(size_t scriptIndex
     return func;
 }
 
-std::unique_ptr<Function> FF7::FF7Disassembler::StartLineFunction(size_t script_index){
-    auto func = std::make_unique<Function>();
-    func->_retVal = false;
-    func->_args = 0;
-    switch (script_index){
-        case 0: func->_name = "on_enter_line"; break;
-        case 1: func->_name = "on_move_to_line"; break;
-        case 4: func->_name = "on_cross_line"; break;
-        case 5: func->_name = "on_leave_line"; break;
-        default: func->_name = "script_" + std::to_string(script_index);
-    }
-    func->mStartAddr = _address;
-    return func;
-}
-
 struct ScriptInfo
 {
     uint16 mEntryPoint;
@@ -203,11 +188,9 @@ void FF7::FF7Disassembler::AddFunc(
 
     // Read each block of opcodes up to a return.
     const size_t old_num_instructions = _insts.size();
-    std::unique_ptr<Function> func;
 
     // Initialize the function.
-    if (mEngine->EntityIsLine(entity_index)) func = StartLineFunction(script_index);
-    else func = StartFunction(script_index);
+    std::unique_ptr<Function> func = StartFunction(script_index);
 
     // Read.
     if (to_return_only){
@@ -242,16 +225,22 @@ void FF7::FF7Disassembler::AddFunc(
 
     if (!func_name.empty()) func->_name = func_name;
 
-    // TODO: Remove and test. Should be applied in StartLineFunction
-    // TODO: I dont know which one is OK. Check.
     if (mEngine->EntityIsLine(entity_index)){
         switch (script_index){
-            case 1:
-            case 2:
-                func->_name = "on_enter_line"; break;
+            // main   - on_update
+            case 0: break;
+            // [OK]   - on_interact
+            case 1: break;
+            // Move - on_enter_line
+            case 2: func->_name = "on_enter_line"; break;
+            // Move - on_move_to_line
             case 3: func->_name = "on_move_to_line"; break;
+            // Go - on_cross_line
             case 4: func->_name = "on_cross_line"; break;
-            case 5: func->_name = "on_leave_line"; break;
+            // Go1x - on_cross_line
+            case 5: func->_name = "on_cross_line_once"; break;
+            // GoAway - on_leave_line
+            case 6: func->_name = "on_leave_line"; break;
         }
     }
 

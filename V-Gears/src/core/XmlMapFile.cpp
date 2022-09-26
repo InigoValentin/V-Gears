@@ -98,8 +98,9 @@ void XmlMapFile::LoadMap(){
             Ogre::Quaternion orientation(
               GetQuaternion(node, "root_orientation")
             );
+            int index(GetInt(node, "index"));
             EntityManager::getSingleton().AddEntity(
-              name, file_name, position, direction, scale, orientation
+              name, file_name, position, direction, scale, orientation, index
             );
         }
         else if (

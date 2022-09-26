@@ -154,19 +154,25 @@ class Entity{
             NONE,
 
             /**
-             * The entity is in the walkmesh.
+             * The entity is attached to the walkmesh.
              */
             WALKMESH,
 
             /**
-             * @todo Understand and document.
+             * The entity is in the middle of a linear movement.
              */
             LINEAR,
 
             /**
-             * @todo Understand and document.
+             * The entity is in the middle of a jump.
              */
-            JUMP
+            JUMP,
+
+            /**
+             * The entity has completed an action and needs to be reattached
+             * to the walkmesh before continuing execution.
+             */
+            NEEDS_TO_REATTACH
         };
 
         /**
@@ -282,6 +288,20 @@ class Entity{
          * @param scale[in] Three dimensional scale.
          */
         virtual void setScale(const Ogre::Vector3 &scale);
+
+        /**
+         * Sets the entity index in the field.
+         *
+         * @param index[in] Index of the entity.
+         */
+        void SetIndex(const int index);
+
+        /**
+         * Retrieves the entity index in the field.
+         *
+         * @return Index of the entity.
+         */
+        int GetIndex();
 
         /**
          * Sets the entity's absolute orientation.
@@ -554,7 +574,7 @@ class Entity{
         const Ogre::String& GetMoveAnimationRunName() const;
 
         /**
-         * Makes the unit move to a point in the map.
+         * Makes the entity move to a point in the map.
          *
          * @param x[in] X coordinate of the destination point.
          * @param y[in] Y coordinate of the destination point.
@@ -569,12 +589,18 @@ class Entity{
         void ScriptMoveToEntity(Entity* entity);
 
         /**
-         * Adds the entity's movement to the sync queue.
+         * Waits for entity's movement to end.
          *
          * @return Always -1.
-         * @todo Properly describe this.
          */
         int ScriptMoveSync();
+
+        /**
+         * Waits for the jump to finish.
+         *
+         * @return Always -1.
+         */
+        int ScriptJumpSync();
 
         /**
          * Cancels the entity's current movement.
@@ -591,10 +617,13 @@ class Entity{
          * @param z[in] Z coordinate of the destination point.
          * @param movement[in] Movement direction.
          * @param animation[in] Movement animation.
+         * @param orientation[in] Orientation during the animation.
+         * @param dest_triangle[in] Triangle to place the entity after the
+         * linear movement.
          */
         void ScriptLinearToPosition(
-          const float x, const float y, const float z,
-          const LinearMovement movement, const char* animation
+          const float x, const float y, const float z, const LinearMovement movement,
+          const char* animation, const float orientation, const int dest_triangle
         );
 
         /**
@@ -611,10 +640,13 @@ class Entity{
          * @param end[in] Destination point.
          * @param movement[in] Movement direction.
          * @param animation[in] Movement animation.
+         * @param orientation[in] Orientation during the animation.
+         * @param dest_triangle[in] Triangle to place the entity after the
+         * linear movement.
          */
         void SetLinear(
           const Ogre::Vector3& end, const LinearMovement movement,
-          const Ogre::String& animation
+          const Ogre::String& animation, const float orientation, const int dest_triangle
         );
 
         /**
@@ -646,32 +678,33 @@ class Entity{
         const Ogre::Vector3& GetLinearEnd() const;
 
         /**
+         * Retrieves the ending triangle of the current linear movement.
+         *
+         * @return Ending triangle.
+         */
+        const int GetLinearDestTriangle() const;
+
+        /**
          * Makes the unit jump to a point in the field.
          *
          * @param x[in] X coordinate of the jump destination point.
          * @param y[in] Y coordinate of the jump destination point.
-         * @param z[in] Z coordinate of the jump destination point.
+         * @param z[in] Maximum height of the jump.
          * @param seconds[in] Jump duration.
+         * @param dest_triangle Triangle to place the entity after the jump.
          */
         void ScriptJumpToPosition(
-          const float x, const float y, const float z,const float seconds
+          const float x, const float y, const float z, const float seconds, const int dest_triangle
         );
-
-        /**
-         * Adds the entity's jump to the sync queue.
-         *
-         * @return Always -1.
-         * @todo Properly describe this.
-         */
-        int ScriptJumpSync();
 
         /**
          * Makes the unit jump to a point in the field.
          *
          * @param jump_to[in] The jump destination point.
          * @param seconds[in] Jump duration.
+         * @param dest_triangle Triangle to place the entity after the jump.
          */
-        void SetJump(const Ogre::Vector3& jump_to, const float seconds);
+        void SetJump(const Ogre::Vector3& jump_to, const float seconds, const int dest_triangle);
 
         /**
          * Cancels the entity's current jump.
@@ -714,6 +747,13 @@ class Entity{
          * @param Jump current duration, in seconds.
          */
         float GetJumpCurrentSeconds() const;
+
+        /**
+         * Retrieves the ending triangle of the current jump.
+         *
+         * @return Ending triangle.
+         */
+        const int GetJumpDestTriangle() const;
 
         /**
          * @todo Understand and document.
@@ -827,7 +867,10 @@ class Entity{
          * @param seconds[in] Total turn duration, in seconds.
          * @todo What if the point
          */
-        void SetTurn(const Ogre::Degree& direction_to, Entity* entity, const TurnDirection turn_direction, const ActionType turn_type, const float seconds);
+        void SetTurn(
+          const Ogre::Degree& direction_to, Entity* entity, const TurnDirection turn_direction,
+          const ActionType turn_type, const float seconds
+        );
 
         /**
          * Cancels the entity's current jump.
@@ -1037,6 +1080,13 @@ class Entity{
          */
         std::string GetCharacterName();
 
+        /**
+         * Checks if the entity is a line.
+         *
+         * @return True if the entity is a line, false otherwise.
+         */
+        bool IsLine();
+
     protected:
 
         /**
@@ -1195,6 +1245,11 @@ class Entity{
         Ogre::Vector3 linear_end_;
 
         /**
+         * Triangle to set the entity on after a linear movement.
+         */
+        int linear_dest_triangle_;
+
+        /**
          * The jump starting point.
          */
         Ogre::Vector3 jump_start_;
@@ -1213,6 +1268,16 @@ class Entity{
          * Current jump duration.
          */
         float jump_current_seconds_;
+
+        /**
+         * Used to store solidity status before a jump.
+         */
+        bool jump_was_solid_;
+
+        /**
+         * Triangle to set the entity on after a jump.
+         */
+        int jump_dest_triangle_;
 
         /**
          * @todo Understand and document.
@@ -1344,5 +1409,16 @@ class Entity{
         uint character_id_;
 
         std::string character_name_;
+
+        /**
+         * Index of the entity on the field.
+         */
+        int index_;
+
+        /**
+         * Indicates if the entity is a line.
+         */
+        bool is_line_;
+
 };
 

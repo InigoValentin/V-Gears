@@ -26,37 +26,29 @@
 #include "core/Logger.h"
 #include "core/Timer.h"
 
-ConfigVar cv_debug_background2d(
-  "debug_background2d", "Draw background debug info", "false"
-);
-ConfigVar cv_show_background2d(
-  "show_background2d", "Draw background", "true"
-);
-ConfigVar cv_background2d_manual(
-  "background2d_manual", "Manual scrolling for 2d background", "false"
-);
+ConfigVar cv_debug_background2d("debug_background2d", "Draw background debug info", "false");
+ConfigVar cv_show_background2d("show_background2d", "Draw background", "true");
+ConfigVar cv_background2d_manual("background2d_manual", "Manual 2d background scrolling", "false");
 
 Background2D::Background2D():
-    alpha_max_vertex_count_(0),
-    add_max_vertex_count_(0),
-    subtract_max_vertex_count_(0),
-    scroll_entity_(nullptr),
-    scroll_position_start_(Ogre::Vector2::ZERO),
-    scroll_position_end_(Ogre::Vector2::ZERO),
-    scroll_type_(Background2D::NONE),
-    scroll_seconds_(0),
-    scroll_current_seconds_(0),
-    position_(Ogre::Vector2::ZERO),
-    position_real_(Ogre::Vector2::ZERO),
-    range_(Ogre::AxisAlignedBox::BOX_INFINITE),
-    virtual_screen_size_(320, 240) // FFVII original resolution
+  alpha_max_vertex_count_(0),
+  add_max_vertex_count_(0),
+  subtract_max_vertex_count_(0),
+  scroll_entity_(nullptr),
+  scroll_position_start_(Ogre::Vector2::ZERO),
+  scroll_position_end_(Ogre::Vector2::ZERO),
+  scroll_type_(Background2D::NONE),
+  scroll_seconds_(0),
+  scroll_current_seconds_(0),
+  position_(Ogre::Vector2::ZERO),
+  position_real_(Ogre::Vector2::ZERO),
+  range_(Ogre::AxisAlignedBox::BOX_INFINITE),
+  virtual_screen_size_(320, 240) // FFVII original resolution
 {
     scene_manager_ = Ogre::Root::getSingleton().getSceneManager("Scene");
     render_system_ = Ogre::Root::getSingletonPtr()->getRenderSystem();
     CreateVertexBuffers();
-    alpha_material_ = Ogre::MaterialManager::getSingleton().create(
-      "Background2DAlpha", "General"
-    );
+    alpha_material_ = Ogre::MaterialManager::getSingleton().create("Background2DAlpha", "General");
     Ogre::Pass* pass = alpha_material_->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
     pass->setCullingMode(Ogre::CULL_NONE);
@@ -70,10 +62,7 @@ Background2D::Background2D():
     tex->setTextureName("system/blank.png");
     tex->setNumMipmaps(-1);
     tex->setTextureFiltering(Ogre::TFO_NONE);
-
-    add_material = Ogre::MaterialManager::getSingleton().create(
-      "Background2DAdd", "General"
-    );
+    add_material = Ogre::MaterialManager::getSingleton().create("Background2DAdd", "General");
     pass = add_material->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
     pass->setCullingMode(Ogre::CULL_NONE);
@@ -87,7 +76,6 @@ Background2D::Background2D():
     tex->setTextureName("system/blank.png");
     tex->setNumMipmaps(-1);
     tex->setTextureFiltering(Ogre::TFO_NONE);
-
     subtract_material_ = Ogre::MaterialManager::getSingleton().create(
       "Background2DSubtract", "General"
     );
@@ -108,20 +96,14 @@ Background2D::Background2D():
     scene_manager_->addRenderQueueListener(this);
 }
 
-
 Background2D::~Background2D(){
     scene_manager_->removeRenderQueueListener(this);
-    for (unsigned int i = 0; i < animations_.size(); ++ i)
-        delete animations_[i];
+    for (unsigned int i = 0; i < animations_.size(); ++ i) delete animations_[i];
     DestroyVertexBuffers();
 }
 
-
 void Background2D::InputDebug(const QGears::Event& event){
-    if (
-      cv_background2d_manual.GetB() == true
-      && event.type == QGears::ET_KEY_IMPULSE
-    ){
+    if (cv_background2d_manual.GetB() == true && event.type == QGears::ET_KEY_IMPULSE){
         if (event.param1 == OIS::KC_W)
             position_real_.y += 2;
         else if (event.param1 == OIS::KC_A)
@@ -137,46 +119,35 @@ void Background2D::InputDebug(const QGears::Event& event){
 void Background2D::Update(){
     for (unsigned int i = 0; i < animation_played_.size(); ++ i){
         for (unsigned int j = 0; j < animations_.size(); ++ j){
-            if( animations_[j]->GetName() == animation_played_[i].name){
+            if (animations_[j]->GetName() == animation_played_[i].name){
                 float delta_time = Timer::getSingleton().GetGameTimeDelta();
                 float time = animations_[j]->GetTime();
                 float end_time = animations_[j]->GetLength();
 
                 // If animation ended
                 if (time + delta_time >= end_time){
-                    // set to last frame of animation
+                    // Set to last frame of animation.
                     if (time != end_time) animations_[j]->SetTime(end_time);
 
-                    if (
-                      animation_played_[i].state == Background2DAnimation::ONCE
-                    ){
-                        for (
-                          unsigned int k = 0;
-                          k < animation_played_[i].sync.size();
-                          ++k
-                        ){
-                            ScriptManager::getSingleton()
-                              .ContinueScriptExecution(
-                                 animation_played_[i].sync[k]
-                               );
+                    if (animation_played_[i].state == Background2DAnimation::ONCE){
+                        for (unsigned int k = 0; k < animation_played_[i].sync.size(); ++k){
+                            ScriptManager::getSingleton().ContinueScriptExecution(
+                              animation_played_[i].sync[k]
+                            );
                         }
                         animation_played_[i].sync.clear();
                         // Mark to delete this way:
                         animation_played_[i].name = "";
                     }
-                    else { // LOOPED
-                        // In case of looped we need to sync with end
-                        animations_[j]->SetTime(time + delta_time - end_time);
-                    }
+                    // In case of looped, sync with end:
+                    else animations_[j]->SetTime(time + delta_time - end_time);
                 }
-                else{
-                    animations_[j]->AddTime(delta_time);
-                }
+                else animations_[j]->AddTime(delta_time);
             }
         }
     }
 
-    // remove stopped animations
+    // Remove stopped animations.
     std::vector<AnimationPlayed>::iterator i = animation_played_.begin();
     for(; i != animation_played_.end();){
         if ((*i).name == "") i = animation_played_.erase(i);
@@ -187,9 +158,8 @@ void Background2D::Update(){
 void Background2D::UpdateDebug(){
     // TODO: is this necessary? does it cost to apply camera 2d Scroll?
     // if so maybe move this check to applyScroll
-    if(position_real_ != GetScreenScroll()) applyScroll();
-
-    if(cv_debug_background2d.GetB() == true){
+    if (position_real_ != GetScreenScroll()) applyScroll();
+    if (cv_debug_background2d.GetB() == true){
         DEBUG_DRAW.SetTextAlignment(DEBUG_DRAW.LEFT);
         DEBUG_DRAW.SetScreenSpace(true);
         DEBUG_DRAW.SetColour(Ogre::ColourValue(0.0f, 0.8f, 0.8f, 1.0f));
@@ -204,10 +174,8 @@ void Background2D::UpdateDebug(){
 
 void Background2D::calculateScreenScale(){
     Ogre::Viewport *viewport(CameraManager::getSingleton().getViewport());
-    Ogre::Real scale_width =
-      static_cast<Ogre::Real>(viewport->getActualWidth());
-    Ogre::Real scale_height =
-      static_cast<Ogre::Real>(viewport->getActualHeight());
+    Ogre::Real scale_width = static_cast<Ogre::Real>(viewport->getActualWidth());
+    Ogre::Real scale_height = static_cast<Ogre::Real>(viewport->getActualHeight());
     scale_width /= virtual_screen_size_.x;
     scale_height /= virtual_screen_size_.y;
     screen_scale_ = scale_height;
@@ -217,22 +185,17 @@ void Background2D::calculateScreenScale(){
 
 void Background2D::OnResize(){
     calculateScreenScale();
-    for(unsigned int i = 0; i < tiles_.size(); ++ i){
-        Tile &tile(tiles_[ i ]);
-        Ogre::Vector2 top_left(
-          static_cast<Ogre::Real>(tile.x), static_cast<Ogre::Real>(- tile.y)
-        );
+    for (unsigned int i = 0; i < tiles_.size(); ++ i){
+        Tile &tile(tiles_[i]);
+        Ogre::Vector2 top_left(static_cast<Ogre::Real>(tile.x), static_cast<Ogre::Real>(- tile.y));
         Ogre::Vector2 top_right(
-          static_cast<Ogre::Real>(tile.x + tile.width),
-          static_cast<Ogre::Real>(top_left.y)
+          static_cast<Ogre::Real>(tile.x + tile.width), static_cast<Ogre::Real>(top_left.y)
         );
         Ogre::Vector2 bottom_right(
-          static_cast<Ogre::Real>(top_right.x),
-          static_cast<Ogre::Real>(-(tile.y + tile.height))
+          static_cast<Ogre::Real>(top_right.x), static_cast<Ogre::Real>(-(tile.y + tile.height))
         );
         Ogre::Vector2 bottom_left(
-          static_cast<Ogre::Real>(top_left.x),
-          static_cast<Ogre::Real>(bottom_right.y)
+          static_cast<Ogre::Real>(top_left.x), static_cast<Ogre::Real>(bottom_right.y)
         );
         virtualScreenToWorldSpace(top_left);
         virtualScreenToWorldSpace(top_right);
@@ -253,26 +216,25 @@ void Background2D::OnResize(){
             vertex_buffer = add_vertex_buffer_;
         else if(tiles_[i].blending == QGears::B_SUBTRACT)
             vertex_buffer = subtract_vertex_buffer_;
-        float* writeIterator =
-          (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-        writeIterator += tiles_[i].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
-        *writeIterator ++ = new_x1;
-        *writeIterator ++ = new_y1;
-        writeIterator += 7;
-        *writeIterator ++ = new_x2;
-        *writeIterator ++ = new_y2;
-        writeIterator += 7;
-        *writeIterator ++ = new_x3;
-        *writeIterator ++ = new_y3;
-        writeIterator += 7;
-        *writeIterator++ = new_x1;
-        *writeIterator++ = new_y1;
-        writeIterator += 7;
-        *writeIterator++ = new_x3;
-        *writeIterator++ = new_y3;
-        writeIterator += 7;
-        *writeIterator++ = new_x4;
-        *writeIterator++ = new_y4;
+        float* write_iterator = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+        write_iterator += tiles_[i].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
+        *write_iterator ++ = new_x1;
+        *write_iterator ++ = new_y1;
+        write_iterator += 7;
+        *write_iterator ++ = new_x2;
+        *write_iterator ++ = new_y2;
+        write_iterator += 7;
+        *write_iterator ++ = new_x3;
+        *write_iterator ++ = new_y3;
+        write_iterator += 7;
+        *write_iterator++ = new_x1;
+        *write_iterator++ = new_y1;
+        write_iterator += 7;
+        *write_iterator ++ = new_x3;
+        *write_iterator ++ = new_y3;
+        write_iterator += 7;
+        *write_iterator ++ = new_x4;
+        *write_iterator ++ = new_y4;
         vertex_buffer->unlock();
     }
     applyScroll();
@@ -292,18 +254,14 @@ void Background2D::Clear(){
     animations_.clear();
     for(unsigned int i = 0; i < animation_played_.size(); ++ i)
         for(unsigned int j = 0; j < animation_played_[i].sync.size(); ++j)
-            ScriptManager::getSingleton().ContinueScriptExecution(
-              animation_played_[i].sync[j]
-            );
+            ScriptManager::getSingleton().ContinueScriptExecution(animation_played_[i].sync[j]);
     animation_played_.clear();
     tiles_.clear();
     DestroyVertexBuffers();
     CreateVertexBuffers();
 }
 
-void Background2D::ScriptAutoScrollToEntity(Entity* entity){
-    scroll_entity_ = entity;
-}
+void Background2D::ScriptAutoScrollToEntity(Entity* entity){scroll_entity_ = entity;}
 
 Entity* Background2D::GetAutoScrollEntity() const{return scroll_entity_;}
 
@@ -344,27 +302,17 @@ void Background2D::UnsetScroll(){
     scroll_sync_.clear();
 }
 
-const Ogre::Vector2& Background2D::GetScrollPositionStart() const{
-    return scroll_position_start_;
-}
+const Ogre::Vector2& Background2D::GetScrollPositionStart() const{return scroll_position_start_;}
 
-const Ogre::Vector2& Background2D::GetScrollPositionEnd() const{
-    return scroll_position_end_;
-}
+const Ogre::Vector2& Background2D::GetScrollPositionEnd() const{return scroll_position_end_;}
 
-Background2D::ScrollType Background2D::GetScrollType() const{
-    return scroll_type_;
-}
+Background2D::ScrollType Background2D::GetScrollType() const{return scroll_type_;}
 
 float Background2D::GetScrollSeconds() const{return scroll_seconds_;}
 
-void Background2D::SetScrollCurrentSeconds(const float seconds){
-    scroll_current_seconds_ = seconds;
-}
+void Background2D::SetScrollCurrentSeconds(const float seconds){scroll_current_seconds_ = seconds;}
 
-float Background2D::GetScrollCurrentSeconds() const{
-    return scroll_current_seconds_;
-}
+float Background2D::GetScrollCurrentSeconds() const{return scroll_current_seconds_;}
 
 void Background2D::SetScreenScroll(const Ogre::Vector2& position){
     SetScroll(position / screen_scale_);
@@ -391,18 +339,12 @@ void Background2D::applyScroll(){
     }
 }
 
+const Ogre::Vector2& Background2D::GetScroll() const{return position_;}
 
-const Ogre::Vector2& Background2D::GetScroll() const{
-    return position_;
-}
-
-const Ogre::Vector2 Background2D::GetScreenScroll() const{
-    return GetScroll() * screen_scale_;
-}
+const Ogre::Vector2 Background2D::GetScreenScroll() const{return GetScroll() * screen_scale_;}
 
 void Background2D::SetImage(const Ogre::String& image){
-    Ogre::LogManager::getSingleton().stream()
-      << "Background2D::SetImage " << image;
+    Ogre::LogManager::getSingleton().stream() << "Background2D::SetImage " << image;
     Ogre::Pass* pass = alpha_material_->getTechnique(0)->getPass(0);
     Ogre::TextureUnitState* tex = pass->getTextureUnitState(0);
     tex->setTextureName(image);
@@ -418,38 +360,27 @@ void Background2D::SetRange(const Ogre::Vector4& range){
     SetRange((int)range.x, (int)range.y, (int)range.z, (int)range.w);
 }
 
-void Background2D::SetRange(
-  const int min_x, const int min_y, const int max_x, const int max_y
-){
+void Background2D::SetRange(const int min_x, const int min_y, const int max_x, const int max_y){
     Ogre::LogManager::getSingleton().stream()
-      << "Background2D::SetRange " << min_x << " " << min_y
-      << " " << max_x << " " << max_y;
+      << "Background2D::SetRange " << min_x << " " << min_y << " " << max_x << " " << max_y;
     Ogre::Vector2 half_virtual_screen_size(virtual_screen_size_ / 2);
     half_virtual_screen_size /= screen_proportion_;
-    range_.setMaximum(
-      max_x - half_virtual_screen_size.x , max_y - half_virtual_screen_size.y, 1
-    );
-    range_.setMinimum(
-      min_x + half_virtual_screen_size.x , min_y + half_virtual_screen_size.y, 0
-    );
-    Ogre::LogManager::getSingleton().stream()
-      << "Background2D::SetRange " << range_;
-
+    range_.setMaximum(max_x - half_virtual_screen_size.x , max_y - half_virtual_screen_size.y, 1);
+    range_.setMinimum(min_x + half_virtual_screen_size.x , min_y + half_virtual_screen_size.y, 0);
+    Ogre::LogManager::getSingleton().stream() << "Background2D::SetRange " << range_;
     calculateScreenScale();
 }
-
 
 void Background2D::AddTile(const QGears::Tile& tile){
     // TODO: move depth calculation to flevelBackgroundLoader maybe? and let
     // Backgorund2D only handle 0 <= depth <= 1 or so?
     // Maybe just move the < 4095 part to flevel background loader?
     Ogre::Real depth(0.0001f);
-    if(tile.depth >= 1){
-        if(tile.depth < 4095){
+    if (tile.depth >= 1){
+        if (tile.depth < 4095){
             const Ogre::Matrix4 &cam_projection(
-              CameraManager::getSingleton().GetCurrentCamera()
-                ->getProjectionMatrixWithRSDepth()
-              );
+              CameraManager::getSingleton().GetCurrentCamera()->getProjectionMatrixWithRSDepth()
+            );
             Ogre::Vector4 res(0, 0, -tile.depth, 1);
             res = cam_projection * res;
             res /= res.w;
@@ -478,24 +409,23 @@ void Background2D::virtualScreenToWorldSpace(Ogre::Vector2& pos) const{
 }
 
 void Background2D::AddTile(
-  const int x, const int y, const int width, const int height,
-  const float depth, const float u1, const float v1,
-  const float u2, const float v2, const Blending blending
+  const int x, const int y, const int width, const int height, const float depth, const float u1,
+  const float v1, const float u2, const float v2, const Blending blending
 ){
     Ogre::RenderOperation render_op;
     Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
     unsigned int max_vertex_count;
-    if(blending == QGears::B_ALPHA){
+    if (blending == QGears::B_ALPHA){
         render_op = alpha_render_op_;
         vertex_buffer = alpha_vertex_buffer_;
         max_vertex_count = alpha_max_vertex_count_;
     }
-    else if(blending == QGears::B_ADD){
+    else if (blending == QGears::B_ADD){
         render_op = add_render_op_;
         vertex_buffer = add_vertex_buffer_;
         max_vertex_count = add_max_vertex_count_;
     }
-    else if(blending == QGears::B_SUBTRACT){
+    else if (blending == QGears::B_SUBTRACT){
         render_op = subtract_render_op_;
         vertex_buffer = subtract_vertex_buffer_;
         max_vertex_count = subtract_max_vertex_count_;
@@ -504,14 +434,10 @@ void Background2D::AddTile(
         LOG_ERROR("Unknown blending type.");
         return;
     }
-    if (
-      render_op.vertexData->vertexCount + TILE_VERTEX_COUNT > max_vertex_count
-    ){
+    if (render_op.vertexData->vertexCount + TILE_VERTEX_COUNT > max_vertex_count){
         LOG_ERROR(
           "Max number of tiles reached. Can't create more than "
-          + Ogre::StringConverter::toString(
-            max_vertex_count / TILE_VERTEX_COUNT
-          ) + " tiles."
+          + Ogre::StringConverter::toString(max_vertex_count / TILE_VERTEX_COUNT) + " tiles."
         );
         return;
     }
@@ -524,9 +450,7 @@ void Background2D::AddTile(
     tile.blending = blending;
     size_t index(tiles_.size());
     tiles_.push_back(tile);
-    Ogre::Vector2 top_left(
-      static_cast<Ogre::Real>(x), static_cast<Ogre::Real>(-y)
-    );
+    Ogre::Vector2 top_left(static_cast<Ogre::Real>(x), static_cast<Ogre::Real>(-y));
     Ogre::Vector2 top_right(
       static_cast<Ogre::Real>(x + width), static_cast<Ogre::Real>(top_left.y)
     );
@@ -547,79 +471,73 @@ void Background2D::AddTile(
     float new_y3 = bottom_right.y;
     float new_x4 = bottom_left.x;
     float new_y4 = bottom_left.y;
-    float* writeIterator
-      = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-    writeIterator
-      += render_op.vertexData->vertexCount * TILE_VERTEX_INDEX_SIZE;
+    float* write_iterator = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    write_iterator += render_op.vertexData->vertexCount * TILE_VERTEX_INDEX_SIZE;
 
     // TODO: Can use WriteGlyph
-    *writeIterator ++ = new_x1;
-    *writeIterator ++ = new_y1;
-    *writeIterator ++ = depth;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = u1;
-    *writeIterator ++ = v1;
-    *writeIterator ++ = new_x2;
-    *writeIterator ++ = new_y2;
-    *writeIterator ++ = depth;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = u2;
-    *writeIterator ++ = v1;
-    *writeIterator ++ = new_x3;
-    *writeIterator ++ = new_y3;
-    *writeIterator ++ = depth;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = u2;
-    *writeIterator ++ = v2;
-    *writeIterator ++ = new_x1;
-    *writeIterator ++ = new_y1;
-    *writeIterator ++ = depth;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = u1;
-    *writeIterator ++ = v1;
-    *writeIterator ++ = new_x3;
-    *writeIterator ++ = new_y3;
-    *writeIterator ++ = depth;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = u2;
-    *writeIterator ++ = v2;
-    *writeIterator ++ = new_x4;
-    *writeIterator ++ = new_y4;
-    *writeIterator ++ = depth;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = 1;
-    *writeIterator ++ = u1;
-    *writeIterator ++ = v2;
+    *write_iterator ++ = new_x1;
+    *write_iterator ++ = new_y1;
+    *write_iterator ++ = depth;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = u1;
+    *write_iterator ++ = v1;
+    *write_iterator ++ = new_x2;
+    *write_iterator ++ = new_y2;
+    *write_iterator ++ = depth;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = u2;
+    *write_iterator ++ = v1;
+    *write_iterator ++ = new_x3;
+    *write_iterator ++ = new_y3;
+    *write_iterator ++ = depth;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = u2;
+    *write_iterator ++ = v2;
+    *write_iterator ++ = new_x1;
+    *write_iterator ++ = new_y1;
+    *write_iterator ++ = depth;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = u1;
+    *write_iterator ++ = v1;
+    *write_iterator ++ = new_x3;
+    *write_iterator ++ = new_y3;
+    *write_iterator ++ = depth;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = u2;
+    *write_iterator ++ = v2;
+    *write_iterator ++ = new_x4;
+    *write_iterator ++ = new_y4;
+    *write_iterator ++ = depth;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = 1;
+    *write_iterator ++ = u1;
+    *write_iterator ++ = v2;
     render_op.vertexData->vertexCount += TILE_VERTEX_COUNT;
     vertex_buffer->unlock();
 }
 
 void Background2D::UpdateTileUV(
-  const unsigned int tile_id, const float u1, const float v1,
-  const float u2, const float v2
+  const unsigned int tile_id, const float u1, const float v1, const float u2, const float v2
 ){
     if (tile_id >= tiles_.size()){
-        LOG_ERROR(
-          "Tile with id " + Ogre::StringConverter::toString( tile_id )
-          + " doesn't exist."
-        );
+        LOG_ERROR("Tile with id " + Ogre::StringConverter::toString( tile_id ) + " doesn't exist.");
         return;
     }
     Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
@@ -629,34 +547,30 @@ void Background2D::UpdateTileUV(
         vertex_buffer = add_vertex_buffer_;
     else if(tiles_[tile_id].blending == QGears::B_SUBTRACT)
         vertex_buffer = subtract_vertex_buffer_;
-    float* writeIterator
-      = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-    writeIterator
-      += tiles_[tile_id].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
-    writeIterator += 7;
-    *writeIterator ++ = u1;
-    *writeIterator ++ = v1;
-    writeIterator += 7;
-    *writeIterator ++ = u2;
-    *writeIterator ++ = v1;
-    writeIterator += 7;
-    *writeIterator ++ = u2;
-    *writeIterator ++ = v2;
-    writeIterator += 7;
-    *writeIterator ++ = u1;
-    *writeIterator ++ = v1;
-    writeIterator += 7;
-    *writeIterator ++ = u2;
-    *writeIterator ++ = v2;
-    writeIterator += 7;
-    *writeIterator ++ = u1;
-    *writeIterator ++ = v2;
+    float* write_iterator = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    write_iterator += tiles_[tile_id].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
+    write_iterator += 7;
+    *write_iterator ++ = u1;
+    *write_iterator ++ = v1;
+    write_iterator += 7;
+    *write_iterator ++ = u2;
+    *write_iterator ++ = v1;
+    write_iterator += 7;
+    *write_iterator ++ = u2;
+    *write_iterator ++ = v2;
+    write_iterator += 7;
+    *write_iterator ++ = u1;
+    *write_iterator ++ = v1;
+    write_iterator += 7;
+    *write_iterator ++ = u2;
+    *write_iterator ++ = v2;
+    write_iterator += 7;
+    *write_iterator ++ = u1;
+    *write_iterator ++ = v2;
     vertex_buffer->unlock();
 }
 
-void Background2D::AddAnimation(Background2DAnimation* animation){
-    animations_.push_back(animation);
-}
+void Background2D::AddAnimation(Background2DAnimation* animation){animations_.push_back(animation);}
 
 void Background2D::PlayAnimation(
   const Ogre::String& animation, const Background2DAnimation::State state
@@ -670,9 +584,8 @@ void Background2D::PlayAnimation(
         }
     }
     for (unsigned int i = 0; i < animation_played_.size(); ++ i){
-        if (animation_played_[i].name == animation){
+        if (animation_played_[i].name == animation)
             animation_played_.erase(animation_played_.begin() + i);
-        }
     }
     if(found == true){
         AnimationPlayed anim;
@@ -696,8 +609,7 @@ void Background2D::ScriptPlayAnimationOnce(const char* name){
 int Background2D::ScriptAnimationSync(const char* animation){
     for (unsigned int i = 0; i < animation_played_.size(); ++ i){
         if (animation_played_[i].name == animation){
-            ScriptId script
-              = ScriptManager::getSingleton().GetCurrentScriptId();
+            ScriptId script = ScriptManager::getSingleton().GetCurrentScriptId();
             animation_played_[i].sync.push_back(script);
             return -1;
         }
@@ -706,53 +618,38 @@ int Background2D::ScriptAnimationSync(const char* animation){
 }
 
 void Background2D::renderQueueEnded(
-  Ogre::uint8 queue_group_id, const Ogre::String& invocation,
-  bool& repeat_this_invocation
+  Ogre::uint8 queue_group_id, const Ogre::String& invocation, bool& repeat_this_invocation
 ){
     if (cv_show_background2d.GetB() == false) return;
     if (queue_group_id == Ogre::RENDER_QUEUE_MAIN){
-        Ogre::GpuProgramParametersPtr rs_params
-          = render_system_->getFixedFunctionParams(
-            Ogre::TVC_NONE, Ogre::FOG_NONE
-          );
+        Ogre::GpuProgramParametersPtr rs_params = render_system_->getFixedFunctionParams(
+          Ogre::TVC_NONE, Ogre::FOG_NONE
+        );
         rs_params->setConstant(
           Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY
         );
         rs_params->setConstant(
-          Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX,
-          Ogre::Matrix4::IDENTITY
+          Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX, Ogre::Matrix4::IDENTITY
         );
         Ogre::Viewport *viewport(CameraManager::getSingleton().getViewport());
         float width = static_cast<float>(viewport->getActualWidth());
         float height = static_cast<float>(viewport->getActualHeight());
         Ogre::Matrix4 view;
-        view.makeTrans(
-          Ogre::Vector3(position_real_.x /* * 2*/ / width,
-          -position_real_.y /* * 2*/ / height, 0)
-        );
-        // TODO This is deprecated, but if not done , the background image
-        // disappears.
+        view.makeTrans(Ogre::Vector3(position_real_.x / width, -position_real_.y / height, 0));
+        // TODO This is deprecated, but if not done , the background image disappears.
         render_system_->_setViewMatrix(view);
-        rs_params->setConstant(
-          Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view
-        );
+        rs_params->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view);
         render_system_->applyFixedFunctionParams(rs_params, Ogre::GPV_GLOBAL);
         if (alpha_render_op_.vertexData->vertexCount != 0){
-            scene_manager_->_setPass(
-              alpha_material_->getTechnique(0)->getPass(0), true, false
-            );
+            scene_manager_->_setPass(alpha_material_->getTechnique(0)->getPass(0), true, false);
             render_system_->_render(alpha_render_op_);
         }
         if (add_render_op_.vertexData->vertexCount != 0){
-            scene_manager_->_setPass(
-              add_material->getTechnique(0)->getPass(0), true, false
-            );
+            scene_manager_->_setPass(add_material->getTechnique(0)->getPass(0), true, false);
             render_system_->_render(add_render_op_);
         }
         if(subtract_render_op_.vertexData->vertexCount != 0){
-            scene_manager_->_setPass(
-              subtract_material_->getTechnique(0)->getPass(0), true, false
-            );
+            scene_manager_->_setPass(subtract_material_->getTechnique(0)->getPass(0), true, false);
             render_system_->_render(subtract_render_op_);
         }
 
@@ -763,68 +660,54 @@ void Background2D::CreateVertexBuffers(){
     alpha_max_vertex_count_ = 2048 * TILE_VERTEX_COUNT;
     alpha_render_op_.vertexData = new Ogre::VertexData;
     alpha_render_op_.vertexData->vertexStart = 0;
-    Ogre::VertexDeclaration* vDecl
+    Ogre::VertexDeclaration* vertex_declaration
       = alpha_render_op_.vertexData->vertexDeclaration;
     size_t offset = 0;
-    vDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vDecl->addElement(
-      0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+    alpha_vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+      vertex_declaration->getVertexSize(0), alpha_max_vertex_count_,
+      Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
     );
-    alpha_vertex_buffer_
-      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
-        vDecl->getVertexSize(0), alpha_max_vertex_count_,
-        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
-      );
-    alpha_render_op_.vertexData->vertexBufferBinding->setBinding(
-      0, alpha_vertex_buffer_
-    );
+    alpha_render_op_.vertexData->vertexBufferBinding->setBinding(0, alpha_vertex_buffer_);
     alpha_render_op_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
     alpha_render_op_.useIndexes = false;
-    add_max_vertex_count_ = 256 * TILE_VERTEX_COUNT;
+    add_max_vertex_count_ = 1024 * TILE_VERTEX_COUNT;
     add_render_op_.vertexData = new Ogre::VertexData;
     add_render_op_.vertexData->vertexStart = 0;
-    vDecl = add_render_op_.vertexData->vertexDeclaration;
+    vertex_declaration = add_render_op_.vertexData->vertexDeclaration;
     offset = 0;
-    vDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vDecl->addElement(
-      0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+    add_vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+      vertex_declaration->getVertexSize(0), add_max_vertex_count_,
+      Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
     );
-    add_vertex_buffer_
-      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
-        vDecl->getVertexSize(0), add_max_vertex_count_,
-        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
-      );
-    add_render_op_.vertexData->vertexBufferBinding->setBinding(
-      0, add_vertex_buffer_
-    );
+    add_render_op_.vertexData->vertexBufferBinding->setBinding(0, add_vertex_buffer_);
     add_render_op_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
     add_render_op_.useIndexes = false;
-    subtract_max_vertex_count_ = 256 * TILE_VERTEX_COUNT; // FIXME: 256?
+    subtract_max_vertex_count_ = 512 * TILE_VERTEX_COUNT;
     subtract_render_op_.vertexData = new Ogre::VertexData;
     subtract_render_op_.vertexData->vertexStart = 0;
-    vDecl = subtract_render_op_.vertexData->vertexDeclaration;
+    vertex_declaration = subtract_render_op_.vertexData->vertexDeclaration;
     offset = 0;
-    vDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vDecl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vDecl->addElement(
-      0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES
     );
-    subtract_vertex_buffer_
-      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
-        vDecl->getVertexSize(0), subtract_max_vertex_count_,
-        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
-      );
-    subtract_render_op_.vertexData->vertexBufferBinding->setBinding(
-      0, subtract_vertex_buffer_
+    subtract_vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+      vertex_declaration->getVertexSize(0), subtract_max_vertex_count_,
+      Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
     );
+    subtract_render_op_.vertexData->vertexBufferBinding->setBinding(0, subtract_vertex_buffer_);
     subtract_render_op_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
     subtract_render_op_.useIndexes = false;
 }
@@ -868,17 +751,13 @@ void Background2D::load(const QGears::Background2DFile::TileList& tiles){
     }
 }
 
-void Background2D::load(
-  const size_t tile_index, const QGears::AnimationMap& animations
-){
+void Background2D::load(const size_t tile_index, const QGears::AnimationMap& animations){
     QGears::AnimationMap::const_iterator it(animations.begin());
     QGears::AnimationMap::const_iterator it_end(animations.end());
     while(it != it_end){
         const QGears::String& name(it->first);
         const QGears::Animation& animation(it->second);
-        Background2DAnimation* anim(
-          new Background2DAnimation(name, this, tile_index)
-        );
+        Background2DAnimation* anim(new Background2DAnimation(name, this, tile_index));
         anim->SetLength(animation.length);
         QGears::KeyFrameList::const_iterator itk(animation.key_frames.begin());
         QGears::KeyFrameList::const_iterator itk_end(animation.key_frames.end());

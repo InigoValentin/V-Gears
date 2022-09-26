@@ -97,10 +97,11 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * @param file_name[in] Path to the entity model file.
          * @param position[in] Entity position in the map.
          * @param direction[in] Entity face direction.
+         * @param index[in] Index of the entity on the map.
          */
         void AddEntity(
           const Ogre::String& name, const Ogre::String& file_name,
-          const Ogre::Vector3& position, const Ogre::Degree& direction
+          const Ogre::Vector3& position, const Ogre::Degree& direction, int index
         );
 
         /**
@@ -112,11 +113,12 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * @param rotation[in] Entity face direction.
          * @param scale[in] Entity scale.
          * @param root_orientation[in] Map orientation.
+         * @param index[in] Index of the entity on the map.
          */
         void AddEntity(
           const Ogre::String& name, const Ogre::String& file_name,
           const Ogre::Vector3& position, const Ogre::Degree& rotation,
-          const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation
+          const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, int index
         );
 
         /**
@@ -128,10 +130,11 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * @param y[in] Y coordinate of the entity position in the map.
          * @param z[in] Z coordinate of the entity position in the map.
          * @param direction[in] Entity face direction.
+         * @param index[in] Index of the entity on the map.
          */
         void ScriptAddEntity(
           const char* name, const char* file_name,
-          const float x, const float y, const float z, const float direction
+          const float x, const float y, const float z, const float direction, int index
         );
 
         /**
@@ -184,6 +187,14 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * one.
          */
         Entity* GetEntity(const Ogre::String& name) const;
+
+        /**
+         * Retrieves an entity by it's index in the field.
+         *
+         * @param index[in] Index of the entity to retrieve.
+         * @return The entity with the ID, or nullptr if there is no one.
+         */
+        Entity* GetEntityFromIndex(const int id) const;
 
         /**
          * Retrieves an entity by it's assigned character ID.
@@ -311,7 +322,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * @param key_code[in] The code of the key to test.
          * @return False if the key is being pressed, true otherwise.
          */
-        bool IsKeyOn(unsigned int key_code);
+        bool IsKeyOff(unsigned int key_code);
 
         /**
          * Assigns a character to an entity.
@@ -327,7 +338,10 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Attaches an entity to the walkmesh.
          *
-         * It sets the triangle from the entity position coordinates.
+         * It sets the triangle from the entity position coordinates. To
+         * account for multiple triangles on different levels, it uses only
+         * the X and Y coordinates, and automatically sets the Z one to the
+         * closest triangle.
          *
          * @param entity[in] Entity to attach.
          * @return True if the entity was assigned to a walkmesh triangle,
@@ -379,14 +393,17 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         );
 
         /**
-         * Checks for entity triggers at a specified location.
+         * Checks for entity triggers near a entity.
          *
-         * @param entity[in] Entity to check for triggers.
-         * @param position[in] Position of the entity trigger.
-         * @return True if the entity is colliding with another, false
-         * otherwise. If the entity is not solid, always false.
+         * If there are triggers, and the conditions are met, the appropriate
+         * trigger function will be added to the queue. This must be tested
+         * every time an entity moves. If the entity is not solid, it will do
+         * nothing.
+         *
+         * @param entity[in] Entity to check for nearby triggers.
+         * @param position[in] The position of the entity.
          */
-        void CheckTriggers(Entity* entity, Ogre::Vector3& position);
+        void CheckTriggers(Entity* entity, const Ogre::Vector3& position);
 
         /**
          * Checks if an entity can be interacted.
@@ -413,16 +430,16 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         void SetNextTurnStep(Entity* entity);
 
         /**
-         * @todo Understand and document.
+         * Calculates and sets the next position during a linear movement.
          *
-         * @param entity[in] @todo.
+         * @param entity[in] The moving entity.
          */
         void SetNextLinearStep(Entity* entity);
 
         /**
-         * @todo Understand and document.
+         * Calculates and sets the next position during a jump.
          *
-         * @param entity[in] @todo.
+         * @param entity[in] The jump entity.
          */
         void SetNextJumpStep(Entity* entity);
 

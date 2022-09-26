@@ -77,14 +77,26 @@ namespace FF7{
                      *
                      * @param name[in] Entity name.
                      */
-                    Entity(const std::string& name): mName(name), is_line_(false){}
+                    Entity(const std::string& name, size_t index):
+                      mName(name), index_(index), is_line_(false)
+                    {}
 
                     /**
                      * Retrieves the entity name.
                      *
-                     * @return The entity name
+                     * @return The entity name.
                      */
                     std::string Name() const{return mName;}
+
+                    /**
+                     * Retrieves the entity index.
+                     *
+                     * The index is the one at which appears in the original
+                     * game script.
+                     *
+                     * @return The entity index.
+                     */
+                    size_t GetIndex() const{return index_;}
 
                     /**
                      * Retrieves a function.
@@ -114,17 +126,7 @@ namespace FF7{
                      * @todo What is a function here? An Opcode?
                      */
                     void AddFunction(const std::string& name, size_t index){
-                        // TODO: Delete renaming and test. It should work.
-                        std::string new_name = name;
-                        if (is_line_){
-                            switch (index){
-                                case 2: new_name = "on_enter_line"; break;
-                                case 3: new_name = "on_move_to_line"; break;
-                                case 4: new_name = "on_cross_line"; break;
-                                case 5: new_name = "on_leave_line"; break;
-                            }
-                        }
-                        mFunctions[index] = new_name;
+                        mFunctions[index] = name;
                     }
 
                     /**
@@ -199,6 +201,11 @@ namespace FF7{
                      * Entity name.
                      */
                     std::string mName;
+
+                    /**
+                     * Entity index.
+                     */
+                    size_t index_;
 
                     /**
                      * Function list.
@@ -283,6 +290,13 @@ namespace FF7{
              * @return A map of entities, with the name and index.
              */
             std::map<std::string, int> GetEntities() const;
+
+            /**
+             * Retrieves all non-line entities in the map.
+             *
+             * @return A list of non-line entities.
+             */
+            std::vector<SUDM::FF7::Field::FieldEntity> GetEntityList() const;
 
             /**
              * Retrieves all line entities in the map.
@@ -1107,6 +1121,175 @@ namespace FF7{
             void processCANIM2(CodeGenerator* code_gen, const std::string& entity, int char_id);
             void processCANM_2(CodeGenerator* code_gen, const std::string& entity, int char_id);
             void processCC(CodeGenerator* code_gen, const FF7FieldEngine& engine);
+
+            /**
+             * Processes a JUMP opcode.
+             *
+             * Opcode: 0xC0
+             * Short name: JUMP
+             * Long name: Jump
+             *
+             * Memory layout (7 bytes)
+             * |0xC2|B1/B2|B3/B4|X|Y|I|Steps|
+             *
+             * Arguments
+             * - const Bit[4] B1: Bank to retrieve X-coordinate, or zero if
+             * specifying X as a literal value.
+             * - const Bit[4] B2: Bank to retrieve Y-coordinate, or zero if
+             * specifying Y as a literal value.
+             * - const Bit[4] B3: Bank to retrieve triangle ID, or zero if
+             * specifying Z as a literal value.
+             * - const Bit[4] B4: Bank to retrieve jump height, or zero if
+             * specifying H as a literal value.
+             * - const Short X: X-coordinate of the target to jump to, or
+             * lower byte specifying address if B1 is non-zero.
+             * - const Short Y: Y-coordinate of the target to jump to, or
+             * lower byte specifying address if B2 is non-zero.
+             * - const Short I: Triangle ID of the target to jump to, or
+             * lower byte specifying address if B3 is non-zero.
+             * - const UShort Steps: Steps in jump. Must be non-zero if a
+             * literal value. Alternatively, lower byte specifies address if
+             * B4 is non-zero.
+             *
+             * Causes the character to jump to the specified point and
+             * triangle ID, with the jump curve peaking at a height which is
+             * increased by using a larger value for the H argument. In
+             * addition, the larger the number, the longer the jump will take
+             * to complete. A "normal" value is around 0x15, 0x01 is fast and
+             * instantaneous; the argument must not be zero or the game will
+             * crash. Whilst this is an unsigned two-byte number, a large
+             * value (beyond around 0x60) will not only cause a vast jump
+             * height, but also cause the screen to scroll erratically (the
+             * larger the number, the more erratic).
+             * Main update function go through all entity with JUMP state and
+             * if stage is 0 it calculates final Z point according to triangle
+             * id. It sets current coords as start coords. The main thing this
+             * function does is set B coefficient for later calculation. It
+             * defines as follows:
+             *   B = (Z_final - Z_start) / steps - steps * 1.45;
+             * Then it set current step to 0 and stage to 1. On next update
+             * other part of function works. It's calculate real position.
+             * First it increment current step number. Then it calculate X and
+             * Y. They change linear so nothing interesting here. The Z
+             * calculation is as follows:
+             *   Z_current = - step^2 * 1.45 + step * B + Z_start;
+             * If current substep equal number of steps then we set current
+             * triangle to final triangle and set stage to 2. Which finalizes
+             * the routine on next opcode call. Neither animation nor sound is
+             * specified in this opcode. An animation is played by using an
+             * animation opcode such as DFANM, and a SOUND played, before the
+             * jump.
+             *
+             * @param code_gen[in] The code generator.
+             * @param entity[in] The name of the entity.
+             */
+            void processJUMP(CodeGenerator* code_gen, const std::string& entity);
+
+            /**
+             * Processes a AXYZI opcode
+             *
+             * Opcode: 0xC1
+             * Short name: AXYZI
+             * Long name: Entity Get Position
+             *
+             * Memory layout (8 bytes)
+             * |0xC1|B1/B2|B3/B4|A|X|Y|Z|I|
+             *
+             * Arguments
+             * - const Bit[4] B1: Bank to store X.
+             * - const Bit[4] B2: Bank to store Y.
+             * - const Bit[4] B3: Bank to store Z.
+             * - const Bit[4] B4: Bank to store I.
+             * - const UByte A: Entity ID whose field object will have its
+             * position retrieved from.
+             * - const UByte X: Address to store the X-coordinate.
+             * - const UByte Y: Address to store the Y-coordinate.
+             * - const UByte Z: Address to store the Z-coordinate.
+             * - const UByte I: Address to store the ID of the walkmesh
+             * triangle the object is standing on.
+             *
+             * Retrieves the coordinates of the field object that the entity,
+             * whose ID specified in A, is associated with. This opcode uses
+             * an entity ID, not a field object offset; as such, if an entity
+             * ID is given that does not have a field object, this opcode will
+             * store zero in each of the four address specified.
+             */
+            void processAXYZI(CodeGenerator* code_gen);
+
+            /**
+             * Processes a LADER opcode.
+             *
+             * Opcode: 0xC2
+             * Short name: LADER
+             * Long name: Ladder
+             *
+             * Memory layout (15 bytes)
+             * |0xC2|B1/B2|B3/B4|X|X|Y|Y|Z|Z|I|I|K|A|D|S|
+             *
+             * Arguments
+             * - const Bit[4] B1: Bank to retrieve X-coordinate, or zero if X
+             * is specified as a literal value.
+             * - const Bit[4] B2: Bank to retrieve Y-coordinate, or zero if Y
+             * is specified as a literal value.
+             * - const Bit[4] B3: Bank to retrieve Z-coordinate, or zero if Z
+             * is specified as a literal value.
+             * - const Bit[4] B4: Bank to retrieve ID, or zero if I is
+             * specified as a literal value.
+             * - const Short X: X-coordinate of the end of the ladder, or
+             * address to find X-coordinate if B1 is non-zero.
+             * - const Short Y: Y-coordinate of the end of the ladder, or
+             * address to find Y-coordinate if B2 is non-zero.
+             * - const Short Z: Z-coordinate of the end of the ladder, or
+             * address to find Z-coordinate if B3 is non-zero.
+             * - const UShort I: ID of the walkmesh triangle found at the end
+             * of the ladder, or address to find ID if B4 is non-zero.
+             * - const UByte K: The keys used to move the character on the
+             * ladder.
+             * - const UByte A: Animation ID for the field object's movement
+             * animation.
+             * - const UByte D: Direction the character faces when climbing
+             * the ladder.
+             * - const UByte S: Speed of the animation whilst climbing the
+             * ladder.
+             *
+             * Causes the character to climb a ladder; that is, switching from
+             * standard walkmesh movement, to climbing along a line connecting
+             * two points on the walkmesh. If B1, B2, B3 or B4 is non-zero,
+             * then the value for that particular component is taken from
+             * memory using the corresponding bank and address specified,
+             * rather than as a literal value. Both retrieved values and
+             * literals can be used for different components. If using X, Y, Z
+             * or I as addresses, the lower byte should hold the address
+             * whilst the higher byte should be zero. The coordinates specify
+             * the end-point of the ladder; the current position of the
+             * character is used as the start point. The ID of the walkmesh
+             * triangle must be specified; this is the triangle the character
+             * will step onto after reaching the end point of the ladder. The
+             * K value specifies the keys used to move the character across
+             * the ladder; keys outside the range found in the table will
+             * cause unpredictable behaviour. The animation ID specifies an
+             * offset into the field object's animation list; this animation
+             * is played at the speed specified by S whilst the character
+             * climbs. Finally, the D argument is a direction value in the
+             * game's standard direction format, which orients the character
+             * on the ladder. This opcode is used as part of the character's
+             * entity, rather than in a seperate entity, as with a LINE. A
+             * LINE is used to set the start point of the ladder on the
+             * walkmesh. When this LINE is crossed by the player, a script in
+             * the LINE then uses a PREQ (or one of its variants), calling the
+             * script in the party leader that defines the LADER, causing the
+             * character to switch to 'climbing mode'. To set up a two-way
+             * ladder, two LINEs are used at either end, with different values
+             * for the LADER arguments, such as differing end points. If this
+             * opcode is used as part of a non-playable character entity, the
+             * NPC object will automatically climb from the start to the end
+             * point without need for player interaction.
+             *
+             * @param code_gen[in] The code generator.
+             * @param entity[in] The name of the entity.
+             */
+            void processLADER(CodeGenerator* code_gen, const std::string& entity);
+
             void processSOLID(CodeGenerator* code_gen, const std::string& entity);
 
             /**
@@ -1161,7 +1344,7 @@ namespace FF7{
              * Script execution may also be halted until the gradual offset
              * has been completed. For this, see OFSTW.
              *
-             * @param codegen The code generator.
+             * @param codegen[in] The code generator.
              * @param entity[in] The entity name.
              */
             void processOFST(CodeGenerator* codegen, const std::string& entity);

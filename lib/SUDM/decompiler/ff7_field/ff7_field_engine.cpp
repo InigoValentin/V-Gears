@@ -92,6 +92,33 @@ std::map<std::string, int> FF7::FF7FieldEngine::GetEntities() const{
     return r;
 }
 
+std::vector<SUDM::FF7::Field::FieldEntity> FF7::FF7FieldEngine::GetEntityList() const{
+    std::vector<SUDM::FF7::Field::FieldEntity> entities;
+    for (auto entity: mEntityIndexMap){
+        if (entity.second.IsLine() == false){
+            SUDM::FF7::Field::FieldEntity ent;
+            ent.name = entity.second.Name();
+            ent.index = entity.second.GetIndex();
+
+            // Get character ID.
+            ent.char_id = -1;
+            std::map<std::string, int> r;
+            //if (ent.name == "Cloud") std::cout << "CHAR_ID FOR CLOUD" << std::endl;
+            for (auto& f : _functions){
+
+                const Function& func = f.second;
+                FF7::FunctionMetaData meta(func._metadata);
+                if (meta.EntityName() == ent.name){
+                    ent.char_id = meta.CharacterId();
+                    break;
+                }
+            }
+            entities.push_back(ent);
+        }
+    }
+    return entities;
+}
+
 std::vector<SUDM::FF7::Field::Line> FF7::FF7FieldEngine::GetLineList() const{
     std::vector<SUDM::FF7::Field::Line> lines;
     for (auto entity: mEntityIndexMap){
@@ -113,7 +140,7 @@ void FF7::FF7FieldEngine::AddEntityFunction(
     auto it = mEntityIndexMap.find(entity_index);
     if (it != std::end(mEntityIndexMap)) (*it).second.AddFunction(func_name, func_index);
     else{
-        Entity e(entity_name);
+        Entity e(entity_name, entity_index);
         e.AddFunction(func_name, func_index);
         mEntityIndexMap.insert(std::make_pair(entity_index, e));
     }
@@ -767,7 +794,7 @@ void FF7::FF7MathInstruction::processBITON(CodeGenerator* code_gen){
 }
 
 void FF7::FF7MathInstruction::processBITOFF(CodeGenerator* code_gen){
-    code_gen->addOutputLine((boost::format("bit_on(%1%, %2%, %3%)")
+    code_gen->addOutputLine((boost::format("bit_off(%1%, %2%, %3%)")
       % _params[0]->getUnsigned() % _params[2]->getUnsigned() % _params[3]->getUnsigned()
     ).str());
 }
@@ -1042,9 +1069,9 @@ void FF7::FF7ModelInstruction::processInst(
         case eOpcodes::CANM_2: processCANM_2(code_gen, md.EntityName(), md.CharacterId()); break;
         case eOpcodes::ASPED: WriteTodo(code_gen, md.EntityName(), "ASPED"); break;
         case eOpcodes::CC: processCC(code_gen, eng); break;
-        case eOpcodes::JUMP: WriteTodo(code_gen, md.EntityName(), "JUMP"); break;
-        case eOpcodes::AXYZI: WriteTodo(code_gen, md.EntityName(), "AXYZI"); break;
-        case eOpcodes::LADER: WriteTodo(code_gen, md.EntityName(), "LADER"); break;
+        case eOpcodes::JUMP: processJUMP(code_gen, md.EntityName()); break;
+        case eOpcodes::AXYZI: processAXYZI(code_gen); break;
+        case eOpcodes::LADER: processLADER(code_gen, md.EntityName()); break;
         case eOpcodes::OFST: processOFST(code_gen, md.EntityName()); break;
         case eOpcodes::OFSTW:
             code_gen->addOutputLine("self." + md.EntityName() + ":offset_sync()");
@@ -1070,22 +1097,37 @@ void FF7::FF7ModelInstruction::processJOIN(CodeGenerator* code_gen){
 }
 
 void FF7::FF7ModelInstruction::processSPLIT(CodeGenerator* code_gen){
-    code_gen->addOutputLine(
-      "split_party("
-      + std::to_string(_params[0]->getUnsigned()) + ", " // ax_addr
-      + std::to_string(_params[1]->getUnsigned()) + ", " // ay_addr
-      + std::to_string(_params[2]->getUnsigned()) + ", " // ar_addr
-      + std::to_string(_params[3]->getUnsigned()) + ", " // bx_addr
-      + std::to_string(_params[4]->getUnsigned()) + ", " // by_addr
-      + std::to_string(_params[5]->getUnsigned()) + ", " // br_addr
-      + std::to_string(_params[6]->getSigned()) + ", " // ax
-      + std::to_string(_params[7]->getSigned()) + ", " // ay
-      + std::to_string(_params[8]->getSigned()) + ", " // ar
-      + std::to_string(_params[9]->getSigned()) + ", " // bx
-      + std::to_string(_params[10]->getSigned()) + ", " // by
-      + std::to_string(_params[11]->getSigned()) + ", " // br
-      + std::to_string(_params[12]->getUnsigned()) + ", " // speed
-      + ")");
+    FF7SimpleCodeGenerator* cg = static_cast<FF7SimpleCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->ScaleFactor();
+    const auto& ax = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[0]->getUnsigned(), _params[6]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    );
+    const auto& ay = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[1]->getUnsigned(), _params[7]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    );
+    const auto& ar = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[2]->getUnsigned(), _params[8]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    );
+    const auto& bx = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[3]->getUnsigned(), _params[9]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    );
+    const auto& by = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[4]->getUnsigned(), _params[10]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    );
+    const auto& br = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[5]->getUnsigned(), _params[11]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    );
+    const auto& speed = _params[12]->getUnsigned();
+    code_gen->addOutputLine((
+      boost::format("split_party(%1%, %2%, %3%, %4%, %5%, %6%, %7%)")
+      % ax % ay % ar % bx % by % br % speed
+    ).str());
 }
 
 void FF7::FF7ModelInstruction::processTLKON(CodeGenerator* code_gen, const std::string& entity){
@@ -1309,6 +1351,87 @@ void FF7::FF7ModelInstruction::processCC(CodeGenerator* code_gen, const FF7Field
     );
 }
 
+void FF7::FF7ModelInstruction::processJUMP(CodeGenerator* code_gen, const std::string& entity){
+    FF7SimpleCodeGenerator* cg = static_cast<FF7SimpleCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->ScaleFactor();
+    float x = std::stof(FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[0]->getUnsigned(), _params[4]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    ));
+    float y = std::stof(FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[1]->getUnsigned(), _params[5]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    ));
+    int i = atoi(FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[2]->getUnsigned(), _params[6]->getSigned()
+    ).c_str());
+    int steps = atoi(FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[3]->getUnsigned(), _params[7]->getSigned()
+    ).c_str());
+    //x *= 0.00781250273224;
+    //y *= 0.00781250273224;
+    // Always force reduce steps and bound it between 1 and 5.
+    steps /= 6;
+    if (steps < 1) steps = 1;
+    if (steps > 5) steps = 5;
+    // TODO: Z hardcoded as -1, handled in Entity::ScriptJumpToPosition.
+    // TODO: Hardcoded 0.5 in seconds. Calculate using distance.
+    code_gen->addOutputLine((
+      boost::format("self.%1%:jump_to_position(%2%, %3%, -1, 0.5, %4%) -- %5% steps.")
+      % entity % x % y % i % steps
+    ).str());
+    code_gen->addOutputLine((boost::format("self.%1%:jump_sync()") % entity).str());
+}
+
+void FF7::FF7ModelInstruction::processAXYZI(CodeGenerator* code_gen){
+    FF7SimpleCodeGenerator* cg = static_cast<FF7SimpleCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->ScaleFactor();
+    code_gen->addOutputLine((
+      boost::format("axyzi(%1%, %2%, %3%, %4%, %5%, %6%, %7%, %8%, %9%, %10%)")
+      % _params[0]->getSigned() % _params[1]->getSigned() % _params[2]->getSigned()
+      % _params[3]->getSigned() % _params[4]->getSigned() % _params[5]->getSigned()
+      % _params[6]->getSigned() % _params[7]->getSigned() % _params[8]->getSigned()
+      % scale
+    ).str());
+}
+
+void FF7::FF7ModelInstruction::processLADER(CodeGenerator* code_gen, const std::string& entity){
+    FF7SimpleCodeGenerator* cg = static_cast<FF7SimpleCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->ScaleFactor();
+    const auto& x = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[0]->getUnsigned(), _params[4]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    );
+    const auto& y = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[1]->getUnsigned(), _params[5]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    );
+    const auto& z = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[2]->getUnsigned(), _params[6]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    );
+    uint end_triangle = atoi(FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[3]->getUnsigned(), _params[7]->getUnsigned()
+    ).c_str());
+    uint keys = _params[8]->getUnsigned();
+    uint animation = _params[9]->getUnsigned();
+    //float orientation = _params[10]->getUnsigned() / (256.0f / 360.0f);
+    const auto& orientation = FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, 0, _params[10]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, 256.0f / 360.0f
+    );
+    uint speed = _params[11]->getUnsigned();
+    // TODO: Animation hardcoded as "btce".
+    // TODO: Orientation and speed not set.
+    code_gen->addOutputLine((
+      boost::format(
+        "self.%1%:linear_to_position(%2%, %3%, %4%, %5%, \"Climb\", %6%, %7%) "
+        "-- Animation %8% -- Speed %9%"
+      ) % entity % x % y % z % keys % orientation % end_triangle % animation % speed
+    ).str());
+    code_gen->addOutputLine((boost::format("self.%1%:linear_sync()") % entity).str());
+}
+
 void FF7::FF7ModelInstruction::processSOLID(CodeGenerator* code_gen, const std::string& entity){
     code_gen->addOutputLine((
       boost::format("self.%1%:set_solid(%2%)")
@@ -1318,23 +1441,27 @@ void FF7::FF7ModelInstruction::processSOLID(CodeGenerator* code_gen, const std::
 
 void FF7::FF7ModelInstruction::processOFST(CodeGenerator* code_gen, const std::string& entity){
     FF7SimpleCodeGenerator* cg = static_cast<FF7SimpleCodeGenerator*>(code_gen);
-    float x = atoi(FF7CodeGeneratorHelpers::FormatValueOrVariable(
-      cg->mFormatter, _params[0]->getUnsigned(), _params[5]->getSigned()
-    ).c_str());
-    float y = atoi(FF7CodeGeneratorHelpers::FormatValueOrVariable(
-      cg->mFormatter, _params[1]->getUnsigned(),_params[6]->getSigned()
-    ).c_str());
-    float z = atoi(FF7CodeGeneratorHelpers::FormatValueOrVariable(
-      cg->mFormatter, _params[2]->getUnsigned(), _params[7]->getSigned()
-    ).c_str());
-    float speed = atoi(FF7CodeGeneratorHelpers::FormatValueOrVariable(
+    const float scale = 128.0f * cg->ScaleFactor();
+    float x = std::stof(FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[0]->getUnsigned(), _params[5]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    ));
+    float y = std::stof(FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[1]->getUnsigned(),_params[6]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    ));
+    float z = std::stof(FF7CodeGeneratorHelpers::FormatValueOrVariable(
+      cg->mFormatter, _params[2]->getUnsigned(), _params[7]->getSigned(),
+      FF7CodeGeneratorHelpers::ValueType::Float, scale
+    ));
+    float speed = std::stof(FF7CodeGeneratorHelpers::FormatValueOrVariable(
       cg->mFormatter, _params[3]->getUnsigned(), _params[8]->getUnsigned()
-    ).c_str());
+    ));
     // Spatial coordinates need to be scaled down.
     // TODO: This number is empirically deducted. Why this number?
-    x *= 0.00390f;
-    y *= 0.00390f;
-    z *= 0.00390f;
+    //x *= 0.00390f;
+    //y *= 0.00390f;
+    //z *= 0.00390f;
     // Speed needs to be scaled down by the frame rate.
     speed /= 30.0f;
     code_gen->addOutputLine((

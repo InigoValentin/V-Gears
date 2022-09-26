@@ -26,7 +26,8 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   name_(name),
   scene_node_(node),
   height_(1.0f),
-  solid_radius_(0.24f),
+  //solid_radius_(0.24f),
+  solid_radius_(0.21f),
   solid_(true),
   talk_radius_(0.45f),
   talkable_(true),
@@ -45,10 +46,12 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   linear_movement_(LM_UP_TO_DOWN),
   linear_start_(0.0f, 0.0f, 0.0f),
   linear_end_(0.0f, 0.0f, 0.0f),
+  linear_dest_triangle_(-1),
   jump_start_(0.0f, 0.0f, 0.0f),
   jump_end_(0.0f, 0.0f, 0.0f),
   jump_seconds_(0.0f),
   jump_current_seconds_(0.0f),
+  jump_dest_triangle_(-1),
   offset_position_start_(0.0f, 0.0f, 0.0f),
   offset_position_end_(0.0f, 0.0f, 0.0f),
   offset_type_(AT_NONE),
@@ -67,7 +70,8 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   animation_auto_play_(true),
   is_character_(false),
   character_id_(0),
-  character_name_("")
+  character_name_(""),
+  is_line_(false)
 {
     model_root_node_ = scene_node_->createChildSceneNode();
     model_node_ = model_root_node_->createChildSceneNode();
@@ -279,6 +283,13 @@ void Entity::setScale(const Ogre::Vector3 &scale) {
     model_root_node_->setScale(scale);
 }
 
+void Entity::SetIndex(const int index){
+    assert(model_root_node_);
+    index_ = index;
+}
+
+int Entity::GetIndex(){return index_;}
+
 void Entity::setRootOrientation(const Ogre::Quaternion &root_orientation){
     assert(model_node_);
     model_node_->setOrientation(root_orientation);
@@ -401,11 +412,11 @@ void Entity::UnsetMove(){
 }
 
 void Entity::ScriptLinearToPosition(
-  const float x, const float y, const float z,
-  const LinearMovement movement, const char* animation
+  const float x, const float y, const float z, const LinearMovement movement,
+  const char* animation, const float orientation, const int dest_triangle
 ){
     Ogre::Vector3 pos = Ogre::Vector3(x, y, z);
-    SetLinear(pos, movement, animation);
+    SetLinear(pos, movement, animation, orientation, dest_triangle);
     LOG_TRIVIAL(
       "[SCRIPT] Entity \"" + name_ + "\" set linear move to position \""
       + Ogre::StringConverter::toString(pos) + "\" with animation \""
@@ -425,30 +436,29 @@ int Entity::ScriptLinearSync(){
 
 void Entity::SetLinear(
   const Ogre::Vector3& end, const LinearMovement movement,
-  const Ogre::String& animation
+  const Ogre::String& animation, const float orientation, const int dest_triangle
 ){
+    SetRotation(Ogre::Angle(orientation));
     state_ = Entity::LINEAR;
     linear_movement_ = movement;
     linear_start_ = GetPosition();
     linear_end_ = end;
+    linear_dest_triangle_ = dest_triangle;
 
-    // Linear animation
+    // Linear animation.
     animation_auto_play_ = false;
-    PlayAnimation(
-      animation, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1
-    );
+    PlayAnimation(animation, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1);
 
-    // After moving the entity needs to be reattached to the walkmesh.
+    // While moving, the entity is not in a triangle.
     move_triangle_id_ = -1;
 }
 
 void Entity::UnsetLinear(){
-    state_ = Entity::NONE;
+    state_ = Entity::NEEDS_TO_REATTACH;
+    move_triangle_id_ = linear_dest_triangle_; // Set for NPCs. Playable can end up in two places.
     animation_auto_play_ = true;
-    PlayAnimation(
-      animation_default_, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1
-    );
-    for (size_t i = 0; i < sync_.size(); ++i)
+    PlayAnimation(animation_default_, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1);
+    for (size_t i = 0; i < sync_.size(); ++ i)
         ScriptManager::getSingleton().ContinueScriptExecution(sync_[i]);
     sync_.clear();
 }
@@ -459,11 +469,16 @@ const Ogre::Vector3& Entity::GetLinearStart() const{return linear_start_;}
 
 const Ogre::Vector3& Entity::GetLinearEnd() const{return linear_end_;}
 
+const int Entity::GetLinearDestTriangle() const{return linear_dest_triangle_;}
+
 void Entity::ScriptJumpToPosition(
-  const float x, const float y, const float z, const float seconds
+  const float x, const float y, const float z, const float seconds, const int dest_triangle
 ){
-    Ogre::Vector3 jump_to(x, y, z);
-    SetJump(jump_to, seconds);
+    float new_z = z;
+    // If z not specified (-1), asume same Z.
+    if (z < 0) new_z = GetPosition().z;
+    Ogre::Vector3 jump_to(x, y, new_z);
+    SetJump(jump_to, seconds, dest_triangle);
     LOG_TRIVIAL(
       "[SCRIPT] Entity \"" + name_ + "\" set jump to position \""
       + Ogre::StringConverter::toString(jump_to) + "\" in "
@@ -481,17 +496,22 @@ int Entity::ScriptJumpSync(){
     return -1;
 }
 
-void Entity::SetJump(const Ogre::Vector3& jump_to, const float seconds){
+void Entity::SetJump(const Ogre::Vector3& jump_to, const float seconds, const int dest_triangle){
     state_ = Entity::JUMP;
     jump_start_ = GetPosition();
     jump_end_ = jump_to;
     jump_seconds_ = seconds;
     jump_current_seconds_ = 0;
+    jump_was_solid_ = IsSolid();
+    jump_dest_triangle_ = dest_triangle;
+    SetSolid(false);
     // After moving the entity needs to be reattached to the walkmesh.
     move_triangle_id_ = -1;
 }
 
 void Entity::UnsetJump(){
+    SetSolid(jump_was_solid_);
+    move_triangle_id_ = linear_dest_triangle_;
     state_ = Entity::NONE;
     for (size_t i = 0; i < sync_.size(); ++ i)
         ScriptManager::getSingleton().ContinueScriptExecution(sync_[i]);
@@ -509,6 +529,8 @@ void Entity::SetJumpCurrentSeconds(const float seconds){
 }
 
 float Entity::GetJumpCurrentSeconds() const{ return jump_current_seconds_;}
+
+const int Entity::GetJumpDestTriangle() const{return jump_dest_triangle_;}
 
 void Entity::ScriptOffsetToPosition(
   const float x, const float y, const float z,
@@ -751,6 +773,8 @@ bool Entity::IsCharacter(){return is_character_;}
 uint Entity::GetCharacterId(){return character_id_;}
 
 std::string Entity::GetCharacterName(){return character_name_;}
+
+bool Entity::IsLine(){return is_line_;}
 
 Ogre::Degree Entity::GetDirectionToEntity(Entity* entity) const{
     Ogre::Vector3 current_point = GetPosition();

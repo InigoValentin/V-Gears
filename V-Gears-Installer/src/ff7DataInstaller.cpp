@@ -791,15 +791,14 @@ static void FF7PcFieldToQGearsField(
         }
 
         // Get entities.
-        for (const auto& it : decompiled.entities){
+        for (SUDM::FF7::Field::FieldEntity entity : decompiled.entities){
             // If the entity has been added as a line, skip.
             if (line_entities.size() > 0){
-                if (*std::find(line_entities.begin(), line_entities.end(), it.first) == it.first) {
+                if (*std::find(line_entities.begin(), line_entities.end(), entity.name) == entity.name) {
                     continue;
                 }
             }
-
-            const int char_id = it.second;
+            const int char_id = entity.char_id;
             if (char_id != -1){
                 const QGears::ModelListFile::ModelDescription& desc
                   = models->GetModels().at(char_id);
@@ -807,7 +806,7 @@ static void FF7PcFieldToQGearsField(
                 for (auto& anim : desc.animations)
                     animations.insert(model_animation_db.NormalizeAnimationName(anim.name));
                 std::unique_ptr<TiXmlElement> xml_entity_script(new TiXmlElement("entity_model"));
-                xml_entity_script->SetAttribute("name", it.first);
+                xml_entity_script->SetAttribute("name", entity.name);
                 // TODO: Add to list of HRC's to convert, obtain name of converted .mesh file.
                 auto lower_case_hrc_name = desc.hrc_name;
                 QGears::StringUtil::toLowerCase(lower_case_hrc_name);
@@ -815,6 +814,7 @@ static void FF7PcFieldToQGearsField(
                   "file_name",
                   FieldModelDir() + "/" + model_animation_db.ModelMetaDataName(lower_case_hrc_name)
                 );
+                xml_entity_script->SetAttribute("index", entity.index);
                 if (desc.type == QGears::ModelListFile::PLAYER){
                     // For player models the position is set manually in the xml because if a map
                     // is loaded manually this is where the player will end up. Hence we set the
@@ -839,7 +839,7 @@ static void FF7PcFieldToQGearsField(
             }
             else{
                 std::unique_ptr<TiXmlElement> xml_entity_script(new TiXmlElement("entity_script"));
-                xml_entity_script->SetAttribute("name", it.first);
+                xml_entity_script->SetAttribute("name", entity.name);//it.first);
                 element->LinkEndChild(xml_entity_script.release());
             }
         }
@@ -1206,6 +1206,8 @@ static bool IsTestField(Ogre::String& resource_name){
       || resource_name == "nmkin_1"
       || resource_name == "nmkin_2"
       || resource_name == "nmkin_3"
+      || resource_name == "nmkin_4"
+      || resource_name == "nmkin_5"
       || resource_name == "nrthmk"
       || resource_name == "elevtr1"
       || resource_name == "tin_1"
