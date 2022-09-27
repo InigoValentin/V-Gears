@@ -25,7 +25,6 @@
 #include "decompiler/scummv6/engine.h"
 #include <gmock/gmock.h>
 #include <vector>
-#include "make_unique.h"
 
 #define GET(vertex) (boost::get(boost::vertex_name, g, vertex))
 

@@ -140,104 +140,103 @@ namespace SUDM{
             ){return "";}
         };
 
-    namespace FF7{
 
-        namespace Field{
+
+    namespace Field{
+
+        /**
+         * A line.
+         */
+        struct Line{
 
             /**
-             * A line.
+             * Name of the line entity.
              */
-            struct Line{
-
-                /**
-                 * Name of the line entity.
-                 */
-                std::string name;
-
-                /**
-                 * First point of the line.
-                 */
-                std::vector<float> point_a;
-
-                /**
-                 * Second point of the line.
-                 */
-                std::vector<float> point_b;
-            };
+            std::string name;
 
             /**
-             * An entity.
+             * First point of the line.
              */
-            struct FieldEntity{
-
-                /**
-                 * Character identifier of the entity.
-                 */
-                uint char_id;
-
-                /**
-                 * Index of the entity in the field.
-                 */
-                uint index;
-
-                /**
-                 * Name of the entity.
-                 */
-                std::string name;
-            };
+            std::vector<float> point_a;
 
             /**
-             * The field decompiled script.
+             * Second point of the line.
              */
-            struct DecompiledScript{
+            std::vector<float> point_b;
+        };
 
-                /**
-                 * The LUA script for the field.
-                 */
-                std::string luaScript;
-
-                /**
-                 * The field entities.
-                 *
-                 * Lines are not included.
-                 */
-                std::vector<FieldEntity> entities;
-
-                /**
-                 * Lines in the field.
-                 */
-                std::vector<Line> lines;
-            };
+        /**
+         * An entity.
+         */
+        struct FieldEntity{
 
             /**
-             * Retrieves the scale factor of a field.
+             * Character identifier of the entity.
+             */
+            uint char_id;
+
+            /**
+             * Index of the entity in the field.
+             */
+            uint index;
+
+            /**
+             * Name of the entity.
+             */
+            std::string name;
+        };
+
+        /**
+         * The field decompiled script.
+         */
+        struct DecompiledScript{
+
+            /**
+             * The LUA script for the field.
+             */
+            std::string luaScript;
+
+            /**
+             * The field entities.
              *
-             * @param script_bytes[in] Vector of raw byte data that makes up
-             * the script.
-             * @return The scale fctor.
+             * Lines are not included.
              */
-            float ScaleFactor(const std::vector<unsigned char>& script_bytes);
+            std::vector<FieldEntity> entities;
 
             /**
-             * Decompiles a field script.
-             *
-             * @param script_name[in] Name of the script to be converted,
-             * should match file name.
-             * @param script_bytes[in] Vector of raw byte data that makes up
-             * the script.
-             * @param formatter[in] Formatter used to rename variables, drop
-             * functions...
-             * @param text_after[in] Raw text that is added at to the end of
-             * the decompiled output.
-             * @param text_before[in] Raw text that is added at to the start of
-             * the decompiled output.
-             * @return A string with the decompiled script.
-             * @throws InternalDecompilerError on failure.
+             * Lines in the field.
              */
-            DecompiledScript Decompile(
-              std::string script_name, const std::vector<unsigned char>& script_bytes,
-              IScriptFormatter& formatter, std::string text_after = "", std::string text_before = ""
-            );
-        }
+            std::vector<Line> lines;
+        };
+
+        /**
+         * Retrieves the scale factor of a field.
+         *
+         * @param script_bytes[in] Vector of raw byte data that makes up
+         * the script.
+         * @return The scale fctor.
+         */
+        float ScaleFactor(const std::vector<unsigned char>& script_bytes);
+
+        /**
+         * Decompiles a field script.
+         *
+         * @param script_name[in] Name of the script to be converted,
+         * should match file name.
+         * @param script_bytes[in] Vector of raw byte data that makes up
+         * the script.
+         * @param formatter[in] Formatter used to rename variables, drop
+         * functions...
+         * @param text_after[in] Raw text that is added at to the end of
+         * the decompiled output.
+         * @param text_before[in] Raw text that is added at to the start of
+         * the decompiled output.
+         * @return A string with the decompiled script.
+         * @throws InternalDecompilerError on failure.
+         */
+        DecompiledScript Decompile(
+          std::string script_name, const std::vector<unsigned char>& script_bytes,
+          IScriptFormatter& formatter, std::string text_after = "", std::string text_before = ""
+        );
     }
 }

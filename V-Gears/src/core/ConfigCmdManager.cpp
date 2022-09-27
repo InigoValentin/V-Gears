@@ -13,7 +13,6 @@
  * GNU General Public License for more details.
  */
 
-#include "common/make_unique.h"
 #include "core/Assert.h"
 #include "core/ConfigCmdManager.h"
 #include "core/ConfigCmdManagerCommands.h"

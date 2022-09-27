@@ -208,6 +208,8 @@ set(VGears_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/tinyxml
 )
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fPIC")
+
 if (MSVC)
     # Build cpp files on all cores, up virtual mem for PCH's as cotire really makes the compiler scream
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Zm193")
@@ -215,7 +217,7 @@ if (MSVC)
     add_definitions( -D_CRT_SECURE_NO_WARNINGS )
 else()
     # Enable C++11, you may need to use -std=c++0x if using an older gcc compiler
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fPIC")
 endif()
 
 if (UNIX AND $ENV{COVERAGE}==1)

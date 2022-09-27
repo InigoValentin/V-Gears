@@ -113,7 +113,7 @@ void DupStackInstruction::processInst(Function&, ValueStack &stack, Engine*, Cod
 	std::stringstream s;
 	ValuePtr p = stack.pop()->dup(s);
 	if (s.str().length() > 0)
-		codeGen->addOutputLine(s.str());
+		codeGen->AddOutputLine(s.str());
 	stack.push(p);
 	stack.push(p);
 }
@@ -125,9 +125,9 @@ void BoolNegateStackInstruction::processInst(Function&, ValueStack &stack, Engin
 void BinaryOpStackInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen) {
 	ValuePtr op1 = stack.pop();
 	ValuePtr op2 = stack.pop();
-	if (codeGen->_binOrder == kFIFOArgOrder)
+	if (codeGen->_binOrder == FIFO_ARGUMENT_ORDER)
 		stack.push(new BinaryOpValue(op2, op1, _codeGenData));
-	else if (codeGen->_binOrder == kLIFOArgOrder)
+	else if (codeGen->_binOrder == LIFO_ARGUMENT_ORDER)
 		stack.push(new BinaryOpValue(op1, op2, _codeGenData));
 }
 
@@ -136,7 +136,7 @@ bool ReturnInstruction::isReturn() const {
 }
 
 void ReturnInstruction::processInst(Function&, ValueStack&, Engine*, CodeGenerator *codeGen) {
-	codeGen->addOutputLine("return;");
+	codeGen->AddOutputLine("return;");
 }
 
 void UnaryOpPrefixStackInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator*) {
@@ -157,7 +157,7 @@ void KernelCallStackInstruction::processInst(Function&, ValueStack &stack, Engin
 	if (!returnsValue) {
 		std::stringstream stream;
 		stream << stack.pop() << ";";
-		codeGen->addOutputLine(stream.str());
+		codeGen->AddOutputLine(stream.str());
 	}
 }
 

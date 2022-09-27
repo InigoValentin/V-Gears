@@ -17,8 +17,6 @@
 
 #include <Ogre.h>
 #include <OgreTextAreaOverlayElement.h>
-//#include <OgreOverlayManager.h>
-//#include <Overlay/OgreOverlayManager.h>
 #include <OgreOverlay.h>
 #include <OgreOverlayManager.h>
 #include <Bites/OgreWindowEventUtilities.h>
@@ -65,7 +63,6 @@ class DisplayFrameListener :
 {
 
     public:
-        // Constructor takes a RenderWindow because it uses that to determine input context
 
         /**
          * Constructor.
@@ -78,9 +75,7 @@ class DisplayFrameListener :
         {
 
             using namespace OIS;
-            Ogre::LogManager::getSingletonPtr()->logMessage(
-              "[OIS] Initializing..."
-            );
+            Ogre::LogManager::getSingletonPtr()->logMessage("[OIS] Initializing...");
             ParamList pl;
             size_t window_hnd = 0; // TODO What does HND stand for?
             std::ostringstream window_hnd_str;
@@ -90,7 +85,6 @@ class DisplayFrameListener :
               std::make_pair(std::string("WINDOW"), window_hnd_str.str())
             );
             input_manager_ = InputManager::createInputSystem(pl);
-
             keyboard_ = static_cast<Keyboard*> (
               input_manager_->createInputObject(OIS::OISKeyboard, true)
             );
@@ -108,9 +102,7 @@ class DisplayFrameListener :
             info_text->setPosition(5, 5);
            // info_text->setFontName("BlueHighway");
             info_text->setCharHeight(18);
-            info_overlay = Ogre::OverlayManager::getSingleton().create(
-              "DebugOverlay"
-            );
+            info_overlay = Ogre::OverlayManager::getSingleton().create("DebugOverlay");
             info_overlay->setZOrder(1);
             info_overlay->add2D((Ogre::OverlayContainer*) info_text);
             info_overlay->show();
@@ -120,9 +112,7 @@ class DisplayFrameListener :
             input_manager_->destroyInputObject(keyboard_);
             OIS::InputManager::destroyInputSystem(input_manager_);
             //Remove self as a Window listener.
-            Ogre::WindowEventUtilities::removeWindowEventListener(
-              window_, this
-            );
+            Ogre::WindowEventUtilities::removeWindowEventListener(window_, this);
             windowClosed(window_);
         }
 
@@ -154,15 +144,13 @@ class DisplayFrameListener :
             for (unsigned int i = 0; i < entities.size(); ++ i){
                 if (entities[i]->isVisible() == true){
                     Ogre::AnimationStateIterator animations
-                      = entities[i]->getAllAnimationStates()
-                        ->getAnimationStateIterator();
+                      = entities[i]->getAllAnimationStates()->getAnimationStateIterator();
                     while (animations.hasMoreElements() == true){
                         Ogre::AnimationState* state = animations.getNext();
                         if (state->getEnabled() == true){
                             state->addTime(evt.timeSinceLastFrame);
                             info_text->setCaption(
-                              entities[i]->getName() + ": "
-                              + state->getAnimationName()
+                              entities[i]->getName() + ": " + state->getAnimationName()
                             );
                         }
                     }
@@ -213,10 +201,7 @@ class DisplayFrameListener :
                                 entities[i]->setVisible(true);
                                 break;
                             }
-                            if (
-                              entities[i]->isVisible() == true
-                              && (i != entities.size() - 1)
-                            ){
+                            if (entities[i]->isVisible() == true && (i != entities.size() - 1)){
                                 entities[i]->setVisible(false);
                                 change = true;
                             }
@@ -268,11 +253,9 @@ class DisplayFrameListener :
                     for (unsigned int i = 0; i < entities.size(); ++ i){
                         if (entities[i]->isVisible() == true){
                             Ogre::AnimationStateIterator animations
-                              = entities[i]->getAllAnimationStates()
-                                ->getAnimationStateIterator();
+                              = entities[i]->getAllAnimationStates()->getAnimationStateIterator();
                             while (animations.hasMoreElements() == true){
-                                Ogre::AnimationState* state
-                                  = animations.getNext();
+                                Ogre::AnimationState* state = animations.getNext();
                                 if (change == true){
                                     state->setEnabled(true);
                                     state->setLoop(true);

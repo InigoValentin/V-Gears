@@ -43,8 +43,8 @@ const int kIndentAmount = 4; ///< How many spaces to use for each indent.
  */
 enum ArgOrder
 {
-    kFIFOArgOrder, ///< First argument is pushed to stack first.
-    kLIFOArgOrder  ///< First argument is pushed to stack last.
+    FIFO_ARGUMENT_ORDER, ///< First argument is pushed to stack first.
+    LIFO_ARGUMENT_ORDER  ///< First argument is pushed to stack last.
 };
 
 class ITargetLanaguge
@@ -296,7 +296,7 @@ protected:
     ValueStack _stack;      ///< The stack currently being processed.
     uint _indentLevel;      ///< Indentation level.
     GraphVertex _curVertex; ///< Graph vertex currently being processed.
-    std::unique_ptr<ITargetLanaguge> mTargetLang;
+    std::unique_ptr<ITargetLanaguge> target_lang_;
 
     /**
      * Processes an instruction. Called by process() for each instruction.
@@ -322,10 +322,10 @@ protected:
      *
      * @param func Reference to the function to construct the signature for.
      */
-    virtual std::string constructFuncSignature(const Function& func);
-    virtual void onBeforeStartFunction(const Function& func);
-    virtual void onEndFunction(const Function& func);
-    virtual void onStartFunction(const Function&) { }
+    virtual std::string ConstructFuncSignature(const Function& func);
+    virtual void OnBeforeStartFunction(const Function& func);
+    virtual void OnEndFunction(const Function& func);
+    virtual void OnStartFunction(const Function&) { }
     virtual bool OutputOnlyRequiredLabels() const { return false; }
 
     void generatePass(InstVec& insts, const Graph& g);
@@ -334,8 +334,8 @@ protected:
 public:
     ITargetLanaguge& TargetLang()
     {
-        assert(mTargetLang);
-        return *mTargetLang;
+        assert(target_lang_);
+        return *target_lang_;
     }
 
     void writeFunctionCall(std::string functionName, std::string paramsFormat, const std::vector<ValuePtr>& params);
@@ -362,7 +362,7 @@ public:
      *
      * @param g The annotated graph of the script.
      */
-    virtual void generate(InstVec& insts, const Graph &g);
+    virtual void Generate(InstVec& insts, const Graph &g);
 
     /**
      * Adds a line of code to the current group.
@@ -371,7 +371,7 @@ public:
      * @param unindentBefore Whether or not to remove an indentation level before the line. Defaults to false.
      * @param indentAfter Whether or not to add an indentation level after the line. Defaults to false.
      */
-    virtual void addOutputLine(std::string s, bool unindentBefore = false, bool indentAfter = false);
+    virtual void AddOutputLine(std::string s, bool unindentBefore = false, bool indentAfter = false);
 
     /**
      * Generate an assignment statement.

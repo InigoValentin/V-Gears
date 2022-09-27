@@ -10,7 +10,7 @@ namespace FF7
     public:
         FF7WorldDisassembler(FF7WorldEngine* engine, InstVec& insts, int scriptNumber);
         ~FF7WorldDisassembler();
-	    void doDisassemble() override;
+	    void DoDisassemble() override;
     private:
         int mScriptNumber = 0;
     };

@@ -27,7 +27,7 @@
 class PasCDisassembler : public SimpleDisassembler {
 public:
 	PasCDisassembler(InstVec &insts);
-	virtual void doDisassemble() override;
+	virtual void DoDisassemble() override;
     virtual ValuePtr readParameter(InstPtr inst, std::string type) override;
 };
 

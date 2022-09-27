@@ -35,20 +35,12 @@ set(HEADER_FILES
     include/decompiler/unknown_opcode_exception.h
     include/decompiler/value.h
     include/decompiler/wrongtype.h
-    include/decompiler/scummv6/codegen.h
-    include/decompiler/scummv6/disassembler.h
-    include/decompiler/scummv6/engine.h
-    include/decompiler/field/ff7_field_disassembler.h
+    include/decompiler/field/FieldDisassembler.h
     include/decompiler/field/ff7_field_engine.h
-    include/decompiler/field/ff7_field_codegen.h
-    include/common/algorithm.h
-    include/common/noncopyable.h
+    include/decompiler/field/FieldCodeGenerator.h
     include/common/scummsys.h
-    include/common/str.h
-    include/common/util.h
-    include/common/binaryreader.h
-    include/common/lzs.h
-    include/common/make_unique.h
+    include/common/BinaryReader.h
+    include/common/Lzs.h
 )
 
 
@@ -72,13 +64,9 @@ set(SOURCE_FILES
     src/decompiler/simple_disassembler.cpp
     src/decompiler/unknown_opcode_exception.cpp
     src/decompiler/value.cpp
-    src/decompiler/scummv6/codegen.cpp
-    src/decompiler/scummv6/disassembler.cpp
-    src/decompiler/scummv6/engine.cpp
-    src/decompiler/field/ff7_field_disassembler.cpp
+    src/decompiler/field/FieldDisassembler.cpp
     src/decompiler/field/ff7_field_engine.cpp
-    src/decompiler/field/ff7_field_codegen.cpp
-    src/common/str.cpp
+    src/decompiler/field/FieldCodeGenerator.cpp
 )
 
 # For SUDM. TODO: Add elses.

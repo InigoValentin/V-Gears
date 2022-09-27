@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "instruction.h"
-#include "common/binaryreader.h"
+#include "common/BinaryReader.h"
 #include "unknown_opcode_exception.h"
 #include "objectFactory.h"
 
@@ -35,23 +35,23 @@
  */
 class Disassembler {
 protected:
-	std::unique_ptr<BinaryReader> mStream;                         ///< Used to perform file I/O.
+	std::unique_ptr<BinaryReader> stream_;                         ///< Used to perform file I/O.
 	InstVec &_insts;                              ///< Container for disassembled instructions.
-	uint32 _addressBase;                          ///< Base address where the script starts.
+	uint32 address_base_;                          ///< Base address where the script starts.
 
 	/**
 	 * Performs disassembly.
 	 *
 	 * @throws UnknownOpcodeException on unknown opcode. May throw std::exception on other failures.
 	 */
-	virtual void doDisassemble() = 0;
+	virtual void DoDisassemble() = 0;
 
 	/**
 	 * Outputs the disassembled code.
 	 *
 	 * @param output The std::ostream to output to.
 	 */
-	virtual void doDumpDisassembly(std::ostream &output);
+	virtual void DoDumpDisassembly(std::ostream &output);
 
 public:
 	/**
@@ -67,20 +67,20 @@ public:
 	 *
 	 * @param filename The file to disassemble.
 	 */
-	virtual void open(const char *filename);
+	virtual void Open(const char *filename);
 
 	/**
 	 * Request disassembled instructions.
 	 *
 	 * @return An std::vector containing the disassembled instructions.
 	 */
-	void disassemble();
+	void Disassemble();
 
 	/**
 	 * Outputs the disassembled code. Disassembles code if this has not already been done.
 	 *
 	 * @param output The std::ostream to output to.
 	 */
-	void dumpDisassembly(std::ostream &output);
+	void DumpDisassembly(std::ostream &output);
 };
 #endif

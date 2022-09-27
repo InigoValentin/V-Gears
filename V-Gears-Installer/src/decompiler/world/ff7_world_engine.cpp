@@ -5,7 +5,6 @@
 #include <iostream>
 #include <sstream>
 #include <boost/format.hpp>
-#include "make_unique.h"
 
 #define GET(vertex) (boost::get(boost::vertex_name, g, vertex))
 
@@ -125,7 +124,7 @@ void FF7::FF7WorldStoreInstruction::processInst(Function&, ValueStack &stack, En
     // the bank address, not whats *at* the bank address
     ValuePtr bankValue = stack.pop();
     std::string bankAddr = bankValue->getString();
-    codeGen->addOutputLine("Write(" + bankAddr + ", " + strValue + ");");
+    codeGen->AddOutputLine("Write(" + bankAddr + ", " + strValue + ");");
 }
 
 void FF7::FF7WorldStackInstruction::processInst(Function&, ValueStack&, Engine*, CodeGenerator*)
@@ -461,7 +460,7 @@ void FF7::FF7WorldKernelCallInstruction::processInst(Function& , ValueStack &sta
         strFunc = "kernel_unknown_" + AddressValue(_opcode).getString() + "();";
         break;
     }
-    codeGen->addOutputLine(strFunc);
+    codeGen->AddOutputLine(strFunc);
 }
 
 void FF7::FF7WorldNoOutputInstruction::processInst(Function&, ValueStack&, Engine*, CodeGenerator*)

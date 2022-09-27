@@ -8,7 +8,6 @@ set(HEADER_FILES
     include/common/LzsFile.h
     include/common/File.h
     include/common/FileSystem.h
-    include/common/make_unique.h
     include/map/VGearsBackground2DFile.h
     include/map/VGearsBackground2DFileManager.h
     include/map/VGearsBackground2DFileXMLSerializer.h

@@ -20,31 +20,30 @@
  */
 
 #include "decompiler/decompiler_disassembler.h"
-#include "common/make_unique.h"
 
 Disassembler::Disassembler(InstVec &insts) : _insts(insts) {
-	_addressBase = 0;
+	address_base_ = 0;
 }
 
-void Disassembler::open(const char *filename) {
-    mStream = std::make_unique<BinaryReader>(BinaryReader::ReadAll(filename));
+void Disassembler::Open(const char *filename) {
+    stream_ = std::make_unique<BinaryReader>(BinaryReader::ReadAll(filename));
 }
 
-void Disassembler::doDumpDisassembly(std::ostream &output) {
+void Disassembler::DoDumpDisassembly(std::ostream &output) {
 	InstIterator inst;
 	for (inst = _insts.begin(); inst != _insts.end(); ++inst) {
 		output << *inst << "\n";
 	}
 }
 
-void Disassembler::disassemble() {
+void Disassembler::Disassemble() {
 	if (_insts.empty()) {
-        mStream->Seek(0);
-		doDisassemble();
+        stream_->Seek(0);
+		DoDisassemble();
 	}
 }
 
-void Disassembler::dumpDisassembly(std::ostream &output) {
-	disassemble();
-	doDumpDisassembly(output);
+void Disassembler::DumpDisassembly(std::ostream &output) {
+	Disassemble();
+	DoDumpDisassembly(output);
 }

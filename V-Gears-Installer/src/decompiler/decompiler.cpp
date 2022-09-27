@@ -27,7 +27,8 @@
 
 #include "control_flow.h"
 
-#include "scummv6/engine.h"
+//#include "scummv6/engine.h"
+#include "decompiler_engine.h"
 
 #include <fstream>
 #include <iostream>
@@ -45,7 +46,6 @@
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
-#include "make_unique.h"
 
 
 namespace po = boost::program_options;
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 		std::map<std::string, std::string> engines;
 		ObjectFactory<std::string, Engine> engineFactory;
 
-		ENGINE("scummv6", "SCUMM v6", Scumm::v6::Scummv6Engine);
+		ENGINE("scummv6", "SCUMM v6", Engine);//Scumm::v6::Scummv6Engine);
 
         po::options_description visible("Options", 1024);
 		visible.add_options()

@@ -23,7 +23,7 @@
 #include <vector>
 #include "decompiler/sudm.h"
 
-namespace FF7{
+//namespace FF7{
 
     /**
      * Represents the FF7 Field engine.
@@ -296,14 +296,14 @@ namespace FF7{
              *
              * @return A list of non-line entities.
              */
-            std::vector<SUDM::FF7::Field::FieldEntity> GetEntityList() const;
+            std::vector<SUDM::Field::FieldEntity> GetEntityList() const;
 
             /**
              * Retrieves all line entities in the map.
              *
              * @param A list of line entities.
              */
-            std::vector<SUDM::FF7::Field::Line> GetLineList() const;
+            std::vector<SUDM::Field::Line> GetLineList() const;
 
             /**
              * Retrieves all entities in the map.
@@ -368,7 +368,7 @@ namespace FF7{
              *
              * @return Map scale factor.
              */
-            float ScaleFactor() const {return mScaleFactor;}
+            float GetScaleFactor() const {return scale_factor_;}
 
             /**
              * Retrieves the script name.
@@ -430,7 +430,7 @@ namespace FF7{
             /**
              * The map scale factor.
              */
-            float mScaleFactor = 1.0f;
+            float scale_factor_ = 1.0f;
 
             /**
              * The script name.
@@ -1551,4 +1551,4 @@ namespace FF7{
               Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
             ) override;
     };
-}
+//}

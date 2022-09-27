@@ -37,7 +37,6 @@
 #include "data/VGearsLGPArchiveFactory.h"
 #include "data/VGearsTriggersFile.h"
 #include "data/VGearsMapListFile.h"
-#include "common/make_unique.h"
 #include "vgears_version.h"
 
 template<> VGears::Application

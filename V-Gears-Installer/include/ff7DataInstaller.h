@@ -18,7 +18,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "common/make_unique.h"
 #include "common/VGearsApplication.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
 #include "data/VGearsTriggersFile.h"

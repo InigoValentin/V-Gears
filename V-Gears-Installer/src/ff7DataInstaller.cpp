@@ -29,7 +29,7 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreResourceGroupManager.h>
 #include <OgreLog.h>
-#include "../include/ff7DataInstaller.h"
+#include "ff7DataInstaller.h"
 #include "VGearsGameState.h"
 #include "data/VGearsAFileManager.h"
 #include "data/VGearsBackgroundFileManager.h"
@@ -51,7 +51,6 @@
 #include "decompiler/sudm.h"
 #include <memory>
 #include <QtCore/QDir>
-#include "common/make_unique.h"
 
 float FF7DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
 
@@ -626,13 +625,13 @@ static void FF7PcFieldToVGearsField(
         }
     }
     const VGears::ModelListFilePtr& models = field->GetModelList();
-    SUDM::FF7::Field::DecompiledScript decompiled;
+    SUDM::Field::DecompiledScript decompiled;
     FF7FieldScriptFormatter formatter(field->getName(), models, field_id_to_name_lookup, spawn_map);
     try{
         // Get the raw script bytes.
         const std::vector<u8> raw_field_data = field->GetRawScript();
         // Decompile to LUA.
-        decompiled = SUDM::FF7::Field::Decompile(
+        decompiled = SUDM::Field::Decompile(
           field->getName(), raw_field_data, formatter, gateway_script_data,
           "EntityContainer = {}\n\n"
         );
@@ -769,7 +768,7 @@ static void FF7PcFieldToVGearsField(
 
         // Get lines. Add them to a list, so they aren't processed later as regular entities.
         std::vector<std::string> line_entities;
-        for (SUDM::FF7::Field::Line line : decompiled.lines){
+        for (SUDM::Field::Line line : decompiled.lines){
 
             std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));
             line_entities.push_back(line.name);
@@ -791,7 +790,7 @@ static void FF7PcFieldToVGearsField(
         }
 
         // Get entities.
-        for (SUDM::FF7::Field::FieldEntity entity : decompiled.entities){
+        for (SUDM::Field::FieldEntity entity : decompiled.entities){
             // If the entity has been added as a line, skip.
             if (line_entities.size() > 0){
                 if (*std::find(line_entities.begin(), line_entities.end(), entity.name) == entity.name) {
@@ -1099,13 +1098,13 @@ static void CollectSpawnPoints(
     // full list of entries to each field.
     try{
         // Get the raw script bytes.
-        SUDM::FF7::Field::DecompiledScript decompiled;
+        SUDM::Field::DecompiledScript decompiled;
         const std::vector<u8> raw_field_data = field->GetRawScript();
         // Decompile to LUA.
         FF7FieldScriptGatewayCollector formatter(
           field->getName(), field_id_to_name_lookup, spawn_points, this_field_id
         );
-        decompiled = SUDM::FF7::Field::Decompile(
+        decompiled = SUDM::Field::Decompile(
           field->getName(), raw_field_data, formatter, "", "EntityContainer = {}\n\n"
         );
     }
@@ -1232,7 +1231,7 @@ static void CollectFieldScaleFactors(
   const std::vector<std::string>& field_id_to_name_lookup
 ){
     scale_factors[FieldId(field->getName(), field_id_to_name_lookup)]
-      = ::SUDM::FF7::Field::ScaleFactor(field->GetRawScript());
+      = ::SUDM::Field::ScaleFactor(field->GetRawScript());
 }
 
 void FF7DataInstaller::InitCollectSpawnAndScaleFactors(){

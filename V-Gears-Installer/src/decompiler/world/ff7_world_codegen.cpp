@@ -1,7 +1,7 @@
 #include "ff7_world_codegen.h"
 #include "ff7_world_engine.h"
 
-std::string FF7::FF7WorldCodeGenerator::constructFuncSignature(const Function&)
+std::string FF7::FF7WorldCodeGenerator::ConstructFuncSignature(const Function&)
 {
     return "";
 }

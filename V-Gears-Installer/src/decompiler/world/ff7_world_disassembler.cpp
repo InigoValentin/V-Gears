@@ -45,7 +45,7 @@ if(!Read(897))
 }
 
 */
-void FF7::FF7WorldDisassembler::doDisassemble()
+void FF7::FF7WorldDisassembler::DoDisassemble()
 {
     struct wmScriptData
     {
@@ -59,8 +59,8 @@ void FF7::FF7WorldDisassembler::doDisassemble()
     for (int i = 0; i < 256; i++)
     {
         wmScriptData tmp;
-        tmp.mType = this->mStream->ReadU16();
-        tmp.mInstructionPointer = this->mStream->ReadU16();
+        tmp.mType = this->stream_->ReadU16();
+        tmp.mInstructionPointer = this->stream_->ReadU16();
         mData.emplace_back(tmp);
     }
 
@@ -70,15 +70,15 @@ void FF7::FF7WorldDisassembler::doDisassemble()
     {
         wmScriptData data = mData[i];
 
-        this->mStream->Seek((256 * sizeof(int)) + (data.mInstructionPointer*sizeof(uint16)));
-        this->_address = this->mStream->Position();
+        this->stream_->Seek((256 * sizeof(int)) + (data.mInstructionPointer*sizeof(uint16)));
+        this->_address = this->stream_->Position();
 
         bool end = false;
         //    while (this->_f.pos() != (int)this->_f.size())
         for (;;)
         {
             uint32 full_opcode = 0;
-            uint16 opcode = this->mStream->ReadU16();
+            uint16 opcode = this->stream_->ReadU16();
             std::string opcodePrefix;
             if (end)
             {

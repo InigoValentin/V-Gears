@@ -27,7 +27,7 @@
 class SubOpcodeDisassembler : public SimpleDisassembler {
 public:
 	SubOpcodeDisassembler(InstVec &insts);
-	void doDisassemble() override;
+	void DoDisassemble() override;
 };
 
 class SubOpcodeFakeInstruction : public Instruction {

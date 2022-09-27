@@ -60,18 +60,18 @@ void SimpleDisassembler::readParams(InstPtr inst, const char *typeString)
         std::string typeStr(typeString, 1);
         if (typeStr == "N") // Read nibbles 
         {
-            const uint8 byte = mStream->ReadU8();
+            const uint8 byte = stream_->ReadU8();
 
             inst->_params.push_back(new IntValue(Nib1(byte), false));
             inst->_params.push_back(new IntValue(Nib2(byte), false));
-            _address++;
+            address_++;
         }
         else if (typeStr == "U")
         {
-            const uint8 byte = mStream->ReadU8();
+            const uint8 byte = stream_->ReadU8();
             inst->_params.push_back( new IntValue((byte >> 5) & 0x7, false));
             inst->_params.push_back( new IntValue((byte & 0x1F), false));
-            _address++;
+            address_++;
         }
         else
         {
@@ -89,11 +89,11 @@ void SimpleDisassembler::readParams(InstPtr inst, const char *typeString, const 
         if (typeStr == "N") // Read nibbles 
         {
          
-            _address++;
+            address_++;
         }
         else if (typeStr == "U")
         {
-            _address++;
+            address_++;
         }
         else
         {
@@ -108,33 +108,33 @@ ValuePtr SimpleDisassembler::readParameter(InstPtr inst, std::string type) {
 
     if (type == "b") // signed byte
     {
-        retval = new IntValue(mStream->ReadS8(), true);
-        _address++;
+        retval = new IntValue(stream_->ReadS8(), true);
+        address_++;
     }
     else if (type == "B") // unsigned byte
     {
-        retval = new IntValue((uint32)mStream->ReadU8(), false);
-        _address++;
+        retval = new IntValue((uint32)stream_->ReadU8(), false);
+        address_++;
     }
     else if (type == "s") // 16-bit signed integer (short), little-endian
     {
-        retval = new IntValue(mStream->ReadS16(), true);
-        _address += 2;
+        retval = new IntValue(stream_->ReadS16(), true);
+        address_ += 2;
     }
     else if (type == "w") // 16-bit unsigned integer (word), little-endian
     {
-        retval = new IntValue((uint32)mStream->ReadU16(), false);
-        _address += 2;
+        retval = new IntValue((uint32)stream_->ReadU16(), false);
+        address_ += 2;
     }
     else if (type == "i") // 32-bit signed integer (int), little-endian
     {
-        retval = new IntValue(mStream->ReadS32(), true);
-        _address += 4;
+        retval = new IntValue(stream_->ReadS32(), true);
+        address_ += 4;
     }
     else if (type == "d") // 32-bit unsigned integer (dword), little-endian
     {
-        retval = new IntValue(mStream->ReadU32(), false);
-        _address += 4;
+        retval = new IntValue(stream_->ReadU32(), false);
+        address_ += 4;
     }
     else
     {

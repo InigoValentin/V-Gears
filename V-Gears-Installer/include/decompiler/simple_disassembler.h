@@ -29,7 +29,7 @@
  */
 class SimpleDisassembler : public Disassembler {
 protected:
-	uint32 _address; ///< Variable to maintain the current address.
+	uint32 address_; ///< Variable to maintain the current address.
 
 	/**
 	 * Read parameters and associate them with an instruction.
@@ -58,20 +58,20 @@ public:
 	SimpleDisassembler(InstVec &insts);
 };
 
-#define INC_ADDR this->_address++;
+#define INC_ADDR this->address_++;
 #define ADD_INST(category) this->_insts.push_back(new category());
 #define LAST_INST (this->_insts.back())
 
 #define START_OPCODES \
-	this->_address = this->_addressBase; \
-            	while (this->mStream->Position() != (unsigned int)this->mStream->Size()) { \
+	this->address_ = this->address_base_; \
+            	while (this->stream_->Position() != (unsigned int)this->stream_->Size()) { \
 		uint32 full_opcode = 0; \
-		uint8 opcode = this->mStream->ReadU8(); \
+		uint8 opcode = this->stream_->ReadU8(); \
 		std::string opcodePrefix; \
 		switch (opcode) {
 #define END_OPCODES \
 		default: \
-			throw UnknownOpcodeException(this->_address, opcode);\
+			throw UnknownOpcodeException(this->address_, opcode);\
 		} \
 		INC_ADDR; \
 	}
@@ -86,7 +86,7 @@ public:
 #define OPCODE_BODY(name, category, stackChange, params, codeGenData) \
 		ADD_INST(category); \
 		LAST_INST->_opcode = full_opcode; \
-		LAST_INST->_address = this->_address; \
+		LAST_INST->_address = this->address_; \
 		LAST_INST->_stackChange = stackChange; \
 		LAST_INST->_name = opcodePrefix + std::string(name); \
 		LAST_INST->_codeGenData = codeGenData; \
@@ -97,21 +97,21 @@ public:
 		OPCODE_BODY(name, category, stackChange, params, codeGenData)\
 		OPCODE_END;
 
-#define OPCODE(val, name, category, stackChange, params) \
+#define CASE_OPCODE(val, name, category, stackChange, params) \
 	OPCODE_MD(val, name, category, stackChange, params, "")
 
 #define START_SUBOPCODE_WITH_PREFIX(val,prefix) \
 	OPCODE_BASE(val) \
 		opcodePrefix = prefix + std::string("."); \
-		opcode = this->mStream->ReadU8(); \
+		opcode = this->stream_->ReadU8(); \
 		switch (opcode) {
 #define START_SUBOPCODE(val) \
 	OPCODE_BASE(val) \
-		opcode = this->mStream->ReadU8(); \
+		opcode = this->stream_->ReadU8(); \
 		switch (opcode) {
 #define END_SUBOPCODE \
 		default: \
-			throw UnknownSubOpcodeException(this->_address, opcode);\
+			throw UnknownSubOpcodeException(this->address_, opcode);\
 		} \
 		INC_ADDR; \
 		OPCODE_END;
