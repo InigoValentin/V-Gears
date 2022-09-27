@@ -1,23 +1,20 @@
 # define header and source files for the library
 set(HEADER_FILES
-  include/common/FF7NameLookup.h
-  include/data/FF7ModelListFile.h
-  include/data/FF7ModelListFileManager.h
-  include/data/FF7ModelListFileSerializer.h
-  include/map/FF7WalkmeshFileSerializer.h
-  include/FF7Common.h
-  #include/FF7Character.h
+    include/common/FF7NameLookup.h
+    include/data/FF7ModelListFile.h
+    include/data/FF7ModelListFileManager.h
+    include/data/FF7ModelListFileSerializer.h
+    include/map/FF7WalkmeshFileSerializer.h
+    include/FF7Common.h
 )
 set(SOURCE_FILES
-  src/common/FF7NameLookup.cpp
-  src/data/FF7ModelListFile.cpp
-  src/data/FF7ModelListFileManager.cpp
-  src/data/FF7ModelListFileSerializer.cpp
-  src/map/FF7WalkmeshFileSerializer.cpp
-  src/FF7Common.cpp
-  #src/FF7Character.cpp
+    src/common/FF7NameLookup.cpp
+    src/data/FF7ModelListFile.cpp
+    src/data/FF7ModelListFileManager.cpp
+    src/data/FF7ModelListFileSerializer.cpp
+    src/map/FF7WalkmeshFileSerializer.cpp
+    src/FF7Common.cpp
 )
-
 
 include_directories(
     ${VGears_INCLUDE_DIRS}
@@ -26,8 +23,8 @@ include_directories(
 )
 
 add_library(FinalFantasy7 STATIC
-  ${HEADER_FILES}
-  ${SOURCE_FILES}
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
 )
 SET_PROPERTY(TARGET FinalFantasy7 PROPERTY FOLDER "v-gears")
 

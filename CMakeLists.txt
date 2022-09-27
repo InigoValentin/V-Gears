@@ -14,11 +14,11 @@ set(VGears_VERSION__MINOR 1)
 set(VGears_VERSION__PATCH 0)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
-  # CMake defaults to leaving CMAKE_BUILD_TYPE empty. This screws up
-  # differentiation between debug and release builds.
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None (CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel." FORCE)
-  message("CMAKE_BUILD_TYPE was empty defaulting to Release")
-endif ()
+    # CMake defaults to leaving CMAKE_BUILD_TYPE empty. This screws up
+    # differentiation between debug and release builds.
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None (CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel." FORCE)
+    message("CMAKE_BUILD_TYPE was empty defaulting to Release")
+endif()
 
 message("CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE} CMAKE_BINARY_DIR is ${CMAKE_BINARY_DIR}")
 
@@ -30,43 +30,44 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug)
 
-# Generate header containing window title/version information
+# Generate header containing window title/version information.
 set(VGEARS_VERSION "V-Gears v${VGears_VERSION__MAJOR}.${VGears_VERSION__MINOR}.${VGears_VERSION__PATCH}")
 configure_file(configure_version_file.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake @ONLY)
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/vgears_version.h
-  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake
-  DEPENDS
-    ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake
-    ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/vgears_version.h.in
-  COMMENT "Configuring vgears_version.h"
-  VERBATIM)
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake
+    DEPENDS
+        ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake
+        ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/vgears_version.h.in
+    COMMENT "Configuring vgears_version.h"
+    VERBATIM
+)
 add_custom_target(configure_vgears_version ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/vgears_version.h)
 
-# Enable Visual Studio solution "folders"
-SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON) 
+# Enable Visual Studio solution "folders".
+SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #if (APPLE)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -m32")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+    #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -m32")
 #endif()
 
 set(CMAKE_FRAMEWORK_PATH
-      ${CMAKE_FRAMEWORK_PATH}
-      ${CMAKE_CURRENT_SOURCE_DIR}/OgreSDK/lib/macosx/Release
-      ${CMAKE_CURRENT_SOURCE_DIR}/OgreSDK/lib/macosx/Debug
-   )
-
-set(OGRE_FRAMEWORK_INCLUDES
-      ${CMAKE_CURRENT_SOURCE_DIR}/OgreSDK/include
+    ${CMAKE_FRAMEWORK_PATH}
+    ${CMAKE_CURRENT_SOURCE_DIR}/OgreSDK/lib/macosx/Release
+    ${CMAKE_CURRENT_SOURCE_DIR}/OgreSDK/lib/macosx/Debug
 )
 
-option(VGears_BUILD_PLUGINS     "Build the plugins"     TRUE)
-option(VGears_BUILD_UTILITIES   "Build the V-Gears-Installer"   TRUE)
-option(VGears_BUILD_TESTS       "Build the unit tests"  FALSE)
-option(VGears_MULTITHREADING    "Enable multithreading" FALSE)
-option(VGears_SOUND             "Enable Sound"          TRUE)
+set(OGRE_FRAMEWORK_INCLUDES
+    ${CMAKE_CURRENT_SOURCE_DIR}/OgreSDK/include
+)
+
+option(VGears_BUILD_PLUGINS "Build the plugins" TRUE)
+option(VGears_BUILD_UTILITIES "Build the V-Gears-Installer" TRUE)
+option(VGears_BUILD_TESTS "Build the unit tests" FALSE)
+option(VGears_MULTITHREADING "Enable multithreading" FALSE)
+option(VGears_SOUND "Enable Sound" TRUE)
 
 find_path(OGRE_CMAKE_MODULE_PATH FindOGRE.cmake
     HINTS
@@ -89,16 +90,16 @@ message("VGears_SOURCE_DIR ${VGears_SOURCE_DIR}")
 
 set(CMAKE_MODULE_PATH "${OGRE_CMAKE_MODULE_PATH};${CMAKE_MODULE_PATH}")
 set(CMAKE_MODULE_PATH 
-  "${CMAKE_MODULE_PATH}"
-  "${CMAKE_SOURCE_DIR}/CMake"
+    "${CMAKE_MODULE_PATH}"
+    "${CMAKE_SOURCE_DIR}/CMake"
 )
 
 set(CMAKE_DEBUG_POSTFIX "_d")
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX
-    "${VGears_SOURCE_DIR}/output" CACHE PATH "V-Gears install prefix" FORCE
-  )
+    set(CMAKE_INSTALL_PREFIX
+        "${VGears_SOURCE_DIR}/output" CACHE PATH "V-Gears install prefix" FORCE
+    )
 endif()
 
 find_package(Qt5Widgets REQUIRED)
@@ -108,80 +109,80 @@ find_package(OIS REQUIRED)
 
 
 #if(NOT OIS_FOUND)
-#        message(SEND_ERROR "Failed to find OIS.")
+    #message(SEND_ERROR "Failed to find OIS.")
 #endif()
 
 # Find Boost
-if (NOT OGRE_BUILD_PLATFORM_IPHONE)
-        if (WIN32)
-                set(Boost_USE_STATIC_LIBS TRUE)
-        else ()
-                # Statically linking boost to a dynamic Ogre build doesn't work on Linux 64bit
-                set(Boost_USE_STATIC_LIBS ${OGRE_STATIC})
-        endif ()
-        if (MINGW)
-                # this is probably a bug in CMake: the boost find module tries to look for
-                # boost libraries with name libboost_*, but CMake already prefixes library
-                # search names with "lib". This is the workaround.
-                set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES} "")
-        endif ()
+if(NOT OGRE_BUILD_PLATFORM_IPHONE)
+    if(WIN32)
+        set(Boost_USE_STATIC_LIBS TRUE)
+    else()
+        # Statically linking boost to a dynamic Ogre build doesn't work on Linux 64bit
+        set(Boost_USE_STATIC_LIBS ${OGRE_STATIC})
+    endif ()
+    if(MINGW)
+        # This is probably a bug in CMake: the boost find module tries to look for
+        # boost libraries with name libboost_*, but CMake already prefixes library
+        # search names with "lib". This is the workaround.
+        set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES} "")
+    endif ()
 
-        set(Boost_ADDITIONAL_VERSIONS "1.55" "1.55.0" "1.53" "1.53.0" "1.52" "1.52.0" "1.51" "1.51.0" "1.50" "1.50.0" "1.49" "1.49.0" "1.48" "1.48.0" "1.47" "1.47.0" "1.46" "1.46.0" "1.45" "1.45.0" "1.44" "1.44.0" "1.42" "1.42.0" "1.41.0" "1.41" "1.40.0" "1.40")
-        # Components that need linking (NB does not include header-only components like bind)
-        set(OGRE_BOOST_COMPONENTS thread date_time)
+    set(Boost_ADDITIONAL_VERSIONS "1.55" "1.55.0" "1.53" "1.53.0" "1.52" "1.52.0" "1.51" "1.51.0" "1.50" "1.50.0" "1.49" "1.49.0" "1.48" "1.48.0" "1.47" "1.47.0" "1.46" "1.46.0" "1.45" "1.45.0" "1.44" "1.44.0" "1.42" "1.42.0" "1.41.0" "1.41" "1.40.0" "1.40")
+    # Components that need linking (NB does not include header-only components like bind)
+    set(OGRE_BOOST_COMPONENTS thread date_time)
+    find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
+    if (NOT Boost_FOUND)
+        set(Boost_USE_STATIC_LIBS NOT ${Boost_USE_STATIC_LIBS})
         find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
-        if (NOT Boost_FOUND)
-                set(Boost_USE_STATIC_LIBS NOT ${Boost_USE_STATIC_LIBS})
-                find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
-        endif()
-
-        if(Boost_FOUND AND Boost_VERSION GREATER 104900)
-                set(OGRE_BOOST_COMPONENTS thread date_time system chrono)
-                find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
-        endif()
-
-        # Set up referencing of Boost
-        include_directories(${Boost_INCLUDE_DIR})
-    if (NOT APPLE)        
-    add_definitions(-DBOOST_ALL_NO_LIB)
     endif()
 
-        set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${Boost_LIBRARIES})
+    if(Boost_FOUND AND Boost_VERSION GREATER 104900)
+        set(OGRE_BOOST_COMPONENTS thread date_time system chrono)
+        find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
+    endif()
 
-        find_package(Boost COMPONENTS program_options filesystem QUIET)
-        set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${Boost_LIBRARIES})
-        set(VGears_LIBRARIES ${OGRE_LIBRARIES})
-        
-        if(VGears_SOUND)
-            find_package(OpenAL REQUIRED)
-            find_package(OggVorbis REQUIRED)
-            add_definitions(-DVGears_SOUND)
-            set(VGears_LIBRARIES
-                ${VGears_LIBRARIES}
-                ${OPENAL_LIBRARY}
-                ${OGGVORBIS_LIBRARIES}
-            )
-        endif()
+    # Set up referencing of Boost
+    include_directories(${Boost_INCLUDE_DIR})
+    if (NOT APPLE)
+        add_definitions(-DBOOST_ALL_NO_LIB)
+    endif()
 
-        if(VGears_MULTITHREADING)
-            # Find Threads
-            find_package (Threads REQUIRED)
-            set(VGears_LIBRARIES
-                ${VGears_LIBRARIES}
-                ${CMAKE_THREAD_LIBS_INIT}
-            )
-        endif()
+    set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${Boost_LIBRARIES})
 
-        if(VGears_BUILD_TESTS)
-        message(STATUS "Looking for boost unit test..")
-            find_package(Boost COMPONENTS unit_test_framework REQUIRED)
-            set(VGears_TEST_LIBRARIES
-                ${OGRE_LIBRARIES}
-                ${Boost_LIBRARIES}
-            )
-            message(STATUS "Test libs = ${VGears_TEST_LIBRARIES}")
-            # enable CTest
-            enable_testing()
+    find_package(Boost COMPONENTS program_options filesystem QUIET)
+    set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${Boost_LIBRARIES})
+    set(VGears_LIBRARIES ${OGRE_LIBRARIES})
+
+    if(VGears_SOUND)
+        find_package(OpenAL REQUIRED)
+        find_package(OggVorbis REQUIRED)
+        add_definitions(-DVGears_SOUND)
+        set(VGears_LIBRARIES
+            ${VGears_LIBRARIES}
+            ${OPENAL_LIBRARY}
+            ${OGGVORBIS_LIBRARIES}
+        )
+    endif()
+
+    if(VGears_MULTITHREADING)
+        # Find Threads
+        find_package (Threads REQUIRED)
+        set(VGears_LIBRARIES
+            ${VGears_LIBRARIES}
+            ${CMAKE_THREAD_LIBS_INIT}
+        )
+    endif()
+
+    if(VGears_BUILD_TESTS)
+        #message(STATUS "Looking for boost unit test..")
+        find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+        set(VGears_TEST_LIBRARIES
+            ${OGRE_LIBRARIES}
+            ${Boost_LIBRARIES}
+        )
+        #message(STATUS "Test libs = ${VGears_TEST_LIBRARIES}")
+        # Enable CTest.
+        enable_testing()
         endif()
 endif()
 
@@ -190,38 +191,32 @@ set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${OGRE_Overlay_LIBRARIES})
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 if (Boost_LIBRARIES STREQUAL "")
-message(SEND_ERROR "Boost_LIBRARIES is not set")
+    message(SEND_ERROR "Boost_LIBRARIES is not set")
 endif()
 
 set(VGears_INCLUDE_DIRS
     ${VGears_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/
     ${OIS_INCLUDE_DIRS}
-    #/usr/include/luabind # TODO: Autofind
-    #/usr/include/lua5.2
     ${OGRE_Overlay_INCLUDE_DIRS}
     ${OGRE_SAMPLES_INCLUDEPATH}
-    #${LUABIND_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
     ${CMAKE_CURRENT_BINARY_DIR}/lib/luajit
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/luajit/src
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/luabind
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/luabind/luabind/detail
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/tinyxml
-	#${CMAKE_CURRENT_SOURCE_DIR}/lib/SUDM
 )
 
-
 if (MSVC)
-# Build cpp files on all cores, up virtual mem for PCH's as cotire really makes the compiler scream
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Zm193")
-# Shut up about insecure functions, as this is cross platform code we can't use the Win32 specifc functions
-add_definitions( -D_CRT_SECURE_NO_WARNINGS )
+    # Build cpp files on all cores, up virtual mem for PCH's as cotire really makes the compiler scream
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Zm193")
+    # Shut up about insecure functions, as this is cross platform code we can't use the Win32 specifc functions
+    add_definitions( -D_CRT_SECURE_NO_WARNINGS )
 else()
-# Enable C++11, you may need to use -std=c++0x if using an older gcc compiler
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+    # Enable C++11, you may need to use -std=c++0x if using an older gcc compiler
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 endif()
-
 
 if (UNIX AND $ENV{COVERAGE}==1)
       message("Setting coverage compiler options")
@@ -268,16 +263,14 @@ MESSAGE( STATUS "BOOST_ROOT:         " ${BOOST_ROOT} )
 
 INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/output/field_models_and_animation_metadata.xml" DESTINATION ".")
 
-#OS SPECIFIC 
+#OS SPECIFIC
 if(WIN32)
     # On Windows generate MSI packages
     SET(CPACK_GENERATOR "WIX")
     SET(CPACK_WIX_TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/wix.template.in")
     SET(CPACK_WIX_UPGRADE_GUID 8fbb893f-5622-4f6d-a7f6-c221f7be5d52)
-
     # TODO: Set MSI banner image, copyright info etc, also include startmenu/desktop shortcuts
     #set the name of the installer default formating is name-version-os
-
     # If empty assume release
     if ("${CMAKE_BUILD_TYPE}" STREQUAL "" OR "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
         message("RELEASE installer build")
@@ -328,25 +321,25 @@ elseif(APPLE)
     install(FILES ${OSX_BIN_DIR}/liblua.dylib DESTINATION ./)
 elseif(UNIX)
     # On Linux generate TAR.GZ,DEB and RPM packages
-    #Find out what architecture are we running on and set the package architecture 
+    # Find out what architecture are we running on and set the package architecture 
     
-    # set the generic files needing to be installed
-    install( FILES ${PROJECT_SOURCE_DIR}/v-gears.png DESTINATION ./share/pixmaps/ )
-    install( FILES ${PROJECT_SOURCE_DIR}/v-gears.desktop DESTINATION ./share/applications/ )
-    install( FILES ${PROJECT_SOURCE_DIR}/debian/menu DESTINATION share/menu/ RENAME v-gears )
-    install( FILES ${PROJECT_SOURCE_DIR}/output/plugins.cfg_linux DESTINATION share/v-gears/ RENAME plugins.cfg PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ GROUP_WRITE WORLD_WRITE WORLD_READ)
-    install( FILES ${PROJECT_SOURCE_DIR}/output/resources.cfg_linux DESTINATION share/v-gears/ RENAME resources.cfg PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ GROUP_WRITE WORLD_WRITE WORLD_READ)
-    install( FILES ${PROJECT_SOURCE_DIR}/output/v-gears.cfg_linux DESTINATION share/v-gears/ RENAME v-gears.cfg PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ GROUP_WRITE WORLD_WRITE WORLD_READ)
+    # Set the generic files needing to be installed
+    install(FILES ${PROJECT_SOURCE_DIR}/v-gears.png DESTINATION ./share/pixmaps/ )
+    install(FILES ${PROJECT_SOURCE_DIR}/v-gears.desktop DESTINATION ./share/applications/ )
+    install(FILES ${PROJECT_SOURCE_DIR}/debian/menu DESTINATION share/menu/ RENAME v-gears )
+    install(FILES ${PROJECT_SOURCE_DIR}/output/plugins.cfg_linux DESTINATION share/v-gears/ RENAME plugins.cfg PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ GROUP_WRITE WORLD_WRITE WORLD_READ)
+    install(FILES ${PROJECT_SOURCE_DIR}/output/resources.cfg_linux DESTINATION share/v-gears/ RENAME resources.cfg PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ GROUP_WRITE WORLD_WRITE WORLD_READ)
+    install(FILES ${PROJECT_SOURCE_DIR}/output/v-gears.cfg_linux DESTINATION share/v-gears/ RENAME v-gears.cfg PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ GROUP_WRITE WORLD_WRITE WORLD_READ)
         
     if(EXISTS "/usr/lib/x86_64-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0")
-      install( FILES /usr/lib/x86_64-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0 DESTINATION lib/v-gears/plugins/ )
+        install(FILES /usr/lib/x86_64-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0 DESTINATION lib/v-gears/plugins/ )
     elseif(EXISTS "/usr/lib/i386-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0")
-      install( FILES /usr/lib/i386-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0 DESTINATION lib/v-gears/plugins/ )
+        install(FILES /usr/lib/i386-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0 DESTINATION lib/v-gears/plugins/ )
     endif()
         
     SET(CPACK_SOURCE_GENERATOR "TGZ;TZ")
     SET(CPACK_GENERATOR "TGZ")
-    #detect Distro Family DEB , RPM 
+    # Detect Distro Family DEB , RPM.
     if(EXISTS "/etc/lsb-release")
         set(DistroType DEB)
     elseif(EXISTS "/etc/debian_release")
@@ -357,19 +350,19 @@ elseif(UNIX)
     message(STATUS "Distro Detected: ${DistroType} ")
 
     if(DistroType MATCHES "DEB")
-      # Setup DEB package properties
-      MESSAGE(STATUS "DEB ADDED TO GENERATION LIST")
-      SET(CPACK_GENERATOR "${CPACK_GENERATOR};DEB")
+        # Setup DEB package properties
+        MESSAGE(STATUS "DEB ADDED TO GENERATION LIST")
+        SET(CPACK_GENERATOR "${CPACK_GENERATOR};DEB")
     endif()
     if(EXISTS "/usr/bin/rpmbuild")
-      MESSAGE(STATUS "RPM ADDED TO GENERATION LIST (RPM IS DISABLED IN CMAKELISTS)")
-    #  Uncomment to allow for rpm files to be built.   
-    #  SET(CPACK_GENERATOR "${CPACK_GENERATOR};RPM")
+        MESSAGE(STATUS "RPM ADDED TO GENERATION LIST (RPM IS DISABLED IN CMAKELISTS)")
+        # Uncomment to allow for rpm files to be built.   
+        # SET(CPACK_GENERATOR "${CPACK_GENERATOR};RPM")
     endif()
-    
+
     # Setup DEB package properties
-    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Chris Rizzitello <sithlord48@gmail.com>")
-    
+    # TODO
+    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Iñigo Valentin <i@v.com>")
     
     #Set DEBIAN INFO
     SET(CPACK_DEBIAN_PACKAGE_SECTION games)
@@ -377,35 +370,26 @@ elseif(UNIX)
     #SET(CPACK_PACKAGE_EXECUTABLE )
     EXECUTE_PROCESS(COMMAND dpkg --print-architecture OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE OUTPUT_STRIP_TRAILING_WHITESPACE)
     MESSAGE (STATUS "Architecture: ${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
-    #we should need no longer need postinst since we have added extra install steps to what it would.
+    # We should need no longer need postinst since we have added extra install steps to what it would.
     #SET(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${CMAKE_SOURCE_DIR}/debian/postinst )
-    #set the name to be debian package like.
+    # Set the name to be debian package like.
     SET(CPACK_PACKAGE_FILE_NAME "v-gears_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
     #SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogre-1.9, libois,libboost-program-options,libboost-filesystem,libvorbis,libopenal,libboost-test,zlib1g")
     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libogre-1.9.0, libois-1.3.0,libboost-program-options1.54.0,libboost-filesystem1.54.0,libvorbis0a,libvorbisfile3,libvorbisenc2,libopenal1,libboost-test1.54.0,zlib1g,liblua5.1-0")
-
     #Set RPM info
-      SET(CPACK_RPM_PACKAGE_SUMMARY CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-      SET(CPACK_RPM_PACKAGE_NAME CPACK_PACKAGE_NAME)
-      SET(CPACK_RPM_PACKAGE_VERSION CPACK_PACKAGE_VERSION)
-      SET(CPACK_RPM_PACKAGE_RELEASE 1)
-      SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3+")
-      SET(CPACK_RPM_PACKAGE_GROUP games)
-      SET(CPACK_RPM_PACKAGE_VENDOR)
-      SET(CPACK_RPM_PACKAGE_DESCRIPTION)
-      #REQUIREMENTS NEED TO BE CHECKED USING FEDORA.
-      #SET(CPACK_RPM_PACKAGE_REQUIRES "ogre,ois,boost,vorbis,lua,zlib1g")
-
+    SET(CPACK_RPM_PACKAGE_SUMMARY CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+    SET(CPACK_RPM_PACKAGE_NAME CPACK_PACKAGE_NAME)
+    SET(CPACK_RPM_PACKAGE_VERSION CPACK_PACKAGE_VERSION)
+    SET(CPACK_RPM_PACKAGE_RELEASE 1)
+    SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3+")
+    SET(CPACK_RPM_PACKAGE_GROUP games)
+    SET(CPACK_RPM_PACKAGE_VENDOR)
+    SET(CPACK_RPM_PACKAGE_DESCRIPTION)
+    #REQUIREMENTS NEED TO BE CHECKED USING FEDORA.
+    #SET(CPACK_RPM_PACKAGE_REQUIRES "ogre,ois,boost,vorbis,lua,zlib1g")
 endif()
 
-#SET_PROPERTY(TARGET liblua PROPERTY FOLDER "3rdparty")
-#SET_PROPERTY(TARGET buildvm PROPERTY FOLDER "3rdparty")
 SET_PROPERTY(TARGET LuaBind PROPERTY FOLDER "3rdparty")
-#SET_PROPERTY(TARGET luajit PROPERTY FOLDER "3rdparty")
-#SET_PROPERTY(TARGET minilua PROPERTY FOLDER "3rdparty")
-#SET_PROPERTY(TARGET TinyXml PROPERTY FOLDER "3rdparty")
-#SET_PROPERTY(TARGET Sudm_Lib PROPERTY FOLDER "v-gears")
-
 
 INCLUDE(CPack)
 #End of install instructions

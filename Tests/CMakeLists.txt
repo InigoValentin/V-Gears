@@ -3,9 +3,7 @@ add_definitions(
 )
 
 if(UNIX OR APPLE)
-    add_definitions(
-        -DBOOST_TEST_DYN_LINK
-    )
+    add_definitions(-DBOOST_TEST_DYN_LINK)
 endif()
 
 set(V-Gears_SOURCE_DIR ${VGears_SOURCE_DIR}/V-Gears)

@@ -1,19 +1,19 @@
 set(V-Gears_SOURCE_DIR ../../V-Gears)
 
-# define header and source files for the library
+# Define header and source files for the library.
 set(HEADER_FILES
-  ${V-Gears_SOURCE_DIR}/include/VGearsPrerequisites.h
-  ${V-Gears_SOURCE_DIR}/include/common/VGearsManualObject.h
-  ${V-Gears_SOURCE_DIR}/include/common/VGearsStringUtil.h
-  ${V-Gears_SOURCE_DIR}/include/common/TypeDefine.h
-  include/VGearsDataPlugin.h
+    ${V-Gears_SOURCE_DIR}/include/VGearsPrerequisites.h
+    ${V-Gears_SOURCE_DIR}/include/common/VGearsManualObject.h
+    ${V-Gears_SOURCE_DIR}/include/common/VGearsStringUtil.h
+    ${V-Gears_SOURCE_DIR}/include/common/TypeDefine.h
+    include/VGearsDataPlugin.h
 )
 set(SOURCE_FILES
-  ${V-Gears_SOURCE_DIR}/src/common/VGearsManualObject.cpp
-  ${V-Gears_SOURCE_DIR}/src/common/VGearsStringUtil.cpp
-  ${V-Gears_SOURCE_DIR}/src/common/TypeDefine.cpp
-  src/VGearsDataPlugin.cpp
-  src/VGearsDataPluginDll.cpp
+    ${V-Gears_SOURCE_DIR}/src/common/VGearsManualObject.cpp
+    ${V-Gears_SOURCE_DIR}/src/common/VGearsStringUtil.cpp
+    ${V-Gears_SOURCE_DIR}/src/common/TypeDefine.cpp
+    src/VGearsDataPlugin.cpp
+    src/VGearsDataPluginDll.cpp
 )
 
 include_directories(
@@ -25,35 +25,32 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../lib
 )
 
-#defines
+# Defines.
 #add_definitions(-DBOOST_ALL_DYN_LINK)
 
 add_library(DataPlugin MODULE
-  ${HEADER_FILES}
-  ${SOURCE_FILES}
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
 )
 SET_PROPERTY(TARGET DataPlugin PROPERTY FOLDER "v-gears")
 
 set_target_properties(DataPlugin PROPERTIES
-  PREFIX ${PLUGIN_PREFIX}
-  OUTPUT_NAME Data
+    PREFIX ${PLUGIN_PREFIX}
+    OUTPUT_NAME Data
 )
 
 set(LIBRARIES
-  ${OGRE_LIBRARIES} 
-  #FinalFantasy7
-  v-gears-data
+    ${OGRE_LIBRARIES}
+    v-gears-data
 )
 
 target_link_libraries(DataPlugin ${LIBRARIES})
 
 if(NOT VGEARS_STATIC)
-  set_target_properties(DataPlugin PROPERTIES
-    COMPILE_DEFINITIONS VGEARS_DATAPLUGIN_EXPORTS
-  )
+    set_target_properties(DataPlugin PROPERTIES COMPILE_DEFINITIONS VGEARS_DATAPLUGIN_EXPORTS)
     if(WIN32 OR APPLE)
-      install(TARGETS DataPlugin LIBRARY DESTINATION .)
+        install(TARGETS DataPlugin LIBRARY DESTINATION .)
     else()
-      install(TARGETS DataPlugin LIBRARY DESTINATION ./lib/v-gears/plugins/ )
+        install(TARGETS DataPlugin LIBRARY DESTINATION ./lib/v-gears/plugins/ )
     endif()
 endif()
