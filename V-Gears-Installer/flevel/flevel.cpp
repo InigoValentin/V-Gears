@@ -31,7 +31,7 @@ THE SOFTWARE.
 
 #include "common/FileSystem.h"
 #include "common/Logger.h"
-//#include "common/QGearsFLevelFile.h"
+//#include "common/VGearsFLevelFile.h"
 
 using std::cout;
 using std::endl;
@@ -44,7 +44,7 @@ void extractSections( const bfs::path &file_in, const bfs::path &path_out )
     /*
     File f( file_in.string() );
     // TODO alternative implementation adapted to FLevel Resource
-    QGears::FLevelFile flevel( &f );
+    VGears::FLevelFile flevel( &f );
     File** sections( flevel.getSections() );
 
     bfs::path file_out;

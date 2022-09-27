@@ -25,8 +25,8 @@
 #include "Logger.h"
 #include "XmlMapFile.h"
 #include "XmlMapsFile.h"
-#include "QGearsGameState.h"
-#include "common/QGearsApplication.h"
+#include "VGearsGameState.h"
+#include "common/VGearsApplication.h"
 
 /**
  * Command to quit the application.
@@ -34,7 +34,7 @@
  * @param params[in] Command parameters. Ignored.
  */
 void CmdQuit(const Ogre::StringVector& params){
-    QGears::g_ApplicationState = QGears::G_EXIT;
+    VGears::g_ApplicationState = VGears::G_EXIT;
 }
 
 /**
@@ -347,7 +347,7 @@ void CmdResolution(const Ogre::StringVector& params){
         return;
     }
     Ogre::RenderWindow* window
-      = QGears::Application::getSingleton().getRenderWindow();
+      = VGears::Application::getSingleton().getRenderWindow();
     if (params.size() >= 4){
         window->setFullscreen(
           Ogre::StringConverter::parseBool(params[3]),
@@ -393,7 +393,7 @@ void CmdResolutionCompletition(Ogre::StringVector& complete_params){
  */
 void CmdScreenshot(const Ogre::StringVector& params){
     Ogre::RenderWindow* window
-      = QGears::Application::getSingleton().getRenderWindow();
+      = VGears::Application::getSingleton().getRenderWindow();
     Ogre::String ret
       = window->writeContentsToTimestampedFile("screenshot_", ".tga");
     Console::getSingleton().AddTextToOutput("Screenshot " + ret + " saved.");

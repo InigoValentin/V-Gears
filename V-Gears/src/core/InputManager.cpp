@@ -41,9 +41,9 @@ void InputManager::ButtonPressed(int button, char text, bool down){
     if (button_state_[button] != down){
         button_state_[button] = down;
         button_text_[button] = text;
-        QGears::Event event;
+        VGears::Event event;
         event.type
-          = (down == true) ? QGears::ET_KEY_PRESS : QGears::ET_KEY_RELEASE;
+          = (down == true) ? VGears::ET_KEY_PRESS : VGears::ET_KEY_RELEASE;
         event.param1 = button;
         event.param2 = text;
         event_queue_.push_back(event);
@@ -53,30 +53,30 @@ void InputManager::ButtonPressed(int button, char text, bool down){
     if (Console::getSingleton().IsVisible() != true){
         if (down == true){
             ActivateBinds(button);
-            AddGameEvents(button, QGears::ET_KEY_PRESS);
+            AddGameEvents(button, VGears::ET_KEY_PRESS);
         }
-        else AddGameEvents(button, QGears::ET_KEY_RELEASE);
+        else AddGameEvents(button, VGears::ET_KEY_RELEASE);
     }
 }
 
 void InputManager::MousePressed(int button, bool down){
-    QGears::Event event;
-    event.type = (down == true) ? QGears::ET_KEY_PRESS : QGears::ET_KEY_RELEASE;
+    VGears::Event event;
+    event.type = (down == true) ? VGears::ET_KEY_PRESS : VGears::ET_KEY_RELEASE;
     event.param1 = button;
     event_queue_.push_back(event);
 }
 
 void InputManager::MouseMoved(int x, int y){
-    QGears::Event event;
-    event.type = QGears::ET_MOUSE_MOVE;
+    VGears::Event event;
+    event.type = VGears::ET_MOUSE_MOVE;
     event.param1 = x;
     event.param2 = y;
     event_queue_.push_back(event);
 }
 
 void InputManager::MouseScrolled(int value){
-    QGears::Event event;
-    event.type = QGears::ET_MOUSE_SCROLL;
+    VGears::Event event;
+    event.type = VGears::ET_MOUSE_SCROLL;
     event.param1 = value;
     event_queue_.push_back(event);
 }
@@ -90,13 +90,13 @@ void InputManager::Update(){
     ){
         for (int button = 0; button < 256; ++ button){
             if (button_state_[button] == true){
-                QGears::Event event;
-                event.type = QGears::ET_KEY_REPEAT_WAIT;
+                VGears::Event event;
+                event.type = VGears::ET_KEY_REPEAT_WAIT;
                 event.param1 = button;
                 event.param2 = button_text_[button];
                 event_queue_.push_back(event);
                 if (Console::getSingleton().IsVisible() != true)
-                    AddGameEvents(button, QGears::ET_KEY_REPEAT_WAIT);
+                    AddGameEvents(button, VGears::ET_KEY_REPEAT_WAIT);
             }
         }
         repeat_first_wait_ = false;
@@ -105,13 +105,13 @@ void InputManager::Update(){
 
     for (int button = 0; button < 256; ++ button){
         if (button_state_[button] == true){
-            QGears::Event event;
-            event.type = QGears::ET_KEY_REPEAT;
+            VGears::Event event;
+            event.type = VGears::ET_KEY_REPEAT;
             event.param1 = button;
             event.param2 = button_text_[button];
             event_queue_.push_back(event);
             if (Console::getSingleton().IsVisible() != true)
-                AddGameEvents(button, QGears::ET_KEY_REPEAT);
+                AddGameEvents(button, VGears::ET_KEY_REPEAT);
         }
     }
 }
@@ -179,7 +179,7 @@ void InputManager::ActivateBinds(const int button) {
 }
 
 void InputManager::AddGameEvents(
-  const int button, const QGears::EventType type
+  const int button, const VGears::EventType type
 ){
     std::vector< int > binds_indexes;
     for (unsigned int i = 0; i < bind_game_events_.size(); ++ i){
@@ -220,7 +220,7 @@ void InputManager::AddGameEvents(
     }
 
     for (unsigned int i = 0; i < binds_to_activate.size(); ++ i){
-        QGears::Event event;
+        VGears::Event event;
         event.type = type;
         event.event = bind_game_events_[binds_to_activate[i]].event;
         event_queue_.push_back(event);

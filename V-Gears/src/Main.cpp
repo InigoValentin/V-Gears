@@ -20,11 +20,11 @@
 #include <OgreFontManager.h>
 #include <OgreOverlayManager.h>
 #include <OgreOverlaySystem.h>
-#include "QGearsGameState.h"
+#include "VGearsGameState.h"
 #ifdef VGears_SOUND
 #include "core/AudioManager.h"
 #endif
-#include "common/QGearsApplication.h"
+#include "common/VGearsApplication.h"
 #include "core/CameraManager.h"
 #include "core/ConfigCmdManager.h"
 #include "core/ConfigFile.h"
@@ -41,11 +41,11 @@
 #include "core/particles/ParticleSystemManager.h"
 #include "core/TextManager.h"
 #include "core/DialogsManager.h"
-#include "data/QGearsLZSFLevelFileManager.h"
+#include "data/VGearsLZSFLevelFileManager.h"
 #include "common/make_unique.h"
 #include "modules/worldmap/WorldMapModule.h"
 #include "data/worldmap/MapFileManager.h"
-#include "data/QGearsLGPArchiveFactory.h"
+#include "data/VGearsLGPArchiveFactory.h"
 
 /**
  * Main application function
@@ -57,7 +57,7 @@
 int main(int argc, char *argv[]){
     try{
         std::cout << "V-Gears Init" << std::endl;
-        QGears::Application app(argc, argv);
+        VGears::Application app(argc, argv);
         if (!app.initOgre()) return 0;
         Ogre::Root *root(app.getRoot());
         Ogre::RenderWindow *window(app.getRenderWindow());
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]){
         directionalLight->setSpecularColour(Ogre::ColourValue(0.0, 0.0, 0.0));
         directionalLight->setDirection(Ogre::Vector3(0, 1, 0));
         // auto fontManager = std::make_unique<Ogre::FontManager>();
-        QGears::MapFileManager* worldManager = new QGears::MapFileManager();
+        VGears::MapFileManager* worldManager = new VGears::MapFileManager();
 
         // Initialize resources.
         // TODO: Use correct file location in the end, now is OK for testing
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]){
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
           "./data/wm/world_us.lgp",
-          QGears::LGPArchiveFactory::ARCHIVE_TYPE, "TEST"
+          VGears::LGPArchiveFactory::ARCHIVE_TYPE, "TEST"
         );
         Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]){
         auto dialogs_manager = std::make_unique<DialogsManager>();
         auto entity_manager = std::make_unique<EntityManager>();
         auto console = std::make_unique<Console>();
-        auto worldMapModule = std::make_unique<QGears::WorldMapModule>();
+        auto worldMapModule = std::make_unique<VGears::WorldMapModule>();
 
         // Initialize after game managers because it attaches them to script.
         auto script_manager = std::make_unique<ScriptManager>();
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]){
         dialogs_manager->Initialise();
 
         // Run application loop
-        QGears::g_ApplicationState = QGears::G_GAME;
+        VGears::g_ApplicationState = VGears::G_GAME;
         root->startRendering();
 
         // System modules

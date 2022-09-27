@@ -19,7 +19,7 @@
 #include "FontFile.h"
 #include "common/TypeDefine.h"
 
-using namespace QGears;
+using namespace VGears;
 
 /*
 FontFile::FontFile(const Ogre::String& file): File(*GAMEFILESYSTEM, file){}

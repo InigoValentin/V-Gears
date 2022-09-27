@@ -19,7 +19,7 @@
 // uses Input function.
 #include <OIS/OIS.h>
 
-namespace QGears{
+namespace VGears{
 
     /**
      * Type of event.

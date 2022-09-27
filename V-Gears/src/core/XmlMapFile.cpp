@@ -18,8 +18,8 @@
 #include "core/ScriptManager.h"
 #include "core/XmlBackground2DFile.h"
 #include "core/XmlMapFile.h"
-#include "map/QGearsBackground2DFileManager.h"
-#include "map/QGearsWalkmeshFileManager.h"
+#include "map/VGearsBackground2DFileManager.h"
+#include "map/VGearsWalkmeshFileManager.h"
 
 XmlMapFile::XmlMapFile(const Ogre::String& file): XmlFile(file){}
 
@@ -42,10 +42,10 @@ void XmlMapFile::LoadMap(){
         ){
             Ogre::String name(GetString(node, "file_name"));
             if (!name.empty()){
-                QGears::WalkmeshFileManager::getSingleton();
-                QGears::WalkmeshFilePtr walkmesh
-                  = QGears::WalkmeshFileManager::getSingleton()
-                    .load(name, "Game").staticCast<QGears::WalkmeshFile>();
+                VGears::WalkmeshFileManager::getSingleton();
+                VGears::WalkmeshFilePtr walkmesh
+                  = VGears::WalkmeshFileManager::getSingleton()
+                    .load(name, "Game").staticCast<VGears::WalkmeshFile>();
                 EntityManager::getSingleton().GetWalkmesh()->load(walkmesh);
             }
         }
@@ -66,9 +66,9 @@ void XmlMapFile::LoadMap(){
             if (name != ""){
                 // TODO Migrate this code to a Resource and use it's group to
                 // load the background.
-                QGears::Background2DFilePtr background
-                  = QGears::Background2DFileManager::getSingleton()
-                    .load(name, "Game").staticCast<QGears::Background2DFile>();
+                VGears::Background2DFilePtr background
+                  = VGears::Background2DFileManager::getSingleton()
+                    .load(name, "Game").staticCast<VGears::Background2DFile>();
                 EntityManager::getSingleton().GetBackground2D()->load(
                   background
                 );

@@ -10,7 +10,7 @@ include_directories(
 # define header and source files for the library
 set(HEADER_FILES
 ./common/FontFile.h
-./common/include/QGearsUtility.h
+./common/include/VGearsUtility.h
 ./common/Logger.h
 ./common/Surface.h
 ./common/TimToVram.h
@@ -31,7 +31,7 @@ set(SOURCE_FILES
 ./common/TimToVram.cpp
 ./common/Vram.cpp
 ./common/OgreBase.cpp
-./common/src/QGearsUtility.cpp
+./common/src/VGearsUtility.cpp
 )
 
 add_library(Utility STATIC
@@ -85,7 +85,7 @@ set ( v-gears-launcher_MOCS
 QT5_WRAP_CPP(MOCS ${v-gears-launcher_MOCS})
 
 add_definitions(
-    -DQGEARS_ADD_MANAGERS
+    -DVGEARS_ADD_MANAGERS
 )
 add_executable ( v-gears-launcher ${v-gears-launcher_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
 

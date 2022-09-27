@@ -75,11 +75,11 @@ void XmlBackground2DFile::Load(){
                 Ogre::String blending_str = GetString(
                   node, "blending", "alpha"
                 );
-                QGears::Blending blending;
-                if (blending_str == "add") blending = QGears::B_ADD;
+                VGears::Blending blending;
+                if (blending_str == "add") blending = VGears::B_ADD;
                 else if (blending_str == "subtract")
-                    blending = QGears::B_SUBTRACT;
-                else blending = QGears::B_ALPHA;
+                    blending = VGears::B_SUBTRACT;
+                else blending = VGears::B_ALPHA;
                 Ogre::Vector4 distance = Ogre::Vector4(0, 0, -depth, 1);
                 Ogre::Vector4 res
                   = CameraManager::getSingleton().GetCurrentCamera()

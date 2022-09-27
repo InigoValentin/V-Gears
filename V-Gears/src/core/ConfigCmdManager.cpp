@@ -30,11 +30,11 @@ void ConfigCmdManager::AddCommand(
   const Ogre::String& params_description, ConfigCmdHandler handler,
   ConfigCmdCompletion completion
 ){
-    QGEARS_ASSERT(name != "", "Command name shouldn't be empty.");
-    QGEARS_ASSERT(handler, "Null command handler.");
+    VGEARS_ASSERT(name != "", "Command name shouldn't be empty.");
+    VGEARS_ASSERT(handler, "Null command handler.");
     // Check if command already added
     for (unsigned int i = 0; i < commands_.size(); ++ i)
-        QGEARS_ASSERT(
+        VGEARS_ASSERT(
           commands_[i]->GetName() != name, "Command already exist."
         );
     commands_.emplace_back(std::make_unique<ConfigCmd>(

@@ -13,12 +13,12 @@ unzip OgreDependencies_OSX_libc._20130610.zip >> extract.log
 echo "Setup env vars"
 #export OGRE_HOME="${PWD}/../OgreSDK"
 #export OGRE_SDK="${PWD}/../OgreSDK"
-export OGRE_HOME="/Users/travis/build/q-gears/q-gears/OgreSDK"
-export OGRE_SDK="/Users/travis/build/q-gears/q-gears/OgreSDK"
-export OIS_HOME="/Users/travis/build/q-gears/q-gears/Dependencies"
+export OGRE_HOME="/Users/travis/build/v-gears/v-gears/OgreSDK"
+export OGRE_SDK="/Users/travis/build/v-gears/v-gears/OgreSDK"
+export OIS_HOME="/Users/travis/build/v-gears/v-gears/Dependencies"
 
-# /Users/travis/build/q-gears/q-gears/Dependencies;
-# /Users/travis/build/q-gears/q-gears/../Dependencies
+# /Users/travis/build/v-gears/v-gears/Dependencies;
+# /Users/travis/build/v-gears/v-gears/../Dependencies
 
 echo "Env vars are $OGRE_SDK and $OIS_HOME"
 # Overwrite broken symlink with actual file

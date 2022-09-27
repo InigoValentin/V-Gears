@@ -24,4 +24,4 @@
  * @param text[in] Error message to be displayed when the expression is not
  * true.
  */
-#define QGEARS_ASSERT(exp, text) assert(exp && text)
+#define VGEARS_ASSERT(exp, text) assert(exp && text)

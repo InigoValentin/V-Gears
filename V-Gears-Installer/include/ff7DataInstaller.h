@@ -19,11 +19,11 @@
 #include <vector>
 #include <iostream>
 #include "common/make_unique.h"
-#include "common/QGearsApplication.h"
+#include "common/VGearsApplication.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
-#include "data/QGearsTriggersFile.h"
-#include "common/QGearsStringUtil.h"
-#include "data/QGearsFLevelFile.h"
+#include "data/VGearsTriggersFile.h"
+#include "common/VGearsStringUtil.h"
+#include "data/VGearsFLevelFile.h"
 #include "ff7FieldTextWriter.h"
 
 // TODO: Separate classes in files.
@@ -131,7 +131,7 @@ class SpawnPointDb{
                 /**
                  * Gateway data.
                  */
-                QGears::TriggersFile::Gateway gateway;
+                VGears::TriggersFile::Gateway gateway;
 
                 /**
                  * Indicates if the gateway is a map jump from a script.
@@ -183,7 +183,7 @@ class ModelsAndAnimationsDb{
          */
         std::string NormalizeAnimationName(const std::string& name){
             Ogre::String base_name;
-            QGears::StringUtil::splitBase(name, base_name);
+            VGears::StringUtil::splitBase(name, base_name);
             std::transform(
               base_name.begin(), base_name.end(), base_name.begin(), ::tolower
             );
@@ -215,8 +215,8 @@ class ModelsAndAnimationsDb{
         std::string ModelMetaDataName(const std::string& model_name){
             // If not in meta data then just replace .hrc with .mesh.
             Ogre::String base_name;
-            QGears::StringUtil::splitBase(model_name, base_name);
-            return QGears::FF7::NameLookup::model(base_name) + ".mesh";
+            VGears::StringUtil::splitBase(model_name, base_name);
+            return VGears::FF7::NameLookup::model(base_name) + ".mesh";
         }
 
         //private:
@@ -412,7 +412,7 @@ class FF7DataInstaller{
          * It's a singleton so it can't be recreated. It will crash the second
          * time round.
          */
-        QGears::Application application_;
+        VGears::Application application_;
 
         /**
          * LGP archive with field data.
@@ -483,7 +483,7 @@ class FF7DataInstaller{
         /**
          * Field currently being processed.
          */
-        QGears::FLevelFilePtr field_;
+        VGears::FLevelFilePtr field_;
 
         /**
          * List of model files.

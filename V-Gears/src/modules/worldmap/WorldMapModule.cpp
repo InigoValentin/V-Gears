@@ -30,10 +30,10 @@
 #include "data/worldmap/TxzFileSerializer.h"
 #include "data/worldmap/MapFileManager.h"
 
-template<> QGears::WorldMapModule
-*Ogre::Singleton< QGears::WorldMapModule >::msSingleton = nullptr;
+template<> VGears::WorldMapModule
+*Ogre::Singleton< VGears::WorldMapModule >::msSingleton = nullptr;
 
-namespace QGears {
+namespace VGears {
 
     using namespace Ogre;
 
@@ -370,12 +370,12 @@ namespace QGears {
      * @todo Understand and document properly.
      */
     static void CreateReferenceTextureFileInstance(
-      QGears::TxzFileSerializer& s
+      VGears::TxzFileSerializer& s
     ){
         /**
          * A test file.
          */
-        class TestFile : public QGears::TxzFile{
+        class TestFile : public VGears::TxzFile{
 
             public:
 
@@ -384,7 +384,7 @@ namespace QGears {
                  *
                  * Generates a null TXZ file.
                  */
-                TestFile() : QGears::TxzFile(nullptr, "", 0, "") {}
+                TestFile() : VGears::TxzFile(nullptr, "", 0, "") {}
         };
 
         // TODO: Get correct path
@@ -408,13 +408,13 @@ namespace QGears {
     static void CreateReferenceFileInstance(
       std::function<
         void(Ogre::DataStreamPtr& stream,
-        QGears::WorldMapFile& file)
+        VGears::WorldMapFile& file)
       > callBack
     ){
         /**
          * A test file.
          */
-        class TestFile : public QGears::WorldMapFile{
+        class TestFile : public VGears::WorldMapFile{
 
             public:
 
@@ -423,7 +423,7 @@ namespace QGears {
                  *
                  * Generates a null WM file.
                  */
-                TestFile() : QGears::WorldMapFile(nullptr, "", 0, "") {}
+                TestFile() : VGears::WorldMapFile(nullptr, "", 0, "") {}
         };
         const char* file_name = "data/wm/WM0.MAP";
         std::ifstream ifs(file_name, std::ifstream::binary);
@@ -453,7 +453,7 @@ namespace QGears {
      * @parma coord[in] The coordinates.
      * @return Coordinate point.
      */
-    static float From16BitFixedPoint(QGears::sint16 coord){
+    static float From16BitFixedPoint(VGears::sint16 coord){
         // return float(coord);
         return (float(coord) / 4096.0f);
     }
@@ -583,11 +583,11 @@ namespace QGears {
      * @param scene_manager[in] The scene manager.
      */
     void CreateTestMap(SceneManager* scene_manager){
-        std::vector<QGears::MapFileSerializer::Block> blocks;
+        std::vector<VGears::MapFileSerializer::Block> blocks;
         CreateReferenceFileInstance(
-          [&](Ogre::DataStreamPtr& stream, QGears::WorldMapFile& file
+          [&](Ogre::DataStreamPtr& stream, VGears::WorldMapFile& file
         ){
-            QGears::MapFileSerializer s;
+            VGears::MapFileSerializer s;
             s.ImportMapFile(stream, file);
             blocks = s.blocks;
         });
@@ -595,7 +595,7 @@ namespace QGears {
         if (blocks.empty()) return; // Load failed
         /*
         // TODO: Get PSX textures working
-        QGears::TxzFileSerializer s;
+        VGears::TxzFileSerializer s;
         createReferenceTextureFileInstance(s);
 
         std::vector<std::vector<TxzFileSerializer::rgba>> data
@@ -610,13 +610,13 @@ namespace QGears {
         int map_y = 0;
         for (unsigned int k = 0; k < block_count; k ++){
             // 7x9 size.
-            QGears::MapFileSerializer::Block& block = blocks[k];
+            VGears::MapFileSerializer::Block& block = blocks[k];
             int block_x = 0;
             int block_y = 0;
             for (size_t i = 0; i < block.meshes.size(); i ++){
-                QGears::MapFileSerializer::BlockPart& part = block.meshes[i];
+                VGears::MapFileSerializer::BlockPart& part = block.meshes[i];
                 for (size_t j = 0; j < part.triangles.size(); j ++){
-                    QGears::MapFileSerializer::BlockTriangle& tri
+                    VGears::MapFileSerializer::BlockTriangle& tri
                       = part.triangles.at(j);
                     ManualObject* manual = nullptr;
                     auto it = texture_ids.find(tri.TextureInfo);
@@ -637,7 +637,7 @@ namespace QGears {
                     const float pos_y = (block_y * SPACE) + (map_y * SPACE * 4);
 
                     // v1
-                    QGears::MapFileSerializer::Vertex v1
+                    VGears::MapFileSerializer::Vertex v1
                       = part.vertices.at(tri.vertex_2_index);
                     manual->position(
                       From16BitFixedPoint(v1.x) + pos_x,
@@ -699,4 +699,4 @@ namespace QGears {
         CameraManager::getSingleton().EnableWireFrame(true);
     }
 
-} // namespace QGears
+} // namespace VGears

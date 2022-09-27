@@ -15,7 +15,7 @@
 
 #include <iostream>
 #include "../include/ff7FieldTextWriter.h"
-#include "common/QGearsStringUtil.h"
+#include "common/VGearsStringUtil.h"
 
 // TODO: Refactor: this is based on/copied from DatFile::DumpText.
 

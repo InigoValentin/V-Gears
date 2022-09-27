@@ -21,7 +21,7 @@
 #include <vector>
 #include "Event.h"
 
-typedef std::vector<QGears::Event> InputEventArray;
+typedef std::vector<VGears::Event> InputEventArray;
 typedef std::vector<int> ButtonList;
 
 class ConfigCmd;
@@ -156,7 +156,7 @@ class InputManager : public Ogre::Singleton<InputManager>{
          * @param button[in] ID of the button.
          * @param type[in] Event type.
          */
-        void AddGameEvents(const int button, const QGears::EventType type);
+        void AddGameEvents(const int button, const VGears::EventType type);
 
     private:
 

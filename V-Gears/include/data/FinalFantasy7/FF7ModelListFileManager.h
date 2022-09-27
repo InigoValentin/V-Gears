@@ -16,17 +16,17 @@
 #pragma once
 
 #include <OgreResourceManager.h>
-#include "QGearsPrerequisites.h"
+#include "VGearsPrerequisites.h"
 #include "FF7ModelListFile.h"
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
 
         /**
          * A manager for model list files.
          */
-        class _QGearsExport ModelListFileManager :
+        class _VGearsExport ModelListFileManager :
           public Ogre::ResourceManager,
           public Ogre::Singleton<ModelListFileManager>
         {

@@ -16,12 +16,12 @@
 #pragma once
 
 #include "common/TypeDefine.h"
-#include "common/QGearsStringUtil.h"
+#include "common/VGearsStringUtil.h"
 #include "core/XmlFile.h"
 
 // TODO: Move implementations to cpp file.
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
 

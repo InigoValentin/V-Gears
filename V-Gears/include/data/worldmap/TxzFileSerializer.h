@@ -17,9 +17,9 @@
 
 #include <array>
 #include "common/TypeDefine.h"
-#include "data/QGearsSerializer.h"
+#include "data/VGearsSerializer.h"
 
-namespace QGears {
+namespace VGears {
 
     class TxzFile;
 

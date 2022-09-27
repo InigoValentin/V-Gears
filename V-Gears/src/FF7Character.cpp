@@ -81,7 +81,7 @@ namespace FFVII{
       Character::CreateLookupMap()
     );
 
-    Character::CharacterId Character::GetIdByName(const QGears::String& name){
+    Character::CharacterId Character::GetIdByName(const VGears::String& name){
         CharacterIdLookupMap::const_iterator entry;
         entry = character_id_lookup_.find(name);
         if (entry != character_id_lookup_.end()) return entry->second;

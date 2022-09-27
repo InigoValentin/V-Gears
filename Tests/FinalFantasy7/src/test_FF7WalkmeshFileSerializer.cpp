@@ -2,13 +2,13 @@
 -----------------------------------------------------------------------------
 Copyright (c) 06.10.2013 Tobias Peters <tobias.peters@kreativeffekt.at>
 
-This file is part of Q-Gears
+This file is part of V-Gears
 
-Q-Gears is free software: you can redistribute it and/or modify
+V-Gears is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 2.0 (GPLv2) of the License.
 
-Q-Gears is distributed in the hope that it will be useful,
+V-Gears is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
@@ -23,10 +23,10 @@ GNU General Public License for more details.
 
 BOOST_AUTO_TEST_CASE( read_file )
 {
-    class TestFile : public QGears::WalkmeshFile
+    class TestFile : public VGears::WalkmeshFile
     {
     public:
-        TestFile() : QGears::WalkmeshFile( NULL, "", 0, "" ) {}
+        TestFile() : VGears::WalkmeshFile( NULL, "", 0, "" ) {}
         size_t getCalculatedSize() const { return calculateSize(); }
 
         virtual void unload( void ) {}
@@ -38,16 +38,16 @@ BOOST_AUTO_TEST_CASE( read_file )
     BOOST_REQUIRE( stream->isReadable() );
 
     Ogre::LogManager                    logMgr;
-    QGears::FF7::WalkmeshFileSerializer ser;
+    VGears::FF7::WalkmeshFileSerializer ser;
     TestFile                            f;
 
     logMgr.createLog( "Default Log", true, true, true );
 
     ser.importWalkmeshFile( stream, &f );
-    QGears::WalkmeshFile::TriangleList &triangles( f.getTriangles() );
+    VGears::WalkmeshFile::TriangleList &triangles( f.getTriangles() );
     BOOST_CHECK_EQUAL( 39, triangles.size() );
 
-    QGears::WalkmeshFile::Triangle &t1( triangles.front() );
+    VGears::WalkmeshFile::Triangle &t1( triangles.front() );
     BOOST_CHECK_EQUAL( Ogre::Vector3( 3784, 27544, 325 ), t1.a );
     BOOST_CHECK_EQUAL( Ogre::Vector3( 3778, 27434, 325 ), t1.b );
     BOOST_CHECK_EQUAL( Ogre::Vector3( 3751, 27410, 310 ), t1.c );
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( read_file )
     BOOST_CHECK_EQUAL( -1, t1.access_side[1] );
     BOOST_CHECK_EQUAL(  1, t1.access_side[2] );
 
-    QGears::WalkmeshFile::Triangle &t2( triangles.back() );
+    VGears::WalkmeshFile::Triangle &t2( triangles.back() );
     BOOST_CHECK_EQUAL( Ogre::Vector3( 3506, 29251, 432 ), t2.a );
     BOOST_CHECK_EQUAL( Ogre::Vector3( 3527, 29405, 432 ), t2.b );
     BOOST_CHECK_EQUAL( Ogre::Vector3( 3566, 29245, 400 ), t2.c );

@@ -15,7 +15,7 @@
 
 #include <OgreStringConverter.h>
 #include "../../include/core/GameFrameListener.h"
-#include "QGearsGameState.h"
+#include "VGearsGameState.h"
 #include "core/CameraManager.h"
 #include "core/ConfigVar.h"
 #include "core/Console.h"
@@ -86,7 +86,7 @@ GameFrameListener::~GameFrameListener(){
 
 bool GameFrameListener::frameStarted(const Ogre::FrameEvent& evt){
     Timer::getSingleton().AddTime(evt.timeSinceLastFrame);
-    if(QGears::g_ApplicationState == QGears::G_EXIT) return false;
+    if(VGears::g_ApplicationState == VGears::G_EXIT) return false;
     if(keyboard_) keyboard_->capture();
     if(mouse_) mouse_->capture();
     InputManager::getSingleton().Update();
@@ -143,7 +143,7 @@ void GameFrameListener::windowResized(Ogre::RenderWindow *rw){
 }
 
 void GameFrameListener::windowClosed(Ogre::RenderWindow* rw){
-    QGears::g_ApplicationState = QGears::G_EXIT;
+    VGears::g_ApplicationState = VGears::G_EXIT;
 }
 
 void GameFrameListener::windowFocusChange(Ogre::RenderWindow* rw){}

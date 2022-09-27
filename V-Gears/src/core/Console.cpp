@@ -15,7 +15,7 @@
 
 #include <OgreFontManager.h>
 #include <OgreRenderWindow.h>
-#include "common/QGearsApplication.h"
+#include "common/VGearsApplication.h"
 #include "core/ConfigCmdManager.h"
 #include "core/ConfigVarManager.h"
 #include "core/Console.h"
@@ -57,7 +57,7 @@ Console::Console():
 
     // Calculate width and height of console depending on size of application
     Ogre::RenderTarget *render_target(
-      QGears::Application::getSingleton().getRenderWindow()
+      VGears::Application::getSingleton().getRenderWindow()
     );
     console_width_ = render_target->getWidth();
     console_height_ = static_cast<int>(render_target->getHeight() / 2.5f);
@@ -101,17 +101,17 @@ void Console::AddToHistory(const Ogre::String& history){
     history_line_cycle_index_ = -1;
 }
 
-void Console::Input(const QGears::Event& event){
+void Console::Input(const VGears::Event& event){
     if (visible_ != true){
         // Add console
-        if (event.type == QGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE)
+        if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE)
             SetToVisible();
         return;
     }
 
     // input command
     else if (
-      event.type == QGears::ET_KEY_PRESS && (
+      event.type == VGears::ET_KEY_PRESS && (
         event.param1 == OIS::KC_RETURN || event.param1 == OIS::KC_NUMPADENTER
       ) && input_line_.size()
     ){
@@ -132,19 +132,19 @@ void Console::Input(const QGears::Event& event){
         cursor_position_ = 0;
         ResetAutoCompletion();
     }
-    else if (event.type == QGears::ET_KEY_PRESS && event.param1 == OIS::KC_TAB)
+    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_TAB)
         CompleteInput();
     // Remove console
     else if (
-      event.type == QGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE
+      event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE
     ){
         SetToHide();
     }
     // History up
     else if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       ) && event.param1 == OIS::KC_UP
     ){
         if (history_line_cycle_index_ < (int)history_.size() - 1){
@@ -155,8 +155,8 @@ void Console::Input(const QGears::Event& event){
     // History down
     else if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       ) && event.param1 == OIS::KC_DOWN
     ){
         if (history_line_cycle_index_ > 0){
@@ -165,19 +165,19 @@ void Console::Input(const QGears::Event& event){
         }
     }
     // Scroll display to previous row
-    else if (event.type == QGears::ET_MOUSE_SCROLL && event.param1 > 0){
+    else if (event.type == VGears::ET_MOUSE_SCROLL && event.param1 > 0){
         if (display_line_ > 0) display_line_ -= 1;
     }
     // Scroll display to next row
-    else if (event.type == QGears::ET_MOUSE_SCROLL && event.param1 < 0){
+    else if (event.type == VGears::ET_MOUSE_SCROLL && event.param1 < 0){
         if (display_line_ < output_line_.size()) display_line_ += 1;
 
     }
     // Scroll display to previous row
     else if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       ) && event.param1 == OIS::KC_PGUP
     ){
         if (display_line_ > 0) display_line_ -= 1;
@@ -186,8 +186,8 @@ void Console::Input(const QGears::Event& event){
     // Scroll display to next row
     else if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       ) && event.param1 == OIS::KC_PGDOWN
     ){
         if (display_line_ < output_line_.size()) display_line_ += 1;
@@ -195,8 +195,8 @@ void Console::Input(const QGears::Event& event){
     // Delete character after cursor
     else if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       ) && event.param1 == OIS::KC_DELETE
     ){
         if (auto_completition_.size() > 0) ResetAutoCompletion();
@@ -208,8 +208,8 @@ void Console::Input(const QGears::Event& event){
     // Delete character before cursor
     else if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       ) && event.param1 == OIS::KC_BACK
     ){
         if (auto_completition_.size() > 0) ResetAutoCompletion();
@@ -223,8 +223,8 @@ void Console::Input(const QGears::Event& event){
     // Move cursor to left
     else if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       ) && event.param1 == OIS::KC_LEFT
     ){
         if (auto_completition_.size() > 0){
@@ -236,8 +236,8 @@ void Console::Input(const QGears::Event& event){
     // Move cursor to right
     else if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       ) && event.param1 == OIS::KC_RIGHT
     ){
         if (auto_completition_.size() > 0){
@@ -247,7 +247,7 @@ void Console::Input(const QGears::Event& event){
         if (cursor_position_ <  input_line_.size()) ++ cursor_position_;
     }
     else if (
-      event.type == QGears::ET_KEY_PRESS && event.param1 == OIS::KC_ESCAPE
+      event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_ESCAPE
     ){
         input_line_.clear();
         cursor_position_ = 0;
@@ -255,7 +255,7 @@ void Console::Input(const QGears::Event& event){
     }
     // Move cursor to start of string
     else if (
-      event.type == QGears::ET_KEY_PRESS && event.param1 == OIS::KC_HOME
+      event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_HOME
     ){
         cursor_position_ = 0;
         if (auto_completition_.size() > 0){
@@ -264,7 +264,7 @@ void Console::Input(const QGears::Event& event){
         }
     }
     // Move cursor to end of string
-    else if (event.type == QGears::ET_KEY_PRESS && event.param1 == OIS::KC_END){
+    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_END){
         if (auto_completition_.size() > 0){
             input_line_ += auto_completition_[auto_completition_line_];
             ResetAutoCompletion();
@@ -274,8 +274,8 @@ void Console::Input(const QGears::Event& event){
     // Input Ascii character
     else if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       ) && input_line_.size() < line_width_
     ){
         char legalchars[]
@@ -295,7 +295,7 @@ void Console::Input(const QGears::Event& event){
     }
 }
 
-char Console::TranslateNumpad(const QGears::Event& event){
+char Console::TranslateNumpad(const VGears::Event& event){
     switch (static_cast<int>(event.param1)){
         case OIS::KC_NUMPAD0: return '0';
         case OIS::KC_NUMPAD1: return '1';
@@ -418,7 +418,7 @@ void Console::UpdateNotification(){
 void Console::OnResize(){
     // Calculate width and height of console depending on size of application
     Ogre::RenderTarget *render_target(
-      QGears::Application::getSingleton().getRenderWindow()
+      VGears::Application::getSingleton().getRenderWindow()
     );
     console_width_ = render_target->getWidth();
     console_height_ = static_cast<int>(render_target->getHeight() / 2.5f);

@@ -16,9 +16,9 @@
 #pragma once
 
 #include <OgreColourValue.h>
-#include "common/QGearsResource.h"
+#include "common/VGearsResource.h"
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
 

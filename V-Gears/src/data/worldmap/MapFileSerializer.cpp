@@ -16,7 +16,7 @@
 #include "data/worldmap/MapFileSerializer.h"
 #include "common/LzsFile.h"
 
-namespace QGears {
+namespace VGears {
 
     /**
      * Size of each block in a world map file.

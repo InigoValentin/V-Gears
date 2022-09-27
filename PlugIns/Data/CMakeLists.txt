@@ -2,18 +2,18 @@ set(V-Gears_SOURCE_DIR ../../V-Gears)
 
 # define header and source files for the library
 set(HEADER_FILES
-  ${V-Gears_SOURCE_DIR}/include/QGearsPrerequisites.h
-  ${V-Gears_SOURCE_DIR}/include/common/QGearsManualObject.h
-  ${V-Gears_SOURCE_DIR}/include/common/QGearsStringUtil.h
+  ${V-Gears_SOURCE_DIR}/include/VGearsPrerequisites.h
+  ${V-Gears_SOURCE_DIR}/include/common/VGearsManualObject.h
+  ${V-Gears_SOURCE_DIR}/include/common/VGearsStringUtil.h
   ${V-Gears_SOURCE_DIR}/include/common/TypeDefine.h
-  include/QGearsDataPlugin.h
+  include/VGearsDataPlugin.h
 )
 set(SOURCE_FILES
-  ${V-Gears_SOURCE_DIR}/src/common/QGearsManualObject.cpp
-  ${V-Gears_SOURCE_DIR}/src/common/QGearsStringUtil.cpp
+  ${V-Gears_SOURCE_DIR}/src/common/VGearsManualObject.cpp
+  ${V-Gears_SOURCE_DIR}/src/common/VGearsStringUtil.cpp
   ${V-Gears_SOURCE_DIR}/src/common/TypeDefine.cpp
-  src/QGearsDataPlugin.cpp
-  src/QGearsDataPluginDll.cpp
+  src/VGearsDataPlugin.cpp
+  src/VGearsDataPluginDll.cpp
 )
 
 include_directories(
@@ -47,13 +47,13 @@ set(LIBRARIES
 
 target_link_libraries(DataPlugin ${LIBRARIES})
 
-if(NOT QGEARS_STATIC)
+if(NOT VGEARS_STATIC)
   set_target_properties(DataPlugin PROPERTIES
-    COMPILE_DEFINITIONS QGEARS_DATAPLUGIN_EXPORTS
+    COMPILE_DEFINITIONS VGEARS_DATAPLUGIN_EXPORTS
   )
     if(WIN32 OR APPLE)
       install(TARGETS DataPlugin LIBRARY DESTINATION .)
     else()
-      install(TARGETS DataPlugin LIBRARY DESTINATION ./lib/q-gears/plugins/ )
+      install(TARGETS DataPlugin LIBRARY DESTINATION ./lib/v-gears/plugins/ )
     endif()
 endif()

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>QGears Launcher</string>
+   <string>VGears Launcher</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -22,7 +22,7 @@
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Q-Gears Config</string>
+        <string>V-Gears Config</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
@@ -30,15 +30,15 @@
           <item>
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>QGears Path</string>
+             <string>VGears Path</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineQGearsExe"/>
+           <widget class="QLineEdit" name="lineVGearsExe"/>
           </item>
           <item>
-           <widget class="QPushButton" name="btnQGearsExe">
+           <widget class="QPushButton" name="btnVGearsExe">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -94,7 +94,7 @@
         <item>
          <widget class="QPushButton" name="btnLaunch">
           <property name="text">
-           <string>Run Q-Gears</string>
+           <string>Run V-Gears</string>
           </property>
          </widget>
         </item>
@@ -137,7 +137,7 @@
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>QGears Data Path:</string>
+             <string>VGears Data Path:</string>
             </property>
            </widget>
           </item>

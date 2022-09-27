@@ -62,7 +62,7 @@ std::unique_ptr<CodeGenerator> FF7::FF7FieldEngine::getCodeGenerator(
 void FF7::FF7FieldEngine::postCFG(InstVec& insts, Graph g){
     /*
     // In FF7 some scripts ends with an infinite loop to "keep it alive"
-    // in QGears this isn't required so we can remove them
+    // in VGears this isn't required so we can remove them
     RemoveTrailingInfiniteLoops(insts, g);
 
     // This could generate bad code, but it always seems to follow that pattern that if the last

@@ -420,8 +420,8 @@ void ScriptManager::InitBinds(){
 
     // Commnds to initiate modules
     luabind::module(lua_state_)[
-        luabind::class_<QGears::WorldMapModule>("world_map_module")
-          .def("init", (void(QGears::WorldMapModule::*)()) &QGears::WorldMapModule::Init)
+        luabind::class_<VGears::WorldMapModule>("world_map_module")
+          .def("init", (void(VGears::WorldMapModule::*)()) &VGears::WorldMapModule::Init)
     ];
 
     // Register all command handlers
@@ -437,7 +437,7 @@ void ScriptManager::InitBinds(){
     luabind::globals(lua_state_)["dialog"] = boost::ref(*(DialogsManager::getSingletonPtr()));
     luabind::globals(lua_state_)["ui_manager"] = boost::ref(*(UiManager::getSingletonPtr()));
     luabind::globals(lua_state_)["world_map_module"]
-      = boost::ref(*(QGears::WorldMapModule::getSingletonPtr()));
+      = boost::ref(*(VGears::WorldMapModule::getSingletonPtr()));
     luabind::globals(lua_state_)["timer"] = boost::ref(*(Timer::getSingletonPtr()));
     luabind::globals(lua_state_)["script"] = boost::ref(*this);
 }

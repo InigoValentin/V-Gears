@@ -46,7 +46,7 @@ class Console : public Ogre::Singleton<Console>, public Ogre::LogListener{
          *
          * @param event[in] Event to process.
          */
-        void Input(const QGears::Event& event);
+        void Input(const VGears::Event& event);
 
         /**
          * Updates the console.
@@ -165,7 +165,7 @@ class Console : public Ogre::Singleton<Console>, public Ogre::LogListener{
          *
          * @param event[in] Event to translate.
          */
-        char TranslateNumpad(const QGears::Event& event);
+        char TranslateNumpad(const VGears::Event& event);
 
         /**
          * The console width.

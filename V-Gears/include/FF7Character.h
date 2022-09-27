@@ -97,11 +97,11 @@ namespace FFVII{
              * @return ID of the character with the specified name, or {@see
              * UNKNOWN} if the character doesn't exist.
              */
-            static CharacterId GetIdByName( const QGears::String& name);
+            static CharacterId GetIdByName( const VGears::String& name);
 
         private:
 
-            typedef std::map<QGears::String, CharacterId> CharacterIdLookupMap;
+            typedef std::map<VGears::String, CharacterId> CharacterIdLookupMap;
 
             /**
              * Creates a lookup map for character names.

@@ -17,7 +17,7 @@
 #include "core/particles/ParticleSystem.h"
 #include "core/particles/ParticleSystemManager.h"
 
-Ogre::String ParticleSystemFactory::FACTORY_TYPE_NAME = "QgearsParticleSystem";
+Ogre::String ParticleSystemFactory::FACTORY_TYPE_NAME = "VgearsParticleSystem";
 
 
 const Ogre::String& ParticleSystemFactory::getType() const{

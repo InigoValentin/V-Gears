@@ -96,7 +96,7 @@ class LzsBuffer{
          * @param buffer[in] Buffer with the data of the lzs file.
          * @return Decompressed data.
          */
-        static std::vector<QGears::uint8> Decompress(
-          const std::vector<QGears::uint8>& buffer
+        static std::vector<VGears::uint8> Decompress(
+          const std::vector<VGears::uint8>& buffer
         );
 };

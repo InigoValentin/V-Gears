@@ -102,8 +102,8 @@ Background2D::~Background2D(){
     DestroyVertexBuffers();
 }
 
-void Background2D::InputDebug(const QGears::Event& event){
-    if (cv_background2d_manual.GetB() == true && event.type == QGears::ET_KEY_IMPULSE){
+void Background2D::InputDebug(const VGears::Event& event){
+    if (cv_background2d_manual.GetB() == true && event.type == VGears::ET_KEY_IMPULSE){
         if (event.param1 == OIS::KC_W)
             position_real_.y += 2;
         else if (event.param1 == OIS::KC_A)
@@ -210,11 +210,11 @@ void Background2D::OnResize(){
         float new_x4 = bottom_left.x;
         float new_y4 = bottom_left.y;
         Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
-        if (tiles_[i].blending == QGears::B_ALPHA)
+        if (tiles_[i].blending == VGears::B_ALPHA)
             vertex_buffer = alpha_vertex_buffer_;
-        else if(tiles_[i].blending == QGears::B_ADD)
+        else if(tiles_[i].blending == VGears::B_ADD)
             vertex_buffer = add_vertex_buffer_;
-        else if(tiles_[i].blending == QGears::B_SUBTRACT)
+        else if(tiles_[i].blending == VGears::B_SUBTRACT)
             vertex_buffer = subtract_vertex_buffer_;
         float* write_iterator = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
         write_iterator += tiles_[i].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
@@ -371,7 +371,7 @@ void Background2D::SetRange(const int min_x, const int min_y, const int max_x, c
     calculateScreenScale();
 }
 
-void Background2D::AddTile(const QGears::Tile& tile){
+void Background2D::AddTile(const VGears::Tile& tile){
     // TODO: move depth calculation to flevelBackgroundLoader maybe? and let
     // Backgorund2D only handle 0 <= depth <= 1 or so?
     // Maybe just move the < 4095 part to flevel background loader?
@@ -415,17 +415,17 @@ void Background2D::AddTile(
     Ogre::RenderOperation render_op;
     Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
     unsigned int max_vertex_count;
-    if (blending == QGears::B_ALPHA){
+    if (blending == VGears::B_ALPHA){
         render_op = alpha_render_op_;
         vertex_buffer = alpha_vertex_buffer_;
         max_vertex_count = alpha_max_vertex_count_;
     }
-    else if (blending == QGears::B_ADD){
+    else if (blending == VGears::B_ADD){
         render_op = add_render_op_;
         vertex_buffer = add_vertex_buffer_;
         max_vertex_count = add_max_vertex_count_;
     }
-    else if (blending == QGears::B_SUBTRACT){
+    else if (blending == VGears::B_SUBTRACT){
         render_op = subtract_render_op_;
         vertex_buffer = subtract_vertex_buffer_;
         max_vertex_count = subtract_max_vertex_count_;
@@ -541,11 +541,11 @@ void Background2D::UpdateTileUV(
         return;
     }
     Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
-    if (tiles_[tile_id].blending == QGears::B_ALPHA)
+    if (tiles_[tile_id].blending == VGears::B_ALPHA)
         vertex_buffer = alpha_vertex_buffer_;
-    else if (tiles_[tile_id].blending == QGears::B_ADD)
+    else if (tiles_[tile_id].blending == VGears::B_ADD)
         vertex_buffer = add_vertex_buffer_;
-    else if(tiles_[tile_id].blending == QGears::B_SUBTRACT)
+    else if(tiles_[tile_id].blending == VGears::B_SUBTRACT)
         vertex_buffer = subtract_vertex_buffer_;
     float* write_iterator = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
     write_iterator += tiles_[tile_id].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
@@ -727,7 +727,7 @@ void Background2D::DestroyVertexBuffers(){
     subtract_max_vertex_count_ = 0;
 }
 
-void Background2D::load(const QGears::Background2DFilePtr& background){
+void Background2D::load(const VGears::Background2DFilePtr& background){
     assert(background != nullptr);
     background->load();
     SetImage(background->GetTextureName());
@@ -740,9 +740,9 @@ void Background2D::load(const QGears::Background2DFilePtr& background){
     load(background->GetTiles());
 }
 
-void Background2D::load(const QGears::Background2DFile::TileList& tiles){
-    QGears::Background2DFile::TileList::const_iterator it(tiles.begin());
-    QGears::Background2DFile::TileList::const_iterator it_end(tiles.end());
+void Background2D::load(const VGears::Background2DFile::TileList& tiles){
+    VGears::Background2DFile::TileList::const_iterator it(tiles.begin());
+    VGears::Background2DFile::TileList::const_iterator it_end(tiles.end());
     size_t tile_index(0);
     while (it != it_end) {
         AddTile(*it);
@@ -751,16 +751,16 @@ void Background2D::load(const QGears::Background2DFile::TileList& tiles){
     }
 }
 
-void Background2D::load(const size_t tile_index, const QGears::AnimationMap& animations){
-    QGears::AnimationMap::const_iterator it(animations.begin());
-    QGears::AnimationMap::const_iterator it_end(animations.end());
+void Background2D::load(const size_t tile_index, const VGears::AnimationMap& animations){
+    VGears::AnimationMap::const_iterator it(animations.begin());
+    VGears::AnimationMap::const_iterator it_end(animations.end());
     while(it != it_end){
-        const QGears::String& name(it->first);
-        const QGears::Animation& animation(it->second);
+        const VGears::String& name(it->first);
+        const VGears::Animation& animation(it->second);
         Background2DAnimation* anim(new Background2DAnimation(name, this, tile_index));
         anim->SetLength(animation.length);
-        QGears::KeyFrameList::const_iterator itk(animation.key_frames.begin());
-        QGears::KeyFrameList::const_iterator itk_end(animation.key_frames.end());
+        VGears::KeyFrameList::const_iterator itk(animation.key_frames.begin());
+        VGears::KeyFrameList::const_iterator itk_end(animation.key_frames.end());
         while(itk != itk_end) anim->AddUVKeyFrame(*(itk++));
         AddAnimation(anim);
         ++ it;

@@ -16,9 +16,9 @@
 #include "data/worldmap/MapFile.h"
 #include "data/worldmap/MapFileSerializer.h"
 
-namespace QGears {
+namespace VGears {
 
-    const String WorldMapFile::RESOURCE_TYPE("QGearsWorldMap7File");
+    const String WorldMapFile::RESOURCE_TYPE("VGearsWorldMap7File");
 
     WorldMapFile::WorldMapFile(
       Ogre::ResourceManager* creator, const Ogre::String& name,

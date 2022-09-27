@@ -14,7 +14,7 @@
  */
 #include "FF7Common.h"
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
 

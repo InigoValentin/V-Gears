@@ -27,11 +27,11 @@ ConfigVar::ConfigVar(
   default_value_(default_value),
   value_s_(default_value)
 {
-    QGEARS_ASSERT(name != "", "name_ of ConfigVar can't be empty!");
-    QGEARS_ASSERT(
+    VGEARS_ASSERT(name != "", "name_ of ConfigVar can't be empty!");
+    VGEARS_ASSERT(
       default_value != "", "default_value_ of ConfigVar can't be empty!"
     );
-    QGEARS_ASSERT(
+    VGEARS_ASSERT(
       description != "", "description_ of ConfigVar can't be empty!"
     );
     UpdateVariables();
@@ -42,7 +42,7 @@ ConfigVar::ConfigVar(
         static_config_var_list_ = this;
     }
     else{
-        QGEARS_ASSERT(
+        VGEARS_ASSERT(
           false, "ConfigVar declared after RegisterCvars were called!"
         );
     }

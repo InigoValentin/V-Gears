@@ -180,7 +180,7 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
          *
          * @param event[in] The event to handle.
          */
-        void Input(const QGears::Event& event);
+        void Input(const VGears::Event& event);
 
         /**
          * Updates the state of all scripts of a given type.

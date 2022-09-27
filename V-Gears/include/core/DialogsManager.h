@@ -229,7 +229,7 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          *
          * @param event[in] Event to process.
          */
-        void Input(const QGears::Event& event);
+        void Input(const VGears::Event& event);
 
         /**
          * Updates all the messages in the manager.

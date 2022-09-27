@@ -1,6 +1,6 @@
 /*
- * Q-Gears
- * Copyright (C) 2022 Q-Gears Team
+ * V-Gears
+ * Copyright (C) 2022 V-Gears Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -396,7 +396,7 @@ namespace FF7{
              * Removes trailing infinite loops.
              *
              * In FF7 some scripts ends with an infinite loop to keep it
-             * alive. in QGears this isn't required, and can cause infinite
+             * alive. in VGears this isn't required, and can cause infinite
              * loops, so they can be removed.
              *
              * @param insts[in|out] List of instructions to proccess. Trailing
@@ -410,7 +410,7 @@ namespace FF7{
              * Tries to detect scripts with trailing infinite loops.
              *
              * In FF7 some scripts ends with an infinite loop to keep it
-             * alive. in QGears this isn't required, and can cause infinite
+             * alive. in VGears this isn't required, and can cause infinite
              * loops, so they can be removed. This function marks them, so
              * they can be deleted with
              * @{see FF7FieldEngine::RemoveTrailingInfiniteLoops}.

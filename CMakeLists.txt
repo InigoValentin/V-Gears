@@ -84,7 +84,7 @@ endif()
 
 set(VGears_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 
-message("QGears_SOURCE_DIR ${QGears_SOURCE_DIR}")
+message("VGears_SOURCE_DIR ${VGears_SOURCE_DIR}")
 message("VGears_SOURCE_DIR ${VGears_SOURCE_DIR}")
 
 set(CMAKE_MODULE_PATH "${OGRE_CMAKE_MODULE_PATH};${CMAKE_MODULE_PATH}")

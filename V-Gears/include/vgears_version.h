@@ -22,4 +22,4 @@
 /**
  * Application version.
  */
-#define QG_VERSION_NAME ""
+#define QG_VERSION_NAME "V-Gears v0.1.0"

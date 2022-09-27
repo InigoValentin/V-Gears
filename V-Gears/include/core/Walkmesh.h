@@ -63,7 +63,7 @@ struct WalkmeshTriangle{
     bool locked;
 };
 
-namespace QGears{
+namespace VGears{
     typedef Ogre::SharedPtr<class WalkmeshFile> WalkmeshFilePtr;
 }
 
@@ -162,7 +162,7 @@ class Walkmesh{
          *
          * @param walkmesh[in] Walkmesh file.
          */
-        virtual void load(const QGears::WalkmeshFilePtr &walkmesh);
+        virtual void load(const VGears::WalkmeshFilePtr &walkmesh);
 
     private:
 

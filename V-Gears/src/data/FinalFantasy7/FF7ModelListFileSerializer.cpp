@@ -17,7 +17,7 @@
 #include <OgreException.h>
 #include "data/FinalFantasy7/FF7ModelListFileSerializer.h"
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
 

@@ -17,14 +17,14 @@
 
 #include <OgreResourceManager.h>
 #include "common/TypeDefine.h"
-#include "QGearsPrerequisites.h"
+#include "VGearsPrerequisites.h"
 
-namespace QGears {
+namespace VGears {
 
     /**
      * The manager for TXZ files
      */
-    class _QGearsExport TxzFileManager
+    class _VGearsExport TxzFileManager
       : public Ogre::ResourceManager, public Ogre::Singleton<TxzFileManager>
     {
 

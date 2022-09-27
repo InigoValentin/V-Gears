@@ -16,10 +16,10 @@
 #include "data/worldmap/MapFileManager.h"
 #include "data/worldmap/MapFile.h"
 
-template<> QGears::MapFileManager*
-  Ogre::Singleton<QGears::MapFileManager>::msSingleton = nullptr;
+template<> VGears::MapFileManager*
+  Ogre::Singleton<VGears::MapFileManager>::msSingleton = nullptr;
 
-namespace QGears {
+namespace VGears {
 
     MapFileManager *MapFileManager::GetSingletonPtr(){return msSingleton;}
 

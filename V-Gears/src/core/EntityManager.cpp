@@ -176,29 +176,29 @@ EntityManager::~EntityManager(){
     LOG_TRIVIAL("EntityManager destroyed.");
 }
 
-void EntityManager::Input(const QGears::Event& event){
+void EntityManager::Input(const VGears::Event& event){
     background_2d_.InputDebug(event);
     if (paused_ == true) return;
 
     if (player_entity_ != NULL && player_lock_ == false){
-        if (event.type == QGears::ET_KEY_REPEAT && event.event == "walk_left")
+        if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_left")
             player_move_.x = -1;
         else if (
-          event.type == QGears::ET_KEY_REPEAT && event.event == "walk_right"
+          event.type == VGears::ET_KEY_REPEAT && event.event == "walk_right"
         ){
             player_move_.x = 1;
         }
-        if (event.type == QGears::ET_KEY_REPEAT && event.event == "walk_down")
+        if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_down")
             player_move_.y = -1;
         else if (
-          event.type == QGears::ET_KEY_REPEAT && event.event == "walk_up"
+          event.type == VGears::ET_KEY_REPEAT && event.event == "walk_up"
         ){
             player_move_.y = 1;
         }
-        if (event.type == QGears::ET_KEY_REPEAT && event.event == "run")
+        if (event.type == VGears::ET_KEY_REPEAT && event.event == "run")
             player_run_ = true;
 
-        if (event.type == QGears::ET_KEY_PRESS && event.event == "interact"){
+        if (event.type == VGears::ET_KEY_PRESS && event.event == "interact"){
             CheckEntityInteract();
             for (unsigned int i = 0; i < entity_triggers_.size(); ++ i){
                 if (

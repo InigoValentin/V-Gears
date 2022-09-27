@@ -42,14 +42,14 @@ MainWindow::MainWindow(QWidget *parent) :
       settings_->value("ConfigDir").toString()
     );
     main_window_->lineDataDir->setText(settings_->value("DataDir").toString());
-    main_window_->lineQGearsExe->setText(
-      settings_->value("QGearsEXE").toString()
+    main_window_->lineVGearsExe->setText(
+      settings_->value("VGearsEXE").toString()
     );
 #ifdef _DEBUG
     // Hard coded prebaked paths for debugging to save time
     //main_window_->lineInput->setText("C:\\Games\\FF7\\data");
     //main_window_->lineDataDir->setText(
-    //  "C:\\Users\\paul\\Desktop\\q-gears\\output\\data"
+    //  "C:\\Users\\paul\\Desktop\\v-gears\\output\\data"
     //);
 #endif
     timer_ = new QTimer(this);
@@ -68,7 +68,7 @@ void MainWindow::InitSettings(void){
         win = true;
     #else
         settings_ = new QSettings(
-          QSettings::NativeFormat,QSettings::UserScope, "q-gears", "launcher", 0
+          QSettings::NativeFormat,QSettings::UserScope, "v-gears", "launcher", 0
         );
     #endif
     //Check settings
@@ -98,15 +98,15 @@ void MainWindow::InitSettings(void){
         }
     }
 
-    if (settings_->value("QGearsEXE").isNull()){
+    if (settings_->value("VGearsEXE").isNull()){
         if (win){
             settings_->setValue(
-              "QGearsEXE",QString("%1/v-gears.exe").arg(
+              "VGearsEXE",QString("%1/v-gears.exe").arg(
                  QCoreApplication::applicationDirPath()
                )
             );
         }
-        else settings_->setValue("QGearsEXE", QString("/usr/games/q-gears"));
+        else settings_->setValue("VGearsEXE", QString("/usr/games/v-gears"));
     }
 }
 
@@ -116,7 +116,7 @@ void MainWindow::on_lineConfigDir_editingFinished(){
 
 void MainWindow::on_btnConfigDir_clicked(){
     QString temp = QFileDialog::getExistingDirectory(
-      this, tr("Select Location of QGears Configuration Data,"),
+      this, tr("Select Location of VGears Configuration Data,"),
       settings_->value("ConfigDir").toString());
     if (!temp.isNull()){
         settings_->setValue("ConfigDir", temp);
@@ -124,29 +124,29 @@ void MainWindow::on_btnConfigDir_clicked(){
     }
 }
 
-void MainWindow::on_lineQGearsExe_editingFinished(){
-    settings_->setValue("QGearsEXE",main_window_->lineQGearsExe->text());
+void MainWindow::on_lineVGearsExe_editingFinished(){
+    settings_->setValue("VGearsEXE",main_window_->lineVGearsExe->text());
 }
 
-void MainWindow::on_btnQGearsExe_clicked(){
+void MainWindow::on_btnVGearsExe_clicked(){
     QString temp = QFileDialog::getOpenFileName(
-      this, tr("Location of QGears Executable,"), QDir::rootPath());
+      this, tr("Location of VGears Executable,"), QDir::rootPath());
     if (!temp.isNull()){
-        settings_->setValue("QGearsEXE", temp);
-        main_window_->lineQGearsExe->setText(temp);
+        settings_->setValue("VGearsEXE", temp);
+        main_window_->lineVGearsExe->setText(temp);
     }
 }
 
 void MainWindow::on_btnLaunch_clicked(){
     QString configDir(main_window_->lineConfigDir->text());
-    QString exe(main_window_->lineQGearsExe->text());
+    QString exe(main_window_->lineVGearsExe->text());
     QStringList args;
     args.append(
       QString("--resources-file=%1/resources.cfg").arg(
         main_window_->lineConfigDir->text())
     );
     args.append(
-      QString("--config-file=%1/q-gears.cfg").arg(
+      QString("--config-file=%1/v-gears.cfg").arg(
         main_window_->lineConfigDir->text()
       )
     );
@@ -156,8 +156,8 @@ void MainWindow::on_btnLaunch_clicked(){
       )
     );
     // Check that the config dir is set up correctly.
-    QProcess qGears;
-    qGears.startDetached(exe,args,configDir);
+    QProcess vGears;
+    vGears.startDetached(exe,args,configDir);
 }
 
 
@@ -174,7 +174,7 @@ void MainWindow::on_lineDataDir_editingFinished(){
 
 void MainWindow::on_btnDataDir_clicked(){
     QString temp = QFileDialog::getExistingDirectory(
-      this, tr("Location of QGears Data),"),
+      this, tr("Location of VGears Data),"),
       settings_->value("DataDir").toString()
     );
     if(!temp.isNull()){

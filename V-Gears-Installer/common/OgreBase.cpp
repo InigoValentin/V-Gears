@@ -33,7 +33,7 @@ DisplayFrameListener *frame_listener;
 void InitializeOgreBase(const Ogre::String& name){
     std::cout << "[OGRE] Initializing..." << std::endl;
     Ogre::LogManager* log_manager = new Ogre::LogManager();
-    log_manager->createLog("q-gears.log", true, true);
+    log_manager->createLog("v-gears.log", true, true);
     log_manager->getDefaultLog()->setLogDetail((Ogre::LoggingLevel)3);
     Ogre::String ressource_cfg("");
     Ogre::String plugins_cfg("");

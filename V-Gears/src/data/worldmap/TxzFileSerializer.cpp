@@ -19,7 +19,7 @@
 #include "data/worldmap/TxzFileSerializer.h"
 #include "common/LzsFile.h"
 
-namespace QGears {
+namespace VGears {
 
     TxzFileSerializer::TxzFileSerializer(){}
 

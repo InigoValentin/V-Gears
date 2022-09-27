@@ -15,7 +15,7 @@
 
 #include "common/TypeDefine.h"
 
-namespace QGears{
+namespace VGears{
     const String EXT_MATERIAL(".material");
     const String EXT_MESH(".mesh");
     const String EXT_SKELETON(".skeleton");

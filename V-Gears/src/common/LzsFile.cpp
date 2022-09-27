@@ -97,11 +97,11 @@ void LzsFile::ExtractLzs(){
     buffer_size_ = outputoffset_;
 }
 
-std::vector<QGears::uint8> LzsBuffer::Decompress(
-  const std::vector<QGears::uint8>& buffer
+std::vector<VGears::uint8> LzsBuffer::Decompress(
+  const std::vector<VGears::uint8>& buffer
 ){
     LzsFile tmp(static_cast<const u8*>(buffer.data()), 0, buffer.size());
-    std::vector<QGears::uint8> ret(tmp.buffer_size_);
+    std::vector<VGears::uint8> ret(tmp.buffer_size_);
     ret.assign(tmp.buffer_, tmp.buffer_ + tmp.buffer_size_);
     return ret;
 }

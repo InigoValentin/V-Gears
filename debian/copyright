@@ -1,6 +1,6 @@
 Format: http://dep.debian.net/deps/dep5
 Upstream-Name: V-Gears
-Source: http://sourceforge.net/projects/q-gears
+Source: http://sourceforge.net/projects/v-gears
 
 Files: debian/*
 Copyright: 2022 The V-Gears team <CCR EMAIL>

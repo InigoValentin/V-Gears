@@ -17,7 +17,7 @@
 #include "core/DebugDraw.h"
 #include "core/Logger.h"
 #include "core/Walkmesh.h"
-#include "map/QGearsWalkmeshFile.h"
+#include "map/VGearsWalkmeshFile.h"
 
 ConfigVar cv_debug_walkmesh(
   "debug_walkmesh", "Draw walkmesh and walkmesh debug info", "false"
@@ -145,6 +145,6 @@ bool Walkmesh::IsLocked(unsigned int triangle_id) const{
     return triangles_[triangle_id].locked;
 }
 
-void Walkmesh::load(const QGears::WalkmeshFilePtr &walkmesh){
+void Walkmesh::load(const VGears::WalkmeshFilePtr &walkmesh){
     for (const auto &triangle : walkmesh->GetTriangles()) AddTriangle(triangle);
 }

@@ -87,21 +87,21 @@ void DialogsManager::Initialise(){
     LOG_TRIVIAL("DialogsManager initialized.");
 }
 
-void DialogsManager::Input(const QGears::Event& input){
-    if ((input.type == QGears::ET_KEY_PRESS) && (input.event == "message_ok"))
+void DialogsManager::Input(const VGears::Event& input){
+    if ((input.type == VGears::ET_KEY_PRESS) && (input.event == "message_ok"))
         next_pressed_ = true;
     else if (
-      (input.type == QGears::ET_KEY_REPEAT) && (input.event == "message_ok")
+      (input.type == VGears::ET_KEY_REPEAT) && (input.event == "message_ok")
     ){
         next_repeated_ = true;
     }
     else if (
-      (input.type == QGears::ET_KEY_PRESS) && (input.event == "message_up")
+      (input.type == VGears::ET_KEY_PRESS) && (input.event == "message_up")
     ){
         up_pressed_ = true;
     }
     else if (
-      (input.type == QGears::ET_KEY_PRESS) && (input.event == "message_down")
+      (input.type == VGears::ET_KEY_PRESS) && (input.event == "message_down")
     ){
         down_pressed_ = true;
     }

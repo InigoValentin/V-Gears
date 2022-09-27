@@ -15,10 +15,10 @@
 
 #include "data/FinalFantasy7/FF7ModelListFileManager.h"
 
-template<> QGears::FF7::ModelListFileManager
-  *Ogre::Singleton<QGears::FF7::ModelListFileManager>::msSingleton = NULL;
+template<> VGears::FF7::ModelListFileManager
+  *Ogre::Singleton<VGears::FF7::ModelListFileManager>::msSingleton = NULL;
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
 

@@ -20,7 +20,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 #include <OgreDataStream.h>
-#include "data/QGearsTexFile.h"
+#include "data/VGearsTexFile.h"
 
 using std::back_inserter;
 using std::copy;
@@ -39,7 +39,7 @@ void pintFileInfo(const bfs::path &tex_path){
     bfs::ifstream *ifs(OGRE_NEW_T(bfs::ifstream, Ogre::MEMCATEGORY_GENERAL)(tex_path, bfs::ifstream::binary));
     Ogre::FileStreamDataStream *stream(OGRE_NEW Ogre::FileStreamDataStream(ifs));
     Ogre::DataStreamPtr input(stream);
-    QGears::TexFile tex;
+    VGears::TexFile tex;
     tex.readHeader(input);
     cout << endl << " size: "
       << tex.m_header.image_data.width

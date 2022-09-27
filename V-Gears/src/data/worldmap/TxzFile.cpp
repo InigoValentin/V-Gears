@@ -16,9 +16,9 @@
 #include "data/worldmap/TxzFile.h"
 #include "data/worldmap/TxzFileSerializer.h"
 
-namespace QGears {
+namespace VGears {
 
-    const String TxzFile::RESOURCE_TYPE("QGearsWorldMapTxzFile");
+    const String TxzFile::RESOURCE_TYPE("VGearsWorldMapTxzFile");
 
     TxzFile::TxzFile(
       Ogre::ResourceManager* creator, const Ogre::String& name,

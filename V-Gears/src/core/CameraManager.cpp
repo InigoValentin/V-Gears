@@ -19,7 +19,7 @@
 #include <OIS.h>
 #include "core/CameraManager.h"
 #include "core/CameraManagerCommands.h"
-#include "common/QGearsApplication.h"
+#include "common/VGearsApplication.h"
 #include "core/ConfigVar.h"
 #include "core/InputManager.h"
 #include "core/Logger.h"
@@ -49,7 +49,7 @@ CameraManager::CameraManager():
     //camera_->lookAt(Ogre::Vector3(0, 0, 0));
     Ogre::Root::getSingleton().getSceneManager("Scene")->getRootSceneNode()
       ->lookAt(Ogre::Vector3(0, 0, 0), Ogre::Node::TS_LOCAL);
-    viewport_ = QGears::Application::getSingleton().getRenderWindow()
+    viewport_ = VGears::Application::getSingleton().getRenderWindow()
       ->addViewport(camera_, 0);
     viewport_->setBackgroundColour(Ogre::ColourValue(0, 0, 0));
     camera_->setAspectRatio(
@@ -61,7 +61,7 @@ CameraManager::CameraManager():
 CameraManager::~CameraManager(){LOG_TRIVIAL("CameraManager finished.");}
 
 void CameraManager::Input(
-  const QGears::Event& event, Ogre::Real time_since_last_frame
+  const VGears::Event& event, Ogre::Real time_since_last_frame
 ){
     if (camera_free_ == true){
         float speed = cv_cam_speed.GetF() * time_since_last_frame;
@@ -76,14 +76,14 @@ void CameraManager::Input(
           Ogre::Root::getSingleton().getSceneManager("Scene")
             ->getRootSceneNode();
 
-        if (event.type == QGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_W){
+        if (event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_W){
             //camera_->moveRelative(Ogre::Vector3(0, 0, -speed));
             rootScene->translate(
               Ogre::Vector3(0, 0, -speed), Ogre::Node::TS_LOCAL
             );
         }
         else if (
-          event.type == QGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_A
+          event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_A
         ){
             //camera_->moveRelative(Ogre::Vector3(-speed, 0, 0));
             rootScene->translate(
@@ -91,7 +91,7 @@ void CameraManager::Input(
             );
         }
         else if (
-          event.type == QGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_S
+          event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_S
         ){
             //camera_->moveRelative(Ogre::Vector3(0, 0, speed));
             rootScene->translate(
@@ -99,7 +99,7 @@ void CameraManager::Input(
             );
         }
         else if (
-          event.type == QGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_D
+          event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_D
         ){
             //camera_->moveRelative(Ogre::Vector3(speed, 0, 0));
             rootScene->translate(
@@ -107,18 +107,18 @@ void CameraManager::Input(
             );
         }
         else if (
-          event.type == QGears::ET_MOUSE_PRESS && event.param1 == OIS::MB_Right
+          event.type == VGears::ET_MOUSE_PRESS && event.param1 == OIS::MB_Right
         ){
             camera_free_rotate_ = true;
         }
         else if (
-          event.type == QGears::ET_MOUSE_RELEASE
+          event.type == VGears::ET_MOUSE_RELEASE
           && event.param1 == OIS::MB_Right
         ){
             camera_free_rotate_ = false;
         }
         else if (
-          event.type == QGears::ET_MOUSE_MOVE && camera_free_rotate_ == true
+          event.type == VGears::ET_MOUSE_MOVE && camera_free_rotate_ == true
         ){
             //camera_->rotate(
             //  Ogre::Vector3::UNIT_Z,

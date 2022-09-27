@@ -16,11 +16,11 @@
 #pragma once
 
 #include "common/TypeDefine.h"
-#include "data/QGearsSerializer.h"
+#include "data/VGearsSerializer.h"
 
 #include "FF7ModelListFile.h"
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
 

@@ -18,7 +18,7 @@
 #include <OgreString.h>
 #include <Ogre.h>
 #include <vector>
-#include "map/QGearsTile.h"
+#include "map/VGearsTile.h"
 
 class Background2D;
 
@@ -114,7 +114,7 @@ class Background2DAnimation{
          *
          * @param key_frame[in] The keyframe to add.
          */
-        virtual void AddUVKeyFrame(const QGears::KeyFrame key_frame);
+        virtual void AddUVKeyFrame(const VGears::KeyFrame key_frame);
 
         /**
          * Adds a keyframe to the animation.

@@ -17,7 +17,7 @@
 
 #include "common/TypeDefine.h"
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
 

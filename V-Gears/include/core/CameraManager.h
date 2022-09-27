@@ -48,7 +48,7 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
          * @param time_since_last_frame[in] For speed calculation.
          */
         void Input(
-          const QGears::Event& event , Ogre::Real time_since_last_frame
+          const VGears::Event& event , Ogre::Real time_since_last_frame
         );
 
         /**

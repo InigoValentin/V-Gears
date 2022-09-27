@@ -60,7 +60,7 @@ void Background2DAnimation::SetLength(const float time){length_ = time;}
 
 float Background2DAnimation::GetLength() const{return length_;}
 
-void Background2DAnimation::AddUVKeyFrame(const QGears::KeyFrame key_frame){
+void Background2DAnimation::AddUVKeyFrame(const VGears::KeyFrame key_frame){
     AddUVKeyFrame(key_frame.time, key_frame.uv);
 }
 

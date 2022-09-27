@@ -17,7 +17,7 @@
 #include <OgreException.h>
 #include "map/FinalFantasy7/FF7WalkmeshFileSerializer.h"
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
 

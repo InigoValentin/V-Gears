@@ -2,7 +2,7 @@
 
 ## What is V-Gears? 
 
-Q-Gears is an RPG engine for games like Squaresoft's Final Fantasy 7, Final Fantasy IX or Xenogears. It is designed to be cross-platfrom and run on modern operating systems such as Win32 and Linux.
+V-Gears is an RPG engine for games like Squaresoft's Final Fantasy 7, Final Fantasy IX or Xenogears. It is designed to be cross-platfrom and run on modern operating systems such as Win32 and Linux.
 
 See here for builds http://qgears.itscovarr.com here you will find nightly builds and Linux builds for every version. Since the Windows version only builds daily not every change will have a matching Windows build.
 
@@ -111,14 +111,14 @@ configure -platform win32-msvc2013 -no-webkit -debug-and-release -no-phonon -no-
 
 Key in "o" to use the open source license and then "y" to agree. Once this is done enter "nmake" to finish compling Qt.
 
-Now sync down the QGears source code, first create a directory some where you want to sync the code to using Windows explorer. Then right in the newly created directory and select "GIT Bash here".
+Now sync down the VGears source code, first create a directory some where you want to sync the code to using Windows explorer. Then right in the newly created directory and select "GIT Bash here".
 
 In the git bash enter:
 ```
-git clone --recursive https://github.com/q-gears/q-gears.git
+git clone --recursive https://github.com/v-gears/v-gears.git
 ```
 
-**Building the QGears code:**
+**Building the VGears code:**
 First launch a "Visual studio developer command prompt" (Found under "tools" in the start menu in the Visual studio directory" (you've already done this if you've got this far).
 
 Now cd to where you synced the qgears source code to. For me this was "cd C:\Users\paul\Desktop\qgears\src"
@@ -132,14 +132,14 @@ cmake .. -DZLIB_ROOT=C:/zlib128-dll -DBOOST_ROOT=C:/boost_1_55_0
 
 (Note how we use / and not \ in paths here).
 
-Now you can open the newly created QGears.sln in Visual Studio and build Win32/Release or Debug. If files are added/deleted/or the depends change then repeat the set and cmake commands in the Visual Studio command prompt in order to update QGears.sln.
+Now you can open the newly created VGears.sln in Visual Studio and build Win32/Release or Debug. If files are added/deleted/or the depends change then repeat the set and cmake commands in the Visual Studio command prompt in order to update VGears.sln.
 
-You can also build the sln file from the command line by entering "msbuild QGears.sln /m" in the Visual Studio command prompt.
+You can also build the sln file from the command line by entering "msbuild VGears.sln /m" in the Visual Studio command prompt.
 
 To build the installer build the "PACKAGE" project from VisualStudio, this will generate an MSI, alternatively you can run it from the Visual Studio command prompt by entering "cpack -C Debug" (replace Debug with Release if building release).
 
 # What next?
 
-Now that you've got everything built see the wiki for how to run QGears, coding style, how to start hacking etc.
+Now that you've got everything built see the wiki for how to run VGears, coding style, how to start hacking etc.
 
-https://github.com/q-gears/q-gears/wiki
+https://github.com/v-gears/v-gears/wiki

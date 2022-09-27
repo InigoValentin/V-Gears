@@ -16,7 +16,7 @@
 #include "data/FinalFantasy7/FF7ModelListFile.h"
 #include "data/FinalFantasy7/FF7ModelListFileSerializer.h"
 
-namespace QGears{
+namespace VGears{
 
     namespace FF7{
         const String ModelListFile::RESOURCE_TYPE("FF7ModelListFile");

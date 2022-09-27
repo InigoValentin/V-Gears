@@ -44,7 +44,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          *
          * @param event[in] Event to handle.
          */
-        void Input(const QGears::Event& event);
+        void Input(const VGears::Event& event);
 
         /**
          * Updates the entities in the manager.

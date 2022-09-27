@@ -70,11 +70,11 @@ ScriptManager::~ScriptManager(){
     LOG_TRIVIAL("ScriptManager closed.");
 }
 
-void ScriptManager::Input(const QGears::Event& event){
+void ScriptManager::Input(const VGears::Event& event){
     if (
       (
-        event.type == QGears::ET_KEY_PRESS
-        || event.type == QGears::ET_KEY_REPEAT_WAIT
+        event.type == VGears::ET_KEY_PRESS
+        || event.type == VGears::ET_KEY_REPEAT_WAIT
       )
       && (
         event.param1 == OIS::KC_RETURN
@@ -89,8 +89,8 @@ void ScriptManager::Input(const QGears::Event& event){
     ){
         for (unsigned int i = 0; i < script_entity_.size(); ++ i){
             Ogre::String argument2 = "";
-            if (event.type == QGears::ET_KEY_PRESS) argument2 = "Press";
-            else if (event.type == QGears::ET_KEY_REPEAT_WAIT)
+            if (event.type == VGears::ET_KEY_PRESS) argument2 = "Press";
+            else if (event.type == VGears::ET_KEY_REPEAT_WAIT)
                 argument2 = "Repeat";
             ScriptRequest(
               &script_entity_[i], "on_button", 100,

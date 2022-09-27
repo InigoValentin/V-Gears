@@ -66,14 +66,14 @@ class MainWindow : public QMainWindow{
          *
          * Sets the selected directory.
          */
-        void on_lineQGearsExe_editingFinished();
+        void on_lineVGearsExe_editingFinished();
 
         /**
          * Triggered when the executable directory button is clicked.
          *
          * Opens a file manager for file selection.
          */
-        void on_btnQGearsExe_clicked();
+        void on_btnVGearsExe_clicked();
 
         /**
          * Triggered when the launch button is clicked.

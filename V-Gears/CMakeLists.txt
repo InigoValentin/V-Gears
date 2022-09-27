@@ -2,27 +2,27 @@
 set(HEADER_FILES
   include/modules/worldmap/WorldMapModule.h
 
-  include/common/QGearsManualObject.h
-  include/common/QGearsResource.h
-  include/common/QGearsStringUtil.h
+  include/common/VGearsManualObject.h
+  include/common/VGearsResource.h
+  include/common/VGearsStringUtil.h
   include/common/TypeDefine.h
   include/common/LzsFile.h
   include/common/File.h
   include/common/FileSystem.h
   include/common/make_unique.h
-  include/map/QGearsBackground2DFile.h
-  include/map/QGearsBackground2DFileManager.h
-  include/map/QGearsBackground2DFileXMLSerializer.h
-  include/map/QGearsTile.h
-  include/map/QGearsMapFile.h
-  include/map/QGearsMapFileManager.h
-  include/map/QGearsMapFileXMLSerializer.h
-  include/map/QGearsWalkmeshFile.h
-  include/map/QGearsWalkmeshFileManager.h
-  include/map/QGearsWalkmeshFileXMLSerializer.h
+  include/map/VGearsBackground2DFile.h
+  include/map/VGearsBackground2DFileManager.h
+  include/map/VGearsBackground2DFileXMLSerializer.h
+  include/map/VGearsTile.h
+  include/map/VGearsMapFile.h
+  include/map/VGearsMapFileManager.h
+  include/map/VGearsMapFileXMLSerializer.h
+  include/map/VGearsWalkmeshFile.h
+  include/map/VGearsWalkmeshFileManager.h
+  include/map/VGearsWalkmeshFileXMLSerializer.h
   include/LuaIncludes.h
-  include/QGearsGameState.h
-  include/QGearsPrerequisites.h
+  include/VGearsGameState.h
+  include/VGearsPrerequisites.h
   include/core/particles/emitters/ParticlePointEmitter.h
   include/core/particles/emitters/ParticlePointEmitterFactory.h
   include/core/particles/renderer/ParticleEntityAdditionalData.h
@@ -103,7 +103,7 @@ set(HEADER_FILES
   include/core/TextManager.h
   include/core/TextManagerCommands.h
   #include/viewer/ViewerModule.h
-  include/data/QGearsXMLSerializer.h
+  include/data/VGearsXMLSerializer.h
   include/common/FinalFantasy7/FF7NameLookup.h
   include/map/FinalFantasy7/FF7WalkmeshFileSerializer.h
   include/FF7Character.h
@@ -111,106 +111,106 @@ set(HEADER_FILES
 )
 
 set(HEADER_FILES_DATA
-  include/common/QGearsApplication.h
+  include/common/VGearsApplication.h
 include/data/worldmap/MapFile.h
   include/data/worldmap/MapFileManager.h
   include/data/worldmap/MapFileSerializer.h
   include/data/worldmap/TxzFile.h
   include/data/worldmap/TxzFileManager.h
   include/data/worldmap/TxzFileSerializer.h
-  include/data/QGearsAFile.h
-  include/data/QGearsAFileManager.h
-  include/data/QGearsAFileSerializer.h
-  include/data/QGearsBackgroundFile.h
-  include/data/QGearsBackgroundFileManager.h
-  include/data/QGearsBackgroundFileSerializer.h
-  include/data/QGearsBackgroundTextureLoader.h
-  include/data/QGearsCameraMatrixFile.h
-  include/data/QGearsCameraMatrixFileManager.h
-  include/data/QGearsCameraMatrixFileSerializer.h
-  include/data/QGearsFLevelBackground2DLoader.h
-  include/data/QGearsFLevelFile.h
-  include/data/QGearsFLevelFileManager.h
-  include/data/QGearsFLevelFileSerializer.h
-  include/data/QGearsFLevelTextureLoader.h
-  include/data/QGearsHRCFile.h
-  include/data/QGearsHRCFileManager.h
-  include/data/QGearsHRCFileSerializer.h
-  include/data/QGearsHRCMeshLoader.h
-  include/data/QGearsHRCSkeletonLoader.h
-  include/data/QGearsLGPArchive.h
-  include/data/QGearsLGPArchiveFactory.h
-  include/data/QGearsLGPArchiveSerializer.h
-  include/data/QGearsLZSDataStream.h
-  include/data/QGearsLZSFLevelFile.h
-  include/data/QGearsLZSFLevelFileManager.h
-  include/data/QGearsPaletteFile.h
-  include/data/QGearsPaletteFileManager.h
-  include/data/QGearsPaletteFileSerializer.h
-  include/data/QGearsPFile.h
-  include/data/QGearsPFileManager.h
-  include/data/QGearsPFileSerializer.h
-  include/data/QGearsRSDFile.h
-  include/data/QGearsRSDFileManager.h
-  include/data/QGearsRSDFileSerializer.h
-  include/data/QGearsSerializer.h
-  include/data/QGearsTexCodec.h
-  include/data/QGearsTexFile.h
-  include/data/QGearsTriggersFile.h
-  include/data/QGearsMapListFile.h
+  include/data/VGearsAFile.h
+  include/data/VGearsAFileManager.h
+  include/data/VGearsAFileSerializer.h
+  include/data/VGearsBackgroundFile.h
+  include/data/VGearsBackgroundFileManager.h
+  include/data/VGearsBackgroundFileSerializer.h
+  include/data/VGearsBackgroundTextureLoader.h
+  include/data/VGearsCameraMatrixFile.h
+  include/data/VGearsCameraMatrixFileManager.h
+  include/data/VGearsCameraMatrixFileSerializer.h
+  include/data/VGearsFLevelBackground2DLoader.h
+  include/data/VGearsFLevelFile.h
+  include/data/VGearsFLevelFileManager.h
+  include/data/VGearsFLevelFileSerializer.h
+  include/data/VGearsFLevelTextureLoader.h
+  include/data/VGearsHRCFile.h
+  include/data/VGearsHRCFileManager.h
+  include/data/VGearsHRCFileSerializer.h
+  include/data/VGearsHRCMeshLoader.h
+  include/data/VGearsHRCSkeletonLoader.h
+  include/data/VGearsLGPArchive.h
+  include/data/VGearsLGPArchiveFactory.h
+  include/data/VGearsLGPArchiveSerializer.h
+  include/data/VGearsLZSDataStream.h
+  include/data/VGearsLZSFLevelFile.h
+  include/data/VGearsLZSFLevelFileManager.h
+  include/data/VGearsPaletteFile.h
+  include/data/VGearsPaletteFileManager.h
+  include/data/VGearsPaletteFileSerializer.h
+  include/data/VGearsPFile.h
+  include/data/VGearsPFileManager.h
+  include/data/VGearsPFileSerializer.h
+  include/data/VGearsRSDFile.h
+  include/data/VGearsRSDFileManager.h
+  include/data/VGearsRSDFileSerializer.h
+  include/data/VGearsSerializer.h
+  include/data/VGearsTexCodec.h
+  include/data/VGearsTexFile.h
+  include/data/VGearsTriggersFile.h
+  include/data/VGearsMapListFile.h
   include/data/FinalFantasy7/FF7ModelListFile.h
   include/data/FinalFantasy7/FF7ModelListFileManager.h
   include/data/FinalFantasy7/FF7ModelListFileSerializer.h
 )
 
 set(SOURCE_FILES_DATA
-  src/common/QGearsApplication.cpp
-  src/data/QGearsAFile.cpp
-  src/data/QGearsAFileManager.cpp
-  src/data/QGearsAFileSerializer.cpp
+  src/common/VGearsApplication.cpp
+  src/data/VGearsAFile.cpp
+  src/data/VGearsAFileManager.cpp
+  src/data/VGearsAFileSerializer.cpp
   src/data/worldmap/MapFile.cpp
   src/data/worldmap/MapFileManager.cpp
   src/data/worldmap/MapFileSerializer.cpp
   src/data/worldmap/TxzFile.cpp
   src/data/worldmap/TxzFileManager.cpp
   src/data/worldmap/TxzFileSerializer.cpp
-  src/data/QGearsBackgroundFile.cpp
-  src/data/QGearsBackgroundFileManager.cpp
-  src/data/QGearsBackgroundFileSerializer.cpp
-  src/data/QGearsBackgroundTextureLoader.cpp
-  src/data/QGearsCameraMatrixFile.cpp
-  src/data/QGearsCameraMatrixFileManager.cpp
-  src/data/QGearsCameraMatrixFileSerializer.cpp
-  src/data/QGearsFLevelBackground2DLoader.cpp
-  src/data/QGearsFLevelFile.cpp
-  src/data/QGearsFLevelFileManager.cpp
-  src/data/QGearsFLevelFileSerializer.cpp
-  src/data/QGearsFLevelTextureLoader.cpp
-  src/data/QGearsHRCFile.cpp
-  src/data/QGearsHRCFileManager.cpp
-  src/data/QGearsHRCFileSerializer.cpp
-  src/data/QGearsHRCMeshLoader.cpp
-  src/data/QGearsHRCSkeletonLoader.cpp
-  src/data/QGearsLGPArchive.cpp
-  src/data/QGearsLGPArchiveFactory.cpp
-  src/data/QGearsLGPArchiveSerializer.cpp
-  src/data/QGearsLZSDataStream.cpp
-  src/data/QGearsLZSFLevelFile.cpp
-  src/data/QGearsLZSFLevelFileManager.cpp
-  src/data/QGearsPaletteFile.cpp
-  src/data/QGearsPaletteFileManager.cpp
-  src/data/QGearsPaletteFileSerializer.cpp
-  src/data/QGearsPFile.cpp
-  src/data/QGearsPFileManager.cpp
-  src/data/QGearsPFileSerializer.cpp
-  src/data/QGearsRSDFile.cpp
-  src/data/QGearsRSDFileManager.cpp
-  src/data/QGearsRSDFileSerializer.cpp
-  src/data/QGearsSerializer.cpp
-  src/data/QGearsTexCodec.cpp
-  src/data/QGearsTexFile.cpp
-  src/data/QGearsTriggersFile.cpp
-  src/data/QGearsMapListFile.cpp
+  src/data/VGearsBackgroundFile.cpp
+  src/data/VGearsBackgroundFileManager.cpp
+  src/data/VGearsBackgroundFileSerializer.cpp
+  src/data/VGearsBackgroundTextureLoader.cpp
+  src/data/VGearsCameraMatrixFile.cpp
+  src/data/VGearsCameraMatrixFileManager.cpp
+  src/data/VGearsCameraMatrixFileSerializer.cpp
+  src/data/VGearsFLevelBackground2DLoader.cpp
+  src/data/VGearsFLevelFile.cpp
+  src/data/VGearsFLevelFileManager.cpp
+  src/data/VGearsFLevelFileSerializer.cpp
+  src/data/VGearsFLevelTextureLoader.cpp
+  src/data/VGearsHRCFile.cpp
+  src/data/VGearsHRCFileManager.cpp
+  src/data/VGearsHRCFileSerializer.cpp
+  src/data/VGearsHRCMeshLoader.cpp
+  src/data/VGearsHRCSkeletonLoader.cpp
+  src/data/VGearsLGPArchive.cpp
+  src/data/VGearsLGPArchiveFactory.cpp
+  src/data/VGearsLGPArchiveSerializer.cpp
+  src/data/VGearsLZSDataStream.cpp
+  src/data/VGearsLZSFLevelFile.cpp
+  src/data/VGearsLZSFLevelFileManager.cpp
+  src/data/VGearsPaletteFile.cpp
+  src/data/VGearsPaletteFileManager.cpp
+  src/data/VGearsPaletteFileSerializer.cpp
+  src/data/VGearsPFile.cpp
+  src/data/VGearsPFileManager.cpp
+  src/data/VGearsPFileSerializer.cpp
+  src/data/VGearsRSDFile.cpp
+  src/data/VGearsRSDFileManager.cpp
+  src/data/VGearsRSDFileSerializer.cpp
+  src/data/VGearsSerializer.cpp
+  src/data/VGearsTexCodec.cpp
+  src/data/VGearsTexFile.cpp
+  src/data/VGearsTriggersFile.cpp
+  src/data/VGearsMapListFile.cpp
   src/data/FinalFantasy7/FF7ModelListFile.cpp
   src/data/FinalFantasy7/FF7ModelListFileManager.cpp
   src/data/FinalFantasy7/FF7ModelListFileSerializer.cpp
@@ -219,9 +219,9 @@ set(SOURCE_FILES_DATA
 set(SOURCE_FILES
   src/modules/worldmap/WorldMapModule.cpp
 
-  src/common/QGearsManualObject.cpp
-  src/common/QGearsResource.cpp
-  src/common/QGearsStringUtil.cpp
+  src/common/VGearsManualObject.cpp
+  src/common/VGearsResource.cpp
+  src/common/VGearsStringUtil.cpp
   src/common/TypeDefine.cpp
   src/common/LzsFile.cpp
   src/common/File.cpp
@@ -286,18 +286,18 @@ set(SOURCE_FILES
   src/core/XmlTextsFile.cpp
   src/core/DialogsManager.cpp
   src/core/TextManager.cpp
-  src/map/QGearsBackground2DFile.cpp
-  src/map/QGearsBackground2DFileManager.cpp
-  src/map/QGearsBackground2DFileXMLSerializer.cpp
-  src/map/QGearsMapFile.cpp
-  src/map/QGearsMapFileManager.cpp
-  src/map/QGearsMapFileXMLSerializer.cpp
-  src/map/QGearsWalkmeshFile.cpp
-  src/map/QGearsWalkmeshFileManager.cpp
-  src/map/QGearsWalkmeshFileXMLSerializer.cpp
+  src/map/VGearsBackground2DFile.cpp
+  src/map/VGearsBackground2DFileManager.cpp
+  src/map/VGearsBackground2DFileXMLSerializer.cpp
+  src/map/VGearsMapFile.cpp
+  src/map/VGearsMapFileManager.cpp
+  src/map/VGearsMapFileXMLSerializer.cpp
+  src/map/VGearsWalkmeshFile.cpp
+  src/map/VGearsWalkmeshFileManager.cpp
+  src/map/VGearsWalkmeshFileXMLSerializer.cpp
   #src/viewer/ViewerModule.cpp
-  src/QGearsGameState.cpp
-  src/data/QGearsXMLSerializer.cpp
+  src/VGearsGameState.cpp
+  src/data/VGearsXMLSerializer.cpp
   src/common/FinalFantasy7/FF7NameLookup.cpp
   src/map/FinalFantasy7/FF7WalkmeshFileSerializer.cpp
   src/FF7Character.cpp
@@ -393,13 +393,13 @@ set(CPACK_PACKAGE_EXECUTABLES v-gears "v-gears")
 set(CPACK_WIX_PROGRAM_MENU_FOLDER "VGears")
 
 if (APPLE)
-target_link_libraries(q-gears "-framework CoreFoundation -framework Cocoa -framework IOKit" ${ois_lib})
+target_link_libraries(v-gears "-framework CoreFoundation -framework Cocoa -framework IOKit" ${ois_lib})
 endif()
 
 if( WIN32 AND NOT (CMAKE_BUILD_TYPE MATCHES "Debug") )
-    set_target_properties( q-gears PROPERTIES WIN32_EXECUTABLE ON )
+    set_target_properties( v-gears PROPERTIES WIN32_EXECUTABLE ON )
 	if (MSVC)
-        set_target_properties(q-gears PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+        set_target_properties(v-gears PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
     endif()
 endif()
 

@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "common/QGearsResource.h"
+#include "common/VGearsResource.h"
 
-namespace QGears {
+namespace VGears {
 
     /**
      * Handles a world map file.

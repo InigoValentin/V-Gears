@@ -22,4 +22,4 @@
 /**
  * Application version.
  */
-#define QG_VERSION_NAME "@QGEARS_VERSION@"
+#define QG_VERSION_NAME "@VGEARS_VERSION@"

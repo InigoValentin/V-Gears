@@ -17,16 +17,16 @@
 
 #include <OgreResourceManager.h>
 #include "common/TypeDefine.h"
-#include "QGearsPrerequisites.h"
+#include "VGearsPrerequisites.h"
 
-namespace QGears {
+namespace VGears {
 
     class WorldMapFile;
 
     /**
      * Manages map files.
      */
-    class _QGearsExport MapFileManager
+    class _VGearsExport MapFileManager
        : public Ogre::ResourceManager, public Ogre::Singleton<MapFileManager>
     {
         public:

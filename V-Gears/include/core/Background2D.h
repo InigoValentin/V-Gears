@@ -18,7 +18,7 @@
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreRenderQueueListener.h>
 #include <OgreRoot.h>
-#include "map/QGearsBackground2DFile.h"
+#include "map/VGearsBackground2DFile.h"
 #include "Background2DAnimation.h"
 #include "Entity.h"
 #include "ScriptManager.h"
@@ -30,7 +30,7 @@ class Background2D : public Ogre::RenderQueueListener{
 
     public:
 
-        typedef QGears::Blending  Blending;
+        typedef VGears::Blending  Blending;
 
         /**
          * How to scroll the background.
@@ -71,7 +71,7 @@ class Background2D : public Ogre::RenderQueueListener{
          * @todo Understand and document.
          * @param event[in] Event.
          */
-        void InputDebug(const QGears::Event& event);
+        void InputDebug(const VGears::Event& event);
 
         /**
          * Run each frame.
@@ -287,7 +287,7 @@ class Background2D : public Ogre::RenderQueueListener{
          *
          * @param tile[in] The tile to add.
          */
-        void AddTile(const QGears::Tile& tile);
+        void AddTile(const VGears::Tile& tile);
 
         /**
          * Updates the UV vector of a tile
@@ -405,7 +405,7 @@ class Background2D : public Ogre::RenderQueueListener{
          *
          * @param background[in] The background to load.
          */
-        virtual void load(const QGears::Background2DFilePtr &background);
+        virtual void load(const VGears::Background2DFilePtr &background);
 
     protected:
 
@@ -414,7 +414,7 @@ class Background2D : public Ogre::RenderQueueListener{
          *
          * @param tiles[in] The list of tiles to load.
          */
-        virtual void load(const QGears::Background2DFile::TileList &tiles);
+        virtual void load(const VGears::Background2DFile::TileList &tiles);
 
         /**
          * Loads an animation list to the background.
@@ -423,7 +423,7 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param animations[in] List of animations to load.
          */
         virtual void load(
-          const size_t tile_index, const QGears::AnimationMap &animations
+          const size_t tile_index, const VGears::AnimationMap &animations
         );
 
         /**

@@ -18,7 +18,7 @@
 #include <OgreSingleton.h>
 #include "common/TypeDefine.h"
 
-namespace QGears {
+namespace VGears {
 
     /**
      * The world map module.

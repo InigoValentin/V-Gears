@@ -11,7 +11,7 @@ lzs.cpp
 )
 
 add_definitions(
-    -DQGEARS_ADD_MANAGERS
+    -DVGEARS_ADD_MANAGERS
 )
 
 add_executable(lzs
