@@ -23,7 +23,6 @@
 #include <QtCore/QSettings>
 #include <QtWidgets/QMessageBox>
 #include <QtCore/QTimer>
-
 /**
  * Indicates if an installer has already been created.
  */

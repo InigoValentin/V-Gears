@@ -2,37 +2,96 @@ include_directories(
     ${VGears_INCLUDE_DIRS}
     ${VGears_SOURCE_DIR}/V-Gears/include
     ${VGears_SOURCE_DIR}/SupportedGames/FinalFantasy7/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/include
+    #${CMAKE_CURRENT_SOURCE_DIR}/common/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${ZLIB_INCLUDE_DIRS}
 )
 
 # define header and source files for the library
 set(HEADER_FILES
-./common/FontFile.h
-./common/include/VGearsUtility.h
-./common/Logger.h
-./common/Surface.h
-./common/TimToVram.h
-./common/BinGZipFile.h
-./common/OgreBase.h
-./common/OgreGenUtilites.h
-./common/Vram.h
-./common/DrawSkeleton.h
+./include/common/FontFile.h
+./include/VGearsUtility.h
+./include/common/Logger.h
+./include/common/Surface.h
+./include/common/TimToVram.h
+./include/common/BinGZipFile.h
+./include/common/OgreBase.h
+./include/common/OgreGenUtilites.h
+./include/common/Vram.h
+./include/common/DrawSkeleton.h
+
+    include/common/Logger.h
+    include/decompiler/sudm.h
+    include/decompiler/decompiler_codegen.h
+    include/decompiler/control_flow.h
+    include/decompiler/decompiler_disassembler.h
+    include/decompiler/decompiler_engine.h
+    include/decompiler/graph.h
+    include/decompiler/instruction.h
+    include/decompiler/objectFactory.h
+    include/decompiler/refcounted.h
+    include/decompiler/simple_disassembler.h
+    include/decompiler/stack.h
+    include/decompiler/unknown_opcode_exception.h
+    include/decompiler/value.h
+    include/decompiler/wrongtype.h
+    include/decompiler/scummv6/codegen.h
+    include/decompiler/scummv6/disassembler.h
+    include/decompiler/scummv6/engine.h
+    include/decompiler/field/ff7_field_disassembler.h
+    include/decompiler/field/ff7_field_engine.h
+    include/decompiler/field/ff7_field_codegen.h
+    #include/decompiler/world/ff7_world_disassembler.h
+    #include/decompiler/world/ff7_world_engine.h
+    #include/decompiler/world/ff7_world_codegen.h
+    include/common/algorithm.h
+    include/common/noncopyable.h
+    include/common/scummsys.h
+    include/common/str.h
+    include/common/util.h
+    include/common/binaryreader.h
+    include/common/lzs.h
+    include/common/make_unique.h
 )
 
+
 set(SOURCE_FILES
-./common/Logger.cpp
-./common/BinGZipFile.cpp
-./common/DrawSkeleton.cpp
-./common/Surface.cpp
-./common/OgreGenUtilites.cpp
-./common/FontFile.cpp
-./common/TimToVram.cpp
-./common/Vram.cpp
-./common/OgreBase.cpp
-./common/src/VGearsUtility.cpp
+./src/common/Logger.cpp
+./src/common/BinGZipFile.cpp
+./src/common/DrawSkeleton.cpp
+./src/common/Surface.cpp
+./src/common/OgreGenUtilites.cpp
+./src/common/FontFile.cpp
+./src/common/TimToVram.cpp
+./src/common/Vram.cpp
+./src/common/OgreBase.cpp
+./src/VGearsUtility.cpp
+    src/decompiler/sudm.cpp
+    src/decompiler/decompiler_codegen.cpp
+    src/decompiler/control_flow.cpp
+    src/decompiler/decompiler_disassembler.cpp
+    src/decompiler/graph.cpp
+    src/decompiler/instruction.cpp
+    src/decompiler/simple_disassembler.cpp
+    src/decompiler/unknown_opcode_exception.cpp
+    src/decompiler/value.cpp
+    src/decompiler/scummv6/codegen.cpp
+    src/decompiler/scummv6/disassembler.cpp
+    src/decompiler/scummv6/engine.cpp
+    src/decompiler/field/ff7_field_disassembler.cpp
+    src/decompiler/field/ff7_field_engine.cpp
+    src/decompiler/field/ff7_field_codegen.cpp
+    #src/decompiler/world/ff7_world_disassembler.cpp
+    #src/decompiler/world/ff7_world_engine.cpp
+    #src/decompiler/world/ff7_world_codegen.cpp
+    src/common/str.cpp
 )
+
+# For SUDM
+if (UNIX)
+    add_definitions(-DPOSIX)
+endif()
 
 add_library(Utility STATIC
   ${HEADER_FILES}
@@ -46,8 +105,8 @@ target_link_libraries(Utility
 )
 SET_PROPERTY(TARGET Utility PROPERTY FOLDER "utilities")
 
-add_subdirectory(flevel)
-add_subdirectory(lzs)
+#add_subdirectory(flevel)
+#add_subdirectory(lzs)
 #add_subdirectory(v-gears-launcher)
 
 #DEBUG, no optimizations
@@ -106,7 +165,7 @@ set(LIBRARIES
     Utility
     V-Gears
     v-gears-data
-    Sudm_Lib
+    #Sudm_Lib
 )
 
 

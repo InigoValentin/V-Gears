@@ -14,6 +14,8 @@
  */
 
 #pragma once
+#ifndef _MAKE_UNIQUE_
+#define _MAKE_UNIQUE_
 
 #include <memory>
 
@@ -24,4 +26,5 @@ namespace std{
         return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
     }
 }
+#endif
 #endif

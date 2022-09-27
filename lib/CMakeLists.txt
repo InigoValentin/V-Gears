@@ -4,14 +4,14 @@ include_directories(
 	luajit/src
 	luabind/luabind
 	luabind/luabind/detail
-	SUDM
+	#SUDM
 )
 
 #add_subdirectory(tinyxml)
 add_subdirectory(luajit)
 
 SET(SUDM_AS_LIB TRUE CACHE BOOL "Build only lib")
-add_subdirectory(SUDM)
+#add_subdirectory(SUDM)
 
  aux_source_directory( luabind/luabind LuaBind_header_FILES )
  aux_source_directory( luabind/luabind/details LuaBind_header_details_FILES )
