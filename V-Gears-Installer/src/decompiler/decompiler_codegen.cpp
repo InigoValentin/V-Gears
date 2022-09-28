@@ -240,7 +240,7 @@ void CodeGenerator::process(Function& func, InstVec& insts, GraphVertex v)
         {
             AddOutputLine(target_lang_->Label((*it)->_address));
         }
-        processInst(func, insts, *it);
+        ProcessInst(func, insts, *it);
     } while (it++ != mCurGroup->_end);
 
     // Add else end if necessary
@@ -300,7 +300,7 @@ void CodeGenerator::processUncondJumpInst(Function& func, InstVec& insts, const 
                 {
                     // Check if this instruction is the last instruction in the function
                     // and its an uncond jump
-                    if (mCurGroup->_type == kDoWhileCondGroupType && inst->_address == func.mEndAddr && inst->isUncondJump())
+                    if (mCurGroup->_type == kDoWhileCondGroupType && inst->_address == func.mEndAddr && inst->IsUncondJump())
                     {
                         printJump = false;
                         AddOutputLine(target_lang_->DoLoopFooter(true) + "true" + target_lang_->DoLoopFooter(false), true, false);
@@ -311,7 +311,7 @@ void CodeGenerator::processUncondJumpInst(Function& func, InstVec& insts, const 
 
         if (printJump)
         {
-            const uint32 dstAddr = inst->getDestAddress();
+            const uint32 dstAddr = inst->GetDestAddress();
             if (mIsLabelPass)
             {
                 // Mark the goto target
@@ -417,14 +417,14 @@ void CodeGenerator::processCondJumpInst(const InstPtr inst)
     }
 }
 
-void CodeGenerator::processInst(Function& func, InstVec& insts, const InstPtr inst)
+void CodeGenerator::ProcessInst(Function& func, InstVec& insts, const InstPtr inst)
 {
-    inst->processInst(func, _stack, _engine, this);
+    inst->ProcessInst(func, _stack, _engine, this);
     if (inst->isCondJump())
     {
         processCondJumpInst(inst);
     }
-    else if (inst->isUncondJump())
+    else if (inst->IsUncondJump())
     {
         processUncondJumpInst(func, insts, inst);
     }

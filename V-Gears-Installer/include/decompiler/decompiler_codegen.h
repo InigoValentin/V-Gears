@@ -305,7 +305,7 @@ protected:
      *
      * @param inst The instruction to process.
      */
-    void processInst(Function& func, InstVec& insts, const InstPtr inst);
+    void ProcessInst(Function& func, InstVec& insts, const InstPtr inst);
     void processUncondJumpInst(Function& func, InstVec& insts, const InstPtr inst);
     void processCondJumpInst(const InstPtr inst);
 

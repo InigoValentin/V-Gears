@@ -81,6 +81,15 @@ public:
 	std::string _codeGenData;       ///< String containing metadata for code generation. See the extended documentation for details.
     bool mLabelRequired = false;
 
+    /**
+     * Writes a comment to the script indicating an unimplemented opcode.
+     *
+     * @param code_gen[in|out] Code generator. The line will be added to it
+     * @param owner[in] The name of the class. Unused.
+     * @param instructions[in] The name of the instruction.
+     */
+    static void WriteTodo(CodeGenerator *code_gen, std::string owner, std::string opcode);
+
 	/**
 	 * Operator overload to output an Instruction to a std::ostream.
 	 *
@@ -89,7 +98,7 @@ public:
 	 * @return The std::ostream used for output.
 	 */
 	friend std::ostream &operator<<(std::ostream &output, const Instruction *inst) {
-		return inst->print(output);
+		return inst->Print(output);
 	}
 
 	/**
@@ -98,7 +107,7 @@ public:
 	 * @param output The std::ostream to write to.
 	 * @return The std::ostream used for output.
 	 */
-	virtual std::ostream &print(std::ostream &output) const;
+	virtual std::ostream &Print(std::ostream &output) const;
 
 	/**
 	 * Returns whether or not the instruction is a jump of some sort.
@@ -119,7 +128,7 @@ public:
 	 *
 	 * @return True if the instruction is an unconditional jump, otherwise false.
 	 */
-	virtual bool isUncondJump() const;
+	virtual bool IsUncondJump() const;
 
 	/**
 	 * Returns whether or not the instruction is a stack operation.
@@ -133,7 +142,7 @@ public:
 	 *
 	 * @return True if the instruction is a script function call, otherwise false.
 	 */
-	virtual bool isFuncCall() const;
+	virtual bool IsFuncCall() const;
 
 	/**
 	 * Returns whether or not the instruction is a return statement.
@@ -169,7 +178,7 @@ public:
 	 * @return Destination address of a jump instruction.
 	 * @throws WrongTypeException if instruction is not a jump.
 	 */
-	virtual uint32 getDestAddress() const;
+	virtual uint32 GetDestAddress() const;
 
 	/**
 	 * Process an instruction for code generation.
@@ -178,7 +187,8 @@ public:
 	 * @param engine Pointer to the Engine used for code generation.
 	 * @param codeGen Pointer to the CodeGenerator used for code generation.
 	 */
-	virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) = 0;
+	virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) = 0;
+
 };
 
 /**
@@ -200,8 +210,8 @@ public:
  */
 struct UncondJumpInstruction : public JumpInstruction {
 public:
-	virtual bool isUncondJump() const override;
-	virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
+	virtual bool IsUncondJump() const override;
+	virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
 };
 
 /**
@@ -217,7 +227,7 @@ public:
  */
 struct CallInstruction : public Instruction {
 public:
-	virtual bool isFuncCall() const;
+	virtual bool IsFuncCall() const;
 };
 
 /**
@@ -273,7 +283,7 @@ public:
  */
 struct DupStackInstruction : public DupInstruction {
 public:
-	virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
+	virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
 };
 
 /**
@@ -281,7 +291,7 @@ public:
  */
 struct BoolNegateStackInstruction : public BoolNegateInstruction {
 public:
-	virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
+	virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
 };
 
 /**
@@ -289,7 +299,7 @@ public:
  */
 struct BinaryOpStackInstruction : public BinaryOpInstruction {
 public:
-	virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
+	virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
 };
 
 /**
@@ -297,7 +307,7 @@ public:
  */
 struct ReturnInstruction : public Instruction {
 public:
-    virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
+    virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
 	virtual bool isReturn() const;
 };
 
@@ -306,7 +316,7 @@ public:
  */
 struct UnaryOpPrefixStackInstruction : public UnaryOpInstruction {
 public:
-	virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
+	virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
 };
 
 /**
@@ -314,7 +324,7 @@ public:
  */
 struct UnaryOpPostfixStackInstruction : public UnaryOpInstruction {
 public:
-	virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
+	virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
 };
 
 /**
@@ -322,7 +332,7 @@ public:
  */
 struct KernelCallStackInstruction : public Instruction {
 public:
-	virtual void processInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
+	virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) override;
 };
 
 /**

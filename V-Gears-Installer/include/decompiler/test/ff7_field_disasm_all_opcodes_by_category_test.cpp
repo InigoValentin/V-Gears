@@ -106,9 +106,9 @@ TEST(FF7Field, DisasmAllOpcodes)
 
     InstVec insts;
     DummyFormatter formatter;
-    FF7FieldEngine engine(formatter, "test");
+    FieldEngine engine(formatter, "test");
 
-    auto d = engine.getDisassembler(insts);
+    auto d = engine.GetDisassembler(insts);
     d->open("decompiler/test/ff7_all_opcodes_by_category.dat");
     d->disassemble();
     d->dumpDisassembly(tmp);

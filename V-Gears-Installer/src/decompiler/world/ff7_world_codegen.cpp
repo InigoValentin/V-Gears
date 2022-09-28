@@ -11,7 +11,7 @@ const InstPtr FF7::FF7WorldCodeGenerator::findFirstCall()
     ConstInstIterator it = mCurGroup->_start;
     do
     {
-        if ((*it)->isFuncCall() || (*it)->isKernelCall())
+        if ((*it)->IsFuncCall() || (*it)->isKernelCall())
             return *it;
     } while (it++ != mCurGroup->_end);
 
@@ -22,7 +22,7 @@ const InstPtr FF7::FF7WorldCodeGenerator::findLastCall()
 {
     ConstInstIterator it = mCurGroup->_end;
     do {
-        if ((*it)->isFuncCall() || (*it)->isKernelCall())
+        if ((*it)->IsFuncCall() || (*it)->isKernelCall())
             return *it;
     } while (it-- != mCurGroup->_start);
 

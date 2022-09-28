@@ -43,7 +43,7 @@ static InstPtr DoReadParameterTest(std::string str, std::vector<unsigned char> d
 {
     InstVec insts;
     TestReadParameterDisassembler d(std::move(data), insts);
-    InstPtr inst = new FF7::FF7NoOperationInstruction();
+    InstPtr inst = new FF7::FieldNoOperationInstruction();
     d.readParams(inst, str.c_str());
     return inst;
 }
@@ -199,7 +199,7 @@ TEST(FF7World, DisAsm)
         std::cout << "SCRIPT(" << i << ")" << std::endl;
 
 
-        auto d = engine.getDisassembler(insts);
+        auto d = engine.GetDisassembler(insts);
         d->open("decompiler/ff7_world/wm0.ev");
         d->disassemble();
         d->dumpDisassembly(std::cout);
@@ -214,11 +214,11 @@ TEST(FF7World, DisAsm)
 
         Graph g = c->analyze();
 
-        engine.postCFG(insts, g);
+        engine.PostCFG(insts, g);
 
 
         onullstream ns;
-        auto cg = engine.getCodeGenerator(insts, std::cout);
+        auto cg = engine.GetCodeGenerator(insts, std::cout);
 
         std::ofstream out;
         out.open("graph.dot");
@@ -1507,7 +1507,7 @@ TEST(Parser, ZeroGapIf)
 TEST(FF7Field, Asm)
 {
     DummyFormatter dummy;
-    FF7FieldEngine eng(dummy, "test");
+    FieldEngine eng(dummy, "test");
 
     InstVec insts;
     FieldDisassembler d(dummy, &eng, insts);

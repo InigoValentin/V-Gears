@@ -1,0 +1,61 @@
+/*
+ * V-Gears
+ * Copyright (C) 2022 V-Gears Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include "decompiler/decompiler_engine.h"
+
+/**
+ * A conditional map jump instruction.
+ */
+class FieldCondJumpInstruction : public CondJumpInstruction{
+
+    public:
+
+        /**
+         * Processes a conditional jump instruction.
+         *
+         * Checks if the condition is a function or a comparison, and
+         * adds the function to the stack.
+         *
+         * @param function[in] Function to process. Unused.
+         * @param stack[out] Function stack. The instruction will be added
+         * here.
+         * @param engine[in] Engine. Unused.
+         * @param code_gen[in|out] Code generator.
+         */
+        virtual void ProcessInst(
+          Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
+
+        /**
+         * Retrieves the destination address of the jump.
+         *
+         * @return The offset (number of bytes) to jump from the beginning
+         * of the instruction.
+         */
+        virtual uint32 GetDestAddress() const override;
+
+        /**
+         * Prints the instruction
+         *
+         * @param output The stram to print the instruction to.
+         * @todo Understand and document properly.
+         */
+        virtual std::ostream& Print(std::ostream &output) const override;
+};

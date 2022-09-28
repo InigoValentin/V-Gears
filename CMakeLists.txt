@@ -227,7 +227,7 @@ if (UNIX AND $ENV{COVERAGE}==1)
 endif()
 
 #DEBUG, no optimizations
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O0")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O0")
 
 add_definitions(-DTIXML_USE_STL)
 add_subdirectory(lib)

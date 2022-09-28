@@ -32,7 +32,7 @@
 TEST(CFG, testUnreachable) {
     InstVec insts;
     Scumm::v6::Scummv6Engine *engine = new Scumm::v6::Scummv6Engine();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/unreachable.dmp");
     d->disassemble();
     ControlFlow *c = new ControlFlow(insts, *engine);
@@ -65,7 +65,7 @@ TEST(CFG, testUnreachable) {
 TEST(CFG, testBranching) {
     InstVec insts;
     Scumm::v6::Scummv6Engine *engine = new Scumm::v6::Scummv6Engine();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/branches.dmp");
     d->disassemble();
 
@@ -99,7 +99,7 @@ TEST(CFG, testBranching) {
 TEST(CFG, testGrouping) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/branches.dmp");
     d->disassemble();
 
@@ -132,7 +132,7 @@ TEST(CFG, testGrouping) {
 TEST(CFG, DISABLED_testShortCircuitDetection) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/short-circuit.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
@@ -144,7 +144,7 @@ TEST(CFG, DISABLED_testShortCircuitDetection) {
 TEST(CFG, testWhileDetection) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/while.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
@@ -162,7 +162,7 @@ TEST(CFG, testWhileDetection) {
 TEST(CFG, testDoWhileDetection) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/while.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
@@ -179,7 +179,7 @@ TEST(CFG, testDoWhileDetection) {
 TEST(CFG, testBreakDetection) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/break-while.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
@@ -195,7 +195,7 @@ TEST(CFG, testBreakDetection) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/break-do-while.dmp");
     d->disassemble();
 
@@ -211,7 +211,7 @@ TEST(CFG, testBreakDetection) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/break-do-while2.dmp");
     d->disassemble();
     c = std::make_unique<ControlFlow>(insts, *engine);
@@ -229,7 +229,7 @@ TEST(CFG, testBreakDetection) {
 TEST(CFG, testContinueDetection) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/continue-while.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
@@ -247,7 +247,7 @@ TEST(CFG, testContinueDetection) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/continue-do-while.dmp");
     d->disassemble();
     c = std::make_unique<ControlFlow>(insts, *engine);
@@ -262,7 +262,7 @@ TEST(CFG, testContinueDetection) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/continue-do-while2.dmp");
     d->disassemble();
     c = std::make_unique<ControlFlow>(insts, *engine);
@@ -279,7 +279,7 @@ TEST(CFG, testContinueDetection) {
 TEST(CFG, testIfDetection) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/if.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
@@ -294,7 +294,7 @@ TEST(CFG, testIfDetection) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/break-do-while.dmp");
     d->disassemble();
 
@@ -310,7 +310,7 @@ TEST(CFG, testIfDetection) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/break-do-while2.dmp");
     d->disassemble();
     c = std::make_unique<ControlFlow>(insts, *engine);
@@ -326,7 +326,7 @@ TEST(CFG, testIfDetection) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/continue-do-while.dmp");
     d->disassemble();
     c = std::make_unique<ControlFlow>(insts, *engine);
@@ -341,7 +341,7 @@ TEST(CFG, testIfDetection) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/continue-do-while2.dmp");
     d->disassemble();
     c = std::make_unique<ControlFlow>(insts, *engine);
@@ -358,7 +358,7 @@ TEST(CFG, testIfDetection) {
 TEST(CFG, testElseDetection) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/if-else.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
@@ -375,7 +375,7 @@ TEST(CFG, testElseDetection) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/if-no-else.dmp");
     d->disassemble();
 
@@ -394,7 +394,7 @@ TEST(CFG, testElseDetection) {
 TEST(CFG, testNestedLoops) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/do-while-in-while.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
@@ -411,7 +411,7 @@ TEST(CFG, testNestedLoops) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/nested-do-while.dmp");
     d->disassemble();
 
@@ -429,7 +429,7 @@ TEST(CFG, testNestedLoops) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/nested-while.dmp");
     d->disassemble();
     c = std::make_unique<ControlFlow>(insts, *engine);
@@ -446,7 +446,7 @@ TEST(CFG, testNestedLoops) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/nested-while2.dmp");
     d->disassemble();
     c = std::make_unique<ControlFlow>(insts, *engine);
@@ -463,7 +463,7 @@ TEST(CFG, testNestedLoops) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/while-in-do-while.dmp");
     d->disassemble();
     c = std::make_unique<ControlFlow>(insts, *engine);
@@ -480,7 +480,7 @@ TEST(CFG, testNestedLoops) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/while-in-do-while2.dmp");
     d->disassemble();
 
@@ -503,7 +503,7 @@ TEST(CFG, testNestedLoops) {
 TEST(CFG, DISABLED_testSamAndMaxScript30) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/script-30.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);

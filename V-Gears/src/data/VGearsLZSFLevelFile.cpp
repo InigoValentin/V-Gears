@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include "data/VGearsLZSFLevelFile.h"
 #include "data/VGearsLZSDataStream.h"
 
@@ -25,7 +26,9 @@ namespace VGears{
       Ogre::ResourceManager *creator, const String &name,
       Ogre::ResourceHandle handle, const String &group, bool is_manual,
       Ogre::ManualResourceLoader *loader
-    ) : FLevelFile(creator, name, handle, group, is_manual, loader){}
+    ) : FLevelFile(creator, name, handle, group, is_manual, loader){
+        std::cout << "[LZSFLevelFile] " << name << std::endl;
+    }
 
     LZSFLevelFile::~LZSFLevelFile(){}
 

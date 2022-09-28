@@ -608,6 +608,7 @@ static void FF7PcFieldToVGearsField(
   MapCollection& maps,
   std::function<void(std::string)> write_output_line
 ){
+    std::cout << "[FF7PcFieldToVGearsField] START " << field->getName() << std::endl;
     // Generate triggers script to insert into main
     // decompiled FF7 field -> LUA script.
     std::string gateway_script_data;
@@ -992,6 +993,7 @@ static void FF7PcFieldToVGearsField(
         doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/wm.xml");
     }
     maps.insert(field->getName());
+    std::cout << "[FF7PcFieldToVGearsField] END " << field->getName() << std::endl;
 }
 
 /**
@@ -1097,16 +1099,21 @@ static void CollectSpawnPoints(
     // Decompile the script just so the MAPJUMPs can be collected. This is needed to construct the
     // full list of entries to each field.
     try{
+        std::cerr << "CollectSpawnPoints: 1: " << std::endl;
         // Get the raw script bytes.
         SUDM::Field::DecompiledScript decompiled;
         const std::vector<u8> raw_field_data = field->GetRawScript();
+        std::cerr << "CollectSpawnPoints: 1: " << std::endl;
         // Decompile to LUA.
         FF7FieldScriptGatewayCollector formatter(
           field->getName(), field_id_to_name_lookup, spawn_points, this_field_id
         );
+        std::cerr << "CollectSpawnPoints: 3: " << std::endl;
+        std::cout<< "ABOUT TO DECOMPILE " << field->getName() << std::endl;
         decompiled = SUDM::Field::Decompile(
           field->getName(), raw_field_data, formatter, "", "EntityContainer = {}\n\n"
         );
+        std::cout<< "    DECOMPILED " << field->getName() << std::endl;
     }
     catch (const ::InternalDecompilerError& ex){
         std::cerr << "CollectSpawnPoints: InternalDecompilerError: " << ex.what() << std::endl;
@@ -1262,22 +1269,29 @@ void FF7DataInstaller::CollectionFieldSpawnAndScaleFactors(){
         if (IsAFieldFile(resource_name) && IsTestField(resource_name)){
             conversion_step_ ++;
             if (conversion_step_ == 1){
+                std::cout << "Loading resource file " << resource_name << std::endl;
                 field_ = VGears::LZSFLevelFileManager::GetSingleton().load(
                   resource_name, "FFVIIFields"
                 ).staticCast<VGears::FLevelFile>();
+                std::cout << "    Loaded!" << std::endl;
                 //write_output_line("Load field " + resource_name);
+
                 return;
             }
             if (conversion_step_ == 2){
+                std::cout << "Step 2" << std::endl;
                 //write_output_line("Read spawn points from scripts");
                 CollectSpawnPoints(field_, map_list_, spawn_points_);
+                std::cout << "    Step 2 END" << std::endl;
                 return;
             }
             if (conversion_step_ == 3){
+                std::cout << "Step 3" << std::endl;
                 //write_output_line("Read scale factor");
                 CollectFieldScaleFactors(field_, scale_factors_, map_list_);
                 conversion_step_ = 0;
                 iterator_counter_ ++;
+                std::cout << "    Step 3 END" << std::endl;
                 return;
             }
         }

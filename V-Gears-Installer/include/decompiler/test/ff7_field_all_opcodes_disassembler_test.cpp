@@ -12,9 +12,9 @@ TEST(FF7Field, AllOpcodesDisassembler)
 {
     InstVec insts;
     DummyFormatter formatter;
-    FF7FieldEngine engine(formatter);
+    FieldEngine engine(formatter);
 
-    auto d = engine.getDisassembler(insts);
+    auto d = engine.GetDisassembler(insts);
     d->open("decompiler/test/ff7_all_opcodes.dat");
     d->disassemble();
     d->dumpDisassembly(std::cout);

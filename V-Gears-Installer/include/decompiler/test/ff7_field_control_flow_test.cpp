@@ -29,7 +29,7 @@ static void CheckForwardJump(OPCODE opCode, size_t paramsSize, InstVec& insts, u
     ASSERT_EQ(jumpInst->_params.size(), paramsSize);
 
     const uint32 lastNopAddr = Is3Nops(insts, pos);
-    ASSERT_EQ(jumpInst->getDestAddress(), lastNopAddr);
+    ASSERT_EQ(jumpInst->GetDestAddress(), lastNopAddr);
 }
 
 // Verify next instructions is a NOP and return address of final NOP
@@ -59,7 +59,7 @@ static void CheckBackwardJump(OPCODE opCode, size_t paramsSize, InstVec& insts, 
 
     ASSERT_EQ(jumpInst->_opcode, opCode);
     ASSERT_EQ(jumpInst->_params.size(), paramsSize);
-    ASSERT_EQ(jumpInst->getDestAddress(), firstNopAddr);
+    ASSERT_EQ(jumpInst->GetDestAddress(), firstNopAddr);
 }
 
 
@@ -68,9 +68,9 @@ TEST(FF7Field, ControlFlow)
 {
     InstVec insts;
     DummyFormatter formatter;
-    FF7FieldEngine engine(formatter, "test");
+    FieldEngine engine(formatter, "test");
 
-    auto d = engine.getDisassembler(insts);
+    auto d = engine.GetDisassembler(insts);
     d->open("decompiler/test/ff7_control_flow_test.dat");
     d->disassemble();
     d->dumpDisassembly(std::cout);

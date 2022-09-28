@@ -8,17 +8,17 @@
 
 #define GET(vertex) (boost::get(boost::vertex_name, g, vertex))
 
-std::unique_ptr<Disassembler> FF7::FF7WorldEngine::getDisassembler(InstVec &insts)
+std::unique_ptr<Disassembler> FF7::FF7WorldEngine::GetDisassembler(InstVec &insts)
 {
     return std::make_unique<FF7WorldDisassembler>(this, insts, mScriptNumber);
 }
 
-std::unique_ptr<CodeGenerator> FF7::FF7WorldEngine::getCodeGenerator(const InstVec& /*insts*/, std::ostream &output)
+std::unique_ptr<CodeGenerator> FF7::FF7WorldEngine::GetCodeGenerator(const InstVec& /*insts*/, std::ostream &output)
 {
     return std::make_unique<FF7WorldCodeGenerator>(this, output);
 }
 
-void FF7::FF7WorldEngine::postCFG(InstVec&, Graph g)
+void FF7::FF7WorldEngine::PostCFG(InstVec&, Graph g)
 {
     /*
     VertexRange vr = boost::vertices(g);
@@ -27,7 +27,7 @@ void FF7::FF7WorldEngine::postCFG(InstVec&, Graph g)
         GroupPtr gr = GET(*v);
 
         // If this group is the last instruction and its an unconditional jump
-        if ((*gr->_start)->_address == insts.back()->_address && insts.back()->isUncondJump())
+        if ((*gr->_start)->_address == insts.back()->_address && insts.back()->IsUncondJump())
         {
             // Then assume its an infinite do { } while(true) loop that wraps part of the script
             gr->_type = kDoWhileCondGroupType;
@@ -40,17 +40,17 @@ void FF7::FF7WorldEngine::getVariants(std::vector<std::string>&) const
 
 }
 
-void FF7::FF7WorldLoadBankInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator*)
+void FF7::FF7WorldLoadBankInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator*)
 {
     stack.push(new BankValue("Read(" + _params[0]->getString() + ")"));
 }
 
-void FF7::FF7WorldLoadInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator*)
+void FF7::FF7WorldLoadInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator*)
 {
     stack.push(new VarValue(_params[0]->getString()));
 }
 
-void FF7::FF7SubStackInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator*)
+void FF7::FF7SubStackInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator*)
 {
     std::string op;
     switch (_opcode)
@@ -116,7 +116,7 @@ void FF7::FF7SubStackInstruction::processInst(Function&, ValueStack &stack, Engi
     stack.push(new VarValue(strValue));
 }
 
-void FF7::FF7WorldStoreInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen)
+void FF7::FF7WorldStoreInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen)
 {
     std::string strValue = stack.pop()->getString();
 
@@ -127,17 +127,17 @@ void FF7::FF7WorldStoreInstruction::processInst(Function&, ValueStack &stack, En
     codeGen->AddOutputLine("Write(" + bankAddr + ", " + strValue + ");");
 }
 
-void FF7::FF7WorldStackInstruction::processInst(Function&, ValueStack&, Engine*, CodeGenerator*)
+void FF7::FF7WorldStackInstruction::ProcessInst(Function&, ValueStack&, Engine*, CodeGenerator*)
 {
 
 }
 
-void FF7::FF7WorldCondJumpInstruction::processInst(Function&, ValueStack&, Engine*, CodeGenerator*)
+void FF7::FF7WorldCondJumpInstruction::ProcessInst(Function&, ValueStack&, Engine*, CodeGenerator*)
 {
 
 }
 
-uint32 FF7::FF7WorldCondJumpInstruction::getDestAddress() const
+uint32 FF7::FF7WorldCondJumpInstruction::GetDestAddress() const
 {
     return 0x200 + _params[0]->getUnsigned();
 }
@@ -149,17 +149,17 @@ std::ostream& FF7::FF7WorldCondJumpInstruction::print(std::ostream &output) cons
 }
 
 
-bool FF7::FF7WorldUncondJumpInstruction::isFuncCall() const
+bool FF7::FF7WorldUncondJumpInstruction::IsFuncCall() const
 {
 	return _isCall;
 }
 
-bool FF7::FF7WorldUncondJumpInstruction::isUncondJump() const
+bool FF7::FF7WorldUncondJumpInstruction::IsUncondJump() const
 {
 	return !_isCall;
 }
 
-uint32 FF7::FF7WorldUncondJumpInstruction::getDestAddress() const
+uint32 FF7::FF7WorldUncondJumpInstruction::GetDestAddress() const
 {
     // the world map while loops are incorrect without +1'in this, but
     // doing that will break some if elses.. hmm
@@ -169,17 +169,17 @@ uint32 FF7::FF7WorldUncondJumpInstruction::getDestAddress() const
 std::ostream& FF7::FF7WorldUncondJumpInstruction::print(std::ostream &output) const
 {
     Instruction::print(output);
- //   output << " (Jump target address: 0x" << std::hex << getDestAddress() << std::dec << ")";
+ //   output << " (Jump target address: 0x" << std::hex << GetDestAddress() << std::dec << ")";
     return output;
 }
 
 
-void FF7::FF7WorldUncondJumpInstruction::processInst(Function& , ValueStack&, Engine*, CodeGenerator*)
+void FF7::FF7WorldUncondJumpInstruction::ProcessInst(Function& , ValueStack&, Engine*, CodeGenerator*)
 {
 
 }
 
-void FF7::FF7WorldKernelCallInstruction::processInst(Function& , ValueStack &stack, Engine*, CodeGenerator *codeGen)
+void FF7::FF7WorldKernelCallInstruction::ProcessInst(Function& , ValueStack &stack, Engine*, CodeGenerator *codeGen)
 {
     std::string strFunc;
     switch (_opcode)
@@ -463,7 +463,7 @@ void FF7::FF7WorldKernelCallInstruction::processInst(Function& , ValueStack &sta
     codeGen->AddOutputLine(strFunc);
 }
 
-void FF7::FF7WorldNoOutputInstruction::processInst(Function&, ValueStack&, Engine*, CodeGenerator*)
+void FF7::FF7WorldNoOutputInstruction::ProcessInst(Function&, ValueStack&, Engine*, CodeGenerator*)
 {
 
 }

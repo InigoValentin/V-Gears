@@ -29,15 +29,19 @@ void setOutputStackEffect(bool value) {
 	outputStackEffect = value;
 }
 
+void Instruction::WriteTodo(CodeGenerator *code_gen, std::string owner, std::string instruction){
+    code_gen->AddOutputLine("-- Todo(\"" + instruction + "\")");
+}
+
 bool Instruction::isJump() const {
-	return isCondJump() || isUncondJump();
+	return isCondJump() || IsUncondJump();
 }
 
 bool Instruction::isCondJump() const {
 	return false;
 }
 
-bool Instruction::isUncondJump() const {
+bool Instruction::IsUncondJump() const {
 	return false;
 }
 
@@ -45,7 +49,7 @@ bool Instruction::isStackOp() const {
 	return false;
 }
 
-bool Instruction::isFuncCall() const {
+bool Instruction::IsFuncCall() const {
 	return false;
 }
 
@@ -65,11 +69,11 @@ bool Instruction::isStore() const {
 	return false;
 }
 
-uint32 Instruction::getDestAddress() const {
+uint32 Instruction::GetDestAddress() const {
 	throw WrongTypeException();
 }
 
-std::ostream &Instruction::print(std::ostream &output) const {
+std::ostream &Instruction::Print(std::ostream &output) const {
 	output << boost::format("%08x: %s") % _address % _name;
 	std::vector<ValuePtr>::const_iterator param;
 	for (param = _params.begin(); param != _params.end(); ++param) {
@@ -86,18 +90,18 @@ bool CondJumpInstruction::isCondJump() const {
 	return true;
 }
 
-bool UncondJumpInstruction::isUncondJump() const {
+bool UncondJumpInstruction::IsUncondJump() const {
 	return true;
 }
 
-void UncondJumpInstruction::processInst(Function&, ValueStack&, Engine*, CodeGenerator*) {
+void UncondJumpInstruction::ProcessInst(Function&, ValueStack&, Engine*, CodeGenerator*) {
 }
 
 bool StackInstruction::isStackOp() const {
 	return true;
 }
 
-bool CallInstruction::isFuncCall() const {
+bool CallInstruction::IsFuncCall() const {
 	return true;
 }
 
@@ -109,7 +113,7 @@ bool StoreInstruction::isStore() const {
 	return true;
 }
 
-void DupStackInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen) {
+void DupStackInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen) {
 	std::stringstream s;
 	ValuePtr p = stack.pop()->dup(s);
 	if (s.str().length() > 0)
@@ -118,11 +122,11 @@ void DupStackInstruction::processInst(Function&, ValueStack &stack, Engine*, Cod
 	stack.push(p);
 }
 
-void BoolNegateStackInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator*) {
+void BoolNegateStackInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator*) {
 	stack.push(stack.pop()->negate());
 }
 
-void BinaryOpStackInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen) {
+void BinaryOpStackInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen) {
 	ValuePtr op1 = stack.pop();
 	ValuePtr op2 = stack.pop();
 	if (codeGen->_binOrder == FIFO_ARGUMENT_ORDER)
@@ -135,19 +139,19 @@ bool ReturnInstruction::isReturn() const {
 	return true;
 }
 
-void ReturnInstruction::processInst(Function&, ValueStack&, Engine*, CodeGenerator *codeGen) {
+void ReturnInstruction::ProcessInst(Function&, ValueStack&, Engine*, CodeGenerator *codeGen) {
 	codeGen->AddOutputLine("return;");
 }
 
-void UnaryOpPrefixStackInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator*) {
+void UnaryOpPrefixStackInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator*) {
 	stack.push(new UnaryOpValue(stack.pop(), _codeGenData, false));
 }
 
-void UnaryOpPostfixStackInstruction::processInst(Function& , ValueStack &stack, Engine*, CodeGenerator*) {
+void UnaryOpPostfixStackInstruction::ProcessInst(Function& , ValueStack &stack, Engine*, CodeGenerator*) {
 	stack.push(new UnaryOpValue(stack.pop(), _codeGenData, true));
 }
 
-void KernelCallStackInstruction::processInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen) {
+void KernelCallStackInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen) {
 	codeGen->_argList.clear();
 	bool returnsValue = (_codeGenData.find("r") == 0);
 	std::string metadata = (!returnsValue ? _codeGenData : _codeGenData.substr(1));

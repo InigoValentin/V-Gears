@@ -17,19 +17,32 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
-
-#include "../../../include/decompiler/field/FieldDisassembler.h"
 #include "common/Lzs.h"
-#include "decompiler/field/ff7_field_engine.h"
 #include "decompiler/decompiler_engine.h"
+#include "decompiler/field/FieldDisassembler.h"
+#include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
+#include "decompiler/field/instruction/FieldBackgroundInstruction.h"
+#include "decompiler/field/instruction/FieldCameraInstruction.h"
+#include "decompiler/field/instruction/FieldCondJumpInstruction.h"
+#include "decompiler/field/instruction/FieldControlFlowInstruction.h"
+#include "decompiler/field/instruction/FieldMathInstruction.h"
+#include "decompiler/field/instruction/FieldMediaInstruction.h"
+#include "decompiler/field/instruction/FieldModelInstruction.h"
+#include "decompiler/field/instruction/FieldModuleInstruction.h"
+#include "decompiler/field/instruction/FieldNoOperationInstruction.h"
+#include "decompiler/field/instruction/FieldPartyInstruction.h"
+#include "decompiler/field/instruction/FieldUncategorizedInstruction.h"
+#include "decompiler/field/instruction/FieldUncondJumpInstruction.h"
+#include "decompiler/field/instruction/FieldWalkmeshInstruction.h"
+#include "decompiler/field/instruction/FieldWindowInstruction.h"
 
 const int FieldDisassembler::MAGIC(0x0502);
 
 const int FieldDisassembler::NUM_SECTIONS(7);
 
 FieldDisassembler::FieldDisassembler(
-  SUDM::IScriptFormatter& formatter, FF7FieldEngine* engine, InstVec& insts,
+  SUDM::IScriptFormatter& formatter, FieldEngine* engine, InstVec& insts,
   const std::vector<unsigned char>& raw_script_data
 ) : SimpleDisassembler(insts), engine_(engine), formatter_(formatter){
     loaded_from_raw_ = true;
@@ -41,7 +54,7 @@ FieldDisassembler::FieldDisassembler(
 }
 
 FieldDisassembler::FieldDisassembler(
-  SUDM::IScriptFormatter& formatter, FF7FieldEngine *engine, InstVec &insts
+  SUDM::IScriptFormatter& formatter, FieldEngine *engine, InstVec &insts
 ) : SimpleDisassembler(insts), engine_(engine), formatter_(formatter){
     section_pointers_size_ = (sizeof(uint32) * NUM_SECTIONS);
 }
@@ -295,12 +308,12 @@ void FieldDisassembler::DisassembleIndivdualScript(
  */
 const InstructionRecord kOpcodes[] ={
     // Flow
-    { 1, OPCODE::RET, "RET", "", FF7ControlFlowInstruction::Create },
-    { 1, OPCODE::REQ, "REQ", "BU", FF7ControlFlowInstruction::Create },
-    { 1, OPCODE::REQSW, "REQSW", "BU", FF7ControlFlowInstruction::Create },
-    { 1, OPCODE::REQEW, "REQEW", "BU", FF7ControlFlowInstruction::Create },
-    { 1, OPCODE::NOP, "NOP", "", FF7NoOperationInstruction::Create },
-    { 1, OPCODE::IFUB, "IFUB", "NNBBBL", FF7NoOperationInstruction::Create }
+    { 1, OPCODE::RET, "RET", "", FieldControlFlowInstruction::Create },
+    { 1, OPCODE::REQ, "REQ", "BU", FieldControlFlowInstruction::Create },
+    { 1, OPCODE::REQSW, "REQSW", "BU", FieldControlFlowInstruction::Create },
+    { 1, OPCODE::REQEW, "REQEW", "BU", FieldControlFlowInstruction::Create },
+    { 1, OPCODE::NOP, "NOP", "", FieldNoOperationInstruction::Create },
+    { 1, OPCODE::IFUB, "IFUB", "NNBBBL", FieldNoOperationInstruction::Create }
 };
 
 /**
@@ -326,158 +339,168 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
         std::string opcodePrefix;
         switch (opcode){
             // Flow
-            CASE_OPCODE(OPCODE::IFUB, "IFUB", FF7CondJumpInstruction, 0, "NBBBB");
-            CASE_OPCODE(OPCODE::RET, "RET", FF7ControlFlowInstruction, 0, "");
-            CASE_OPCODE(OPCODE::REQ, "REQ", FF7ControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::REQSW, "REQSW", FF7ControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::REQEW, "REQEW", FF7ControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::PREQ, "PREQ", FF7ControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::PRQSW, "PRQSW", FF7ControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::PRQEW, "PRQEW", FF7ControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::RETTO, "RETTO", FF7ControlFlowInstruction, 0, "U");
-            CASE_OPCODE(OPCODE::JMPF, "JMPF", FF7UncondJumpInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::JMPFL, "JMPFL", FF7UncondJumpInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::JMPB, "JMPB", FF7UncondJumpInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::JMPBL, "JMPBL", FF7UncondJumpInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::IFUBL, "IFUBL", FF7CondJumpInstruction, 0, "NBBBw");
-            CASE_OPCODE(OPCODE::IFSW, "IFSW", FF7CondJumpInstruction, 0, "NwwBB");
-            CASE_OPCODE(OPCODE::IFSWL, "IFSWL", FF7CondJumpInstruction, 0, "NwwBw");
-            CASE_OPCODE(OPCODE::IFUW, "IFUW", FF7CondJumpInstruction, 0, "NwwBB");
-            CASE_OPCODE(OPCODE::IFUWL, "IFUWL", FF7CondJumpInstruction, 0, "NwwBw");
-            CASE_OPCODE(OPCODE::WAIT, "WAIT", FF7ControlFlowInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::IFKEY, "IFKEY", FF7CondJumpInstruction, 0, "wB");
-            CASE_OPCODE(OPCODE::IFKEYON, "IFKEYON", FF7CondJumpInstruction, 0, "wB");
-            CASE_OPCODE(OPCODE::IFKEYOFF, "IFKEYOFF", FF7CondJumpInstruction, 0, "wB");
-            CASE_OPCODE(OPCODE::NOP, "NOP", FF7NoOperationInstruction, 0, "");
-            CASE_OPCODE(OPCODE::IFPRTYQ, "IFPRTYQ", FF7CondJumpInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::IFMEMBQ, "IFMEMBQ", FF7CondJumpInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::IFUB, "IFUB", FieldCondJumpInstruction, 0, "NBBBB");
+            /*case OPCODE::IFUB:
+                full_opcode = (full_opcode << 8) + OPCODE::IFUB;
+                this->_insts.push_back(new FieldCondJumpInstruction());
+                (this->_insts.back())->_opcode = full_opcode;
+                (this->_insts.back())->_address = this->address_;
+                (this->_insts.back())->_stackChange = 0;
+                (this->_insts.back())->_name = opcodePrefix + std::string("IFUB");
+                (this->_insts.back())->_codeGenData = "";
+                this->readParams((this->_insts.back()), "NBBBB");
+                break;*/
+            CASE_OPCODE(OPCODE::RET, "RET", FieldControlFlowInstruction, 0, "");
+            CASE_OPCODE(OPCODE::REQ, "REQ", FieldControlFlowInstruction, 0, "BU");
+            CASE_OPCODE(OPCODE::REQSW, "REQSW", FieldControlFlowInstruction, 0, "BU");
+            CASE_OPCODE(OPCODE::REQEW, "REQEW", FieldControlFlowInstruction, 0, "BU");
+            CASE_OPCODE(OPCODE::PREQ, "PREQ", FieldControlFlowInstruction, 0, "BU");
+            CASE_OPCODE(OPCODE::PRQSW, "PRQSW", FieldControlFlowInstruction, 0, "BU");
+            CASE_OPCODE(OPCODE::PRQEW, "PRQEW", FieldControlFlowInstruction, 0, "BU");
+            CASE_OPCODE(OPCODE::RETTO, "RETTO", FieldControlFlowInstruction, 0, "U");
+            CASE_OPCODE(OPCODE::JMPF, "JMPF", FieldUncondJumpInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::JMPFL, "JMPFL", FieldUncondJumpInstruction, 0, "w");
+            CASE_OPCODE(OPCODE::JMPB, "JMPB", FieldUncondJumpInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::JMPBL, "JMPBL", FieldUncondJumpInstruction, 0, "w");
+            CASE_OPCODE(OPCODE::IFUBL, "IFUBL", FieldCondJumpInstruction, 0, "NBBBw");
+            CASE_OPCODE(OPCODE::IFSW, "IFSW", FieldCondJumpInstruction, 0, "NwwBB");
+            CASE_OPCODE(OPCODE::IFSWL, "IFSWL", FieldCondJumpInstruction, 0, "NwwBw");
+            CASE_OPCODE(OPCODE::IFUW, "IFUW", FieldCondJumpInstruction, 0, "NwwBB");
+            CASE_OPCODE(OPCODE::IFUWL, "IFUWL", FieldCondJumpInstruction, 0, "NwwBw");
+            CASE_OPCODE(OPCODE::WAIT, "WAIT", FieldControlFlowInstruction, 0, "w");
+            CASE_OPCODE(OPCODE::IFKEY, "IFKEY", FieldCondJumpInstruction, 0, "wB");
+            CASE_OPCODE(OPCODE::IFKEYON, "IFKEYON", FieldCondJumpInstruction, 0, "wB");
+            CASE_OPCODE(OPCODE::IFKEYOFF, "IFKEYOFF", FieldCondJumpInstruction, 0, "wB");
+            CASE_OPCODE(OPCODE::NOP, "NOP", FieldNoOperationInstruction, 0, "");
+            CASE_OPCODE(OPCODE::IFPRTYQ, "IFPRTYQ", FieldCondJumpInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::IFMEMBQ, "IFMEMBQ", FieldCondJumpInstruction, 0, "BB");
 
             // Module
-            CASE_OPCODE(OPCODE::DSKCG, "DSKCG", FF7ModuleInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::DSKCG, "DSKCG", FieldModuleInstruction, 0, "B");
             START_SUBOPCODE(OPCODE::SPECIAL)
-                CASE_OPCODE(OPCODE_SPECIAL::ARROW, "ARROW", FF7ModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::PNAME, "PNAME", FF7ModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::GMSPD, "GMSPD", FF7ModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::SMSPD, "SMSPD", FF7ModuleInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE_SPECIAL::FLMAT, "FLMAT", FF7ModuleInstruction, 0, "");
-            CASE_OPCODE(OPCODE_SPECIAL::FLITM, "FLITM", FF7ModuleInstruction, 0, "");
-            CASE_OPCODE(OPCODE_SPECIAL::BTLCK, "BTLCK", FF7ModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::MVLCK, "MVLCK", FF7ModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::SPCNM, "SPCNM", FF7ModuleInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE_SPECIAL::RSGLB, "RSGLB", FF7ModuleInstruction, 0, "");
-            CASE_OPCODE(OPCODE_SPECIAL::CLITM, "CLITM", FF7ModuleInstruction, 0, "");
+                CASE_OPCODE(OPCODE_SPECIAL::ARROW, "ARROW", FieldModuleInstruction, 0, "B");
+            CASE_OPCODE(OPCODE_SPECIAL::PNAME, "PNAME", FieldModuleInstruction, 0, "B");
+            CASE_OPCODE(OPCODE_SPECIAL::GMSPD, "GMSPD", FieldModuleInstruction, 0, "B");
+            CASE_OPCODE(OPCODE_SPECIAL::SMSPD, "SMSPD", FieldModuleInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE_SPECIAL::FLMAT, "FLMAT", FieldModuleInstruction, 0, "");
+            CASE_OPCODE(OPCODE_SPECIAL::FLITM, "FLITM", FieldModuleInstruction, 0, "");
+            CASE_OPCODE(OPCODE_SPECIAL::BTLCK, "BTLCK", FieldModuleInstruction, 0, "B");
+            CASE_OPCODE(OPCODE_SPECIAL::MVLCK, "MVLCK", FieldModuleInstruction, 0, "B");
+            CASE_OPCODE(OPCODE_SPECIAL::SPCNM, "SPCNM", FieldModuleInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE_SPECIAL::RSGLB, "RSGLB", FieldModuleInstruction, 0, "");
+            CASE_OPCODE(OPCODE_SPECIAL::CLITM, "CLITM", FieldModuleInstruction, 0, "");
             END_SUBOPCODE
-                CASE_OPCODE(OPCODE::MINIGAME, "MINIGAME", FF7ModuleInstruction, 0, "wsswBB");
-            CASE_OPCODE(OPCODE::BTMD2, "BTMD2", FF7ModuleInstruction, 0, "d");
-            CASE_OPCODE(OPCODE::BTRLD, "BTRLD", FF7ModuleInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::BTLTB, "BTLTB", FF7ModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MAPJUMP, "MAPJUMP", FF7ModuleInstruction, 0, "wsswB");
-            CASE_OPCODE(OPCODE::LSTMP, "LSTMP", FF7ModuleInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::BATTLE, "BATTLE", FF7ModuleInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::BTLON, "BTLON", FF7ModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::BTLMD, "BTLMD", FF7ModuleInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::MPJPO, "MPJPO", FF7ModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PMJMP, "PMJMP", FF7ModuleInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::PMJMP2, "PMJMP2", FF7ModuleInstruction, 0, "");
-            CASE_OPCODE(OPCODE::GAMEOVER, "GAMEOVER", FF7ModuleInstruction, 0, "");
+                CASE_OPCODE(OPCODE::MINIGAME, "MINIGAME", FieldModuleInstruction, 0, "wsswBB");
+            CASE_OPCODE(OPCODE::BTMD2, "BTMD2", FieldModuleInstruction, 0, "d");
+            CASE_OPCODE(OPCODE::BTRLD, "BTRLD", FieldModuleInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::BTLTB, "BTLTB", FieldModuleInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::MAPJUMP, "MAPJUMP", FieldModuleInstruction, 0, "wsswB");
+            CASE_OPCODE(OPCODE::LSTMP, "LSTMP", FieldModuleInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::BATTLE, "BATTLE", FieldModuleInstruction, 0, "Nw");
+            CASE_OPCODE(OPCODE::BTLON, "BTLON", FieldModuleInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::BTLMD, "BTLMD", FieldModuleInstruction, 0, "w");
+            CASE_OPCODE(OPCODE::MPJPO, "MPJPO", FieldModuleInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::PMJMP, "PMJMP", FieldModuleInstruction, 0, "w");
+            CASE_OPCODE(OPCODE::PMJMP2, "PMJMP2", FieldModuleInstruction, 0, "");
+            CASE_OPCODE(OPCODE::GAMEOVER, "GAMEOVER", FieldModuleInstruction, 0, "");
 
             // Math
-            CASE_OPCODE(OPCODE::PLUS_, "PLUS!", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PLUS2_, "PLUS2!", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MINUS_, "MINUS!", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MINUS2_, "MINUS2!", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::INC_, "INC!", FF7MathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::INC2_, "INC2!", FF7MathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::DEC_, "DEC!", FF7MathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::DEC2_, "DEC2!", FF7MathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::RDMSD, "RDMSD", FF7MathInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::SETBYTE, "SETBYTE", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::SETWORD, "SETWORD", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::BITON, "BITON", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::BITOFF, "BITOFF", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::BITXOR, "BITXOR", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PLUS, "PLUS", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PLUS2, "PLUS2", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MINUS, "MINUS", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MINUS2, "MINUS2", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MUL, "MUL", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MUL2, "MUL2", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::DIV, "DIV", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::DIV2, "DIV2", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MOD, "MOD", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MOD2, "MOD2", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::AND, "AND", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::AND2, "AND2", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::OR, "OR", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::OR2, "OR2", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::XOR, "XOR", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::XOR2, "XOR2", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::INC, "INC", FF7MathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::INC2, "INC2", FF7MathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::DEC, "DEC", FF7MathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::DEC2, "DEC2", FF7MathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::RANDOM, "RANDOM", FF7MathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::LBYTE, "LBYTE", FF7MathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::HBYTE, "HBYTE", FF7MathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::TWOBYTE, "2BYTE", FF7MathInstruction, 0, "NNBBB");
-            CASE_OPCODE(OPCODE::SIN, "SIN", FF7MathInstruction, 0, "NNwwwB");
-            CASE_OPCODE(OPCODE::COS, "COS", FF7MathInstruction, 0, "NNwwwB");
+            CASE_OPCODE(OPCODE::PLUS_, "PLUS!", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::PLUS2_, "PLUS2!", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::MINUS_, "MINUS!", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::MINUS2_, "MINUS2!", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::INC_, "INC!", FieldMathInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::INC2_, "INC2!", FieldMathInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::DEC_, "DEC!", FieldMathInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::DEC2_, "DEC2!", FieldMathInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::RDMSD, "RDMSD", FieldMathInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::SETBYTE, "SETBYTE", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::SETWORD, "SETWORD", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::BITON, "BITON", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::BITOFF, "BITOFF", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::BITXOR, "BITXOR", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::PLUS, "PLUS", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::PLUS2, "PLUS2", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::MINUS, "MINUS", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::MINUS2, "MINUS2", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::MUL, "MUL", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::MUL2, "MUL2", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::DIV, "DIV", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::DIV2, "DIV2", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::MOD, "MOD", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::MOD2, "MOD2", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::AND, "AND", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::AND2, "AND2", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::OR, "OR", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::OR2, "OR2", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::XOR, "XOR", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::XOR2, "XOR2", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::INC, "INC", FieldMathInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::INC2, "INC2", FieldMathInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::DEC, "DEC", FieldMathInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::DEC2, "DEC2", FieldMathInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::RANDOM, "RANDOM", FieldMathInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::LBYTE, "LBYTE", FieldMathInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::HBYTE, "HBYTE", FieldMathInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::TWOBYTE, "2BYTE", FieldMathInstruction, 0, "NNBBB");
+            CASE_OPCODE(OPCODE::SIN, "SIN", FieldMathInstruction, 0, "NNwwwB");
+            CASE_OPCODE(OPCODE::COS, "COS", FieldMathInstruction, 0, "NNwwwB");
 
             // Window
-            CASE_OPCODE(OPCODE::TUTOR, "TUTOR", FF7WindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WCLS, "WCLS", FF7WindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WSIZW, "WSIZW", FF7WindowInstruction, 0, "Bwwww");
-            CASE_OPCODE(OPCODE::WSPCL, "WSPCL", FF7WindowInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::WNUMB, "WNUMB", FF7WindowInstruction, 0, "NBwwB"); // NBdB when N == 0
-            CASE_OPCODE(OPCODE::STTIM, "STTIM", FF7WindowInstruction, 0, "NNBBB");
-            CASE_OPCODE(OPCODE::MESSAGE, "MESSAGE", FF7WindowInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::MPARA, "MPARA", FF7WindowInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::MPRA2, "MPRA2", FF7WindowInstruction, 0, "NBBw");
-            CASE_OPCODE(OPCODE::MPNAM, "MPNAM", FF7WindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::ASK, "ASK", FF7WindowInstruction, 0, "NBBBBB");
-            CASE_OPCODE(OPCODE::MENU, "MENU", FF7WindowInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MENU2, "MENU2", FF7WindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WINDOW, "WINDOW", FF7WindowInstruction, 0, "Bwwww");
-            CASE_OPCODE(OPCODE::WMOVE, "WMOVE", FF7WindowInstruction, 0, "Bss");
-            CASE_OPCODE(OPCODE::WMODE, "WMODE", FF7WindowInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::WREST, "WREST", FF7WindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WCLSE, "WCLSE", FF7WindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WROW, "WROW", FF7WindowInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::GWCOL, "GWCOL", FF7WindowInstruction, 0, "NNBBBB");
-            CASE_OPCODE(OPCODE::SWCOL, "SWCOL", FF7WindowInstruction, 0, "NNBBBB");
+            CASE_OPCODE(OPCODE::TUTOR, "TUTOR", FieldWindowInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::WCLS, "WCLS", FieldWindowInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::WSIZW, "WSIZW", FieldWindowInstruction, 0, "Bwwww");
+            CASE_OPCODE(OPCODE::WSPCL, "WSPCL", FieldWindowInstruction, 0, "BBBB");
+            CASE_OPCODE(OPCODE::WNUMB, "WNUMB", FieldWindowInstruction, 0, "NBwwB"); // NBdB when N == 0
+            CASE_OPCODE(OPCODE::STTIM, "STTIM", FieldWindowInstruction, 0, "NNBBB");
+            CASE_OPCODE(OPCODE::MESSAGE, "MESSAGE", FieldWindowInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::MPARA, "MPARA", FieldWindowInstruction, 0, "NBBB");
+            CASE_OPCODE(OPCODE::MPRA2, "MPRA2", FieldWindowInstruction, 0, "NBBw");
+            CASE_OPCODE(OPCODE::MPNAM, "MPNAM", FieldWindowInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::ASK, "ASK", FieldWindowInstruction, 0, "NBBBBB");
+            CASE_OPCODE(OPCODE::MENU, "MENU", FieldWindowInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::MENU2, "MENU2", FieldWindowInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::WINDOW, "WINDOW", FieldWindowInstruction, 0, "Bwwww");
+            CASE_OPCODE(OPCODE::WMOVE, "WMOVE", FieldWindowInstruction, 0, "Bss");
+            CASE_OPCODE(OPCODE::WMODE, "WMODE", FieldWindowInstruction, 0, "BBB");
+            CASE_OPCODE(OPCODE::WREST, "WREST", FieldWindowInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::WCLSE, "WCLSE", FieldWindowInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::WROW, "WROW", FieldWindowInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::GWCOL, "GWCOL", FieldWindowInstruction, 0, "NNBBBB");
+            CASE_OPCODE(OPCODE::SWCOL, "SWCOL", FieldWindowInstruction, 0, "NNBBBB");
 
             // Party
-            CASE_OPCODE(OPCODE::SPTYE, "SPTYE", FF7PartyInstruction, 0, "NNBBB");
-            CASE_OPCODE(OPCODE::GTPYE, "GTPYE", FF7PartyInstruction, 0, "NNBBB");
-            CASE_OPCODE(OPCODE::GOLDU, "GOLDU", FF7PartyInstruction, 0, "Nww"); // Nd when N == 0
-            CASE_OPCODE(OPCODE::GOLDD, "GOLDD", FF7PartyInstruction, 0, "Nww"); // Nd when N == 0
-            CASE_OPCODE(OPCODE::CHGLD, "CHGLD", FF7PartyInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::HMPMAX1, "HMPMAX1", FF7PartyInstruction, 0, "");
-            CASE_OPCODE(OPCODE::HMPMAX2, "HMPMAX2", FF7PartyInstruction, 0, "");
-            CASE_OPCODE(OPCODE::MHMMX, "MHMMX", FF7PartyInstruction, 0, "");
-            CASE_OPCODE(OPCODE::HMPMAX3, "HMPMAX3", FF7PartyInstruction, 0, "");
-            CASE_OPCODE(OPCODE::MPU, "MPU", FF7PartyInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MPD, "MPD", FF7PartyInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::HPU, "HPU", FF7PartyInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::HPD, "HPD", FF7PartyInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::STITM, "STITM", FF7PartyInstruction, 0, "NwB");
-            CASE_OPCODE(OPCODE::DLITM, "DLITM", FF7PartyInstruction, 0, "NwB");
-            CASE_OPCODE(OPCODE::CKITM, "CKITM", FF7PartyInstruction, 0, "NwB");
-            CASE_OPCODE(OPCODE::SMTRA, "SMTRA", FF7PartyInstruction, 0, "NNBBBB");
-            CASE_OPCODE(OPCODE::DMTRA, "DMTRA", FF7PartyInstruction, 0, "NNBBBBB");
-            CASE_OPCODE(OPCODE::CMTRA, "CMTRA", FF7PartyInstruction, 0, "NNNBBBBBB");
-            CASE_OPCODE(OPCODE::GETPC, "GETPC", FF7PartyInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PRTYP, "PRTYP", FF7PartyInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PRTYM, "PRTYM", FF7PartyInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PRTYE, "PRTYE", FF7PartyInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::MMBUD, "MMBUD", FF7PartyInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::MMBLK, "MMBLK", FF7PartyInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MMBUK, "MMBUK", FF7PartyInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::SPTYE, "SPTYE", FieldPartyInstruction, 0, "NNBBB");
+            CASE_OPCODE(OPCODE::GTPYE, "GTPYE", FieldPartyInstruction, 0, "NNBBB");
+            CASE_OPCODE(OPCODE::GOLDU, "GOLDU", FieldPartyInstruction, 0, "Nww"); // Nd when N == 0
+            CASE_OPCODE(OPCODE::GOLDD, "GOLDD", FieldPartyInstruction, 0, "Nww"); // Nd when N == 0
+            CASE_OPCODE(OPCODE::CHGLD, "CHGLD", FieldPartyInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::HMPMAX1, "HMPMAX1", FieldPartyInstruction, 0, "");
+            CASE_OPCODE(OPCODE::HMPMAX2, "HMPMAX2", FieldPartyInstruction, 0, "");
+            CASE_OPCODE(OPCODE::MHMMX, "MHMMX", FieldPartyInstruction, 0, "");
+            CASE_OPCODE(OPCODE::HMPMAX3, "HMPMAX3", FieldPartyInstruction, 0, "");
+            CASE_OPCODE(OPCODE::MPU, "MPU", FieldPartyInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::MPD, "MPD", FieldPartyInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::HPU, "HPU", FieldPartyInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::HPD, "HPD", FieldPartyInstruction, 0, "NBw");
+            CASE_OPCODE(OPCODE::STITM, "STITM", FieldPartyInstruction, 0, "NwB");
+            CASE_OPCODE(OPCODE::DLITM, "DLITM", FieldPartyInstruction, 0, "NwB");
+            CASE_OPCODE(OPCODE::CKITM, "CKITM", FieldPartyInstruction, 0, "NwB");
+            CASE_OPCODE(OPCODE::SMTRA, "SMTRA", FieldPartyInstruction, 0, "NNBBBB");
+            CASE_OPCODE(OPCODE::DMTRA, "DMTRA", FieldPartyInstruction, 0, "NNBBBBB");
+            CASE_OPCODE(OPCODE::CMTRA, "CMTRA", FieldPartyInstruction, 0, "NNNBBBBBB");
+            CASE_OPCODE(OPCODE::GETPC, "GETPC", FieldPartyInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::PRTYP, "PRTYP", FieldPartyInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::PRTYM, "PRTYM", FieldPartyInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::PRTYE, "PRTYE", FieldPartyInstruction, 0, "BBB");
+            CASE_OPCODE(OPCODE::MMBUD, "MMBUD", FieldPartyInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::MMBLK, "MMBLK", FieldPartyInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::MMBUK, "MMBUK", FieldPartyInstruction, 0, "B");
 
             // Model
-            CASE_OPCODE(OPCODE::JOIN, "JOIN", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SPLIT, "SPLIT", FF7ModelInstruction, 0, "NNNssBssBB");
-            CASE_OPCODE(OPCODE::BLINK, "BLINK", FF7ModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::JOIN, "JOIN", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::SPLIT, "SPLIT", FieldModelInstruction, 0, "NNNssBssBB");
+            CASE_OPCODE(OPCODE::BLINK, "BLINK", FieldModelInstruction, 0, "B");
             OPCODE_BASE(OPCODE::KAWAI){
                 int length = this->stream_->ReadU8();
                 assert(length >= 3);
@@ -488,58 +511,58 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
                 opcode = this->stream_->ReadU8();
                 switch (opcode){
                     CASE_OPCODE(
-                        OPCODE_KAWAI::EYETX, "EYETX", FF7ModelInstruction, 0, parameters.c_str()
+                        OPCODE_KAWAI::EYETX, "EYETX", FieldModelInstruction, 0, parameters.c_str()
                     ); // was BBBB
                     CASE_OPCODE(
-                        OPCODE_KAWAI::TRNSP, "TRNSP", FF7ModelInstruction, 0, parameters.c_str()
+                        OPCODE_KAWAI::TRNSP, "TRNSP", FieldModelInstruction, 0, parameters.c_str()
                     ); // was B
                     CASE_OPCODE(
-                        OPCODE_KAWAI::AMBNT, "AMBNT", FF7ModelInstruction, 0, parameters.c_str()
+                        OPCODE_KAWAI::AMBNT, "AMBNT", FieldModelInstruction, 0, parameters.c_str()
                     ); // was BBBBBBB
                     CASE_OPCODE(
                         OPCODE_KAWAI::Unknown03, "Unknown03",
-                        FF7ModelInstruction, 0, parameters.c_str()
+                        FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
                         OPCODE_KAWAI::Unknown04, "Unknown04",
-                        FF7ModelInstruction, 0, parameters.c_str()
+                        FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
                         OPCODE_KAWAI::Unknown05, "Unknown05",
-                        FF7ModelInstruction, 0, parameters.c_str()
+                        FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
-                        OPCODE_KAWAI::LIGHT, "LIGHT",FF7ModelInstruction, 0, parameters.c_str()
+                        OPCODE_KAWAI::LIGHT, "LIGHT",FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
                         OPCODE_KAWAI::Unknown07, "Unknown07",
-                        FF7ModelInstruction, 0, parameters.c_str()
+                        FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
                         OPCODE_KAWAI::Unknown08, "Unknown08",
-                        FF7ModelInstruction, 0, parameters.c_str()
+                        FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
                         OPCODE_KAWAI::Unknown09, "Unknown09",
-                        FF7ModelInstruction, 0, parameters.c_str()
+                        FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
                         OPCODE_KAWAI::SBOBJ, "SBOBJ",
-                        FF7ModelInstruction, 0, parameters.c_str()
+                        FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
                       OPCODE_KAWAI::Unknown0B, "Unknown0B",
-                      FF7ModelInstruction, 0, parameters.c_str()
+                      FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
                         OPCODE_KAWAI::Unknown0C, "Unknown0C",
-                        FF7ModelInstruction, 0, parameters.c_str()
+                        FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
-                        OPCODE_KAWAI::SHINE, "SHINE", FF7ModelInstruction, 0, parameters.c_str()
+                        OPCODE_KAWAI::SHINE, "SHINE", FieldModelInstruction, 0, parameters.c_str()
                     );
                     CASE_OPCODE(
-                        OPCODE_KAWAI::RESET, "RESET", FF7ModelInstruction, 0, parameters.c_str()
+                        OPCODE_KAWAI::RESET, "RESET", FieldModelInstruction, 0, parameters.c_str()
                     );
                 default:
                     throw UnknownSubOpcodeException(this->address_, opcode);
@@ -548,71 +571,71 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
                 INC_ADDR;
             }
             OPCODE_END
-            CASE_OPCODE(OPCODE::KAWIW, "KAWIW", FF7ModelInstruction, 0, "");
-            CASE_OPCODE(OPCODE::PMOVA, "PMOVA", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PDIRA, "PDIRA", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PTURA, "PTURA", FF7ModelInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::PGTDR, "PGTDR", FF7ModelInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PXYZI, "PXYZI", FF7ModelInstruction, 0, "NNBBBBB");
-            CASE_OPCODE(OPCODE::TLKON, "TLKON", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PC, "PC", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::opCodeCHAR, "CHAR", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::DFANM, "DFANM", FF7ModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::ANIME1, "ANIME1", FF7ModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::VISI, "VISI", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::XYZI, "XYZI", FF7ModelInstruction, 0, "NNsssw");
-            CASE_OPCODE(OPCODE::XYI, "XYI", FF7ModelInstruction, 0, "NNssw");
-            CASE_OPCODE(OPCODE::XYZ, "XYZ", FF7ModelInstruction, 0, "NNsss");
-            CASE_OPCODE(OPCODE::MOVE, "MOVE", FF7ModelInstruction, 0, "Nss");
-            CASE_OPCODE(OPCODE::CMOVE, "CMOVE", FF7ModelInstruction, 0, "Nss");
-            CASE_OPCODE(OPCODE::MOVA, "MOVA", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::TURA, "TURA", FF7ModelInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::ANIMW, "ANIMW", FF7ModelInstruction, 0, "");
-            CASE_OPCODE(OPCODE::FMOVE, "FMOVE", FF7ModelInstruction, 0, "Nss");
-            CASE_OPCODE(OPCODE::ANIME2, "ANIME2", FF7ModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::ANIM_1, "ANIM!1", FF7ModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::CANIM1, "CANIM1", FF7ModelInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::CANM_1, "CANM!1", FF7ModelInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::MSPED, "MSPED", FF7ModelInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::DIR, "DIR", FF7ModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::TURNGEN, "TURNGEN", FF7ModelInstruction, 0, "NBBBB");
-            CASE_OPCODE(OPCODE::TURN, "TURN", FF7ModelInstruction, 0, "NBBBB");
-            CASE_OPCODE(OPCODE::DIRA, "DIRA", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::GETDIR, "GETDIR", FF7ModelInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::GETAXY, "GETAXY", FF7ModelInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::GETAI, "GETAI", FF7ModelInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::ANIM_2, "ANIM!2", FF7ModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::CANIM2, "CANIM2", FF7ModelInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::CANM_2, "CANM!2", FF7ModelInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::ASPED, "ASPED", FF7ModelInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::CC, "CC", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::JUMP, "JUMP", FF7ModelInstruction, 0, "NNssww");
-            CASE_OPCODE(OPCODE::AXYZI, "AXYZI", FF7ModelInstruction, 0, "NNBBBBB");
-            CASE_OPCODE(OPCODE::LADER, "LADER", FF7ModelInstruction, 0, "NNssswBBBB");
-            CASE_OPCODE(OPCODE::OFST, "OFST", FF7ModelInstruction, 0, "NNBsssw");
-            CASE_OPCODE(OPCODE::OFSTW, "OFSTW", FF7ModelInstruction, 0, "");
-            CASE_OPCODE(OPCODE::TALKR, "TALKR", FF7ModelInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::SLIDR, "SLIDR", FF7ModelInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::SOLID, "SOLID", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::TLKR2, "TLKR2", FF7ModelInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::SLDR2, "SLDR2", FF7ModelInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::CCANM, "CCANM", FF7ModelInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::FCFIX, "FCFIX", FF7ModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::ANIMB, "ANIMB", FF7ModelInstruction, 0, "");
-            CASE_OPCODE(OPCODE::TURNW, "TURNW", FF7ModelInstruction, 0, "");
+            CASE_OPCODE(OPCODE::KAWIW, "KAWIW", FieldModelInstruction, 0, "");
+            CASE_OPCODE(OPCODE::PMOVA, "PMOVA", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::PDIRA, "PDIRA", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::PTURA, "PTURA", FieldModelInstruction, 0, "BBB");
+            CASE_OPCODE(OPCODE::PGTDR, "PGTDR", FieldModelInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::PXYZI, "PXYZI", FieldModelInstruction, 0, "NNBBBBB");
+            CASE_OPCODE(OPCODE::TLKON, "TLKON", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::PC, "PC", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::opCodeCHAR, "CHAR", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::DFANM, "DFANM", FieldModelInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::ANIME1, "ANIME1", FieldModelInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::VISI, "VISI", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::XYZI, "XYZI", FieldModelInstruction, 0, "NNsssw");
+            CASE_OPCODE(OPCODE::XYI, "XYI", FieldModelInstruction, 0, "NNssw");
+            CASE_OPCODE(OPCODE::XYZ, "XYZ", FieldModelInstruction, 0, "NNsss");
+            CASE_OPCODE(OPCODE::MOVE, "MOVE", FieldModelInstruction, 0, "Nss");
+            CASE_OPCODE(OPCODE::CMOVE, "CMOVE", FieldModelInstruction, 0, "Nss");
+            CASE_OPCODE(OPCODE::MOVA, "MOVA", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::TURA, "TURA", FieldModelInstruction, 0, "BBB");
+            CASE_OPCODE(OPCODE::ANIMW, "ANIMW", FieldModelInstruction, 0, "");
+            CASE_OPCODE(OPCODE::FMOVE, "FMOVE", FieldModelInstruction, 0, "Nss");
+            CASE_OPCODE(OPCODE::ANIME2, "ANIME2", FieldModelInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::ANIM_1, "ANIM!1", FieldModelInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::CANIM1, "CANIM1", FieldModelInstruction, 0, "BBBB");
+            CASE_OPCODE(OPCODE::CANM_1, "CANM!1", FieldModelInstruction, 0, "BBBB");
+            CASE_OPCODE(OPCODE::MSPED, "MSPED", FieldModelInstruction, 0, "Nw");
+            CASE_OPCODE(OPCODE::DIR, "DIR", FieldModelInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::TURNGEN, "TURNGEN", FieldModelInstruction, 0, "NBBBB");
+            CASE_OPCODE(OPCODE::TURN, "TURN", FieldModelInstruction, 0, "NBBBB");
+            CASE_OPCODE(OPCODE::DIRA, "DIRA", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::GETDIR, "GETDIR", FieldModelInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::GETAXY, "GETAXY", FieldModelInstruction, 0, "NBBB");
+            CASE_OPCODE(OPCODE::GETAI, "GETAI", FieldModelInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::ANIM_2, "ANIM!2", FieldModelInstruction, 0, "BB");
+            CASE_OPCODE(OPCODE::CANIM2, "CANIM2", FieldModelInstruction, 0, "BBBB");
+            CASE_OPCODE(OPCODE::CANM_2, "CANM!2", FieldModelInstruction, 0, "BBBB");
+            CASE_OPCODE(OPCODE::ASPED, "ASPED", FieldModelInstruction, 0, "Nw");
+            CASE_OPCODE(OPCODE::CC, "CC", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::JUMP, "JUMP", FieldModelInstruction, 0, "NNssww");
+            CASE_OPCODE(OPCODE::AXYZI, "AXYZI", FieldModelInstruction, 0, "NNBBBBB");
+            CASE_OPCODE(OPCODE::LADER, "LADER", FieldModelInstruction, 0, "NNssswBBBB");
+            CASE_OPCODE(OPCODE::OFST, "OFST", FieldModelInstruction, 0, "NNBsssw");
+            CASE_OPCODE(OPCODE::OFSTW, "OFSTW", FieldModelInstruction, 0, "");
+            CASE_OPCODE(OPCODE::TALKR, "TALKR", FieldModelInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::SLIDR, "SLIDR", FieldModelInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::SOLID, "SOLID", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::TLKR2, "TLKR2", FieldModelInstruction, 0, "Nw");
+            CASE_OPCODE(OPCODE::SLDR2, "SLDR2", FieldModelInstruction, 0, "Nw");
+            CASE_OPCODE(OPCODE::CCANM, "CCANM", FieldModelInstruction, 0, "BBB");
+            CASE_OPCODE(OPCODE::FCFIX, "FCFIX", FieldModelInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::ANIMB, "ANIMB", FieldModelInstruction, 0, "");
+            CASE_OPCODE(OPCODE::TURNW, "TURNW", FieldModelInstruction, 0, "");
 
             // Walkmesh
-            CASE_OPCODE(OPCODE::SLIP, "SLIP", FF7WalkmeshInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::UC, "UC", FF7WalkmeshInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::IDLCK, "IDLCK", FF7WalkmeshInstruction, 0, "wB");
-            CASE_OPCODE(OPCODE::LINON, "LINON", FF7WalkmeshInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SLINE, "SLINE", FF7WalkmeshInstruction, 0, "NNNssssss");
-            //CASE_OPCODE(OPCODE::LINE, "LINE", FF7WalkmeshInstruction, 0, "ssssss");
+            CASE_OPCODE(OPCODE::SLIP, "SLIP", FieldWalkmeshInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::UC, "UC", FieldWalkmeshInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::IDLCK, "IDLCK", FieldWalkmeshInstruction, 0, "wB");
+            CASE_OPCODE(OPCODE::LINON, "LINON", FieldWalkmeshInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::SLINE, "SLINE", FieldWalkmeshInstruction, 0, "NNNssssss");
+            //CASE_OPCODE(OPCODE::LINE, "LINE", FieldWalkmeshInstruction, 0, "ssssss");
             // LINE is done like this to save opcode params to the function out params.
             case OPCODE::LINE:
                 is_line = true;
                 full_opcode = (full_opcode << 8) + OPCODE::LINE;
-                this->_insts.push_back(new FF7WalkmeshInstruction());
+                this->_insts.push_back(new FieldWalkmeshInstruction());
                 (this->_insts.back())->_opcode = full_opcode;
                 (this->_insts.back())->_address = this->address_;
                 (this->_insts.back())->_stackChange = 0;
@@ -628,66 +651,66 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
                 break;
 
             // Backgnd
-            CASE_OPCODE(OPCODE::BGPDH, "BGPDH", FF7BackgroundInstruction, 0, "NBs");
-            CASE_OPCODE(OPCODE::BGSCR, "BGSCR", FF7BackgroundInstruction, 0, "NBss");
-            CASE_OPCODE(OPCODE::MPPAL, "MPPAL", FF7BackgroundInstruction, 0, "NNNBBBBBBB");
-            CASE_OPCODE(OPCODE::BGON, "BGON", FF7BackgroundInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::BGOFF, "BGOFF", FF7BackgroundInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::BGROL, "BGROL", FF7BackgroundInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::BGROL2, "BGROL2", FF7BackgroundInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::BGCLR, "BGCLR", FF7BackgroundInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::STPAL, "STPAL", FF7BackgroundInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::LDPAL, "LDPAL", FF7BackgroundInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::CPPAL, "CPPAL", FF7BackgroundInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::RTPAL, "RTPAL", FF7BackgroundInstruction, 0, "NNBBBB");
-            CASE_OPCODE(OPCODE::ADPAL, "ADPAL", FF7BackgroundInstruction, 0, "NNNBBBBBB");
-            CASE_OPCODE(OPCODE::MPPAL2, "MPPAL2", FF7BackgroundInstruction, 0, "NNNBBBBBB");
-            CASE_OPCODE(OPCODE::STPLS, "STPLS", FF7BackgroundInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::LDPLS, "LDPLS", FF7BackgroundInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::CPPAL2, "CPPAL2", FF7BackgroundInstruction, 0, "BBBBBBB");
-            CASE_OPCODE(OPCODE::RTPAL2, "RTPAL2", FF7BackgroundInstruction, 0, "BBBBBBB");
-            CASE_OPCODE(OPCODE::ADPAL2, "ADPAL2", FF7BackgroundInstruction, 0, "BBBBBBBBBB");
+            CASE_OPCODE(OPCODE::BGPDH, "BGPDH", FieldBackgroundInstruction, 0, "NBs");
+            CASE_OPCODE(OPCODE::BGSCR, "BGSCR", FieldBackgroundInstruction, 0, "NBss");
+            CASE_OPCODE(OPCODE::MPPAL, "MPPAL", FieldBackgroundInstruction, 0, "NNNBBBBBBB");
+            CASE_OPCODE(OPCODE::BGON, "BGON", FieldBackgroundInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::BGOFF, "BGOFF", FieldBackgroundInstruction, 0, "NBB");
+            CASE_OPCODE(OPCODE::BGROL, "BGROL", FieldBackgroundInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::BGROL2, "BGROL2", FieldBackgroundInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::BGCLR, "BGCLR", FieldBackgroundInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::STPAL, "STPAL", FieldBackgroundInstruction, 0, "NBBB");
+            CASE_OPCODE(OPCODE::LDPAL, "LDPAL", FieldBackgroundInstruction, 0, "NBBB");
+            CASE_OPCODE(OPCODE::CPPAL, "CPPAL", FieldBackgroundInstruction, 0, "NBBB");
+            CASE_OPCODE(OPCODE::RTPAL, "RTPAL", FieldBackgroundInstruction, 0, "NNBBBB");
+            CASE_OPCODE(OPCODE::ADPAL, "ADPAL", FieldBackgroundInstruction, 0, "NNNBBBBBB");
+            CASE_OPCODE(OPCODE::MPPAL2, "MPPAL2", FieldBackgroundInstruction, 0, "NNNBBBBBB");
+            CASE_OPCODE(OPCODE::STPLS, "STPLS", FieldBackgroundInstruction, 0, "BBBB");
+            CASE_OPCODE(OPCODE::LDPLS, "LDPLS", FieldBackgroundInstruction, 0, "BBBB");
+            CASE_OPCODE(OPCODE::CPPAL2, "CPPAL2", FieldBackgroundInstruction, 0, "BBBBBBB");
+            CASE_OPCODE(OPCODE::RTPAL2, "RTPAL2", FieldBackgroundInstruction, 0, "BBBBBBB");
+            CASE_OPCODE(OPCODE::ADPAL2, "ADPAL2", FieldBackgroundInstruction, 0, "BBBBBBBBBB");
 
             // Camera
-            CASE_OPCODE(OPCODE::NFADE, "NFADE", FF7CameraInstruction, 0, "NNBBBBBB");
-            CASE_OPCODE(OPCODE::SHAKE, "SHAKE", FF7CameraInstruction, 0, "BBBBBBB");
-            CASE_OPCODE(OPCODE::SCRLO, "SCRLO", FF7CameraInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SCRLC, "SCRLC", FF7CameraInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::SCRLA, "SCRLA", FF7CameraInstruction, 0, "NwBB");
-            CASE_OPCODE(OPCODE::SCR2D, "SCR2D", FF7CameraInstruction, 0, "Nss");
-            CASE_OPCODE(OPCODE::SCRCC, "SCRCC", FF7CameraInstruction, 0, "");
-            CASE_OPCODE(OPCODE::SCR2DC, "SCR2DC", FF7CameraInstruction, 0, "NNssw");
-            CASE_OPCODE(OPCODE::SCRLW, "SCRLW", FF7CameraInstruction, 0, "");
-            CASE_OPCODE(OPCODE::SCR2DL, "SCR2DL", FF7CameraInstruction, 0, "NNssw");
-            CASE_OPCODE(OPCODE::VWOFT, "VWOFT", FF7CameraInstruction, 0, "NssB");
-            CASE_OPCODE(OPCODE::FADE, "FADE", FF7CameraInstruction, 0, "NNBBBBBB");
-            CASE_OPCODE(OPCODE::FADEW, "FADEW", FF7CameraInstruction, 0, "");
-            CASE_OPCODE(OPCODE::SCRLP, "SCRLP", FF7CameraInstruction, 0, "NwBB");
-            CASE_OPCODE(OPCODE::MVCAM, "MVCAM", FF7CameraInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::NFADE, "NFADE", FieldCameraInstruction, 0, "NNBBBBBB");
+            CASE_OPCODE(OPCODE::SHAKE, "SHAKE", FieldCameraInstruction, 0, "BBBBBBB");
+            CASE_OPCODE(OPCODE::SCRLO, "SCRLO", FieldCameraInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::SCRLC, "SCRLC", FieldCameraInstruction, 0, "BBBB");
+            CASE_OPCODE(OPCODE::SCRLA, "SCRLA", FieldCameraInstruction, 0, "NwBB");
+            CASE_OPCODE(OPCODE::SCR2D, "SCR2D", FieldCameraInstruction, 0, "Nss");
+            CASE_OPCODE(OPCODE::SCRCC, "SCRCC", FieldCameraInstruction, 0, "");
+            CASE_OPCODE(OPCODE::SCR2DC, "SCR2DC", FieldCameraInstruction, 0, "NNssw");
+            CASE_OPCODE(OPCODE::SCRLW, "SCRLW", FieldCameraInstruction, 0, "");
+            CASE_OPCODE(OPCODE::SCR2DL, "SCR2DL", FieldCameraInstruction, 0, "NNssw");
+            CASE_OPCODE(OPCODE::VWOFT, "VWOFT", FieldCameraInstruction, 0, "NssB");
+            CASE_OPCODE(OPCODE::FADE, "FADE", FieldCameraInstruction, 0, "NNBBBBBB");
+            CASE_OPCODE(OPCODE::FADEW, "FADEW", FieldCameraInstruction, 0, "");
+            CASE_OPCODE(OPCODE::SCRLP, "SCRLP", FieldCameraInstruction, 0, "NwBB");
+            CASE_OPCODE(OPCODE::MVCAM, "MVCAM", FieldCameraInstruction, 0, "B");
 
             // AV
-            CASE_OPCODE(OPCODE::BGMOVIE, "BGMOVIE", FF7AudioVideoInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::AKAO2, "AKAO2", FF7AudioVideoInstruction, 0, "NNNBwwwww");
-            CASE_OPCODE(OPCODE::MUSIC, "MUSIC", FF7AudioVideoInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SOUND, "SOUND", FF7AudioVideoInstruction, 0, "NwB");
-            CASE_OPCODE(OPCODE::AKAO, "AKAO", FF7AudioVideoInstruction, 0, "NNNBBwwww");
-            CASE_OPCODE(OPCODE::MUSVT, "MUSVT", FF7AudioVideoInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MUSVM, "MUSVM", FF7AudioVideoInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MULCK, "MULCK", FF7AudioVideoInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::BMUSC, "BMUSC", FF7AudioVideoInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::CHMPH, "CHMPH", FF7AudioVideoInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::PMVIE, "PMVIE", FF7AudioVideoInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MOVIE, "MOVIE", FF7AudioVideoInstruction, 0, "");
-            CASE_OPCODE(OPCODE::MVIEF, "MVIEF", FF7AudioVideoInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::FMUSC, "FMUSC", FF7AudioVideoInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::CMUSC, "CMUSC", FF7AudioVideoInstruction, 0, "BBBBBBB");
-            CASE_OPCODE(OPCODE::CHMST, "CHMST", FF7AudioVideoInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::BGMOVIE, "BGMOVIE", FieldMediaInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::AKAO2, "AKAO2", FieldMediaInstruction, 0, "NNNBwwwww");
+            CASE_OPCODE(OPCODE::MUSIC, "MUSIC", FieldMediaInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::SOUND, "SOUND", FieldMediaInstruction, 0, "NwB");
+            CASE_OPCODE(OPCODE::AKAO, "AKAO", FieldMediaInstruction, 0, "NNNBBwwww");
+            CASE_OPCODE(OPCODE::MUSVT, "MUSVT", FieldMediaInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::MUSVM, "MUSVM", FieldMediaInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::MULCK, "MULCK", FieldMediaInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::BMUSC, "BMUSC", FieldMediaInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::CHMPH, "CHMPH", FieldMediaInstruction, 0, "BBB");
+            CASE_OPCODE(OPCODE::PMVIE, "PMVIE", FieldMediaInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::MOVIE, "MOVIE", FieldMediaInstruction, 0, "");
+            CASE_OPCODE(OPCODE::MVIEF, "MVIEF", FieldMediaInstruction, 0, "NB");
+            CASE_OPCODE(OPCODE::FMUSC, "FMUSC", FieldMediaInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::CMUSC, "CMUSC", FieldMediaInstruction, 0, "BBBBBBB");
+            CASE_OPCODE(OPCODE::CHMST, "CHMST", FieldMediaInstruction, 0, "NB");
 
             // Uncat
-            CASE_OPCODE(OPCODE::MPDSP, "MPDSP", FF7UncategorizedInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SETX, "SETX", FF7UncategorizedInstruction, 0, "BBBBBB");
-            CASE_OPCODE(OPCODE::GETX, "GETX", FF7UncategorizedInstruction, 0, "BBBBBB");
-            CASE_OPCODE(OPCODE::SEARCHX, "SEARCHX", FF7UncategorizedInstruction, 0, "BBBBBBBBBB");
+            CASE_OPCODE(OPCODE::MPDSP, "MPDSP", FieldUncategorizedInstruction, 0, "B");
+            CASE_OPCODE(OPCODE::SETX, "SETX", FieldUncategorizedInstruction, 0, "BBBBBB");
+            CASE_OPCODE(OPCODE::GETX, "GETX", FieldUncategorizedInstruction, 0, "BBBBBB");
+            CASE_OPCODE(OPCODE::SEARCHX, "SEARCHX", FieldUncategorizedInstruction, 0, "BBBBBBBBBB");
 
             default:
                 throw UnknownOpcodeException(this->address_, opcode);
@@ -696,7 +719,7 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
 
         // Is it within an "if" statement tracking?
         InstPtr i = this->_insts.back();
-        if (i->isCondJump()) exitAddrs.push_back(i->getDestAddress());
+        if (i->isCondJump()) exitAddrs.push_back(i->GetDestAddress());
         if (!exitAddrs.empty())
             if (i->_address == exitAddrs.back()) exitAddrs.pop_back();
 

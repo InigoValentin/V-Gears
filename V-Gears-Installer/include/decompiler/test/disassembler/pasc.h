@@ -33,7 +33,7 @@ public:
 
 class PasCFakeInstruction : public Instruction {
 public:
-    virtual void processInst(Function&, ValueStack&, Engine*, CodeGenerator*) override {}
+    virtual void ProcessInst(Function&, ValueStack&, Engine*, CodeGenerator*) override {}
 };
 
 #endif

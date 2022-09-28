@@ -16,7 +16,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "decompiler/field/FieldCodeGenerator.h"
-#include "decompiler/field/ff7_field_engine.h"
+
+#include "../../../include/decompiler/field/FieldEngine.h"
 
 const std::string FunctionMetaData::DELIMITER("_");
 
@@ -117,8 +118,8 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
           instruction != function->second.end();
           ++ instruction
         ){
-            if ((*instruction)->isCondJump() || (*instruction)->isUncondJump()){
-                auto targetAddr = (*instruction)->getDestAddress();
+            if ((*instruction)->isCondJump() || (*instruction)->IsUncondJump()){
+                auto targetAddr = (*instruction)->GetDestAddress();
                 auto label = labels.find(targetAddr);
                 if (label == labels.end()) labels.insert({targetAddr, InstVec()});
                 labels[targetAddr].push_back(*instruction);
@@ -148,7 +149,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                     AddOutputLine((boost::format("::label_0x%1$X::") % label->first).str());
             }
             ValueStack stack;
-            (*instruction)->processInst(function->first, stack, _engine, this);
+            (*instruction)->ProcessInst(function->first, stack, _engine, this);
             if (end_needed){
                 AddOutputLine("end -- end if", true, false);
                 end_needed = false;
@@ -162,12 +163,12 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                 if ((*(instruction + 1))->_address == (*(function->second.back()))._address)
                     end_needed = true;
             }
-            else if ((*instruction)->isUncondJump()){
+            else if ((*instruction)->IsUncondJump()){
                 // If destination address is outside the functions, turn goto into a return.
-                if ((*instruction)->getDestAddress() > function->first.mEndAddr){
+                if ((*instruction)->GetDestAddress() > function->first.mEndAddr){
                     AddOutputLine(
                       "-- Overflowed jump to "
-                      + (boost::format("0x%1$X") % (*instruction)->getDestAddress()).str()
+                      + (boost::format("0x%1$X") % (*instruction)->GetDestAddress()).str()
                       + " (last address in function is "
                       + (boost::format("0x%1$X)") % function->first.mEndAddr).str()
                     );
@@ -176,16 +177,16 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                 // Prevent backward jumps in the on_start script.
                 else if (
                   "on_start" == function->first._name
-                  && (*instruction)->getDestAddress() <= (*instruction)->_address
+                  && (*instruction)->GetDestAddress() <= (*instruction)->_address
                 ){
                     AddOutputLine("-- No infinite loops in the on_start script.");
                     AddOutputLine((
-                      boost::format("-- goto label_0x%1$X") % (*instruction)->getDestAddress()
+                      boost::format("-- goto label_0x%1$X") % (*instruction)->GetDestAddress()
                     ).str());
                 }
                 else{
                     AddOutputLine(
-                      (boost::format("goto label_0x%1$X") % (*instruction)->getDestAddress()).str()
+                      (boost::format("goto label_0x%1$X") % (*instruction)->GetDestAddress()).str()
                     );
                 }
             }
@@ -215,7 +216,7 @@ void FieldCodeGenerator::AddOutputLine(
 ){lines_.push_back(CodeLine(line, unindent_before, indent_after));}
 
 float FieldCodeGenerator::GetScaleFactor() const
-{return static_cast<FF7FieldEngine*>(_engine)->GetScaleFactor();}
+{return static_cast<FieldEngine*>(_engine)->GetScaleFactor();}
 
 void FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
     FunctionMetaData meta_data(function._metadata);

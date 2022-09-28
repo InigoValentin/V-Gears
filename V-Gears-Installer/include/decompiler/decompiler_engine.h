@@ -76,7 +76,7 @@ class Engine
 public:
     virtual ~Engine() = default;
 
-    virtual std::unique_ptr<Disassembler> getDisassembler(InstVec &, const std::vector<unsigned char>& )
+    virtual std::unique_ptr<Disassembler> GetDisassembler(InstVec &, const std::vector<unsigned char>& )
     {
         throw NotImplementedException();
     }
@@ -87,7 +87,7 @@ public:
 	 * @param insts Reference to the std::vector to place the Instructions in.
 	 * @return Pointer to a Disassembler for the engine.
 	 */
-	virtual std::unique_ptr<Disassembler> getDisassembler(InstVec &insts) = 0;
+	virtual std::unique_ptr<Disassembler> GetDisassembler(InstVec &insts) = 0;
 
 	/**
 	 * Retrieve the code generator for the engine.
@@ -95,14 +95,14 @@ public:
 	 * @param output The std::ostream to output the code to.
 	 * @return Pointer to a CodeGenerator for the engine.
 	 */
-    virtual std::unique_ptr<CodeGenerator> getCodeGenerator(const InstVec& insts, std::ostream &output) = 0;
+    virtual std::unique_ptr<CodeGenerator> GetCodeGenerator(const InstVec& insts, std::ostream &output) = 0;
 
 	/**
 	 * Post-processing step after CFG analysis.
 	 * @param insts Reference to the std::vector to place the Instructions in.
 	 * @param g Graph generated from the CFG analysis.
 	 */
-	virtual void postCFG(InstVec&, Graph) { }
+	virtual void PostCFG(InstVec&, Graph) { }
 
 	/**
 	 * Whether or not code flow analysis is supported for this engine.
@@ -137,7 +137,7 @@ public:
 	 *
 	 * @return True if pure grouping should be used, false if not.
 	 */
-	virtual bool usePureGrouping() const { return false; }
+	virtual bool UsePureGrouping() const { return false; }
 };
 
 #endif

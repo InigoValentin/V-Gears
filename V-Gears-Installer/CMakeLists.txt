@@ -35,8 +35,22 @@ set(HEADER_FILES
     include/decompiler/unknown_opcode_exception.h
     include/decompiler/value.h
     include/decompiler/wrongtype.h
+    include/decompiler/field/instruction/FieldBackgroundInstruction.h
+    include/decompiler/field/instruction/FieldCameraInstruction.h
+    include/decompiler/field/instruction/FieldCondJumpInstruction.h
+    include/decompiler/field/instruction/FieldControlFlowInstruction.h
+    include/decompiler/field/instruction/FieldMathInstruction.h
+    include/decompiler/field/instruction/FieldMediaInstruction.h
+    include/decompiler/field/instruction/FieldModelInstruction.h
+    include/decompiler/field/instruction/FieldModuleInstruction.h
+    include/decompiler/field/instruction/FieldNoOperationInstruction.h
+    include/decompiler/field/instruction/FieldPartyInstruction.h
+    include/decompiler/field/instruction/FieldUncategorizedInstruction.h
+    include/decompiler/field/instruction/FieldUncondJumpInstruction.h
+    include/decompiler/field/instruction/FieldWalkmeshInstruction.h
+    include/decompiler/field/instruction/FieldWindowInstruction.h
     include/decompiler/field/FieldDisassembler.h
-    include/decompiler/field/ff7_field_engine.h
+    include/decompiler/field/FieldEngine.h
     include/decompiler/field/FieldCodeGenerator.h
     include/common/scummsys.h
     include/common/BinaryReader.h
@@ -64,8 +78,22 @@ set(SOURCE_FILES
     src/decompiler/simple_disassembler.cpp
     src/decompiler/unknown_opcode_exception.cpp
     src/decompiler/value.cpp
+    src/decompiler/field/instruction/FieldBackgroundInstruction.cpp
+    src/decompiler/field/instruction/FieldCameraInstruction.cpp
+    src/decompiler/field/instruction/FieldCondJumpInstruction.cpp
+    src/decompiler/field/instruction/FieldControlFlowInstruction.cpp
+    src/decompiler/field/instruction/FieldMathInstruction.cpp
+    src/decompiler/field/instruction/FieldMediaInstruction.cpp
+    src/decompiler/field/instruction/FieldModelInstruction.cpp
+    src/decompiler/field/instruction/FieldModuleInstruction.cpp
+    src/decompiler/field/instruction/FieldNoOperationInstruction.cpp
+    src/decompiler/field/instruction/FieldPartyInstruction.cpp
+    src/decompiler/field/instruction/FieldUncategorizedInstruction.cpp
+    src/decompiler/field/instruction/FieldUncondJumpInstruction.cpp
+    src/decompiler/field/instruction/FieldWalkmeshInstruction.cpp
+    src/decompiler/field/instruction/FieldWindowInstruction.cpp
     src/decompiler/field/FieldDisassembler.cpp
-    src/decompiler/field/ff7_field_engine.cpp
+    src/decompiler/field/FieldEngine.cpp
     src/decompiler/field/FieldCodeGenerator.cpp
 )
 

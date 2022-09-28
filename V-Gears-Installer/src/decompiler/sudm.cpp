@@ -16,8 +16,8 @@
 #include "decompiler/sudm.h"
 
 #include "../../include/decompiler/field/FieldDisassembler.h"
+#include "../../include/decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
-#include "decompiler/field/ff7_field_engine.h"
 #include "decompiler/control_flow.h"
 
 namespace SUDM{
@@ -32,9 +32,9 @@ namespace SUDM{
         float ScaleFactor(const std::vector<unsigned char>& script_bytes){
             // Could be cleaner, but just does enough work to pull out the fields scale.
             IScriptFormatter formatter;
-            FF7FieldEngine engine(formatter, "Unused");
+            FieldEngine engine(formatter, "Unused");
             InstVec insts;
-            engine.getDisassembler(insts, script_bytes);
+            engine.GetDisassembler(insts, script_bytes);
             return engine.GetScaleFactor();
         }
 
@@ -43,21 +43,21 @@ namespace SUDM{
           IScriptFormatter& formatter, std::string text_after, std::string text_before
         ){
             // Disassemble the script.
-            FF7FieldEngine engine(formatter, script_name);
+            FieldEngine engine(formatter, script_name);
             InstVec insts;
-            auto disassembler = engine.getDisassembler(insts, script_bytes);
+            auto disassembler = engine.GetDisassembler(insts, script_bytes);
             disassembler->Disassemble();
             // Create control flow group.
             auto control_flow = std::make_unique<ControlFlow>(insts, engine);
             control_flow->createGroups();
             // Decompile/analyze
             //Graph graph = controlFlow->analyze();
-            //engine.postCFG(insts, graph);
+            //engine.PostCFG(insts, graph);
             Graph graph;
             DecompiledScript ds;
             // Generate code and return it.
             std::stringstream output;
-            auto cg = engine.getCodeGenerator(insts, output);
+            auto cg = engine.GetCodeGenerator(insts, output);
             cg->Generate(insts, graph);
             ds.luaScript = text_before + output.str() + text_after;
             for (auto entity : engine.GetEntityList()) ds.entities.push_back(entity);

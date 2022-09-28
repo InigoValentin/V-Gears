@@ -1,0 +1,124 @@
+/*
+ * V-Gears
+ * Copyright (C) 2022 V-Gears Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "decompiler/field/instruction/FieldCondJumpInstruction.h"
+#include "decompiler/field/FieldEngine.h"
+#include "decompiler/field/FieldCodeGenerator.h"
+#include "decompiler/field/FieldDisassembler.h"
+
+void FieldCondJumpInstruction::ProcessInst(
+  Function& function, ValueStack &stack, Engine* engine, CodeGenerator* code_gen
+){
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    std::string func_name;
+    if (_opcode == OPCODE::IFKEYON) func_name = "entity_manager:is_key_on";
+    else if (_opcode == OPCODE::IFKEYOFF) func_name = "entity_manager:is_key_off";
+    else if (_opcode == OPCODE::IFKEY) func_name = "Key";
+    else if (_opcode == OPCODE::IFMEMBQ) func_name = "IFMEMBQ";
+    else if (_opcode == OPCODE::IFPRTYQ) func_name = "IFPRTYQ";
+    // If condition is a function, add and stop.
+    if (!func_name.empty()){
+        uint32 param = _params[0]->getUnsigned();
+        // Special cases. The first parameter of IFKEY, IFKEYON and IFKEYOFF
+        // can be ORed to get the individual keys, but there are two invalid
+        // ones: 512 and 1024. They must be XORed.
+        if (
+          _opcode == OPCODE::IFKEY
+          || _opcode == OPCODE::IFKEYON
+          || _opcode == OPCODE::IFKEYOFF
+        ){
+            if (param >= 1024) param = param ^ 1024;
+            if (param >= 512) param = param ^ 512;
+        }
+        ValuePtr v = new UnqotedStringValue(func_name + "(" + std::to_string(param) + ")");
+        stack.push(v);
+        return;
+    }
+    std::string op;
+    uint32 type = _params[4]->getUnsigned();
+    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getUnsigned()
+    );
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
+    );
+    switch (type){
+        case 0: op = "=="; break;
+        case 1: op = "~="; break;
+        case 2: op = ">"; break;
+        case 3: op = "<"; break;
+        case 4: op = ">="; break;
+        case 5: op = "<="; break;
+        case 6: op = "&"; break;
+        case 7: op = "^"; break;
+        case 8: op = "|"; break;
+        case 9:
+            {
+                // TODO: Use FormatValueOrVariable
+                op = "bit(" + _params[0]->getString() + ", " + _params[2]->getString()
+                  + ", " + destination + ") == 1";
+                ValuePtr v = new UnqotedStringValue(op);
+                stack.push(v);
+            }
+            return;
+        case 0xA:
+            {
+                // TODO: Use FormatValueOrVariable
+                op = "bit(" + _params[0]->getString() + ", " + _params[2]->getString()
+                  + ", " + destination + ") == 0";
+                ValuePtr v = new UnqotedStringValue(op);
+                stack.push(v);
+            }
+            return;
+        default: throw UnknownConditionalOperatorException(_address, type);
+    }
+    ValuePtr v = new BinaryOpValue(new VarValue(source), new VarValue(destination), op);
+    stack.push(v);
+}
+
+uint32 FieldCondJumpInstruction::GetDestAddress() const{
+    uint32 params_size = 0;
+    uint32 jump_param_index = 5;
+    switch (_opcode){
+        case OPCODE::IFUB: params_size = 5; break;
+        case OPCODE::IFUBL: params_size = 5; break;
+        case OPCODE::IFSW: params_size = 7; break;
+        case OPCODE::IFSWL: params_size = 7; break;
+        case OPCODE::IFUW: params_size = 7; break;
+        case OPCODE::IFUWL: params_size = 7; break;
+        case OPCODE::IFKEYON:
+        case OPCODE::IFKEYOFF:
+        case OPCODE::IFKEY:
+            params_size = 3;
+            jump_param_index = 1;
+            break;
+        case OPCODE::IFPRTYQ:
+        case OPCODE::IFMEMBQ:
+            params_size = 2;
+            jump_param_index = 1;
+            break;
+        default: throw UnknownJumpTypeException(_address, _opcode);
+    }
+    return _address + _params[jump_param_index]->getUnsigned() + params_size;
+}
+
+std::ostream& FieldCondJumpInstruction::Print(std::ostream &output) const{
+    Instruction::Print(output);
+    output << " (False target address: 0x" << std::hex << GetDestAddress() << std::dec << ")";
+    return output;
+}

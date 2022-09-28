@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
 
 		// Disassembly
 		InstVec insts;
-		auto disassembler = engine->getDisassembler(insts);
+		auto disassembler = engine->GetDisassembler(insts);
 		disassembler->open(inputFile.c_str());
 
 		disassembler->disassemble();
@@ -191,10 +191,10 @@ int main(int argc, char** argv) {
 		}
 
 		// Post-processing of CFG
-		engine->postCFG(insts, g);
+		engine->PostCFG(insts, g);
 
 		// Code generation
-        auto cg = engine->getCodeGenerator(insts, std::cout);
+        auto cg = engine->GetCodeGenerator(insts, std::cout);
         cg->generate(insts, g);
 
 		if (vm.count("show-unreachable")) {

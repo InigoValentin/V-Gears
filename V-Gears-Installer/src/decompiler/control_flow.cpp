@@ -80,7 +80,7 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine)
 		}
 
 		last = cur;
-		addEdge = !((*it)->isUncondJump() || (*it)->isReturn());
+		addEdge = !((*it)->IsUncondJump() || (*it)->isReturn());
 		prev = GET(cur);
 
 	}
@@ -88,7 +88,7 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine)
 	// Add jump edges
 	for (InstIterator it = insts.begin(); it != insts.end(); ++it) {
 		if ((*it)->isJump()) {
-			GraphEdge e = boost::add_edge(find(it), find((*it)->getDestAddress()), _g).first;
+			GraphEdge e = boost::add_edge(find(it), find((*it)->GetDestAddress()), _g).first;
 			PUT_EDGE(e, true);
 		}
 	}
@@ -231,7 +231,7 @@ void ControlFlow::createGroups()
 		}
 
 		// This part is only relevant if we use the stack level.
-		if (!mEngine.usePureGrouping()) {
+		if (!mEngine.UsePureGrouping()) {
 			// If group has no instructions with stack effect >= 0, don't merge on balanced stack
 			bool forceMerge = true;
 			ConstInstIterator it = grCur->_start;
@@ -347,7 +347,7 @@ void ControlFlow::detectBreak() {
 	for (VertexIterator v = vr.first; v != vr.second; ++v) {
 		GroupPtr gr = GET(*v);
 		// Undetermined block with unconditional jump...
-		if (gr->_type == kNormalGroupType && ((*gr->_end)->isUncondJump()) && out_degree(*v, _g) == 1) {
+		if (gr->_type == kNormalGroupType && ((*gr->_end)->IsUncondJump()) && out_degree(*v, _g) == 1) {
 			OutEdgeIterator oe = boost::out_edges(*v, _g).first;
 			GraphVertex target = boost::target(*oe, _g);
 			GroupPtr targetGr = GET(target);
@@ -372,7 +372,7 @@ void ControlFlow::detectContinue() {
 	for (VertexIterator v = vr.first; v != vr.second; ++v) {
 		GroupPtr gr = GET(*v);
 		// Undetermined block with unconditional jump...
-		if (gr->_type == kNormalGroupType && ((*gr->_end)->isUncondJump()) && out_degree(*v, _g) == 1) {
+		if (gr->_type == kNormalGroupType && ((*gr->_end)->IsUncondJump()) && out_degree(*v, _g) == 1) {
 			OutEdgeIterator oe = boost::out_edges(*v, _g).first;
 			GraphVertex target = boost::target(*oe, _g);
 			GroupPtr targetGr = GET(target);
@@ -466,7 +466,7 @@ void ControlFlow::detectElse() {
 			}
 			targetGr = GET(target);
 			// else: Jump target of if immediately preceded by an unconditional jump...
-			if (!(*targetGr->_prev->_end)->isUncondJump())
+			if (!(*targetGr->_prev->_end)->IsUncondJump())
 				continue;
 			// ...which is not a break or a continue...
 			if (targetGr->_prev->_type == kContinueGroupType || targetGr->_prev->_type == kBreakGroupType)
@@ -506,7 +506,7 @@ bool ControlFlow::validateElseBlock(GroupPtr ifGroup, GroupPtr start, GroupPtr e
 		}
 
 		// Unless group is a simple unconditional jump...
-		if ((*cursor->_start)->isUncondJump())
+		if ((*cursor->_start)->IsUncondJump())
 			continue;
 
 		// ...validate ingoing edges
@@ -520,7 +520,7 @@ bool ControlFlow::validateElseBlock(GroupPtr ifGroup, GroupPtr start, GroupPtr e
 				// ...must not come from outside the range [start, end]...
 				if ((*start->_start)->_address > (*sourceGr->_start)->_address || (*sourceGr->_start)->_address > (*end->_start)->_address) {
 					// ...unless source is simple unconditional jump...
-					if ((*sourceGr->_start)->isUncondJump())
+					if ((*sourceGr->_start)->IsUncondJump())
 						continue;
 					// ...or the edge is from the if condition associated with this else
 					if (ifGroup == sourceGr)

@@ -351,7 +351,7 @@ struct InstructionRecord{
 
 std::map<std::string, const InstructionRecord*> FieldInstructions();
 
-class FF7FieldEngine;
+class FieldEngine;
 
 class FieldDisassembler : public SimpleDisassembler{
 
@@ -364,7 +364,7 @@ class FieldDisassembler : public SimpleDisassembler{
          * @param engine[in] The engine to use to disassemble.
          * @param insts[in] The list of instructions.
          */
-        FieldDisassembler(SUDM::IScriptFormatter& formatter, FF7FieldEngine* engine, InstVec& insts);
+        FieldDisassembler(SUDM::IScriptFormatter& formatter, FieldEngine* engine, InstVec& insts);
 
         /**
          * Constructor.
@@ -375,7 +375,7 @@ class FieldDisassembler : public SimpleDisassembler{
          * @param raw_script_data[in] @todo Understand and document.
          */
         FieldDisassembler(
-          SUDM::IScriptFormatter& formatter, FF7FieldEngine* engine,
+          SUDM::IScriptFormatter& formatter, FieldEngine* engine,
           InstVec& insts, const std::vector<unsigned char>& raw_script_data
         );
 
@@ -490,7 +490,7 @@ class FieldDisassembler : public SimpleDisassembler{
         /**
          * The engine.
          */
-        FF7FieldEngine* engine_;
+        FieldEngine* engine_;
 
         /**
          * Last address of the header.

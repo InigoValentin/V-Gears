@@ -47,14 +47,14 @@ typedef std::vector<std::string>::iterator CodeIterator;
 TEST(CodeGen, testContinue) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/continue-do-while.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
     c->createGroups();
     Graph g = c->analyze();
     onullstream ns;
-    auto cg = engine->getCodeGenerator(insts, ns);
+    auto cg = engine->GetCodeGenerator(insts, ns);
     cg->generate(insts, g);
 
     VertexIterator v = boost::vertices(g).first;
@@ -86,14 +86,14 @@ TEST(CodeGen, testContinue) {
 TEST(CodeGen, testBreak) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/break-while.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
     c->createGroups();
     Graph g = c->analyze();
     onullstream ns;
-    auto cg = engine->getCodeGenerator(insts, ns);
+    auto cg = engine->GetCodeGenerator(insts, ns);
     cg->generate(insts, g);
 
     VertexIterator v = boost::vertices(g).first;
@@ -125,14 +125,14 @@ TEST(CodeGen, testBreak) {
 TEST(CodeGen, testElse) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/if-else.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
     c->createGroups();
     Graph g = c->analyze();
     onullstream ns;
-    auto cg = engine->getCodeGenerator(insts, ns);
+    auto cg = engine->GetCodeGenerator(insts, ns);
     cg->generate(insts, g);
 
     VertexIterator v = boost::vertices(g).first;
@@ -167,14 +167,14 @@ TEST(CodeGen, testElse) {
 TEST(CodeGen, DISABLED_testCoalescing) {
     InstVec insts;
     auto engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    auto d = engine->getDisassembler(insts);
+    auto d = engine->GetDisassembler(insts);
     d->open("decompiler/test/script-30.dmp");
     d->disassemble();
     auto c = std::make_unique<ControlFlow>(insts, *engine);
     c->createGroups();
     Graph g = c->analyze();
     onullstream ns;
-    auto cg = engine->getCodeGenerator(insts, ns);
+    auto cg = engine->GetCodeGenerator(insts, ns);
     cg->generate(insts, g);
 
     VertexIterator v = boost::vertices(g).first;
@@ -192,14 +192,14 @@ TEST(CodeGen, DISABLED_testCoalescing) {
 
     insts.clear();
     engine = std::make_unique<Scumm::v6::Scummv6Engine>();
-    d = engine->getDisassembler(insts);
+    d = engine->GetDisassembler(insts);
     d->open("decompiler/test/script-48.dmp");
     d->disassemble();
 
     c = std::make_unique<ControlFlow>(insts, *engine);
     c->createGroups();
     g = c->analyze();
-    cg = engine->getCodeGenerator(insts, ns);
+    cg = engine->GetCodeGenerator(insts, ns);
     cg->generate(insts, g);
 
     v = boost::vertices(g).first;
