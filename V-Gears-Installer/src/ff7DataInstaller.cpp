@@ -29,7 +29,7 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreResourceGroupManager.h>
 #include <OgreLog.h>
-#include "../include/ff7DataInstaller.h"
+#include "ff7DataInstaller.h"
 #include "VGearsGameState.h"
 #include "data/VGearsAFileManager.h"
 #include "data/VGearsBackgroundFileManager.h"

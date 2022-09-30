@@ -15,10 +15,10 @@
 
 #include "decompiler/sudm.h"
 
+#include "../../include/decompiler/ControlFlow.h"
 #include "../../include/decompiler/field/FieldCodeGenerator.h"
 #include "../../include/decompiler/field/FieldDisassembler.h"
 #include "../../include/decompiler/field/FieldEngine.h"
-#include "decompiler/control_flow.h"
 
 namespace SUDM{
     namespace FF7{
@@ -50,7 +50,7 @@ namespace SUDM{
                 disassembler->disassemble();
                 // Create control flow group.
                 auto control_flow = std::make_unique<ControlFlow>(insts, engine);
-                control_flow->createGroups();
+                control_flow->CreateGroups();
                 // Decompile/analyze
                 //Graph graph = controlFlow->analyze();
                 //engine.PostCFG(insts, graph);

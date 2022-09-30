@@ -23,7 +23,7 @@ set(HEADER_FILES
     include/common/Logger.h
     include/decompiler/sudm.h
     include/decompiler/decompiler_codegen.h
-    include/decompiler/control_flow.h
+    include/decompiler/ControlFlow.h
     include/decompiler/decompiler_disassembler.h
     include/decompiler/decompiler_engine.h
     include/decompiler/graph.h
@@ -84,7 +84,7 @@ set(SOURCE_FILES
     src/VGearsUtility.cpp
     src/decompiler/sudm.cpp
     src/decompiler/decompiler_codegen.cpp
-    src/decompiler/control_flow.cpp
+    src/decompiler/ControlFlow.cpp
     src/decompiler/decompiler_disassembler.cpp
     src/decompiler/graph.cpp
     src/decompiler/instruction.cpp

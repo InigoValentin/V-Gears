@@ -14,10 +14,10 @@
  */
 
 #include <vector>
-#include "decompiler/decompiler_engine.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
+#include "decompiler/decompiler_engine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 #include "decompiler/field/FieldEngine.h"

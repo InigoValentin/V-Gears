@@ -1,8 +1,9 @@
 #include <gmock/gmock.h>
+
+#include "../ControlFlow.h"
 #include "decompiler/ff7_field/ff7_field_disassembler.h"
 #include "decompiler/ff7_field/ff7_field_engine.h"
 #include "decompiler/ff7_field/ff7_field_codegen.h"
-#include "control_flow.h"
 #include "util.h"
 #include "ff7_field_dummy_formatter.h"
 

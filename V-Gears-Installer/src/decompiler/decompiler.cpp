@@ -25,13 +25,12 @@
 #include "decompiler_engine.h"
 #include "instruction.h"
 
-#include "control_flow.h"
-
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
+#include "../../include/decompiler/ControlFlow.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
