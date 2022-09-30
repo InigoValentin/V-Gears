@@ -16,43 +16,46 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <sstream>
+#include <boost/format.hpp>
 #include "decompiler/field/instruction/FieldWalkmeshInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FieldWalkmeshInstruction::ProcessInst(
+void FF7::FieldWalkmeshInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func._metadata);
     switch (_opcode){
-        case OPCODE::SLIP: WriteTodo(code_gen, md.GetEntityName(), "SLIP"); break;
-        case OPCODE::UC: ProcessUC(code_gen); break;
-        case OPCODE::IDLCK:
+        case OPCODES::SLIP: code_gen->WriteTodo(md.GetEntityName(), "SLIP"); break;
+        case OPCODES::UC: ProcessUC(code_gen); break;
+        case OPCODES::IDLCK:
             // Triangle id, on or off
             code_gen->AddOutputLine(
                 (boost::format("walkmesh:lock_walkmesh(%1%, %2%)")
                 % _params[0]->getUnsigned()
-                % FieldCodeGenerator::FormatBool(_params[1]->getUnsigned())).str());
+                % FF7::FieldCodeGenerator::FormatBool(_params[1]->getUnsigned())).str());
             break;
-        case OPCODE::LINE: ProcessLINE(code_gen, md.GetEntityName()); break;
-        case OPCODE::LINON: WriteTodo(code_gen, md.GetEntityName(), "LINON"); break;
-        case OPCODE::SLINE: WriteTodo(code_gen, md.GetEntityName(), "SLINE"); break;
+        case OPCODES::LINE: ProcessLINE(code_gen, md.GetEntityName()); break;
+        case OPCODES::LINON: code_gen->WriteTodo(md.GetEntityName(), "LINON"); break;
+        case OPCODES::SLINE: code_gen->WriteTodo(md.GetEntityName(), "SLINE"); break;
         default:
-            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), _address, _opcode
             ));
     }
 }
 
-void FieldWalkmeshInstruction::ProcessUC(CodeGenerator* code_gen){
+void FF7::FieldWalkmeshInstruction::ProcessUC(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("entity_manager:player_lock(%1%)")
-      % FieldCodeGenerator::FormatBool(_params[0]->getUnsigned())
+      % FF7::FieldCodeGenerator::FormatBool(_params[0]->getUnsigned())
     ).str());
 }
 
-void FieldWalkmeshInstruction::ProcessLINE(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldWalkmeshInstruction::ProcessLINE(CodeGenerator* code_gen, const std::string& entity){
     float xa = _params[0]->getSigned();
     float ya = _params[1]->getSigned();
     float za = _params[2]->getSigned();

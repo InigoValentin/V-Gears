@@ -17,7 +17,6 @@
 #include <iostream>
 #include <OgreFontManager.h>
 #include <OgreOverlay.h>
-//#include <OgreOverlayManager.h>
 #include <Overlay/OgreOverlayManager.h>
 
 Ogre::Root* root;
@@ -92,9 +91,7 @@ void InitializeOgreBase(const Ogre::String& name){
     misc["title"] = name;
     window = root->createRenderWindow("VGearsWindow", 800, 600, false, &misc);
     // Initialize resources in the current launch directory.
-    Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-      "./", "FileSystem", "General"
-    );
+    Ogre::ResourceGroupManager::getSingleton().addResourceLocation("./", "FileSystem", "General");
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
       "./exported", "FileSystem", "General"
     );
@@ -108,9 +105,7 @@ void InitializeOgreBase(const Ogre::String& name){
     scene_manager = root->createSceneManager(Ogre::ST_GENERIC, "Scene");
     scene_manager->clearScene();
     scene_manager->setAmbientLight(Ogre::ColourValue(0.5, 0.5, 0.5));
-    Ogre::Light* directional_light = scene_manager->createLight(
-      "directionalLight"
-    );
+    Ogre::Light* directional_light = scene_manager->createLight("directionalLight");
     directional_light->setType(Ogre::Light::LT_DIRECTIONAL);
     directional_light->setDiffuseColour(Ogre::ColourValue(0.5, 0.5, 0.5));
     directional_light->setSpecularColour(Ogre::ColourValue(0.5, 0.5, 0.5));
@@ -122,8 +117,7 @@ void InitializeOgreBase(const Ogre::String& name){
     viewport = window->addViewport(camera);
     viewport->setBackgroundColour(Ogre::ColourValue(0.0f, 0.4f, 0.0f));
     camera->setAspectRatio(
-      Ogre::Real(viewport->getActualWidth())
-      / Ogre::Real(viewport->getActualHeight())
+      Ogre::Real(viewport->getActualWidth()) / Ogre::Real(viewport->getActualHeight())
     );
     LOGGER = new Logger("game.log");
 }

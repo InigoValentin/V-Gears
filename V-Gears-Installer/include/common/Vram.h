@@ -33,9 +33,7 @@ class Vram{
          *
          * @return The VRAM block.
          */
-        static std::unique_ptr<Vram> MakeInstance(){
-            return std::unique_ptr<Vram>(new Vram());
-        }
+        static std::unique_ptr<Vram> MakeInstance(){return std::unique_ptr<Vram>(new Vram());}
 
         /**
          * Destructor.

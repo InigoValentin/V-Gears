@@ -24,7 +24,7 @@
 PasCDisassembler::PasCDisassembler(InstVec &insts) : ::SimpleDisassembler(insts) {
 }
 
-void PasCDisassembler::DoDisassemble(){
+void PasCDisassembler::doDisassemble(){
 	START_OPCODES;
 		//Basic machine operations
 		OPCODE(0x00, "PUSH", PasCFakeInstruction, 0, "i");
@@ -136,7 +136,7 @@ ValuePtr PasCDisassembler::readParameter(InstPtr inst, std::string type)
     if (type == "a")
     {
         retval = new AddressValue(stream_->ReadU32());
-        _address += 4;
+        address_ += 4;
     }
     else
     {

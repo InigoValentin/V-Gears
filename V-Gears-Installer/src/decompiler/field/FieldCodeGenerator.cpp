@@ -14,28 +14,26 @@
  */
 
 #include <boost/algorithm/string/predicate.hpp>
-
 #include "decompiler/field/FieldCodeGenerator.h"
+#include "decompiler/field/FieldEngine.h"
 
-#include "../../../include/decompiler/field/FieldEngine.h"
+const std::string FF7::FunctionMetaData::DELIMITER("_");
 
-const std::string FunctionMetaData::DELIMITER("_");
+const std::string FF7::FunctionMetaData::START("start");
 
-const std::string FunctionMetaData::START("start");
+const std::string FF7::FunctionMetaData::END("end");
 
-const std::string FunctionMetaData::END("end");
+FF7::FunctionMetaData::FunctionMetaData(std::string meta_data){Parse(meta_data);}
 
-FunctionMetaData::FunctionMetaData(std::string meta_data){Parse(meta_data);}
+bool FF7::FunctionMetaData::IsStart() const{return start_;}
 
-bool FunctionMetaData::IsStart() const{return start_;}
+bool FF7::FunctionMetaData::IsEnd() const{return end_;}
 
-bool FunctionMetaData::IsEnd() const{return end_;}
+std::string FF7::FunctionMetaData::GetEntityName(){return entity_name_;}
 
-std::string FunctionMetaData::GetEntityName(){return entity_name_;}
+int FF7::FunctionMetaData::GetCharacterId(){return character_id_;}
 
-int FunctionMetaData::GetCharacterId(){return character_id_;}
-
-void FunctionMetaData::Parse(std::string meta_data){
+void FF7::FunctionMetaData::Parse(std::string meta_data){
     std::deque<std::string> strs;
     boost::split(strs, meta_data, boost::is_any_of(DELIMITER), boost::token_compress_on);
     if (!strs.empty()){
@@ -45,7 +43,7 @@ void FunctionMetaData::Parse(std::string meta_data){
     }
 }
 
-void FunctionMetaData::ParseStart(const std::string& item, std::deque<std::string>& strs){
+void FF7::FunctionMetaData::ParseStart(const std::string& item, std::deque<std::string>& strs){
     if (item == START){
         start_ = true;
         if (!strs.empty()){
@@ -57,7 +55,7 @@ void FunctionMetaData::ParseStart(const std::string& item, std::deque<std::strin
     else ParseEnd(item, strs);
 }
 
-void FunctionMetaData::ParseEnd(const std::string& item, std::deque<std::string>& strs){
+void FF7::FunctionMetaData::ParseEnd(const std::string& item, std::deque<std::string>& strs){
     if (item == END){
         end_ = true;
         if (!strs.empty()){
@@ -69,7 +67,7 @@ void FunctionMetaData::ParseEnd(const std::string& item, std::deque<std::string>
     else ParseCharId(item, strs);
 }
 
-void FunctionMetaData::ParseCharId(const std::string& item, std::deque<std::string>& strs){
+void FF7::FunctionMetaData::ParseCharId(const std::string& item, std::deque<std::string>& strs){
     if (!item.empty()) character_id_ = std::stoi(item);
     if (!strs.empty()){
         auto tmp = strs.front();
@@ -78,13 +76,13 @@ void FunctionMetaData::ParseCharId(const std::string& item, std::deque<std::stri
     }
 }
 
-void FunctionMetaData::ParseEntity(const std::string& item, std::deque<std::string>& strs){
+void FF7::FunctionMetaData::ParseEntity(const std::string& item, std::deque<std::string>& strs){
     entity_name_ = item;
     for (auto& part : strs)
         if (!part.empty()) entity_name_ += "_" + part;
 }
 
-void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
+void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
     // TODO: Break into parts
     auto instruction = insts.begin();
     
@@ -211,14 +209,14 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
     }
 }
 
-void FieldCodeGenerator::AddOutputLine(
+void FF7::FieldCodeGenerator::AddOutputLine(
   std::string line, bool unindent_before, bool indent_after
 ){lines_.push_back(CodeLine(line, unindent_before, indent_after));}
 
-float FieldCodeGenerator::GetScaleFactor() const
+float FF7::FieldCodeGenerator::GetScaleFactor() const
 {return static_cast<FieldEngine*>(_engine)->GetScaleFactor();}
 
-void FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
+void FF7::FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
     FunctionMetaData meta_data(function._metadata);
     if (meta_data.IsStart()){
         AddOutputLine("EntityContainer[\"" + meta_data.GetEntityName() + "\"] = {", false, true);
@@ -229,7 +227,7 @@ void FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
     if (!comment.empty()) AddOutputLine("-- " + comment);
 }
 
-void FieldCodeGenerator::OnStartFunction(const Function& func){
+void FF7::FieldCodeGenerator::OnStartFunction(const Function& func){
     AddOutputLine("--[[");
     for (const auto& inst : insts_){
         if (inst->_address >= func.mStartAddr && inst->_address <= func.mEndAddr){
@@ -246,7 +244,7 @@ void FieldCodeGenerator::OnStartFunction(const Function& func){
     }
 }
 
-void FieldCodeGenerator::OnEndFunction(const Function& function){
+void FF7::FieldCodeGenerator::OnEndFunction(const Function& function){
     // End function.
     AddOutputLine("end,", true, false);
     // End class?
@@ -255,17 +253,17 @@ void FieldCodeGenerator::OnEndFunction(const Function& function){
     else AddOutputLine("\n");
 }
 
-std::string FieldCodeGenerator::ConstructFuncSignature(const Function &function){
+std::string FF7::FieldCodeGenerator::ConstructFuncSignature(const Function &function){
     // Generate name
     FunctionMetaData meta_data(function._metadata);
     return formatter_.FunctionName(meta_data.GetEntityName(), function._name) + " = function(self)";
 }
 
-bool FieldCodeGenerator::OutputOnlyRequiredLabels() const{return true;}
+bool FF7::FieldCodeGenerator::OutputOnlyRequiredLabels() const{return true;}
 
-SUDM::IScriptFormatter& FieldCodeGenerator::GetFormatter(){return formatter_;}
+SUDM::IScriptFormatter& FF7::FieldCodeGenerator::GetFormatter(){return formatter_;}
 
-const std::string FieldCodeGenerator::FormatInstructionNotImplemented(
+const std::string FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
   const std::string& entity, uint32 address, uint32 opcode
 ){
     return (
@@ -276,7 +274,7 @@ const std::string FieldCodeGenerator::FormatInstructionNotImplemented(
     ).str();
 }
 
-const std::string FieldCodeGenerator::FormatInstructionNotImplemented(
+const std::string FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
   const std::string& entity, uint32 address, const Instruction& instruction
 ){
     std::stringstream parameterList;
@@ -292,10 +290,10 @@ const std::string FieldCodeGenerator::FormatInstructionNotImplemented(
       ).str();
 }
 
-const std::string FieldCodeGenerator::FormatBool(uint32 value){
+const std::string FF7::FieldCodeGenerator::FormatBool(uint32 value){
     return value == 0 ? "false" : "true";
 }
 
-const std::string FieldCodeGenerator::FormatInvertedBool(uint32 value){
+const std::string FF7::FieldCodeGenerator::FormatInvertedBool(uint32 value){
     return value == 0 ? "true" : "false";
 }

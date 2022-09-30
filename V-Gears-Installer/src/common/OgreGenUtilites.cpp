@@ -25,16 +25,12 @@ void CreateTextureFromVram(
     for (u32 y = 0; y < 256; ++ y){
         // IVV type cast
         u32* data = static_cast<u32*>(
-          (unsigned int *) (
-            (pixel_box.data) + (y + start_y) * pixel_box.rowPitch
-          )
+          (unsigned int *) ((pixel_box.data) + (y + start_y) * pixel_box.rowPitch)
         );
         for (u32 x = 0; x < 256; ++ x){
             if (bpp == BPP_4){
                 u8 pixel = vram->GetU8(texture_x * 2 + x / 2, texture_y + y);
-                u16 clut1 = vram->GetU16(
-                  clut_x * 2 + (pixel & 0xf) * 2, clut_y
-                );
+                u16 clut1 = vram->GetU16(clut_x * 2 + (pixel & 0xf) * 2, clut_y);
                 u16 clut2 = vram->GetU16(clut_x * 2 + (pixel >> 4) * 2, clut_y);
                 u32 ogre_pixel1
                   = (((clut1 & 0x1f) * 255 / 31) << 0x18)
@@ -78,9 +74,8 @@ void CreateTexture(
     Ogre::TexturePtr ptex;
     Ogre::HardwarePixelBufferSharedPtr buffer;
     ptex = Ogre::TextureManager::getSingleton().createManual(
-      "DynaTex", "General", Ogre::TEX_TYPE_2D,
-      mesh_data.tex_width, mesh_data.tex_height,
-      0, Ogre::PF_R8G8B8A8, Ogre::TU_STATIC
+      "DynaTex", "General", Ogre::TEX_TYPE_2D, mesh_data.tex_width,
+      mesh_data.tex_height, 0, Ogre::PF_R8G8B8A8, Ogre::TU_STATIC
     );
     buffer = ptex->getBuffer(0, 0);
     buffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
@@ -88,10 +83,8 @@ void CreateTexture(
 
     for (unsigned int i = 0; i < textures.size(); ++ i){
         LOGGER->Log(
-          "CreateTexture palette_x=\""
-          + Ogre::StringConverter::toString(textures[i].palette_x)
-          + "\" palette_y=\""
-          + Ogre::StringConverter::toString(textures[i].palette_y) + "\" bpp=\""
+          "CreateTexture palette_x=\"" + Ogre::StringConverter::toString(textures[i].palette_x)
+          + "\" palette_y=\"" + Ogre::StringConverter::toString(textures[i].palette_y) + "\" bpp=\""
           + Ogre::StringConverter::toString(textures[i].bpp) + "\"."
         );
         CreateTextureFromVram(
@@ -102,8 +95,7 @@ void CreateTexture(
     }
     Ogre::Image image;
     image.loadDynamicImage(
-      (Ogre::uchar*) pixel_box.data, mesh_data.tex_width, mesh_data.tex_height,
-      Ogre::PF_R8G8B8A8
+      (Ogre::uchar*) pixel_box.data, mesh_data.tex_width, mesh_data.tex_height, Ogre::PF_R8G8B8A8
     );
     image.save(texture_file_name);
     buffer->unlock();
@@ -116,9 +108,8 @@ CreateMaterial(
   const Ogre::String& texture_name, const Ogre::String& vertex_program,
   const Ogre::String& fragment_program
 ){
-    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
-      material_name, "General"
-    );
+    Ogre::MaterialPtr material
+      = Ogre::MaterialManager::getSingleton().create(material_name, "General");
     Ogre::Technique* tech = material->getTechnique(0);
     Ogre::Pass* pass1 = tech->getPass(0);
     pass1->setVertexColourTracking(Ogre::TVC_AMBIENT);
@@ -132,8 +123,7 @@ CreateMaterial(
         tex->setTextureFiltering(Ogre::TFO_NONE);
     }
     if (vertex_program != "") pass1->setVertexProgram(vertex_program, true);
-    if (fragment_program != "")
-        pass1->setFragmentProgram(fragment_program, true);
+    if (fragment_program != "") pass1->setFragmentProgram(fragment_program, true);
     Ogre::MaterialSerializer mat;
     mat.exportMaterial(material, material_file_name);
 }
@@ -149,17 +139,6 @@ void AddTexture(
             return;
         }
     }
-    /*
-    if (logger != NULL){
-        logger->Log(
-          "New Texture: X:" + ToHexString(texture.texture_x, 4, '0')
-          + ", Y:" + ToHexString(texture.texture_y, 4, '0') + ", CLUTX:"
-          + ToHexString(texture.palette_x, 4, '0') + ", CLUTY:"
-          + ToHexString(texture.palette_y, 4, '0') + ", bpp:"
-          + ToHexString(texture.bpp, 4, '0') + "\n"
-        );
-    }
-    */
 
     float start_x = 0;
     float start_y = 0;
@@ -168,11 +147,8 @@ void AddTexture(
         start_y = float(textures[ textures.size() - 1 ].start_y);
         if (start_x + 256 >= data.tex_width){
             if (start_y + 256 >= data.tex_height){
-                if (logger != NULL){
-                    logger->Log(
-                      "[ERROR] Can't add anymore textures. Increase tex size.\n"
-                    );
-                }
+                if (logger != NULL)
+                    logger->Log("[ERROR] Can't add anymore textures. Increase tex size.\n");
                 return;
             }
             start_x = 0;
@@ -183,14 +159,6 @@ void AddTexture(
     texture.start_x = static_cast<int>(start_x);
     texture.start_y = static_cast<int>(start_y);
     textures.push_back(texture);
-    /*
-    if (logger != NULL){
-        logger->Log(
-          "Startx:" + ToHexString(texture.start_x, 4, '0')
-          + ", Starty:" + ToHexString(texture.start_y, 4, '0') + "\n"
-        );
-    }
-    */
 }
 
 void AddTransparency(u32& colour, const bool transparency, const bool stp){

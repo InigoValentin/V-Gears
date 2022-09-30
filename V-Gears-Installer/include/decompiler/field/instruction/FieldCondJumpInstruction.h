@@ -18,44 +18,46 @@
 
 #pragma once
 
-#include "decompiler/decompiler_engine.h"
+#include "decompiler/instruction.h"
 
-/**
- * A conditional map jump instruction.
- */
-class FieldCondJumpInstruction : public CondJumpInstruction{
+namespace FF7{
 
-    public:
+    /**
+     * A conditional map jump instruction.
+     */
+    class FieldCondJumpInstruction : public CondJumpInstruction{
 
-        /**
-         * Processes a conditional jump instruction.
-         *
-         * Checks if the condition is a function or a comparison, and
-         * adds the function to the stack.
-         *
-         * @param function[in] Function to process. Unused.
-         * @param stack[out] Function stack. The instruction will be added
-         * here.
-         * @param engine[in] Engine. Unused.
-         * @param code_gen[in|out] Code generator.
-         */
-        virtual void ProcessInst(
-          Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-        ) override;
+        public:
 
-        /**
-         * Retrieves the destination address of the jump.
-         *
-         * @return The offset (number of bytes) to jump from the beginning
-         * of the instruction.
-         */
-        virtual uint32 GetDestAddress() const override;
+            /**
+             * Processes a conditional jump instruction.
+             *
+             * Checks if the condition is a function or a comparison, and
+             * adds the function to the stack.
+             *
+             * @param function[in] Function to process. Unused.
+             * @param stack[out] Function stack. The instruction will be added
+             * here.
+             * @param engine[in] Engine. Unused.
+             * @param codegen[in|out] Code generator to append lines.
+             */
+            virtual void ProcessInst(
+              Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+            ) override;
 
-        /**
-         * Prints the instruction
-         *
-         * @param output The stram to print the instruction to.
-         * @todo Understand and document properly.
-         */
-        virtual std::ostream& Print(std::ostream &output) const override;
-};
+            /**
+             * Retrieves the destination address of the jump.
+             *
+             * @return The offset (number of bytes) to jump from the beginning
+             * of the instruction.
+             */
+            virtual uint32 GetDestAddress() const override;
+
+            /**
+             * Prints the instruction
+             *
+             * @param output The stream to print the instruction to.
+             */
+            virtual std::ostream& Print(std::ostream &output) const override;
+    };
+}

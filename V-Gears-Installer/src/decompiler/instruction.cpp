@@ -29,10 +29,6 @@ void setOutputStackEffect(bool value) {
 	outputStackEffect = value;
 }
 
-void Instruction::WriteTodo(CodeGenerator *code_gen, std::string owner, std::string instruction){
-    code_gen->AddOutputLine("-- Todo(\"" + instruction + "\")");
-}
-
 bool Instruction::isJump() const {
 	return isCondJump() || IsUncondJump();
 }
@@ -156,7 +152,7 @@ void KernelCallStackInstruction::ProcessInst(Function&, ValueStack &stack, Engin
 	bool returnsValue = (_codeGenData.find("r") == 0);
 	std::string metadata = (!returnsValue ? _codeGenData : _codeGenData.substr(1));
 	for (size_t i = 0; i < metadata.length(); i++)
-		codeGen->processSpecialMetadata(this, metadata[i], i);
+		codeGen->ProcessSpecialMetadata(this, metadata[i], i);
 	stack.push(new CallValue(_name, codeGen->_argList));
 	if (!returnsValue) {
 		std::stringstream stream;

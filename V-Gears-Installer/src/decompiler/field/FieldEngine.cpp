@@ -24,58 +24,53 @@
 #include "decompiler/field/FieldDisassembler.h"
 #include "decompiler/field/instruction/FieldNoOperationInstruction.h"
 
-#define GET(vertex) (boost::get(boost::vertex_name, g, vertex))
+/**
+ * @todo Understand and document
+ */
+#define GET(vertex) (boost::get(boost::vertex_name, graph, vertex))
 
 /*
-OpCodes which need implementing (already done in DAT dumper)
+ * TODO: OpCodes which need implementing.
+ *
+ * BLINK
+ * XYI
+ * CMOVE
+ * MOVA
+ * TURA
+ * ANIMW
+ * FMOVE
+ * ANIME2
+ * ANIM_1
+ * CANIM1 ?
+ * CANM_1
+ * TURN
+ * DIRA
+ * GETDIR
+ * GETAXY
+ * TALKR
+ * ANIMB
+ * TURNW
+ */
 
-"BLINK"
-"XYI"
-"CMOVE"
-"MOVA"
-"TURA"
-"ANIMW"
-"FMOVE"
-"ANIME2"
-"ANIM_1"
-"CANIM1" ?
-"CANM_1"
-"TURN"
-"DIRA"
-"GETDIR"
-"GETAXY"
-"JUMP"
-"AXYZI"
-"LADER"
-"OFST"
-"TALKR"
-"ANIMB"
-"TURNW"
-*/
-
-FieldEngine::FieldEngine(SUDM::IScriptFormatter& formatter, std::string script_name) :
-mFormatter(formatter), script_name_(script_name)
-{setOutputStackEffect(false);}
-
-FieldEngine::Entity::Entity(const std::string& name, size_t index):
+FF7::FieldEngine::Entity::Entity(const std::string& name, size_t index):
   name_(name), index_(index), is_line_(false)
 {}
 
-std::string FieldEngine::Entity::GetName() const{return name_;}
+std::string FF7::FieldEngine::Entity::GetName() const{return name_;}
 
-size_t FieldEngine::Entity::GetIndex() const{return index_;}
+size_t FF7::FieldEngine::Entity::GetIndex() const{return index_;}
 
-std::string FieldEngine::Entity::FunctionByIndex(size_t index) const{
+std::string FF7::FieldEngine::Entity::FunctionByIndex(size_t index) const{
     auto it = functions_.find(index);
     if (it == std::end(functions_)) throw InternalDecompilerError();
     return it->second;
 }
 
-void FieldEngine::Entity::AddFunction(const std::string& name, size_t index){
+void FF7::FieldEngine::Entity::AddFunction(const std::string& name, size_t index){
     functions_[index] = name;
 }
 
-void FieldEngine::Entity::MarkAsLine(
+void FF7::FieldEngine::Entity::MarkAsLine(
   bool line, std::vector<float> point_a, std::vector<float> point_b
 ){
     is_line_ = line;
@@ -100,74 +95,77 @@ void FieldEngine::Entity::MarkAsLine(
     AddFunction("on_leave_line", 4);
 }
 
-bool FieldEngine::Entity::IsLine(){return is_line_;}
+bool FF7::FieldEngine::Entity::IsLine(){return is_line_;}
 
-std::vector<float> FieldEngine::Entity::GetLinePointA(){return point_a_;}
+std::vector<float> FF7::FieldEngine::Entity::GetLinePointA(){return point_a_;}
 
-std::vector<float> FieldEngine::Entity::GetLinePointB(){return point_b_;}
+std::vector<float> FF7::FieldEngine::Entity::GetLinePointB(){return point_b_;}
 
-std::unique_ptr<Disassembler> FieldEngine::GetDisassembler(
+FF7::FieldEngine::FieldEngine(SUDM::IScriptFormatter& formatter, std::string script_name) :
+  formatter_(formatter), script_name_(script_name), scale_factor_(1.0f)
+{setOutputStackEffect(false);}
+
+std::unique_ptr<Disassembler> FF7::FieldEngine::GetDisassembler(
   InstVec &insts, const std::vector<unsigned char>& raw_script_data
 ){
-    auto ret = std::make_unique<FieldDisassembler>(mFormatter, this, insts, raw_script_data);
+    auto ret = std::make_unique<FieldDisassembler>(formatter_, this, insts, raw_script_data);
     scale_factor_ = ret->GetScaleFactor();
     return std::move(ret);
 }
 
-std::unique_ptr<Disassembler> FieldEngine::GetDisassembler(InstVec &insts){
-    auto ret = std::make_unique<FieldDisassembler>(mFormatter, this, insts);
+std::unique_ptr<Disassembler> FF7::FieldEngine::GetDisassembler(InstVec &insts){
+    auto ret = std::make_unique<FieldDisassembler>(formatter_, this, insts);
     scale_factor_ = ret->GetScaleFactor();
     return std::move(ret);
 }
 
-std::unique_ptr<CodeGenerator> FieldEngine::GetCodeGenerator(
+std::unique_ptr<CodeGenerator> FF7::FieldEngine::GetCodeGenerator(
   const InstVec& insts, std::ostream &output
 ){
     // The broken version:
-    //return std::make_unique<FF7CodeGenerator>(this, insts, output);
+    //return std::make_unique<FieldCodeGenerator>(this, insts, output);
     // The not-as-nice-but-at-least-it-works version:
-    return std::make_unique<FieldCodeGenerator>(this, insts, output, mFormatter);
+    return std::make_unique<FF7::FieldCodeGenerator>(this, insts, output, formatter_);
 }
 
-void FieldEngine::PostCFG(InstVec& insts, Graph graph){
-
+void FF7::FieldEngine::PostCFG(InstVec& insts, Graph graph){
     // In FF7 some scripts ends with an infinite loop to "keep it alive"
-    // in VGears this isn't required so we can remove them
+    // in V-Gears this isn't required so they can be removed.
     //RemoveTrailingInfiniteLoops(insts, graph);
 
     // This could generate bad code, but it always seems to follow that pattern that if the last
     // instruction is an uncond jump back into the script then it simply nests all of those blocks
-    // in an infinite loop
+    // in an infinite loop.
     //MarkInfiniteLoopGroups(insts, graph);
 
-    // Scripts end with a "return" this isn't required so strip them out
+    // Scripts end with a "return". This isn't required so strip them out.
     //RemoveExtraneousReturnStatements(insts, graph);
 }
 
-bool FieldEngine::UsePureGrouping() const{return false;}
+bool FF7::FieldEngine::UsePureGrouping() const{return false;}
 
-std::map<std::string, int> FieldEngine::GetEntities() const{
+std::map<std::string, int> FF7::FieldEngine::GetEntities() const{
     std::map<std::string, int> r;
     for (auto& f : _functions){
         const Function& func = f.second;
-        FunctionMetaData meta(func._metadata);
+        FF7::FunctionMetaData meta(func._metadata);
         auto it = r.find(meta.GetEntityName());
         if (it != std::end(r)){
-            // Try to find a function in this entity has that has a char id
+            // Try to find a function in this entity has that has a char id.
             // don't overwrite a valid char id with a "blank" one.
             if (it->second == -1) it->second = meta.GetCharacterId();
         }
-        // TODO: Don't add lines here:
+        // TODO: Don't add line entities here:
         else r[meta.GetEntityName()] = meta.GetCharacterId();
     }
     return r;
 }
 
-std::vector<SUDM::Field::FieldEntity> FieldEngine::GetEntityList() const{
-    std::vector<SUDM::Field::FieldEntity> entities;
+std::vector<SUDM::FF7::Field::FieldEntity> FF7::FieldEngine::GetEntityList() const{
+    std::vector<SUDM::FF7::Field::FieldEntity> entities;
     for (auto entity: entity_index_map_){
         if (entity.second.IsLine() == false){
-            SUDM::Field::FieldEntity ent;
+            SUDM::FF7::Field::FieldEntity ent;
             ent.name = entity.second.GetName();
             ent.index = entity.second.GetIndex();
 
@@ -176,7 +174,7 @@ std::vector<SUDM::Field::FieldEntity> FieldEngine::GetEntityList() const{
             std::map<std::string, int> r;
             for (auto& f : _functions){
                 const Function& func = f.second;
-                FunctionMetaData meta(func._metadata);
+                FF7::FunctionMetaData meta(func._metadata);
                 if (meta.GetEntityName() == ent.name){
                     ent.char_id = meta.GetCharacterId();
                     break;
@@ -188,11 +186,11 @@ std::vector<SUDM::Field::FieldEntity> FieldEngine::GetEntityList() const{
     return entities;
 }
 
-std::vector<SUDM::Field::Line> FieldEngine::GetLineList() const{
-    std::vector<SUDM::Field::Line> lines;
+std::vector<SUDM::FF7::Field::Line> FF7::FieldEngine::GetLineList() const{
+    std::vector<SUDM::FF7::Field::Line> lines;
     for (auto entity: entity_index_map_){
         if (entity.second.IsLine() == true){
-            SUDM::Field::Line line;
+            SUDM::FF7::Field::Line line;
             line.name = entity.second.GetName();
             line.point_a = entity.second.GetLinePointA();
             line.point_b = entity.second.GetLinePointB();
@@ -202,7 +200,7 @@ std::vector<SUDM::Field::Line> FieldEngine::GetLineList() const{
     return lines;
 }
 
-void FieldEngine::AddEntityFunction(
+void FF7::FieldEngine::AddEntityFunction(
   const std::string& entity_name, size_t entity_index,
   const std::string& func_name, size_t func_index
 ){
@@ -215,7 +213,7 @@ void FieldEngine::AddEntityFunction(
     }
 }
 
-void FieldEngine::MarkEntityAsLine(
+void FF7::FieldEngine::MarkEntityAsLine(
   size_t entity_index, bool line, std::vector<float> point_a, std::vector<float> point_b
 ){
     auto it = entity_index_map_.find(entity_index);
@@ -224,34 +222,34 @@ void FieldEngine::MarkEntityAsLine(
     }
 }
 
-bool FieldEngine::EntityIsLine(size_t entity_index){
+bool FF7::FieldEngine::EntityIsLine(size_t entity_index){
     auto it = entity_index_map_.find(entity_index);
     if (it != std::end(entity_index_map_)) return (*it).second.IsLine();
     return false;
 }
 
-const FieldEngine::Entity& FieldEngine::EntityByIndex(size_t index) const{
+const FF7::FieldEngine::Entity& FF7::FieldEngine::EntityByIndex(size_t index) const{
     auto it = entity_index_map_.find(index);
     if (it == std::end(entity_index_map_)) throw InternalDecompilerError();
     return it->second;
 }
 
-float FieldEngine::GetScaleFactor() const {return scale_factor_;}
+float FF7::FieldEngine::GetScaleFactor() const {return scale_factor_;}
 
-const std::string& FieldEngine::ScriptName() const {return script_name_;}
+const std::string& FF7::FieldEngine::GetScriptName() const {return script_name_;}
 
-void FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph g){
+void FF7::FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph graph){
     for (auto& f : _functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
             // Is it the last instruction in the function, and is it a return statement?
             if ((*it)->_address == func.mEndAddr){
-                if ((*it)->_opcode == OPCODE::RET){
+                if ((*it)->_opcode == OPCODES::RET){
                     // Set new end address to be before the NOP.
                     func.mEndAddr = (*(it - 1))->_address;
                     func.mNumInstructions --;
                     Instruction* nop = new FieldNoOperationInstruction();
-                    nop->_opcode = OPCODE::NOP;
+                    nop->_opcode = OPCODES::NOP;
                     nop->_address = (*it)->_address;
                     (*it).reset(nop);
                     break;
@@ -261,7 +259,7 @@ void FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph g){
     }
 }
 
-void FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph g){
+void FF7::FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph){
     for (auto& f : _functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
@@ -272,7 +270,7 @@ void FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph g){
                     func.mEndAddr = (*(it - 1))->_address;
                     func.mNumInstructions--;
                     Instruction* nop = new FieldNoOperationInstruction();
-                    nop->_opcode = OPCODE::NOP;
+                    nop->_opcode = OPCODES::NOP;
                     nop->_address = (*it)->_address;
                     (*it).reset(nop);
                     break;
@@ -282,7 +280,7 @@ void FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph g){
     }
 }
 
-void FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph g){
+void FF7::FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph graph){
     for (auto& f : _functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
@@ -292,10 +290,10 @@ void FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph g){
                 if ((*it)->IsUncondJump()){
                     // Then assume its an infinite do { } while(true)
                     // loop that wraps part of the script.
-                    VertexRange vr = boost::vertices(g);
+                    VertexRange vr = boost::vertices(graph);
                     for (VertexIterator v = vr.first; v != vr.second; ++ v){
                         GroupPtr gr = GET(*v);
-                        if ((*gr->_start)->_address == func.mEndAddr){
+                        if ((*gr->start_)->_address == func.mEndAddr){
                             // Then assume its an infinite do { } while(true) loop
                             // that wraps part of the script.
                             gr->_type = kDoWhileCondGroupType;
@@ -307,3 +305,4 @@ void FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph g){
         }
     }
 }
+

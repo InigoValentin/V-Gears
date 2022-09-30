@@ -238,8 +238,8 @@ typedef ElseEnds::iterator ElseEndIterator;
 struct Group : public RefCounted {
 public:
 	GraphVertex _vertex;         ///< Vertex the group belongs to.
-	InstIterator _start;    ///< First instruction in the group.
-	InstIterator _end;      ///< Last instruction in the group.
+	InstIterator start_;    ///< First instruction in the group.
+	InstIterator end_;      ///< Last instruction in the group.
 	int _stackLevel;             ///< Level of the stack upon entry.
 	GroupType _type;             ///< Type of the group.
 	bool _startElse;             ///< Group is start of an else block.
@@ -264,8 +264,8 @@ public:
 	 */
 	Group(GraphVertex v,InstIterator start, InstIterator end, GroupPtr prev) {
 		_vertex = v;
-		_start = start;
-		_end = end;
+		start_ = start;
+		end_ = end;
 		_stackLevel = -1;
 		_type = kNormalGroupType;
 		_prev = prev.get();
@@ -310,10 +310,10 @@ public:
 		if (group->_startElse)
 			output << "Start of else\\n";
 		for (ElseEndIterator it = group->_endElse.begin(); it != group->_endElse.end(); ++it) {
-			output << boost::format("End of else at %08x\\n") % (*(*it)->_start)->_address;
+			output << boost::format("End of else at %08x\\n") % (*(*it)->start_)->_address;
 		}
 		output << "|";
-		ConstInstIterator inst = group->_start;
+		ConstInstIterator inst = group->start_;
 		do {
 			std::stringstream stream;
 			stream << *inst;
@@ -334,7 +334,7 @@ public:
 						output << *it;
 #endif
 			output << "\\n";
-		} while (inst++ != group->_end);
+		} while (inst++ != group->end_);
 		output << "}";
 		return output;
 	}

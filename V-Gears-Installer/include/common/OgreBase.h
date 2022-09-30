@@ -63,6 +63,7 @@ class DisplayFrameListener :
 {
 
     public:
+        // Constructor takes a RenderWindow because it uses that to determine input context
 
         /**
          * Constructor.
@@ -81,15 +82,13 @@ class DisplayFrameListener :
             std::ostringstream window_hnd_str;
             win->getCustomAttribute("WINDOW", &window_hnd);
             window_hnd_str << window_hnd;
-            pl.insert(
-              std::make_pair(std::string("WINDOW"), window_hnd_str.str())
-            );
+            pl.insert(std::make_pair(std::string("WINDOW"), window_hnd_str.str()));
             input_manager_ = InputManager::createInputSystem(pl);
-            keyboard_ = static_cast<Keyboard*> (
+            keyboard_ = static_cast<Keyboard*>(
               input_manager_->createInputObject(OIS::OISKeyboard, true)
             );
             keyboard_->setEventCallback(this);
-            mouse_ = static_cast<OIS::Mouse*> (
+            mouse_ = static_cast<OIS::Mouse*>(
               input_manager_->createInputObject(OIS::OISMouse, true)
             );
             mouse_->setEventCallback(this);
@@ -226,7 +225,7 @@ class DisplayFrameListener :
                 case OIS::KC_UP:
                     {
                         bool change = false;
-                        for (unsigned int i = 0; i < entities.size(); ++i){
+                        for (unsigned int i = 0; i < entities.size(); ++ i){
                             if (entities[i]->isVisible() == true){
                                 Ogre::AnimationStateIterator animations
                                   = entities[i]->getAllAnimationStates()

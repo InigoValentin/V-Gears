@@ -16,14 +16,12 @@
 #include "common/Surface.h"
 #include <memory.h>
 #ifdef WIN32
-    #include <windows.h>
+#include <windows.h>
 #endif
 
 Surface::Surface(): pixels(NULL), width(0), height(0){}
 
-Surface::Surface(const Surface &copy):
-  pixels(NULL), width(copy.width), height(copy.height)
-{
+Surface::Surface(const Surface &copy):pixels(NULL), width(copy.width), height(copy.height){
   if (width && height) pixels = copy.pixels;
 }
 
@@ -61,9 +59,7 @@ Surface* CreateSubSurface(
 ){
     Surface* image = CreateSurface(width, height);
     if (surface != NULL){
-        for (
-          int y_from = y, y_to = y + image->height; y_from < y_to; ++ y_from
-        ){
+        for (int y_from = y, y_to = y + image->height; y_from < y_to; ++ y_from){
             memcpy(
               image->pixels.data() + (y_from - y) * image->width * 4,
               surface->pixels.data() + (y_from * surface->width + x) * 4,
@@ -74,11 +70,8 @@ Surface* CreateSubSurface(
     return image;
 }
 
-Surface* CreateSurfaceFrom(
-  const int width, const int height, unsigned char* pixels
-){
+Surface* CreateSurfaceFrom(const int width, const int height, unsigned char* pixels){
     Surface* image = CreateSurface(width, height);
-    if (pixels != NULL)
-        memcpy(image->pixels.data(), pixels, width * height * 4);
+    if (pixels != NULL) memcpy(image->pixels.data(), pixels, width * height * 4);
     return image;
 }

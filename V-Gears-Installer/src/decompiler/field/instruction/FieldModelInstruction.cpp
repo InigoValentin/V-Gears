@@ -16,156 +16,167 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <sstream>
+#include <boost/format.hpp>
 #include "decompiler/field/instruction/FieldModelInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FieldModelInstruction::ProcessInst(
+void FF7::FieldModelInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
-    FieldEngine& eng = static_cast<FieldEngine&>(*engine);
+    FF7::FieldEngine& eng = static_cast<FF7::FieldEngine&>(*engine);
     FunctionMetaData md(func._metadata);
     switch (_opcode){
-        case OPCODE::JOIN: ProcessJOIN(code_gen); break;
-        case OPCODE::SPLIT: ProcessSPLIT(code_gen); break;
-        case OPCODE::BLINK: WriteTodo(code_gen, md.GetEntityName(), "BLINK"); break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::EYETX:
-            WriteTodo(code_gen, md.GetEntityName(), "EYETX");
+        case OPCODES::JOIN: ProcessJOIN(code_gen); break;
+        case OPCODES::SPLIT: ProcessSPLIT(code_gen); break;
+        case OPCODES::BLINK: code_gen->WriteTodo(md.GetEntityName(), "BLINK"); break;
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::EYETX:
+            code_gen->WriteTodo(md.GetEntityName(), "EYETX");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::TRNSP:
-            WriteTodo(code_gen, md.GetEntityName(), "TRNSP");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::TRNSP:
+            code_gen->WriteTodo(md.GetEntityName(), "TRNSP");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::AMBNT:
-            WriteTodo(code_gen, md.GetEntityName(), "AMBNT");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::AMBNT:
+            code_gen->WriteTodo(md.GetEntityName(), "AMBNT");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::Unknown03:
-            WriteTodo(code_gen, md.GetEntityName(), "Unknown03");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::Unknown03:
+            code_gen->WriteTodo(md.GetEntityName(), "Unknown03");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::Unknown04:
-            WriteTodo(code_gen, md.GetEntityName(), "Unknown04");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::Unknown04:
+            code_gen->WriteTodo(md.GetEntityName(), "Unknown04");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::Unknown05:
-            WriteTodo(code_gen, md.GetEntityName(), "Unknown05");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::Unknown05:
+            code_gen->WriteTodo(md.GetEntityName(), "Unknown05");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::LIGHT:
-            WriteTodo(code_gen, md.GetEntityName(), "LIGHT");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::LIGHT:
+            code_gen->WriteTodo(md.GetEntityName(), "LIGHT");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::Unknown07:
-            WriteTodo(code_gen, md.GetEntityName(), "Unknown07");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::Unknown07:
+            code_gen->WriteTodo(md.GetEntityName(), "Unknown07");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::Unknown08:
-            WriteTodo(code_gen, md.GetEntityName(), "Unknown08");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::Unknown08:
+            code_gen->WriteTodo(md.GetEntityName(), "Unknown08");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::Unknown09:
-            WriteTodo(code_gen, md.GetEntityName(), "Unknown09");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::Unknown09:
+            code_gen->WriteTodo(md.GetEntityName(), "Unknown09");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::SBOBJ:
-            WriteTodo(code_gen, md.GetEntityName(), "SBOBJ");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::SBOBJ:
+            code_gen->WriteTodo(md.GetEntityName(), "SBOBJ");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::Unknown0B:
-            WriteTodo(code_gen, md.GetEntityName(), "Unknown0B");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::Unknown0B:
+            code_gen->WriteTodo(md.GetEntityName(), "Unknown0B");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::Unknown0C:
-            WriteTodo(code_gen, md.GetEntityName(), "Unknown0C");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::Unknown0C:
+            code_gen->WriteTodo(md.GetEntityName(), "Unknown0C");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::SHINE:
-            WriteTodo(code_gen, md.GetEntityName(), "SHINE");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::SHINE:
+            code_gen->WriteTodo(md.GetEntityName(), "SHINE");
             break;
-        case (OPCODE::KAWAI << 8) | OPCODE_KAWAI::RESET:
-            WriteTodo(code_gen, md.GetEntityName(), "RESET");
+        case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::RESET:
+            code_gen->WriteTodo(md.GetEntityName(), "RESET");
             break;
-        case OPCODE::KAWIW: WriteTodo(code_gen, md.GetEntityName(), "KAWIW"); break;
-        case OPCODE::PMOVA: WriteTodo(code_gen, md.GetEntityName(), "PMOVA"); break;
-        case OPCODE::PDIRA: WriteTodo(code_gen, md.GetEntityName(), "PDIRA"); break;
-        case OPCODE::PTURA: WriteTodo(code_gen, md.GetEntityName(), "PTURA"); break;
-        case OPCODE::PGTDR: WriteTodo(code_gen, md.GetEntityName(), "PGTDR"); break;
-        case OPCODE::PXYZI: WriteTodo(code_gen, md.GetEntityName(), "PXYZI"); break;
-        case OPCODE::TLKON: ProcessTLKON(code_gen, md.GetEntityName()); break;
-        case OPCODE::PC: ProcessPC(code_gen, md.GetEntityName()); break;
-        case OPCODE::opCodeCHAR: ProcessCHAR(code_gen, md.GetEntityName()); break;
-        case OPCODE::DFANM: ProcessDFANM(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
-        case OPCODE::ANIME1: ProcessANIME1(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
-        case OPCODE::VISI: ProcessVISI(code_gen, md.GetEntityName()); break;
-        case OPCODE::XYZI: ProcessXYZI(code_gen, md.GetEntityName()); break;
-        case OPCODE::XYI: WriteTodo(code_gen, md.GetEntityName(), "XYI"); break;
-        case OPCODE::XYZ: WriteTodo(code_gen, md.GetEntityName(), "XYZ"); break;
-        case OPCODE::MOVE: ProcessMOVE(code_gen, md.GetEntityName()); break;
-        case OPCODE::CMOVE: WriteTodo(code_gen, md.GetEntityName(), "CMOVE"); break;
-        case OPCODE::MOVA: WriteTodo(code_gen, md.GetEntityName(), "MOVA"); break;
-        case OPCODE::TURA: WriteTodo(code_gen, md.GetEntityName(), "TURA"); break;
-        case OPCODE::ANIMW: WriteTodo(code_gen, md.GetEntityName(), "ANIMW"); break;
-        case OPCODE::FMOVE: WriteTodo(code_gen, md.GetEntityName(), "FMOVE"); break;
-        case OPCODE::ANIME2: WriteTodo(code_gen, md.GetEntityName(), "ANIME2"); break;
-        case OPCODE::ANIM_1: WriteTodo(code_gen, md.GetEntityName(), "ANIM_1"); break;
-        case OPCODE::CANIM1: WriteTodo(code_gen, md.GetEntityName(), "CANIM1"); break;
-        case OPCODE::CANM_1: WriteTodo(code_gen, md.GetEntityName(), "CANM_1"); break;
-        case OPCODE::MSPED: ProcessMSPED(code_gen, md.GetEntityName()); break;
-        case OPCODE::DIR: ProcessDIR(code_gen, md.GetEntityName()); break;
-        case OPCODE::TURNGEN: ProcessTURNGEN(code_gen, md.GetEntityName()); break;
-        case OPCODE::TURN: WriteTodo(code_gen, md.GetEntityName(), "TURN"); break;
-        case OPCODE::DIRA: WriteTodo(code_gen, md.GetEntityName(), "DIRA"); break;
-        case OPCODE::GETDIR: WriteTodo(code_gen, md.GetEntityName(), "GETDIR"); break;
-        case OPCODE::GETAXY: WriteTodo(code_gen, md.GetEntityName(), "GETAXY"); break;
-        case OPCODE::GETAI: ProcessGETAI(code_gen, eng); break;
-        case OPCODE::ANIM_2: ProcessANIM_2(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
-        case OPCODE::CANIM2: ProcessCANIM2(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
-        case OPCODE::CANM_2: ProcessCANM_2(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
-        case OPCODE::ASPED: WriteTodo(code_gen, md.GetEntityName(), "ASPED"); break;
-        case OPCODE::CC: ProcessCC(code_gen, eng); break;
-        case OPCODE::JUMP: ProcessJUMP(code_gen, md.GetEntityName()); break;
-        case OPCODE::AXYZI: ProcessAXYZI(code_gen); break;
-        case OPCODE::LADER: ProcessLADER(code_gen, md.GetEntityName()); break;
-        case OPCODE::OFST: ProcessOFST(code_gen, md.GetEntityName()); break;
-        case OPCODE::OFSTW:
+        case OPCODES::KAWIW: code_gen->WriteTodo(md.GetEntityName(), "KAWIW"); break;
+        case OPCODES::PMOVA: code_gen->WriteTodo(md.GetEntityName(), "PMOVA"); break;
+        case OPCODES::PDIRA: code_gen->WriteTodo(md.GetEntityName(), "PDIRA"); break;
+        case OPCODES::PTURA: code_gen->WriteTodo(md.GetEntityName(), "PTURA"); break;
+        case OPCODES::PGTDR: code_gen->WriteTodo(md.GetEntityName(), "PGTDR"); break;
+        case OPCODES::PXYZI: code_gen->WriteTodo(md.GetEntityName(), "PXYZI"); break;
+        case OPCODES::TLKON: ProcessTLKON(code_gen, md.GetEntityName()); break;
+        case OPCODES::PC: ProcessPC(code_gen, md.GetEntityName()); break;
+        case OPCODES::opCodeCHAR: ProcessCHAR(code_gen, md.GetEntityName()); break;
+        case OPCODES::DFANM: ProcessDFANM(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
+        case OPCODES::ANIME1:
+            ProcessANIME1(code_gen, md.GetEntityName(), md.GetCharacterId());
+            break;
+        case OPCODES::VISI: ProcessVISI(code_gen, md.GetEntityName()); break;
+        case OPCODES::XYZI: ProcessXYZI(code_gen, md.GetEntityName()); break;
+        case OPCODES::XYI: code_gen->WriteTodo(md.GetEntityName(), "XYI"); break;
+        case OPCODES::XYZ: code_gen->WriteTodo(md.GetEntityName(), "XYZ"); break;
+        case OPCODES::MOVE: ProcessMOVE(code_gen, md.GetEntityName()); break;
+        case OPCODES::CMOVE: code_gen->WriteTodo(md.GetEntityName(), "CMOVE"); break;
+        case OPCODES::MOVA: code_gen->WriteTodo(md.GetEntityName(), "MOVA"); break;
+        case OPCODES::TURA: code_gen->WriteTodo(md.GetEntityName(), "TURA"); break;
+        case OPCODES::ANIMW: code_gen->WriteTodo(md.GetEntityName(), "ANIMW"); break;
+        case OPCODES::FMOVE: code_gen->WriteTodo(md.GetEntityName(), "FMOVE"); break;
+        case OPCODES::ANIME2: code_gen->WriteTodo(md.GetEntityName(), "ANIME2"); break;
+        case OPCODES::ANIM_1: code_gen->WriteTodo(md.GetEntityName(), "ANIM_1"); break;
+        case OPCODES::CANIM1: code_gen->WriteTodo(md.GetEntityName(), "CANIM1"); break;
+        case OPCODES::CANM_1: code_gen->WriteTodo(md.GetEntityName(), "CANM_1"); break;
+        case OPCODES::MSPED: ProcessMSPED(code_gen, md.GetEntityName()); break;
+        case OPCODES::DIR: ProcessDIR(code_gen, md.GetEntityName()); break;
+        case OPCODES::TURNGEN: ProcessTURNGEN(code_gen, md.GetEntityName()); break;
+        case OPCODES::TURN: code_gen->WriteTodo(md.GetEntityName(), "TURN"); break;
+        case OPCODES::DIRA: code_gen->WriteTodo(md.GetEntityName(), "DIRA"); break;
+        case OPCODES::GETDIR: code_gen->WriteTodo(md.GetEntityName(), "GETDIR"); break;
+        case OPCODES::GETAXY: code_gen->WriteTodo(md.GetEntityName(), "GETAXY"); break;
+        case OPCODES::GETAI: ProcessGETAI(code_gen, eng); break;
+        case OPCODES::ANIM_2:
+            ProcessANIM_2(code_gen, md.GetEntityName(), md.GetCharacterId());
+            break;
+        case OPCODES::CANIM2:
+            ProcessCANIM2(code_gen, md.GetEntityName(), md.GetCharacterId());
+            break;
+        case OPCODES::CANM_2:
+            ProcessCANM_2(code_gen, md.GetEntityName(), md.GetCharacterId());
+            break;
+        case OPCODES::ASPED: code_gen->WriteTodo(md.GetEntityName(), "ASPED"); break;
+        case OPCODES::CC: ProcessCC(code_gen, eng); break;
+        case OPCODES::JUMP: ProcessJUMP(code_gen, md.GetEntityName()); break;
+        case OPCODES::AXYZI: ProcessAXYZI(code_gen); break;
+        case OPCODES::LADER: ProcessLADER(code_gen, md.GetEntityName()); break;
+        case OPCODES::OFST: ProcessOFST(code_gen, md.GetEntityName()); break;
+        case OPCODES::OFSTW:
             code_gen->AddOutputLine("self." + md.GetEntityName() + ":offset_sync()");
             break;
-        case OPCODE::TALKR: WriteTodo(code_gen, md.GetEntityName(), "TALKR"); break;
-        case OPCODE::SLIDR: WriteTodo(code_gen, md.GetEntityName(), "SLIDR"); break;
-        case OPCODE::SOLID: ProcessSOLID(code_gen, md.GetEntityName()); break;
-        case OPCODE::TLKR2: WriteTodo(code_gen, md.GetEntityName(), "TLKR2"); break;
-        case OPCODE::SLDR2: WriteTodo(code_gen, md.GetEntityName(), "SLDR2"); break;
-        case OPCODE::CCANM: WriteTodo(code_gen, md.GetEntityName(), "CCANM"); break;
-        case OPCODE::FCFIX: WriteTodo(code_gen, md.GetEntityName(), "FCFIX"); break;
-        case OPCODE::ANIMB: WriteTodo(code_gen, md.GetEntityName(), "ANIMB"); break;
-        case OPCODE::TURNW: WriteTodo(code_gen, md.GetEntityName(), "TURNW"); break;
+        case OPCODES::TALKR: code_gen->WriteTodo(md.GetEntityName(), "TALKR"); break;
+        case OPCODES::SLIDR: code_gen->WriteTodo(md.GetEntityName(), "SLIDR"); break;
+        case OPCODES::SOLID: ProcessSOLID(code_gen, md.GetEntityName()); break;
+        case OPCODES::TLKR2: code_gen->WriteTodo(md.GetEntityName(), "TLKR2"); break;
+        case OPCODES::SLDR2: code_gen->WriteTodo(md.GetEntityName(), "SLDR2"); break;
+        case OPCODES::CCANM: code_gen->WriteTodo(md.GetEntityName(), "CCANM"); break;
+        case OPCODES::FCFIX: code_gen->WriteTodo(md.GetEntityName(), "FCFIX"); break;
+        case OPCODES::ANIMB: code_gen->WriteTodo(md.GetEntityName(), "ANIMB"); break;
+        case OPCODES::TURNW: code_gen->WriteTodo(md.GetEntityName(), "TURNW"); break;
         default:
-            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), _address, _opcode
             ));
     }
 }
 
-void FieldModelInstruction::ProcessJOIN(CodeGenerator* code_gen){
+void FF7::FieldModelInstruction::ProcessJOIN(CodeGenerator* code_gen){
     code_gen->AddOutputLine("join_party(" + std::to_string(_params[0]->getUnsigned()) + ")");
 }
 
-void FieldModelInstruction::ProcessSPLIT(CodeGenerator* code_gen){
+void FF7::FieldModelInstruction::ProcessSPLIT(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    const auto& ax = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& ax = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[6]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& ay = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& ay = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[7]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& ar = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& ar = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[2]->getUnsigned(), _params[8]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& bx = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& bx = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[3]->getUnsigned(), _params[9]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& by = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& by = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[4]->getUnsigned(), _params[10]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& br = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& br = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[5]->getUnsigned(), _params[11]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& speed = _params[12]->getUnsigned();
     code_gen->AddOutputLine((
@@ -174,26 +185,26 @@ void FieldModelInstruction::ProcessSPLIT(CodeGenerator* code_gen){
     ).str());
 }
 
-void FieldModelInstruction::ProcessTLKON(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessTLKON(CodeGenerator* code_gen, const std::string& entity){
     code_gen->AddOutputLine((
       boost::format("self.%1%:set_talkable(%2%)")
-      % entity % FieldCodeGenerator::FormatInvertedBool(_params[0]->getUnsigned())
+      % entity % FF7::FieldCodeGenerator::FormatInvertedBool(_params[0]->getUnsigned())
     ).str());
 }
 
-void FieldModelInstruction::ProcessPC(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessPC(CodeGenerator* code_gen, const std::string& entity){
     code_gen->AddOutputLine(
       (boost::format("set_entity_to_character(\"%1%\", \"%1%\")") % entity).str()
     );
 }
 
-void FieldModelInstruction::ProcessCHAR(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessCHAR(CodeGenerator* code_gen, const std::string& entity){
     code_gen->AddOutputLine(
       (boost::format("self.%1% = entity_manager:get_entity(\"%1%\")") % entity).str()
     );
 }
 
-void FieldModelInstruction::ProcessDFANM(
+void FF7::FieldModelInstruction::ProcessDFANM(
   CodeGenerator* code_gen, const std::string& entity, int char_id
 ){
     // ID will be fixed-up downstream.
@@ -211,7 +222,7 @@ void FieldModelInstruction::ProcessDFANM(
     ).str());
 }
 
-void FieldModelInstruction::ProcessANIME1(
+void FF7::FieldModelInstruction::ProcessANIME1(
   CodeGenerator* code_gen, const std::string& entity, int char_id
 ){
     // ID will be fixed-up downstream.
@@ -226,29 +237,29 @@ void FieldModelInstruction::ProcessANIME1(
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
 }
 
-void FieldModelInstruction::ProcessVISI(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessVISI(CodeGenerator* code_gen, const std::string& entity){
     code_gen->AddOutputLine((
       boost::format("self.%1%:set_visible(%2%)")
-      % entity % FieldCodeGenerator::FormatBool(_params[0]->getUnsigned())
+      % entity % FF7::FieldCodeGenerator::FormatBool(_params[0]->getUnsigned())
     ).str());
 }
 
-void FieldModelInstruction::ProcessXYZI(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessXYZI(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[4]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[5]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& z = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& z = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[2]->getUnsigned(), _params[6]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& triangle_id = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& triangle_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[3]->getUnsigned(), _params[7]->getUnsigned()
     );
     code_gen->AddOutputLine((
@@ -257,16 +268,16 @@ void FieldModelInstruction::ProcessXYZI(CodeGenerator* code_gen, const std::stri
     ).str());
 }
 
-void FieldModelInstruction::ProcessMOVE(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessMOVE(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     code_gen->AddOutputLine(
       (boost::format("self.%1%:move_to_position(%2%, %3%)") % entity % x % y).str()
@@ -274,32 +285,32 @@ void FieldModelInstruction::ProcessMOVE(CodeGenerator* code_gen, const std::stri
     code_gen->AddOutputLine((boost::format("self.%1%:move_sync()") % entity).str());
 }
 
-void FieldModelInstruction::ProcessMSPED(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessMSPED(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    const auto& speed = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& speed = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[2]->getUnsigned(),
-      FieldCodeGenerator::ValueType::Float, 256.0f * scale / 30.0f
+      FF7::FieldCodeGenerator::ValueType::Float, 256.0f * scale / 30.0f
     );
     code_gen->AddOutputLine(
       (boost::format("self.%1%:set_move_auto_speed(%2%)") % entity % speed).str()
     );
 }
 
-void FieldModelInstruction::ProcessDIR(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessDIR(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& degrees = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& degrees = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[1]->getUnsigned(),
-      FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
+      FF7::FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
     );
     code_gen->AddOutputLine((boost::format("self.%1%:set_rotation(%2%)") % entity % degrees).str());
 }
 
-void FieldModelInstruction::ProcessTURNGEN(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessTURNGEN(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& degrees = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& degrees = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[2]->getUnsigned(),
-      FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
+      FF7::FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
     );
     std::string direction;
     switch (_params[3]->getUnsigned()){
@@ -325,10 +336,10 @@ void FieldModelInstruction::ProcessTURNGEN(CodeGenerator* code_gen, const std::s
     code_gen->AddOutputLine((boost::format("self.%1%:turn_sync()") % entity).str());
 }
 
-void FieldModelInstruction::ProcessGETAI(CodeGenerator* code_gen, const FieldEngine& engine){
+void FF7::FieldModelInstruction::ProcessGETAI(CodeGenerator* code_gen, const FieldEngine& engine){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: check for assignment to literal.
-    const auto& variable = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& variable = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
     );
     const auto& entity = engine.EntityByIndex(_params[2]->getUnsigned());
@@ -338,7 +349,7 @@ void FieldModelInstruction::ProcessGETAI(CodeGenerator* code_gen, const FieldEng
     ).str());
 }
 
-void FieldModelInstruction::ProcessANIM_2(
+void FF7::FieldModelInstruction::ProcessANIM_2(
   CodeGenerator* code_gen, const std::string& entity, int char_id
 ){
     // ID will be fixed-up downstream.
@@ -353,7 +364,7 @@ void FieldModelInstruction::ProcessANIM_2(
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
 }
 
-void FieldModelInstruction::ProcessCANIM2(
+void FF7::FieldModelInstruction::ProcessCANIM2(
   CodeGenerator* code_gen, const std::string& entity, int char_id
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
@@ -370,7 +381,7 @@ void FieldModelInstruction::ProcessCANIM2(
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
 }
 
-void FieldModelInstruction::ProcessCANM_2(
+void FF7::FieldModelInstruction::ProcessCANM_2(
   CodeGenerator* code_gen, const std::string& entity, int char_id
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
@@ -388,28 +399,28 @@ void FieldModelInstruction::ProcessCANM_2(
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
 }
 
-void FieldModelInstruction::ProcessCC(CodeGenerator* code_gen, const FieldEngine& engine){
+void FF7::FieldModelInstruction::ProcessCC(CodeGenerator* code_gen, const FieldEngine& engine){
     const auto& entity = engine.EntityByIndex(_params[0]->getUnsigned());
     code_gen->AddOutputLine(
       (boost::format("entity_manager:set_player_entity(\"%1%\")") % entity.GetName()).str()
     );
 }
 
-void FieldModelInstruction::ProcessJUMP(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessJUMP(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    float x = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    float x = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[4]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
-    float y = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    float y = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[5]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
-    int i = atoi(FieldCodeGenerator::FormatValueOrVariable(
+    int i = atoi(FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[2]->getUnsigned(), _params[6]->getSigned()
     ).c_str());
-    int steps = atoi(FieldCodeGenerator::FormatValueOrVariable(
+    int steps = atoi(FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[3]->getUnsigned(), _params[7]->getSigned()
     ).c_str());
     //x *= 0.00781250273224;
@@ -427,7 +438,7 @@ void FieldModelInstruction::ProcessJUMP(CodeGenerator* code_gen, const std::stri
     code_gen->AddOutputLine((boost::format("self.%1%:jump_sync()") % entity).str());
 }
 
-void FieldModelInstruction::ProcessAXYZI(CodeGenerator* code_gen){
+void FF7::FieldModelInstruction::ProcessAXYZI(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     code_gen->AddOutputLine((
@@ -439,30 +450,30 @@ void FieldModelInstruction::ProcessAXYZI(CodeGenerator* code_gen){
     ).str());
 }
 
-void FieldModelInstruction::ProcessLADER(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessLADER(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[4]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[5]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& z = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& z = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[2]->getUnsigned(), _params[6]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    uint end_triangle = atoi(FieldCodeGenerator::FormatValueOrVariable(
+    uint end_triangle = atoi(FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[3]->getUnsigned(), _params[7]->getUnsigned()
     ).c_str());
     uint keys = _params[8]->getUnsigned();
     uint animation = _params[9]->getUnsigned();
     //float orientation = _params[10]->getUnsigned() / (256.0f / 360.0f);
-    const auto& orientation = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& orientation = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), 0, _params[10]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
+      FF7::FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
     );
     uint speed = _params[11]->getUnsigned();
     // TODO: Animation hardcoded as "btce".
@@ -476,29 +487,29 @@ void FieldModelInstruction::ProcessLADER(CodeGenerator* code_gen, const std::str
     code_gen->AddOutputLine((boost::format("self.%1%:linear_sync()") % entity).str());
 }
 
-void FieldModelInstruction::ProcessSOLID(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessSOLID(CodeGenerator* code_gen, const std::string& entity){
     code_gen->AddOutputLine((
       boost::format("self.%1%:set_solid(%2%)")
-      % entity % FieldCodeGenerator::FormatInvertedBool(_params[0]->getUnsigned())
+      % entity % FF7::FieldCodeGenerator::FormatInvertedBool(_params[0]->getUnsigned())
     ).str());
 }
 
-void FieldModelInstruction::ProcessOFST(CodeGenerator* code_gen, const std::string& entity){
+void FF7::FieldModelInstruction::ProcessOFST(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    float x = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    float x = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[5]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
-    float y = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    float y = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(),_params[6]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
-    float z = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    float z = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[2]->getUnsigned(), _params[7]->getSigned(),
-      FieldCodeGenerator::ValueType::Float, scale
+      FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
-    float speed = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    float speed = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[3]->getUnsigned(), _params[8]->getUnsigned()
     ));
     // Spatial coordinates need to be scaled down.

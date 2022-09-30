@@ -14,14 +14,13 @@
  */
 
 #include <vector>
+#include "decompiler/decompiler_engine.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
-#include "common/Lzs.h"
-#include "decompiler/decompiler_engine.h"
+#include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 #include "decompiler/field/FieldEngine.h"
-#include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/instruction/FieldBackgroundInstruction.h"
 #include "decompiler/field/instruction/FieldCameraInstruction.h"
 #include "decompiler/field/instruction/FieldCondJumpInstruction.h"
@@ -36,67 +35,65 @@
 #include "decompiler/field/instruction/FieldUncondJumpInstruction.h"
 #include "decompiler/field/instruction/FieldWalkmeshInstruction.h"
 #include "decompiler/field/instruction/FieldWindowInstruction.h"
+#include "common/Lzs.h"
 
-const int FieldDisassembler::MAGIC(0x0502);
 
-const int FieldDisassembler::NUM_SECTIONS(7);
+const int FF7::FieldDisassembler::MAGIC(0x0502);
 
-FieldDisassembler::FieldDisassembler(
-  SUDM::IScriptFormatter& formatter, FieldEngine* engine, InstVec& insts,
-  const std::vector<unsigned char>& raw_script_data
-) : SimpleDisassembler(insts), engine_(engine), formatter_(formatter){
-    loaded_from_raw_ = true;
-    // If loading a raw section then we don't have a "sections header" to skip.
+const int FF7::FieldDisassembler::NUM_SECTIONS(7);
+
+FF7::FieldDisassembler::FieldDisassembler(
+  SUDM::IScriptFormatter& formatter, FieldEngine* engine,
+  InstVec& insts, const std::vector<unsigned char>& raw_script_data
+): SimpleDisassembler(insts), engine_(engine), formatter_(formatter){
+    loaded_from_raw_data_ = true;
+    // If loading a raw section then skip the header section.
     section_pointers_size_ = 0;
     auto data_copy = raw_script_data;
     stream_ = std::make_unique<BinaryReader>(std::move(data_copy));
     ReadHeader();
 }
 
-FieldDisassembler::FieldDisassembler(
+FF7::FieldDisassembler::FieldDisassembler(
   SUDM::IScriptFormatter& formatter, FieldEngine *engine, InstVec &insts
-) : SimpleDisassembler(insts), engine_(engine), formatter_(formatter){
+): SimpleDisassembler(insts), engine_(engine), formatter_(formatter){
     section_pointers_size_ = (sizeof(uint32) * NUM_SECTIONS);
 }
 
-FieldDisassembler::~FieldDisassembler(){}
+float FF7::FieldDisassembler::GetScaleFactor() const{return scale_factor_;}
 
-void FieldDisassembler::ReadHeader(){
-    if (!loaded_from_raw_){
+FF7::FieldDisassembler::~FieldDisassembler(){}
+
+void FF7::FieldDisassembler::ReadHeader(){
+    if (!loaded_from_raw_data_){
         // First read the file section pointers.
         for (int i = 0; i < NUM_SECTIONS; i ++) sections_[i] = stream_->ReadU32();
         // Now fix up from PSX RAM pointers to simple file offsets.
-        const uint32 base_ptr = sections_[0];
-        for (int i = 0; i < NUM_SECTIONS; i ++)
-            sections_[i] = (sections_[i] - base_ptr) + section_pointers_size_;
+        const uint32 basePtr = sections_[0];
+        for (int i = 0; i < NUM_SECTIONS; i++)
+            sections_[i] = (sections_[i] - basePtr) + section_pointers_size_;
         // Now seek to the script section.
         stream_->Seek(sections_[SCRIPT]);
     }
-
     // Read the script header
     header_.Read(*stream_);
     scale_factor_ = static_cast<float>(header_.scale) / 512.0f;
 }
 
-void FieldDisassembler::ReadHeader(BinaryReader& reader){
-    header_.Read(reader);
-    header_end_position_ = reader.GetPosition();
-}
-
-void FieldDisassembler::Open(const char *filename){
+void FF7::FieldDisassembler::Open(const char *filename){
     // Read all of the file, decompress it, then stuff it into a stream.
     stream_ = std::make_unique<BinaryReader>(Lzs::Decompress(BinaryReader::ReadAll(filename)));
     ReadHeader();
 }
 
-uint32 FieldDisassembler::GetEndOfScriptOffset(
+uint32 FF7::FieldDisassembler::GetEndOfScriptOffset(
   uint16 cur_entry_point, size_t entity_index, size_t script_index
 ){
     uint16 next_entry_point = cur_entry_point;
     do{
         if (script_index + 1 >= 32){
-            // If this is the very last script, so use the end of its data
-            // which is the offset to strings.
+            // If this is the very last script, so use the end of its
+            // data which is the offset to strings.
             if (entity_index + 1 >= header_.entity_scripts.size()) return header_.offset_to_strings;
             else{
                 // Wrap around to the next entity
@@ -104,14 +101,14 @@ uint32 FieldDisassembler::GetEndOfScriptOffset(
                 script_index = 0;
             }
         }
-        // Get the next script in the same entity:
+        // Get the next script in the same entity.
         else script_index ++;
         next_entry_point = header_.entity_scripts[entity_index][script_index];
     } while (next_entry_point == cur_entry_point);
     return next_entry_point;
 }
 
-std::unique_ptr<Function> FieldDisassembler::StartFunction(size_t script_index){
+std::unique_ptr<Function> FF7::FieldDisassembler::StartFunction(size_t script_index){
     auto func = std::make_unique<Function>();
     func->_retVal = false;
     func->_args = 0;
@@ -120,25 +117,25 @@ std::unique_ptr<Function> FieldDisassembler::StartFunction(size_t script_index){
     return func;
 }
 
-void FieldDisassembler::DoDisassemble(){
+void FF7::FieldDisassembler::DoDisassemble(){
     // Loop through the scripts for each entity.
     for (size_t entity_number = 0; entity_number < header_.entity_scripts.size(); entity_number ++){
         std::string original_name = header_.field_entity_names[entity_number].data();
-        // If the entity name was blank in the file then use a consistent generated name.
+        // If the entity name was blank in the file then use a consistent generated name
         if (original_name.empty()) original_name = "entity_" + std::to_string(entity_number);
         const std::string entity_name = formatter_.EntityName(original_name);
         // Only parse each script one.
         std::set<uint16> parsed_scripts;
         std::vector<ScriptInfo> script_info;
-        // Collect the scripts to parse.
+        // Collect the scripts to parse
         for (
           size_t script_index = 0;
           script_index < header_.entity_scripts[entity_number].size();
           script_index ++
         ){
             uint16 script_entry_point = header_.entity_scripts[entity_number][script_index];
-            // If this scripts entry point is already parsed, then don't do it again as it means
-            // two scripts have the same entry which only seems to be true for "empty" scripts.
+            // If this scripts entry point is already parsed, don't do it again as it means
+            // two scripts have the same entry, which only seems to be true for "empty" scripts.
             if (parsed_scripts.find(script_entry_point) != std::end(parsed_scripts)) continue;
             parsed_scripts.insert(script_entry_point);
             const uint32 next_script_entry_point = GetEndOfScriptOffset(
@@ -146,13 +143,13 @@ void FieldDisassembler::DoDisassemble(){
             );
             const uint32 script_size = next_script_entry_point - script_entry_point;
             if (script_size > 0){
-                ScriptInfo info = { script_entry_point, next_script_entry_point, script_index };
+                ScriptInfo info = {script_entry_point, next_script_entry_point, script_index};
                 script_info.push_back(info);
             }
         }
         for (auto it = script_info.begin(); it != script_info.end(); it ++){
             const bool is_start = it == script_info.begin();
-            const bool is_end = it == (--script_info.end());
+            const bool is_end = it == (-- script_info.end());
             DisassembleIndivdualScript(
               entity_name, entity_number, it->index, it->entry_point,
               it->next_entry_point, is_start, is_end
@@ -161,19 +158,17 @@ void FieldDisassembler::DoDisassemble(){
     }
 }
 
-float FieldDisassembler::GetScaleFactor() const{return scale_factor_;}
-
-int FieldDisassembler::FindId(uint32 start_addr, uint32 end_addr, const InstVec& insts){
+int FF7::FieldDisassembler::FindId(uint32 start_addr, uint32 end_addr, const InstVec& insts){
     for (const InstPtr& instruction : insts){
         if (instruction->_address >= start_addr && instruction->_address <= end_addr){
-            if (instruction->_opcode == OPCODE::opCodeCHAR)
+            if (instruction->_opcode == FF7::OPCODES::opCodeCHAR)
                 return instruction->_params[0]->getSigned();
         }
     }
     return -1;
 }
 
-void FieldDisassembler::AddFunc(
+void FF7::FieldDisassembler::AddFunc(
   std::string entity_name, size_t entity_index, size_t script_index, uint32 next_script_entry_point,
   const bool is_start, bool is_end, bool to_return_only, std::string func_name
 ){
@@ -182,7 +177,7 @@ void FieldDisassembler::AddFunc(
     std::vector<float> point_b = {0, 0, 0};
     const auto SCRIPT_ENTRY_POINT = stream_->GetPosition();
     // Read each block of opcodes up to a return.
-    const size_t old_num_instructions = _insts.size();
+    const size_t old_num_instructions = insts_.size();
     // Initialize the function.
     std::unique_ptr<Function> func = StartFunction(script_index);
     // Read.
@@ -197,22 +192,23 @@ void FieldDisassembler::AddFunc(
         if (stream_pos != endPos) is_end = false;
     }
     else{
-        // Keep going till we have all of the script, i.e if we bail at a
-        // return then call again till we have everything
+        // Keep going until all of the scriptis fectched, i.e if bailed at a
+        // return, then call again until everything is parsed.
         while (stream_->GetPosition() != next_script_entry_point + section_pointers_size_){
             is_line = ReadOpCodesToPositionOrReturn(
               next_script_entry_point + section_pointers_size_, point_a, point_b
             );
         }
     }
-    // Read metadata, mark start the function as first and/or last of the class.
+    // Read metadata, mark start and/or end.
     std::string meta_data;
     if (is_start && is_end) meta_data = "start_end_";
     else if (is_start) meta_data = "start_";
     else if (is_end) meta_data = "end_";
-    const size_t new_num_instructions = _insts.size();
+
+    const size_t new_num_instructions = insts_.size();
     func->mNumInstructions = new_num_instructions - old_num_instructions;
-    func->mEndAddr = _insts.back()->_address;
+    func->mEndAddr = insts_.back()->_address;
     if (!func_name.empty()) func->_name = func_name;
     if (engine_->EntityIsLine(entity_index)){
         switch (script_index){
@@ -232,15 +228,13 @@ void FieldDisassembler::AddFunc(
             case 6: func->_name = "on_leave_line"; break;
         }
     }
-    int id = FindId(func->mStartAddr, func->mEndAddr, _insts);
+    int id = FindId(func->mStartAddr, func->mEndAddr, insts_);
     // If there is no ID check if there was an ID for this entity in any of
     // its other functions and use that instead.
     if (id == -1){
         for (auto& func : engine_->_functions){
             FunctionMetaData func_meta_data(func.second._metadata);
-            if (
-              func_meta_data.GetEntityName() == entity_name && func_meta_data.GetCharacterId() != -1
-            ){
+            if (func_meta_data.GetEntityName() == entity_name && func_meta_data.GetCharacterId() != -1){
                 id = func_meta_data.GetCharacterId();
                 break;
             }
@@ -254,10 +248,10 @@ void FieldDisassembler::AddFunc(
     if (is_line) engine_->MarkEntityAsLine(entity_index, true, point_a, point_b);
 }
 
-void FieldDisassembler::DisassembleIndivdualScript(
-    std::string entity_name, size_t entity_index, size_t script_entry_point,
-    size_t script_index, uint32 next_script_entry_point, bool is_start, bool is_end
-){
+void FF7::FieldDisassembler::DisassembleIndivdualScript(
+  std::string entity_name, size_t entity_index, size_t script_index,
+  size_t script_entry_point, uint32 next_script_entry_point, bool is_start, bool is_end)
+{
     script_entry_point += section_pointers_size_;
     stream_->Seek(script_entry_point);
     address_base_ = stream_->GetPosition();
@@ -279,56 +273,46 @@ void FieldDisassembler::DisassembleIndivdualScript(
     }
     else{
         const size_t end_pos = next_script_entry_point + section_pointers_size_;
-        // Read the init script, which means stop at the first return
+        // Read the init script, which means stop at the first return.
         AddFunc(
           entity_name, entity_index, script_index, next_script_entry_point,
           is_start, is_end, true, "on_start"
         );
-
         // Not at the end of this script? Then the remaining data is the "main" script
         auto stream_pos = stream_->GetPosition();
         if (stream_pos != end_pos){
-            // The "main" script can have more than one return statement
+            // The "main" script can have more than one return statement...
             AddFunc(
               entity_name, entity_index, script_index, next_script_entry_point,
               false, is_end, false, "on_update"
             );
             stream_pos = stream_->GetPosition();
-
-            // But should end exactly on the end pos
+            // ... but should end exactly on the end pos
             if (stream_pos != end_pos) throw InternalDecompilerError();
         }
-
     }
 }
 
-/**
- * @todo Understand and document.
- * @todo Maybe add to the class.
- */
-const InstructionRecord kOpcodes[] ={
-    // Flow
-    { 1, OPCODE::RET, "RET", "", FieldControlFlowInstruction::Create },
-    { 1, OPCODE::REQ, "REQ", "BU", FieldControlFlowInstruction::Create },
-    { 1, OPCODE::REQSW, "REQSW", "BU", FieldControlFlowInstruction::Create },
-    { 1, OPCODE::REQEW, "REQEW", "BU", FieldControlFlowInstruction::Create },
-    { 1, OPCODE::NOP, "NOP", "", FieldNoOperationInstruction::Create },
-    { 1, OPCODE::IFUB, "IFUB", "NNBBBL", FieldNoOperationInstruction::Create }
+
+FF7::FieldDisassembler::InstructionRecord FF7::FieldDisassembler::FLOW_OPCODES[] ={
+    {1, FF7::OPCODES::RET, "RET", "", FF7::FF7ControlFlowInstruction::Create},
+    {1, FF7::OPCODES::REQ, "REQ", "BU", FF7::FF7ControlFlowInstruction::Create},
+    {1, FF7::OPCODES::REQSW, "REQSW", "BU", FF7::FF7ControlFlowInstruction::Create},
+    {1, FF7::OPCODES::REQEW, "REQEW", "BU", FF7::FF7ControlFlowInstruction::Create},
+    {1, FF7::OPCODES::NOP, "NOP", "", FF7::FieldNoOperationInstruction::Create},
+    {1, FF7::OPCODES::IFUB, "IFUB", "NNBBBL", FF7::FieldNoOperationInstruction::Create}
 };
 
-/**
- * @todo Understand and document.
- * @todo Maybe add to the class.
- */
-std::map<std::string, const InstructionRecord*> FieldInstructions(){
-    // Convert the array to a map that we can query on by mnemonic
+std::map<std::string, const FF7::FieldDisassembler::InstructionRecord*>
+  FF7::FieldDisassembler::FieldInstructions(){
+    // Convert the array to a map that we can query on by opcode name.
     std::map<std::string, const InstructionRecord*> name_to_instruction_records;
-    for (size_t i = 0; i < boost::size(kOpcodes); i++)
-        name_to_instruction_records[kOpcodes[i].opcode_name] = &kOpcodes[i];
+    for (size_t i = 0; i < boost::size(FLOW_OPCODES); i ++)
+        name_to_instruction_records[FLOW_OPCODES[i].opcode_name] = &FLOW_OPCODES[i];
     return name_to_instruction_records;
 }
 
-bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
+bool FF7::FieldDisassembler::ReadOpCodesToPositionOrReturn(
   size_t end_pos, std::vector<float>& point_a, std::vector<float>& point_b
 ){
     bool is_line = false;
@@ -336,395 +320,924 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
     while (stream_->GetPosition() < end_pos){
         uint8 opcode = stream_->ReadU8();
         uint32 full_opcode = 0;
-        std::string opcodePrefix;
+        full_opcode = (full_opcode << 8) + opcode;
         switch (opcode){
+
             // Flow
-            CASE_OPCODE(OPCODE::IFUB, "IFUB", FieldCondJumpInstruction, 0, "NBBBB");
-            /*case OPCODE::IFUB:
-                full_opcode = (full_opcode << 8) + OPCODE::IFUB;
-                this->_insts.push_back(new FieldCondJumpInstruction());
-                (this->_insts.back())->_opcode = full_opcode;
-                (this->_insts.back())->_address = this->address_;
-                (this->_insts.back())->_stackChange = 0;
-                (this->_insts.back())->_name = opcodePrefix + std::string("IFUB");
-                (this->_insts.back())->_codeGenData = "";
-                this->readParams((this->_insts.back()), "NBBBB");
-                break;*/
-            CASE_OPCODE(OPCODE::RET, "RET", FieldControlFlowInstruction, 0, "");
-            CASE_OPCODE(OPCODE::REQ, "REQ", FieldControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::REQSW, "REQSW", FieldControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::REQEW, "REQEW", FieldControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::PREQ, "PREQ", FieldControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::PRQSW, "PRQSW", FieldControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::PRQEW, "PRQEW", FieldControlFlowInstruction, 0, "BU");
-            CASE_OPCODE(OPCODE::RETTO, "RETTO", FieldControlFlowInstruction, 0, "U");
-            CASE_OPCODE(OPCODE::JMPF, "JMPF", FieldUncondJumpInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::JMPFL, "JMPFL", FieldUncondJumpInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::JMPB, "JMPB", FieldUncondJumpInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::JMPBL, "JMPBL", FieldUncondJumpInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::IFUBL, "IFUBL", FieldCondJumpInstruction, 0, "NBBBw");
-            CASE_OPCODE(OPCODE::IFSW, "IFSW", FieldCondJumpInstruction, 0, "NwwBB");
-            CASE_OPCODE(OPCODE::IFSWL, "IFSWL", FieldCondJumpInstruction, 0, "NwwBw");
-            CASE_OPCODE(OPCODE::IFUW, "IFUW", FieldCondJumpInstruction, 0, "NwwBB");
-            CASE_OPCODE(OPCODE::IFUWL, "IFUWL", FieldCondJumpInstruction, 0, "NwwBw");
-            CASE_OPCODE(OPCODE::WAIT, "WAIT", FieldControlFlowInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::IFKEY, "IFKEY", FieldCondJumpInstruction, 0, "wB");
-            CASE_OPCODE(OPCODE::IFKEYON, "IFKEYON", FieldCondJumpInstruction, 0, "wB");
-            CASE_OPCODE(OPCODE::IFKEYOFF, "IFKEYOFF", FieldCondJumpInstruction, 0, "wB");
-            CASE_OPCODE(OPCODE::NOP, "NOP", FieldNoOperationInstruction, 0, "");
-            CASE_OPCODE(OPCODE::IFPRTYQ, "IFPRTYQ", FieldCondJumpInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::IFMEMBQ, "IFMEMBQ", FieldCondJumpInstruction, 0, "BB");
+            case OPCODES::IFUB:
+                ParseOpcode(full_opcode, "IFUB", new FieldCondJumpInstruction(), 0, "NBBBB");
+                break;
+            case OPCODES::RET:
+                ParseOpcode(full_opcode, "RET", new FF7ControlFlowInstruction(), 0, "");
+                break;
+            case OPCODES::REQ:
+                ParseOpcode(full_opcode, "REQ", new FF7ControlFlowInstruction(), 0, "BU");
+                break;
+            case OPCODES::REQSW:
+                ParseOpcode(full_opcode, "REQSW", new FF7ControlFlowInstruction(), 0, "BU");
+                break;
+            case OPCODES::REQEW:
+                ParseOpcode(full_opcode, "REQEW", new FF7ControlFlowInstruction(), 0, "BU");
+                break;
+            case OPCODES::PREQ:
+                ParseOpcode(full_opcode, "PREQ", new FF7ControlFlowInstruction(), 0, "BU");
+                break;
+            case OPCODES::PRQSW:
+                ParseOpcode(full_opcode, "PRQSW", new FF7ControlFlowInstruction(), 0, "BU");
+                break;
+            case OPCODES::PRQEW:
+                ParseOpcode(full_opcode, "PRQEW", new FF7ControlFlowInstruction(), 0, "BU");
+                break;
+            case OPCODES::RETTO:
+                ParseOpcode(full_opcode, "RETTO", new FF7ControlFlowInstruction(), 0, "U");
+                break;
+            case OPCODES::JMPF:
+                ParseOpcode(full_opcode, "JMPF", new FieldUncondJumpInstruction(), 0, "B");
+                break;
+            case OPCODES::JMPFL:
+                ParseOpcode(full_opcode, "JMPFL", new FieldUncondJumpInstruction(), 0, "w");
+                break;
+            case OPCODES::JMPB:
+                ParseOpcode(full_opcode, "JMPB", new FieldUncondJumpInstruction(), 0, "B");
+                break;
+            case OPCODES::JMPBL:
+                ParseOpcode(full_opcode, "JMPBL", new FieldUncondJumpInstruction(), 0, "w");
+                break;
+            case OPCODES::IFUBL:
+                ParseOpcode(full_opcode, "IFUBL", new FieldCondJumpInstruction(), 0, "NBBBw");
+                break;
+            case OPCODES::IFSW:
+                ParseOpcode(full_opcode, "IFSW", new FieldCondJumpInstruction(), 0, "NwwBB");
+                break;
+            case OPCODES::IFSWL:
+                ParseOpcode(full_opcode, "IFSWL", new FieldCondJumpInstruction(), 0, "NwwBw");
+                break;
+            case OPCODES::IFUW:
+                ParseOpcode(full_opcode, "IFUW", new FieldCondJumpInstruction(), 0, "NwwBB");
+                break;
+            case OPCODES::IFUWL:
+                ParseOpcode(full_opcode, "IFUWL", new FieldCondJumpInstruction(), 0, "NwwBw");
+                break;
+            case OPCODES::WAIT:
+                ParseOpcode(full_opcode, "WAIT", new FF7ControlFlowInstruction(), 0, "w");
+                break;
+            case OPCODES::IFKEY:
+                ParseOpcode(full_opcode, "IFKEY", new FieldCondJumpInstruction(), 0, "wB");
+                break;
+            case OPCODES::IFKEYON:
+                ParseOpcode(full_opcode, "IFKEYON", new FieldCondJumpInstruction(), 0, "wB");
+                break;
+            case OPCODES::IFKEYOFF:
+                ParseOpcode(full_opcode, "IFKEYOFF", new FieldCondJumpInstruction(), 0, "wB");
+                break;
+            case OPCODES::NOP:
+                ParseOpcode(full_opcode, "NOP", new FieldNoOperationInstruction(), 0, "");
+                break;
+            case OPCODES::IFPRTYQ:
+                ParseOpcode(full_opcode, "IFPRTYQ", new FieldCondJumpInstruction(), 0, "BB");
+                break;
+            case OPCODES::IFMEMBQ:
+                ParseOpcode(full_opcode, "IFMEMBQ", new FieldCondJumpInstruction(), 0, "BB");
+                break;
 
             // Module
-            CASE_OPCODE(OPCODE::DSKCG, "DSKCG", FieldModuleInstruction, 0, "B");
-            START_SUBOPCODE(OPCODE::SPECIAL)
-                CASE_OPCODE(OPCODE_SPECIAL::ARROW, "ARROW", FieldModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::PNAME, "PNAME", FieldModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::GMSPD, "GMSPD", FieldModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::SMSPD, "SMSPD", FieldModuleInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE_SPECIAL::FLMAT, "FLMAT", FieldModuleInstruction, 0, "");
-            CASE_OPCODE(OPCODE_SPECIAL::FLITM, "FLITM", FieldModuleInstruction, 0, "");
-            CASE_OPCODE(OPCODE_SPECIAL::BTLCK, "BTLCK", FieldModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::MVLCK, "MVLCK", FieldModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE_SPECIAL::SPCNM, "SPCNM", FieldModuleInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE_SPECIAL::RSGLB, "RSGLB", FieldModuleInstruction, 0, "");
-            CASE_OPCODE(OPCODE_SPECIAL::CLITM, "CLITM", FieldModuleInstruction, 0, "");
-            END_SUBOPCODE
-                CASE_OPCODE(OPCODE::MINIGAME, "MINIGAME", FieldModuleInstruction, 0, "wsswBB");
-            CASE_OPCODE(OPCODE::BTMD2, "BTMD2", FieldModuleInstruction, 0, "d");
-            CASE_OPCODE(OPCODE::BTRLD, "BTRLD", FieldModuleInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::BTLTB, "BTLTB", FieldModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MAPJUMP, "MAPJUMP", FieldModuleInstruction, 0, "wsswB");
-            CASE_OPCODE(OPCODE::LSTMP, "LSTMP", FieldModuleInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::BATTLE, "BATTLE", FieldModuleInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::BTLON, "BTLON", FieldModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::BTLMD, "BTLMD", FieldModuleInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::MPJPO, "MPJPO", FieldModuleInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PMJMP, "PMJMP", FieldModuleInstruction, 0, "w");
-            CASE_OPCODE(OPCODE::PMJMP2, "PMJMP2", FieldModuleInstruction, 0, "");
-            CASE_OPCODE(OPCODE::GAMEOVER, "GAMEOVER", FieldModuleInstruction, 0, "");
-
-            // Math
-            CASE_OPCODE(OPCODE::PLUS_, "PLUS!", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PLUS2_, "PLUS2!", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MINUS_, "MINUS!", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MINUS2_, "MINUS2!", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::INC_, "INC!", FieldMathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::INC2_, "INC2!", FieldMathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::DEC_, "DEC!", FieldMathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::DEC2_, "DEC2!", FieldMathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::RDMSD, "RDMSD", FieldMathInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::SETBYTE, "SETBYTE", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::SETWORD, "SETWORD", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::BITON, "BITON", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::BITOFF, "BITOFF", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::BITXOR, "BITXOR", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PLUS, "PLUS", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PLUS2, "PLUS2", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MINUS, "MINUS", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MINUS2, "MINUS2", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MUL, "MUL", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MUL2, "MUL2", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::DIV, "DIV", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::DIV2, "DIV2", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MOD, "MOD", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MOD2, "MOD2", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::AND, "AND", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::AND2, "AND2", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::OR, "OR", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::OR2, "OR2", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::XOR, "XOR", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::XOR2, "XOR2", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::INC, "INC", FieldMathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::INC2, "INC2", FieldMathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::DEC, "DEC", FieldMathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::DEC2, "DEC2", FieldMathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::RANDOM, "RANDOM", FieldMathInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::LBYTE, "LBYTE", FieldMathInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::HBYTE, "HBYTE", FieldMathInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::TWOBYTE, "2BYTE", FieldMathInstruction, 0, "NNBBB");
-            CASE_OPCODE(OPCODE::SIN, "SIN", FieldMathInstruction, 0, "NNwwwB");
-            CASE_OPCODE(OPCODE::COS, "COS", FieldMathInstruction, 0, "NNwwwB");
-
-            // Window
-            CASE_OPCODE(OPCODE::TUTOR, "TUTOR", FieldWindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WCLS, "WCLS", FieldWindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WSIZW, "WSIZW", FieldWindowInstruction, 0, "Bwwww");
-            CASE_OPCODE(OPCODE::WSPCL, "WSPCL", FieldWindowInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::WNUMB, "WNUMB", FieldWindowInstruction, 0, "NBwwB"); // NBdB when N == 0
-            CASE_OPCODE(OPCODE::STTIM, "STTIM", FieldWindowInstruction, 0, "NNBBB");
-            CASE_OPCODE(OPCODE::MESSAGE, "MESSAGE", FieldWindowInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::MPARA, "MPARA", FieldWindowInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::MPRA2, "MPRA2", FieldWindowInstruction, 0, "NBBw");
-            CASE_OPCODE(OPCODE::MPNAM, "MPNAM", FieldWindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::ASK, "ASK", FieldWindowInstruction, 0, "NBBBBB");
-            CASE_OPCODE(OPCODE::MENU, "MENU", FieldWindowInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::MENU2, "MENU2", FieldWindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WINDOW, "WINDOW", FieldWindowInstruction, 0, "Bwwww");
-            CASE_OPCODE(OPCODE::WMOVE, "WMOVE", FieldWindowInstruction, 0, "Bss");
-            CASE_OPCODE(OPCODE::WMODE, "WMODE", FieldWindowInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::WREST, "WREST", FieldWindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WCLSE, "WCLSE", FieldWindowInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::WROW, "WROW", FieldWindowInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::GWCOL, "GWCOL", FieldWindowInstruction, 0, "NNBBBB");
-            CASE_OPCODE(OPCODE::SWCOL, "SWCOL", FieldWindowInstruction, 0, "NNBBBB");
-
-            // Party
-            CASE_OPCODE(OPCODE::SPTYE, "SPTYE", FieldPartyInstruction, 0, "NNBBB");
-            CASE_OPCODE(OPCODE::GTPYE, "GTPYE", FieldPartyInstruction, 0, "NNBBB");
-            CASE_OPCODE(OPCODE::GOLDU, "GOLDU", FieldPartyInstruction, 0, "Nww"); // Nd when N == 0
-            CASE_OPCODE(OPCODE::GOLDD, "GOLDD", FieldPartyInstruction, 0, "Nww"); // Nd when N == 0
-            CASE_OPCODE(OPCODE::CHGLD, "CHGLD", FieldPartyInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::HMPMAX1, "HMPMAX1", FieldPartyInstruction, 0, "");
-            CASE_OPCODE(OPCODE::HMPMAX2, "HMPMAX2", FieldPartyInstruction, 0, "");
-            CASE_OPCODE(OPCODE::MHMMX, "MHMMX", FieldPartyInstruction, 0, "");
-            CASE_OPCODE(OPCODE::HMPMAX3, "HMPMAX3", FieldPartyInstruction, 0, "");
-            CASE_OPCODE(OPCODE::MPU, "MPU", FieldPartyInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::MPD, "MPD", FieldPartyInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::HPU, "HPU", FieldPartyInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::HPD, "HPD", FieldPartyInstruction, 0, "NBw");
-            CASE_OPCODE(OPCODE::STITM, "STITM", FieldPartyInstruction, 0, "NwB");
-            CASE_OPCODE(OPCODE::DLITM, "DLITM", FieldPartyInstruction, 0, "NwB");
-            CASE_OPCODE(OPCODE::CKITM, "CKITM", FieldPartyInstruction, 0, "NwB");
-            CASE_OPCODE(OPCODE::SMTRA, "SMTRA", FieldPartyInstruction, 0, "NNBBBB");
-            CASE_OPCODE(OPCODE::DMTRA, "DMTRA", FieldPartyInstruction, 0, "NNBBBBB");
-            CASE_OPCODE(OPCODE::CMTRA, "CMTRA", FieldPartyInstruction, 0, "NNNBBBBBB");
-            CASE_OPCODE(OPCODE::GETPC, "GETPC", FieldPartyInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PRTYP, "PRTYP", FieldPartyInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PRTYM, "PRTYM", FieldPartyInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PRTYE, "PRTYE", FieldPartyInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::MMBUD, "MMBUD", FieldPartyInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::MMBLK, "MMBLK", FieldPartyInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MMBUK, "MMBUK", FieldPartyInstruction, 0, "B");
-
-            // Model
-            CASE_OPCODE(OPCODE::JOIN, "JOIN", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SPLIT, "SPLIT", FieldModelInstruction, 0, "NNNssBssBB");
-            CASE_OPCODE(OPCODE::BLINK, "BLINK", FieldModelInstruction, 0, "B");
-            OPCODE_BASE(OPCODE::KAWAI){
-                int length = this->stream_->ReadU8();
-                assert(length >= 3);
-                std::ostringstream paramStream;
-                for (int i = 3; i < length; ++ i) paramStream << "B";
-                auto parameters = paramStream.str();
-
+            case OPCODES::DSKCG:
+                ParseOpcode(full_opcode, "DSKCG", new FieldModuleInstruction(), 0, "B");
+                break;
+            case OPCODES::SPECIAL:
+                full_opcode = 0;
+                full_opcode = (full_opcode << 8) + OPCODES::SPECIAL;
                 opcode = this->stream_->ReadU8();
                 switch (opcode){
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::EYETX, "EYETX", FieldModelInstruction, 0, parameters.c_str()
-                    ); // was BBBB
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::TRNSP, "TRNSP", FieldModelInstruction, 0, parameters.c_str()
-                    ); // was B
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::AMBNT, "AMBNT", FieldModelInstruction, 0, parameters.c_str()
-                    ); // was BBBBBBB
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::Unknown03, "Unknown03",
-                        FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::Unknown04, "Unknown04",
-                        FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::Unknown05, "Unknown05",
-                        FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::LIGHT, "LIGHT",FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::Unknown07, "Unknown07",
-                        FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::Unknown08, "Unknown08",
-                        FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::Unknown09, "Unknown09",
-                        FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::SBOBJ, "SBOBJ",
-                        FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                      OPCODE_KAWAI::Unknown0B, "Unknown0B",
-                      FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::Unknown0C, "Unknown0C",
-                        FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::SHINE, "SHINE", FieldModelInstruction, 0, parameters.c_str()
-                    );
-                    CASE_OPCODE(
-                        OPCODE_KAWAI::RESET, "RESET", FieldModelInstruction, 0, parameters.c_str()
-                    );
-                default:
-                    throw UnknownSubOpcodeException(this->address_, opcode);
+                    case OPCODES_SPECIAL::ARROW:
+                        ParseOpcode(full_opcode, "ARROW", new FieldModuleInstruction(), 0, "B");
+                        break;
+                    case OPCODES_SPECIAL::PNAME:
+                        ParseOpcode(full_opcode, "PNAME", new FieldModuleInstruction(), 0, "B");
+                        break;
+                    case OPCODES_SPECIAL::GMSPD:
+                        ParseOpcode(full_opcode, "GMSPD", new FieldModuleInstruction(), 0, "B");
+                        break;
+                    case OPCODES_SPECIAL::SMSPD:
+                        ParseOpcode(full_opcode, "SMSPD", new FieldModuleInstruction(), 0, "BB");
+                        break;
+                    case OPCODES_SPECIAL::FLMAT:
+                        ParseOpcode(full_opcode, "FLMAT", new FieldModuleInstruction(), 0, "");
+                        break;
+                    case OPCODES_SPECIAL::FLITM:
+                        ParseOpcode(full_opcode, "FLITM", new FieldModuleInstruction(), 0, "");
+                        break;
+                    case OPCODES_SPECIAL::BTLCK:
+                        ParseOpcode(full_opcode, "BTLCK", new FieldModuleInstruction(), 0, "B");
+                        break;
+                    case OPCODES_SPECIAL::MVLCK:
+                        ParseOpcode(full_opcode, "MVLCK", new FieldModuleInstruction(), 0, "B");
+                        break;
+                    case OPCODES_SPECIAL::SPCNM:
+                        ParseOpcode(full_opcode, "SPCNM", new FieldModuleInstruction(), 0, "BB");
+                        break;
+                    case OPCODES_SPECIAL::RSGLB:
+                        ParseOpcode(full_opcode, "RSGLB", new FieldModuleInstruction(), 0, "");
+                        break;
+                    case OPCODES_SPECIAL::CLITM:
+                        ParseOpcode(full_opcode, "CLITM", new FieldModuleInstruction(), 0, "");
+                        break;
+                    default:
+                        throw UnknownSubOpcodeException(this->address_, opcode);\
                 }
-                INC_ADDR;
-                INC_ADDR;
-            }
-            OPCODE_END
-            CASE_OPCODE(OPCODE::KAWIW, "KAWIW", FieldModelInstruction, 0, "");
-            CASE_OPCODE(OPCODE::PMOVA, "PMOVA", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PDIRA, "PDIRA", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PTURA, "PTURA", FieldModelInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::PGTDR, "PGTDR", FieldModelInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::PXYZI, "PXYZI", FieldModelInstruction, 0, "NNBBBBB");
-            CASE_OPCODE(OPCODE::TLKON, "TLKON", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::PC, "PC", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::opCodeCHAR, "CHAR", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::DFANM, "DFANM", FieldModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::ANIME1, "ANIME1", FieldModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::VISI, "VISI", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::XYZI, "XYZI", FieldModelInstruction, 0, "NNsssw");
-            CASE_OPCODE(OPCODE::XYI, "XYI", FieldModelInstruction, 0, "NNssw");
-            CASE_OPCODE(OPCODE::XYZ, "XYZ", FieldModelInstruction, 0, "NNsss");
-            CASE_OPCODE(OPCODE::MOVE, "MOVE", FieldModelInstruction, 0, "Nss");
-            CASE_OPCODE(OPCODE::CMOVE, "CMOVE", FieldModelInstruction, 0, "Nss");
-            CASE_OPCODE(OPCODE::MOVA, "MOVA", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::TURA, "TURA", FieldModelInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::ANIMW, "ANIMW", FieldModelInstruction, 0, "");
-            CASE_OPCODE(OPCODE::FMOVE, "FMOVE", FieldModelInstruction, 0, "Nss");
-            CASE_OPCODE(OPCODE::ANIME2, "ANIME2", FieldModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::ANIM_1, "ANIM!1", FieldModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::CANIM1, "CANIM1", FieldModelInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::CANM_1, "CANM!1", FieldModelInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::MSPED, "MSPED", FieldModelInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::DIR, "DIR", FieldModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::TURNGEN, "TURNGEN", FieldModelInstruction, 0, "NBBBB");
-            CASE_OPCODE(OPCODE::TURN, "TURN", FieldModelInstruction, 0, "NBBBB");
-            CASE_OPCODE(OPCODE::DIRA, "DIRA", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::GETDIR, "GETDIR", FieldModelInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::GETAXY, "GETAXY", FieldModelInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::GETAI, "GETAI", FieldModelInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::ANIM_2, "ANIM!2", FieldModelInstruction, 0, "BB");
-            CASE_OPCODE(OPCODE::CANIM2, "CANIM2", FieldModelInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::CANM_2, "CANM!2", FieldModelInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::ASPED, "ASPED", FieldModelInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::CC, "CC", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::JUMP, "JUMP", FieldModelInstruction, 0, "NNssww");
-            CASE_OPCODE(OPCODE::AXYZI, "AXYZI", FieldModelInstruction, 0, "NNBBBBB");
-            CASE_OPCODE(OPCODE::LADER, "LADER", FieldModelInstruction, 0, "NNssswBBBB");
-            CASE_OPCODE(OPCODE::OFST, "OFST", FieldModelInstruction, 0, "NNBsssw");
-            CASE_OPCODE(OPCODE::OFSTW, "OFSTW", FieldModelInstruction, 0, "");
-            CASE_OPCODE(OPCODE::TALKR, "TALKR", FieldModelInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::SLIDR, "SLIDR", FieldModelInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::SOLID, "SOLID", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::TLKR2, "TLKR2", FieldModelInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::SLDR2, "SLDR2", FieldModelInstruction, 0, "Nw");
-            CASE_OPCODE(OPCODE::CCANM, "CCANM", FieldModelInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::FCFIX, "FCFIX", FieldModelInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::ANIMB, "ANIMB", FieldModelInstruction, 0, "");
-            CASE_OPCODE(OPCODE::TURNW, "TURNW", FieldModelInstruction, 0, "");
+                this->address_++ ;
+                break;
+            case OPCODES::MINIGAME:
+                ParseOpcode(full_opcode, "MINIGAME", new FieldModuleInstruction(), 0, "wsswBB");
+                break;
+            case OPCODES::BTMD2:
+                ParseOpcode(full_opcode, "BTMD2", new FieldModuleInstruction(), 0, "d");
+                break;
+            case OPCODES::BTRLD:
+                ParseOpcode(full_opcode, "BTRLD", new FieldModuleInstruction(), 0, "NB");
+                break;
+            case OPCODES::BTLTB:
+                ParseOpcode(full_opcode, "BTLTB", new FieldModuleInstruction(), 0, "B");
+                break;
+            case OPCODES::MAPJUMP:
+                ParseOpcode(full_opcode, "MAPJUMP", new FieldModuleInstruction(), 0, "wsswB");
+                break;
+            case OPCODES::LSTMP:
+                ParseOpcode(full_opcode, "LSTMP", new FieldModuleInstruction(), 0, "NB");
+                break;
+            case OPCODES::BATTLE:
+                ParseOpcode(full_opcode, "BATTLE", new FieldModuleInstruction(), 0, "Nw");
+                break;
+            case OPCODES::BTLON:
+                ParseOpcode(full_opcode, "BTLON", new FieldModuleInstruction(), 0, "B");
+                break;
+            case OPCODES::BTLMD:
+                ParseOpcode(full_opcode, "BTLMD", new FieldModuleInstruction(), 0, "w");
+                break;
+            case OPCODES::MPJPO:
+                ParseOpcode(full_opcode, "MPJPO", new FieldModuleInstruction(), 0, "B");
+                break;
+            case OPCODES::PMJMP:
+                ParseOpcode(full_opcode, "PMJMP", new FieldModuleInstruction(), 0, "w");
+                break;
+            case OPCODES::PMJMP2:
+                ParseOpcode(full_opcode, "PMJMP2", new FieldModuleInstruction(), 0, "");
+                break;
+            case OPCODES::GAMEOVER:
+                ParseOpcode(full_opcode, "GAMEOVER", new FieldModuleInstruction(), 0, "");
+                break;
+
+            // Math
+            case OPCODES::PLUS_:
+                ParseOpcode(full_opcode, "PLUS!", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::PLUS2_:
+                ParseOpcode(full_opcode, "PLUS2!", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::MINUS_:
+                ParseOpcode(full_opcode, "MINUS!", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::MINUS2_:
+                ParseOpcode(full_opcode, "MINUS2!", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::INC_:
+                ParseOpcode(full_opcode, "INC!", new FieldMathInstruction(), 0, "BB");
+                break;
+            case OPCODES::INC2_:
+                ParseOpcode(full_opcode, "INC2!", new FieldMathInstruction(), 0, "BB");
+                break;
+            case OPCODES::DEC_:
+                ParseOpcode(full_opcode, "DEC!", new FieldMathInstruction(), 0, "BB");
+                break;
+            case OPCODES::DEC2_:
+                ParseOpcode(full_opcode, "DEC2!", new FieldMathInstruction(), 0, "BB");
+                break;
+            case OPCODES::RDMSD:
+                ParseOpcode(full_opcode, "RDMSD", new FieldMathInstruction(), 0, "NB");
+                break;
+            case OPCODES::SETBYTE:
+                ParseOpcode(full_opcode, "SETBYTE", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::SETWORD:
+                ParseOpcode(full_opcode, "SETWORD", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::BITON:
+                ParseOpcode(full_opcode, "BITON", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::BITOFF:
+                ParseOpcode(full_opcode, "BITOFF", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::BITXOR:
+                ParseOpcode(full_opcode, "BITXOR", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::PLUS:
+                ParseOpcode(full_opcode, "PLUS", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::PLUS2:
+                ParseOpcode(full_opcode, "PLUS2", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::MINUS:
+                ParseOpcode(full_opcode, "MINUS", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::MINUS2:
+                ParseOpcode(full_opcode, "MINUS2", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::MUL:
+                ParseOpcode(full_opcode, "MUL", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::MUL2:
+                ParseOpcode(full_opcode, "MUL2", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::DIV:
+                ParseOpcode(full_opcode, "DIV", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::DIV2:
+                ParseOpcode(full_opcode, "DIV2", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::MOD:
+                ParseOpcode(full_opcode, "MOD", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::MOD2:
+                ParseOpcode(full_opcode, "MOD2", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::AND:
+                ParseOpcode(full_opcode, "AND", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::AND2:
+                ParseOpcode(full_opcode, "AND2", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::OR:
+                ParseOpcode(full_opcode, "OR", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::OR2:
+                ParseOpcode(full_opcode, "OR2", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::XOR:
+                ParseOpcode(full_opcode, "XOR", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::XOR2:
+                ParseOpcode(full_opcode, "XOR2", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::INC:
+                ParseOpcode(full_opcode, "INC", new FieldMathInstruction(), 0, "BB");
+                break;
+            case OPCODES::INC2:
+                ParseOpcode(full_opcode, "INC2", new FieldMathInstruction(), 0, "BB");
+                break;
+            case OPCODES::DEC:
+                ParseOpcode(full_opcode, "DEC", new FieldMathInstruction(), 0, "BB");
+                break;
+            case OPCODES::DEC2:
+                ParseOpcode(full_opcode, "DEC2", new FieldMathInstruction(), 0, "BB");
+                break;
+            case OPCODES::RANDOM:
+                ParseOpcode(full_opcode, "RANDOM", new FieldMathInstruction(), 0, "BB");
+                break;
+            case OPCODES::LBYTE:
+                ParseOpcode(full_opcode, "LBYTE", new FieldMathInstruction(), 0, "NBB");
+                break;
+            case OPCODES::HBYTE:
+                ParseOpcode(full_opcode, "HBYTE", new FieldMathInstruction(), 0, "NBw");
+                break;
+            case OPCODES::TWOBYTE:
+                ParseOpcode(full_opcode, "2BYTE", new FieldMathInstruction(), 0, "NNBBB");
+                break;
+            case OPCODES::SIN:
+                ParseOpcode(full_opcode, "SIN", new FieldMathInstruction(), 0, "NNwwwB");
+                break;
+            case OPCODES::COS:
+                ParseOpcode(full_opcode, "COS", new FieldMathInstruction(), 0, "NNwwwB");
+                break;
+
+            // Window
+            case OPCODES::TUTOR:
+                ParseOpcode(full_opcode, "TUTOR", new FieldWindowInstruction(), 0, "B");
+                break;
+            case OPCODES::WCLS:
+                ParseOpcode(full_opcode, "WCLS", new FieldWindowInstruction(), 0, "B");
+                break;
+            case OPCODES::WSIZW:
+                ParseOpcode(full_opcode, "WSIZW", new FieldWindowInstruction(), 0, "Bwwww");
+                break;
+            case OPCODES::WSPCL:
+                ParseOpcode(full_opcode, "WSPCL", new FieldWindowInstruction(), 0, "BBBB");
+                break;
+            case OPCODES::WNUMB:
+                ParseOpcode(full_opcode, "WNUMB", new FieldWindowInstruction(), 0, "NBwwB");
+                break;
+            case OPCODES::STTIM:
+                ParseOpcode(full_opcode, "STTIM", new FieldWindowInstruction(), 0, "NNBBB");
+                break;
+            case OPCODES::MESSAGE:
+                ParseOpcode(full_opcode, "MESSAGE", new FieldWindowInstruction(), 0, "BB");
+                break;
+            case OPCODES::MPARA:
+                ParseOpcode(full_opcode, "MPARA", new FieldWindowInstruction(), 0, "NBBB");
+                break;
+            case OPCODES::MPRA2:
+                ParseOpcode(full_opcode, "MPRA2", new FieldWindowInstruction(), 0, "NBBw");
+                break;
+            case OPCODES::MPNAM:
+                ParseOpcode(full_opcode, "MPNAM", new FieldWindowInstruction(), 0, "B");
+                break;
+            case OPCODES::ASK:
+                ParseOpcode(full_opcode, "ASK", new FieldWindowInstruction(), 0, "NBBBBB");
+                break;
+            case OPCODES::MENU:
+                ParseOpcode(full_opcode, "MENU", new FieldWindowInstruction(), 0, "NBB");
+                break;
+            case OPCODES::MENU2:
+                ParseOpcode(full_opcode, "MENU2", new FieldWindowInstruction(), 0, "B");
+                break;
+            case OPCODES::WINDOW:
+                ParseOpcode(full_opcode, "WINDOW", new FieldWindowInstruction(), 0, "Bwwww");
+                break;
+            case OPCODES::WMOVE:
+                ParseOpcode(full_opcode, "WMOVE", new FieldWindowInstruction(), 0, "Bss");
+                break;
+            case OPCODES::WMODE:
+                ParseOpcode(full_opcode, "WMODE", new FieldWindowInstruction(), 0, "BBB");
+                break;
+            case OPCODES::WREST:
+                ParseOpcode(full_opcode, "WREST", new FieldWindowInstruction(), 0, "B");
+                break;
+            case OPCODES::WCLSE:
+                ParseOpcode(full_opcode, "WCLSE", new FieldWindowInstruction(), 0, "B");
+                break;
+            case OPCODES::WROW:
+                ParseOpcode(full_opcode, "WROW", new FieldWindowInstruction(), 0, "BB");
+                break;
+            case OPCODES::GWCOL:
+                ParseOpcode(full_opcode, "GWCOL", new FieldWindowInstruction(), 0, "NNBBBB");
+                break;
+            case OPCODES::SWCOL:
+                ParseOpcode(full_opcode, "SWCOL", new FieldWindowInstruction(), 0, "NNBBBB");
+                break;
+
+            // Party
+            case OPCODES::SPTYE:
+                ParseOpcode(full_opcode, "SPTYE", new FieldPartyInstruction(), 0, "NNBBB");
+                break;
+            case OPCODES::GTPYE:
+                ParseOpcode(full_opcode, "GTPYE", new FieldPartyInstruction(), 0, "NNBBB");
+                break;
+            case OPCODES::GOLDU:
+                ParseOpcode(full_opcode, "GOLDU", new FieldPartyInstruction(), 0, "Nww");
+                break;
+            case OPCODES::GOLDD:
+                ParseOpcode(full_opcode, "GOLDD", new FieldPartyInstruction(), 0, "Nww");
+                break;
+            case OPCODES::CHGLD:
+                ParseOpcode(full_opcode, "CHGLD", new FieldPartyInstruction(), 0, "NBB");
+                break;
+            case OPCODES::HMPMAX1:
+                ParseOpcode(full_opcode, "HMPMAX1", new FieldPartyInstruction(), 0, "");
+                break;
+            case OPCODES::HMPMAX2:
+                ParseOpcode(full_opcode, "HMPMAX2", new FieldPartyInstruction(), 0, "");
+                break;
+            case OPCODES::MHMMX:
+                ParseOpcode(full_opcode, "MHMMX", new FieldPartyInstruction(), 0, "");
+                break;
+            case OPCODES::HMPMAX3:
+                ParseOpcode(full_opcode, "HMPMAX3", new FieldPartyInstruction(), 0, "");
+                break;
+            case OPCODES::MPU:
+                ParseOpcode(full_opcode, "MPU", new FieldPartyInstruction(), 0, "NBw");
+                break;
+            case OPCODES::MPD:
+                ParseOpcode(full_opcode, "MPD", new FieldPartyInstruction(), 0, "NBw");
+                break;
+            case OPCODES::HPU:
+                ParseOpcode(full_opcode, "HPU", new FieldPartyInstruction(), 0, "NBw");
+                break;
+            case OPCODES::HPD:
+                ParseOpcode(full_opcode, "HPD", new FieldPartyInstruction(), 0, "NBw");
+                break;
+            case OPCODES::STITM:
+                ParseOpcode(full_opcode, "STITM", new FieldPartyInstruction(), 0, "NwB");
+                break;
+            case OPCODES::DLITM:
+                ParseOpcode(full_opcode, "DLITM", new FieldPartyInstruction(), 0, "NwB");
+                break;
+            case OPCODES::CKITM:
+                ParseOpcode(full_opcode, "CKITM", new FieldPartyInstruction(), 0, "NwB");
+                break;
+            case OPCODES::SMTRA:
+                ParseOpcode(full_opcode, "SMTRA", new FieldPartyInstruction(), 0, "NNBBBB");
+                break;
+            case OPCODES::DMTRA:
+                ParseOpcode(full_opcode, "DMTRA", new FieldPartyInstruction(), 0, "NNBBBBB");
+                break;
+            case OPCODES::CMTRA:
+                ParseOpcode(full_opcode, "CMTRA", new FieldPartyInstruction(), 0, "NNNBBBBBB");
+                break;
+            case OPCODES::GETPC:
+                ParseOpcode(full_opcode, "GETPC", new FieldPartyInstruction(), 0, "NBB");
+                break;
+            case OPCODES::PRTYP:
+                ParseOpcode(full_opcode, "PRTYP", new FieldPartyInstruction(), 0, "B");
+                break;
+            case OPCODES::PRTYM:
+                ParseOpcode(full_opcode, "PRTYM", new FieldPartyInstruction(), 0, "B");
+                break;
+            case OPCODES::PRTYE:
+                ParseOpcode(full_opcode, "PRTYE", new FieldPartyInstruction(), 0, "BBB");
+                break;
+            case OPCODES::MMBUD:
+                ParseOpcode(full_opcode, "MMBUD", new FieldPartyInstruction(), 0, "BB");
+                break;
+            case OPCODES::MMBLK:
+                ParseOpcode(full_opcode, "MMBLK", new FieldPartyInstruction(), 0, "B");
+                break;
+            case OPCODES::MMBUK:
+                ParseOpcode(full_opcode, "MMBUK", new FieldPartyInstruction(), 0, "B");
+                break;
+
+            // Model
+            case OPCODES::JOIN:
+                ParseOpcode(full_opcode, "JOIN", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::SPLIT:
+                ParseOpcode(full_opcode, "SPLIT", new FieldModelInstruction(), 0, "NNNssBssBB");
+                break;
+            case OPCODES::BLINK:
+                ParseOpcode(full_opcode, "BLINK", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::KAWAI:
+                {
+                    full_opcode = 0;
+                    full_opcode = (full_opcode << 8) + OPCODES::KAWAI;
+                    int length = this->stream_->ReadU8();
+                    assert(length >= 3);
+                    std::ostringstream param_stream;
+                    for (int i = 3; i < length; ++ i) param_stream << "B";
+                    auto parameters = param_stream.str();
+                    opcode = this->stream_->ReadU8();
+                    switch (opcode){
+                        case OPCODES_KAWAI::EYETX:
+                            // Parameters were "BBBB"
+                            ParseOpcode(
+                              opcode, "EYETX", new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::TRNSP:
+                            // Parameters were "B"
+                            ParseOpcode(
+                              opcode, "TRNSP", new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::AMBNT:
+                            // Parameters were "AMBNT"
+                            ParseOpcode(
+                              opcode, "AMBNT",
+                              new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::Unknown03:
+                            ParseOpcode(
+                              opcode, "Unknown03",
+                              new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::Unknown04:
+                            ParseOpcode(
+                              opcode, "Unknown04",
+                              new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::Unknown05:
+                            ParseOpcode(
+                              opcode, "Unknown03",
+                              new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::LIGHT:
+                            ParseOpcode(
+                              opcode, "LIGHT",
+                              new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::Unknown07:
+                            ParseOpcode(
+                              opcode, "Unknown07",
+                              new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::Unknown08:
+                            ParseOpcode(
+                              opcode, "Unknown08",
+                              new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::Unknown09:
+                            ParseOpcode(
+                              opcode, "Unknown09",
+                              new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::SBOBJ:
+                            ParseOpcode(
+                              opcode, "SBOBJ", new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::Unknown0B:
+                            ParseOpcode(
+                              opcode, "Unknown0B",
+                              new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::Unknown0C:
+                            ParseOpcode(
+                              opcode, "Unknown0C", new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::SHINE:
+                            ParseOpcode(
+                              opcode, "SHINE", new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        case OPCODES_KAWAI::RESET:
+                            ParseOpcode(
+                              opcode, "RESET", new FieldModelInstruction(), 0, parameters.c_str()
+                            );
+                            break;
+                        default:
+                            throw UnknownSubOpcodeException(this->address_, opcode);
+                    }
+                    this->address_ ++;
+                    this->address_ ++;
+                    break;
+                }
+            case OPCODES::KAWIW:
+                ParseOpcode(full_opcode, "KAWIW", new FieldModelInstruction(), 0, "");
+                break;
+            case OPCODES::PMOVA:
+                ParseOpcode(full_opcode, "PMOVA", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::PDIRA:
+                ParseOpcode(full_opcode, "PDIRA", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::PTURA:
+                ParseOpcode(full_opcode, "PTURA", new FieldModelInstruction(), 0, "BBB");
+                break;
+            case OPCODES::PGTDR:
+                ParseOpcode(full_opcode, "PGTDR", new FieldModelInstruction(), 0, "NBB");
+                break;
+            case OPCODES::PXYZI:
+                ParseOpcode(full_opcode, "PXYZI", new FieldModelInstruction(), 0, "NNBBBBB");
+                break;
+            case OPCODES::TLKON:
+                ParseOpcode(full_opcode, "TLKON", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::PC:
+                ParseOpcode(full_opcode, "PC", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::opCodeCHAR:
+                ParseOpcode(full_opcode, "CHAR", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::DFANM:
+                ParseOpcode(full_opcode, "DFANM", new FieldModelInstruction(), 0, "BB");
+                break;
+            case OPCODES::ANIME1:
+                ParseOpcode(full_opcode, "ANIME1", new FieldModelInstruction(), 0, "BB");
+                break;
+            case OPCODES::VISI:
+                ParseOpcode(full_opcode, "VISI", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::XYZI:
+                ParseOpcode(full_opcode, "XYZI", new FieldModelInstruction(), 0, "NNsssw");
+                break;
+            case OPCODES::XYI:
+                ParseOpcode(full_opcode, "XYI", new FieldModelInstruction(), 0, "NNssw");
+                break;
+            case OPCODES::XYZ:
+                ParseOpcode(full_opcode, "XYZ", new FieldModelInstruction(), 0, "NNsss");
+                break;
+            case OPCODES::MOVE:
+                ParseOpcode(full_opcode, "MOVE", new FieldModelInstruction(), 0, "Nss");
+                break;
+            case OPCODES::CMOVE:
+                ParseOpcode(full_opcode, "CMOVE", new FieldModelInstruction(), 0, "Nss");
+                break;
+            case OPCODES::MOVA:
+                ParseOpcode(full_opcode, "MOVA", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::TURA:
+                ParseOpcode(full_opcode, "TURA", new FieldModelInstruction(), 0, "BBB");
+                break;
+            case OPCODES::ANIMW:
+                ParseOpcode(full_opcode, "ANIMW", new FieldModelInstruction(), 0, "");
+                break;
+            case OPCODES::FMOVE:
+                ParseOpcode(full_opcode, "FMOVE", new FieldModelInstruction(), 0, "Nss");
+                break;
+            case OPCODES::ANIME2:
+                ParseOpcode(full_opcode, "ANIME2", new FieldModelInstruction(), 0, "BB");
+                break;
+            case OPCODES::ANIM_1:
+                ParseOpcode(full_opcode, "ANIM!1", new FieldModelInstruction(), 0, "BB");
+                break;
+            case OPCODES::CANIM1:
+                ParseOpcode(full_opcode, "CANIM1", new FieldModelInstruction(), 0, "BBBB");
+                break;
+            case OPCODES::CANM_1:
+                ParseOpcode(full_opcode, "CANM!1", new FieldModelInstruction(), 0, "BBBB");
+                break;
+            case OPCODES::MSPED:
+                ParseOpcode(full_opcode, "MSPED", new FieldModelInstruction(), 0, "Nw");
+                break;
+            case OPCODES::DIR:
+                ParseOpcode(full_opcode, "DIR", new FieldModelInstruction(), 0, "BB");
+                break;
+            case OPCODES::TURNGEN:
+                ParseOpcode(full_opcode, "TURNGEN", new FieldModelInstruction(), 0, "NBBBB");
+                break;
+            case OPCODES::TURN:
+                ParseOpcode(full_opcode, "TURN", new FieldModelInstruction(), 0, "NBBBB");
+                break;
+            case OPCODES::DIRA:
+                ParseOpcode(full_opcode, "DIRA", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::GETDIR:
+                ParseOpcode(full_opcode, "GETDIR", new FieldModelInstruction(), 0, "NBB");
+                break;
+            case OPCODES::GETAXY:
+                ParseOpcode(full_opcode, "GETAXY", new FieldModelInstruction(), 0, "NBBB");
+                break;
+            case OPCODES::GETAI:
+                ParseOpcode(full_opcode, "GETAI", new FieldModelInstruction(), 0, "NBB");
+                break;
+            case OPCODES::ANIM_2:
+                ParseOpcode(full_opcode, "ANIM!2", new FieldModelInstruction(), 0, "BB");
+                break;
+            case OPCODES::CANIM2:
+                ParseOpcode(full_opcode, "CANIM2", new FieldModelInstruction(), 0, "BBBB");
+                break;
+            case OPCODES::CANM_2:
+                ParseOpcode(full_opcode, "CANM!2", new FieldModelInstruction(), 0, "BBBB");
+                break;
+            case OPCODES::ASPED:
+                ParseOpcode(full_opcode, "ASPED", new FieldModelInstruction(), 0, "Nw");
+                break;
+            case OPCODES::CC:
+                ParseOpcode(full_opcode, "CC", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::JUMP:
+                ParseOpcode(full_opcode, "JUMP", new FieldModelInstruction(), 0, "NNssww");
+                break;
+            case OPCODES::AXYZI:
+                ParseOpcode(full_opcode, "AXYZI", new FieldModelInstruction(), 0, "NNBBBBB");
+                break;
+            case OPCODES::LADER:
+                ParseOpcode(full_opcode, "LADER", new FieldModelInstruction(), 0, "NNssswBBBB");
+                break;
+            case OPCODES::OFST:
+                ParseOpcode(full_opcode, "OFST", new FieldModelInstruction(), 0, "NNBsssw");
+                break;
+            case OPCODES::OFSTW:
+                ParseOpcode(full_opcode, "OFSTW", new FieldModelInstruction(), 0, "");
+                break;
+            case OPCODES::TALKR:
+                ParseOpcode(full_opcode, "TALKR", new FieldModelInstruction(), 0, "NB");
+                break;
+            case OPCODES::SLIDR:
+                ParseOpcode(full_opcode, "SLIDR", new FieldModelInstruction(), 0, "NB");
+                break;
+            case OPCODES::SOLID:
+                ParseOpcode(full_opcode, "SOLID", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::TLKR2:
+                ParseOpcode(full_opcode, "TLKR2", new FieldModelInstruction(), 0, "Nw");
+                break;
+            case OPCODES::SLDR2:
+                ParseOpcode(full_opcode, "SLDR2", new FieldModelInstruction(), 0, "Nw");
+                break;
+            case OPCODES::CCANM:
+                ParseOpcode(full_opcode, "CCANM", new FieldModelInstruction(), 0, "BBB");
+                break;
+            case OPCODES::FCFIX:
+                ParseOpcode(full_opcode, "FCFIX", new FieldModelInstruction(), 0, "B");
+                break;
+            case OPCODES::ANIMB:
+                ParseOpcode(full_opcode, "ANIMB", new FieldModelInstruction(), 0, "");
+                break;
+            case OPCODES::TURNW:
+                ParseOpcode(full_opcode, "TURNW", new FieldModelInstruction(), 0, "");
+                break;
 
             // Walkmesh
-            CASE_OPCODE(OPCODE::SLIP, "SLIP", FieldWalkmeshInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::UC, "UC", FieldWalkmeshInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::IDLCK, "IDLCK", FieldWalkmeshInstruction, 0, "wB");
-            CASE_OPCODE(OPCODE::LINON, "LINON", FieldWalkmeshInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SLINE, "SLINE", FieldWalkmeshInstruction, 0, "NNNssssss");
-            //CASE_OPCODE(OPCODE::LINE, "LINE", FieldWalkmeshInstruction, 0, "ssssss");
-            // LINE is done like this to save opcode params to the function out params.
-            case OPCODE::LINE:
+            case OPCODES::SLIP:
+                ParseOpcode(full_opcode, "SLIP", new FieldWalkmeshInstruction(), 0, "B");
+                break;
+            case OPCODES::UC:
+                ParseOpcode(full_opcode, "UC", new FieldWalkmeshInstruction(), 0, "B");
+                break;
+            case OPCODES::IDLCK:
+                ParseOpcode(full_opcode, "IDLCK", new FieldWalkmeshInstruction(), 0, "wB");
+                break;
+            case OPCODES::LINON:
+                ParseOpcode(full_opcode, "LINON", new FieldWalkmeshInstruction(), 0, "B");
+                break;
+            case OPCODES::SLINE:
+                ParseOpcode(full_opcode, "SLINE", new FieldWalkmeshInstruction(), 0, "NNNssssss");
+                break;
+            case OPCODES::LINE:
+                // Mark function entity owner as line.
                 is_line = true;
-                full_opcode = (full_opcode << 8) + OPCODE::LINE;
-                this->_insts.push_back(new FieldWalkmeshInstruction());
-                (this->_insts.back())->_opcode = full_opcode;
-                (this->_insts.back())->_address = this->address_;
-                (this->_insts.back())->_stackChange = 0;
-                (this->_insts.back())->_name = opcodePrefix + std::string("LINE");
-                (this->_insts.back())->_codeGenData = "";
-                this->readParams((this->_insts.back()), "ssssss");
-                point_a[0] = this->_insts.back()->_params[0]->getSigned();
-                point_a[1] = this->_insts.back()->_params[1]->getSigned();
-                point_a[2] = this->_insts.back()->_params[2]->getSigned();
-                point_b[0] = this->_insts.back()->_params[3]->getSigned();
-                point_b[1] = this->_insts.back()->_params[4]->getSigned();
-                point_b[2] = this->_insts.back()->_params[5]->getSigned();
+                ParseOpcode(full_opcode, "LINE", new FieldWalkmeshInstruction(), 0, "ssssss");
+                point_a[0] = this->insts_.back()->_params[0]->getSigned();
+                point_a[1] = this->insts_.back()->_params[1]->getSigned();
+                point_a[2] = this->insts_.back()->_params[2]->getSigned();
+                point_b[0] = this->insts_.back()->_params[3]->getSigned();
+                point_b[1] = this->insts_.back()->_params[4]->getSigned();
+                point_b[2] = this->insts_.back()->_params[5]->getSigned();
                 break;
 
             // Backgnd
-            CASE_OPCODE(OPCODE::BGPDH, "BGPDH", FieldBackgroundInstruction, 0, "NBs");
-            CASE_OPCODE(OPCODE::BGSCR, "BGSCR", FieldBackgroundInstruction, 0, "NBss");
-            CASE_OPCODE(OPCODE::MPPAL, "MPPAL", FieldBackgroundInstruction, 0, "NNNBBBBBBB");
-            CASE_OPCODE(OPCODE::BGON, "BGON", FieldBackgroundInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::BGOFF, "BGOFF", FieldBackgroundInstruction, 0, "NBB");
-            CASE_OPCODE(OPCODE::BGROL, "BGROL", FieldBackgroundInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::BGROL2, "BGROL2", FieldBackgroundInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::BGCLR, "BGCLR", FieldBackgroundInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::STPAL, "STPAL", FieldBackgroundInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::LDPAL, "LDPAL", FieldBackgroundInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::CPPAL, "CPPAL", FieldBackgroundInstruction, 0, "NBBB");
-            CASE_OPCODE(OPCODE::RTPAL, "RTPAL", FieldBackgroundInstruction, 0, "NNBBBB");
-            CASE_OPCODE(OPCODE::ADPAL, "ADPAL", FieldBackgroundInstruction, 0, "NNNBBBBBB");
-            CASE_OPCODE(OPCODE::MPPAL2, "MPPAL2", FieldBackgroundInstruction, 0, "NNNBBBBBB");
-            CASE_OPCODE(OPCODE::STPLS, "STPLS", FieldBackgroundInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::LDPLS, "LDPLS", FieldBackgroundInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::CPPAL2, "CPPAL2", FieldBackgroundInstruction, 0, "BBBBBBB");
-            CASE_OPCODE(OPCODE::RTPAL2, "RTPAL2", FieldBackgroundInstruction, 0, "BBBBBBB");
-            CASE_OPCODE(OPCODE::ADPAL2, "ADPAL2", FieldBackgroundInstruction, 0, "BBBBBBBBBB");
+            case OPCODES::BGPDH:
+                ParseOpcode(full_opcode, "BGPDH", new FieldBackgroundInstruction(), 0, "NBs");
+                break;
+            case OPCODES::BGSCR:
+                ParseOpcode(full_opcode, "BGSCR", new FieldBackgroundInstruction(), 0, "NBss");
+                break;
+            case OPCODES::MPPAL:
+                ParseOpcode(full_opcode, "MPPAL", new FieldBackgroundInstruction(), 0, "NNNBBBBBBB");
+                break;
+            case OPCODES::BGON:
+                ParseOpcode(full_opcode, "BGON", new FieldBackgroundInstruction(), 0, "NBB");
+                break;
+            case OPCODES::BGOFF:
+                ParseOpcode(full_opcode, "BGOFF", new FieldBackgroundInstruction(), 0, "NBB");
+                break;
+            case OPCODES::BGROL:
+                ParseOpcode(full_opcode, "BGROL", new FieldBackgroundInstruction(), 0, "NB");
+                break;
+            case OPCODES::BGROL2:
+                ParseOpcode(full_opcode, "BGROL2", new FieldBackgroundInstruction(), 0, "NB");
+                break;
+            case OPCODES::BGCLR:
+                ParseOpcode(full_opcode, "BGCLR", new FieldBackgroundInstruction(), 0, "NB");
+                break;
+            case OPCODES::STPAL:
+                ParseOpcode(full_opcode, "STPAL", new FieldBackgroundInstruction(), 0, "NBBB");
+                break;
+            case OPCODES::LDPAL:
+                ParseOpcode(full_opcode, "LDPAL", new FieldBackgroundInstruction(), 0, "NBBB");
+                break;
+            case OPCODES::CPPAL:
+                ParseOpcode(full_opcode, "CPPAL", new FieldBackgroundInstruction(), 0, "NBBB");
+                break;
+            case OPCODES::RTPAL:
+                ParseOpcode(full_opcode, "RTPAL", new FieldBackgroundInstruction(), 0, "NNBBBB");
+                break;
+            case OPCODES::ADPAL:
+                ParseOpcode(full_opcode, "ADPAL", new FieldBackgroundInstruction(), 0, "NNNBBBBBB");
+                break;
+            case OPCODES::MPPAL2:
+                ParseOpcode(
+                  full_opcode, "MPPAL2", new FieldBackgroundInstruction(), 0, "NNNBBBBBB"
+                );
+                break;
+            case OPCODES::STPLS:
+                ParseOpcode(full_opcode, "STPLS", new FieldBackgroundInstruction(), 0, "BBBB");
+                break;
+            case OPCODES::LDPLS:
+                ParseOpcode(full_opcode, "LDPLS", new FieldBackgroundInstruction(), 0, "BBBB");
+                break;
+            case OPCODES::CPPAL2:
+                ParseOpcode(full_opcode, "CPPAL2", new FieldBackgroundInstruction(), 0, "BBBBBBB");
+                break;
+            case OPCODES::RTPAL2:
+                ParseOpcode(full_opcode, "RTPAL2", new FieldBackgroundInstruction(), 0, "BBBBBBB");
+                break;
+            case OPCODES::ADPAL2:
+                ParseOpcode(full_opcode, "ADPAL2", new FieldBackgroundInstruction(), 0, "BBBBBBBBBB");
+                break;
 
             // Camera
-            CASE_OPCODE(OPCODE::NFADE, "NFADE", FieldCameraInstruction, 0, "NNBBBBBB");
-            CASE_OPCODE(OPCODE::SHAKE, "SHAKE", FieldCameraInstruction, 0, "BBBBBBB");
-            CASE_OPCODE(OPCODE::SCRLO, "SCRLO", FieldCameraInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SCRLC, "SCRLC", FieldCameraInstruction, 0, "BBBB");
-            CASE_OPCODE(OPCODE::SCRLA, "SCRLA", FieldCameraInstruction, 0, "NwBB");
-            CASE_OPCODE(OPCODE::SCR2D, "SCR2D", FieldCameraInstruction, 0, "Nss");
-            CASE_OPCODE(OPCODE::SCRCC, "SCRCC", FieldCameraInstruction, 0, "");
-            CASE_OPCODE(OPCODE::SCR2DC, "SCR2DC", FieldCameraInstruction, 0, "NNssw");
-            CASE_OPCODE(OPCODE::SCRLW, "SCRLW", FieldCameraInstruction, 0, "");
-            CASE_OPCODE(OPCODE::SCR2DL, "SCR2DL", FieldCameraInstruction, 0, "NNssw");
-            CASE_OPCODE(OPCODE::VWOFT, "VWOFT", FieldCameraInstruction, 0, "NssB");
-            CASE_OPCODE(OPCODE::FADE, "FADE", FieldCameraInstruction, 0, "NNBBBBBB");
-            CASE_OPCODE(OPCODE::FADEW, "FADEW", FieldCameraInstruction, 0, "");
-            CASE_OPCODE(OPCODE::SCRLP, "SCRLP", FieldCameraInstruction, 0, "NwBB");
-            CASE_OPCODE(OPCODE::MVCAM, "MVCAM", FieldCameraInstruction, 0, "B");
+            case OPCODES::NFADE:
+                ParseOpcode(full_opcode, "NFADE", new FieldCameraInstruction(), 0, "NNBBBBBB");
+                break;
+            case OPCODES::SHAKE:
+                ParseOpcode(full_opcode, "SHAKE", new FieldCameraInstruction(), 0, "BBBBBBB");
+                break;
+            case OPCODES::SCRLO:
+                ParseOpcode(full_opcode, "SCRLO", new FieldCameraInstruction(), 0, "B");
+                break;
+            case OPCODES::SCRLC:
+                ParseOpcode(full_opcode, "SCRLC", new FieldCameraInstruction(), 0, "BBBB");
+                break;
+            case OPCODES::SCRLA:
+                ParseOpcode(full_opcode, "SCRLA", new FieldCameraInstruction(), 0, "NwBB");
+                break;
+            case OPCODES::SCR2D:
+                ParseOpcode(full_opcode, "SCR2D", new FieldCameraInstruction(), 0, "Nss");
+                break;
+            case OPCODES::SCRCC:
+                ParseOpcode(full_opcode, "SCRCC", new FieldCameraInstruction(), 0, "");
+                break;
+            case OPCODES::SCR2DC:
+                ParseOpcode(full_opcode, "SCR2DC", new FieldCameraInstruction(), 0, "NNssw");
+                break;
+            case OPCODES::SCRLW:
+                ParseOpcode(full_opcode, "SCRLW", new FieldCameraInstruction(), 0, "");
+                break;
+            case OPCODES::SCR2DL:
+                ParseOpcode(full_opcode, "SCR2DL", new FieldCameraInstruction(), 0, "NNssw");
+                break;
+            case OPCODES::VWOFT:
+                ParseOpcode(full_opcode, "VWOFT", new FieldCameraInstruction(), 0, "NssB");
+                break;
+            case OPCODES::FADE:
+                ParseOpcode(full_opcode, "FADE", new FieldCameraInstruction(), 0, "NNBBBBBB");
+                break;
+            case OPCODES::FADEW:
+                ParseOpcode(full_opcode, "FADEW", new FieldCameraInstruction(), 0, "");
+                break;
+            case OPCODES::SCRLP:
+                ParseOpcode(full_opcode, "SCRLP", new FieldCameraInstruction(), 0, "NwBB");
+                break;
+            case OPCODES::MVCAM:
+                ParseOpcode(full_opcode, "MVCAM", new FieldCameraInstruction(), 0, "B");
+                break;
 
             // AV
-            CASE_OPCODE(OPCODE::BGMOVIE, "BGMOVIE", FieldMediaInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::AKAO2, "AKAO2", FieldMediaInstruction, 0, "NNNBwwwww");
-            CASE_OPCODE(OPCODE::MUSIC, "MUSIC", FieldMediaInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SOUND, "SOUND", FieldMediaInstruction, 0, "NwB");
-            CASE_OPCODE(OPCODE::AKAO, "AKAO", FieldMediaInstruction, 0, "NNNBBwwww");
-            CASE_OPCODE(OPCODE::MUSVT, "MUSVT", FieldMediaInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MUSVM, "MUSVM", FieldMediaInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MULCK, "MULCK", FieldMediaInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::BMUSC, "BMUSC", FieldMediaInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::CHMPH, "CHMPH", FieldMediaInstruction, 0, "BBB");
-            CASE_OPCODE(OPCODE::PMVIE, "PMVIE", FieldMediaInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::MOVIE, "MOVIE", FieldMediaInstruction, 0, "");
-            CASE_OPCODE(OPCODE::MVIEF, "MVIEF", FieldMediaInstruction, 0, "NB");
-            CASE_OPCODE(OPCODE::FMUSC, "FMUSC", FieldMediaInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::CMUSC, "CMUSC", FieldMediaInstruction, 0, "BBBBBBB");
-            CASE_OPCODE(OPCODE::CHMST, "CHMST", FieldMediaInstruction, 0, "NB");
+            case OPCODES::BGMOVIE:
+                ParseOpcode(full_opcode, "BGMOVIE", new FieldMediaInstruction(), 0, "B");
+                break;
+            case OPCODES::AKAO2:
+                ParseOpcode(full_opcode, "AKAO2", new FieldMediaInstruction(), 0, "NNNBwwwww");
+                break;
+            case OPCODES::MUSIC:
+                ParseOpcode(full_opcode, "MUSIC", new FieldMediaInstruction(), 0, "B");
+                break;
+            case OPCODES::SOUND:
+                ParseOpcode(full_opcode, "SOUND", new FieldMediaInstruction(), 0, "NwB");
+                break;
+            case OPCODES::AKAO:
+                ParseOpcode(full_opcode, "AKAO", new FieldMediaInstruction(), 0, "NNNBBwwww");
+                break;
+            case OPCODES::MUSVT:
+                ParseOpcode(full_opcode, "MUSVT", new FieldMediaInstruction(), 0, "B");
+                break;
+            case OPCODES::MUSVM:
+                ParseOpcode(full_opcode, "MUSVM", new FieldMediaInstruction(), 0, "B");
+                break;
+            case OPCODES::MULCK:
+                ParseOpcode(full_opcode, "MULCK", new FieldMediaInstruction(), 0, "B");
+                break;
+            case OPCODES::BMUSC:
+                ParseOpcode(full_opcode, "BMUSC", new FieldMediaInstruction(), 0, "B");
+                break;
+            case OPCODES::CHMPH:
+                ParseOpcode(full_opcode, "CHMPH", new FieldMediaInstruction(), 0, "BBB");
+                break;
+            case OPCODES::PMVIE:
+                ParseOpcode(full_opcode, "PMVIE", new FieldMediaInstruction(), 0, "B");
+                break;
+            case OPCODES::MOVIE:
+                ParseOpcode(full_opcode, "MOVIE", new FieldMediaInstruction(), 0, "");
+                break;
+            case OPCODES::MVIEF:
+                ParseOpcode(full_opcode, "MVIEF", new FieldMediaInstruction(), 0, "NB");
+                break;
+            case OPCODES::FMUSC:
+                ParseOpcode(full_opcode, "FMUSC", new FieldMediaInstruction(), 0, "B");
+                break;
+            case OPCODES::CMUSC:
+                ParseOpcode(full_opcode, "CMUSC", new FieldMediaInstruction(), 0, "BBBBBBB");
+                break;
+            case OPCODES::CHMST:
+                ParseOpcode(full_opcode, "CHMST", new FieldMediaInstruction(), 0, "NB");
+                break;
 
             // Uncat
-            CASE_OPCODE(OPCODE::MPDSP, "MPDSP", FieldUncategorizedInstruction, 0, "B");
-            CASE_OPCODE(OPCODE::SETX, "SETX", FieldUncategorizedInstruction, 0, "BBBBBB");
-            CASE_OPCODE(OPCODE::GETX, "GETX", FieldUncategorizedInstruction, 0, "BBBBBB");
-            CASE_OPCODE(OPCODE::SEARCHX, "SEARCHX", FieldUncategorizedInstruction, 0, "BBBBBBBBBB");
+            case OPCODES::MPDSP:
+                ParseOpcode(full_opcode, "MPDSP", new FieldUncategorizedInstruction(), 0, "B");
+                break;
+            case OPCODES::SETX:
+                ParseOpcode(full_opcode, "SETX", new FieldUncategorizedInstruction(), 0, "BBBBBB");
+                break;
+            case OPCODES::GETX:
+                ParseOpcode(full_opcode, "GETX", new FieldUncategorizedInstruction(), 0, "BBBBBB");
+                break;
+            case OPCODES::SEARCHX:
+                ParseOpcode(full_opcode, "SEARCHX", new FieldUncategorizedInstruction(), 0, "BBBBBBBBBB");
+                break;
 
             default:
                 throw UnknownOpcodeException(this->address_, opcode);
         }
-        INC_ADDR;
+        this->address_++;
 
         // Is it within an "if" statement tracking?
-        InstPtr i = this->_insts.back();
+        InstPtr i = this->insts_.back();
         if (i->isCondJump()) exitAddrs.push_back(i->GetDestAddress());
         if (!exitAddrs.empty())
             if (i->_address == exitAddrs.back()) exitAddrs.pop_back();
-
         // Only bail if its the first RET that isn't within an "if" block.
-        if (full_opcode == OPCODE::RET && exitAddrs.empty()) return is_line;
+        if (full_opcode == OPCODES::RET && exitAddrs.empty()) return is_line;
     }
     return is_line;
 }

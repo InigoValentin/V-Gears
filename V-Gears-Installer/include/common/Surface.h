@@ -113,6 +113,4 @@ Surface* CreateSubSurface(
  * enough pixels to cover the entire surface, the rest of pixels will be NULL.
  * @return The new surface.
  */
-Surface* CreateSurfaceFrom(
-  const int width, const int height, unsigned char* pixels
-);
+Surface* CreateSurfaceFrom(const int width, const int height, unsigned char* pixels);

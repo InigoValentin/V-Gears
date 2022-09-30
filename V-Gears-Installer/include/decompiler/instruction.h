@@ -81,15 +81,6 @@ public:
 	std::string _codeGenData;       ///< String containing metadata for code generation. See the extended documentation for details.
     bool mLabelRequired = false;
 
-    /**
-     * Writes a comment to the script indicating an unimplemented opcode.
-     *
-     * @param code_gen[in|out] Code generator. The line will be added to it
-     * @param owner[in] The name of the class. Unused.
-     * @param instructions[in] The name of the instruction.
-     */
-    static void WriteTodo(CodeGenerator *code_gen, std::string owner, std::string opcode);
-
 	/**
 	 * Operator overload to output an Instruction to a std::ostream.
 	 *
@@ -188,7 +179,6 @@ public:
 	 * @param codeGen Pointer to the CodeGenerator used for code generation.
 	 */
 	virtual void ProcessInst(Function& func, ValueStack &stack, Engine *engine, CodeGenerator *codeGen) = 0;
-
 };
 
 /**

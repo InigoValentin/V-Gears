@@ -1,5 +1,4 @@
 /*
- * V-Gears
  * Copyright (C) 2022 V-Gears Team
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,92 +17,99 @@
 
 #pragma once
 
-#include "decompiler/decompiler_engine.h"
+#include "decompiler/instruction.h"
+#include "decompiler/field/FieldEngine.h"
 
-/**
- * A math instruction.
- */
-class FieldMathInstruction : public StoreInstruction{
+namespace FF7{
 
-    public:
+    /**
+     * A math instruction.
+     */
+    class FieldMathInstruction : public StoreInstruction{
 
-        /**
-         * Processes the instruction.
-         *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine. Unused.
-         * @param code_gen[in|out] Code generator.
-         */
-        virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-        ) override;
+        public:
 
-    private:
+            /**
+             * Processes the instruction.
+             *
+             * @param func[in] Function to process.
+             * @param stack[out] Function stack.
+             * @param engine[in] Engine. Unused.
+             * @param code_gen[in] Code generator.
+             */
+            virtual void ProcessInst(
+              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+            ) override;
 
-        void ProcessSaturatedPLUS(CodeGenerator* code_gen);
-        void ProcessSaturatedPLUS2(CodeGenerator* code_gen);
-        void ProcessSaturatedMINUS(CodeGenerator* code_gen);
-        void ProcessSaturatedMINUS2(CodeGenerator* code_gen);
-        void ProcessSaturatedINC(CodeGenerator* code_gen);
-        void ProcessSaturatedINC2(CodeGenerator* code_gen);
-        void ProcessSaturatedDEC(CodeGenerator* code_gen);
-        void ProcessSaturatedDEC2(CodeGenerator* code_gen);
-        void ProcessRDMSD(CodeGenerator* code_gen);
-        void ProcessSETBYTE_SETWORD(CodeGenerator* code_gen);
+        private:
 
-        /**
-         * Processes a BITON opcode.
-         *
-         * Opcode: 0x82
-         * Short name: BITON
-         * Long name: Set Bit
-         *
-         * Memory layout (4 bytes)
-         * |0x82|D/S|A|B|
-         *
-         * Arguments
-         * - const Bit[4] D: Destination bank.
-         * - const Bit[4] S: Source bank.
-         * - const UByte A: Destination address.
-         * - const UByte Bit: The number of the bit to turn on.
-         *
-         * Sets the nth bit in the "A" location, where n is a number between
-         * 0-7 supplied in B. A value of zero in B will set the least
-         * significant bit. If the Source Bank is 0 then the bit to be set is
-         * taken from "Bit". If the Source Bank is an 8 bit bank, then the bit
-         * is the address in that bank where the operand is.
-         *
-         * @param codegen[in|out] Code generator. Output lines are appended.
-         */
-        void ProcessBITON(CodeGenerator* code_gen);
+            void ProcessSaturatedPLUS(CodeGenerator* code_gen);
+            void ProcessSaturatedPLUS2(CodeGenerator* code_gen);
+            void ProcessSaturatedMINUS(CodeGenerator* code_gen);
+            void ProcessSaturatedMINUS2(CodeGenerator* code_gen);
+            void ProcessSaturatedINC(CodeGenerator* code_gen);
+            void ProcessSaturatedINC2(CodeGenerator* code_gen);
+            void ProcessSaturatedDEC(CodeGenerator* code_gen);
+            void ProcessSaturatedDEC2(CodeGenerator* code_gen);
+            void ProcessRDMSD(CodeGenerator* code_gen);
+            void ProcessSETBYTE_SETWORD(CodeGenerator* code_gen);
 
-        /**
-         * Processes a BITON opcode.
-         *
-         * Opcode: 0x83
-         * Short name: BITOFF
-         * Long name: Reset Bit
-         *
-         * Memory layout (4 bytes)
-         * |0x83|D/S|A|B|
-         *
-         * Arguments
-         * - const Bit[4] D: Destination bank.
-         * - const Bit[4] S: Source bank.
-         * - const UByte A: Destination address.
-         * - const UByte Bit: The number of the bit to turn off.
-         *
-         * Sets the nth bit in the "A" location, where n is a number between
-         * 0-7 supplied in B. A value of zero in B will reset the least
-         * significant bit. If the Source Bank is 0 then the bit to be set is
-         * taken from "Bit". If the Source Bank is an 8 bit bank, then the bit
-         * is the address in that bank where the operand is.
-         *
-         * @param codegen[in|out] Code generator. Output lines are appended.
-         */
-        void ProcessBITOFF(CodeGenerator* code_gen);
-        void ProcessPLUSx_MINUSx(CodeGenerator* code_gen, const std::string& op);
-        void ProcessINCx_DECx(CodeGenerator* code_gen, const std::string& op);
-        void ProcessRANDOM(CodeGenerator* code_gen);
-};
+            /**
+             * Processes a BITON opcode.
+             *
+             * Opcode: 0x82
+             * Short name: BITON
+             * Long name: Set Bit
+             *
+             * Memory layout (4 bytes)
+             * |0x82|D/S|A|B|
+             *
+             * Arguments
+             * - const Bit[4] D: Destination bank.
+             * - const Bit[4] S: Source bank.
+             * - const UByte A: Destination address.
+             * - const UByte Bit: The number of the bit to turn on.
+             *
+             * Sets the nth bit in the "A" location, where n is a number
+             * between 0-7 supplied in B. A value of zero in B will set the
+             * least significant bit. If the Source Bank is 0 then the bit to
+             * be set is taken from "Bit". If the Source Bank is an 8 bit
+             * bank, then the bit is the address in that bank where the
+             * operand is.
+             *
+             * @param codegen[in|out] Code generator to append lines.
+             */
+            void ProcessBITON(CodeGenerator* code_gen);
+
+            /**
+             * Processes a BITON opcode.
+             *
+             * Opcode: 0x83
+             * Short name: BITOFF
+             * Long name: Reset Bit
+             *
+             * Memory layout (4 bytes)
+             * |0x83|D/S|A|B|
+             *
+             * Arguments
+             * - const Bit[4] D: Destination bank.
+             * - const Bit[4] S: Source bank.
+             * - const UByte A: Destination address.
+             * - const UByte Bit: The number of the bit to turn off.
+             *
+             * Sets the nth bit in the "A" location, where n is a number
+             * between 0-7 supplied in B. A value of zero in B will reset the
+             * least significant bit. If the Source Bank is 0 then the bit to
+             * be set is taken from "Bit". If the Source Bank is an 8 bit
+             * bank, then the bit is the address in that bank where the
+             * operand is.
+             *
+             * @param codegen[in|out] Code generator to append lines.
+             */
+            void ProcessBITOFF(CodeGenerator* code_gen);
+            void ProcessPLUSx_MINUSx(CodeGenerator* code_gen, const std::string& op);
+            void ProcessINCx_DECx(CodeGenerator* code_gen, const std::string& op);
+            void ProcessRANDOM(CodeGenerator* code_gen);
+    };
+
+}

@@ -23,7 +23,7 @@ public:
     TestReadParameterDisassembler(std::vector<unsigned char>&& data, InstVec& insts)
         : SimpleDisassembler(insts)
     {
-        stream_ = std::make_unique<BinaryReader>(std::move(data));
+        mStream = std::make_unique<BinaryReader>(std::move(data));
     }
 
     void readParams(InstPtr inst, const char *typeString)
@@ -32,7 +32,7 @@ public:
     }
 
 
-    virtual void DoDisassemble() override final
+    virtual void doDisassemble() override final
     {
         // NOP
     }
@@ -124,7 +124,7 @@ TEST(SimpleDisassembler, readParameter_d)
 
 TEST(FF7Field, FunctionMetaData_Parse_Empty)
 {
-    FunctionMetaData meta("");
+    FF7::FunctionMetaData meta("");
     ASSERT_EQ("", meta.EntityName());
     ASSERT_EQ(false, meta.IsEnd());
     ASSERT_EQ(false, meta.IsStart());
@@ -132,7 +132,7 @@ TEST(FF7Field, FunctionMetaData_Parse_Empty)
 
 TEST(FF7Field, FunctionMetaData_Parse_Empties)
 {
-    FunctionMetaData meta("__________________");
+    FF7::FunctionMetaData meta("__________________");
     ASSERT_EQ("", meta.EntityName());
     ASSERT_EQ(false, meta.IsEnd());
     ASSERT_EQ(false, meta.IsStart());
@@ -140,7 +140,7 @@ TEST(FF7Field, FunctionMetaData_Parse_Empties)
 
 TEST(FF7Field, FunctionMetaData_Parse_Start)
 {
-    FunctionMetaData meta("start_-1_entity");
+    FF7::FunctionMetaData meta("start_-1_entity");
     ASSERT_EQ("entity", meta.EntityName());
     ASSERT_EQ(false, meta.IsEnd());
     ASSERT_EQ(true, meta.IsStart());
@@ -148,7 +148,7 @@ TEST(FF7Field, FunctionMetaData_Parse_Start)
 
 TEST(FF7Field, FunctionMetaData_Parse_End)
 {
-    FunctionMetaData meta("end_-1_entity");
+    FF7::FunctionMetaData meta("end_-1_entity");
     ASSERT_EQ("entity", meta.EntityName());
     ASSERT_EQ(true, meta.IsEnd());
     ASSERT_EQ(false, meta.IsStart());
@@ -156,7 +156,7 @@ TEST(FF7Field, FunctionMetaData_Parse_End)
 
 TEST(FF7Field, FunctionMetaData_Parse_EntityName)
 {
-    FunctionMetaData meta("end_-1_TheName");
+    FF7::FunctionMetaData meta("end_-1_TheName");
     ASSERT_EQ("TheName", meta.EntityName());
     ASSERT_EQ(true, meta.IsEnd());
     ASSERT_EQ(false, meta.IsStart());
@@ -166,7 +166,7 @@ TEST(FF7Field, FunctionMetaData_Parse_EntityName)
 
 TEST(FF7Field, FunctionMetaData_Parse_EntityNameAndId)
 {
-    FunctionMetaData meta("end_99_The_Name");
+    FF7::FunctionMetaData meta("end_99_The_Name");
     ASSERT_EQ("The_Name", meta.EntityName());
     ASSERT_EQ(99, meta.CharacterId());
 
@@ -177,7 +177,7 @@ TEST(FF7Field, FunctionMetaData_Parse_EntityNameAndId)
 
 TEST(FF7Field, FunctionMetaData_Parse_StartEnd)
 {
-    FunctionMetaData meta("start_end_-1_entity");
+    FF7::FunctionMetaData meta("start_end_-1_entity");
     ASSERT_EQ("entity", meta.EntityName());
     ASSERT_EQ(true, meta.IsEnd());
     ASSERT_EQ(true, meta.IsStart());
@@ -188,7 +188,7 @@ TEST(FF7World, DisAsm)
 {
     for (int i = 0; i < 256; i++)
     {
-        FF7::FF7WorldEngine engine(i);
+        FF7::WorldEngine engine(i);
 
 
         InstVec insts;
@@ -1159,10 +1159,10 @@ private:
         }
 
         // TODO: Handle arguments correctly, validate labels
-        const FF7::InstructionRecord* rec = it->second;
-        const char* fmt = rec->argument_format;
+        const FF7::TInstructRecord* rec = it->second;
+        const char* fmt = rec->mArgumentFormat;
 
-        // method.AddInstruction(rec->opcode, rec->opcode_size);
+        // method.AddInstruction(rec->mOpCode, rec->mOpCodeSize);
         // TODO: Flow control needs special handling
 
         while (*fmt)
@@ -1507,10 +1507,10 @@ TEST(Parser, ZeroGapIf)
 TEST(FF7Field, Asm)
 {
     DummyFormatter dummy;
-    FieldEngine eng(dummy, "test");
+    FF7::FieldEngine eng(dummy, "test");
 
     InstVec insts;
-    FieldDisassembler d(dummy, &eng, insts);
+    FF7::FieldDisassembler d(dummy, &eng, insts);
 
 
 }

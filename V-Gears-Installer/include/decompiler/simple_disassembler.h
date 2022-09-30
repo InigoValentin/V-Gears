@@ -59,8 +59,8 @@ public:
 };
 
 #define INC_ADDR this->address_++;
-#define ADD_INST(category) this->_insts.push_back(new category());
-#define LAST_INST (this->_insts.back())
+#define ADD_INST(category) this->insts_.push_back(new category());
+#define LAST_INST (this->insts_.back())
 
 #define START_OPCODES \
 	this->address_ = this->address_base_; \
@@ -97,7 +97,7 @@ public:
 		OPCODE_BODY(name, category, stackChange, params, codeGenData)\
 		OPCODE_END;
 
-#define CASE_OPCODE(val, name, category, stackChange, params) \
+#define OPCODE(val, name, category, stackChange, params) \
 	OPCODE_MD(val, name, category, stackChange, params, "")
 
 #define START_SUBOPCODE_WITH_PREFIX(val,prefix) \

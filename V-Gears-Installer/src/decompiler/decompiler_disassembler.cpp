@@ -21,7 +21,7 @@
 
 #include "decompiler/decompiler_disassembler.h"
 
-Disassembler::Disassembler(InstVec &insts) : _insts(insts) {
+Disassembler::Disassembler(InstVec &insts) : insts_(insts) {
 	address_base_ = 0;
 }
 
@@ -29,21 +29,21 @@ void Disassembler::Open(const char *filename) {
     stream_ = std::make_unique<BinaryReader>(BinaryReader::ReadAll(filename));
 }
 
-void Disassembler::DoDumpDisassembly(std::ostream &output) {
+void Disassembler::doDumpDisassembly(std::ostream &output) {
 	InstIterator inst;
-	for (inst = _insts.begin(); inst != _insts.end(); ++inst) {
+	for (inst = insts_.begin(); inst != insts_.end(); ++inst) {
 		output << *inst << "\n";
 	}
 }
 
-void Disassembler::Disassemble() {
-	if (_insts.empty()) {
+void Disassembler::disassemble() {
+	if (insts_.empty()) {
         stream_->Seek(0);
 		DoDisassemble();
 	}
 }
 
-void Disassembler::DumpDisassembly(std::ostream &output) {
-	Disassemble();
-	DoDumpDisassembly(output);
+void Disassembler::dumpDisassembly(std::ostream &output) {
+	disassemble();
+	doDumpDisassembly(output);
 }

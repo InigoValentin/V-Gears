@@ -18,67 +18,70 @@
 
 #pragma once
 
-#include "decompiler/decompiler_engine.h"
+#include "decompiler/instruction.h"
 
-/**
- * An unconditional map jump instruction.
- */
-class FieldUncondJumpInstruction : public UncondJumpInstruction{
+namespace FF7{
 
-    public:
+    /**
+     * An unconditional map jump instruction.
+     */
+    class FieldUncondJumpInstruction : public UncondJumpInstruction{
 
-        /**
-         * Constructor.
-         */
-        FieldUncondJumpInstruction();
+        public:
 
-        /**
-         * Indicates if the instruction is a function call.
-         *
-         * @return true if the instruction is a function call, false if not.
-         */
-        virtual bool IsFuncCall() const;
+            /**
+             * Constructor.
+             */
+            FieldUncondJumpInstruction();
 
-        /**
-         * Indicates if the instruction is an unconditional jump.
-         *
-         * @return true if the instruction is an unconditional jump, false if
-         * it's not.
-         */
-        virtual bool IsUncondJump() const;
+            /**
+             * Indicates if the instruction is a function call.
+             *
+             * @return true if the instruction is a function call, false if not.
+             */
+            virtual bool IsFuncCall() const;
 
-        /**
-         * Retrieves the destination address of the jump.
-         *
-         * @return The offset (number of bytes) to jump from the beginning of
-         * the instruction.
-         */
-        virtual uint32 GetDestAddress() const;
+            /**
+             * Indicates if the instruction is an unconditional jump.
+             *
+             * @return true if the instruction is an unconditional jump, false
+             * if it's not.
+             */
+            virtual bool IsUncondJump() const;
 
-        /**
-         * Processes the instruction.
-         *
-         * @param func[in] Function to process. Unused.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine. Unused.
-         * @param code_gen[in|out] Code generator.
-         */
-        virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-        ) override;
+            /**
+             * Retrieves the destination address of the jump.
+             *
+             * @return The offset (number of bytes) to jump from the beginning
+             * of the instruction.
+             */
+            virtual uint32 GetDestAddress() const;
 
-        /**
-         * Prints the instruction
-         *
-         * @param output The stream to print the instruction to.
-         * @todo Understand and document properly.
-         */
-        virtual std::ostream& Print(std::ostream &output) const override;
+            /**
+             * Processes the instruction.
+             *
+             * @param func[in] Function to process.
+             * @param stack[out] Function stack. Unused.
+             * @param engine[in] The engine. Unused
+             * @param codegen[in|out] Code generator to append lines.
+             */
+            virtual void ProcessInst(
+              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+            ) override;
 
-    private:
+            /**
+             * Prints the instruction
+             *
+             * @param[in] output The stream to print the instruction to.
+             * @return The same output.
+             */
+            virtual std::ostream& Print(std::ostream &output) const override;
 
-        /**
-         * Whether or not this is really a call to a script function.
-         */
-        bool call_;
-};
+        private:
+
+            /**
+             * Whether or not this is really a call to a script function.
+             */
+            bool is_func_call_;
+    };
+}

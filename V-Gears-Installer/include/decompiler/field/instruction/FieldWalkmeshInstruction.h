@@ -1,5 +1,4 @@
 /*
- * V-Gears
  * Copyright (C) 2022 V-Gears Team
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,65 +17,71 @@
 
 #pragma once
 
-#include "decompiler/decompiler_engine.h"
+#include "decompiler/instruction.h"
+#include "decompiler/field/FieldEngine.h"
 
-/**
- * A walkmesh instruction.
- */
-class FieldWalkmeshInstruction : public KernelCallInstruction{
+namespace FF7{
 
-    public:
+    /**
+     * A walkmesh instruction.
+     */
+    class FieldWalkmeshInstruction : public KernelCallInstruction{
 
-        /**
-         * Processes the instruction.
-         *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine. Unused.
-         * @param code_gen[in|out] Code generator.
-         */
-        virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-        ) override;
+        public:
 
-    private:
+            /**
+             * Processes the instruction.
+             *
+             * @param func[in] Function to process.
+             * @param stack[out] Function stack.
+             * @param engine[in] Engine. Unused.
+             * @param codegen[in|out] Code generator to append lines.
+             */
+            virtual void ProcessInst(
+              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+            ) override;
 
-        void ProcessUC(CodeGenerator* code_gen);
+        private:
 
-        /**
-         * Processes a LINE opcode.
-         *
-         * Opcode: 0xD0
-         * Short name: LINE
-         * Long name: Line definition
-         *
-         * Memory layout (7 bytes)
-         * |0xD0|XA|YA|ZA|XB|YB|ZB|
-         *
-         * Arguments:
-         * - const Short XA: X-coordinate of the first point of the line.
-         * - const Short YA: Y-coordinate of the first point of the line.
-         * - const Short ZA: Z-coordinate of the first point of the line.
-         * - const Short XB: X-coordinate of the second point of the line.
-         * - const Short YB: Y-coordinate of the second point of the line.
-         * - const Short ZB: Z-coordinate of the second point of the line.
-         *
-         * Defines a line on the walkmesh that, when crossed by a playable
-         * character, causes one of the entity's scripts to be executed. These
-         * are similar to the triggers in Section 8. All the lines in the
-         * current field can be turned on or off by using the LINON opcode.
-         *
-         * There are generally 6 scripts (other than the init and main) if the
-         * entity is a LINE.
-         * - script index 2 -> S1 - [OK].
-         * - script index 3 -> S2 - Move.
-         * - script index 4 -> S3 - Move.
-         * - script index 5 -> S4 - Go.
-         * - script index 6 -> S5 - Go 1x.
-         * - script index 7 -> S6 - Go away.
-         *
-         * @param codegen[in|out] Code generator. Output lines are appended.
-         * @param entity[in] The entity name.
-         */
-        void ProcessLINE(CodeGenerator* code_gen, const std::string& entity);
-};
+            void ProcessUC(CodeGenerator* code_gen);
+
+            /**
+             * Processes a LINE opcode.
+             *
+             * Opcode: 0xD0
+             * Short name: LINE
+             * Long name: Line definition
+             *
+             * Memory layout (7 bytes)
+             * |0xD0|XA|YA|ZA|XB|YB|ZB|
+             *
+             * Arguments:
+             * - const Short XA: X-coordinate of the first point of the line.
+             * - const Short YA: Y-coordinate of the first point of the line.
+             * - const Short ZA: Z-coordinate of the first point of the line.
+             * - const Short XB: X-coordinate of the second point of the line.
+             * - const Short YB: Y-coordinate of the second point of the line.
+             * - const Short ZB: Z-coordinate of the second point of the line.
+             *
+             * Defines a line on the walkmesh that, when crossed by a playable
+             * character, causes one of the entity's scripts to be executed.
+             * These are similar to the triggers in Section 8. All the lines
+             * in the current field can be turned on or off by using the LINON
+             * opcode.
+             *
+             * There are generally 6 scripts (other than the init and main) if
+             * the entity is a LINE.
+             * - script index 2 -> S1 - [OK].
+             * - script index 3 -> S2 - Move.
+             * - script index 4 -> S3 - Move.
+             * - script index 5 -> S4 - Go.
+             * - script index 6 -> S5 - Go 1x.
+             * - script index 7 -> S6 - Go away.
+             *
+             * @param codegen[in|out] Code generator to append lines.
+             * @param entity[in] The entity name.
+             */
+            void ProcessLINE(CodeGenerator* code_gen, const std::string& entity);
+    };
+
+}

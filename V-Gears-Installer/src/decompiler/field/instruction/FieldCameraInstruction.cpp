@@ -16,39 +16,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <sstream>
+#include <boost/format.hpp>
 #include "decompiler/field/instruction/FieldCameraInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FieldCameraInstruction::ProcessInst(
+void FF7::FieldCameraInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func._metadata);
     switch (_opcode){
-    case OPCODE::NFADE: ProcessNFADE(code_gen); break;
-    case OPCODE::SHAKE: WriteTodo(code_gen, md.GetEntityName(), "SHAKE"); break;
-    case OPCODE::SCRLO: WriteTodo(code_gen, md.GetEntityName(), "SCRLO"); break;
-    case OPCODE::SCRLC: WriteTodo(code_gen, md.GetEntityName(), "SCRLC"); break;
-    case OPCODE::SCR2D: ProcessSCR2D(code_gen); break;
-    case OPCODE::SCRCC: WriteTodo(code_gen, md.GetEntityName(), "SCRCC"); break;
-    case OPCODE::SCR2DC: ProcessSCR2DC(code_gen); break;
-    case OPCODE::SCRLW: WriteTodo(code_gen, md.GetEntityName(), "SCRLW"); break;
-    case OPCODE::SCR2DL: WriteTodo(code_gen, md.GetEntityName(), "SCR2DL"); break;
-    case OPCODE::VWOFT: WriteTodo(code_gen, md.GetEntityName(), "VWOFT"); break;
-    case OPCODE::FADE: ProcessFADE(code_gen); break;
-    case OPCODE::FADEW: WriteTodo(code_gen, md.GetEntityName(), "FADEW"); break;
-    case OPCODE::SCRLP: WriteTodo(code_gen, md.GetEntityName(), "SCRLP"); break;
-    case OPCODE::MVCAM: WriteTodo(code_gen, md.GetEntityName(), "MVCAM"); break;
-    case OPCODE::SCRLA: WriteTodo(code_gen, md.GetEntityName(), "SCRLA"); break;
+    case OPCODES::NFADE: ProcessNFADE(code_gen); break;
+    case OPCODES::SHAKE: code_gen->WriteTodo(md.GetEntityName(), "SHAKE"); break;
+    case OPCODES::SCRLO: code_gen->WriteTodo(md.GetEntityName(), "SCRLO"); break;
+    case OPCODES::SCRLC: code_gen->WriteTodo(md.GetEntityName(), "SCRLC"); break;
+    case OPCODES::SCR2D: ProcessSCR2D(code_gen); break;
+    case OPCODES::SCRCC: code_gen->WriteTodo(md.GetEntityName(), "SCRCC"); break;
+    case OPCODES::SCR2DC: ProcessSCR2DC(code_gen); break;
+    case OPCODES::SCRLW: code_gen->WriteTodo(md.GetEntityName(), "SCRLW"); break;
+    case OPCODES::SCR2DL: code_gen->WriteTodo(md.GetEntityName(), "SCR2DL"); break;
+    case OPCODES::VWOFT: code_gen->WriteTodo(md.GetEntityName(), "VWOFT"); break;
+    case OPCODES::FADE: ProcessFADE(code_gen); break;
+    case OPCODES::FADEW: code_gen->WriteTodo(md.GetEntityName(), "FADEW"); break;
+    case OPCODES::SCRLP: code_gen->WriteTodo(md.GetEntityName(), "SCRLP"); break;
+    case OPCODES::MVCAM: code_gen->WriteTodo(md.GetEntityName(), "MVCAM"); break;
+    case OPCODES::SCRLA: code_gen->WriteTodo(md.GetEntityName(), "SCRLA"); break;
     default:
-        code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
+        code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
           md.GetEntityName(), _address, _opcode
         ));
     }
 }
 
-void FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
+void FF7::FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
     // TODO: Not fully reversed.
     auto raw_type = _params[4]->getUnsigned();
     if (raw_type == 0){
@@ -57,16 +60,16 @@ void FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
     }
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const std::string type = raw_type == 12 ? "Fade.SUBTRACT" : "Fade.ADD";
-    const auto& r = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& r = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[5]->getUnsigned()
     );
-    const auto& g = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& g = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[6]->getUnsigned()
     );
-    const auto& b = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& b = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[2]->getUnsigned(), _params[7]->getUnsigned()
     );
-    const auto& unknown = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& unknown = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[3]->getUnsigned(), _params[8]->getUnsigned()
     );
     code_gen->AddOutputLine(
@@ -74,13 +77,13 @@ void FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
     );
 }
 
-void FieldCameraInstruction::ProcessSCR2D(CodeGenerator* code_gen){
+void FF7::FieldCameraInstruction::ProcessSCR2D(CodeGenerator* code_gen){
     // kUpScaler.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getSigned()
     );
-    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getSigned()
     );
     code_gen->AddOutputLine((
@@ -89,17 +92,17 @@ void FieldCameraInstruction::ProcessSCR2D(CodeGenerator* code_gen){
     ).str());
 }
 
-void FieldCameraInstruction::ProcessSCR2DC(CodeGenerator* code_gen){
+void FF7::FieldCameraInstruction::ProcessSCR2DC(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[4]->getSigned()
     );
-    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[5]->getSigned()
     );
-    const auto& speed = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& speed = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[3]->getUnsigned(), _params[6]->getUnsigned(),
-      FieldCodeGenerator::ValueType::Float, 30.0f
+      FF7::FieldCodeGenerator::ValueType::Float, 30.0f
     );
     code_gen->AddOutputLine((
       boost::format("background2d:scroll_to_position(%1% * 3, %2% * 3, Background2D.SMOOTH, %3%)")
@@ -107,7 +110,7 @@ void FieldCameraInstruction::ProcessSCR2DC(CodeGenerator* code_gen){
     ).str());
 }
 
-void FieldCameraInstruction::ProcessFADE(CodeGenerator* code_gen){
+void FF7::FieldCameraInstruction::ProcessFADE(CodeGenerator* code_gen){
     // TODO: not fully reversed
     auto raw_type = _params[8]->getUnsigned();
     std::string type;
@@ -123,13 +126,13 @@ void FieldCameraInstruction::ProcessFADE(CodeGenerator* code_gen){
     }
 
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& r = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& r = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[4]->getUnsigned()
     );
-    const auto& g = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& g = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[5]->getUnsigned()
     );
-    const auto& b = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& b = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[2]->getUnsigned(), _params[6]->getUnsigned()
     );
     // TODO: needs to be divided by 30.0f?

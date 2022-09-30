@@ -164,7 +164,7 @@ void CreateMaterial(
  * @param texture_y[in] Y coordinate for the texture.
  * @param bpp[in] BPP mode for the texture colour.
  * @param transparency[in] Indicates if the texture has transparencies.
- * @todo Whats the difference betwwen start_x/start_y and texture_x/texture_y?
+ * @todo What's the difference between start_x/start_y and texture_x/texture_y?
  */
 void CreateTextureFromVram(
   const Ogre::PixelBox& pixel_box, Vram* vram, const int start_x, const int start_y,
@@ -176,14 +176,13 @@ void CreateTextureFromVram(
  * Adds a texture to the list.
  *
  * @param texture[in] Texture information/
- * @param data[in] Mehs information.
+ * @param data[in] Mesh information.
  * @param textures[in|out] The texture will be added to this list.
- * @param logger[in] Custom logger to print info abou the process. It can be
+ * @param logger[in] Custom logger to print info about the process. It can be
  * NULL, but then nothing will be printed.
  */
 void AddTexture(
-  TexForGen& texture, const MeshData& data, VectorTexForGen& textures,
-  Logger* logger
+  TexForGen& texture, const MeshData& data, VectorTexForGen& textures, Logger* logger
 );
 
 /**

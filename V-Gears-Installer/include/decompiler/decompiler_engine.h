@@ -74,6 +74,7 @@ typedef std::map<uint32, Function> FuncMap;
 class Engine 
 {
 public:
+
     virtual ~Engine() = default;
 
     virtual std::unique_ptr<Disassembler> GetDisassembler(InstVec &, const std::vector<unsigned char>& )
@@ -126,7 +127,7 @@ public:
 	 *
 	 * @param variants Vector to add the supported variants to.
 	 */
-	virtual void getVariants(std::vector<std::string>&) const { };
+	virtual void GetVariants(std::vector<std::string>&) const { };
 
 	std::string _variant; ///< Engine variant to use for the script.
 
@@ -138,6 +139,7 @@ public:
 	 * @return True if pure grouping should be used, false if not.
 	 */
 	virtual bool UsePureGrouping() const { return false; }
+
 };
 
 #endif

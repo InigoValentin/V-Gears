@@ -52,6 +52,19 @@ set(HEADER_FILES
     include/decompiler/field/FieldDisassembler.h
     include/decompiler/field/FieldEngine.h
     include/decompiler/field/FieldCodeGenerator.h
+    include/decompiler/world/instruction/WorldBinaryEqualStackInstruction.h
+    include/decompiler/world/instruction/WorldCondJumpInstruction.h
+    include/decompiler/world/instruction/WorldKernelCallInstruction.h
+    include/decompiler/world/instruction/WorldLoadBankInstruction.h
+    include/decompiler/world/instruction/WorldLoadInstruction.h
+    include/decompiler/world/instruction/WorldNoOutputInstruction.h
+    include/decompiler/world/instruction/WorldStackInstruction.h
+    include/decompiler/world/instruction/WorldStoreInstruction.h
+    include/decompiler/world/instruction/WorldSubStackInstruction.h
+    include/decompiler/world/instruction/WorldUncondJumpInstruction.h
+    include/decompiler/world/WorldCodeGenerator.h
+    include/decompiler/world/WorldDisassembler.h
+    include/decompiler/world/WorldEngine.h
     include/common/scummsys.h
     include/common/BinaryReader.h
     include/common/Lzs.h
@@ -95,6 +108,19 @@ set(SOURCE_FILES
     src/decompiler/field/FieldDisassembler.cpp
     src/decompiler/field/FieldEngine.cpp
     src/decompiler/field/FieldCodeGenerator.cpp
+    src/decompiler/world/instruction/WorldBinaryEqualStackInstruction.cpp
+    src/decompiler/world/instruction/WorldCondJumpInstruction.cpp
+    src/decompiler/world/instruction/WorldKernelCallInstruction.cpp
+    src/decompiler/world/instruction/WorldLoadBankInstruction.cpp
+    src/decompiler/world/instruction/WorldLoadInstruction.cpp
+    src/decompiler/world/instruction/WorldNoOutputInstruction.cpp
+    src/decompiler/world/instruction/WorldStackInstruction.cpp
+    src/decompiler/world/instruction/WorldStoreInstruction.cpp
+    src/decompiler/world/instruction/WorldSubStackInstruction.cpp
+    src/decompiler/world/instruction/WorldUncondJumpInstruction.cpp
+    src/decompiler/world/WorldCodeGenerator.cpp
+    src/decompiler/world/WorldDisassembler.cpp
+    src/decompiler/world/WorldEngine.cpp
 )
 
 # For SUDM. TODO: Add elses.

@@ -16,22 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <sstream>
+#include <boost/format.hpp>
 #include "decompiler/field/instruction/FieldUncategorizedInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FieldUncategorizedInstruction::ProcessInst(
+void FF7::FieldUncategorizedInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func._metadata);
     switch (_opcode){
-        case OPCODE::MPDSP: WriteTodo(code_gen, md.GetEntityName(), "MPDSP"); break;
-        case OPCODE::SETX: WriteTodo(code_gen, md.GetEntityName(), "SETX"); break;
-        case OPCODE::GETX: WriteTodo(code_gen, md.GetEntityName(), "GETX"); break;
-        case OPCODE::SEARCHX: WriteTodo(code_gen, md.GetEntityName(), "SEARCHX"); break;
+        case OPCODES::MPDSP: code_gen->WriteTodo(md.GetEntityName(), "MPDSP"); break;
+        case OPCODES::SETX: code_gen->WriteTodo(md.GetEntityName(), "SETX"); break;
+        case OPCODES::GETX: code_gen->WriteTodo(md.GetEntityName(), "GETX"); break;
+        case OPCODES::SEARCHX: code_gen->WriteTodo(md.GetEntityName(), "SEARCHX"); break;
         default:
-            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), _address, _opcode)
             );
     }

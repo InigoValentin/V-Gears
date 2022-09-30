@@ -13,7 +13,6 @@
  * GNU General Public License for more details.
  */
 
-#include <iostream>
 #include <OgreLogManager.h>
 #include <OgreException.h>
 #include "data/VGearsFLevelFileSerializer.h"
@@ -99,23 +98,7 @@ namespace VGears{
 
     void FLevelFileSerializer::ReadFileHeader(Ogre::DataStreamPtr &stream){
         // Read version, check if its zero.
-        std::cout << "Stream data: " << std::endl;
-        //std::cout << "    AS string: " << stream->getAsString() << std::endl;
-        std::cout << "    SIZE: " << stream->size() << std::endl;
-        std::cout << "    POS : " << stream->tell() << std::endl;
-        std::cout << "    READ: " << stream->isReadable() << std::endl;
-        std::cout << "    READ: " << stream->isWriteable() << std::endl;
-        std::cout << "    MODE: " << stream->getAccessMode() << " R"<< stream->READ << " W" << stream->WRITE << std::endl;
-        std::cout << "    NAME: " << stream->getName() << std::endl;
-        //std::cout << "    NAME: " << stream->seek(0) << std::endl;
-        // stream->read(*header_.version, 2);
         ReadShort(stream, header_.version);
-        //ReadUInt16(stream, header_.version);
-        //uint8 version = 0;
-        //ReadUInt8(stream, version);
-        //header_.version = version;
-        //std::cout << "    HEADER  8: " << version << std::endl;
-        std::cout << "    HEADER 16: " << header_.version << std::endl;
         if (header_.version != 0){
             stream->close();
             OGRE_EXCEPT(

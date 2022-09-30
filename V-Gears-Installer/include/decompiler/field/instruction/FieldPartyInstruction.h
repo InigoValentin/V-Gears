@@ -1,5 +1,4 @@
 /*
- * V-Gears
  * Copyright (C) 2022 V-Gears Team
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,29 +17,34 @@
 
 #pragma once
 
-#include "decompiler/decompiler_engine.h"
+#include "decompiler/instruction.h"
+#include "decompiler/field/FieldEngine.h"
 
-/**
- * A party instruction.
- */
-class FieldPartyInstruction : public KernelCallInstruction{
+namespace FF7{
 
-    public:
+    /**
+     * A party instruction
+     */
+    class FieldPartyInstruction : public KernelCallInstruction{
 
-        /**
-         * Processes the instruction.
-         *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine. Unused
-         * @param code_gen[in|out] Code generator.
-         */
-        virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-        ) override;
+        public:
 
-    private:
+            /**
+             * Processes the instruction.
+             *
+             * @param func[in] Function to process.
+             * @param stack[out] Function stack.
+             * @param engine[in] The engine. Unused
+             * @param codegen[in|out] Code generator to append lines.
+             */
+            virtual void ProcessInst(
+              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+            ) override;
 
-        void ProcessSTITM(CodeGenerator* code_gen);
-        void ProcessPRTYE(CodeGenerator* code_gen);
-};
+        private:
+
+            void ProcessSTITM(CodeGenerator* code_gen);
+            void ProcessPRTYE(CodeGenerator* code_gen);
+    };
+
+}

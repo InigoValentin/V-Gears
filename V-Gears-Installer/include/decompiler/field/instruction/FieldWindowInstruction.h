@@ -1,5 +1,4 @@
 /*
- * V-Gears
  * Copyright (C) 2022 V-Gears Team
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,32 +17,37 @@
 
 #pragma once
 
-#include "decompiler/decompiler_engine.h"
+#include "decompiler/instruction.h"
+#include "decompiler/field/FieldEngine.h"
 
-/**
- * A window instruction.
- */
-class FieldWindowInstruction : public KernelCallInstruction{
+namespace FF7{
 
-    public:
+    /**
+     * A window instruction.
+     */
+    class FieldWindowInstruction : public KernelCallInstruction{
 
-        /**
-         * Processes the instruction.
-         *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine.
-         * @param code_gen[in|out] Code generator.
-         */
-        virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-        ) override;
+        public:
 
-    private:
+            /**
+             * Processes the instruction.
+             *
+             * @param func[in] Function to process.
+             * @param stack[out] Function stack. Unused.
+             * @param engine[in] Engine.
+             * @param codegen[in|out] Code generator to append lines.
+             */
+            virtual void ProcessInst(
+              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+            ) override;
 
-        void ProcessMESSAGE(CodeGenerator* code_gen, const std::string& script_name);
-        void ProcessMPNAM(CodeGenerator* code_gen);
-        void ProcessMENU2(CodeGenerator* code_gen);
-        void ProcessWINDOW(CodeGenerator* code_gen);
-        void ProcessWCLSE(CodeGenerator* code_gen);
-};
+        private:
+
+            void ProcessMESSAGE(CodeGenerator* code_gen, const std::string& script_name);
+            void ProcessMPNAM(CodeGenerator* code_gen);
+            void ProcessMENU2(CodeGenerator* code_gen);
+            void ProcessWINDOW(CodeGenerator* code_gen);
+            void ProcessWCLSE(CodeGenerator* code_gen);
+    };
+
+}

@@ -24,7 +24,7 @@
 SubOpcodeDisassembler::SubOpcodeDisassembler(InstVec &insts) : ::SimpleDisassembler(insts) {
 }
 
-void SubOpcodeDisassembler::DoDisassemble() {
+void SubOpcodeDisassembler::doDisassemble() {
 	START_OPCODES;
 		START_SUBOPCODE(0xFF)
 			OPCODE(0xFF, "FOO", SubOpcodeFakeInstruction, 0, "");

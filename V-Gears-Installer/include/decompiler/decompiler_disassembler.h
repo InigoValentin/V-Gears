@@ -25,8 +25,8 @@
 #include <iostream>
 #include <vector>
 
+#include "../common/BinaryReader.h"
 #include "instruction.h"
-#include "common/BinaryReader.h"
 #include "unknown_opcode_exception.h"
 #include "objectFactory.h"
 
@@ -36,7 +36,7 @@
 class Disassembler {
 protected:
 	std::unique_ptr<BinaryReader> stream_;                         ///< Used to perform file I/O.
-	InstVec &_insts;                              ///< Container for disassembled instructions.
+	InstVec &insts_;                              ///< Container for disassembled instructions.
 	uint32 address_base_;                          ///< Base address where the script starts.
 
 	/**
@@ -51,7 +51,7 @@ protected:
 	 *
 	 * @param output The std::ostream to output to.
 	 */
-	virtual void DoDumpDisassembly(std::ostream &output);
+	virtual void doDumpDisassembly(std::ostream &output);
 
 public:
 	/**
@@ -74,13 +74,13 @@ public:
 	 *
 	 * @return An std::vector containing the disassembled instructions.
 	 */
-	void Disassemble();
+	void disassemble();
 
 	/**
 	 * Outputs the disassembled code. Disassembles code if this has not already been done.
 	 *
 	 * @param output The std::ostream to output to.
 	 */
-	void DumpDisassembly(std::ostream &output);
+	void dumpDisassembly(std::ostream &output);
 };
 #endif

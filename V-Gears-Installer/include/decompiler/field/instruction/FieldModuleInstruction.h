@@ -18,100 +18,108 @@
 
 #pragma once
 
-#include "decompiler/decompiler_engine.h"
+#include "decompiler/instruction.h"
+#include "decompiler/field/FieldEngine.h"
 
-/**
- * A module instruction.
- */
-class FieldModuleInstruction : public KernelCallInstruction{
+namespace FF7{
 
-    public:
+    /**
+     * A module instruction.
+     */
+    class FieldModuleInstruction : public KernelCallInstruction{
 
-        /**
-         * Processes the instruction.
-         *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine. Unused.
-         * @param code_gen[in|out] Code generator.
-         */
-        virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-        ) override;
+        public:
 
-    private:
+            /**
+             * Processes the instruction.
+             *
+             * @param func[in] Function to process.
+             * @param stack[out] Function stack.
+             * @param engine[in] Engine. Unused.
+             * @param code_gen[in] Code generator.
+             */
+            virtual void ProcessInst(
+              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+            ) override;
 
-        /**
-         * Processes a BATTLE opcode.
-         *
-         * Opcode: 0x70
-         * Short name: BATTLE
-         * Long name: Start battle
-         *
-         * Memory layout (4 bytes)
-         * |0x70|B|N|N|
-         *
-         * Arguments
-         * - const UByte B: Bank (16-bit) to retrieve the address of the
-         * battle ID, or zero if it is given as a literal value.
-         * - const UWord N: Battle ID, or address to find ID if B is non-zero.
-         *
-         * This launches the battle module with whatever battle number is used
-         * in the argument, or the value retrieved from memory location N if B
-         * is non-zero. Battle 1, 2, and 999 (0x03E7) are debug battles.
-         *
-         * @param codegen[in|out] Code generator. Output lines are appended.
-         */
-        void ProcessBATTLE(CodeGenerator* code_gen);
+        private:
 
-        /**
-         * Processes a BTLON opcode.
-         *
-         * Opcode: 0x71
-         * Short name: BTLON
-         * Long name: Battle switch
-         *
-         * Memory layout (2 bytes)
-         * |0x71|S|
-         *
-         * Arguments
-         * - const UByte S: Switch battles on/off (0/1, respectively).
-         *
-         * Turns random encounters on or off for this field. Note that if a
-         * field does not have any Encounter Data set in its field file,
-         * battles will not occur regardless of the argument passed with this
-         * opcode.
-         *
-         * @param codegen[in|out] Code generator. Output lines are appended.
-         */
-        void ProcessBTLON(CodeGenerator* code_gen);
+            /**
+             * Processes a BATTLE opcode.
+             *
+             * Opcode: 0x70
+             * Short name: BATTLE
+             * Long name: Start battle
+             *
+             * Memory layout (4 bytes)
+             * |0x70|B|N|N|
+             *
+             * Arguments
+             * - const UByte B: Bank (16-bit) to retrieve the address of the
+             * battle ID, or zero if it is given as a literal value.
+             * - const UWord N: Battle ID, or address to find ID if B is
+             * non-zero.
+             *
+             * This launches the battle module with whatever battle number is
+             * used in the argument, or the value retrieved from memory
+             * location N if B is non-zero. Battle 1, 2, and 999 (0x03E7) are
+             * debug battles.
+             *
+             * @param codegen[in|out] Code generator to append lines.
+             */
+            void ProcessBATTLE(CodeGenerator* code_gen);
 
-        /**
-         * Processes a MAPJUMP opcode.
-         *
-         * Opcode: 0x60
-         * Short name: BTLON
-         * Long name: Change Field
-         *
-         * Memory layout (10 bytes)
-         * |0x60|I|I|X|X|Y|Y|Z|Z|D|
-         *
-         * Arguments
-         * - const UShort I: Field ID of the map to jump to.
-         * - const Short X: X-coordinate of the player on the next field.
-         * - const Short Y: Y-coordinate of the player on the next field.
-         * - const Short Z: Z-coordinate of the player on the next field.
-         * - const UByte D: Direction the character will be facing on the next
-         * field, in the standard game format.
-         *
-         * Switches fields to the one indicated by I, and places the character
-         * at the coordinates and direction specified. This is an alternative
-         * to using a gateway, and can complement their usage as it allows for
-         * more than 12 gateways by simulating their behavior through a LINE
-         * which, when crossed, executes a MAPJUMP.
-         *
-         * @param codegen[in|out] Code generator. Output lines are appended.
-         * @param func[in] Function. @todo What for?
-         */
-        void ProcessMAPJUMP(CodeGenerator* code_gen, Function& func);
-};
+            /**
+             * Processes a BTLON opcode.
+             *
+             * Opcode: 0x71
+             * Short name: BTLON
+             * Long name: Battle switch
+             *
+             * Memory layout (2 bytes)
+             * |0x71|S|
+             *
+             * Arguments
+             * - const UByte S: Switch battles on/off (0/1, respectively).
+             *
+             * Turns random encounters on or off for this field. Note that if
+             * a field does not have any Encounter Data set in its field file,
+             * battles will not occur regardless of the argument passed with
+             * this opcode.
+             *
+             * @param codegen[in|out] Code generator to append lines.
+             */
+            void ProcessBTLON(CodeGenerator* code_gen);
+
+            /**
+             * Processes a MAPJUMP opcode.
+             *
+             * Opcode: 0x60
+             * Short name: BTLON
+             * Long name: Change Field
+             *
+             * Memory layout
+             * |0x60|I|I|X|X|Y|Y|Z|Z|D|
+             *
+             * Arguments
+             * - const UShort I: Field ID of the map to jump to.
+             * - const Short X: X-coordinate of the player on the next field.
+             * - const Short Y: Y-coordinate of the player on the next field.
+             * - const Short Z: Z-coordinate of the player on the next field.
+             * - const UByte D: Direction the character will be facing on the
+             * next field, in the standard game format.
+             *
+             * Switches fields to the one indicated by I, and places the
+             * character at the coordinates and direction specified. This is
+             * an alternative to using a gateway, and can complement their
+             * usage as it allows for more than 12 gateways by simulating
+             * their behavior through a LINE which, when crossed, executes a
+             * MAPJUMP.
+             *
+             * @param codegen[in|out] Code generator to append lines.
+             * @param func[in] Function to get the spawn point from.
+             */
+            void ProcessMAPJUMP(CodeGenerator* code_gen, Function& func);
+    };
+
+}

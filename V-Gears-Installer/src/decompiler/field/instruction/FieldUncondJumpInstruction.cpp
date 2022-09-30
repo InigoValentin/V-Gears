@@ -16,43 +16,47 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <sstream>
+#include <boost/format.hpp>
 #include "decompiler/field/instruction/FieldUncondJumpInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-FieldUncondJumpInstruction::FieldUncondJumpInstruction() : call_(false) {}
+FF7::FieldUncondJumpInstruction::FieldUncondJumpInstruction() : is_func_call_(false) {}
 
-bool FieldUncondJumpInstruction::IsFuncCall() const{return call_;}
+bool FF7::FieldUncondJumpInstruction::IsFuncCall() const{return is_func_call_;}
 
-bool FieldUncondJumpInstruction::IsUncondJump() const{return !call_;}
+bool FF7::FieldUncondJumpInstruction::IsUncondJump() const{return !is_func_call_;}
 
-uint32 FieldUncondJumpInstruction::GetDestAddress() const{
+uint32 FF7::FieldUncondJumpInstruction::GetDestAddress() const{
     if (
-      static_cast<OPCODE>(_opcode) == OPCODE::JMPF
-      || static_cast<OPCODE>(_opcode) == OPCODE::JMPFL){
+      static_cast<OPCODES>(_opcode) == OPCODES::JMPF
+      || static_cast<OPCODES>(_opcode) == OPCODES::JMPFL){
         // Short or long forward jump.
         return _address + _params[0]->getUnsigned() + 1;
     }
-    // Backwards jump,  OPCODE::JMPB/L.
+    // Backwards jump,  eOpcodes::JMPB/L.
     return _address - _params[0]->getUnsigned();
 }
 
-void FieldUncondJumpInstruction::ProcessInst(
-  Function& func, ValueStack&, Engine* engine, CodeGenerator* code_gen
-){
-    switch (_opcode){
-        case OPCODE::JMPB:
-        case OPCODE::JMPBL:
-            // HACK: Hard loop will hang the game, insert a wait to yield control.
-            code_gen->AddOutputLine("-- Hack, yield control for possible inf loop");
-            code_gen->AddOutputLine("script:wait(0)");
-            break;
-    }
-}
-
-std::ostream& FieldUncondJumpInstruction::Print(std::ostream &output) const{
+std::ostream& FF7::FieldUncondJumpInstruction::Print(std::ostream &output) const{
     Instruction::Print(output);
     output << " (Jump target address: 0x" << std::hex << GetDestAddress() << std::dec << ")";
     return output;
+}
+
+
+void FF7::FieldUncondJumpInstruction::ProcessInst(
+  Function& func, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
+){
+    switch (_opcode){
+        case OPCODES::JMPB:
+        case OPCODES::JMPBL:
+            // HACK: Hard loop will hang the game, insert a wait to yield control.
+            code_gen->AddOutputLine("-- HACK: Yield control for possible infinite loop");
+            code_gen->AddOutputLine("script:wait(0)");
+            break;
+    }
 }

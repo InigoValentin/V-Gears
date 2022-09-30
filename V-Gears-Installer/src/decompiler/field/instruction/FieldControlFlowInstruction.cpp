@@ -16,18 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <sstream>
+#include <boost/format.hpp>
 #include "decompiler/field/instruction/FieldControlFlowInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FieldControlFlowInstruction::ProcessInst(
+void FF7::FF7ControlFlowInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
-    FieldEngine& eng = static_cast<FieldEngine&>(*engine);
+    FF7::FieldEngine& eng = static_cast<FF7::FieldEngine&>(*engine);
     FunctionMetaData md(func._metadata);
     switch (_opcode){
-        case OPCODE::RET:
+        case OPCODES::RET:
             // A few notes in RET.
             // - Lua requires all functions to end with a return.
             // - Lua doesn's like returns if not followed by an end.
@@ -38,22 +41,22 @@ void FieldControlFlowInstruction::ProcessInst(
             //     so it's OK not to include it here.
             if (func._name != "on_start") code_gen->AddOutputLine("do return 0 end");
             break;
-        case OPCODE::REQ: ProcessREQ(code_gen, eng); break;
-        case OPCODE::REQSW: ProcessREQSW(code_gen, eng); break;
-        case OPCODE::REQEW: ProcessREQEW(code_gen, eng); break;
-        case OPCODE::PREQ: WriteTodo(code_gen, md.GetEntityName(), "PREQ"); break;
-        case OPCODE::PRQSW: WriteTodo(code_gen, md.GetEntityName(), "PRQSW"); break;
-        case OPCODE::PRQEW: WriteTodo(code_gen, md.GetEntityName(), "PRQEW"); break;
-        case OPCODE::RETTO: ProcessRETTO(code_gen); break;
-        case OPCODE::WAIT: ProcessWAIT(code_gen); break;
+        case OPCODES::REQ: ProcessREQ(code_gen, eng); break;
+        case OPCODES::REQSW: ProcessREQSW(code_gen, eng); break;
+        case OPCODES::REQEW: ProcessREQEW(code_gen, eng); break;
+        case OPCODES::PREQ: code_gen->WriteTodo(md.GetEntityName(), "PREQ"); break;
+        case OPCODES::PRQSW: code_gen->WriteTodo(md.GetEntityName(), "PRQSW"); break;
+        case OPCODES::PRQEW: code_gen->WriteTodo(md.GetEntityName(), "PRQEW"); break;
+        case OPCODES::RETTO: ProcessRETTO(code_gen); break;
+        case OPCODES::WAIT: ProcessWAIT(code_gen); break;
         default:
-            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), _address, _opcode
             ));
     }
 }
 
-void FieldControlFlowInstruction::ProcessREQ(
+void FF7::FF7ControlFlowInstruction::ProcessREQ(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
@@ -68,7 +71,7 @@ void FieldControlFlowInstruction::ProcessREQ(
     ).str());
 }
 
-void FieldControlFlowInstruction::ProcessREQSW(
+void FF7::FF7ControlFlowInstruction::ProcessREQSW(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
@@ -83,7 +86,7 @@ void FieldControlFlowInstruction::ProcessREQSW(
     ).str());
 }
 
-void FieldControlFlowInstruction::ProcessREQEW(
+void FF7::FF7ControlFlowInstruction::ProcessREQEW(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
     try{
@@ -106,7 +109,7 @@ void FieldControlFlowInstruction::ProcessREQEW(
     }
 }
 
-void FieldControlFlowInstruction::ProcessRETTO(CodeGenerator* code_gen){
+void FF7::FF7ControlFlowInstruction::ProcessRETTO(CodeGenerator* code_gen){
     auto entity_index = _params[0]->getUnsigned();
     auto priority = _params[1]->getUnsigned();
     code_gen->AddOutputLine((
@@ -115,9 +118,8 @@ void FieldControlFlowInstruction::ProcessRETTO(CodeGenerator* code_gen){
     ).str());
 }
 
-void FieldControlFlowInstruction::ProcessWAIT(CodeGenerator* code_gen){
+void FF7::FF7ControlFlowInstruction::ProcessWAIT(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("script:wait(%1%)") % (_params[0]->getUnsigned() / 30.0f)
     ).str());
 }
-

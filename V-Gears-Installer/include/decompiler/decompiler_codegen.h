@@ -306,8 +306,8 @@ protected:
      * @param inst The instruction to process.
      */
     void ProcessInst(Function& func, InstVec& insts, const InstPtr inst);
-    void processUncondJumpInst(Function& func, InstVec& insts, const InstPtr inst);
-    void processCondJumpInst(const InstPtr inst);
+    void ProcessUncondJumpInst(Function& func, InstVec& insts, const InstPtr inst);
+    void ProcessCondJumpInst(const InstPtr inst);
 
     /**
      * Indents a string according to the current indentation level.
@@ -343,7 +343,7 @@ public:
     const ArgOrder _binOrder;  ///< Order of operands for binary operations.
     const ArgOrder _callOrder; ///< Order of operands for call arguments.
     ValueList _argList;        ///< Storage for lists of arguments to be built when processing function calls.
-    GroupPtr mCurGroup;     ///< Pointer to the group currently being processed.
+    GroupPtr cur_group_;     ///< Pointer to the group currently being processed.
 
     virtual ~CodeGenerator() { }
 
@@ -374,6 +374,17 @@ public:
     virtual void AddOutputLine(std::string s, bool unindentBefore = false, bool indentAfter = false);
 
     /**
+     * Writes a comment line indicating an unimplemented opcode.
+     *
+     * @param code_gen[in|out] The code generator.
+     * @param class_name[in] The class where the instruction is. Unused.
+     * @param instruction[in] The unimplemented instruction.
+     */
+    void WriteTodo(std::string class_name, std::string instruction){
+        AddOutputLine("-- UNIMPLMENTED INSTRUCTION: \"" + instruction + "\")");
+    }
+
+    /**
      * Generate an assignment statement.
      *
      * @param dst The variable being assigned to.
@@ -395,5 +406,5 @@ public:
      * @param c The character signifying the action to be taken.
      * @param pos The position at which c occurred in the metadata.
      */
-    virtual void processSpecialMetadata(const InstPtr inst, char c, int pos);
+    virtual void ProcessSpecialMetadata(const InstPtr inst, char c, int pos);
 };

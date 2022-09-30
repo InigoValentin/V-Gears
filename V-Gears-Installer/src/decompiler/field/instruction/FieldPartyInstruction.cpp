@@ -16,61 +16,64 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <sstream>
+#include <boost/format.hpp>
 #include "decompiler/field/instruction/FieldPartyInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FieldPartyInstruction::ProcessInst(
+void FF7::FieldPartyInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func._metadata);
     switch (_opcode){
-        case OPCODE::SPTYE: WriteTodo(code_gen, md.GetEntityName(), "SPTYE"); break;
-        case OPCODE::GTPYE: WriteTodo(code_gen, md.GetEntityName(), "GTPYE"); break;
-        case OPCODE::GOLDU: WriteTodo(code_gen, md.GetEntityName(), "GOLDU"); break;
-        case OPCODE::GOLDD: WriteTodo(code_gen, md.GetEntityName(), "GOLDD"); break;
-        case OPCODE::HMPMAX1: WriteTodo(code_gen, md.GetEntityName(), "HMPMAX1"); break;
-        case OPCODE::HMPMAX2: WriteTodo(code_gen, md.GetEntityName(), "HMPMAX2"); break;
-        case OPCODE::MHMMX: WriteTodo(code_gen, md.GetEntityName(), "MHMMX"); break;
-        case OPCODE::HMPMAX3: WriteTodo(code_gen, md.GetEntityName(), "HMPMAX3"); break;
-        case OPCODE::MPU: WriteTodo(code_gen, md.GetEntityName(), "MPU"); break;
-        case OPCODE::MPD: WriteTodo(code_gen, md.GetEntityName(), "MPD"); break;
-        case OPCODE::HPU: WriteTodo(code_gen, md.GetEntityName(), "HPU"); break;
-        case OPCODE::HPD: WriteTodo(code_gen, md.GetEntityName(), "HPD"); break;
-        case OPCODE::STITM: ProcessSTITM(code_gen); break;
-        case OPCODE::DLITM: WriteTodo(code_gen, md.GetEntityName(), "DLITM"); break;
-        case OPCODE::CKITM: WriteTodo(code_gen, md.GetEntityName(), "CKITM"); break;
-        case OPCODE::SMTRA: WriteTodo(code_gen, md.GetEntityName(), "SMTRA"); break;
-        case OPCODE::DMTRA: WriteTodo(code_gen, md.GetEntityName(), "DMTRA"); break;
-        case OPCODE::CMTRA: WriteTodo(code_gen, md.GetEntityName(), "CMTRA"); break;
-        case OPCODE::GETPC: WriteTodo(code_gen, md.GetEntityName(), "GETPC"); break;
-        case OPCODE::PRTYP: WriteTodo(code_gen, md.GetEntityName(), "PRTYP"); break;
-        case OPCODE::PRTYM: WriteTodo(code_gen, md.GetEntityName(), "PRTYM"); break;
-        case OPCODE::PRTYE: ProcessPRTYE(code_gen); break;
-        case OPCODE::MMBUD: WriteTodo(code_gen, md.GetEntityName(), "MMBUD"); break;
-        case OPCODE::MMBLK: WriteTodo(code_gen, md.GetEntityName(), "MMBLK"); break;
-        case OPCODE::MMBUK: WriteTodo(code_gen, md.GetEntityName(), "MMBUK"); break;
-        case OPCODE::CHGLD: WriteTodo(code_gen, md.GetEntityName(), "CHGLD"); break;
+        case OPCODES::SPTYE: code_gen->WriteTodo(md.GetEntityName(), "SPTYE"); break;
+        case OPCODES::GTPYE: code_gen->WriteTodo(md.GetEntityName(), "GTPYE"); break;
+        case OPCODES::GOLDU: code_gen->WriteTodo(md.GetEntityName(), "GOLDU"); break;
+        case OPCODES::GOLDD: code_gen->WriteTodo(md.GetEntityName(), "GOLDD"); break;
+        case OPCODES::HMPMAX1: code_gen->WriteTodo(md.GetEntityName(), "HMPMAX1"); break;
+        case OPCODES::HMPMAX2: code_gen->WriteTodo(md.GetEntityName(), "HMPMAX2"); break;
+        case OPCODES::MHMMX: code_gen->WriteTodo(md.GetEntityName(), "MHMMX"); break;
+        case OPCODES::HMPMAX3: code_gen->WriteTodo(md.GetEntityName(), "HMPMAX3"); break;
+        case OPCODES::MPU: code_gen->WriteTodo(md.GetEntityName(), "MPU"); break;
+        case OPCODES::MPD: code_gen->WriteTodo(md.GetEntityName(), "MPD"); break;
+        case OPCODES::HPU: code_gen->WriteTodo(md.GetEntityName(), "HPU"); break;
+        case OPCODES::HPD: code_gen->WriteTodo(md.GetEntityName(), "HPD"); break;
+        case OPCODES::STITM: ProcessSTITM(code_gen); break;
+        case OPCODES::DLITM: code_gen->WriteTodo(md.GetEntityName(), "DLITM"); break;
+        case OPCODES::CKITM: code_gen->WriteTodo(md.GetEntityName(), "CKITM"); break;
+        case OPCODES::SMTRA: code_gen->WriteTodo(md.GetEntityName(), "SMTRA"); break;
+        case OPCODES::DMTRA: code_gen->WriteTodo(md.GetEntityName(), "DMTRA"); break;
+        case OPCODES::CMTRA: code_gen->WriteTodo(md.GetEntityName(), "CMTRA"); break;
+        case OPCODES::GETPC: code_gen->WriteTodo(md.GetEntityName(), "GETPC"); break;
+        case OPCODES::PRTYP: code_gen->WriteTodo(md.GetEntityName(), "PRTYP"); break;
+        case OPCODES::PRTYM: code_gen->WriteTodo(md.GetEntityName(), "PRTYM"); break;
+        case OPCODES::PRTYE: ProcessPRTYE(code_gen); break;
+        case OPCODES::MMBUD: code_gen->WriteTodo(md.GetEntityName(), "MMBUD"); break;
+        case OPCODES::MMBLK: code_gen->WriteTodo(md.GetEntityName(), "MMBLK"); break;
+        case OPCODES::MMBUK: code_gen->WriteTodo(md.GetEntityName(), "MMBUK"); break;
+        case OPCODES::CHGLD: code_gen->WriteTodo(md.GetEntityName(), "CHGLD"); break;
         default:
-            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), _address, _opcode
             ));
     }
 }
 
-void FieldPartyInstruction::ProcessSTITM(CodeGenerator* code_gen){
+void FF7::FieldPartyInstruction::ProcessSTITM(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& item_id = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& item_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getUnsigned()
     );
-    const auto& amount = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& amount = FF7::FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
     );
     code_gen->AddOutputLine((boost::format("FFVII.add_item(%1%, %2%)") % item_id % amount).str());
 }
 
-void FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
+void FF7::FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
     FieldCodeGenerator* gc = static_cast<FieldCodeGenerator*>(code_gen);
     auto char_id_1 = gc->GetFormatter().CharName(_params[0]->getUnsigned());
     char_id_1 = (char_id_1 == "") ? "nil" : ("\"" + char_id_1 + "\"");

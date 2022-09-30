@@ -21,7 +21,7 @@
 #include "decompiler/unknown_opcode_exception.h"
 
 /**
- * REader for binary files.
+ * Reader for binary files.
  */
 class BinaryReader{
 
