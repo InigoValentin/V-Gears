@@ -23,11 +23,10 @@
 #define ENGINE_H
 
 #include "decompiler_disassembler.h"
-#include "decompiler_codegen.h"
-
 #include <set>
 #include <string>
 #include <vector>
+#include "CodeGenerator.h"
 
 /**
  * Structure representing a function.

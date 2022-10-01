@@ -18,7 +18,8 @@
 #include <boost/algorithm/string.hpp>
 #include <deque>
 #include <unordered_map>
-#include "decompiler/decompiler_codegen.h"
+
+#include "decompiler/CodeGenerator.h"
 #include "decompiler/sudm.h"
 
 namespace FF7{
@@ -306,7 +307,7 @@ namespace FF7{
             ) :
               CodeGenerator(engine, output, FIFO_ARGUMENT_ORDER, LIFO_ARGUMENT_ORDER),
               insts_(insts), formatter_(formatter)
-            {target_lang_ = std::make_unique<LuaTargetLanguage>();}
+            {target_lang_ = std::make_unique<LuaLanguage>();}
 
             /**
              * Generates the script from the instructions.

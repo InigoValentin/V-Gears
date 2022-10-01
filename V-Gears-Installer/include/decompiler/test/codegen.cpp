@@ -22,11 +22,11 @@
 
 #include "decompiler/decompiler_disassembler.h"
 #include "decompiler/graph.h"
-#include "decompiler/decompiler_codegen.h"
 #include "decompiler/scummv6/engine.h"
 
 #include <vector>
 
+#include "../CodeGenerator.h"
 #include "../ControlFlow.h"
 #define GET(vertex) (boost::get(boost::vertex_name, g, vertex))
 

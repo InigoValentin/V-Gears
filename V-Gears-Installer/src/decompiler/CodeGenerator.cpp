@@ -1,30 +1,25 @@
-/* ScummVM Tools
+/*
+ * Copyright (C) 2022 The V-Gears Team
  *
- * ScummVM Tools is the legal property of its developers, whose
- * names are too numerous to list here. Please refer to the
- * COPYRIGHT file distributed with this source distribution.
+ * This file is part of V-Gears
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
  *
- * This program is distributed in the hope that it will be useful,
+ * V-Gears is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "decompiler/decompiler_codegen.h"
 #include "decompiler/decompiler_engine.h"
 #include <algorithm>
 #include <iostream>
 #include <set>
 #include <boost/format.hpp>
+#include "decompiler/CodeGenerator.h"
+#include "decompiler/LuaLanguage.h"
 
 #define GET(vertex)    (boost::get(boost::vertex_name, _g, vertex))
 #define GET_EDGE(edge) (boost::get(boost::edge_attribute, _g, edge))
@@ -46,18 +41,18 @@ std::string CodeGenerator::ConstructFuncSignature(const Function &)
 std::string CodeGenerator::indentString(std::string s)
 {
     std::stringstream stream;
-    stream << std::string(kIndentAmount * _indentLevel, ' ') << s;
+    stream << std::string(INDENT_SPACES * _indentLevel, ' ') << s;
     return stream.str();
 }
 
-CodeGenerator::CodeGenerator(Engine *engine, std::ostream &output, ArgOrder binOrder, ArgOrder callOrder)
+CodeGenerator::CodeGenerator(Engine *engine, std::ostream &output, ARGUMENT_ORDER binOrder, ARGUMENT_ORDER callOrder)
    : _output(output),
     _binOrder(binOrder),
     _callOrder(callOrder)
 {
     _engine = engine;
     _indentLevel = 0;
-    target_lang_ = std::make_unique<CTargetLanguage>();
+    target_lang_ = std::make_unique<LuaLanguage>();
 }
 
 typedef std::pair<GraphVertex, ValueStack> DFSEntry;
@@ -196,7 +191,7 @@ void CodeGenerator::process(Function& func, InstVec& insts, GraphVertex v)
     // Check if we should add else start
     if (cur_group_->_startElse)
     {
-        AddOutputLine(target_lang_->EndBlock(ITargetLanaguge::eToElseBlock) + " " + target_lang_->Else() + " " + target_lang_->StartBlock(ITargetLanaguge::eBeginElse), true, true);
+        AddOutputLine(target_lang_->EndBlock(LuaLanguage::TO_ELSE_BLOCK) + " " + target_lang_->Else() + " " + target_lang_->StartBlock(LuaLanguage::BEGIN_ELSE), true, true);
     }
 
     // Check ingoing edges to see if we want to add any extra output
@@ -219,11 +214,11 @@ void CodeGenerator::process(Function& func, InstVec& insts, GraphVertex v)
         case kIfCondGroupType:
             if (!cur_group_->_startElse)
             {
-                AddOutputLine(target_lang_->EndBlock(ITargetLanaguge::eEndOfIf), true, false);
+                AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_IF), true, false);
             }
             break;
         case kWhileCondGroupType:
-            AddOutputLine(target_lang_->EndBlock(ITargetLanaguge::eEndOfWhile), true, false);
+            AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_WHILE), true, false);
             break;
         default:
             break;
@@ -248,7 +243,7 @@ void CodeGenerator::process(Function& func, InstVec& insts, GraphVertex v)
     {
         if (!(*elseIt)->_coalescedElse)
         {
-            AddOutputLine(target_lang_->EndBlock(ITargetLanaguge::eEndIfElseChain), true, false);
+            AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_IF_ELSE_CHAIN), true, false);
         }
     }
 }
@@ -398,18 +393,18 @@ void CodeGenerator::ProcessCondJumpInst(const InstPtr inst)
             {
                 cur_group_->_code.clear();
                 cur_group_->_coalescedElse = true;
-                s << target_lang_->EndBlock(ITargetLanaguge::eToElseBlock) << " " << target_lang_->Else() << " ";
+                s << target_lang_->EndBlock(LuaLanguage::TO_ELSE_BLOCK) << " " << target_lang_->Else() << " ";
             }
         }
         s << target_lang_->If(true) << _stack.pop()->negate() << target_lang_->If(false);
         AddOutputLine(s.str(), cur_group_->_coalescedElse, true);
         break;
     case kWhileCondGroupType:
-        s << target_lang_->WhileHeader(true) << _stack.pop()->negate() << target_lang_->WhileHeader(false) << " " << target_lang_->StartBlock(ITargetLanaguge::eBeginWhile);
+        s << target_lang_->WhileHeader(true) << _stack.pop()->negate() << target_lang_->WhileHeader(false) << " " << target_lang_->StartBlock(LuaLanguage::BEGIN_WHILE);
         AddOutputLine(s.str(), false, true);
         break;
     case kDoWhileCondGroupType:
-        s << target_lang_->EndBlock(ITargetLanaguge::eEndWhile) <<  " " << target_lang_->WhileHeader(true) << _stack.pop() << target_lang_->WhileHeader(false);
+        s << target_lang_->EndBlock(LuaLanguage::END_WHILE) <<  " " << target_lang_->WhileHeader(true) << _stack.pop() << target_lang_->WhileHeader(false);
         AddOutputLine(s.str(), true, false);
         break;
     default:

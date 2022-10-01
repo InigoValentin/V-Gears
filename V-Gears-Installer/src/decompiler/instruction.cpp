@@ -20,7 +20,8 @@
  */
 
 #include "decompiler/instruction.h"
-#include "decompiler/decompiler_codegen.h"
+
+#include "../../include/decompiler/CodeGenerator.h"
 #include "decompiler/decompiler_engine.h"
 
 bool outputStackEffect = true;

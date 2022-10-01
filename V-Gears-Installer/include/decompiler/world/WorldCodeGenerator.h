@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "decompiler/decompiler_codegen.h"
+#include "../CodeGenerator.h"
 
 namespace FF7{
 

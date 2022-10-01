@@ -22,7 +22,8 @@ set(HEADER_FILES
     include/common/DrawSkeleton.h
     include/common/Logger.h
     include/decompiler/sudm.h
-    include/decompiler/decompiler_codegen.h
+    include/decompiler/LuaLanguage.h
+    include/decompiler/CodeGenerator.h
     include/decompiler/ControlFlow.h
     include/decompiler/decompiler_disassembler.h
     include/decompiler/decompiler_engine.h
@@ -83,7 +84,8 @@ set(SOURCE_FILES
     src/common/OgreBase.cpp
     src/VGearsUtility.cpp
     src/decompiler/sudm.cpp
-    src/decompiler/decompiler_codegen.cpp
+    src/decompiler/LuaLanguage.cpp
+    src/decompiler/CodeGenerator.cpp
     src/decompiler/ControlFlow.cpp
     src/decompiler/decompiler_disassembler.cpp
     src/decompiler/graph.cpp
