@@ -27,7 +27,7 @@
 void FF7::FieldBackgroundInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     switch (_opcode){
         case OPCODES::BGPDH: code_gen->WriteTodo(md.GetEntityName(), "BGPDH");break;
         case OPCODES::BGSCR: code_gen->WriteTodo(md.GetEntityName(), "BGSCR"); break;

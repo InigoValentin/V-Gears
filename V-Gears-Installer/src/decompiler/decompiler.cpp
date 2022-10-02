@@ -21,8 +21,6 @@
 
 #include "objectFactory.h"
 
-#include "decompiler_disassembler.h"
-#include "decompiler_engine.h"
 #include "instruction.h"
 
 #include <fstream>
@@ -31,6 +29,8 @@
 #include <string>
 #include <vector>
 #include "../../include/decompiler/ControlFlow.h"
+#include "../../include/decompiler/Disassembler.h"
+#include "../../include/decompiler/Engine.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)

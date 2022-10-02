@@ -28,7 +28,7 @@ void FF7::FieldWindowInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FF7::FieldEngine& eng = static_cast<FF7::FieldEngine&>(*engine);
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     switch (_opcode){
         case OPCODES::TUTOR: code_gen->WriteTodo(md.GetEntityName(), "TUTOR"); break;
         case OPCODES::WCLS: code_gen->WriteTodo(md.GetEntityName(), "WCLS"); break;

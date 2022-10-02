@@ -15,8 +15,8 @@
 
 #pragma once
 
+#include "Engine.h"
 #include "graph.h"
-#include "decompiler_engine.h"
 
 /**
  * Class for doing code flow analysis.

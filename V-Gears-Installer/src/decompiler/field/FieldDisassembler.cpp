@@ -17,9 +17,10 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
-#include "decompiler/decompiler_engine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
+
+#include "../../../include/decompiler/Engine.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/instruction/FieldBackgroundInstruction.h"
 #include "decompiler/field/instruction/FieldCameraInstruction.h"
@@ -110,10 +111,10 @@ uint32 FF7::FieldDisassembler::GetEndOfScriptOffset(
 
 std::unique_ptr<Function> FF7::FieldDisassembler::StartFunction(size_t script_index){
     auto func = std::make_unique<Function>();
-    func->_retVal = false;
-    func->_args = 0;
-    func->_name = "script_" + std::to_string(script_index);
-    func->mStartAddr = address_;
+    func->ret_val = false;
+    func->num_args = 0;
+    func->name = "script_" + std::to_string(script_index);
+    func->start_addr = address_;
     return func;
 }
 
@@ -207,9 +208,9 @@ void FF7::FieldDisassembler::AddFunc(
     else if (is_end) meta_data = "end_";
 
     const size_t new_num_instructions = insts_.size();
-    func->mNumInstructions = new_num_instructions - old_num_instructions;
-    func->mEndAddr = insts_.back()->_address;
-    if (!func_name.empty()) func->_name = func_name;
+    func->num_instructions = new_num_instructions - old_num_instructions;
+    func->end_addr = insts_.back()->_address;
+    if (!func_name.empty()) func->name = func_name;
     if (engine_->EntityIsLine(entity_index)){
         switch (script_index){
             // main   - on_update
@@ -217,23 +218,23 @@ void FF7::FieldDisassembler::AddFunc(
             // [OK]   - on_interact
             case 1: break;
             // Move - on_enter_line
-            case 2: func->_name = "on_enter_line"; break;
+            case 2: func->name = "on_enter_line"; break;
             // Move - on_move_to_line
-            case 3: func->_name = "on_move_to_line"; break;
+            case 3: func->name = "on_move_to_line"; break;
             // Go - on_cross_line
-            case 4: func->_name = "on_cross_line"; break;
+            case 4: func->name = "on_cross_line"; break;
             // Go1x - on_cross_line
-            case 5: func->_name = "on_cross_line_once"; break;
+            case 5: func->name = "on_cross_line_once"; break;
             // GoAway - on_leave_line
-            case 6: func->_name = "on_leave_line"; break;
+            case 6: func->name = "on_leave_line"; break;
         }
     }
-    int id = FindId(func->mStartAddr, func->mEndAddr, insts_);
+    int id = FindId(func->start_addr, func->end_addr, insts_);
     // If there is no ID check if there was an ID for this entity in any of
     // its other functions and use that instead.
     if (id == -1){
-        for (auto& func : engine_->_functions){
-            FunctionMetaData func_meta_data(func.second._metadata);
+        for (auto& func : engine_->GetFunctions()){
+            FunctionMetaData func_meta_data(func.second.metadata);
             if (func_meta_data.GetEntityName() == entity_name && func_meta_data.GetCharacterId() != -1){
                 id = func_meta_data.GetCharacterId();
                 break;
@@ -241,9 +242,10 @@ void FF7::FieldDisassembler::AddFunc(
         }
     }
     meta_data += std::to_string(id) + "_" + entity_name;
-    func->_metadata = meta_data;
-    engine_->_functions[SCRIPT_ENTRY_POINT] = *func;
-    engine_->AddEntityFunction(entity_name, entity_index, func->_name, script_index);
+    func->metadata = meta_data;
+    //engine_->_functions[SCRIPT_ENTRY_POINT] = *func;
+    engine_->SetFunction(SCRIPT_ENTRY_POINT, *func);
+    engine_->AddEntityFunction(entity_name, entity_index, func->name, script_index);
     // If the entity is a line, mark it as so.
     if (is_line) engine_->MarkEntityAsLine(entity_index, true, point_a, point_b);
 }

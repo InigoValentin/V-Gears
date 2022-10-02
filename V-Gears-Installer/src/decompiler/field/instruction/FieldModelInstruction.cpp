@@ -28,7 +28,7 @@ void FF7::FieldModelInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FF7::FieldEngine& eng = static_cast<FF7::FieldEngine&>(*engine);
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     switch (_opcode){
         case OPCODES::JOIN: ProcessJOIN(code_gen); break;
         case OPCODES::SPLIT: ProcessSPLIT(code_gen); break;

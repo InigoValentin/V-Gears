@@ -13,12 +13,13 @@
  * GNU General Public License for more details.
  */
 
-#include "decompiler/decompiler_engine.h"
 #include <algorithm>
 #include <iostream>
 #include <set>
 #include <boost/format.hpp>
 #include "decompiler/CodeGenerator.h"
+
+#include "../../include/decompiler/Engine.h"
 #include "decompiler/LuaLanguage.h"
 
 #define GET(vertex)    (boost::get(boost::vertex_name, graph_, vertex))
@@ -162,7 +163,7 @@ void CodeGenerator::ProcessUncondJumpInst(Function& function, InstVec& insts, co
                             // and its an uncond jump.
                             if (
                               cur_group_->_type == kDoWhileCondGroupType
-                              && inst->_address == function.mEndAddr
+                              && inst->_address == function.end_addr
                               && inst->IsUncondJump()
                             ){
                                 print_jump = false;
@@ -256,16 +257,18 @@ typedef std::pair<GraphVertex, ValueStack> DFSEntry;
 void CodeGenerator::GeneratePass(InstVec& insts, const Graph& graph){
     graph_ = graph;
     for (
-      FuncMap::iterator fn = engine_->_functions.begin(); fn != engine_->_functions.end(); ++ fn
+      FuncMap::iterator fn = engine_->GetFunctions().begin();
+      fn != engine_->GetFunctions().end();
+      ++ fn
     ){
         while (!stack_.empty()) stack_.pop();
-        GraphVertex entry_point = fn->second._v;
+        GraphVertex entry_point = fn->second.vertex;
         std::string func_signature = ConstructFuncSignature(fn->second);
         // Write the function start.
         bool print_func_signature = !func_signature.empty();
         if (print_func_signature){
             cur_group_ = GET(entry_point);
-            if (!(fn == engine_->_functions.begin())) AddOutputLine("");
+            if (!(fn == engine_->GetFunctions().begin())) AddOutputLine("");
             OnBeforeStartFunction(fn->second);
             AddOutputLine(func_signature, false, true);
             OnStartFunction(fn->second);

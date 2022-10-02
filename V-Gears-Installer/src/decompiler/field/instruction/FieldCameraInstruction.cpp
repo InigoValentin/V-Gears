@@ -27,7 +27,7 @@
 void FF7::FieldCameraInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     switch (_opcode){
     case OPCODES::NFADE: ProcessNFADE(code_gen); break;
     case OPCODES::SHAKE: code_gen->WriteTodo(md.GetEntityName(), "SHAKE"); break;

@@ -27,7 +27,7 @@
 void FF7::FieldWalkmeshInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     switch (_opcode){
         case OPCODES::SLIP: code_gen->WriteTodo(md.GetEntityName(), "SLIP"); break;
         case OPCODES::UC: ProcessUC(code_gen); break;

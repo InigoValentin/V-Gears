@@ -28,7 +28,7 @@ void FF7::FieldMathInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     switch (_opcode){
         case OPCODES::PLUS_: ProcessSaturatedPLUS(code_gen); break;
         case OPCODES::PLUS2_: ProcessSaturatedPLUS2(code_gen); break;

@@ -22,7 +22,7 @@ FF7::WorldCodeGenerator::WorldCodeGenerator(Engine *engine, std::ostream &output
 
 std::string FF7::WorldCodeGenerator::ConstructFuncSignature(const Function& function){
     // TODO: Implement.
-    return function._name + " = function(self)";
+    return function.name + " = function(self)";
 }
 
 const InstPtr FF7::WorldCodeGenerator::FindFirstCall(){

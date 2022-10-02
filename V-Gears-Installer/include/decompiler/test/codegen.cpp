@@ -20,7 +20,6 @@
  */
 
 
-#include "decompiler/decompiler_disassembler.h"
 #include "decompiler/graph.h"
 #include "decompiler/scummv6/engine.h"
 
@@ -28,6 +27,7 @@
 
 #include "../CodeGenerator.h"
 #include "../ControlFlow.h"
+#include "../Disassembler.h"
 #define GET(vertex) (boost::get(boost::vertex_name, g, vertex))
 
 #include <streambuf>

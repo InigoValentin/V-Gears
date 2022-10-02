@@ -65,7 +65,11 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine): insts_(insts),engine_(
     // Automatically add a function if we're not supposed to look for more functions
     // and no functions are defined.
     // This avoids a special case for when no real functions exist in the script.
-    if (engine_._functions.empty()){
+    if (engine_.GetFunctions().empty()){
+        /*engine_.SetFunction(
+          (*insts.begin())->_address,
+          Function((*insts.begin())->_address, (insts.back())->_address)
+        );*/
         engine_._functions[(*insts.begin())->_address]= Function(
           (*insts.begin())->_address, (insts.back())->_address
         );
@@ -80,8 +84,11 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine): insts_(insts),engine_(
         PUT_ID(cur, id);
         id ++;
         // Add reference to vertex if function starts here.
-        if (engine_._functions.find((*it)->_address) != engine_._functions.end())
-            engine_._functions[(*it)->_address]._v = cur;
+        /*if (engine_.GetFunctions().find((*it)->_address) != engine_.GetFunctions().end())
+            engine_.GetFunctions()[(*it)->_address].vertex = cur;*/
+        if (engine_._functions.find((*it)->_address) != engine_._functions.end()){
+            engine_._functions[(*it)->_address].vertex = cur;
+        }
         prev = GET(cur);
     }
     // Add regular edges.
@@ -90,7 +97,8 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine): insts_(insts),engine_(
     bool add_edge = false;
     prev = NULL;
     for (InstIterator it = insts.begin(); it != insts.end(); ++it){
-        if (engine_._functions.find((*it)->_address) != engine_._functions.end()) add_edge = false;
+        if (engine_.GetFunctions().find((*it)->_address) != engine_.GetFunctions().end())
+            add_edge = false;
         GraphVertex cur = Find(it);
         if (add_edge){
             GraphEdge e = boost::add_edge(last, cur, graph_).first;
@@ -184,16 +192,24 @@ void ControlFlow::SetStackLevel(GraphVertex graph, int level){
 
 void ControlFlow::CreateGroups(){
     if (
-      !engine_._functions.empty() && GET(engine_._functions.begin()->second._v)->_stackLevel != -1
+      !engine_.GetFunctions().empty()
+      //&& GET(engine_.GetFunctions().begin()->second.GetVertex())->_stackLevel != -1
+      //&& GET(engine_.GetFunctions().begin()->second.vertex_)->_stackLevel != -1
+      && GET(engine_._functions.begin()->second.vertex)->_stackLevel != -1
     ){
         return;
     }
 
-    for (FuncMap::iterator fn = engine_._functions.begin(); fn != engine_._functions.end(); ++ fn)
-        SetStackLevel(fn->second._v, 0);
+    for (
+      FuncMap::iterator fn = engine_._functions.begin();
+      fn != engine_._functions.end();
+      ++ fn
+    ){
+        SetStackLevel(fn->second.vertex, 0);
+    }
     ConstInstIterator cur_inst, next_inst;
     next_inst = insts_.begin();
-    next_inst++;
+    next_inst ++;
     int stack_level = 0;
     int expected_stack_level = 0;
     for (cur_inst = insts_.begin(); next_inst != insts_.end(); ++ cur_inst, ++ next_inst){
@@ -317,7 +333,7 @@ void ControlFlow::DetectWhile(){
         if (out_degree(*v, graph_) == 2 && gr->_type == kNormalGroupType){
             InEdgeRange ier = boost::in_edges(*v, graph_);
             bool is_while = false;
-            for (InEdgeIterator e = ier.first; e != ier.second; ++e){
+            for (InEdgeIterator e = ier.first; e != ier.second; ++ e){
                 GroupPtr source_gr = GET(boost::source(*e, graph_));
                 // Block has ingoing edge from block later in the
                 // code that isn't a do-while condition.

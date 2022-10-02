@@ -20,7 +20,8 @@
 
 #include <string>
 #include <vector>
-#include "decompiler/decompiler_engine.h"
+
+#include "../Engine.h"
 
 namespace FF7{
 

@@ -27,7 +27,7 @@
 void FF7::FieldUncategorizedInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     switch (_opcode){
         case OPCODES::MPDSP: code_gen->WriteTodo(md.GetEntityName(), "MPDSP"); break;
         case OPCODES::SETX: code_gen->WriteTodo(md.GetEntityName(), "SETX"); break;

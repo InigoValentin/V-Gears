@@ -93,7 +93,7 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
       ++ function
     ){
         InstVec body;
-        for (size_t i = 0; i < function->second.mNumInstructions; ++ i, ++ instruction)
+        for (size_t i = 0; i < function->second.num_instructions; ++ i, ++ instruction)
             body.push_back(*instruction);
         functions_with_bodies.push_back(std::pair<Function&, InstVec> {function->second, body});
     }
@@ -163,18 +163,18 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
             }
             else if ((*instruction)->IsUncondJump()){
                 // If destination address is outside the functions, turn goto into a return.
-                if ((*instruction)->GetDestAddress() > function->first.mEndAddr){
+                if ((*instruction)->GetDestAddress() > function->first.end_addr){
                     AddOutputLine(
                       "-- Overflowed jump to "
                       + (boost::format("0x%1$X") % (*instruction)->GetDestAddress()).str()
                       + " (last address in function is "
-                      + (boost::format("0x%1$X)") % function->first.mEndAddr).str()
+                      + (boost::format("0x%1$X)") % function->first.end_addr).str()
                     );
                     AddOutputLine("do return 0 end");
                 }
                 // Prevent backward jumps in the on_start script.
                 else if (
-                  "on_start" == function->first._name
+                  "on_start" == function->first.name
                   && (*instruction)->GetDestAddress() <= (*instruction)->_address
                 ){
                     AddOutputLine("-- No infinite loops in the on_start script.");
@@ -217,20 +217,20 @@ float FF7::FieldCodeGenerator::GetScaleFactor() const
 {return static_cast<FieldEngine*>(engine_)->GetScaleFactor();}
 
 void FF7::FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
-    FunctionMetaData meta_data(function._metadata);
+    FunctionMetaData meta_data(function.metadata);
     if (meta_data.IsStart()){
         AddOutputLine("EntityContainer[\"" + meta_data.GetEntityName() + "\"] = {", false, true);
         if (meta_data.GetCharacterId() != -1)
             AddOutputLine(meta_data.GetEntityName() + " = nil,\n");
     }
-    const auto comment = formatter_.FunctionComment(meta_data.GetEntityName(), function._name);
+    const auto comment = formatter_.FunctionComment(meta_data.GetEntityName(), function.name);
     if (!comment.empty()) AddOutputLine("-- " + comment);
 }
 
 void FF7::FieldCodeGenerator::OnStartFunction(const Function& func){
     AddOutputLine("--[[");
     for (const auto& inst : insts_){
-        if (inst->_address >= func.mStartAddr && inst->_address <= func.mEndAddr){
+        if (inst->_address >= func.start_addr && inst->_address <= func.end_addr){
             std::stringstream output;
             output << inst;
             AddOutputLine(output.str());
@@ -238,7 +238,7 @@ void FF7::FieldCodeGenerator::OnStartFunction(const Function& func){
     }
     AddOutputLine("]]\n");
     // TODO: If this hack is needed, maybe it can just be added to the "Direcor" entity.
-    if (func._name == "on_start" || func._name == "init"){
+    if (func.name == "on_start" || func.name == "init"){
         AddOutputLine("-- HACK ensure camera follows cloud, fix in engine properly later");
         AddOutputLine("background2d:autoscroll_to_entity(entity_manager:get_entity(\"Cloud\"))");
     }
@@ -248,15 +248,15 @@ void FF7::FieldCodeGenerator::OnEndFunction(const Function& function){
     // End function.
     AddOutputLine("end,", true, false);
     // End class?
-    FunctionMetaData meta_data(function._metadata);
+    FunctionMetaData meta_data(function.metadata);
     if (meta_data.IsEnd()) AddOutputLine("}\n\n\n", true, false);
     else AddOutputLine("\n");
 }
 
 std::string FF7::FieldCodeGenerator::ConstructFuncSignature(const Function &function){
     // Generate name
-    FunctionMetaData meta_data(function._metadata);
-    return formatter_.FunctionName(meta_data.GetEntityName(), function._name) + " = function(self)";
+    FunctionMetaData meta_data(function.metadata);
+    return formatter_.FunctionName(meta_data.GetEntityName(), function.name) + " = function(self)";
 }
 
 bool FF7::FieldCodeGenerator::OutputOnlyRequiredLabels() const{return true;}

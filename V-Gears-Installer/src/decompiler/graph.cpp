@@ -20,12 +20,13 @@
  */
 
 #include "decompiler/graph.h"
-#include "decompiler/decompiler_engine.h"
+
+#include "../../include/decompiler/Engine.h"
 
 void GraphProperties::operator()(std::ostream& out) const {
 	out << "node [shape=record]" << std::endl;
-	for (FuncMap::iterator fn = _engine->_functions.begin(); fn != _engine->_functions.end(); ++fn) {
-		int index = (boost::get(boost::vertex_index, *_g, fn->second._v));
+	for (FuncMap::iterator fn = _engine->GetFunctions().begin(); fn != _engine->GetFunctions().end(); ++fn) {
+		int index = (boost::get(boost::vertex_index, *_g, fn->second.vertex));
 		out << "XXX" << index << " [shape=none, label=\"\", height=0]" << std::endl;
 		out << "XXX" << index << " -> " << index << std::endl;
 	}

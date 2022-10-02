@@ -25,8 +25,9 @@ set(HEADER_FILES
     include/decompiler/LuaLanguage.h
     include/decompiler/CodeGenerator.h
     include/decompiler/ControlFlow.h
-    include/decompiler/decompiler_disassembler.h
-    include/decompiler/decompiler_engine.h
+    include/decompiler/Disassembler.h
+    include/decompiler/Engine.h
+    include/decompiler/Function.h
     include/decompiler/graph.h
     include/decompiler/instruction.h
     include/decompiler/objectFactory.h
@@ -87,7 +88,9 @@ set(SOURCE_FILES
     src/decompiler/LuaLanguage.cpp
     src/decompiler/CodeGenerator.cpp
     src/decompiler/ControlFlow.cpp
-    src/decompiler/decompiler_disassembler.cpp
+    src/decompiler/Disassembler.cpp
+    src/decompiler/Engine.cpp
+    src/decompiler/Function.cpp
     src/decompiler/graph.cpp
     src/decompiler/instruction.cpp
     src/decompiler/simple_disassembler.cpp

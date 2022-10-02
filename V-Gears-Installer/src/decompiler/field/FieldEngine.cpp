@@ -148,7 +148,7 @@ std::map<std::string, int> FF7::FieldEngine::GetEntities() const{
     std::map<std::string, int> r;
     for (auto& f : _functions){
         const Function& func = f.second;
-        FF7::FunctionMetaData meta(func._metadata);
+        FF7::FunctionMetaData meta(func.metadata);
         auto it = r.find(meta.GetEntityName());
         if (it != std::end(r)){
             // Try to find a function in this entity has that has a char id.
@@ -174,7 +174,7 @@ std::vector<SUDM::FF7::Field::FieldEntity> FF7::FieldEngine::GetEntityList() con
             std::map<std::string, int> r;
             for (auto& f : _functions){
                 const Function& func = f.second;
-                FF7::FunctionMetaData meta(func._metadata);
+                FF7::FunctionMetaData meta(func.metadata);
                 if (meta.GetEntityName() == ent.name){
                     ent.char_id = meta.GetCharacterId();
                     break;
@@ -243,11 +243,11 @@ void FF7::FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph gr
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
             // Is it the last instruction in the function, and is it a return statement?
-            if ((*it)->_address == func.mEndAddr){
+            if ((*it)->_address == func.end_addr){
                 if ((*it)->_opcode == OPCODES::RET){
                     // Set new end address to be before the NOP.
-                    func.mEndAddr = (*(it - 1))->_address;
-                    func.mNumInstructions --;
+                    func.end_addr =(*(it - 1))->_address;
+                    func.num_instructions --;
                     Instruction* nop = new FieldNoOperationInstruction();
                     nop->_opcode = OPCODES::NOP;
                     nop->_address = (*it)->_address;
@@ -264,11 +264,11 @@ void FF7::FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
             // Is it the last instruction in the function, a jump, and a jumping to itself?
-            if ((*it)->_address == func.mEndAddr){
+            if ((*it)->_address == func.end_addr){
                 if ((*it)->isJump() && (*it)->GetDestAddress() == (*it)->_address){
                     // Set new end address to be before the NOP
-                    func.mEndAddr = (*(it - 1))->_address;
-                    func.mNumInstructions--;
+                    func.end_addr =(*(it - 1))->_address;
+                    func.num_instructions --;
                     Instruction* nop = new FieldNoOperationInstruction();
                     nop->_opcode = OPCODES::NOP;
                     nop->_address = (*it)->_address;
@@ -284,7 +284,7 @@ void FF7::FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph graph){
     for (auto& f : _functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
-            if ((*it)->_address == func.mEndAddr){
+            if ((*it)->_address == func.end_addr){
                 // Note: This is a "best effort heuristic", so quite a few loops will
                 // still end up as goto's. This could potentially generate invalid code too.
                 if ((*it)->IsUncondJump()){
@@ -293,7 +293,7 @@ void FF7::FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph graph){
                     VertexRange vr = boost::vertices(graph);
                     for (VertexIterator v = vr.first; v != vr.second; ++ v){
                         GroupPtr gr = GET(*v);
-                        if ((*gr->start_)->_address == func.mEndAddr){
+                        if ((*gr->start_)->_address == func.end_addr){
                             // Then assume its an infinite do { } while(true) loop
                             // that wraps part of the script.
                             gr->_type = kDoWhileCondGroupType;

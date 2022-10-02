@@ -47,7 +47,7 @@ namespace SUDM{
                 ::FF7::FieldEngine engine(formatter, script_name);
                 InstVec insts;
                 auto disassembler = engine.GetDisassembler(insts, script_bytes);
-                disassembler->disassemble();
+                disassembler->Disassemble();
                 // Create control flow group.
                 auto control_flow = std::make_unique<ControlFlow>(insts, engine);
                 control_flow->CreateGroups();

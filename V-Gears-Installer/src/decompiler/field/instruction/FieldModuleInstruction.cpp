@@ -27,7 +27,7 @@
 void FF7::FieldModuleInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     switch (_opcode){
         case OPCODES::DSKCG: code_gen->WriteTodo(md.GetEntityName(), "DSKCG"); break;
         case (OPCODES::SPECIAL << 8) | OPCODES_SPECIAL::ARROW:
@@ -119,12 +119,12 @@ void FF7::FieldModuleInstruction::ProcessBTLON(CodeGenerator* code_gen){
 void FF7::FieldModuleInstruction::ProcessMAPJUMP(CodeGenerator* code_gen, Function& func){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto target_map_id = _params[0]->getUnsigned();
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     const std::string source_spawn_point_name = cg->GetFormatter().SpawnPointName(
-      target_map_id, md.GetEntityName(), func._name, _address
+      target_map_id, md.GetEntityName(), func.name, _address
     );
     cg->GetFormatter().AddSpawnPoint(
-      target_map_id, md.GetEntityName(), func._name, _address,
+      target_map_id, md.GetEntityName(), func.name, _address,
       _params[1]->getSigned(), // X
       _params[2]->getSigned(), // Y
       _params[3]->getSigned(), // Walk mesh triangle ID

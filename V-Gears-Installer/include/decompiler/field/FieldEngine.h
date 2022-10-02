@@ -18,9 +18,10 @@
 
 #pragma once
 
-#include "decompiler/decompiler_engine.h"
 #include <string>
 #include <vector>
+
+#include "../Engine.h"
 #include "decompiler/sudm.h"
 
 namespace FF7{

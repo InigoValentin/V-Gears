@@ -28,7 +28,7 @@ void FF7::FF7ControlFlowInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FF7::FieldEngine& eng = static_cast<FF7::FieldEngine&>(*engine);
-    FunctionMetaData md(func._metadata);
+    FunctionMetaData md(func.metadata);
     switch (_opcode){
         case OPCODES::RET:
             // A few notes in RET.
@@ -39,7 +39,7 @@ void FF7::FF7ControlFlowInstruction::ProcessInst(
             //     'main' return is kept, the code of 'main' is never executed.
             //     There are safeguards forfunctions without a return in the end,
             //     so it's OK not to include it here.
-            if (func._name != "on_start") code_gen->AddOutputLine("do return 0 end");
+            if (func.name != "on_start") code_gen->AddOutputLine("do return 0 end");
             break;
         case OPCODES::REQ: ProcessREQ(code_gen, eng); break;
         case OPCODES::REQSW: ProcessREQSW(code_gen, eng); break;
