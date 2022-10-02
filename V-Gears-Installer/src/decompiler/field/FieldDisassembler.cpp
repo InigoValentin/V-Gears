@@ -233,7 +233,7 @@ void FF7::FieldDisassembler::AddFunc(
     // If there is no ID check if there was an ID for this entity in any of
     // its other functions and use that instead.
     if (id == -1){
-        for (auto& func : engine_->GetFunctions()){
+        for (auto& func : engine_->functions){
             FunctionMetaData func_meta_data(func.second.metadata);
             if (func_meta_data.GetEntityName() == entity_name && func_meta_data.GetCharacterId() != -1){
                 id = func_meta_data.GetCharacterId();
@@ -243,8 +243,7 @@ void FF7::FieldDisassembler::AddFunc(
     }
     meta_data += std::to_string(id) + "_" + entity_name;
     func->metadata = meta_data;
-    //engine_->_functions[SCRIPT_ENTRY_POINT] = *func;
-    engine_->SetFunction(SCRIPT_ENTRY_POINT, *func);
+    engine_->functions[SCRIPT_ENTRY_POINT] = *func;
     engine_->AddEntityFunction(entity_name, entity_index, func->name, script_index);
     // If the entity is a line, mark it as so.
     if (is_line) engine_->MarkEntityAsLine(entity_index, true, point_a, point_b);

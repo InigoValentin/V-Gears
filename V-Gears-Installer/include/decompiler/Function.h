@@ -22,15 +22,14 @@
 /**
  * Structure representing a function.
  */
-class Function {
-    public:
+struct Function {
 
         /**
          * Constructor.
          *
          * Required for use with STL, should not be called manually.
          */
-        Function();
+        Function(): start_addr(0), end_addr(0), num_instructions(0){}
 
         /**
          * Constructor.
@@ -38,22 +37,23 @@ class Function {
          * @param start_addr[in] Address of the first instruction in the function.
          * @param end_addr[in] Address of the last instruction in the function
          */
-        Function(uint32 start_addr, uint32 end_addr);
+        Function(uint32 start_addr, uint32 end_addr):
+          start_addr(start_addr), end_addr(end_addr), num_instructions(0){}
 
         /**
          * The function starting address.
          */
-        uint32 start_addr = 0;
+        uint32 start_addr;
 
         /**
          * The function ending address.
          */
-        uint32 end_addr = 0;
+        uint32 end_addr;
 
         /**
          * Number of instructions in the function.
          */
-        uint32 num_instructions = 0;
+        uint32 num_instructions;
 
         /**
          * The name of the function.
@@ -79,7 +79,5 @@ class Function {
          * Metadata for code generation.
          */
         std::string metadata;
-
-
 
 };

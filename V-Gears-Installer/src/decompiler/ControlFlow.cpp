@@ -65,12 +65,8 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine): insts_(insts),engine_(
     // Automatically add a function if we're not supposed to look for more functions
     // and no functions are defined.
     // This avoids a special case for when no real functions exist in the script.
-    if (engine_.GetFunctions().empty()){
-        /*engine_.SetFunction(
-          (*insts.begin())->_address,
-          Function((*insts.begin())->_address, (insts.back())->_address)
-        );*/
-        engine_._functions[(*insts.begin())->_address]= Function(
+    if (engine_.functions.empty()){
+        engine_.functions[(*insts.begin())->_address]= Function(
           (*insts.begin())->_address, (insts.back())->_address
         );
     }
@@ -84,10 +80,8 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine): insts_(insts),engine_(
         PUT_ID(cur, id);
         id ++;
         // Add reference to vertex if function starts here.
-        /*if (engine_.GetFunctions().find((*it)->_address) != engine_.GetFunctions().end())
-            engine_.GetFunctions()[(*it)->_address].vertex = cur;*/
-        if (engine_._functions.find((*it)->_address) != engine_._functions.end()){
-            engine_._functions[(*it)->_address].vertex = cur;
+        if (engine_.functions.find((*it)->_address) != engine_.functions.end()){
+            engine_.functions[(*it)->_address].vertex = cur;
         }
         prev = GET(cur);
     }
@@ -97,7 +91,7 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine): insts_(insts),engine_(
     bool add_edge = false;
     prev = NULL;
     for (InstIterator it = insts.begin(); it != insts.end(); ++it){
-        if (engine_.GetFunctions().find((*it)->_address) != engine_.GetFunctions().end())
+        if (engine_.functions.find((*it)->_address) != engine_.functions.end())
             add_edge = false;
         GraphVertex cur = Find(it);
         if (add_edge){
@@ -192,17 +186,17 @@ void ControlFlow::SetStackLevel(GraphVertex graph, int level){
 
 void ControlFlow::CreateGroups(){
     if (
-      !engine_.GetFunctions().empty()
-      //&& GET(engine_.GetFunctions().begin()->second.GetVertex())->_stackLevel != -1
-      //&& GET(engine_.GetFunctions().begin()->second.vertex_)->_stackLevel != -1
-      && GET(engine_._functions.begin()->second.vertex)->_stackLevel != -1
+      !engine_.functions.empty()
+      //&& GET(engine_.functions.begin()->second.GetVertex())->_stackLevel != -1
+      //&& GET(engine_.functions.begin()->second.vertex_)->_stackLevel != -1
+      && GET(engine_.functions.begin()->second.vertex)->_stackLevel != -1
     ){
         return;
     }
 
     for (
-      FuncMap::iterator fn = engine_._functions.begin();
-      fn != engine_._functions.end();
+      FuncMap::iterator fn = engine_.functions.begin();
+      fn != engine_.functions.end();
       ++ fn
     ){
         SetStackLevel(fn->second.vertex, 0);

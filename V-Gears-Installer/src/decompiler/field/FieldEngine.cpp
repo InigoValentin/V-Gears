@@ -146,7 +146,7 @@ bool FF7::FieldEngine::UsePureGrouping() const{return false;}
 
 std::map<std::string, int> FF7::FieldEngine::GetEntities() const{
     std::map<std::string, int> r;
-    for (auto& f : _functions){
+    for (auto& f : functions){
         const Function& func = f.second;
         FF7::FunctionMetaData meta(func.metadata);
         auto it = r.find(meta.GetEntityName());
@@ -172,7 +172,7 @@ std::vector<SUDM::FF7::Field::FieldEntity> FF7::FieldEngine::GetEntityList() con
             // Get character ID.
             ent.char_id = -1;
             std::map<std::string, int> r;
-            for (auto& f : _functions){
+            for (auto& f : functions){
                 const Function& func = f.second;
                 FF7::FunctionMetaData meta(func.metadata);
                 if (meta.GetEntityName() == ent.name){
@@ -239,7 +239,7 @@ float FF7::FieldEngine::GetScaleFactor() const {return scale_factor_;}
 const std::string& FF7::FieldEngine::GetScriptName() const {return script_name_;}
 
 void FF7::FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph graph){
-    for (auto& f : _functions){
+    for (auto& f : functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
             // Is it the last instruction in the function, and is it a return statement?
@@ -260,7 +260,7 @@ void FF7::FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph gr
 }
 
 void FF7::FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph){
-    for (auto& f : _functions){
+    for (auto& f : functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
             // Is it the last instruction in the function, a jump, and a jumping to itself?
@@ -281,7 +281,7 @@ void FF7::FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph){
 }
 
 void FF7::FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph graph){
-    for (auto& f : _functions){
+    for (auto& f : functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
             if ((*it)->_address == func.end_addr){

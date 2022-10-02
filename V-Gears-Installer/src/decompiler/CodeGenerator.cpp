@@ -257,8 +257,8 @@ typedef std::pair<GraphVertex, ValueStack> DFSEntry;
 void CodeGenerator::GeneratePass(InstVec& insts, const Graph& graph){
     graph_ = graph;
     for (
-      FuncMap::iterator fn = engine_->GetFunctions().begin();
-      fn != engine_->GetFunctions().end();
+      FuncMap::iterator fn = engine_->functions.begin();
+      fn != engine_->functions.end();
       ++ fn
     ){
         while (!stack_.empty()) stack_.pop();
@@ -268,7 +268,7 @@ void CodeGenerator::GeneratePass(InstVec& insts, const Graph& graph){
         bool print_func_signature = !func_signature.empty();
         if (print_func_signature){
             cur_group_ = GET(entry_point);
-            if (!(fn == engine_->GetFunctions().begin())) AddOutputLine("");
+            if (!(fn == engine_->functions.begin())) AddOutputLine("");
             OnBeforeStartFunction(fn->second);
             AddOutputLine(func_signature, false, true);
             OnStartFunction(fn->second);

@@ -13,3 +13,20 @@
  * GNU General Public License for more details.
  */
 
+#include "decompiler/Engine.h"
+
+std::unique_ptr<Disassembler> Engine::GetDisassembler(
+  InstVec& insts, const std::vector<unsigned char>& c
+){
+    throw NotImplementedException();
+}
+
+void Engine::PostCFG(InstVec& insts, Graph graph){}
+
+bool Engine::SupportsCodeFlow() const{return true;}
+
+bool Engine::SupportsCodeGen() const{return true;}
+
+void Engine::GetVariants(std::vector<std::string>&) const{};
+
+bool Engine::UsePureGrouping() const{return false;}

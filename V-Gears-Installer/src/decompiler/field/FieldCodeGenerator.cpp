@@ -88,8 +88,8 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
     
     std::vector<std::pair<Function&, InstVec>> functions_with_bodies;
     for (
-      auto function = engine_->_functions.begin();
-      function != engine_->_functions.end();
+      auto function = engine_->functions.begin();
+      function != engine_->functions.end();
       ++ function
     ){
         InstVec body;

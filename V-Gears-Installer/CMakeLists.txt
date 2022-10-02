@@ -90,7 +90,6 @@ set(SOURCE_FILES
     src/decompiler/ControlFlow.cpp
     src/decompiler/Disassembler.cpp
     src/decompiler/Engine.cpp
-    src/decompiler/Function.cpp
     src/decompiler/graph.cpp
     src/decompiler/instruction.cpp
     src/decompiler/simple_disassembler.cpp
