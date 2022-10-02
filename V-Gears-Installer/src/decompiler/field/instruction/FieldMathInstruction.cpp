@@ -71,7 +71,7 @@ void FF7::FieldMathInstruction::ProcessInst(
                   cg->GetFormatter(), dest_bank, dest_address
                 );
                 code_gen->AddOutputLine(
-                  source + " = " + source + " % " + dest + code_gen->TargetLang().LineTerminator()
+                  source + " = " + source + " % " + dest + code_gen->GetLanguage().LineTerminator()
                 );
             }
         break;

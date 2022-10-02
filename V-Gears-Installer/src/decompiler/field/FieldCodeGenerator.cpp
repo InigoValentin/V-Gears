@@ -88,8 +88,8 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
     
     std::vector<std::pair<Function&, InstVec>> functions_with_bodies;
     for (
-      auto function = _engine->_functions.begin();
-      function != _engine->_functions.end();
+      auto function = engine_->_functions.begin();
+      function != engine_->_functions.end();
       ++ function
     ){
         InstVec body;
@@ -147,7 +147,7 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                     AddOutputLine((boost::format("::label_0x%1$X::") % label->first).str());
             }
             ValueStack stack;
-            (*instruction)->ProcessInst(function->first, stack, _engine, this);
+            (*instruction)->ProcessInst(function->first, stack, engine_, this);
             if (end_needed){
                 AddOutputLine("end -- end if", true, false);
                 end_needed = false;
@@ -201,11 +201,11 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
     }
 
     for (auto i = lines_.begin(); i != lines_.end(); ++i){
-        if (i->_unindentBefore && _indentLevel > 0){
-            _indentLevel --;
+        if (i->_unindentBefore && indent_level_ > 0){
+            indent_level_ --;
         }
-        _output << indentString(i->_line) << std::endl;
-        if (i->_indentAfter) _indentLevel++;
+        output_ << IndentString(i->_line) << std::endl;
+        if (i->_indentAfter) indent_level_++;
     }
 }
 
@@ -214,7 +214,7 @@ void FF7::FieldCodeGenerator::AddOutputLine(
 ){lines_.push_back(CodeLine(line, unindent_before, indent_after));}
 
 float FF7::FieldCodeGenerator::GetScaleFactor() const
-{return static_cast<FieldEngine*>(_engine)->GetScaleFactor();}
+{return static_cast<FieldEngine*>(engine_)->GetScaleFactor();}
 
 void FF7::FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
     FunctionMetaData meta_data(function._metadata);

@@ -126,9 +126,9 @@ void BoolNegateStackInstruction::ProcessInst(Function&, ValueStack &stack, Engin
 void BinaryOpStackInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen) {
 	ValuePtr op1 = stack.pop();
 	ValuePtr op2 = stack.pop();
-	if (codeGen->_binOrder == FIFO_ARGUMENT_ORDER)
+	if (codeGen->GetBinaryOrder() == FIFO_ARGUMENT_ORDER)
 		stack.push(new BinaryOpValue(op2, op1, _codeGenData));
-	else if (codeGen->_binOrder == LIFO_ARGUMENT_ORDER)
+	else if (codeGen->GetBinaryOrder() == LIFO_ARGUMENT_ORDER)
 		stack.push(new BinaryOpValue(op1, op2, _codeGenData));
 }
 
@@ -149,12 +149,12 @@ void UnaryOpPostfixStackInstruction::ProcessInst(Function& , ValueStack &stack, 
 }
 
 void KernelCallStackInstruction::ProcessInst(Function&, ValueStack &stack, Engine*, CodeGenerator *codeGen) {
-	codeGen->_argList.clear();
+	codeGen->GetArgList().clear();
 	bool returnsValue = (_codeGenData.find("r") == 0);
 	std::string metadata = (!returnsValue ? _codeGenData : _codeGenData.substr(1));
 	for (size_t i = 0; i < metadata.length(); i++)
 		codeGen->ProcessSpecialMetadata(this, metadata[i], i);
-	stack.push(new CallValue(_name, codeGen->_argList));
+	stack.push(new CallValue(_name, codeGen->GetArgList()));
 	if (!returnsValue) {
 		std::stringstream stream;
 		stream << stack.pop() << ";";

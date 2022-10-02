@@ -74,7 +74,7 @@ class LuaLanguage{
          *
          * Continue is not implemented in Lua.
          *
-         * @return An emopty string.
+         * @return A commented string.
          */
         virtual const std::string LoopContinue();
 
