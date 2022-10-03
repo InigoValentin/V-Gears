@@ -103,7 +103,7 @@ std::vector<float> FF7::FieldEngine::Entity::GetLinePointB(){return point_b_;}
 
 FF7::FieldEngine::FieldEngine(SUDM::IScriptFormatter& formatter, std::string script_name) :
   formatter_(formatter), script_name_(script_name), scale_factor_(1.0f)
-{setOutputStackEffect(false);}
+{SetOutputStackEffect(false);}
 
 std::unique_ptr<Disassembler> FF7::FieldEngine::GetDisassembler(
   InstVec &insts, const std::vector<unsigned char>& raw_script_data
@@ -243,14 +243,14 @@ void FF7::FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph gr
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
             // Is it the last instruction in the function, and is it a return statement?
-            if ((*it)->_address == func.end_addr){
-                if ((*it)->_opcode == OPCODES::RET){
+            if ((*it)->GetAddress() == func.end_addr){
+                if ((*it)->GetOpcode() == OPCODES::RET){
                     // Set new end address to be before the NOP.
-                    func.end_addr =(*(it - 1))->_address;
+                    func.end_addr = (*(it - 1))->GetAddress();
                     func.num_instructions --;
                     Instruction* nop = new FieldNoOperationInstruction();
-                    nop->_opcode = OPCODES::NOP;
-                    nop->_address = (*it)->_address;
+                    nop->SetOpcode(OPCODES::NOP);
+                    nop->SetAddress((*it)->GetAddress());
                     (*it).reset(nop);
                     break;
                 }
@@ -264,14 +264,14 @@ void FF7::FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
             // Is it the last instruction in the function, a jump, and a jumping to itself?
-            if ((*it)->_address == func.end_addr){
-                if ((*it)->isJump() && (*it)->GetDestAddress() == (*it)->_address){
+            if ((*it)->GetAddress() == func.end_addr){
+                if ((*it)->IsJump() && (*it)->GetDestAddress() == (*it)->GetAddress()){
                     // Set new end address to be before the NOP
-                    func.end_addr =(*(it - 1))->_address;
+                    func.end_addr = (*(it - 1))->GetAddress();
                     func.num_instructions --;
                     Instruction* nop = new FieldNoOperationInstruction();
-                    nop->_opcode = OPCODES::NOP;
-                    nop->_address = (*it)->_address;
+                    nop->SetOpcode(OPCODES::NOP);
+                    nop->SetAddress((*it)->GetAddress());
                     (*it).reset(nop);
                     break;
                 }
@@ -284,7 +284,7 @@ void FF7::FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph graph){
     for (auto& f : functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
-            if ((*it)->_address == func.end_addr){
+            if ((*it)->GetAddress() == func.end_addr){
                 // Note: This is a "best effort heuristic", so quite a few loops will
                 // still end up as goto's. This could potentially generate invalid code too.
                 if ((*it)->IsUncondJump()){
@@ -293,10 +293,10 @@ void FF7::FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph graph){
                     VertexRange vr = boost::vertices(graph);
                     for (VertexIterator v = vr.first; v != vr.second; ++ v){
                         GroupPtr gr = GET(*v);
-                        if ((*gr->start_)->_address == func.end_addr){
+                        if ((*gr->start)->GetAddress() == func.end_addr){
                             // Then assume its an infinite do { } while(true) loop
                             // that wraps part of the script.
-                            gr->_type = kDoWhileCondGroupType;
+                            gr->type = GROUP_TYPE_DO_WHILE;
                         }
                     }
                 }

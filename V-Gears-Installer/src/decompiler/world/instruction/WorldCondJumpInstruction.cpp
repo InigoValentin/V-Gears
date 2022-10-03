@@ -30,7 +30,7 @@ void FF7::WorldCondJumpInstruction::ProcessInst(Function&, ValueStack&, Engine*,
 }
 
 uint32 FF7::WorldCondJumpInstruction::GetDestAddress() const{
-    return 0x200 + _params[0]->getUnsigned();
+    return 0x200 + params_[0]->getUnsigned();
 }
 
 std::ostream& FF7::WorldCondJumpInstruction::Print(std::ostream &output) const{

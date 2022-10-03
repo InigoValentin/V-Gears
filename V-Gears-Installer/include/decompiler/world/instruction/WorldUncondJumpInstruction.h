@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "decompiler/instruction.h"
+#include "decompiler/instruction/UncondJumpInstruction.h"
 #include "decompiler/world/WorldEngine.h"
 
 namespace FF7{

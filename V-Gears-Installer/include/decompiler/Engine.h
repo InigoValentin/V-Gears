@@ -18,9 +18,10 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "Function.h"
+#include "Graph.h"
 #include "CodeGenerator.h"
 #include "Disassembler.h"
-#include "Function.h"
 
 /**
  * Type representing a map of functions, indexed by starting address.

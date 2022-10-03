@@ -161,9 +161,9 @@ void FF7::FieldDisassembler::DoDisassemble(){
 
 int FF7::FieldDisassembler::FindId(uint32 start_addr, uint32 end_addr, const InstVec& insts){
     for (const InstPtr& instruction : insts){
-        if (instruction->_address >= start_addr && instruction->_address <= end_addr){
-            if (instruction->_opcode == FF7::OPCODES::opCodeCHAR)
-                return instruction->_params[0]->getSigned();
+        if (instruction->GetAddress() >= start_addr && instruction->GetAddress() <= end_addr){
+            if (instruction->GetOpcode() == FF7::OPCODES::opCodeCHAR)
+                return instruction->GetParam(0)->getSigned();
         }
     }
     return -1;
@@ -209,7 +209,7 @@ void FF7::FieldDisassembler::AddFunc(
 
     const size_t new_num_instructions = insts_.size();
     func->num_instructions = new_num_instructions - old_num_instructions;
-    func->end_addr = insts_.back()->_address;
+    func->end_addr = insts_.back()->GetAddress();
     if (!func_name.empty()) func->name = func_name;
     if (engine_->EntityIsLine(entity_index)){
         switch (script_index){
@@ -1047,12 +1047,12 @@ bool FF7::FieldDisassembler::ReadOpCodesToPositionOrReturn(
                 // Mark function entity owner as line.
                 is_line = true;
                 ParseOpcode(full_opcode, "LINE", new FieldWalkmeshInstruction(), 0, "ssssss");
-                point_a[0] = this->insts_.back()->_params[0]->getSigned();
-                point_a[1] = this->insts_.back()->_params[1]->getSigned();
-                point_a[2] = this->insts_.back()->_params[2]->getSigned();
-                point_b[0] = this->insts_.back()->_params[3]->getSigned();
-                point_b[1] = this->insts_.back()->_params[4]->getSigned();
-                point_b[2] = this->insts_.back()->_params[5]->getSigned();
+                point_a[0] = this->insts_.back()->GetParam(0)->getSigned();
+                point_a[1] = this->insts_.back()->GetParam(1)->getSigned();
+                point_a[2] = this->insts_.back()->GetParam(2)->getSigned();
+                point_b[0] = this->insts_.back()->GetParam(3)->getSigned();
+                point_b[1] = this->insts_.back()->GetParam(4)->getSigned();
+                point_b[2] = this->insts_.back()->GetParam(5)->getSigned();
                 break;
 
             // Backgnd
@@ -1234,9 +1234,9 @@ bool FF7::FieldDisassembler::ReadOpCodesToPositionOrReturn(
 
         // Is it within an "if" statement tracking?
         InstPtr i = this->insts_.back();
-        if (i->isCondJump()) exitAddrs.push_back(i->GetDestAddress());
+        if (i->IsCondJump()) exitAddrs.push_back(i->GetDestAddress());
         if (!exitAddrs.empty())
-            if (i->_address == exitAddrs.back()) exitAddrs.pop_back();
+            if (i->GetAddress() == exitAddrs.back()) exitAddrs.pop_back();
         // Only bail if its the first RET that isn't within an "if" block.
         if (full_opcode == OPCODES::RET && exitAddrs.empty()) return is_line;
     }

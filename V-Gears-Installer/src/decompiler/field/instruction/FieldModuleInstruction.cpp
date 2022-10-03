@@ -28,12 +28,12 @@ void FF7::FieldModuleInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
-    switch (_opcode){
+    switch (opcode_){
         case OPCODES::DSKCG: code_gen->WriteTodo(md.GetEntityName(), "DSKCG"); break;
         case (OPCODES::SPECIAL << 8) | OPCODES_SPECIAL::ARROW:
             code_gen->AddOutputLine((
               boost::format("game:pointer_enable(%1%)")
-              % (_params[0]->getUnsigned() ? "true" : "false")
+              % (params_[0]->getUnsigned() ? "true" : "false")
             ).str());
             break;
         case (OPCODES::SPECIAL << 8) | OPCODES_SPECIAL::PNAME:
@@ -54,13 +54,13 @@ void FF7::FieldModuleInstruction::ProcessInst(
         case (OPCODES::SPECIAL << 8) | OPCODES_SPECIAL::BTLCK:
             code_gen->AddOutputLine((
               boost::format("game:battle_enable(%1%)")
-              % (_params[0]->getUnsigned() ? "true" : "false")
+              % (params_[0]->getUnsigned() ? "true" : "false")
             ).str());
             break;
         case (OPCODES::SPECIAL << 8) | OPCODES_SPECIAL::MVLCK:
             code_gen->AddOutputLine((
               boost::format("game:movie_enable(%1%)")
-              % (_params[0]->getUnsigned() ? "true" : "false")
+              % (params_[0]->getUnsigned() ? "true" : "false")
             ).str());
             break;
         case (OPCODES::SPECIAL << 8) | OPCODES_SPECIAL::SPCNM:
@@ -85,7 +85,7 @@ void FF7::FieldModuleInstruction::ProcessInst(
             // Gateway function will do nothing if this is set to true
             code_gen->AddOutputLine(
               std::string("FFVII.Data.DisableGateways=")
-              + (_params[0]->getUnsigned() ? "true" : "false")
+              + (params_[0]->getUnsigned() ? "true" : "false")
             );
             break;
         // Prepare to change map, don't need to output anything for this.
@@ -96,7 +96,7 @@ void FF7::FieldModuleInstruction::ProcessInst(
         case OPCODES::GAMEOVER: code_gen->WriteTodo(md.GetEntityName(), "GAMEOVER"); break;
         default:
             code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
-              md.GetEntityName(), _address, _opcode
+              md.GetEntityName(), address_, opcode_
             ));
     }
 }
@@ -104,7 +104,7 @@ void FF7::FieldModuleInstruction::ProcessInst(
 void FF7::FieldModuleInstruction::ProcessBATTLE(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& battle_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[1]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[1]->getUnsigned()
     );
     code_gen->AddOutputLine((boost::format("entity_manager:battle_run(%1%)") % battle_id).str());
 }
@@ -112,23 +112,23 @@ void FF7::FieldModuleInstruction::ProcessBATTLE(CodeGenerator* code_gen){
 void FF7::FieldModuleInstruction::ProcessBTLON(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("entity_manager:random_encounters_on(%1%)")
-      % FF7::FieldCodeGenerator::FormatInvertedBool(_params[0]->getUnsigned())
+      % FF7::FieldCodeGenerator::FormatInvertedBool(params_[0]->getUnsigned())
     ).str());
 }
 
 void FF7::FieldModuleInstruction::ProcessMAPJUMP(CodeGenerator* code_gen, Function& func){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto target_map_id = _params[0]->getUnsigned();
+    const auto target_map_id = params_[0]->getUnsigned();
     FunctionMetaData md(func.metadata);
     const std::string source_spawn_point_name = cg->GetFormatter().SpawnPointName(
-      target_map_id, md.GetEntityName(), func.name, _address
+      target_map_id, md.GetEntityName(), func.name, address_
     );
     cg->GetFormatter().AddSpawnPoint(
-      target_map_id, md.GetEntityName(), func.name, _address,
-      _params[1]->getSigned(), // X
-      _params[2]->getSigned(), // Y
-      _params[3]->getSigned(), // Walk mesh triangle ID
-      _params[4]->getSigned()  // Angle
+      target_map_id, md.GetEntityName(), func.name, address_,
+      params_[1]->getSigned(), // X
+      params_[2]->getSigned(), // Y
+      params_[3]->getSigned(), // Walk mesh triangle ID
+      params_[4]->getSigned()  // Angle
     );
     const std::string target_map_name = cg->GetFormatter().MapName(target_map_id);
     code_gen->AddOutputLine(

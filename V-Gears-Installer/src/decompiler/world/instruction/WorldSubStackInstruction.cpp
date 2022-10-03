@@ -28,7 +28,7 @@ void FF7::WorldSubStackInstruction::ProcessInst(
     Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
     std::string op;
-    switch (_opcode){
+    switch (opcode_){
         case 0x41: op = "-"; break;
         case 0x40: op = "+"; break;
         case 0x80: op = "&&"; break;

@@ -62,20 +62,31 @@ void SimpleDisassembler::readParams(InstPtr inst, const char *typeString)
         {
             const uint8 byte = stream_->ReadU8();
 
-            inst->_params.push_back(new IntValue(Nib1(byte), false));
-            inst->_params.push_back(new IntValue(Nib2(byte), false));
+            //inst->GetParams().push_back(new IntValue(Nib1(byte), false));
+            //inst->GetParams().push_back(new IntValue(Nib2(byte), false));
+            //inst->_params.push_back(new IntValue(Nib1(byte), false));
+            //inst->_params.push_back(new IntValue(Nib2(byte), false));
+            inst->AddParam(new IntValue(Nib1(byte), false));
+            inst->AddParam(new IntValue(Nib2(byte), false));
+
             address_++;
         }
         else if (typeStr == "U")
         {
             const uint8 byte = stream_->ReadU8();
-            inst->_params.push_back( new IntValue((byte >> 5) & 0x7, false));
-            inst->_params.push_back( new IntValue((byte & 0x1F), false));
+            //inst->GetParams().push_back( new IntValue((byte >> 5) & 0x7, false));
+            //inst->GetParams().push_back( new IntValue((byte & 0x1F), false));
+            //inst->_params.push_back( new IntValue((byte >> 5) & 0x7, false));
+            //inst->_params.push_back( new IntValue((byte & 0x1F), false));
+            inst->AddParam( new IntValue((byte >> 5) & 0x7, false));
+            inst->AddParam( new IntValue((byte & 0x1F), false));
             address_++;
         }
         else
         {
-            inst->_params.push_back(readParameter(inst, typeStr));
+            //inst->GetParams().push_back(readParameter(inst, typeStr));
+            //inst->_params.push_back(readParameter(inst, typeStr));
+            inst->AddParam(readParameter(inst, typeStr));
         }
         typeString++;
     }

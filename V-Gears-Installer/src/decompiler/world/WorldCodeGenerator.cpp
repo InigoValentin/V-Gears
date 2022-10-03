@@ -26,19 +26,19 @@ std::string FF7::WorldCodeGenerator::ConstructFuncSignature(const Function& func
 }
 
 const InstPtr FF7::WorldCodeGenerator::FindFirstCall(){
-    ConstInstIterator it = cur_group_->start_;
+    ConstInstIterator it = cur_group_->start;
     do{
-        if ((*it)->IsFuncCall() || (*it)->isKernelCall()) return *it;
-    } while (it ++ != cur_group_->end_);
-    return *cur_group_->start_;
+        if ((*it)->IsFuncCall() || (*it)->IsKernelCall()) return *it;
+    } while (it ++ != cur_group_->end);
+    return *cur_group_->start;
 }
 
 const InstPtr FF7::WorldCodeGenerator::FindLastCall(){
-    ConstInstIterator it = cur_group_->end_;
+    ConstInstIterator it = cur_group_->end;
     do {
-        if ((*it)->IsFuncCall() || (*it)->isKernelCall()) return *it;
-    } while (it -- != cur_group_->start_);
-    return *cur_group_->end_;
+        if ((*it)->IsFuncCall() || (*it)->IsKernelCall()) return *it;
+    } while (it -- != cur_group_->start);
+    return *cur_group_->end;
 }
 
 void FF7::WorldCodeGenerator::ProcessSpecialMetadata(const InstPtr inst, char c, int pos){}

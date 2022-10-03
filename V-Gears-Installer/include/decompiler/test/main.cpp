@@ -2,6 +2,7 @@
 
 #include "../../common/Lzs.h"
 #include "../ControlFlow.h"
+#include "../Graph.h"
 #include "decompiler/ff7_field/ff7_field_disassembler.h"
 #include "decompiler/ff7_field/ff7_field_engine.h"
 #include "decompiler/ff7_field/ff7_field_codegen.h"
@@ -10,7 +11,6 @@
 #include "decompiler/ff7_world/ff7_world_engine.h"
 
 #include "util.h"
-#include "graph.h"
 #include "sudm.h"
 #include "ff7_field_dummy_formatter.h"
 
@@ -227,7 +227,7 @@ TEST(FF7World, DisAsm)
             auto& g = c->getGraph();
             boost::write_graphviz(
                 out, g, boost::make_label_writer(get(boost::vertex_name, g)),
-                boost::makeArrowheadWriter(get(boost::edge_attribute, g)), GraphProperties(&engine, g));
+                boost::MakeArrowheadWriter(get(boost::edge_attribute, g)), GraphProperties(&engine, g));
         }
         out.close();
 

@@ -33,7 +33,7 @@ bool FF7::WorldUncondJumpInstruction::IsUncondJump() const{return !is_call_;}
 uint32 FF7::WorldUncondJumpInstruction::GetDestAddress() const{
     // The world map while loops are incorrect without +1'in this, but
     // doing that will break some if elses...
-    return 0x200 + _params[0]->getUnsigned();// +1; // TODO: +1 to skip param?
+    return 0x200 + params_[0]->getUnsigned();// +1; // TODO: +1 to skip param?
 }
 
 std::ostream& FF7::WorldUncondJumpInstruction::Print(std::ostream &output) const{

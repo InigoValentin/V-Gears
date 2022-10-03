@@ -28,7 +28,7 @@ void FF7::FieldMediaInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
-    switch (_opcode){
+    switch (opcode_){
         case OPCODES::BGMOVIE: code_gen->WriteTodo(md.GetEntityName(), "BGMOVIE"); break;
         case OPCODES::AKAO2: ProcessAKAO2(code_gen); break;
         case OPCODES::MUSIC: ProcessMUSIC(code_gen); break;
@@ -47,7 +47,7 @@ void FF7::FieldMediaInstruction::ProcessInst(
         case OPCODES::CHMST: code_gen->WriteTodo(md.GetEntityName(), "CHMST"); break;
         default:
             code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
-              md.GetEntityName(), _address, _opcode
+              md.GetEntityName(), address_, opcode_
             ));
     }
 }
@@ -55,21 +55,21 @@ void FF7::FieldMediaInstruction::ProcessInst(
 void FF7::FieldMediaInstruction::ProcessAKAO2(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& param1 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[7]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[7]->getUnsigned()
     );
     const auto& param2 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[8]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[8]->getUnsigned()
     );
     const auto& param3 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[2]->getUnsigned(), _params[9]->getUnsigned()
+      cg->GetFormatter(), params_[2]->getUnsigned(), params_[9]->getUnsigned()
     );
     const auto& param4 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[3]->getUnsigned(), _params[10]->getUnsigned()
+      cg->GetFormatter(), params_[3]->getUnsigned(), params_[10]->getUnsigned()
     );
     const auto& param5 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[5]->getUnsigned(), _params[11]->getUnsigned()
+      cg->GetFormatter(), params_[5]->getUnsigned(), params_[11]->getUnsigned()
     );
-    auto op = _params[6]->getUnsigned();
+    auto op = params_[6]->getUnsigned();
     code_gen->AddOutputLine((
       boost::format("-- music:execute_akao(0x%6$02x, %1%, %2%, %3%, %4%, %5%)")
       % param1 % param2 % param3 % param4 % param5 % op
@@ -79,17 +79,17 @@ void FF7::FieldMediaInstruction::ProcessAKAO2(CodeGenerator* code_gen){
 void FF7::FieldMediaInstruction::ProcessMUSIC(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("-- music:execute_akao(0x10, pointer_to_field_AKAO_%1%)")
-      % _params[0]->getUnsigned()
+      % params_[0]->getUnsigned()
     ).str());
 }
 
 void FF7::FieldMediaInstruction::ProcessSOUND(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& soundId = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getUnsigned()
     );
     const auto& panning = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
     );
     code_gen->AddOutputLine(
       (boost::format("-- music:execute_akao(0x20, %1%, %2%)") % soundId % panning).str()
@@ -99,21 +99,21 @@ void FF7::FieldMediaInstruction::ProcessSOUND(CodeGenerator* code_gen){
 void FF7::FieldMediaInstruction::ProcessAKAO(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& param1 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[7]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[7]->getUnsigned()
     );
     const auto& param2 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[8]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[8]->getUnsigned()
     );
     const auto& param3 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[2]->getUnsigned(), _params[9]->getUnsigned()
+      cg->GetFormatter(), params_[2]->getUnsigned(), params_[9]->getUnsigned()
     );
     const auto& param4 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[3]->getUnsigned(), _params[10]->getUnsigned()
+      cg->GetFormatter(), params_[3]->getUnsigned(), params_[10]->getUnsigned()
     );
     const auto& param5 = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[5]->getUnsigned(), _params[11]->getUnsigned()
+      cg->GetFormatter(), params_[5]->getUnsigned(), params_[11]->getUnsigned()
     );
-    auto op = _params[6]->getUnsigned();
+    auto op = params_[6]->getUnsigned();
     code_gen->AddOutputLine((
       boost::format("-- music:execute_akao(0x%6$02x, %1%, %2%, %3%, %4%, %5%)")
       % param1 % param2 % param3 % param4 % param5 % op
@@ -123,13 +123,13 @@ void FF7::FieldMediaInstruction::ProcessAKAO(CodeGenerator* code_gen){
 void FF7::FieldMediaInstruction::ProcessMULCK(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("-- music:lock(%1%)")
-      % FF7::FieldCodeGenerator::FormatBool(_params[0]->getUnsigned())
+      % FF7::FieldCodeGenerator::FormatBool(params_[0]->getUnsigned())
     ).str());
 }
 
 void FF7::FieldMediaInstruction::ProcessPMVIE(CodeGenerator* code_gen){
     code_gen->AddOutputLine(
-      (boost::format("-- field:movie_set(%1%)") % _params[0]->getUnsigned()
+      (boost::format("-- field:movie_set(%1%)") % params_[0]->getUnsigned()
     ).str());
 }
 
@@ -141,7 +141,7 @@ void FF7::FieldMediaInstruction::ProcessMVIEF(CodeGenerator* code_gen){
     // TODO: Check for assignment to value.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[2]->getUnsigned());
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[2]->getUnsigned());
     code_gen->AddOutputLine(
       (boost::format("-- %1% = field:get_movie_frame()") % destination).str()
     );

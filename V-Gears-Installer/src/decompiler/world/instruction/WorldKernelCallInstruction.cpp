@@ -29,7 +29,7 @@ void FF7::WorldKernelCallInstruction::ProcessInst(
     Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
     std::string func;
-    switch (_opcode){
+    switch (opcode_){
         case 0x203: func = "return;"; break;
         case 0x317: func = "TriggerBattle(" + stack.pop()->getString() + ");"; break;
         case 0x324:
@@ -176,7 +176,7 @@ void FF7::WorldKernelCallInstruction::ProcessInst(
             break;
         case 0x307: func = "SetControlLock(" + stack.pop()->getString() + ");"; break;
         case 0x30c: func = "EnterVehicle();"; break;
-        default: func = "kernel_unknown_" + AddressValue(_opcode).getString() + "();"; break;
+        default: func = "kernel_unknown_" + AddressValue(opcode_).getString() + "();"; break;
     }
     code_gen->AddOutputLine(func);
 }

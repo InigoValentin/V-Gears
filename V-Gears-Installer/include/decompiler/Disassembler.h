@@ -18,9 +18,9 @@
 #include <iostream>
 #include <vector>
 #include "common/BinaryReader.h"
-#include "instruction.h"
+#include "instruction/Instruction.h"
+#include "ObjectFactory.h"
 #include "unknown_opcode_exception.h"
-#include "objectFactory.h"
 
 /**
  * Base class for disassemblers.

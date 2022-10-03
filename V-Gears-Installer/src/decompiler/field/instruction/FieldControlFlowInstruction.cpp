@@ -29,7 +29,7 @@ void FF7::FF7ControlFlowInstruction::ProcessInst(
 ){
     FF7::FieldEngine& eng = static_cast<FF7::FieldEngine&>(*engine);
     FunctionMetaData md(func.metadata);
-    switch (_opcode){
+    switch (opcode_){
         case OPCODES::RET:
             // A few notes in RET.
             // - Lua requires all functions to end with a return.
@@ -51,7 +51,7 @@ void FF7::FF7ControlFlowInstruction::ProcessInst(
         case OPCODES::WAIT: ProcessWAIT(code_gen); break;
         default:
             code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
-              md.GetEntityName(), _address, _opcode
+              md.GetEntityName(), address_, opcode_
             ));
     }
 }
@@ -60,11 +60,11 @@ void FF7::FF7ControlFlowInstruction::ProcessREQ(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& entity = engine.EntityByIndex(_params[0]->getSigned());
+    const auto& entity = engine.EntityByIndex(params_[0]->getSigned());
     const auto& script_name = cg->GetFormatter().FunctionName(
-      entity.GetName(), entity.FunctionByIndex(_params[2]->getUnsigned())
+      entity.GetName(), entity.FunctionByIndex(params_[2]->getUnsigned())
     );
-    auto priority = _params[1]->getUnsigned();
+    auto priority = params_[1]->getUnsigned();
     code_gen->AddOutputLine((
       boost::format("script:request(Script.ENTITY, \"%1%\", \"%2%\", %3%)")
       % entity.GetName() % script_name % priority
@@ -75,11 +75,11 @@ void FF7::FF7ControlFlowInstruction::ProcessREQSW(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& entity = engine.EntityByIndex(_params[0]->getSigned());
+    const auto& entity = engine.EntityByIndex(params_[0]->getSigned());
     const auto& script_name = cg->GetFormatter().FunctionName(
-      entity.GetName(), entity.FunctionByIndex(_params[2]->getUnsigned())
+      entity.GetName(), entity.FunctionByIndex(params_[2]->getUnsigned())
     );
-    auto priority = _params[1]->getUnsigned();
+    auto priority = params_[1]->getUnsigned();
     code_gen->AddOutputLine((
       boost::format("script:request_start_sync(Script.ENTITY, \"%1%\", \"%2%\", %3%)")
       % entity.GetName() % script_name % priority
@@ -91,11 +91,11 @@ void FF7::FF7ControlFlowInstruction::ProcessREQEW(
 ){
     try{
         FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-        const auto& entity = engine.EntityByIndex(_params[0]->getSigned());
+        const auto& entity = engine.EntityByIndex(params_[0]->getSigned());
         const auto& script_name = cg->GetFormatter().FunctionName(
-          entity.GetName(), entity.FunctionByIndex(_params[2]->getUnsigned())
+          entity.GetName(), entity.FunctionByIndex(params_[2]->getUnsigned())
         );
-        auto priority = _params[1]->getUnsigned();
+        auto priority = params_[1]->getUnsigned();
         code_gen->AddOutputLine((
           boost::format("script:request_end_sync(Script.ENTITY, \"%1%\", \"%2%\", %3%)")
           % entity.GetName() % script_name % priority
@@ -104,14 +104,14 @@ void FF7::FF7ControlFlowInstruction::ProcessREQEW(
     catch (const InternalDecompilerError&){
         code_gen->AddOutputLine((
           boost::format("-- ERROR call to non existing function index %1%")
-          % _params[2]->getUnsigned()
+          % params_[2]->getUnsigned()
         ).str());
     }
 }
 
 void FF7::FF7ControlFlowInstruction::ProcessRETTO(CodeGenerator* code_gen){
-    auto entity_index = _params[0]->getUnsigned();
-    auto priority = _params[1]->getUnsigned();
+    auto entity_index = params_[0]->getUnsigned();
+    auto priority = params_[1]->getUnsigned();
     code_gen->AddOutputLine((
       boost::format("-- return_to(script_id_in_current_entity=%2%, priority=%1%)")
       % entity_index % priority
@@ -120,6 +120,6 @@ void FF7::FF7ControlFlowInstruction::ProcessRETTO(CodeGenerator* code_gen){
 
 void FF7::FF7ControlFlowInstruction::ProcessWAIT(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
-      boost::format("script:wait(%1%)") % (_params[0]->getUnsigned() / 30.0f)
+      boost::format("script:wait(%1%)") % (params_[0]->getUnsigned() / 30.0f)
     ).str());
 }

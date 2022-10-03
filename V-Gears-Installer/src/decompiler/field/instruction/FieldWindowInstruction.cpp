@@ -29,7 +29,7 @@ void FF7::FieldWindowInstruction::ProcessInst(
 ){
     FF7::FieldEngine& eng = static_cast<FF7::FieldEngine&>(*engine);
     FunctionMetaData md(func.metadata);
-    switch (_opcode){
+    switch (opcode_){
         case OPCODES::TUTOR: code_gen->WriteTodo(md.GetEntityName(), "TUTOR"); break;
         case OPCODES::WCLS: code_gen->WriteTodo(md.GetEntityName(), "WCLS"); break;
         case OPCODES::WSIZW: code_gen->WriteTodo(md.GetEntityName(), "WSIZW"); break;
@@ -53,18 +53,18 @@ void FF7::FieldWindowInstruction::ProcessInst(
         case OPCODES::SWCOL: code_gen->WriteTodo(md.GetEntityName(), "SWCOL"); break;
         default:
             code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
-              md.GetEntityName(), _address, _opcode
+              md.GetEntityName(), address_, opcode_
             ));
     }
 }
 
 void FF7::FieldWindowInstruction::ProcessWINDOW(CodeGenerator* code_gen){
     // Initializes a new window. It won't be displayed until MESSAGE is used.
-    auto windowId = _params[0]->getUnsigned();
-    auto x = _params[1]->getUnsigned();
-    auto y = _params[2]->getUnsigned();
-    auto width = _params[3]->getUnsigned();
-    auto height = _params[4]->getUnsigned();
+    auto windowId = params_[0]->getUnsigned();
+    auto x = params_[1]->getUnsigned();
+    auto y = params_[2]->getUnsigned();
+    auto width = params_[3]->getUnsigned();
+    auto height = params_[4]->getUnsigned();
     code_gen->AddOutputLine((
       boost::format("dialog:dialog_open(\"%1%\", %2%, %3%, %4%, %5%)")
       % windowId % x % y % width % height
@@ -75,8 +75,8 @@ void FF7::FieldWindowInstruction::ProcessMESSAGE(
   CodeGenerator* code_gen, const std::string& script_name
 ){
     // Displays a dialog in the WINDOW that has previously been initialized to display this dialog.
-    auto window_id = _params[0]->getUnsigned();
-    auto dialog_id = _params[1]->getUnsigned();
+    auto window_id = params_[0]->getUnsigned();
+    auto dialog_id = params_[1]->getUnsigned();
     code_gen->AddOutputLine((
       boost::format("dialog:dialog_set_text(\"%1%\", \"%2%_%3%\")")
       % window_id % script_name % dialog_id
@@ -89,19 +89,19 @@ void FF7::FieldWindowInstruction::ProcessMESSAGE(
 
 void FF7::FieldWindowInstruction::ProcessWCLSE(CodeGenerator* code_gen){
     // Close a dialog.
-    auto windowId = _params[0]->getUnsigned();
+    auto windowId = params_[0]->getUnsigned();
     code_gen->AddOutputLine((boost::format("dialog:dialog_close(\"%1%\")") % windowId).str());
 }
 
 void FF7::FieldWindowInstruction::ProcessMPNAM(CodeGenerator* code_gen){
     code_gen->AddOutputLine(
-      (boost::format("-- field:map_name(%1%)") % _params[0]->getUnsigned()).str()
+      (boost::format("-- field:map_name(%1%)") % params_[0]->getUnsigned()).str()
     );
 }
 
 void FF7::FieldWindowInstruction::ProcessMENU2(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("-- field:menu_lock(%1%)")
-      % FF7::FieldCodeGenerator::FormatBool(_params[0]->getUnsigned())
+      % FF7::FieldCodeGenerator::FormatBool(params_[0]->getUnsigned())
     ).str());
 }

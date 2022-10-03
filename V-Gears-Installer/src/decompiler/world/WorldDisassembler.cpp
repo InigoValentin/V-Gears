@@ -567,7 +567,8 @@ void FF7::WorldDisassembler::DoDisassemble(){
             }
             this->address_ += 2;
         }
-        for (auto& instruction : this->insts_) instruction->_address = instruction->_address / 2;
+        for (auto& instruction : this->insts_)
+            instruction->SetAddress(instruction->GetAddress() / 2);
     }
 }
 

@@ -27,10 +27,29 @@ set(HEADER_FILES
     include/decompiler/ControlFlow.h
     include/decompiler/Disassembler.h
     include/decompiler/Engine.h
+    include/decompiler/Graph.h
     include/decompiler/Function.h
-    include/decompiler/graph.h
-    include/decompiler/instruction.h
-    include/decompiler/objectFactory.h
+    include/decompiler/instruction/Instruction.h
+    include/decompiler/instruction/BinaryOpInstruction.h
+    include/decompiler/instruction/BinaryOpStackInstruction.h
+    include/decompiler/instruction/BoolNegateInstruction.h
+    include/decompiler/instruction/BoolNegateStackInstruction.h
+    include/decompiler/instruction/CallInstruction.h
+    include/decompiler/instruction/CondJumpInstruction.h
+    include/decompiler/instruction/DupInstruction.h
+    include/decompiler/instruction/DupStackInstruction.h
+    include/decompiler/instruction/JumpInstruction.h
+    include/decompiler/instruction/KernelCallInstruction.h
+    include/decompiler/instruction/KernelCallStackInstruction.h
+    include/decompiler/instruction/LoadInstruction.h
+    include/decompiler/instruction/ReturnInstruction.h
+    include/decompiler/instruction/StackInstruction.h
+    include/decompiler/instruction/StoreInstruction.h
+    include/decompiler/instruction/UnaryOpInstruction.h
+    include/decompiler/instruction/UnaryOpPostfixStackInstruction.h
+    include/decompiler/instruction/UnaryOpPrefixStackInstruction.h
+    include/decompiler/instruction/UncondJumpInstruction.h
+    include/decompiler/ObjectFactory.h
     include/decompiler/refcounted.h
     include/decompiler/simple_disassembler.h
     include/decompiler/stack.h
@@ -90,8 +109,22 @@ set(SOURCE_FILES
     src/decompiler/ControlFlow.cpp
     src/decompiler/Disassembler.cpp
     src/decompiler/Engine.cpp
-    src/decompiler/graph.cpp
-    src/decompiler/instruction.cpp
+    src/decompiler/Graph.cpp
+    src/decompiler/instruction/Instruction.cpp
+    src/decompiler/instruction/BinaryOpStackInstruction.cpp
+    src/decompiler/instruction/BoolNegateStackInstruction.cpp
+    src/decompiler/instruction/CallInstruction.cpp
+    src/decompiler/instruction/CondJumpInstruction.cpp
+    src/decompiler/instruction/DupStackInstruction.cpp
+    src/decompiler/instruction/KernelCallInstruction.cpp
+    src/decompiler/instruction/KernelCallStackInstruction.cpp
+    src/decompiler/instruction/LoadInstruction.cpp
+    src/decompiler/instruction/ReturnInstruction.cpp
+    src/decompiler/instruction/StackInstruction.cpp
+    src/decompiler/instruction/StoreInstruction.cpp
+    src/decompiler/instruction/UnaryOpPostfixStackInstruction.cpp
+    src/decompiler/instruction/UnaryOpPrefixStackInstruction.cpp
+    src/decompiler/instruction/UncondJumpInstruction.cpp
     src/decompiler/simple_disassembler.cpp
     src/decompiler/unknown_opcode_exception.cpp
     src/decompiler/value.cpp

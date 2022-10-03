@@ -66,11 +66,11 @@ namespace FF7{
             ){
                 uint32 full_opcode = (full_opcode << 8) + opcode;
                 this->insts_.push_back(instruction);
-                this->insts_.back()->_opcode = full_opcode;
-                this->insts_.back()->_address = this->address_;
-                this->insts_.back()->_stackChange = 0;
-                this->insts_.back()->_name = std::string(name);
-                this->insts_.back()->_codeGenData = "";
+                this->insts_.back()->SetOpcode(full_opcode);
+                this->insts_.back()->SetAddress(this->address_);
+                this->insts_.back()->SetStackChange(0);
+                this->insts_.back()->SetName(std::string(name));
+                this->insts_.back()->SetCodeGenData("");
                 this->readParams(this->insts_.back(), argument_format);
             }
 

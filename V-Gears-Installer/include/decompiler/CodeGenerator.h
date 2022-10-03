@@ -19,8 +19,9 @@
 #include <utility>
 #include <memory>
 #include <boost/intrusive_ptr.hpp>
+
+#include "Graph.h"
 #include "LuaLanguage.h"
-#include "graph.h"
 #include "value.h"
 #include "unknown_opcode_exception.h"
 

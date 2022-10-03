@@ -29,7 +29,7 @@
 #include <boost/intrusive_ptr.hpp>
 
 #include "common/scummsys.h"
-#include "refcounted.h"
+#include "RefCounted.h"
 #include "stack.h"
 #include "wrongtype.h"
 

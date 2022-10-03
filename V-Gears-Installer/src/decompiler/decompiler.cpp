@@ -19,10 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "objectFactory.h"
-
-#include "instruction.h"
-
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -31,6 +27,8 @@
 #include "../../include/decompiler/ControlFlow.h"
 #include "../../include/decompiler/Disassembler.h"
 #include "../../include/decompiler/Engine.h"
+#include "../../include/decompiler/Instruction.h"
+#include "../../include/decompiler/ObjectFactory.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -176,12 +174,12 @@ int main(int argc, char** argv) {
 				buf = std::cout.rdbuf();
 			}
 			std::ostream out(buf);
-			boost::write_graphviz(out, g, boost::make_label_writer(get(boost::vertex_name, g)), boost::makeArrowheadWriter(get(boost::edge_attribute, g)), GraphProperties(engine.get(), g));
+			boost::write_graphviz(out, g, boost::make_label_writer(get(boost::vertex_name, g)), boost::MakeArrowheadWriter(get(boost::edge_attribute, g)), GraphProperties(engine.get(), g));
 		}
 
 		if (!engine->supportsCodeGen() || vm.count("only-graph")) {
 			if (!vm.count("dump-graph")) {
-				boost::write_graphviz(std::cout, g, boost::make_label_writer(get(boost::vertex_name, g)), boost::makeArrowheadWriter(get(boost::edge_attribute, g)), GraphProperties(engine.get(), g));
+				boost::write_graphviz(std::cout, g, boost::make_label_writer(get(boost::vertex_name, g)), boost::MakeArrowheadWriter(get(boost::edge_attribute, g)), GraphProperties(engine.get(), g));
 			}
 			return 0;
 		}
@@ -199,7 +197,7 @@ int main(int argc, char** argv) {
 			for (VertexIterator v = vr.first; v != vr.second; ++v)
 			{
 				GroupPtr gr = boost::get(boost::vertex_name, g, *v);
-				if (gr->_stackLevel == -1)
+				if (gr->stack_level == -1)
 					unreachable.push_back(gr);
 			}
 			if (!unreachable.empty()) {

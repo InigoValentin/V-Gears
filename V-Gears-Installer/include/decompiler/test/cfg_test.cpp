@@ -19,12 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "decompiler/graph.h"
 #include "decompiler/scummv6/engine.h"
 #include <gmock/gmock.h>
 #include <vector>
 #include "../ControlFlow.h"
 #include "../Disassembler.h"
+#include "../Graph.h"
 
 #define GET(vertex) (boost::get(boost::vertex_name, g, vertex))
 

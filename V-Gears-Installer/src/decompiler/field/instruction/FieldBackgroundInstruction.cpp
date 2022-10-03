@@ -28,7 +28,7 @@ void FF7::FieldBackgroundInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
-    switch (_opcode){
+    switch (opcode_){
         case OPCODES::BGPDH: code_gen->WriteTodo(md.GetEntityName(), "BGPDH");break;
         case OPCODES::BGSCR: code_gen->WriteTodo(md.GetEntityName(), "BGSCR"); break;
         case OPCODES::MPPAL: code_gen->WriteTodo(md.GetEntityName(), "MPPAL"); break;
@@ -50,7 +50,7 @@ void FF7::FieldBackgroundInstruction::ProcessInst(
         case OPCODES::RTPAL2: code_gen->WriteTodo(md.GetEntityName(), "RTPAL2"); break;
         default:
             code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
-              md.GetEntityName(), _address, _opcode
+              md.GetEntityName(), address_, opcode_
             ));
     }
 }
@@ -58,10 +58,10 @@ void FF7::FieldBackgroundInstruction::ProcessInst(
 void FF7::FieldBackgroundInstruction::ProcessBGON(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& background_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getUnsigned()
     );
     const auto& layer_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
     );
     code_gen->AddOutputLine(
       (boost::format("-- field:background_on(%1%, %2%)") % background_id % layer_id).str()
@@ -71,10 +71,10 @@ void FF7::FieldBackgroundInstruction::ProcessBGON(CodeGenerator* code_gen){
 void FF7::FieldBackgroundInstruction::ProcessBGOFF(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& background_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getUnsigned()
     );
     const auto& layer_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
     );
     code_gen->AddOutputLine(
       (boost::format("-- field:background_off(%1%, %2%)") % background_id % layer_id).str()
@@ -84,7 +84,7 @@ void FF7::FieldBackgroundInstruction::ProcessBGOFF(CodeGenerator* code_gen){
 void FF7::FieldBackgroundInstruction::ProcessBGCLR(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& background_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[2]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[2]->getUnsigned()
     );
     code_gen->AddOutputLine(
       (boost::format("-- field:background_clear(%1%)") % background_id).str()
@@ -94,12 +94,12 @@ void FF7::FieldBackgroundInstruction::ProcessBGCLR(CodeGenerator* code_gen){
 void FF7::FieldBackgroundInstruction::ProcessSTPAL(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getUnsigned()
     );
     const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
     );
-    auto num_entries = _params[4]->getUnsigned() + 1;
+    auto num_entries = params_[4]->getUnsigned() + 1;
     code_gen->AddOutputLine((
       boost::format("-- store palette %1% to position %2%, start CLUT index 0, %3% entries")
       % source % destination % num_entries
@@ -109,12 +109,12 @@ void FF7::FieldBackgroundInstruction::ProcessSTPAL(CodeGenerator* code_gen){
 void FF7::FieldBackgroundInstruction::ProcessLDPAL(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getUnsigned()
     );
     const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
     );
-    auto num_entries = _params[4]->getUnsigned() + 1;
+    auto num_entries = params_[4]->getUnsigned() + 1;
     code_gen->AddOutputLine((
       boost::format("-- load palette %2% from position %1%, start CLUT index 0, %3% entries")
       % source % destination % num_entries
@@ -124,12 +124,12 @@ void FF7::FieldBackgroundInstruction::ProcessLDPAL(CodeGenerator* code_gen){
 void FF7::FieldBackgroundInstruction::ProcessCPPAL(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getUnsigned()
     );
     const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
     );
-    auto num_entries = _params[4]->getUnsigned() + 1;
+    auto num_entries = params_[4]->getUnsigned() + 1;
     code_gen->AddOutputLine((
       boost::format("-- copy palette %1% to palette %2%, %3% entries")
       % source % destination % num_entries
@@ -139,21 +139,21 @@ void FF7::FieldBackgroundInstruction::ProcessCPPAL(CodeGenerator* code_gen){
 void FF7::FieldBackgroundInstruction::ProcessADPAL(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[6]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[6]->getUnsigned()
     );
     const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[7]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[7]->getUnsigned()
     );
     const auto& r = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[4]->getUnsigned(), _params[10]->getUnsigned()
+      cg->GetFormatter(), params_[4]->getUnsigned(), params_[10]->getUnsigned()
     );
     const auto& g = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[3]->getUnsigned(), _params[9]->getUnsigned()
+      cg->GetFormatter(), params_[3]->getUnsigned(), params_[9]->getUnsigned()
     );
     const auto& b = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[2]->getUnsigned(), _params[8]->getUnsigned()
+      cg->GetFormatter(), params_[2]->getUnsigned(), params_[8]->getUnsigned()
     );
-    auto num_entries = _params[11]->getUnsigned() + 1;
+    auto num_entries = params_[11]->getUnsigned() + 1;
     code_gen->AddOutputLine((
       boost::format(
         "-- add RGB(%3%, %4%, %5%) to %6% entries of palette stored at position %1%, "
@@ -165,21 +165,21 @@ void FF7::FieldBackgroundInstruction::ProcessADPAL(CodeGenerator* code_gen){
 void FF7::FieldBackgroundInstruction::ProcessMPPAL2(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[6]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[6]->getUnsigned()
     );
     const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[7]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[7]->getUnsigned()
     );
     const auto& r = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[4]->getUnsigned(), _params[10]->getUnsigned()
+      cg->GetFormatter(), params_[4]->getUnsigned(), params_[10]->getUnsigned()
     );
     const auto& g = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[3]->getUnsigned(), _params[9]->getUnsigned()
+      cg->GetFormatter(), params_[3]->getUnsigned(), params_[9]->getUnsigned()
     );
     const auto& b = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[2]->getUnsigned(), _params[8]->getUnsigned()
+      cg->GetFormatter(), params_[2]->getUnsigned(), params_[8]->getUnsigned()
     );
-    auto num_entries = _params[11]->getUnsigned() + 1;
+    auto num_entries = params_[11]->getUnsigned() + 1;
     code_gen->AddOutputLine((
       boost::format(
         "-- multiply RGB(%3%, %4%, %5%) by %6% entries of palette stored at position %1%, "
@@ -188,10 +188,10 @@ void FF7::FieldBackgroundInstruction::ProcessMPPAL2(CodeGenerator* code_gen){
 }
 
 void FF7::FieldBackgroundInstruction::ProcessSTPLS(CodeGenerator* code_gen){
-    auto source = _params[0]->getUnsigned();
-    auto destination = _params[1]->getUnsigned();
-    auto start_clut = _params[2]->getUnsigned();
-    auto num_entries = _params[3]->getUnsigned() + 1;
+    auto source = params_[0]->getUnsigned();
+    auto destination = params_[1]->getUnsigned();
+    auto start_clut = params_[2]->getUnsigned();
+    auto num_entries = params_[3]->getUnsigned() + 1;
     code_gen->AddOutputLine((
       boost::format("-- store palette %1% to position %2%, start CLUT index %3%, %4% entries")
       % source % destination % start_clut % num_entries
@@ -199,10 +199,10 @@ void FF7::FieldBackgroundInstruction::ProcessSTPLS(CodeGenerator* code_gen){
 }
 
 void FF7::FieldBackgroundInstruction::ProcessLDPLS(CodeGenerator* code_gen){
-    auto source = _params[0]->getUnsigned();
-    auto destination = _params[1]->getUnsigned();
-    auto startClut = _params[2]->getUnsigned();
-    auto num_entries = _params[3]->getUnsigned() + 1;
+    auto source = params_[0]->getUnsigned();
+    auto destination = params_[1]->getUnsigned();
+    auto startClut = params_[2]->getUnsigned();
+    auto num_entries = params_[3]->getUnsigned() + 1;
     code_gen->AddOutputLine((
       boost::format("-- load palette %2% from position %1%, start CLUT index %3%, %4% entries")
       % source % destination % startClut % num_entries

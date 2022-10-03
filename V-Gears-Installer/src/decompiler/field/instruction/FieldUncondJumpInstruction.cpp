@@ -32,13 +32,13 @@ bool FF7::FieldUncondJumpInstruction::IsUncondJump() const{return !is_func_call_
 
 uint32 FF7::FieldUncondJumpInstruction::GetDestAddress() const{
     if (
-      static_cast<OPCODES>(_opcode) == OPCODES::JMPF
-      || static_cast<OPCODES>(_opcode) == OPCODES::JMPFL){
+      static_cast<OPCODES>(opcode_) == OPCODES::JMPF
+      || static_cast<OPCODES>(opcode_) == OPCODES::JMPFL){
         // Short or long forward jump.
-        return _address + _params[0]->getUnsigned() + 1;
+        return address_ + params_[0]->getUnsigned() + 1;
     }
     // Backwards jump,  eOpcodes::JMPB/L.
-    return _address - _params[0]->getUnsigned();
+    return address_ - params_[0]->getUnsigned();
 }
 
 std::ostream& FF7::FieldUncondJumpInstruction::Print(std::ostream &output) const{
@@ -51,7 +51,7 @@ std::ostream& FF7::FieldUncondJumpInstruction::Print(std::ostream &output) const
 void FF7::FieldUncondJumpInstruction::ProcessInst(
   Function& func, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
 ){
-    switch (_opcode){
+    switch (opcode_){
         case OPCODES::JMPB:
         case OPCODES::JMPBL:
             // HACK: Hard loop will hang the game, insert a wait to yield control.

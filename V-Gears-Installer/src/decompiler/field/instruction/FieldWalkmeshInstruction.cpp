@@ -28,22 +28,22 @@ void FF7::FieldWalkmeshInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
-    switch (_opcode){
+    switch (opcode_){
         case OPCODES::SLIP: code_gen->WriteTodo(md.GetEntityName(), "SLIP"); break;
         case OPCODES::UC: ProcessUC(code_gen); break;
         case OPCODES::IDLCK:
             // Triangle id, on or off
             code_gen->AddOutputLine(
                 (boost::format("walkmesh:lock_walkmesh(%1%, %2%)")
-                % _params[0]->getUnsigned()
-                % FF7::FieldCodeGenerator::FormatBool(_params[1]->getUnsigned())).str());
+                % params_[0]->getUnsigned()
+                % FF7::FieldCodeGenerator::FormatBool(params_[1]->getUnsigned())).str());
             break;
         case OPCODES::LINE: ProcessLINE(code_gen, md.GetEntityName()); break;
         case OPCODES::LINON: code_gen->WriteTodo(md.GetEntityName(), "LINON"); break;
         case OPCODES::SLINE: code_gen->WriteTodo(md.GetEntityName(), "SLINE"); break;
         default:
             code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
-              md.GetEntityName(), _address, _opcode
+              md.GetEntityName(), address_, opcode_
             ));
     }
 }
@@ -51,17 +51,17 @@ void FF7::FieldWalkmeshInstruction::ProcessInst(
 void FF7::FieldWalkmeshInstruction::ProcessUC(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("entity_manager:player_lock(%1%)")
-      % FF7::FieldCodeGenerator::FormatBool(_params[0]->getUnsigned())
+      % FF7::FieldCodeGenerator::FormatBool(params_[0]->getUnsigned())
     ).str());
 }
 
 void FF7::FieldWalkmeshInstruction::ProcessLINE(CodeGenerator* code_gen, const std::string& entity){
-    float xa = _params[0]->getSigned();
-    float ya = _params[1]->getSigned();
-    float za = _params[2]->getSigned();
-    float xb = _params[3]->getSigned();
-    float yb = _params[4]->getSigned();
-    float zb = _params[5]->getSigned();
+    float xa = params_[0]->getSigned();
+    float ya = params_[1]->getSigned();
+    float za = params_[2]->getSigned();
+    float xb = params_[3]->getSigned();
+    float yb = params_[4]->getSigned();
+    float zb = params_[5]->getSigned();
     // Scale down. TODO: Why this number?
     xa *= 0.00781249709639;
     ya *= 0.00781249709639;

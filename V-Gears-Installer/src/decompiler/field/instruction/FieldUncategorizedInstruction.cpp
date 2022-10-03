@@ -28,14 +28,14 @@ void FF7::FieldUncategorizedInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
-    switch (_opcode){
+    switch (opcode_){
         case OPCODES::MPDSP: code_gen->WriteTodo(md.GetEntityName(), "MPDSP"); break;
         case OPCODES::SETX: code_gen->WriteTodo(md.GetEntityName(), "SETX"); break;
         case OPCODES::GETX: code_gen->WriteTodo(md.GetEntityName(), "GETX"); break;
         case OPCODES::SEARCHX: code_gen->WriteTodo(md.GetEntityName(), "SEARCHX"); break;
         default:
             code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
-              md.GetEntityName(), _address, _opcode)
+              md.GetEntityName(), address_, opcode_)
             );
     }
 }

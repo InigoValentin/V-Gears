@@ -85,7 +85,7 @@ void CodeGenerator::Generate(InstVec& insts, const Graph &graph){
 void CodeGenerator::AddOutputLine(std::string line, bool unindent_before, bool indent_after){
     // Don't generate output in the labels pass, just find
     // instructions that require a label to be outputted.
-    if (!is_label_pass_) cur_group_->_code.push_back(CodeLine(line, unindent_before, indent_after));
+    if (!is_label_pass_) cur_group_->code.push_back(CodeLine(line, unindent_before, indent_after));
 }
 
 void CodeGenerator::WriteTodo(std::string class_name, std::string instruction){
@@ -118,14 +118,14 @@ ARGUMENT_ORDER CodeGenerator::GetBinaryOrder(){return bin_order_;}
 
 void CodeGenerator::ProcessInst(Function& function, InstVec& insts, const InstPtr inst){
     inst->ProcessInst(function, stack_, engine_, this);
-    if (inst->isCondJump()) ProcessCondJumpInst(inst);
+    if (inst->IsCondJump()) ProcessCondJumpInst(inst);
     else if (inst->IsUncondJump()) ProcessUncondJumpInst(function, insts, inst);
 }
 
 void CodeGenerator::ProcessUncondJumpInst(Function& function, InstVec& insts, const InstPtr inst){
-    switch (cur_group_->_type){
-        case kBreakGroupType: AddOutputLine(target_lang_->LoopBreak()); break;
-        case kContinueGroupType: AddOutputLine(target_lang_->LoopContinue()); break;
+    switch (cur_group_->type){
+        case GROUP_TYPE_BREAK: AddOutputLine(target_lang_->LoopBreak()); break;
+        case GROUP_TYPE_CONTINUE: AddOutputLine(target_lang_->LoopContinue()); break;
         default: // Might be a goto.
             {
                 bool print_jump = true;
@@ -135,15 +135,15 @@ void CodeGenerator::ProcessUncondJumpInst(Function& function, InstVec& insts, co
                   target != jump_targets.second && print_jump;
                   ++ target
                 ){
-                    Group* next = cur_group_->_next;
+                    Group* next = cur_group_->next;
                     if (next){
                         // Don't output jump to next vertex.
-                        if (boost::target(*target, graph_) == next->_vertex){
+                        if (boost::target(*target, graph_) == next->vertex){
                             print_jump = false;
                             break;
                         }
                         // Don't output jump if next vertex starts an else block.
-                        if (next->_startElse){
+                        if (next->start_else){
                             print_jump = false;
                             break;
                         }
@@ -156,14 +156,15 @@ void CodeGenerator::ProcessUncondJumpInst(Function& function, InstVec& insts, co
                           ++ target_it
                         ){
                             // Don't output jump to while loop that has jump to next vertex.
-                            if (boost::target(*target_it, graph_) == next->_vertex) print_jump = false;
+                            if (boost::target(*target_it, graph_) == next->vertex)
+                                print_jump = false;
                         }
                         if (print_jump){
                             // Check if this instruction is the last instruction in the function
                             // and its an uncond jump.
                             if (
-                              cur_group_->_type == kDoWhileCondGroupType
-                              && inst->_address == function.end_addr
+                              cur_group_->type == GROUP_TYPE_DO_WHILE
+                              && inst->GetAddress() == function.end_addr
                               && inst->IsUncondJump()
                             ){
                                 print_jump = false;
@@ -180,8 +181,8 @@ void CodeGenerator::ProcessUncondJumpInst(Function& function, InstVec& insts, co
                     if (is_label_pass_){
                         // Mark the goto target.
                         for (auto& i : insts){
-                            if (i->_address == dst_addr){
-                                i->mLabelRequired = true;
+                            if (i->GetAddress() == dst_addr){
+                                i->SetLabelRequired(true);
                                 break;
                             }
                         }
@@ -195,37 +196,37 @@ void CodeGenerator::ProcessUncondJumpInst(Function& function, InstVec& insts, co
 
 void CodeGenerator::ProcessCondJumpInst(const InstPtr inst){
     std::stringstream s;
-    switch (cur_group_->_type){
-        case kIfCondGroupType:
-            if (cur_group_->_startElse && cur_group_->_code.size() == 1){
+    switch (cur_group_->type){
+        case GROUP_TYPE_IF:
+            if (cur_group_->start_else && cur_group_->code.size() == 1){
                 OutEdgeRange oer = boost::out_edges(cur_vertex_, graph_);
                 bool coalesce_else = false;
                 for (OutEdgeIterator oe = oer.first; oe != oer.second; ++ oe){
-                    GroupPtr oGr = GET(boost::target(*oe, graph_))->_prev;
+                    GroupPtr oGr = GET(boost::target(*oe, graph_))->prev;
                     if (
-                      std::find(oGr->_endElse.begin(), oGr->_endElse.end(), cur_group_.get())
-                      != oGr->_endElse.end()
+                      std::find(oGr->end_else.begin(), oGr->end_else.end(), cur_group_.get())
+                      != oGr->end_else.end()
                     ){
                         coalesce_else = true;
                     }
                 }
                 if (coalesce_else){
-                    cur_group_->_code.clear();
-                    cur_group_->_coalescedElse = true;
+                    cur_group_->code.clear();
+                    cur_group_->coalesced_else = true;
                     s << target_lang_->EndBlock(LuaLanguage::TO_ELSE_BLOCK)
                       << " " << target_lang_->Else() << " ";
                 }
             }
             s << target_lang_->If(true) << stack_.pop()->negate() << target_lang_->If(false);
-            AddOutputLine(s.str(), cur_group_->_coalescedElse, true);
+            AddOutputLine(s.str(), cur_group_->coalesced_else, true);
             break;
-        case kWhileCondGroupType:
+        case GROUP_TYPE_WHILE:
             s << target_lang_->WhileHeader(true) << stack_.pop()->negate()
               << target_lang_->WhileHeader(false) << " "
               << target_lang_->StartBlock(LuaLanguage::BEGIN_WHILE);
             AddOutputLine(s.str(), false, true);
             break;
-        case kDoWhileCondGroupType:
+        case GROUP_TYPE_DO_WHILE:
             s << target_lang_->EndBlock(LuaLanguage::END_WHILE) <<  " "
               << target_lang_->WhileHeader(true) << stack_.pop()
               << target_lang_->WhileHeader(false);
@@ -282,7 +283,7 @@ void CodeGenerator::GeneratePass(InstVec& insts, const Graph& graph){
         while (!dfs_stack.empty()){
             DFSEntry e = dfs_stack.pop();
             GroupPtr tmp = GET(e.first);
-            if ((*tmp->start_)->_address > (*last_group->start_)->_address) last_group = tmp;
+            if ((*tmp->start)->GetAddress() > (*last_group->start)->GetAddress()) last_group = tmp;
             stack_ = e.second;
             GraphVertex v = e.first;
             Process(fn->second, insts, v);
@@ -303,20 +304,20 @@ void CodeGenerator::GeneratePass(InstVec& insts, const Graph& graph){
         // Print output.
         GroupPtr p = GET(entry_point);
         while (p != NULL){
-            for (auto it = p->_code.begin(); it != p->_code.end(); ++ it){
-                if (it->_unindentBefore){
+            for (auto it = p->code.begin(); it != p->code.end(); ++ it){
+                if (it->unindent_before){
                     assert(indent_level_ > 0);
                     indent_level_--;
                 }
-                if (OutputOnlyRequiredLabels()) output_ << IndentString(it->_line) << std::endl;
+                if (OutputOnlyRequiredLabels()) output_ << IndentString(it->line) << std::endl;
                 else{
                     output_ << (
-                      boost::format("%08X: %s") % (*p->start_)->_address % IndentString(it->_line)
+                      boost::format("%08X: %s") % (*p->start)->GetAddress() % IndentString(it->line)
                     ) << std::endl;
                 }
-                if (it->_indentAfter) indent_level_++;
+                if (it->indent_after) indent_level_++;
             }
-            p = p->_next;
+            p = p->next;
         }
     }
 }
@@ -326,7 +327,7 @@ void CodeGenerator::Process(Function& function, InstVec& insts, GraphVertex vert
     cur_group_ = GET(vertex);
 
     // Check if we should add else start
-    if (cur_group_->_startElse){
+    if (cur_group_->start_else){
         AddOutputLine(
           target_lang_->EndBlock(LuaLanguage::TO_ELSE_BLOCK) + " " + target_lang_->Else()
           + " " + target_lang_->StartBlock(LuaLanguage::BEGIN_ELSE), true, true
@@ -337,39 +338,39 @@ void CodeGenerator::Process(Function& function, InstVec& insts, GraphVertex vert
     for (InEdgeIterator ie = ier.first; ie != ier.second; ++ ie){
         GraphVertex in = boost::source(*ie, graph_);
         GroupPtr in_group = GET(in);
-        if (!boost::get(boost::edge_attribute, graph_, *ie)._isJump || in_group->_stackLevel == -1)
+        if (!boost::get(boost::edge_attribute, graph_, *ie).is_jump || in_group->stack_level == -1)
             continue;
-        switch (in_group->_type){
-            case kDoWhileCondGroupType:
+        switch (in_group->type){
+            case GROUP_TYPE_DO_WHILE:
                 AddOutputLine(target_lang_->DoLoopHeader(), false, true);
                 break;
-            case kIfCondGroupType:
-                if (!cur_group_->_startElse)
+            case GROUP_TYPE_IF:
+                if (!cur_group_->start_else)
                     AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_IF), true, false);
                 break;
-            case kWhileCondGroupType:
+            case GROUP_TYPE_WHILE:
                 AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_WHILE), true, false);
                 break;
             default:
                 break;
         }
     }
-    ConstInstIterator it = cur_group_->start_;
+    ConstInstIterator it = cur_group_->start;
     do{
         // If we only want to write labels that targets of goto's then check
         // if this is the pass after we've setup mLabelRequired on each
         // instruction. If this is set then it needs a label so write one out.
-        if (OutputOnlyRequiredLabels() && !is_label_pass_ && (*it)->mLabelRequired)
-            AddOutputLine(target_lang_->Label((*it)->_address));
+        if (OutputOnlyRequiredLabels() && !is_label_pass_ && (*it)->LabelRequired())
+            AddOutputLine(target_lang_->Label((*it)->GetAddress()));
         ProcessInst(function, insts, *it);
-    } while (it++ != cur_group_->end_);
+    } while (it++ != cur_group_->end);
     // Add else end if necessary
     for (
-      ElseEndIterator else_it = cur_group_->_endElse.begin();
-      else_it != cur_group_->_endElse.end();
+      ElseEndIterator else_it = cur_group_->end_else.begin();
+      else_it != cur_group_->end_else.end();
       ++ else_it
     ){
-        if (!(*else_it)->_coalescedElse)
+        if (!(*else_it)->coalesced_else)
             AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_IF_ELSE_CHAIN), true, false);
     }
 }

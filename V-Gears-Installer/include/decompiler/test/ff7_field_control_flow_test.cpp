@@ -13,8 +13,8 @@ static uint32 Is3Nops(InstVec& insts, uint32& pos)
     for (int i = 0; i < 3; i++)
     {
         pos++;
-        EXPECT_EQ(insts[pos]->_opcode, FF7::eOpcodes::NOP);
-        EXPECT_EQ(insts[pos]->_params.size(), 0);
+        EXPECT_EQ(insts[pos]->opcode_, FF7::eOpcodes::NOP);
+        EXPECT_EQ(insts[pos]->params_.size(), 0);
     }
     return insts[pos]->_address;
 }
@@ -26,8 +26,8 @@ static void CheckForwardJump(FF7::eOpcodes opCode, size_t paramsSize, InstVec& i
 {
     pos++;
     const InstPtr& jumpInst = insts[pos];
-    ASSERT_EQ(jumpInst->_opcode, opCode);
-    ASSERT_EQ(jumpInst->_params.size(), paramsSize);
+    ASSERT_EQ(jumpInst->opcode_, opCode);
+    ASSERT_EQ(jumpInst->params_.size(), paramsSize);
 
     const uint32 lastNopAddr = Is3Nops(insts, pos);
     ASSERT_EQ(jumpInst->GetDestAddress(), lastNopAddr);
@@ -37,8 +37,8 @@ static void CheckForwardJump(FF7::eOpcodes opCode, size_t paramsSize, InstVec& i
 static uint32 IsNop(InstVec& insts, uint32& pos)
 {
     pos++;
-    EXPECT_EQ(insts[pos]->_opcode, FF7::eOpcodes::NOP);
-    EXPECT_EQ(insts[pos]->_params.size(), 0);
+    EXPECT_EQ(insts[pos]->opcode_, FF7::eOpcodes::NOP);
+    EXPECT_EQ(insts[pos]->params_.size(), 0);
     return insts[pos]->_address;
 }
 
@@ -58,8 +58,8 @@ static void CheckBackwardJump(FF7::eOpcodes opCode, size_t paramsSize, InstVec& 
     pos++;
     const InstPtr& jumpInst = insts[pos];
 
-    ASSERT_EQ(jumpInst->_opcode, opCode);
-    ASSERT_EQ(jumpInst->_params.size(), paramsSize);
+    ASSERT_EQ(jumpInst->opcode_, opCode);
+    ASSERT_EQ(jumpInst->params_.size(), paramsSize);
     ASSERT_EQ(jumpInst->GetDestAddress(), firstNopAddr);
 }
 
@@ -78,8 +78,8 @@ TEST(FF7Field, ControlFlow)
     std::cout << std::endl;
 
     uint32 pos = 0;
-    ASSERT_EQ(insts[pos]->_opcode, FF7::eOpcodes::RET);
-    ASSERT_EQ(insts[pos]->_params.size(), 0);
+    ASSERT_EQ(insts[pos]->opcode_, FF7::eOpcodes::RET);
+    ASSERT_EQ(insts[pos]->params_.size(), 0);
 
     CheckForwardJump(FF7::eOpcodes::IFUB, 6, insts, pos);
     CheckForwardJump(FF7::eOpcodes::IFSWL, 6, insts, pos);

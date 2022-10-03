@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "decompiler/instruction.h"
+#include "decompiler/instruction/Instruction.h"
 #include "decompiler/field/FieldEngine.h"
 
 namespace FF7{

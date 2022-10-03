@@ -18,6 +18,7 @@
 #include <set>
 #include "CodeGenerator.h"
 #include "Disassembler.h"
+#include "Graph.h"
 
 /**
  * Structure representing a function.

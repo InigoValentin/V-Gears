@@ -116,7 +116,7 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
           instruction != function->second.end();
           ++ instruction
         ){
-            if ((*instruction)->isCondJump() || (*instruction)->IsUncondJump()){
+            if ((*instruction)->IsCondJump() || (*instruction)->IsUncondJump()){
                 auto targetAddr = (*instruction)->GetDestAddress();
                 auto label = labels.find(targetAddr);
                 if (label == labels.end()) labels.insert({targetAddr, InstVec()});
@@ -131,12 +131,12 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
           instruction != function->second.end();
           ++instruction
         ){
-            auto label = labels.find((*instruction)->_address);
+            auto label = labels.find((*instruction)->GetAddress());
             if (label != labels.end()){
                 bool needs_label = false;
                 bool needs_new_line = false;
                 for (auto origin = label->second.begin(); origin != label->second.end(); ++ origin){
-                    if ((*origin)->isCondJump()){
+                    if ((*origin)->IsCondJump()){
                         AddOutputLine("end", true, false);
                         needs_new_line = true;
                     }
@@ -152,13 +152,13 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                 AddOutputLine("end -- end if", true, false);
                 end_needed = false;
             }
-            if ((*instruction)->isCondJump()){
+            if ((*instruction)->IsCondJump()){
                 AddOutputLine(
                   (boost::format("if (%s) then") % stack.pop()->getString()).str(), false, true
                 );
                 // If the next instruction is the last in the function, mark the next pass to
                 // add an 'end' after the instruction to close the if.
-                if ((*(instruction + 1))->_address == (*(function->second.back()))._address)
+                if ((*(instruction + 1))->GetAddress() == (*(function->second.back())).GetAddress())
                     end_needed = true;
             }
             else if ((*instruction)->IsUncondJump()){
@@ -175,7 +175,7 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                 // Prevent backward jumps in the on_start script.
                 else if (
                   "on_start" == function->first.name
-                  && (*instruction)->GetDestAddress() <= (*instruction)->_address
+                  && (*instruction)->GetDestAddress() <= (*instruction)->GetAddress()
                 ){
                     AddOutputLine("-- No infinite loops in the on_start script.");
                     AddOutputLine((
@@ -192,8 +192,8 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
         }
         // Add missing return:
         if (
-          "return 0" != lines_.at(lines_.size() - 1)._line
-          && "do return 0 end" != lines_.at(lines_.size() - 1)._line
+          "return 0" != lines_.at(lines_.size() - 1).line
+          && "do return 0 end" != lines_.at(lines_.size() - 1).line
         ){
             AddOutputLine("do return 0 end", false, false);
         }
@@ -201,11 +201,11 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
     }
 
     for (auto i = lines_.begin(); i != lines_.end(); ++i){
-        if (i->_unindentBefore && indent_level_ > 0){
+        if (i->unindent_before && indent_level_ > 0){
             indent_level_ --;
         }
-        output_ << IndentString(i->_line) << std::endl;
-        if (i->_indentAfter) indent_level_++;
+        output_ << IndentString(i->line) << std::endl;
+        if (i->indent_after) indent_level_++;
     }
 }
 
@@ -230,7 +230,7 @@ void FF7::FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
 void FF7::FieldCodeGenerator::OnStartFunction(const Function& func){
     AddOutputLine("--[[");
     for (const auto& inst : insts_){
-        if (inst->_address >= func.start_addr && inst->_address <= func.end_addr){
+        if (inst->GetAddress() >= func.start_addr && inst->GetAddress() <= func.end_addr){
             std::stringstream output;
             output << inst;
             AddOutputLine(output.str());
@@ -278,15 +278,17 @@ const std::string FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
   const std::string& entity, uint32 address, const Instruction& instruction
 ){
     std::stringstream parameterList;
-    for (auto i = instruction._params.begin(); i != instruction._params.end(); ++ i){
-        if (i != instruction._params.begin()) parameterList << ", ";
+    //for (auto i = instruction._params.begin(); i != instruction._params.end(); ++ i){
+    for (auto i = instruction.GetParams().begin(); i != instruction.GetParams().end(); ++ i){
+        //if (i != instruction._params.begin()) parameterList << ", ";
+        if (i != instruction.GetParams().begin()) parameterList << ", ";
         parameterList << *i;
     }
     return(
       boost::format(
         "-- log:log(\"In entity \\\"%1%\\\", address 0x%2$08x: "
         "instruction %3%(%4%) not implemented\")"
-        ) % entity % address % instruction._name % parameterList.str()
+        ) % entity % address % instruction.GetName() % parameterList.str()
       ).str();
 }
 

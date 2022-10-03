@@ -31,7 +31,7 @@
 FF7::WorldEngine::BankValue::BankValue(std::string name) : VarValue(name){}
 
 FF7::WorldEngine::WorldEngine(int script_number) : script_number_(script_number){
-    setOutputStackEffect(true);
+    SetOutputStackEffect(true);
 }
 
 std::unique_ptr<Disassembler> FF7::WorldEngine::GetDisassembler(InstVec &insts){

@@ -28,6 +28,6 @@
 void FF7::WorldBinaryEqualStackInstruction::ProcessInst(
     Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
-    _codeGenData = "==";
+    code_gen_data_ = "==";
     BinaryOpStackInstruction::ProcessInst(function, stack, engine, code_gen);
 }

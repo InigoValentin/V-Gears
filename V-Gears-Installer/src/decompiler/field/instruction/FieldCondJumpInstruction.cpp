@@ -29,22 +29,22 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
 ){
     FF7::FieldCodeGenerator* cg = static_cast<FF7::FieldCodeGenerator*>(code_gen);
     std::string func_name;
-    if (_opcode == OPCODES::IFKEYON) func_name = "entity_manager:is_key_on";
-    else if (_opcode == OPCODES::IFKEYOFF) func_name = "entity_manager:is_key_off";
-    else if (_opcode == OPCODES::IFKEY) func_name = "Key";
-    else if (_opcode == OPCODES::IFMEMBQ) func_name = "IFMEMBQ";
-    else if (_opcode == OPCODES::IFPRTYQ) func_name = "IFPRTYQ";
+    if (opcode_ == OPCODES::IFKEYON) func_name = "entity_manager:is_key_on";
+    else if (opcode_ == OPCODES::IFKEYOFF) func_name = "entity_manager:is_key_off";
+    else if (opcode_ == OPCODES::IFKEY) func_name = "Key";
+    else if (opcode_ == OPCODES::IFMEMBQ) func_name = "IFMEMBQ";
+    else if (opcode_ == OPCODES::IFPRTYQ) func_name = "IFPRTYQ";
 
     // If condition is a function, add and stop.
     if (!func_name.empty()){
-        uint32 param = _params[0]->getUnsigned();
+        uint32 param = params_[0]->getUnsigned();
         // Special cases. The first parameter of IFKEY, IFKEYON and IFKEYOFF
         // can be ORed to get the individual keys, but there are two invalid
         // ones: 512 and 1024. They must be XORed.
         if (
-          _opcode == OPCODES::IFKEY
-          || _opcode == OPCODES::IFKEYON
-          || _opcode == OPCODES::IFKEYOFF
+          opcode_ == OPCODES::IFKEY
+          || opcode_ == OPCODES::IFKEYON
+          || opcode_ == OPCODES::IFKEYOFF
         ){
             if (param >= 1024) param = param ^ 1024;
             if (param >= 512) param = param ^ 512;
@@ -54,12 +54,12 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
         return;
     }
     std::string op;
-    uint32 type = _params[4]->getUnsigned();
+    uint32 type = params_[4]->getUnsigned();
     const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[0]->getUnsigned(), _params[2]->getUnsigned()
+      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getUnsigned()
     );
     const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), _params[1]->getUnsigned(), _params[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
     );
 
     switch (type){
@@ -74,7 +74,7 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
         case 8: op = "|"; break;
         case 9:
             {
-                op = "bit(" + _params[0]->getString() + ", " + _params[2]->getString()
+                op = "bit(" + params_[0]->getString() + ", " + params_[2]->getString()
                   + ", " + destination + ") == 1";
                 ValuePtr v = new UnqotedStringValue(op);
                 stack.push(v);
@@ -82,13 +82,13 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
             return;
         case 0xA:
             {
-                op = "bit(" + _params[0]->getString() + ", " + _params[2]->getString()
+                op = "bit(" + params_[0]->getString() + ", " + params_[2]->getString()
                   + ", " + destination + ") == 0";
                 ValuePtr v = new UnqotedStringValue(op);
                 stack.push(v);
             }
             return;
-        default: throw UnknownConditionalOperatorException(_address, type);
+        default: throw UnknownConditionalOperatorException(address_, type);
     }
     ValuePtr v = new BinaryOpValue(new VarValue(source), new VarValue(destination), op);
     stack.push(v);
@@ -97,7 +97,7 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
 uint32 FF7::FieldCondJumpInstruction::GetDestAddress() const{
     uint32 params_size = 0;
     uint32 jump_param_index = 5;
-    switch (_opcode){
+    switch (opcode_){
         case OPCODES::IFUB: params_size = 5; break;
         case OPCODES::IFUBL: params_size = 5; break;
         case OPCODES::IFSW: params_size = 7; break;
@@ -115,9 +115,9 @@ uint32 FF7::FieldCondJumpInstruction::GetDestAddress() const{
             params_size = 2;
             jump_param_index = 1;
             break;
-        default: throw UnknownJumpTypeException(_address, _opcode);
+        default: throw UnknownJumpTypeException(address_, opcode_);
     }
-    return _address + _params[jump_param_index]->getUnsigned() + params_size;
+    return address_ + params_[jump_param_index]->getUnsigned() + params_size;
 }
 
 std::ostream& FF7::FieldCondJumpInstruction::Print(std::ostream &output) const{
