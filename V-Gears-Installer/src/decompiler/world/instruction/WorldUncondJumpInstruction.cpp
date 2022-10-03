@@ -44,7 +44,7 @@ std::ostream& FF7::WorldUncondJumpInstruction::Print(std::ostream &output) const
 
 
 void FF7::WorldUncondJumpInstruction::ProcessInst(
-    Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+  Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
     // TODO
 }

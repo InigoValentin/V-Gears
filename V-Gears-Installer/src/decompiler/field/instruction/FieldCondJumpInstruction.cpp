@@ -50,7 +50,7 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
             if (param >= 512) param = param ^ 512;
         }
         ValuePtr v = new UnqotedStringValue(func_name + "(" + std::to_string(param) + ")");
-        stack.push(v);
+        stack.Push(v);
         return;
     }
     std::string op;
@@ -77,7 +77,7 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
                 op = "bit(" + params_[0]->getString() + ", " + params_[2]->getString()
                   + ", " + destination + ") == 1";
                 ValuePtr v = new UnqotedStringValue(op);
-                stack.push(v);
+                stack.Push(v);
             }
             return;
         case 0xA:
@@ -85,13 +85,13 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
                 op = "bit(" + params_[0]->getString() + ", " + params_[2]->getString()
                   + ", " + destination + ") == 0";
                 ValuePtr v = new UnqotedStringValue(op);
-                stack.push(v);
+                stack.Push(v);
             }
             return;
         default: throw UnknownConditionalOperatorException(address_, type);
     }
     ValuePtr v = new BinaryOpValue(new VarValue(source), new VarValue(destination), op);
-    stack.push(v);
+    stack.Push(v);
 }
 
 uint32 FF7::FieldCondJumpInstruction::GetDestAddress() const{

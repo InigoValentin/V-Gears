@@ -27,8 +27,8 @@
 #include "decompiler/world/instruction/WorldSubStackInstruction.h"
 #include "decompiler/world/instruction/WorldUncondJumpInstruction.h"
 
-FF7::WorldDisassembler::WorldDisassembler(WorldEngine*, InstVec &insts, int script_number)
-  : SimpleDisassembler(insts), script_number_(script_number){}
+FF7::WorldDisassembler::WorldDisassembler(WorldEngine*, InstVec &insts, int script_number):
+  Disassembler(insts), script_number_(script_number){}
 
 FF7::WorldDisassembler::~WorldDisassembler(){}
 

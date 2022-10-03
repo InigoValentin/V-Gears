@@ -20,10 +20,10 @@
 #include <memory>
 #include <boost/intrusive_ptr.hpp>
 
+#include "DecompilerException.h"
 #include "Graph.h"
 #include "LuaLanguage.h"
 #include "value.h"
-#include "unknown_opcode_exception.h"
 
 
 class Engine;

@@ -82,7 +82,7 @@ namespace FF7{
                      *
                      * @param index[in] Function index.
                      * @return Function name.
-                     * @throws InternalDecompilerError if there is no function
+                     * @throws DecompilerException if there is no function
                      * with the specified index.
                      * @todo What is a function here? An Opcode?
                      */
@@ -322,7 +322,7 @@ namespace FF7{
              * Retrieves an entity.
              *
              * @param index[in] Index of the entity to retrieve.
-             * @throws InternalDecompilerError if there is no entity at the
+             * @throws DecompilerException if there is no entity at the
              * specified index.
              */
             const Entity& EntityByIndex(size_t index) const;

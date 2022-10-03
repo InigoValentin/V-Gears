@@ -26,7 +26,7 @@
 #include "decompiler/world/WorldDisassembler.h"
 
 void FF7::WorldStackInstruction::ProcessInst(
-    Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+  Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
     // TODO
 }

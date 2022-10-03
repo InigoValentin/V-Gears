@@ -27,5 +27,5 @@
 void FF7::WorldLoadInstruction::ProcessInst(
   Function &function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
-    stack.push(new VarValue(params_[0]->getString()));
+    stack.Push(new VarValue(params_[0]->getString()));
 }

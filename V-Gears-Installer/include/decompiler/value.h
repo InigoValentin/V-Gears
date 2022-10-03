@@ -30,8 +30,8 @@
 
 #include "common/scummsys.h"
 #include "RefCounted.h"
-#include "stack.h"
-#include "wrongtype.h"
+#include "Stack.h"
+#include "DecompilerException.h"
 
 class Value;
 

@@ -31,72 +31,72 @@ void FF7::WorldKernelCallInstruction::ProcessInst(
     std::string func;
     switch (opcode_){
         case 0x203: func = "return;"; break;
-        case 0x317: func = "TriggerBattle(" + stack.pop()->getString() + ");"; break;
+        case 0x317: func = "TriggerBattle(" + stack.Pop()->getString() + ");"; break;
         case 0x324:
             // x, y, w, h
             func = "SetWindowDimensions("
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ", "
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ", "
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x32D: func = "WaitForWindowReady();"; break;
-        case 0x325: func = "SetWindowMessage(" + stack.pop()->getString() + ");"; break;
+        case 0x325: func = "SetWindowMessage(" + stack.Pop()->getString() + ");"; break;
         case 0x333:
             func = "Unknown333("
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x308:
             func = "SetActiveEntityMeshCoordinates("
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x309:
             func = "SetActiveEntityMeshCoordinatesInMesh("
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x32e: func = "WaitForMessageAcknowledge();"; break;
         case 0x32c:
             // Mode, Permanency.
             func = "SetWindowParameters("
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x318:
             func = "EnterFieldScene("
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x348:
-            func = "FadeIn(" + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+            func = "FadeIn(" + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x33b:
-            func = "FadeOut(" + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+            func = "FadeOut(" + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x310:
             func = "SetActivePoint("
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x311:
             func = "SetLightMeshCoordinates("
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
         case 0x312:
             func = "SetLightMeshCoordinatesInMesh("
-              + stack.pop()->getString() + ", " + stack.pop()->getString() + ");";
+              + stack.Pop()->getString() + ", " + stack.Pop()->getString() + ");";
             break;
-        case 0x31D: func = "PlaySoundEffect(" + stack.pop()->getString() + ");"; break;
-        case 0x328: func = "SetActiveEntityDirection(" + stack.pop()->getString() + ");"; break;
+        case 0x31D: func = "PlaySoundEffect(" + stack.Pop()->getString() + ");"; break;
+        case 0x328: func = "SetActiveEntityDirection(" + stack.Pop()->getString() + ");"; break;
         case 0x336: // Honor walk mesh.
         case 0x303:
-            func = "SetActiveEntityMovespeed(" + stack.pop()->getString() + ");";
+            func = "SetActiveEntityMovespeed(" + stack.Pop()->getString() + ");";
             break;
         case 0x304:
-            func = "SetActiveEntityDirectionAndFacing(" + stack.pop()->getString() + ");";
+            func = "SetActiveEntityDirectionAndFacing(" + stack.Pop()->getString() + ");";
             break;
-        case 0x32b: func = "SetBattleLock(" + stack.pop()->getString() + ");"; break;
-        case 0x305: func = "SetWaitFrames(" + stack.pop()->getString() + ");"; break;
-        case 0x33e: func = "Unknown_AKAO(" + stack.pop()->getString() + ");"; break;
+        case 0x32b: func = "SetBattleLock(" + stack.Pop()->getString() + ");"; break;
+        case 0x305: func = "SetWaitFrames(" + stack.Pop()->getString() + ");"; break;
+        case 0x33e: func = "Unknown_AKAO(" + stack.Pop()->getString() + ");"; break;
         case 0x306: func = "Wait();"; break;
-        case 0x350: func = "SetMeteorTexture(" + stack.pop()->getString() + ");"; break;
+        case 0x350: func = "SetMeteorTexture(" + stack.Pop()->getString() + ");"; break;
         case 0x34b:
             {
-                std::string type = stack.pop()->getString();
+                std::string type = stack.Pop()->getString();
                 switch (std::stoi(type)){
                     case 0: type = "yellow"; break;
                     case 1: type = "green"; break;
@@ -109,7 +109,7 @@ void FF7::WorldKernelCallInstruction::ProcessInst(
             break;
         case 0x34c:
             {
-                std::string type = stack.pop()->getString();
+                std::string type = stack.Pop()->getString();
                 switch (std::stoi(type)){
                     case 0: type = "red"; break;
                     case 1: type = "blue"; break;
@@ -122,7 +122,7 @@ void FF7::WorldKernelCallInstruction::ProcessInst(
             break;
         case 0x349:
             {
-                std::string type = stack.pop()->getString();
+                std::string type = stack.Pop()->getString();
                 std::string comment = "// ";
                 switch (std::stoi(type)){
                     case 0: comment += "before temple of the ancients,"; break;
@@ -137,7 +137,7 @@ void FF7::WorldKernelCallInstruction::ProcessInst(
             break;
         case 0x300:
             {
-                std::string type = stack.pop()->getString();
+                std::string type = stack.Pop()->getString();
                 std::string comment = "// ";
                 try{
                     switch (std::stoi(type)){
@@ -174,7 +174,7 @@ void FF7::WorldKernelCallInstruction::ProcessInst(
                 func = "LoadModel(" + type + "); " + comment;
             }
             break;
-        case 0x307: func = "SetControlLock(" + stack.pop()->getString() + ");"; break;
+        case 0x307: func = "SetControlLock(" + stack.Pop()->getString() + ");"; break;
         case 0x30c: func = "EnterVehicle();"; break;
         default: func = "kernel_unknown_" + AddressValue(opcode_).getString() + "();"; break;
     }

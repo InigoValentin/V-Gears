@@ -657,7 +657,7 @@ static void FF7PcFieldToVGearsField(
               << field->getName() << "for writing." << std::endl;
         }
     }
-    catch (const ::InternalDecompilerError& ex){
+    catch (const ::DecompilerException& ex){
         write_output_line(
           "[ERROR] Internal decompiler error in field " + field->getName() + ": " + ex.what()
         );
@@ -1108,8 +1108,8 @@ static void CollectSpawnPoints(
           field->getName(), raw_field_data, formatter, "", "EntityContainer = {}\n\n"
         );
     }
-    catch (const ::InternalDecompilerError& ex){
-        std::cerr << "CollectSpawnPoints: InternalDecompilerError: " << ex.what() << std::endl;
+    catch (const ::DecompilerException& ex){
+        std::cerr << "CollectSpawnPoints: DecompilerException: " << ex.what() << std::endl;
     }
     const VGears::TriggersFilePtr& triggers = field->GetTriggers();
     const auto& gateways = triggers->GetGateways();

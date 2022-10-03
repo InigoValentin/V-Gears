@@ -26,11 +26,11 @@
 #include "decompiler/world/WorldDisassembler.h"
 
 void FF7::WorldStoreInstruction::ProcessInst(
-    Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+  Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
-    std::string value = stack.pop()->getString();
+    std::string value = stack.Pop()->getString();
     // If the bank address is from a load bank instruction, then only
     // the bank address is needed, not whats *at* the bank address.
-    ValuePtr bank_addr = stack.pop();
+    ValuePtr bank_addr = stack.Pop();
     code_gen->AddOutputLine("Write(" + bank_addr->getString() + ", " + value + ");");
 }

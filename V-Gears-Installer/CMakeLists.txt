@@ -50,12 +50,10 @@ set(HEADER_FILES
     include/decompiler/instruction/UnaryOpPrefixStackInstruction.h
     include/decompiler/instruction/UncondJumpInstruction.h
     include/decompiler/ObjectFactory.h
-    include/decompiler/refcounted.h
-    include/decompiler/simple_disassembler.h
-    include/decompiler/stack.h
-    include/decompiler/unknown_opcode_exception.h
+    include/decompiler/RefCounted.h
+    include/decompiler/Stack.h
+    include/decompiler/DecompilerException.h
     include/decompiler/value.h
-    include/decompiler/wrongtype.h
     include/decompiler/field/instruction/FieldBackgroundInstruction.h
     include/decompiler/field/instruction/FieldCameraInstruction.h
     include/decompiler/field/instruction/FieldCondJumpInstruction.h
@@ -125,8 +123,7 @@ set(SOURCE_FILES
     src/decompiler/instruction/UnaryOpPostfixStackInstruction.cpp
     src/decompiler/instruction/UnaryOpPrefixStackInstruction.cpp
     src/decompiler/instruction/UncondJumpInstruction.cpp
-    src/decompiler/simple_disassembler.cpp
-    src/decompiler/unknown_opcode_exception.cpp
+    src/decompiler/DecompilerException.cpp
     src/decompiler/value.cpp
     src/decompiler/field/instruction/FieldBackgroundInstruction.cpp
     src/decompiler/field/instruction/FieldCameraInstruction.cpp

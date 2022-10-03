@@ -15,13 +15,13 @@
 
 #pragma once
 
-#include "decompiler/simple_disassembler.h"
+#include "decompiler/Disassembler.h"
 
 namespace FF7{
 
     class WorldEngine;
 
-    class WorldDisassembler : public SimpleDisassembler{
+    class WorldDisassembler : public Disassembler{
 
         public:
 
@@ -71,7 +71,7 @@ namespace FF7{
                 this->insts_.back()->SetStackChange(0);
                 this->insts_.back()->SetName(std::string(name));
                 this->insts_.back()->SetCodeGenData("");
-                this->readParams(this->insts_.back(), argument_format);
+                this->ReadParams(this->insts_.back(), argument_format);
             }
 
             /**

@@ -18,7 +18,8 @@
 #include <fstream> 
 #include <sstream>
 #include <iterator>
-#include "decompiler/unknown_opcode_exception.h"
+
+#include "decompiler/DecompilerException.h"
 
 /**
  * Reader for binary files.
@@ -68,10 +69,10 @@ class BinaryReader{
          * Moves the stream cursor.
          *
          * @param position[in] Position (offset) of the cursor.
-         * @throws InternalDecompilerError if the position is invalid.
+         * @throws DecompilerException if the position is invalid.
          */
         void Seek(unsigned int position){
-            if (!stream_.seekg(position)) throw InternalDecompilerError();
+            if (!stream_.seekg(position)) throw DecompilerException();
         }
 
         /**
@@ -87,7 +88,7 @@ class BinaryReader{
          * It advances the stream cursor.
          *
          * @return Read bits.
-         * @throws InternalDecompilerError if there is not enough data.
+         * @throws DecompilerException if there is not enough data.
          */
         unsigned int ReadU32(){return InternalRead<unsigned int>();}
 
@@ -97,7 +98,7 @@ class BinaryReader{
          * It advances the stream cursor.
          *
          * @return Read bits.
-         * @throws InternalDecompilerError if there is not enough data.
+         * @throws DecompilerException if there is not enough data.
          */
         signed int ReadS32(){return InternalRead<signed int>();}
 
@@ -107,7 +108,7 @@ class BinaryReader{
          * It advances the stream cursor.
          *
          * @return Read bits.
-         * @throws InternalDecompilerError if there is not enough data.
+         * @throws DecompilerException if there is not enough data.
          */
         signed short int ReadS16(){return InternalRead<signed short int>();}
 
@@ -117,7 +118,7 @@ class BinaryReader{
          * It advances the stream cursor.
          *
          * @return Read bits.
-         * @throws InternalDecompilerError if there is not enough data.
+         * @throws DecompilerException if there is not enough data.
          */
         unsigned short int ReadU16(){return InternalRead<unsigned short int>();}
 
@@ -127,7 +128,7 @@ class BinaryReader{
          * It advances the stream cursor.
          *
          * @return Read bits.
-         * @throws InternalDecompilerError if there is not enough data.
+         * @throws DecompilerException if there is not enough data.
          */
         unsigned char ReadU8(){return InternalRead<unsigned char>();}
 
@@ -137,7 +138,7 @@ class BinaryReader{
          * It advances the stream cursor.
          *
          * @return Read bits.
-         * @throws InternalDecompilerError if there is not enough data.
+         * @throws DecompilerException if there is not enough data.
          */
         signed char ReadS8(){return InternalRead<signed char>();}
 
@@ -149,12 +150,12 @@ class BinaryReader{
          * It advances the stream cursor.
          *
          * @return Read bits.
-         * @throws InternalDecompilerError if there is not enough data.
+         * @throws DecompilerException if there is not enough data.
          */
         template<class T> T InternalRead(){
             T r = {};
             if (!stream_.read(reinterpret_cast<char*>(&r), sizeof(r)))
-                throw InternalDecompilerError();
+                throw DecompilerException();
             return r;
         }
 

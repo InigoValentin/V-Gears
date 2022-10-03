@@ -62,7 +62,7 @@ size_t FF7::FieldEngine::Entity::GetIndex() const{return index_;}
 
 std::string FF7::FieldEngine::Entity::FunctionByIndex(size_t index) const{
     auto it = functions_.find(index);
-    if (it == std::end(functions_)) throw InternalDecompilerError();
+    if (it == std::end(functions_)) throw DecompilerException();
     return it->second;
 }
 
@@ -230,7 +230,7 @@ bool FF7::FieldEngine::EntityIsLine(size_t entity_index){
 
 const FF7::FieldEngine::Entity& FF7::FieldEngine::EntityByIndex(size_t index) const{
     auto it = entity_index_map_.find(index);
-    if (it == std::end(entity_index_map_)) throw InternalDecompilerError();
+    if (it == std::end(entity_index_map_)) throw DecompilerException();
     return it->second;
 }
 

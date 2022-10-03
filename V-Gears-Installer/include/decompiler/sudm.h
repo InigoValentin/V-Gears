@@ -18,7 +18,8 @@
 #include <map>
 #include <vector>
 #include <string>
-#include "unknown_opcode_exception.h"
+
+#include "DecompilerException.h"
 
 namespace SUDM{
 
@@ -232,7 +233,7 @@ namespace SUDM{
              * @param text_before[in] Raw text that is added at to the start of
              * the decompiled output.
              * @return A string with the decompiled script.
-             * @throws InternalDecompilerError on failure.
+             * @throws DecompilerException on failure.
              */
             DecompiledScript Decompile(
               std::string script_name, const std::vector<unsigned char>& script_bytes,

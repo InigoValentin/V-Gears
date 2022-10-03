@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "decompiler/simple_disassembler.h"
+#include "decompiler/Disassembler.h"
 #include "decompiler/sudm.h"
 #include <array>
 
@@ -326,7 +326,7 @@ namespace FF7{
     /**
      * A disassebler for field maps.
      */
-    class FieldDisassembler : public SimpleDisassembler{
+    class FieldDisassembler : public Disassembler{
 
         public:
 
@@ -579,12 +579,12 @@ namespace FF7{
                  * Reads the header.
                  *
                  * @param reader[in] The reader used to read the header.
-                 * @throws FF7ScriptHeaderInvalidException If the magic number for
+                 * @throws ScriptHeaderInvalidException If the magic number for
                  * the field is wrong.
                  */
                 void Read(BinaryReader& reader){
                     magic = reader.ReadU16();
-                    if (magic != MAGIC) throw FF7ScriptHeaderInvalidException();
+                    if (magic != MAGIC) throw ScriptHeaderInvalidException();
                     number_of_entities = reader.ReadU8();
                     number_of_models = reader.ReadU8();
                     offset_to_strings = reader.ReadU16();
@@ -636,7 +636,7 @@ namespace FF7{
              * for it's entity.
              * @param is_end[in] Indicates if the script is the last one for
              * it's entity.
-             * @throws InternalDecompilerError for malformed scripts.
+             * @throws DecompilerException for malformed scripts.
              */
             void DisassembleIndivdualScript(
               std::string entity_name, size_t entity_index, size_t script_index,
@@ -740,7 +740,7 @@ namespace FF7{
                 this->insts_.back()->SetStackChange(0);
                 this->insts_.back()->SetName(std::string(name));
                 this->insts_.back()->SetCodeGenData("");
-                this->readParams(this->insts_.back(), argument_format);
+                this->ReadParams(this->insts_.back(), argument_format);
             }
 
             /**

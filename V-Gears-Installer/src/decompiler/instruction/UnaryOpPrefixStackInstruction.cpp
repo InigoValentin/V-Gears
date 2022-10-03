@@ -17,4 +17,4 @@
 
 void UnaryOpPrefixStackInstruction::ProcessInst(
   Function& function, ValueStack &stack, Engine* engine, CodeGenerator* code_gen
-){stack.push(new UnaryOpValue(stack.pop(), code_gen_data_, false));}
+){stack.Push(new UnaryOpValue(stack.Pop(), code_gen_data_, false));}

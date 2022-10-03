@@ -18,9 +18,9 @@
 #include <iostream>
 #include <vector>
 #include "common/BinaryReader.h"
+#include "DecompilerException.h"
 #include "instruction/Instruction.h"
 #include "ObjectFactory.h"
-#include "unknown_opcode_exception.h"
 
 /**
  * Base class for disassemblers.
@@ -80,6 +80,35 @@ class Disassembler{
         virtual void DoDumpDisassembly(std::ostream &output);
 
         /**
+         * Read parameters and associate them with an instruction.
+         *
+         * @param inst[in] The instruction to associate the parameters with.
+         * @param types[in] NUL-terminated string describing the type of each
+         * parameter.
+         */
+        void ReadParams(InstPtr inst, const char *types);
+
+        /**
+         * Read parameters but it doesn't associate them with an instruction.
+         *
+         * @param inst[in] The instruction to associate the parameters with.
+         * Unused.
+         * @param types[in] NUL-terminated string describing the type of each
+         * parameter.
+         * @param params[in] Unused.
+         */
+        void ReadParams(InstPtr inst, const char *types, const std::vector<std::string>& params);
+
+        /**
+         * Reads data for a single parameter.
+         *
+         * @param inst The instruction the parameter will belong to. Unused.
+         * @param type Character describing the type of the parameter.
+         * @return The read data.
+         */
+        virtual ValuePtr ReadParameter(InstPtr inst, std::string type);
+
+        /**
          * Used to perform file I/O.
          */
         std::unique_ptr<BinaryReader> stream_;
@@ -93,4 +122,10 @@ class Disassembler{
          * Base address where the script starts.
          */
         uint32 address_base_;
+
+        /**
+         * The current address.
+         */
+        uint32 address_;
+
 };

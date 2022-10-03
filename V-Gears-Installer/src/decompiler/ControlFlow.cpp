@@ -18,7 +18,8 @@
 #include <set>
 #include <boost/format.hpp>
 #include "decompiler/ControlFlow.h"
-#include "decompiler/stack.h"
+
+#include "../../include/decompiler/Stack.h"
 
 /**
  * Adds a vertex to a group.
@@ -159,10 +160,10 @@ typedef std::pair<GraphVertex, int> LevelEntry;
 void ControlFlow::SetStackLevel(GraphVertex graph, int level){
     Stack<LevelEntry> level_stack;
     std::set<GraphVertex> seen;
-    level_stack.push(LevelEntry(graph, level));
+    level_stack.Push(LevelEntry(graph, level));
     seen.insert(graph);
-    while (!level_stack.empty()){
-        LevelEntry e = level_stack.pop();
+    while (!level_stack.IsEmpty()){
+        LevelEntry e = level_stack.Pop();
         GroupPtr gr = GET(e.first);
         if (gr->stack_level != -1){
             if (gr->stack_level != e.second)
@@ -177,7 +178,7 @@ void ControlFlow::SetStackLevel(GraphVertex graph, int level){
         for (OutEdgeIterator oe = r.first; oe != r.second; ++ oe){
             GraphVertex target = boost::target(*oe, graph_);
             if (seen.find(target) == seen.end()){
-                level_stack.push(LevelEntry(target, e.second + (*gr->start)->GetStackChange()));
+                level_stack.Push(LevelEntry(target, e.second + (*gr->start)->GetStackChange()));
                 seen.insert(target);
             }
         }

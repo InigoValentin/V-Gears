@@ -20,8 +20,8 @@ void DupStackInstruction::ProcessInst(
   Function& function, ValueStack &stack, Engine* engine, CodeGenerator *code_gen
 ){
     std::stringstream s;
-    ValuePtr p = stack.pop()->dup(s);
+    ValuePtr p = stack.Pop()->dup(s);
     if (s.str().length() > 0) code_gen->AddOutputLine(s.str());
-    stack.push(p);
-    stack.push(p);
+    stack.Push(p);
+    stack.Push(p);
 }

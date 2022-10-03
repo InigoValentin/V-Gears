@@ -19,8 +19,7 @@
 #include <boost/algorithm/string.hpp>
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
-
-#include "../../../include/decompiler/Engine.h"
+#include "decompiler/Engine.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/instruction/FieldBackgroundInstruction.h"
 #include "decompiler/field/instruction/FieldCameraInstruction.h"
@@ -46,7 +45,7 @@ const int FF7::FieldDisassembler::NUM_SECTIONS(7);
 FF7::FieldDisassembler::FieldDisassembler(
   SUDM::IScriptFormatter& formatter, FieldEngine* engine,
   InstVec& insts, const std::vector<unsigned char>& raw_script_data
-): SimpleDisassembler(insts), engine_(engine), formatter_(formatter){
+): Disassembler(insts), engine_(engine), formatter_(formatter){
     loaded_from_raw_data_ = true;
     // If loading a raw section then skip the header section.
     section_pointers_size_ = 0;
@@ -57,7 +56,7 @@ FF7::FieldDisassembler::FieldDisassembler(
 
 FF7::FieldDisassembler::FieldDisassembler(
   SUDM::IScriptFormatter& formatter, FieldEngine *engine, InstVec &insts
-): SimpleDisassembler(insts), engine_(engine), formatter_(formatter){
+): Disassembler(insts), engine_(engine), formatter_(formatter){
     section_pointers_size_ = (sizeof(uint32) * NUM_SECTIONS);
 }
 
@@ -289,7 +288,7 @@ void FF7::FieldDisassembler::DisassembleIndivdualScript(
             );
             stream_pos = stream_->GetPosition();
             // ... but should end exactly on the end pos
-            if (stream_pos != end_pos) throw InternalDecompilerError();
+            if (stream_pos != end_pos) throw DecompilerException();
         }
     }
 }

@@ -105,7 +105,7 @@ void CodeGenerator::AddArg(ValuePtr arg) {
 
 void CodeGenerator::ProcessSpecialMetadata(const InstPtr inst, char c, int) {
     switch (c){
-    case 'p': AddArg(stack_.pop()); break;
+    case 'p': AddArg(stack_.Pop()); break;
     default:
         std::cerr << boost::format("WARNING: Unknown character in metadata: %c\n") % c;
         break;
@@ -217,18 +217,18 @@ void CodeGenerator::ProcessCondJumpInst(const InstPtr inst){
                       << " " << target_lang_->Else() << " ";
                 }
             }
-            s << target_lang_->If(true) << stack_.pop()->negate() << target_lang_->If(false);
+            s << target_lang_->If(true) << stack_.Pop()->negate() << target_lang_->If(false);
             AddOutputLine(s.str(), cur_group_->coalesced_else, true);
             break;
         case GROUP_TYPE_WHILE:
-            s << target_lang_->WhileHeader(true) << stack_.pop()->negate()
+            s << target_lang_->WhileHeader(true) << stack_.Pop()->negate()
               << target_lang_->WhileHeader(false) << " "
               << target_lang_->StartBlock(LuaLanguage::BEGIN_WHILE);
             AddOutputLine(s.str(), false, true);
             break;
         case GROUP_TYPE_DO_WHILE:
             s << target_lang_->EndBlock(LuaLanguage::END_WHILE) <<  " "
-              << target_lang_->WhileHeader(true) << stack_.pop()
+              << target_lang_->WhileHeader(true) << stack_.Pop()
               << target_lang_->WhileHeader(false);
             AddOutputLine(s.str(), true, false);
             break;
@@ -262,7 +262,7 @@ void CodeGenerator::GeneratePass(InstVec& insts, const Graph& graph){
       fn != engine_->functions.end();
       ++ fn
     ){
-        while (!stack_.empty()) stack_.pop();
+        while (!stack_.IsEmpty()) stack_.Pop();
         GraphVertex entry_point = fn->second.vertex;
         std::string func_signature = ConstructFuncSignature(fn->second);
         // Write the function start.
@@ -278,10 +278,10 @@ void CodeGenerator::GeneratePass(InstVec& insts, const Graph& graph){
         // DFS from entry point to process each vertex.
         Stack<DFSEntry> dfs_stack;
         std::set<GraphVertex> seen;
-        dfs_stack.push(DFSEntry(entry_point, ValueStack()));
+        dfs_stack.Push(DFSEntry(entry_point, ValueStack()));
         seen.insert(entry_point);
-        while (!dfs_stack.empty()){
-            DFSEntry e = dfs_stack.pop();
+        while (!dfs_stack.IsEmpty()){
+            DFSEntry e = dfs_stack.Pop();
             GroupPtr tmp = GET(e.first);
             if ((*tmp->start)->GetAddress() > (*last_group->start)->GetAddress()) last_group = tmp;
             stack_ = e.second;
@@ -291,7 +291,7 @@ void CodeGenerator::GeneratePass(InstVec& insts, const Graph& graph){
             for (OutEdgeIterator i = r.first; i != r.second; ++ i){
                 GraphVertex target = boost::target(*i, graph_);
                 if (seen.find(target) == seen.end()){
-                    dfs_stack.push(DFSEntry(target, stack_));
+                    dfs_stack.Push(DFSEntry(target, stack_));
                     seen.insert(target);
                 }
             }

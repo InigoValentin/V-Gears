@@ -101,7 +101,7 @@ void FF7::FF7ControlFlowInstruction::ProcessREQEW(
           % entity.GetName() % script_name % priority
         ).str());
     }
-    catch (const InternalDecompilerError&){
+    catch (const DecompilerException&){
         code_gen->AddOutputLine((
           boost::format("-- ERROR call to non existing function index %1%")
           % params_[2]->getUnsigned()

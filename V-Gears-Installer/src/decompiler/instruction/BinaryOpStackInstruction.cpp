@@ -19,10 +19,10 @@
 void BinaryOpStackInstruction::ProcessInst(
   Function& function, ValueStack &stack, Engine* engine, CodeGenerator *code_gen
 ){
-    ValuePtr op1 = stack.pop();
-    ValuePtr op2 = stack.pop();
+    ValuePtr op1 = stack.Pop();
+    ValuePtr op2 = stack.Pop();
     if (code_gen->GetBinaryOrder() == FIFO_ARGUMENT_ORDER)
-        stack.push(new BinaryOpValue(op2, op1, code_gen_data_));
+        stack.Push(new BinaryOpValue(op2, op1, code_gen_data_));
     else if (code_gen->GetBinaryOrder() == LIFO_ARGUMENT_ORDER)
-        stack.push(new BinaryOpValue(op1, op2, code_gen_data_));
+        stack.Push(new BinaryOpValue(op1, op2, code_gen_data_));
 }

@@ -17,4 +17,4 @@
 
 void BoolNegateStackInstruction::ProcessInst(
   Function& function, ValueStack &stack, Engine* engine, CodeGenerator* code_gen
-){stack.push(stack.pop()->negate());}
+){stack.Push(stack.Pop()->negate());}

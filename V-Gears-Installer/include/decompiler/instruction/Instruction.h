@@ -23,7 +23,7 @@
 #include "../RefCounted.h"
 #include "common/scummsys.h"
 #include "decompiler/value.h"
-#include "decompiler/wrongtype.h"
+#include "decompiler/DecompilerException.h"
 
 class CodeGenerator;
 
