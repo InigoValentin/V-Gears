@@ -223,7 +223,7 @@ void FF7::FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
         if (meta_data.GetCharacterId() != -1)
             AddOutputLine(meta_data.GetEntityName() + " = nil,\n");
     }
-    const auto comment = formatter_.FunctionComment(meta_data.GetEntityName(), function.name);
+    const auto comment = formatter_.GetFunctionComment(meta_data.GetEntityName(), function.name);
     if (!comment.empty()) AddOutputLine("-- " + comment);
 }
 
@@ -237,9 +237,9 @@ void FF7::FieldCodeGenerator::OnStartFunction(const Function& func){
         }
     }
     AddOutputLine("]]\n");
-    // TODO: If this hack is needed, maybe it can just be added to the "Direcor" entity.
+    // TODO: If this hack is needed, maybe it can just be added to the "Director" entity.
     if (func.name == "on_start" || func.name == "init"){
-        AddOutputLine("-- HACK ensure camera follows cloud, fix in engine properly later");
+        AddOutputLine("-- HACK ensure camera follows cloud, fix in engine.");
         AddOutputLine("background2d:autoscroll_to_entity(entity_manager:get_entity(\"Cloud\"))");
     }
 }
@@ -256,12 +256,13 @@ void FF7::FieldCodeGenerator::OnEndFunction(const Function& function){
 std::string FF7::FieldCodeGenerator::ConstructFuncSignature(const Function &function){
     // Generate name
     FunctionMetaData meta_data(function.metadata);
-    return formatter_.FunctionName(meta_data.GetEntityName(), function.name) + " = function(self)";
+    return formatter_.GetFriendlyFunctionName(meta_data.GetEntityName(), function.name)
+      + " = function(self)";
 }
 
 bool FF7::FieldCodeGenerator::OutputOnlyRequiredLabels() const{return true;}
 
-SUDM::IScriptFormatter& FF7::FieldCodeGenerator::GetFormatter(){return formatter_;}
+FieldScriptFormatter& FF7::FieldCodeGenerator::GetFormatter(){return formatter_;}
 
 const std::string FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
   const std::string& entity, uint32 address, uint32 opcode

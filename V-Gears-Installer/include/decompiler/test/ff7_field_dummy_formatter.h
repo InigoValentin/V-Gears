@@ -1,6 +1,6 @@
-#include "sudm.h"
+#include "../ScriptFormatter.h"
 
-class DummyFormatter : public SUDM::IScriptFormatter
+class DummyFormatter : public ScriptFormatter
 {
 public:
     // Renames a variable, return empty string for generated name

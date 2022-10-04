@@ -120,7 +120,7 @@ void FF7::FieldModuleInstruction::ProcessMAPJUMP(CodeGenerator* code_gen, Functi
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto target_map_id = params_[0]->GetUnsigned();
     FunctionMetaData md(func.metadata);
-    const std::string source_spawn_point_name = cg->GetFormatter().SpawnPointName(
+    const std::string source_spawn_point_name = cg->GetFormatter().GetSpawnPointName(
       target_map_id, md.GetEntityName(), func.name, address_
     );
     cg->GetFormatter().AddSpawnPoint(
@@ -130,7 +130,7 @@ void FF7::FieldModuleInstruction::ProcessMAPJUMP(CodeGenerator* code_gen, Functi
       params_[3]->GetSigned(), // Walk mesh triangle ID
       params_[4]->GetSigned()  // Angle
     );
-    const std::string target_map_name = cg->GetFormatter().MapName(target_map_id);
+    const std::string target_map_name = cg->GetFormatter().GetMapName(target_map_id);
     code_gen->AddOutputLine(
       "load_field_map_request(\"" + target_map_name + "\", \"" + source_spawn_point_name + "\")"
     );

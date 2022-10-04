@@ -61,7 +61,7 @@ void FF7::FF7ControlFlowInstruction::ProcessREQ(
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& entity = engine.EntityByIndex(params_[0]->GetSigned());
-    const auto& script_name = cg->GetFormatter().FunctionName(
+    const auto& script_name = cg->GetFormatter().GetFriendlyFunctionName(
       entity.GetName(), entity.FunctionByIndex(params_[2]->GetUnsigned())
     );
     auto priority = params_[1]->GetUnsigned();
@@ -76,7 +76,7 @@ void FF7::FF7ControlFlowInstruction::ProcessREQSW(
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& entity = engine.EntityByIndex(params_[0]->GetSigned());
-    const auto& script_name = cg->GetFormatter().FunctionName(
+    const auto& script_name = cg->GetFormatter().GetFriendlyFunctionName(
       entity.GetName(), entity.FunctionByIndex(params_[2]->GetUnsigned())
     );
     auto priority = params_[1]->GetUnsigned();
@@ -92,7 +92,7 @@ void FF7::FF7ControlFlowInstruction::ProcessREQEW(
     try{
         FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
         const auto& entity = engine.EntityByIndex(params_[0]->GetSigned());
-        const auto& script_name = cg->GetFormatter().FunctionName(
+        const auto& script_name = cg->GetFormatter().GetFriendlyFunctionName(
           entity.GetName(), entity.FunctionByIndex(params_[2]->GetUnsigned())
         );
         auto priority = params_[1]->GetUnsigned();

@@ -75,11 +75,11 @@ void FF7::FieldPartyInstruction::ProcessSTITM(CodeGenerator* code_gen){
 
 void FF7::FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
     FieldCodeGenerator* gc = static_cast<FieldCodeGenerator*>(code_gen);
-    auto char_id_1 = gc->GetFormatter().CharName(params_[0]->GetUnsigned());
+    auto char_id_1 = gc->GetFormatter().GetFriendlyCharName(params_[0]->GetUnsigned());
     char_id_1 = (char_id_1 == "") ? "nil" : ("\"" + char_id_1 + "\"");
-    auto char_id_2 = gc->GetFormatter().CharName(params_[1]->GetUnsigned());
+    auto char_id_2 = gc->GetFormatter().GetFriendlyCharName(params_[1]->GetUnsigned());
     char_id_2 = (char_id_2 == "") ? "nil" : ("\"" + char_id_2 + "\"");
-    auto char_id_3 = gc->GetFormatter().CharName(params_[2]->GetUnsigned());
+    auto char_id_3 = gc->GetFormatter().GetFriendlyCharName(params_[2]->GetUnsigned());
     char_id_3 = (char_id_3 == "") ? "nil" : ("\"" + char_id_3 + "\"");
     code_gen->AddOutputLine((
       boost::format("FFVII.set_party(%1%, %2%, %3%)") % char_id_1 % char_id_2 % char_id_3

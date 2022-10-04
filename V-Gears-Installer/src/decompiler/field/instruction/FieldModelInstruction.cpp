@@ -214,11 +214,11 @@ void FF7::FieldModelInstruction::ProcessDFANM(
     auto speed = 1.0f / params_[1]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:set_default_animation(\"%2%\") -- speed %3%")
-      % entity % cg->GetFormatter().AnimationName(char_id, animation_id) % speed
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id) % speed
     ).str());
     code_gen->AddOutputLine((
       boost::format("self.%1%:play_animation(\"%2%\")")
-      % entity % cg->GetFormatter().AnimationName(char_id, animation_id)
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id)
     ).str());
 }
 
@@ -232,7 +232,7 @@ void FF7::FieldModelInstruction::ProcessANIME1(
     auto speed = 1.0f / params_[1]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:play_animation(\"%2%\") -- speed %3%")
-      % entity % cg->GetFormatter().AnimationName(char_id, animation_id) % speed
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id) % speed
     ).str());
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
 }
@@ -359,7 +359,7 @@ void FF7::FieldModelInstruction::ProcessANIM_2(
     auto speed = 1.0f / params_[1]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:play_animation_stop(\"%2%\") -- speed %3%")
-      % entity % cg->GetFormatter().AnimationName(char_id, animation_id) % speed
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id) % speed
     ).str());
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
 }
@@ -375,7 +375,7 @@ void FF7::FieldModelInstruction::ProcessCANIM2(
     auto speed = 1.0f / params_[3]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:play_animation(\"%2%\", %3%, %4%) -- speed %5%")
-      % entity % cg->GetFormatter().AnimationName(char_id, animation_id)
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id)
       % start_frame % end_frame % speed
     ).str());
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
@@ -393,7 +393,7 @@ void FF7::FieldModelInstruction::ProcessCANM_2(
     auto speed = 1.0f / params_[3]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:play_animation_stop(\"%2%\", %3%, %4%) -- speed %5%")
-      % entity % cg->GetFormatter().AnimationName(char_id, animation_id)
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id)
       % start_frame % end_frame % speed
     ).str());
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());

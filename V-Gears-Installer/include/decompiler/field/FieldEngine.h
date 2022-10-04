@@ -21,8 +21,9 @@
 #include <string>
 #include <vector>
 
-#include "../Engine.h"
-#include "decompiler/sudm.h"
+#include "FieldScriptFormatter.h"
+#include "decompiler/Engine.h"
+#include "decompiler/field/FieldDecompiler.h"
 
 namespace FF7{
 
@@ -188,7 +189,7 @@ namespace FF7{
              * @param formatter[in] The formatter to be used by the engine.
              * @param script_name[in] The script name.
              */
-            FieldEngine(SUDM::IScriptFormatter& formatter, std::string script_name);
+            FieldEngine(FieldScriptFormatter& formatter, std::string script_name);
 
             /**
              * Copy constructor, disabled.
@@ -264,14 +265,14 @@ namespace FF7{
              *
              * @return A list of non-line entities.
              */
-            std::vector<SUDM::FF7::Field::FieldEntity> GetEntityList() const;
+            std::vector<FieldDecompiler::FieldEntity> GetEntityList() const;
 
             /**
              * Retrieves all line entities in the map.
              *
              * @param A list of line entities.
              */
-            std::vector<SUDM::FF7::Field::Line> GetLineList() const;
+            std::vector<FieldDecompiler::Line> GetLineList() const;
 
             /**
              * Retrieves all entities in the map.
@@ -383,7 +384,7 @@ namespace FF7{
             /**
              * The script formatter.
              */
-            SUDM::IScriptFormatter& formatter_;
+            FieldScriptFormatter& formatter_;
 
             /**
              * The entity index map for the field.

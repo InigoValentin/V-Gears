@@ -21,11 +21,12 @@ set(HEADER_FILES
     include/common/Vram.h
     include/common/DrawSkeleton.h
     include/common/Logger.h
-    include/decompiler/sudm.h
+    include/decompiler/ScriptFormatter.h
     include/decompiler/LuaLanguage.h
     include/decompiler/CodeGenerator.h
     include/decompiler/ControlFlow.h
     include/decompiler/Disassembler.h
+    include/decompiler/Decompiler.h
     include/decompiler/Engine.h
     include/decompiler/Graph.h
     include/decompiler/Function.h
@@ -71,6 +72,8 @@ set(HEADER_FILES
     include/decompiler/field/FieldDisassembler.h
     include/decompiler/field/FieldEngine.h
     include/decompiler/field/FieldCodeGenerator.h
+    include/decompiler/field/FieldDecompiler.h
+    include/decompiler/field/FieldScriptFormatter.h
     include/decompiler/world/instruction/WorldBinaryEqualStackInstruction.h
     include/decompiler/world/instruction/WorldCondJumpInstruction.h
     include/decompiler/world/instruction/WorldKernelCallInstruction.h
@@ -101,7 +104,7 @@ set(SOURCE_FILES
     src/common/Vram.cpp
     src/common/OgreBase.cpp
     src/VGearsUtility.cpp
-    src/decompiler/sudm.cpp
+    src/decompiler/ScriptFormatter.cpp
     src/decompiler/LuaLanguage.cpp
     src/decompiler/CodeGenerator.cpp
     src/decompiler/ControlFlow.cpp
@@ -142,6 +145,8 @@ set(SOURCE_FILES
     src/decompiler/field/FieldDisassembler.cpp
     src/decompiler/field/FieldEngine.cpp
     src/decompiler/field/FieldCodeGenerator.cpp
+    src/decompiler/field/FieldDecompiler.cpp
+    src/decompiler/field/FieldScriptFormatter.cpp
     src/decompiler/world/instruction/WorldBinaryEqualStackInstruction.cpp
     src/decompiler/world/instruction/WorldCondJumpInstruction.cpp
     src/decompiler/world/instruction/WorldKernelCallInstruction.cpp

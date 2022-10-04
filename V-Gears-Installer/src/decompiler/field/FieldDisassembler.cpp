@@ -43,7 +43,7 @@ const int FF7::FieldDisassembler::MAGIC(0x0502);
 const int FF7::FieldDisassembler::NUM_SECTIONS(7);
 
 FF7::FieldDisassembler::FieldDisassembler(
-  SUDM::IScriptFormatter& formatter, FieldEngine* engine,
+  FieldScriptFormatter& formatter, FieldEngine* engine,
   InstVec& insts, const std::vector<unsigned char>& raw_script_data
 ): Disassembler(insts), engine_(engine), formatter_(formatter){
     loaded_from_raw_data_ = true;
@@ -55,7 +55,7 @@ FF7::FieldDisassembler::FieldDisassembler(
 }
 
 FF7::FieldDisassembler::FieldDisassembler(
-  SUDM::IScriptFormatter& formatter, FieldEngine *engine, InstVec &insts
+  FieldScriptFormatter& formatter, FieldEngine *engine, InstVec &insts
 ): Disassembler(insts), engine_(engine), formatter_(formatter){
     section_pointers_size_ = (sizeof(uint32) * NUM_SECTIONS);
 }
@@ -123,7 +123,7 @@ void FF7::FieldDisassembler::DoDisassemble(){
         std::string original_name = header_.field_entity_names[entity_number].data();
         // If the entity name was blank in the file then use a consistent generated name
         if (original_name.empty()) original_name = "entity_" + std::to_string(entity_number);
-        const std::string entity_name = formatter_.EntityName(original_name);
+        const std::string entity_name = formatter_.GetFriendlyEntityName(original_name);
         // Only parse each script one.
         std::set<uint16> parsed_scripts;
         std::vector<ScriptInfo> script_info;

@@ -19,8 +19,8 @@
 #include <deque>
 #include <unordered_map>
 
+#include "FieldScriptFormatter.h"
 #include "decompiler/CodeGenerator.h"
-#include "decompiler/sudm.h"
 
 namespace FF7{
 
@@ -252,7 +252,7 @@ namespace FF7{
              * address.
              */
             template<typename TValue>static const std::string FormatValueOrVariable(
-              SUDM::IScriptFormatter& formatter, uint32 bank, TValue value_or_address,
+              FieldScriptFormatter& formatter, uint32 bank, TValue value_or_address,
               ValueType type = ValueType::Integer, float scale = 1.0f
             ){
                 switch (bank){
@@ -270,7 +270,7 @@ namespace FF7{
                     case 15:
                         {
                             const auto address = static_cast<uint32>(value_or_address) & 0xFF;
-                            const auto friendly_name = formatter.VarName(bank, value_or_address);
+                            const auto friendly_name = formatter.GetFriendlyVarName(bank, value_or_address);
                             if (friendly_name.empty())
                                 return (boost::format("FFVII.Banks[%1%][%2%]") % bank % address).str();
                             return (boost::format("FFVII.Data.%1%") % friendly_name).str();
@@ -279,7 +279,7 @@ namespace FF7{
                     case 6:
                         {
                             const auto address = static_cast<uint32>(value_or_address)& 0xFF;
-                            const  auto friendly_name = formatter.VarName(bank, address);
+                            const  auto friendly_name = formatter.GetFriendlyVarName(bank, address);
                             if (friendly_name.empty())
                                 return (boost::format("FFVII.Banks[%1%][%2%]") % bank % address).str();
                             return "FFVII.Data." + friendly_name;
@@ -303,7 +303,7 @@ namespace FF7{
              */
             FieldCodeGenerator(
               Engine *engine, const InstVec& insts, std::ostream &output,
-              SUDM::IScriptFormatter& formatter
+              FieldScriptFormatter& formatter
             ) :
               CodeGenerator(engine, output, FIFO_ARGUMENT_ORDER, LIFO_ARGUMENT_ORDER),
               insts_(insts), formatter_(formatter)
@@ -340,7 +340,7 @@ namespace FF7{
             /**
              * Retrieves the formatter.
              */
-            SUDM::IScriptFormatter& GetFormatter();
+            FieldScriptFormatter& GetFormatter();
 
 
 
@@ -412,7 +412,7 @@ namespace FF7{
             /**
              * The formatter.
              */
-            SUDM::IScriptFormatter& formatter_;
+            FieldScriptFormatter& formatter_;
 
     };
 }

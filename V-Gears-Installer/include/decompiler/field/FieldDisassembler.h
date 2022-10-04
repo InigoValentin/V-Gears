@@ -16,8 +16,8 @@
 #pragma once
 
 #include "decompiler/Disassembler.h"
-#include "decompiler/sudm.h"
 #include <array>
+#include "FieldScriptFormatter.h"
 
 class BinaryReader;
 class Function;
@@ -393,7 +393,7 @@ namespace FF7{
              * @param insts[in] The list of instructions.
              */
             FieldDisassembler(
-              SUDM::IScriptFormatter& formatter, FieldEngine* engine, InstVec& insts
+              FieldScriptFormatter& formatter, FieldEngine* engine, InstVec& insts
             );
 
             /**
@@ -405,7 +405,7 @@ namespace FF7{
              * @param raw_script_data[in] @todo Understand and document.
              */
             FieldDisassembler(
-              SUDM::IScriptFormatter& formatter, FieldEngine* engine,
+              FieldScriptFormatter& formatter, FieldEngine* engine,
               InstVec& insts, const std::vector<unsigned char>& raw_script_data
             );
 
@@ -778,7 +778,7 @@ namespace FF7{
             /**
              * The formatter.
              */
-            SUDM::IScriptFormatter& formatter_;
+            FieldScriptFormatter& formatter_;
 
             /**
              * The scale factor of the field.

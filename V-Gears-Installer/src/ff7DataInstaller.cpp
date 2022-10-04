@@ -48,9 +48,11 @@
 #include "common/FinalFantasy7/FF7NameLookup.h"
 #include "data/VGearsTexCodec.h"
 #include "data/VGearsMapListFile.h"
-#include "decompiler/sudm.h"
 #include <memory>
 #include <QtCore/QDir>
+
+#include "decompiler/field/FieldScriptFormatter.h"
+#include "decompiler/field/FieldDecompiler.h"
 
 float FF7DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
 
@@ -304,7 +306,7 @@ static std::string FieldMapDir(){return "maps/ffvii/field";}
 /**
  * Utilities for formatting field scripts.
  */
-class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
+class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
 
     public:
 
@@ -335,7 +337,7 @@ class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
          * @param address[in] @todo Understand and document.
          * @return The composed spawn point name.
          */
-        virtual std::string SpawnPointName(
+        virtual std::string GetSpawnPointName(
           unsigned int map_id, const std::string& entity,
           const std::string& function_name, unsigned int address
         ) override{
@@ -349,7 +351,7 @@ class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
          * @param[in] The map ID.
          * @return The map name.
          */
-        virtual std::string MapName(unsigned int map_id) override{
+        virtual std::string GetMapName(unsigned int map_id) override{
             return FieldName(field_id_to_name_lookup_[map_id]);
         }
 
@@ -361,7 +363,7 @@ class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
          * @return Friendly name for the variable, or an empty string if it
          * doesn't have one assigned.
          */
-        virtual std::string VarName(
+        virtual std::string GetFriendlyVarName(
           unsigned int bank, unsigned int addr
         ) override{
             return VGears::FF7::NameLookup::FieldScriptVarName(bank, addr);
@@ -374,7 +376,7 @@ class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
          * @return Friendly name for the entity, or the current name if it
          * doesn't have one assigned.
          */
-        virtual std::string EntityName(const std::string& entity) override{
+        virtual std::string GetFriendlyEntityName(const std::string& entity) override{
             return VGears::FF7::NameLookup::FieldScriptEntityName(entity);
         }
 
@@ -385,7 +387,7 @@ class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
          * @return Friendly name for the entity, or an empty string if it
          * doesn't have one assigned.
          */
-        virtual std::string CharName(int char_id) override{
+        virtual std::string GetFriendlyCharName(int char_id) override{
             return VGears::FF7::NameLookup::CharName(char_id);
         }
 
@@ -397,7 +399,7 @@ class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
          * @return Friendly name for the function, or the current name if it
          * doesn't have one assigned.
          */
-        virtual std::string FunctionName(
+        virtual std::string GetFriendlyFunctionName(
           const std::string& entity, const std::string& function_name
         ) override{
             return VGears::FF7::NameLookup::FieldScriptFunctionName(
@@ -413,7 +415,7 @@ class BaseFF7FieldScriptFormatter : public SUDM::IScriptFormatter{
          * @return Friendly comment for the function, or an empty string if it
          * doesn't have one assigned.
          */
-        virtual std::string FunctionComment(
+        virtual std::string GetFunctionComment(
           const std::string& entity, const std::string& function_name
         ) override{
             return VGears::FF7::NameLookup::FieldScriptFunctionComment(
@@ -472,7 +474,7 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
          * @return The animation name. If there is no name assigned, or it
          * can't be found, a string with the animation ID.
          */
-        virtual std::string AnimationName(int char_id, int id) override{
+        virtual std::string GetFriendlyAnimationName(int char_id, int id) override{
             // Get the animation file name, then look up the friendly name of
             // the "raw" animation.
             if (static_cast<unsigned int>(char_id) >= model_loader_->GetModels().size()){
@@ -625,13 +627,13 @@ static void FF7PcFieldToVGearsField(
         }
     }
     const VGears::ModelListFilePtr& models = field->GetModelList();
-    SUDM::FF7::Field::DecompiledScript decompiled;
+    FieldDecompiler::DecompiledScript decompiled;
     FF7FieldScriptFormatter formatter(field->getName(), models, field_id_to_name_lookup, spawn_map);
     try{
         // Get the raw script bytes.
         const std::vector<u8> raw_field_data = field->GetRawScript();
         // Decompile to LUA.
-        decompiled = SUDM::FF7::Field::Decompile(
+        decompiled = FieldDecompiler::Decompile(
           field->getName(), raw_field_data, formatter, gateway_script_data,
           "EntityContainer = {}\n\n"
         );
@@ -768,7 +770,7 @@ static void FF7PcFieldToVGearsField(
 
         // Get lines. Add them to a list, so they aren't processed later as regular entities.
         std::vector<std::string> line_entities;
-        for (SUDM::FF7::Field::Line line : decompiled.lines){
+        for (FieldDecompiler::Line line : decompiled.lines){
 
             std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));
             line_entities.push_back(line.name);
@@ -790,7 +792,7 @@ static void FF7PcFieldToVGearsField(
         }
 
         // Get entities.
-        for (SUDM::FF7::Field::FieldEntity entity : decompiled.entities){
+        for (FieldDecompiler::FieldEntity entity : decompiled.entities){
             // If the entity has been added as a line, skip.
             if (line_entities.size() > 0){
                 if (*std::find(line_entities.begin(), line_entities.end(), entity.name) == entity.name) {
@@ -1098,13 +1100,13 @@ static void CollectSpawnPoints(
     // full list of entries to each field.
     try{
         // Get the raw script bytes.
-        SUDM::FF7::Field::DecompiledScript decompiled;
+        FieldDecompiler::DecompiledScript decompiled;
         const std::vector<u8> raw_field_data = field->GetRawScript();
         // Decompile to LUA.
         FF7FieldScriptGatewayCollector formatter(
           field->getName(), field_id_to_name_lookup, spawn_points, this_field_id
         );
-        decompiled = SUDM::FF7::Field::Decompile(
+        decompiled = FieldDecompiler::Decompile(
           field->getName(), raw_field_data, formatter, "", "EntityContainer = {}\n\n"
         );
     }
@@ -1231,7 +1233,7 @@ static void CollectFieldScaleFactors(
   const std::vector<std::string>& field_id_to_name_lookup
 ){
     scale_factors[FieldId(field->getName(), field_id_to_name_lookup)]
-      = ::SUDM::FF7::Field::ScaleFactor(field->GetRawScript());
+      = FieldDecompiler::ScaleFactor(field->GetRawScript());
 }
 
 void FF7DataInstaller::InitCollectSpawnAndScaleFactors(){

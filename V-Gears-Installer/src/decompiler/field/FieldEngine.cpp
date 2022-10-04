@@ -101,7 +101,7 @@ std::vector<float> FF7::FieldEngine::Entity::GetLinePointA(){return point_a_;}
 
 std::vector<float> FF7::FieldEngine::Entity::GetLinePointB(){return point_b_;}
 
-FF7::FieldEngine::FieldEngine(SUDM::IScriptFormatter& formatter, std::string script_name) :
+FF7::FieldEngine::FieldEngine(FieldScriptFormatter& formatter, std::string script_name) :
   formatter_(formatter), script_name_(script_name), scale_factor_(1.0f)
 {SetOutputStackEffect(false);}
 
@@ -161,11 +161,11 @@ std::map<std::string, int> FF7::FieldEngine::GetEntities() const{
     return r;
 }
 
-std::vector<SUDM::FF7::Field::FieldEntity> FF7::FieldEngine::GetEntityList() const{
-    std::vector<SUDM::FF7::Field::FieldEntity> entities;
+std::vector<FieldDecompiler::FieldEntity> FF7::FieldEngine::GetEntityList() const{
+    std::vector<FieldDecompiler::FieldEntity> entities;
     for (auto entity: entity_index_map_){
         if (entity.second.IsLine() == false){
-            SUDM::FF7::Field::FieldEntity ent;
+            FieldDecompiler::FieldEntity ent;
             ent.name = entity.second.GetName();
             ent.index = entity.second.GetIndex();
 
@@ -186,11 +186,11 @@ std::vector<SUDM::FF7::Field::FieldEntity> FF7::FieldEngine::GetEntityList() con
     return entities;
 }
 
-std::vector<SUDM::FF7::Field::Line> FF7::FieldEngine::GetLineList() const{
-    std::vector<SUDM::FF7::Field::Line> lines;
+std::vector<FieldDecompiler::Line> FF7::FieldEngine::GetLineList() const{
+    std::vector<FieldDecompiler::Line> lines;
     for (auto entity: entity_index_map_){
         if (entity.second.IsLine() == true){
-            SUDM::FF7::Field::Line line;
+            FieldDecompiler::Line line;
             line.name = entity.second.GetName();
             line.point_a = entity.second.GetLinePointA();
             line.point_b = entity.second.GetLinePointB();
