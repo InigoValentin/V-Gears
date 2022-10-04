@@ -15,14 +15,11 @@
 
 #include "VGearsUtility.h"
 
-namespace VGears
-{
+namespace VGears{
+
     Utility::Utility(int argc, char *argv[]) :
-      Application(argc, argv),
-      frame_listener_(NULL),
-      scene_manager_(NULL),
-      camera_(NULL),
-      viewport_(NULL)
+      Application(argc, argv), frame_listener_(NULL), scene_manager_(NULL),
+      camera_(NULL), viewport_(NULL)
     {}
 
     Utility::~Utility(){}
@@ -31,15 +28,12 @@ namespace VGears
 
     void Utility::InitComponents(){
         Application::initComponents();
-        Ogre::ResourceGroupManager::getSingleton()
-          .initialiseAllResourceGroups();
+        Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
         Ogre::Root *root(getRoot());
         scene_manager_ = root->createSceneManager(Ogre::ST_GENERIC, "Scene");
         scene_manager_->clearScene();
         scene_manager_->setAmbientLight(Ogre::ColourValue(0.5, 0.5, 0.5));
-        Ogre::Light* directional_light = scene_manager_->createLight(
-          "directional_light"
-        );
+        Ogre::Light* directional_light = scene_manager_->createLight("directional_light");
         directional_light->setType(Ogre::Light::LT_DIRECTIONAL);
         directional_light->setDiffuseColour(Ogre::ColourValue(0.5, 0.5, 0.5));
         directional_light->setSpecularColour(Ogre::ColourValue(0.5, 0.5, 0.5));
@@ -52,8 +46,7 @@ namespace VGears
         viewport_ = window->addViewport(camera_);
         viewport_->setBackgroundColour(Ogre::ColourValue(0.0f, 0.4f, 0.0f));
         camera_->setAspectRatio(
-          Ogre::Real(viewport_->getActualWidth())
-          / Ogre::Real(viewport_->getActualHeight())
+          Ogre::Real(viewport_->getActualWidth()) / Ogre::Real(viewport_->getActualHeight())
         );
         frame_listener_ = new DisplayFrameListener(window);
         frame_listener_->setCamera(camera_);

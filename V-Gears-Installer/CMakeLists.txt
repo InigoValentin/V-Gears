@@ -90,6 +90,9 @@ set(HEADER_FILES
     include/common/scummsys.h
     include/common/BinaryReader.h
     include/common/Lzs.h
+    include/ModelsAndAnimationsDb.h
+    include/ScopedLgp.h
+    include/SpawnPointDb.h
 )
 
 
@@ -160,6 +163,8 @@ set(SOURCE_FILES
     src/decompiler/world/WorldCodeGenerator.cpp
     src/decompiler/world/WorldDisassembler.cpp
     src/decompiler/world/WorldEngine.cpp
+    src/ModelsAndAnimationsDb.cpp
+    src/ScopedLgp.cpp
 )
 
 # For SUDM. TODO: Add elses.
@@ -188,27 +193,27 @@ include_directories (
     ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR}
 )
 set ( v-gears-launcher_HDRS
-    include/mainwindow.h
-    include/ff7DataInstaller.h
-    include/ff7FieldTextWriter.h
+    include/MainWindow.h
+    include/DataInstaller.h
+    include/FieldTextWriter.h
 )
 
 set(v-gears-launcher_SRCS
     src/main.cpp
-    src/mainwindow.cpp
-    src/ff7DataInstaller.cpp
-    src/ff7FieldTextWriter.cpp
+    src/MainWindow.cpp
+    src/DataInstaller.cpp
+    src/FieldTextWriter.cpp
 )
 
 set(v-gears-launcher_UIS
-    src/mainwindow.ui
+    src/MainWindow.ui
 )
 QT5_WRAP_UI(UIS ${v-gears-launcher_UIS})
 
 message(UIS: ${UIS})
 
 set(v-gears-launcher_MOCS
-    include/mainwindow.h
+    include/MainWindow.h
 )
 QT5_WRAP_CPP(MOCS ${v-gears-launcher_MOCS})
 

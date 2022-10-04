@@ -14,10 +14,10 @@
  */
 
 #include <iostream>
-#include "../include/ff7FieldTextWriter.h"
+
+#include "FieldTextWriter.h"
 #include "common/VGearsStringUtil.h"
 
-// TODO: Refactor: this is based on/copied from DatFile::DumpText.
 
 /**
  * Table of English characters.
@@ -180,10 +180,9 @@ static const unsigned short JAPANESE_CHARS_FE[256] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, // 0xF0 - 0xFF
 };
 
-void FF7FieldTextWriter::Begin(std::string file_name){
+void FieldTextWriter::Begin(std::string file_name){
     data_.clear();
     logger_.reset(new Logger(file_name));
-
     // Write BOM
     /* FIX ME - It needs to write data as UTF8.
     std::vector< unsigned char > bomBytes;
@@ -195,19 +194,18 @@ void FF7FieldTextWriter::Begin(std::string file_name){
     logger_->Log("<texts>\n");
 }
 
-u16 FF7FieldTextWriter::GetU16LE(u32 offset){
+u16 FieldTextWriter::GetU16LE(u32 offset){
     if (offset+1 >= data_.size()) throw std::out_of_range("");
     return *reinterpret_cast<u16*>(&data_[offset]);
 }
 
-u8 FF7FieldTextWriter::GetU8(u32 offset){
+u8 FieldTextWriter::GetU8(u32 offset){
     if (offset >= data_.size()) throw std::out_of_range("");
     return data_[offset];
 }
 
-void FF7FieldTextWriter::Write(
-  const std::vector<u8>& script_section_buffer, std::string field_name,
-  bool english
+void FieldTextWriter::Write(
+  const std::vector<u8>& script_section_buffer, std::string field_name, bool english
 ){
     data_ = script_section_buffer;
     // Get sector 1 offset (scripts and dialog).
@@ -230,8 +228,7 @@ void FF7FieldTextWriter::Write(
     const u16 dialogCount = GetU16LE(offset_to_sector + offset_to_dialogs);
     for (u16 i = 0; i <dialogCount; ++ i){
         // gGt offset of string data.
-        u32 offset
-          = offset_to_sector + offset_to_dialogs + GetU16LE(
+        u32 offset = offset_to_sector + offset_to_dialogs + GetU16LE(
             offset_to_sector + offset_to_dialogs
             + 0x02 +  // +2 to skip dialog count
             i * 0x02 // *2 because each char is 2 bytes
@@ -335,8 +332,7 @@ void FF7FieldTextWriter::Write(
                 logger_->Log("<image sprite=\"ButtonCross\" />");
             }
             else if (
-              (temp == 0xFA || temp == 0xFB || temp == 0xFC || temp == 0xFD)
-              && english == false
+              (temp == 0xFA || temp == 0xFB || temp == 0xFC || temp == 0xFD) && english == false
             ){
                 ++ offset;
                 unsigned char temp2 = GetU8(offset);
@@ -347,9 +343,7 @@ void FF7FieldTextWriter::Write(
                     }
                     else{
                         AddText(dialog);
-                        logger_->Log(
-                          "[MISSING 0xFA " + HexToString(temp2, 2, '0') + "]"
-                        );
+                        logger_->Log("[MISSING 0xFA " + HexToString(temp2, 2, '0') + "]");
                     }
                 }
                 else if (temp == 0xFB){
@@ -359,9 +353,7 @@ void FF7FieldTextWriter::Write(
                     }
                     else{
                         AddText(dialog);
-                        logger_->Log(
-                          "[MISSING 0xFB " + HexToString(temp2, 2, '0') + "]"
-                        );
+                        logger_->Log("[MISSING 0xFB " + HexToString(temp2, 2, '0') + "]");
                     }
                 }
                 else if (temp == 0xFC){
@@ -371,9 +363,7 @@ void FF7FieldTextWriter::Write(
                     }
                     else{
                         AddText(dialog);
-                        logger_->Log(
-                          "[MISSING 0xFC " + HexToString(temp2, 2, '0') + "]"
-                        );
+                        logger_->Log("[MISSING 0xFC " + HexToString(temp2, 2, '0') + "]");
                     }
                 }
                 else if (temp == 0xFD){
@@ -383,9 +373,7 @@ void FF7FieldTextWriter::Write(
                     }
                     else{
                         AddText(dialog);
-                        logger_->Log(
-                          "[MISSING 0xFD " + HexToString(temp2, 2, '0') + "]"
-                        );
+                        logger_->Log("[MISSING 0xFD " + HexToString(temp2, 2, '0') + "]");
                     }
                 }
             }
@@ -429,9 +417,7 @@ void FF7FieldTextWriter::Write(
                     ++ offset;
                     ++ offset;
                     AddText(dialog);
-                    logger_->Log(
-                      "<pause time=\"" + IntToString(wait) + "\" />"
-                    );
+                    logger_->Log("<pause time=\"" + IntToString(wait) + "\" />");
                 }
                 else{
                     if (JAPANESE_CHARS_FE[temp2] != 0x0000 && english == false){
@@ -440,9 +426,7 @@ void FF7FieldTextWriter::Write(
                     }
                     else{
                         AddText(dialog);
-                        logger_->Log(
-                          "[MISSING 0xFE " + HexToString(temp2, 2, '0') + "]"
-                        );
+                        logger_->Log("[MISSING 0xFE " + HexToString(temp2, 2, '0') + "]");
                     }
                 }
             }
@@ -456,11 +440,7 @@ void FF7FieldTextWriter::Write(
                 else{
                     AddText(dialog);
                     if (temp == 0xa9) logger_->Log("..."); // TODO Verify.
-                    else{
-                        logger_->Log(
-                          "[MISSING CHAR " + HexToString(temp, 2, '0') + "]"
-                        );
-                    }
+                    else logger_->Log("[MISSING CHAR " + HexToString(temp, 2, '0') + "]");
                 }
             }
         }
@@ -471,12 +451,12 @@ void FF7FieldTextWriter::Write(
 
 }
 
-void FF7FieldTextWriter::End(){
+void FieldTextWriter::End(){
     if (logger_) logger_->Log("</texts>\n");
     logger_.reset();
 }
 
-void FF7FieldTextWriter::AddText(std::vector< unsigned char >& text){
+void FieldTextWriter::AddText(std::vector< unsigned char >& text){
     if (text.empty()) return;
     std::string str(reinterpret_cast<char*>(text.data()), text.size());
     str = Ogre::StringUtil::replaceAll(str, "&", "&amp;");

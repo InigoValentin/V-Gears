@@ -29,7 +29,6 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreResourceGroupManager.h>
 #include <OgreLog.h>
-#include "ff7DataInstaller.h"
 #include "VGearsGameState.h"
 #include "data/VGearsAFileManager.h"
 #include "data/VGearsBackgroundFileManager.h"
@@ -51,12 +50,13 @@
 #include <memory>
 #include <QtCore/QDir>
 
+#include "../include/DataInstaller.h"
 #include "decompiler/field/FieldScriptFormatter.h"
 #include "decompiler/field/FieldDecompiler.h"
 
-float FF7DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
+float DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
 
-FF7DataInstaller::FF7DataInstaller(
+DataInstaller::DataInstaller(
   std::string input_dir, std::string output_dir,
   std::function<void(std::string)> write_output_line
 )
@@ -76,9 +76,9 @@ FF7DataInstaller::FF7DataInstaller(
 
 }
 
-FF7DataInstaller::~FF7DataInstaller(){}
+DataInstaller::~DataInstaller(){}
 
-int FF7DataInstaller::CalcProgress(){
+int DataInstaller::CalcProgress(){
     // TODO: Make more accurate with iterator_counter_ and
     // progress_step_num_elements_.
     float curr_step = installation_state_ / static_cast<float>(STATE_COUNT);
@@ -86,7 +86,7 @@ int FF7DataInstaller::CalcProgress(){
     return static_cast<int>(curr_step);
 }
 
-int FF7DataInstaller::Progress(){
+int DataInstaller::Progress(){
     switch (installation_state_){
         case IDLE:
             write_output_line("Loading flevel.lgp");
@@ -290,7 +290,7 @@ static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
  */
 static std::string FieldName(const std::string& name){return "ffvii_" + name;}
 
-void FF7DataInstaller::CreateDir(const std::string& path){
+void DataInstaller::CreateDir(const std::string& path){
     QString target = QString::fromStdString(output_dir_ + path);
     QDir dir(target);
     if (!dir.mkpath(".")) throw std::runtime_error("Failed to mkpath");
@@ -600,7 +600,7 @@ static float FieldScaleFactor(
  * @param write_output_line[in] Functon to print output to console.
  */
 static void FF7PcFieldToVGearsField(
-  FF7FieldTextWriter& field_text_writter,
+  FieldTextWriter& field_text_writter,
   VGears::FLevelFilePtr& field,
   const std::string& out_dir,
   const std::vector<std::string>& field_id_to_name_lookup,
@@ -777,15 +777,15 @@ static void FF7PcFieldToVGearsField(
             xml_entity_trigger->SetAttribute("name", line.name);
             xml_entity_trigger->SetAttribute(
               "point1",
-              std::to_string(line.point_a[0] * FF7DataInstaller::LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_a[1] * FF7DataInstaller::LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_a[2] * FF7DataInstaller::LINE_SCALE_FACTOR)
+              std::to_string(line.point_a[0] * DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.point_a[1] * DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.point_a[2] * DataInstaller::LINE_SCALE_FACTOR)
             );
             xml_entity_trigger->SetAttribute(
               "point2",
-              std::to_string(line.point_b[0] * FF7DataInstaller::LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_b[1] * FF7DataInstaller::LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_b[2] * FF7DataInstaller::LINE_SCALE_FACTOR)
+              std::to_string(line.point_b[0] * DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.point_b[1] * DataInstaller::LINE_SCALE_FACTOR)
+                + " " + std::to_string(line.point_b[2] * DataInstaller::LINE_SCALE_FACTOR)
             );
             xml_entity_trigger->SetAttribute("enabled", "true");
             element->LinkEndChild(xml_entity_trigger.release());
@@ -1236,7 +1236,7 @@ static void CollectFieldScaleFactors(
       = FieldDecompiler::ScaleFactor(field->GetRawScript());
 }
 
-void FF7DataInstaller::InitCollectSpawnAndScaleFactors(){
+void DataInstaller::InitCollectSpawnAndScaleFactors(){
     progress_step_num_elements_ = 1;
     CreateDir(FieldMapDir());
     CreateDir(FieldModelDir());
@@ -1253,7 +1253,7 @@ void FF7DataInstaller::InitCollectSpawnAndScaleFactors(){
     installation_state_ = SPAWN_POINTS_AND_SCALE_FACTORS;
 }
 
-void FF7DataInstaller::CollectionFieldSpawnAndScaleFactors(){
+void DataInstaller::CollectionFieldSpawnAndScaleFactors(){
     // On the first pass collate required field information.
     progress_step_num_elements_ = flevel_file_list_->size();
     if (iterator_counter_ < flevel_file_list_->size()){
@@ -1293,7 +1293,7 @@ void FF7DataInstaller::CollectionFieldSpawnAndScaleFactors(){
     }
 }
 
-void FF7DataInstaller::ConvertFieldsIteration(){
+void DataInstaller::ConvertFieldsIteration(){
     // Do the full conversion with the collated data.
     progress_step_num_elements_ = flevel_file_list_->size();
     if (iterator_counter_ < flevel_file_list_->size()){
@@ -1332,7 +1332,7 @@ void FF7DataInstaller::ConvertFieldsIteration(){
     }
 }
 
-void FF7DataInstaller::WriteMapsXmlBegin(){
+void DataInstaller::WriteMapsXmlBegin(){
     // Write out maps.xml.
     progress_step_num_elements_ = 1;
     doc_ = std::make_unique<TiXmlDocument>();
@@ -1343,7 +1343,7 @@ void FF7DataInstaller::WriteMapsXmlBegin(){
     converted_map_list_iterator_ = converted_map_list_.begin();
 }
 
-void FF7DataInstaller::WriteMapsXmlIteration(){
+void DataInstaller::WriteMapsXmlIteration(){
     // TODO: Probably need to inject "empty" and "test" fields.
     progress_step_num_elements_ = converted_map_list_.size();
     if (converted_map_list_iterator_ != converted_map_list_.end()){
@@ -1359,14 +1359,14 @@ void FF7DataInstaller::WriteMapsXmlIteration(){
     else installation_state_ = WRITE_MAPS_CLEAN;
 }
 
-void FF7DataInstaller::EndWriteMapsXml(){
+void DataInstaller::EndWriteMapsXml(){
     progress_step_num_elements_ = 1;
     doc_->LinkEndChild(element_.release());
     doc_->SaveFile(output_dir_ + "/maps.xml");
     installation_state_ = CONVERT_FIELD_MODELS_INIT;
 }
 
-void FF7DataInstaller::ConvertFieldModelsBegin(){
+void DataInstaller::ConvertFieldModelsBegin(){
     // TODO: Convert models and animations in model_animation_db.
     progress_step_num_elements_ = 1;
     field_models_lgp_ = std::make_unique<ScopedLgp>(
@@ -1380,12 +1380,12 @@ void FF7DataInstaller::ConvertFieldModelsBegin(){
     model_animation_map_iterator_ = used_models_and_anims_.map.begin();
 }
 
-void FF7DataInstaller::ConvertFieldModelsIteration(){
+void DataInstaller::ConvertFieldModelsIteration(){
     progress_step_num_elements_ = used_models_and_anims_.map.size();
     if (model_animation_map_iterator_ != used_models_and_anims_.map.end()){
         if (conversion_step_ == 0){
             write_output_line("Converting model " + model_animation_map_iterator_->first);
-            conversion_step_++;
+            conversion_step_ ++;
         }
         else{
             try{

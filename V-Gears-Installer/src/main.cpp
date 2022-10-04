@@ -14,7 +14,8 @@
  */
 
 #include <QtWidgets/QApplication>
-#include "../include/mainwindow.h"
+
+#include "MainWindow.h"
 
 /**
  * Installer main function.

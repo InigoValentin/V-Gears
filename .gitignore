@@ -18,3 +18,7 @@ output/include
 output/lib
 CMakeLists.txt.user
 doc/FFVII/RAW/
+.settings/
+.project
+.cproject
+

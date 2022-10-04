@@ -23,7 +23,7 @@
 /**
  * Handles the
  */
-class FF7FieldTextWriter{
+class FieldTextWriter{
 
     public:
 
@@ -41,11 +41,10 @@ class FF7FieldTextWriter{
          *
          * @param script_section_buffer[in] The text data to write.
          * @param field_name[in] The field of the text.
-         * @param english[in] True if the language to write.
+         * @param english[in] True if the language to write is english.
          */
         void Write(
-          const std::vector<u8>& script_section_buffer, std::string field_name,
-          bool english = true
+          const std::vector<u8>& script_section_buffer, std::string field_name, bool english = true
         );
 
         /**
@@ -93,7 +92,7 @@ class FF7FieldTextWriter{
         std::vector<u8> data_;
 
         /**
-         * Indicates if the text XML tag has been openend and not closed.
+         * Indicates if the text XML tag has been opened and not closed.
          */
         bool tag_open_ = false;
 };

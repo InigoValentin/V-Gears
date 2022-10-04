@@ -21,211 +21,25 @@
 #include "common/VGearsApplication.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
 #include "data/VGearsTriggersFile.h"
-#include "common/VGearsStringUtil.h"
 #include "data/VGearsFLevelFile.h"
-#include "ff7FieldTextWriter.h"
+#include "FieldTextWriter.h"
+#include "ModelsAndAnimationsDb.h"
+#include "ScopedLgp.h"
+#include "SpawnPointDb.h"
 
 // TODO: Separate classes in files.
 // TODO: Move implementations to cpp file.
 
-/**
- * Handles a scoped LGP archive.
- */
-class ScopedLgp{
-
-    public:
-
-        /**
-         * Constructor.
-         *
-         * Don't use directly.
-         */
-        ScopedLgp(const ScopedLgp&) = delete;
-
-        /**
-         * Copy constructor.
-         *
-         * Don't use directly.
-         */
-        ScopedLgp& operator = (const ScopedLgp&) = delete;
-
-        /**
-         * Constructor.
-         */
-        ScopedLgp(
-          Ogre::Root* root, std::string full_path,
-          std::string type, std::string group
-        ) : root_(root), full_path_(full_path), group_(group) {
-            if (root_){
-                std::cout << "[RESOURCE] " << full_path_ << ", "
-                  << type << ", " << group_ << std::endl;
-                Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-                  full_path_, type, group_
-                );
-            }
-        }
-
-        /**
-         * Destructor.
-         */
-        ~ScopedLgp(){
-            if (root_){
-                Ogre::ResourceGroupManager::getSingleton()
-                  .removeResourceLocation(full_path_, group_);
-            }
-        }
-
-    private:
-
-        /**
-         * The Ogre root system.
-         */
-        Ogre::Root* root_;
-
-        /**
-         * Full path to the LGP archive.
-         */
-        std::string full_path_;
-
-        /**
-         * Group for the resource.
-         */
-        std::string group_;
-};
-
-
 typedef std::set<std::string> MapCollection;
-
-/**
- * A database of spawn points.
- */
-class SpawnPointDb{
-
-    public:
-        /**
-         * Field IDs.
-         *
-         * ID of the field the gateways records from N other number of fields
-         * are linking to.
-         */
-        u16 target_field_id = 0;
-
-        /**
-         * A spawn point database record.
-         */
-        class Record{
-
-            public:
-
-                /**
-                 * Field that links to {@see SpawnPointDb::target_field_id}.
-                 */
-                u16 field_id = 0;
-
-                /**
-                 * Index of the gateway in {@see field_id}.
-                 */
-                u32 gateway_index_or_map_jump_address = 0;
-
-                /**
-                 * Gateway data.
-                 */
-                VGears::TriggersFile::Gateway gateway;
-
-                /**
-                 * Indicates if the gateway is a map jump from a script.
-                 */
-                bool from_script = false;
-
-                /**
-                 * @todo Understand and document.
-                 *
-                 * Only used from script calls.
-                 */
-                std::string entity_name;
-
-                /**
-                 * @todo Understand and document.
-                 *
-                 * Only used from script calls.
-                 */
-                std::string script_function_name;
-        };
-
-        /**
-         * List of gateways to this field.
-         */
-        std::vector<Record> gateways_to_this_field;
-};
 
 typedef std::map<u16, SpawnPointDb> FieldSpawnPointsMap;
 
 typedef std::map<u16, float> FieldScaleFactorMap;
 
-typedef std::map<std::string, std::set<std::string>> ModelAnimationMap;
-
-/**
- * Database of model animations.
- */
-class ModelsAndAnimationsDb{
-
-    public:
-
-        /**
-         * Normalizes an animation name.
-         *
-         * Generates a normalized file name, without path, lowercase, and an
-         * '.a' extension.
-         *
-         * @param name[in] Current name.
-         * @return The normalized name.
-         */
-        std::string NormalizeAnimationName(const std::string& name){
-            Ogre::String base_name;
-            VGears::StringUtil::splitBase(name, base_name);
-            std::transform(
-              base_name.begin(), base_name.end(), base_name.begin(), ::tolower
-            );
-            return base_name + ".a";
-        }
-
-        /**
-         * @todo Understand and document.
-         *
-         * @param model[in] @todo Understand and document.
-         * @return @todo Understand and document.
-         */
-        std::set<std::string>& ModelAnimations(const std::string model){
-            // HACK FIX LGP READING
-            std::string model_lower = model;
-            std::transform(
-              model_lower.begin(), model_lower.end(),
-              model_lower.begin(), ::tolower
-            );
-            return map[model_lower];
-        }
-
-        /**
-         * Retrieves the metadata file name associated to a model.
-         *
-         * @param model_name[in] The model name.
-         * @return Name of the metadata file.
-         */
-        std::string ModelMetaDataName(const std::string& model_name){
-            // If not in meta data then just replace .hrc with .mesh.
-            Ogre::String base_name;
-            VGears::StringUtil::splitBase(model_name, base_name);
-            return VGears::FF7::NameLookup::model(base_name) + ".mesh";
-        }
-
-        //private:
-        ModelAnimationMap map;
-};
-
 /**
  * The data installer.
  */
-class FF7DataInstaller{
+class DataInstaller{
 
     public:
 
@@ -240,7 +54,7 @@ class FF7DataInstaller{
          * to.
          * @param write_output_line Pointer to function to write output.
          */
-        FF7DataInstaller(
+        DataInstaller(
           std::string input_dir, std::string output_dir,
           std::function<void(std::string)> write_output_line
         );
@@ -248,7 +62,7 @@ class FF7DataInstaller{
         /**
          * Installer destructor.
          */
-        ~FF7DataInstaller();
+        ~DataInstaller();
 
         /**
          * Handle the installation progress.
@@ -516,7 +330,7 @@ class FF7DataInstaller{
         /**
          * Field text writer.
          */
-        FF7FieldTextWriter field_text_writer_;
+        FieldTextWriter field_text_writer_;
 
         /**
          * Written materials.

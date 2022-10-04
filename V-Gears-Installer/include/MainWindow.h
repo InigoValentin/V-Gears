@@ -28,9 +28,6 @@ namespace Ui {
  */
 class MainWindow : public QMainWindow{
 
-    // TODO ??? What is this.
-    Q_OBJECT
-
     public:
 
         /**
@@ -52,63 +49,63 @@ class MainWindow : public QMainWindow{
          *
          * Sets the selected directory.
          */
-        void on_lineConfigDir_editingFinished();
+        void on_line_vgears_config_editingFinished();
 
         /**
          * Triggered when the configuration directory button is clicked.
          *
          * Opens a file manager for directory selection.
          */
-        void on_btnConfigDir_clicked();
+        void on_btn_vgears_config_clicked();
 
         /**
          * Triggered when the executable directory has done being edited.
          *
          * Sets the selected directory.
          */
-        void on_lineVGearsExe_editingFinished();
+        void on_line_vgears_exe_editingFinished();
 
         /**
          * Triggered when the executable directory button is clicked.
          *
          * Opens a file manager for file selection.
          */
-        void on_btnVGearsExe_clicked();
+        void on_btn_vgears_exe_clicked();
 
         /**
          * Triggered when the launch button is clicked.
          *
          * Launches V-Gears.
          */
-        void on_btnLaunch_clicked();
+        void on_btn_vgears_run_clicked();
 
         /**
          * Triggered when the input data directory button is clicked.
          *
          * Opens a file manager for directory selection.
          */
-        void on_btnInput_clicked();
+        void on_btn_data_src_clicked();
 
         /**
          * Triggered when the output data directory has done being edited.
          *
          * Sets the selected directory.
          */
-        void on_lineDataDir_editingFinished();
+        void on_line_data_dst_editingFinished();
 
         /**
          * Triggered when the output data directory button is clicked.
          *
          * Opens a file manager for directory selection.
          */
-        void on_btnDataDir_clicked();
+        void on_btn_data_dst_clicked();
 
         /**
          * Triggered when the install button is clicked.
          *
          * Launches the installation.
          */
-        void on_btnGO_clicked();
+        void on_btn_data_run_clicked();
 
     //private slots:
 
@@ -145,7 +142,10 @@ class MainWindow : public QMainWindow{
          */
         void InitSettings(void);
 
-    private:
+        // The Q_OBJECT macro must appear in the private section of a class definition
+        //that declares its own signals and slots or that uses other services provided
+        // by Qt's meta-object system.
+        Q_OBJECT
 
         /**
          * The installer window.
@@ -165,5 +165,5 @@ class MainWindow : public QMainWindow{
         /**
          * The installer.
          */
-        std::unique_ptr<class FF7DataInstaller> installer_;
+        std::unique_ptr<class DataInstaller> installer_;
 };

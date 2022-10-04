@@ -24,61 +24,62 @@ namespace VGears{
      * Provides utilities for the application.
      */
     class Utility : public Application{
-    public:
 
-        /**
-         * Constructor.
-         *
-         * @param argc[in] Number of arguments passed to the application.
-         * @param argv[in] List of arguments passed to the application.
-         */
-        Utility(int argc, char *argv[]);
+        public:
 
-        /**
-         * Destructor.
-         */
-        virtual ~Utility();
+            /**
+             * Constructor.
+             *
+             * @param argc[in] Number of arguments passed to the application.
+             * @param argv[in] List of arguments passed to the application.
+             */
+            Utility(int argc, char *argv[]);
 
-        virtual Ogre::Camera* GetCamera( void );
+            /**
+             * Destructor.
+             */
+            virtual ~Utility();
 
-    protected:
+            virtual Ogre::Camera* GetCamera( void );
 
-        /**
-         * Initializes components used by the utilities.
-         */
-        virtual void InitComponents();
+        protected:
 
-        /**
-         * Initializes components used by the utilities.
-         */
-        virtual void DestroyComponents();
+            /**
+             * Initializes components used by the utilities.
+             */
+            virtual void InitComponents();
 
-    private:
+            /**
+             * Initializes components used by the utilities.
+             */
+            virtual void DestroyComponents();
 
-        /**
-         * Constructor.
-         */
-        Utility();
+        private:
 
-        /**
-         * The frame listener.
-         */
-        DisplayFrameListener *frame_listener_;
+            /**
+             * Constructor.
+             */
+            Utility();
 
-        /**
-         * The application scene manager.
-         */
-        Ogre::SceneManager *scene_manager_;
+            /**
+             * The frame listener.
+             */
+            DisplayFrameListener *frame_listener_;
 
-        /**
-         * The engine camera.
-         */
-        Ogre::Camera *camera_;
+            /**
+             * The application scene manager.
+             */
+            Ogre::SceneManager *scene_manager_;
 
-        /**
-         * The engine viewport.
-         */
-        Ogre::Viewport *viewport_;
-    };
+            /**
+             * The engine camera.
+             */
+            Ogre::Camera *camera_;
+
+            /**
+             * The engine viewport.
+             */
+            Ogre::Viewport *viewport_;
+        };
 }
 
