@@ -37,7 +37,7 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
 
     // If condition is a function, add and stop.
     if (!func_name.empty()){
-        uint32 param = params_[0]->getUnsigned();
+        uint32 param = params_[0]->GetUnsigned();
         // Special cases. The first parameter of IFKEY, IFKEYON and IFKEYOFF
         // can be ORed to get the individual keys, but there are two invalid
         // ones: 512 and 1024. They must be XORed.
@@ -49,17 +49,17 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
             if (param >= 1024) param = param ^ 1024;
             if (param >= 512) param = param ^ 512;
         }
-        ValuePtr v = new UnqotedStringValue(func_name + "(" + std::to_string(param) + ")");
+        ValuePtr v = new UnquotedStringValue(func_name + "(" + std::to_string(param) + ")");
         stack.Push(v);
         return;
     }
     std::string op;
-    uint32 type = params_[4]->getUnsigned();
+    uint32 type = params_[4]->GetUnsigned();
     const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getUnsigned()
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
     const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
 
     switch (type){
@@ -74,17 +74,17 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
         case 8: op = "|"; break;
         case 9:
             {
-                op = "bit(" + params_[0]->getString() + ", " + params_[2]->getString()
+                op = "bit(" + params_[0]->GetString() + ", " + params_[2]->GetString()
                   + ", " + destination + ") == 1";
-                ValuePtr v = new UnqotedStringValue(op);
+                ValuePtr v = new UnquotedStringValue(op);
                 stack.Push(v);
             }
             return;
         case 0xA:
             {
-                op = "bit(" + params_[0]->getString() + ", " + params_[2]->getString()
+                op = "bit(" + params_[0]->GetString() + ", " + params_[2]->GetString()
                   + ", " + destination + ") == 0";
-                ValuePtr v = new UnqotedStringValue(op);
+                ValuePtr v = new UnquotedStringValue(op);
                 stack.Push(v);
             }
             return;
@@ -117,7 +117,7 @@ uint32 FF7::FieldCondJumpInstruction::GetDestAddress() const{
             break;
         default: throw UnknownJumpTypeException(address_, opcode_);
     }
-    return address_ + params_[jump_param_index]->getUnsigned() + params_size;
+    return address_ + params_[jump_param_index]->GetUnsigned() + params_size;
 }
 
 std::ostream& FF7::FieldCondJumpInstruction::Print(std::ostream &output) const{

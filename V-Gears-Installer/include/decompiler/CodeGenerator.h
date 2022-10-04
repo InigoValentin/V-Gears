@@ -23,7 +23,7 @@
 #include "DecompilerException.h"
 #include "Graph.h"
 #include "LuaLanguage.h"
-#include "value.h"
+#include "Value.h"
 
 
 class Engine;

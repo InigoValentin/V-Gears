@@ -21,8 +21,8 @@
 #include <boost/intrusive_ptr.hpp>
 
 #include "../RefCounted.h"
+#include "../Value.h"
 #include "common/scummsys.h"
-#include "decompiler/value.h"
 #include "decompiler/DecompilerException.h"
 
 class CodeGenerator;

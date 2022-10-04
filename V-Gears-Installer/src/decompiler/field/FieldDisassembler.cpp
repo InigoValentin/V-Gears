@@ -162,7 +162,7 @@ int FF7::FieldDisassembler::FindId(uint32 start_addr, uint32 end_addr, const Ins
     for (const InstPtr& instruction : insts){
         if (instruction->GetAddress() >= start_addr && instruction->GetAddress() <= end_addr){
             if (instruction->GetOpcode() == FF7::OPCODES::opCodeCHAR)
-                return instruction->GetParam(0)->getSigned();
+                return instruction->GetParam(0)->GetSigned();
         }
     }
     return -1;
@@ -1046,12 +1046,12 @@ bool FF7::FieldDisassembler::ReadOpCodesToPositionOrReturn(
                 // Mark function entity owner as line.
                 is_line = true;
                 ParseOpcode(full_opcode, "LINE", new FieldWalkmeshInstruction(), 0, "ssssss");
-                point_a[0] = this->insts_.back()->GetParam(0)->getSigned();
-                point_a[1] = this->insts_.back()->GetParam(1)->getSigned();
-                point_a[2] = this->insts_.back()->GetParam(2)->getSigned();
-                point_b[0] = this->insts_.back()->GetParam(3)->getSigned();
-                point_b[1] = this->insts_.back()->GetParam(4)->getSigned();
-                point_b[2] = this->insts_.back()->GetParam(5)->getSigned();
+                point_a[0] = this->insts_.back()->GetParam(0)->GetSigned();
+                point_a[1] = this->insts_.back()->GetParam(1)->GetSigned();
+                point_a[2] = this->insts_.back()->GetParam(2)->GetSigned();
+                point_b[0] = this->insts_.back()->GetParam(3)->GetSigned();
+                point_b[1] = this->insts_.back()->GetParam(4)->GetSigned();
+                point_b[2] = this->insts_.back()->GetParam(5)->GetSigned();
                 break;
 
             // Backgnd

@@ -28,9 +28,9 @@
 void FF7::WorldStoreInstruction::ProcessInst(
   Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
-    std::string value = stack.Pop()->getString();
+    std::string value = stack.Pop()->GetString();
     // If the bank address is from a load bank instruction, then only
     // the bank address is needed, not whats *at* the bank address.
     ValuePtr bank_addr = stack.Pop();
-    code_gen->AddOutputLine("Write(" + bank_addr->getString() + ", " + value + ");");
+    code_gen->AddOutputLine("Write(" + bank_addr->GetString() + ", " + value + ");");
 }

@@ -36,7 +36,7 @@ void FF7::WorldSubStackInstruction::ProcessInst(
         case 0xc0: op = "|"; break;
         case 0x15: // neg
         case 0x17: // not
-            stack.Push(stack.Pop()->negate());
+            stack.Push(stack.Pop()->Negate());
             return;
             break;
         case 0x30: op = "*";break;
@@ -48,6 +48,6 @@ void FF7::WorldSubStackInstruction::ProcessInst(
         case 0x51: op = "<<"; break;
         default:op = "unknown_operation";
     }
-    std::string value = stack.Pop()->getString() + " " + op + " " + stack.Pop()->getString();
+    std::string value = stack.Pop()->GetString() + " " + op + " " + stack.Pop()->GetString();
     stack.Push(new VarValue(value));
 }

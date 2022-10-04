@@ -26,4 +26,4 @@
 
 void FF7::WorldLoadBankInstruction::ProcessInst(
   Function &function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-){stack.Push(new WorldEngine::BankValue("Read(" + params_[0]->getString() + ")"));}
+){stack.Push(new WorldEngine::BankValue("Read(" + params_[0]->GetString() + ")"));}

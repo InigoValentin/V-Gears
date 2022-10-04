@@ -60,11 +60,11 @@ void FF7::FieldWindowInstruction::ProcessInst(
 
 void FF7::FieldWindowInstruction::ProcessWINDOW(CodeGenerator* code_gen){
     // Initializes a new window. It won't be displayed until MESSAGE is used.
-    auto windowId = params_[0]->getUnsigned();
-    auto x = params_[1]->getUnsigned();
-    auto y = params_[2]->getUnsigned();
-    auto width = params_[3]->getUnsigned();
-    auto height = params_[4]->getUnsigned();
+    auto windowId = params_[0]->GetUnsigned();
+    auto x = params_[1]->GetUnsigned();
+    auto y = params_[2]->GetUnsigned();
+    auto width = params_[3]->GetUnsigned();
+    auto height = params_[4]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("dialog:dialog_open(\"%1%\", %2%, %3%, %4%, %5%)")
       % windowId % x % y % width % height
@@ -75,8 +75,8 @@ void FF7::FieldWindowInstruction::ProcessMESSAGE(
   CodeGenerator* code_gen, const std::string& script_name
 ){
     // Displays a dialog in the WINDOW that has previously been initialized to display this dialog.
-    auto window_id = params_[0]->getUnsigned();
-    auto dialog_id = params_[1]->getUnsigned();
+    auto window_id = params_[0]->GetUnsigned();
+    auto dialog_id = params_[1]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("dialog:dialog_set_text(\"%1%\", \"%2%_%3%\")")
       % window_id % script_name % dialog_id
@@ -89,19 +89,19 @@ void FF7::FieldWindowInstruction::ProcessMESSAGE(
 
 void FF7::FieldWindowInstruction::ProcessWCLSE(CodeGenerator* code_gen){
     // Close a dialog.
-    auto windowId = params_[0]->getUnsigned();
+    auto windowId = params_[0]->GetUnsigned();
     code_gen->AddOutputLine((boost::format("dialog:dialog_close(\"%1%\")") % windowId).str());
 }
 
 void FF7::FieldWindowInstruction::ProcessMPNAM(CodeGenerator* code_gen){
     code_gen->AddOutputLine(
-      (boost::format("-- field:map_name(%1%)") % params_[0]->getUnsigned()).str()
+      (boost::format("-- field:map_name(%1%)") % params_[0]->GetUnsigned()).str()
     );
 }
 
 void FF7::FieldWindowInstruction::ProcessMENU2(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("-- field:menu_lock(%1%)")
-      % FF7::FieldCodeGenerator::FormatBool(params_[0]->getUnsigned())
+      % FF7::FieldCodeGenerator::FormatBool(params_[0]->GetUnsigned())
     ).str());
 }

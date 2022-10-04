@@ -35,8 +35,8 @@ void FF7::FieldWalkmeshInstruction::ProcessInst(
             // Triangle id, on or off
             code_gen->AddOutputLine(
                 (boost::format("walkmesh:lock_walkmesh(%1%, %2%)")
-                % params_[0]->getUnsigned()
-                % FF7::FieldCodeGenerator::FormatBool(params_[1]->getUnsigned())).str());
+                % params_[0]->GetUnsigned()
+                % FF7::FieldCodeGenerator::FormatBool(params_[1]->GetUnsigned())).str());
             break;
         case OPCODES::LINE: ProcessLINE(code_gen, md.GetEntityName()); break;
         case OPCODES::LINON: code_gen->WriteTodo(md.GetEntityName(), "LINON"); break;
@@ -51,17 +51,17 @@ void FF7::FieldWalkmeshInstruction::ProcessInst(
 void FF7::FieldWalkmeshInstruction::ProcessUC(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("entity_manager:player_lock(%1%)")
-      % FF7::FieldCodeGenerator::FormatBool(params_[0]->getUnsigned())
+      % FF7::FieldCodeGenerator::FormatBool(params_[0]->GetUnsigned())
     ).str());
 }
 
 void FF7::FieldWalkmeshInstruction::ProcessLINE(CodeGenerator* code_gen, const std::string& entity){
-    float xa = params_[0]->getSigned();
-    float ya = params_[1]->getSigned();
-    float za = params_[2]->getSigned();
-    float xb = params_[3]->getSigned();
-    float yb = params_[4]->getSigned();
-    float zb = params_[5]->getSigned();
+    float xa = params_[0]->GetSigned();
+    float ya = params_[1]->GetSigned();
+    float za = params_[2]->GetSigned();
+    float xb = params_[3]->GetSigned();
+    float yb = params_[4]->GetSigned();
+    float zb = params_[5]->GetSigned();
     // Scale down. TODO: Why this number?
     xa *= 0.00781249709639;
     ya *= 0.00781249709639;

@@ -53,7 +53,7 @@ set(HEADER_FILES
     include/decompiler/RefCounted.h
     include/decompiler/Stack.h
     include/decompiler/DecompilerException.h
-    include/decompiler/value.h
+    include/decompiler/Value.h
     include/decompiler/field/instruction/FieldBackgroundInstruction.h
     include/decompiler/field/instruction/FieldCameraInstruction.h
     include/decompiler/field/instruction/FieldCondJumpInstruction.h
@@ -124,7 +124,7 @@ set(SOURCE_FILES
     src/decompiler/instruction/UnaryOpPrefixStackInstruction.cpp
     src/decompiler/instruction/UncondJumpInstruction.cpp
     src/decompiler/DecompilerException.cpp
-    src/decompiler/value.cpp
+    src/decompiler/Value.cpp
     src/decompiler/field/instruction/FieldBackgroundInstruction.cpp
     src/decompiler/field/instruction/FieldCameraInstruction.cpp
     src/decompiler/field/instruction/FieldCondJumpInstruction.cpp

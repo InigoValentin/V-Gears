@@ -154,7 +154,7 @@ void FF7::FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
             }
             if ((*instruction)->IsCondJump()){
                 AddOutputLine(
-                  (boost::format("if (%s) then") % stack.Pop()->getString()).str(), false, true
+                  (boost::format("if (%s) then") % stack.Pop()->GetString()).str(), false, true
                 );
                 // If the next instruction is the last in the function, mark the next pass to
                 // add an 'end' after the instruction to close the if.

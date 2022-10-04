@@ -148,37 +148,37 @@ void FF7::FieldModelInstruction::ProcessInst(
 }
 
 void FF7::FieldModelInstruction::ProcessJOIN(CodeGenerator* code_gen){
-    code_gen->AddOutputLine("join_party(" + std::to_string(params_[0]->getUnsigned()) + ")");
+    code_gen->AddOutputLine("join_party(" + std::to_string(params_[0]->GetUnsigned()) + ")");
 }
 
 void FF7::FieldModelInstruction::ProcessSPLIT(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     const auto& ax = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[6]->getSigned(),
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[6]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& ay = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[7]->getSigned(),
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[7]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& ar = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->getUnsigned(), params_[8]->getSigned(),
+      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[8]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& bx = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[3]->getUnsigned(), params_[9]->getSigned(),
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[9]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& by = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[4]->getUnsigned(), params_[10]->getSigned(),
+      cg->GetFormatter(), params_[4]->GetUnsigned(), params_[10]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& br = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[5]->getUnsigned(), params_[11]->getSigned(),
+      cg->GetFormatter(), params_[5]->GetUnsigned(), params_[11]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
-    const auto& speed = params_[12]->getUnsigned();
+    const auto& speed = params_[12]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("split_party(%1%, %2%, %3%, %4%, %5%, %6%, %7%)")
       % ax % ay % ar % bx % by % br % speed
@@ -188,7 +188,7 @@ void FF7::FieldModelInstruction::ProcessSPLIT(CodeGenerator* code_gen){
 void FF7::FieldModelInstruction::ProcessTLKON(CodeGenerator* code_gen, const std::string& entity){
     code_gen->AddOutputLine((
       boost::format("self.%1%:set_talkable(%2%)")
-      % entity % FF7::FieldCodeGenerator::FormatInvertedBool(params_[0]->getUnsigned())
+      % entity % FF7::FieldCodeGenerator::FormatInvertedBool(params_[0]->GetUnsigned())
     ).str());
 }
 
@@ -209,9 +209,9 @@ void FF7::FieldModelInstruction::ProcessDFANM(
 ){
     // ID will be fixed-up downstream.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    auto animation_id = params_[0]->getUnsigned();
+    auto animation_id = params_[0]->GetUnsigned();
     // TODO: check for zero.
-    auto speed = 1.0f / params_[1]->getUnsigned();
+    auto speed = 1.0f / params_[1]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:set_default_animation(\"%2%\") -- speed %3%")
       % entity % cg->GetFormatter().AnimationName(char_id, animation_id) % speed
@@ -227,9 +227,9 @@ void FF7::FieldModelInstruction::ProcessANIME1(
 ){
     // ID will be fixed-up downstream.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    auto animation_id = params_[0]->getUnsigned();
+    auto animation_id = params_[0]->GetUnsigned();
     // TODO: check for zero.
-    auto speed = 1.0f / params_[1]->getUnsigned();
+    auto speed = 1.0f / params_[1]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:play_animation(\"%2%\") -- speed %3%")
       % entity % cg->GetFormatter().AnimationName(char_id, animation_id) % speed
@@ -240,7 +240,7 @@ void FF7::FieldModelInstruction::ProcessANIME1(
 void FF7::FieldModelInstruction::ProcessVISI(CodeGenerator* code_gen, const std::string& entity){
     code_gen->AddOutputLine((
       boost::format("self.%1%:set_visible(%2%)")
-      % entity % FF7::FieldCodeGenerator::FormatBool(params_[0]->getUnsigned())
+      % entity % FF7::FieldCodeGenerator::FormatBool(params_[0]->GetUnsigned())
     ).str());
 }
 
@@ -248,19 +248,19 @@ void FF7::FieldModelInstruction::ProcessXYZI(CodeGenerator* code_gen, const std:
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[4]->getSigned(),
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[5]->getSigned(),
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& z = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->getUnsigned(), params_[6]->getSigned(),
+      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[6]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& triangle_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[3]->getUnsigned(), params_[7]->getUnsigned()
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[7]->GetUnsigned()
     );
     code_gen->AddOutputLine((
       boost::format("self.%1%:set_position(%2%, %3%, %4%) -- triangle ID %5%")
@@ -272,11 +272,11 @@ void FF7::FieldModelInstruction::ProcessMOVE(CodeGenerator* code_gen, const std:
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getSigned(),
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getSigned(),
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     code_gen->AddOutputLine(
@@ -289,7 +289,7 @@ void FF7::FieldModelInstruction::ProcessMSPED(CodeGenerator* code_gen, const std
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     const auto& speed = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[2]->getUnsigned(),
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[2]->GetUnsigned(),
       FF7::FieldCodeGenerator::ValueType::Float, 256.0f * scale / 30.0f
     );
     code_gen->AddOutputLine(
@@ -300,7 +300,7 @@ void FF7::FieldModelInstruction::ProcessMSPED(CodeGenerator* code_gen, const std
 void FF7::FieldModelInstruction::ProcessDIR(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& degrees = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[1]->getUnsigned(),
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned(),
       FF7::FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
     );
     code_gen->AddOutputLine((boost::format("self.%1%:set_rotation(%2%)") % entity % degrees).str());
@@ -309,20 +309,20 @@ void FF7::FieldModelInstruction::ProcessDIR(CodeGenerator* code_gen, const std::
 void FF7::FieldModelInstruction::ProcessTURNGEN(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& degrees = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[2]->getUnsigned(),
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[2]->GetUnsigned(),
       FF7::FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
     );
     std::string direction;
-    switch (params_[3]->getUnsigned()){
+    switch (params_[3]->GetUnsigned()){
         case 0: direction = "Entity.CLOCKWISE"; break;
         case 1: direction = "Entity.ANTICLOCKWISE"; break;
         case 2: direction = "Entity.CLOSEST"; break;
         // Default to closest:
         default: direction = "Entity.CLOSEST"; break;
     }
-    auto steps = params_[4]->getUnsigned();
+    auto steps = params_[4]->GetUnsigned();
     std::string step_type;
-    switch (params_[5]->getUnsigned()){
+    switch (params_[5]->GetUnsigned()){
         case 1: step_type = "Entity.LINEAR"; break;
         case 2: step_type = "Entity.SMOOTH"; break;
         // Default to smooth
@@ -340,9 +340,9 @@ void FF7::FieldModelInstruction::ProcessGETAI(CodeGenerator* code_gen, const Fie
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: check for assignment to literal.
     const auto& variable = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
-    const auto& entity = engine.EntityByIndex(params_[2]->getUnsigned());
+    const auto& entity = engine.EntityByIndex(params_[2]->GetUnsigned());
     code_gen->AddOutputLine(
       (boost::format("%1% = entity_manager:get_entity(\"%2%\"):get_move_triangle_id()")
       % variable % entity.GetName()
@@ -354,9 +354,9 @@ void FF7::FieldModelInstruction::ProcessANIM_2(
 ){
     // ID will be fixed-up downstream.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    auto animation_id = params_[0]->getUnsigned();
+    auto animation_id = params_[0]->GetUnsigned();
     // TODO: check for zero.
-    auto speed = 1.0f / params_[1]->getUnsigned();
+    auto speed = 1.0f / params_[1]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:play_animation_stop(\"%2%\") -- speed %3%")
       % entity % cg->GetFormatter().AnimationName(char_id, animation_id) % speed
@@ -368,11 +368,11 @@ void FF7::FieldModelInstruction::ProcessCANIM2(
   CodeGenerator* code_gen, const std::string& entity, int char_id
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    auto animation_id = params_[0]->getUnsigned();
-    auto start_frame = params_[1]->getUnsigned() / 30.0f;
-    auto end_frame = params_[2]->getUnsigned() / 30.0f;
+    auto animation_id = params_[0]->GetUnsigned();
+    auto start_frame = params_[1]->GetUnsigned() / 30.0f;
+    auto end_frame = params_[2]->GetUnsigned() / 30.0f;
     // TODO: check for zero.
-    auto speed = 1.0f / params_[3]->getUnsigned();
+    auto speed = 1.0f / params_[3]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:play_animation(\"%2%\", %3%, %4%) -- speed %5%")
       % entity % cg->GetFormatter().AnimationName(char_id, animation_id)
@@ -386,11 +386,11 @@ void FF7::FieldModelInstruction::ProcessCANM_2(
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // ID will be fixed-up downstream.
-    auto animation_id = params_[0]->getUnsigned();
-    auto start_frame = params_[1]->getUnsigned() / 30.0f;
-    auto end_frame = params_[2]->getUnsigned() / 30.0f;
+    auto animation_id = params_[0]->GetUnsigned();
+    auto start_frame = params_[1]->GetUnsigned() / 30.0f;
+    auto end_frame = params_[2]->GetUnsigned() / 30.0f;
     // TODO: check for zero.
-    auto speed = 1.0f / params_[3]->getUnsigned();
+    auto speed = 1.0f / params_[3]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("self.%1%:play_animation_stop(\"%2%\", %3%, %4%) -- speed %5%")
       % entity % cg->GetFormatter().AnimationName(char_id, animation_id)
@@ -400,7 +400,7 @@ void FF7::FieldModelInstruction::ProcessCANM_2(
 }
 
 void FF7::FieldModelInstruction::ProcessCC(CodeGenerator* code_gen, const FieldEngine& engine){
-    const auto& entity = engine.EntityByIndex(params_[0]->getUnsigned());
+    const auto& entity = engine.EntityByIndex(params_[0]->GetUnsigned());
     code_gen->AddOutputLine(
       (boost::format("entity_manager:set_player_entity(\"%1%\")") % entity.GetName()).str()
     );
@@ -410,18 +410,18 @@ void FF7::FieldModelInstruction::ProcessJUMP(CodeGenerator* code_gen, const std:
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     float x = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[4]->getSigned(),
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
     float y = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[5]->getSigned(),
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
     int i = atoi(FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->getUnsigned(), params_[6]->getSigned()
+      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[6]->GetSigned()
     ).c_str());
     int steps = atoi(FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[3]->getUnsigned(), params_[7]->getSigned()
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[7]->GetSigned()
     ).c_str());
     //x *= 0.00781250273224;
     //y *= 0.00781250273224;
@@ -443,9 +443,9 @@ void FF7::FieldModelInstruction::ProcessAXYZI(CodeGenerator* code_gen){
     const float scale = 128.0f * cg->GetScaleFactor();
     code_gen->AddOutputLine((
       boost::format("axyzi(%1%, %2%, %3%, %4%, %5%, %6%, %7%, %8%, %9%, %10%)")
-      % params_[0]->getSigned() % params_[1]->getSigned() % params_[2]->getSigned()
-      % params_[3]->getSigned() % params_[4]->getSigned() % params_[5]->getSigned()
-      % params_[6]->getSigned() % params_[7]->getSigned() % params_[8]->getSigned()
+      % params_[0]->GetSigned() % params_[1]->GetSigned() % params_[2]->GetSigned()
+      % params_[3]->GetSigned() % params_[4]->GetSigned() % params_[5]->GetSigned()
+      % params_[6]->GetSigned() % params_[7]->GetSigned() % params_[8]->GetSigned()
       % scale
     ).str());
 }
@@ -454,28 +454,28 @@ void FF7::FieldModelInstruction::ProcessLADER(CodeGenerator* code_gen, const std
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[4]->getSigned(),
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[5]->getSigned(),
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     const auto& z = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->getUnsigned(), params_[6]->getSigned(),
+      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[6]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     );
     uint end_triangle = atoi(FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[3]->getUnsigned(), params_[7]->getUnsigned()
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[7]->GetUnsigned()
     ).c_str());
-    uint keys = params_[8]->getUnsigned();
-    uint animation = params_[9]->getUnsigned();
-    //float orientation = params_[10]->getUnsigned() / (256.0f / 360.0f);
+    uint keys = params_[8]->GetUnsigned();
+    uint animation = params_[9]->GetUnsigned();
+    //float orientation = params_[10]->GetUnsigned() / (256.0f / 360.0f);
     const auto& orientation = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), 0, params_[10]->getSigned(),
+      cg->GetFormatter(), 0, params_[10]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
     );
-    uint speed = params_[11]->getUnsigned();
+    uint speed = params_[11]->GetUnsigned();
     // TODO: Animation hardcoded as "btce".
     // TODO: Orientation and speed not set.
     code_gen->AddOutputLine((
@@ -490,7 +490,7 @@ void FF7::FieldModelInstruction::ProcessLADER(CodeGenerator* code_gen, const std
 void FF7::FieldModelInstruction::ProcessSOLID(CodeGenerator* code_gen, const std::string& entity){
     code_gen->AddOutputLine((
       boost::format("self.%1%:set_solid(%2%)")
-      % entity % FF7::FieldCodeGenerator::FormatInvertedBool(params_[0]->getUnsigned())
+      % entity % FF7::FieldCodeGenerator::FormatInvertedBool(params_[0]->GetUnsigned())
     ).str());
 }
 
@@ -498,19 +498,19 @@ void FF7::FieldModelInstruction::ProcessOFST(CodeGenerator* code_gen, const std:
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     float x = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[5]->getSigned(),
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[5]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
     float y = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(),params_[6]->getSigned(),
+      cg->GetFormatter(), params_[1]->GetUnsigned(),params_[6]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
     float z = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->getUnsigned(), params_[7]->getSigned(),
+      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[7]->GetSigned(),
       FF7::FieldCodeGenerator::ValueType::Float, scale
     ));
     float speed = std::stof(FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[3]->getUnsigned(), params_[8]->getUnsigned()
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[8]->GetUnsigned()
     ));
     // Spatial coordinates need to be scaled down.
     // TODO: This number is empirically deducted. Why this number?
@@ -522,6 +522,6 @@ void FF7::FieldModelInstruction::ProcessOFST(CodeGenerator* code_gen, const std:
     code_gen->AddOutputLine((
       boost::format("self.%1%:offset_to_position(%2%, %3%, %4%, %5%, %6%)")
       % entity % x % y % z
-      % (params_[4]->getUnsigned() ? "Entity.SMOOTH" : "Entity.LINEAR")% speed
+      % (params_[4]->GetUnsigned() ? "Entity.SMOOTH" : "Entity.LINEAR")% speed
     ).str());
 }

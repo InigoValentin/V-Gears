@@ -50,11 +50,11 @@ void CodeGenerator::WriteFunctionCall(
     while (*format){
         bool skip_argument = false;
         switch (*format){
-            case 'b': func_call += params[param_index]->getUnsigned() ? "true" : "false"; break;
-            case 'n': func_call += std::to_string(params[param_index]->getUnsigned()); break;
+            case 'b': func_call += params[param_index]->GetUnsigned() ? "true" : "false"; break;
+            case 'n': func_call += std::to_string(params[param_index]->GetUnsigned()); break;
             case 'f':
                 func_call += std::to_string(
-                  static_cast<float>(params[param_index]->getUnsigned()) / 30.0f
+                  static_cast<float>(params[param_index]->GetUnsigned()) / 30.0f
                 );
                 break;
             case '_': skip_argument = true; break;// Ignore param
@@ -217,11 +217,11 @@ void CodeGenerator::ProcessCondJumpInst(const InstPtr inst){
                       << " " << target_lang_->Else() << " ";
                 }
             }
-            s << target_lang_->If(true) << stack_.Pop()->negate() << target_lang_->If(false);
+            s << target_lang_->If(true) << stack_.Pop()->Negate() << target_lang_->If(false);
             AddOutputLine(s.str(), cur_group_->coalesced_else, true);
             break;
         case GROUP_TYPE_WHILE:
-            s << target_lang_->WhileHeader(true) << stack_.Pop()->negate()
+            s << target_lang_->WhileHeader(true) << stack_.Pop()->Negate()
               << target_lang_->WhileHeader(false) << " "
               << target_lang_->StartBlock(LuaLanguage::BEGIN_WHILE);
             AddOutputLine(s.str(), false, true);

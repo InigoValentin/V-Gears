@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "value.h"
+#include "Value.h"
 
 /**
  * Provides formatters and keywords for the LUA language.

@@ -35,10 +35,10 @@ uint32 FF7::FieldUncondJumpInstruction::GetDestAddress() const{
       static_cast<OPCODES>(opcode_) == OPCODES::JMPF
       || static_cast<OPCODES>(opcode_) == OPCODES::JMPFL){
         // Short or long forward jump.
-        return address_ + params_[0]->getUnsigned() + 1;
+        return address_ + params_[0]->GetUnsigned() + 1;
     }
     // Backwards jump,  eOpcodes::JMPB/L.
-    return address_ - params_[0]->getUnsigned();
+    return address_ - params_[0]->GetUnsigned();
 }
 
 std::ostream& FF7::FieldUncondJumpInstruction::Print(std::ostream &output) const{

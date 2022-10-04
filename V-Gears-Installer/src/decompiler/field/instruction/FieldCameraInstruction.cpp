@@ -53,7 +53,7 @@ void FF7::FieldCameraInstruction::ProcessInst(
 
 void FF7::FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
     // TODO: Not fully reversed.
-    auto raw_type = params_[4]->getUnsigned();
+    auto raw_type = params_[4]->GetUnsigned();
     if (raw_type == 0){
         code_gen->AddOutputLine("-- fade:clear()");
         return;
@@ -61,16 +61,16 @@ void FF7::FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const std::string type = raw_type == 12 ? "Fade.SUBTRACT" : "Fade.ADD";
     const auto& r = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[5]->getUnsigned()
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[5]->GetUnsigned()
     );
     const auto& g = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[6]->getUnsigned()
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[6]->GetUnsigned()
     );
     const auto& b = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->getUnsigned(), params_[7]->getUnsigned()
+      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[7]->GetUnsigned()
     );
     const auto& unknown = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[3]->getUnsigned(), params_[8]->getUnsigned()
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[8]->GetUnsigned()
     );
     code_gen->AddOutputLine(
       (boost::format("-- fade:fade(%2%, %3%, %4%, %1%, %5%)") % type % r % g % b % unknown).str()
@@ -81,10 +81,10 @@ void FF7::FieldCameraInstruction::ProcessSCR2D(CodeGenerator* code_gen){
     // kUpScaler.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getSigned()
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetSigned()
     );
     const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getSigned()
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetSigned()
     );
     code_gen->AddOutputLine((
       boost::format("background2d:scroll_to_position(%1% * 3, %2% * 3, Background2D.NONE, 0)")
@@ -95,13 +95,13 @@ void FF7::FieldCameraInstruction::ProcessSCR2D(CodeGenerator* code_gen){
 void FF7::FieldCameraInstruction::ProcessSCR2DC(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& x = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[4]->getSigned()
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned()
     );
     const auto& y = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[5]->getSigned()
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetSigned()
     );
     const auto& speed = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[3]->getUnsigned(), params_[6]->getUnsigned(),
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[6]->GetUnsigned(),
       FF7::FieldCodeGenerator::ValueType::Float, 30.0f
     );
     code_gen->AddOutputLine((
@@ -112,7 +112,7 @@ void FF7::FieldCameraInstruction::ProcessSCR2DC(CodeGenerator* code_gen){
 
 void FF7::FieldCameraInstruction::ProcessFADE(CodeGenerator* code_gen){
     // TODO: not fully reversed
-    auto raw_type = params_[8]->getUnsigned();
+    auto raw_type = params_[8]->GetUnsigned();
     std::string type;
     switch (raw_type) {
         case 1:
@@ -127,17 +127,17 @@ void FF7::FieldCameraInstruction::ProcessFADE(CodeGenerator* code_gen){
 
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& r = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[4]->getUnsigned()
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetUnsigned()
     );
     const auto& g = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[5]->getUnsigned()
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetUnsigned()
     );
     const auto& b = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->getUnsigned(), params_[6]->getUnsigned()
+      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[6]->GetUnsigned()
     );
     // TODO: needs to be divided by 30.0f?
-    auto speed = params_[7]->getUnsigned();
-    auto start = params_[9]->getUnsigned();
+    auto speed = params_[7]->GetUnsigned();
+    auto start = params_[9]->GetUnsigned();
     code_gen->AddOutputLine((
       boost::format("-- fade:fade(%2%, %3%, %4%, %1%, %5%, %6%)") % type % r % g % b % speed % start
     ).str());

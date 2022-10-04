@@ -65,21 +65,21 @@ void FF7::FieldPartyInstruction::ProcessInst(
 void FF7::FieldPartyInstruction::ProcessSTITM(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& item_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->getUnsigned(), params_[2]->getUnsigned()
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
     const auto& amount = FF7::FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->getUnsigned(), params_[3]->getUnsigned()
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     code_gen->AddOutputLine((boost::format("FFVII.add_item(%1%, %2%)") % item_id % amount).str());
 }
 
 void FF7::FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
     FieldCodeGenerator* gc = static_cast<FieldCodeGenerator*>(code_gen);
-    auto char_id_1 = gc->GetFormatter().CharName(params_[0]->getUnsigned());
+    auto char_id_1 = gc->GetFormatter().CharName(params_[0]->GetUnsigned());
     char_id_1 = (char_id_1 == "") ? "nil" : ("\"" + char_id_1 + "\"");
-    auto char_id_2 = gc->GetFormatter().CharName(params_[1]->getUnsigned());
+    auto char_id_2 = gc->GetFormatter().CharName(params_[1]->GetUnsigned());
     char_id_2 = (char_id_2 == "") ? "nil" : ("\"" + char_id_2 + "\"");
-    auto char_id_3 = gc->GetFormatter().CharName(params_[2]->getUnsigned());
+    auto char_id_3 = gc->GetFormatter().CharName(params_[2]->GetUnsigned());
     char_id_3 = (char_id_3 == "") ? "nil" : ("\"" + char_id_3 + "\"");
     code_gen->AddOutputLine((
       boost::format("FFVII.set_party(%1%, %2%, %3%)") % char_id_1 % char_id_2 % char_id_3
