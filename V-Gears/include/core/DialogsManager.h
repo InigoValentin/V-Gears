@@ -227,7 +227,7 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
         /**
          * Processes an input event.
          *
-         * @param event[in] Event to process.
+         * @param[in] event Event to process.
          */
         void Input(const VGears::Event& event);
 
@@ -246,11 +246,11 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          *
          * Equivalent to dialog_open in the field scripts.
          *
-         * @param d_name[in] The dialog name. Can be used as ID.
-         * @param x[in] X coordinate for the top left corner of the dialog.
-         * @param y[in] Y coordinate for the top left corner of the dialog.
-         * @param w[in] Width of the dialog, in pixels.
-         * @param h[in] Height of the dialog, in pixels.
+         * @param[in] d_name The dialog name. Can be used as ID.
+         * @param[in] x X coordinate for the top left corner of the dialog.
+         * @param[in] y Y coordinate for the top left corner of the dialog.
+         * @param[in] w Width of the dialog, in pixels.
+         * @param[in] h Height of the dialog, in pixels.
          */
         void OpenDialog(const char* d_name, int x, int y, int w, int h);
 
@@ -259,8 +259,8 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          *
          * Equivalent to dialog_set_text in the field scripts.
          *
-         * @param d_name[in] Name of the dialog.
-         * @param text[in] Text to set in the dialog.
+         * @param[in] d_name Name of the dialog.
+         * @param[in] text Text to set in the dialog.
          */
         void SetText(const char* d_name, const char* text);
 
@@ -269,7 +269,7 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          *
          * Equivalent to dialog_wait_for_close in the field scripts.
          *
-         * @param d_name[in] Name of the dialog.
+         * @param[in] d_name Name of the dialog.
          * @return 1 if the dialog doesn't exist, -1 otherwise.
          */
         int Sync(const char* d_name);
@@ -279,16 +279,16 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          *
          * Equivalent to dialog_close in the field scripts.
          *
-         * @param dialog_name Name of the dialog to close.
+         * @param[in] d_name Name of the dialog to close.
          */
         void Hide(const char* d_name);
 
         /**
          * Sets a variable in a dialog
          *
-         * @param d_name[in] Name of the dialog.
-         * @param name[in] Name of the variable.
-         * @param value[in] Value for the variable.
+         * @param[in] d_name Name of the dialog.
+         * @param[in] name Name of the variable.
+         * @param[in] value Value for the variable.
          */
         void SetVariable(
           const char* d_name, const char* name, const char* value
@@ -300,8 +300,8 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          * A clickable dialog presents a choice for the user that must be
          * selected with a cursor.
          *
-         * @param d_name[in] Name of the dialog.
-         * @param clickable[in] True to make the dialog clickable, false to
+         * @param[in] d_name Name of the dialog.
+         * @param[in] clickable True to make the dialog clickable, false to
          * make it unclickable
          */
         void SetClickable(const char* d_name, const bool clickable);
@@ -309,9 +309,9 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
         /**
          * Sets a choice sursor in the dialog.
          *
-         * @param d_name[in] Name of the dialog.
-         * @param first_row[in] First selectable line.
-         * @param last_row[in] Last selectable line.
+         * @param[in] d_name Name of the dialog.
+         * @param[in] first_row First selectable line.
+         * @param[in] last_row Last selectable line.
          */
         void SetCursor(
           const char* d_name, const int first_row, const int last_row
@@ -320,7 +320,7 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
         /**
          * Gets the cursor position in a dialog.
          *
-         * @param d_name[in] Dialog name.
+         * @param[in] d_name Dialog name.
          * @return Position of the cursor in the dialog, including unselectable
          * lines (0-index). 0 if the dialog doesn't exist.
          */
@@ -331,11 +331,11 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
         /**
          * Shows a message in a dialog.
          *
-         * @param id[in] Message id.
-         * @param x[in] X coordinate for the text in the dialog.
-         * @param y[in] Y coordinate for the text in the dialog.
-         * @param width[in] Width of the text, in pixels.
-         * @param height[in] Height of the text, in pixels.
+         * @param[in] id Message id.
+         * @param[in] x X coordinate for the text in the dialog.
+         * @param[in] y Y coordinate for the text in the dialog.
+         * @param[in] width Width of the text, in pixels.
+         * @param[in] height Height of the text, in pixels.
          * @todo Is this a window-limit-aware version of SetText?
          */
         void ShowMessage(
@@ -346,14 +346,14 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
         /**
          * Closes and hides a message.
          *
-         * @param id[in] ID of the message to close.
+         * @param[in] id ID of the message to close.
          */
         void HideMessage(const int id);
 
         /**
          * Retrieves a message Id from it's name.
          *
-         * @param d_name[in] Dialog name.
+         * @param[in] d_name Dialog name.
          * @return The dialog ID. -1 if there is no dialog by that name.
          */
         int GetMessageId(const char* d_name) const;
@@ -361,7 +361,7 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
         /**
          * Checks if a message is set to close automatically.
          *
-         * @param id[in] Message ID.
+         * @param[in] id Message ID.
          * @return True if the message is set to auto close, false otherwise.
          */
         bool AutoCloseCheck(const unsigned int id);

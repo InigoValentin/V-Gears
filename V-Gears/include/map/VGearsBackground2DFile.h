@@ -25,7 +25,7 @@ namespace VGears{
     /**
      * Handles 2D background files
      *
-     * @todo Whats the difference with VGearsBackgroundFile.h?
+     * @todo What's the difference with VGearsBackgroundFile.h?
      */
     class Background2DFile : public Resource{
         public:
@@ -33,15 +33,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -49,9 +49,8 @@ namespace VGears{
              * ManualResourceLoader instance is strongly recommended.
              */
             Background2DFile(
-              Ogre::ResourceManager* creator, const String &name,
-              Ogre::ResourceHandle handle, const String& group,
-              bool is_manual = false,
+              Ogre::ResourceManager* creator, const String &name, Ogre::ResourceHandle handle,
+              const String& group, bool is_manual = false,
               Ogre::ManualResourceLoader* loader = nullptr
             );
 
@@ -70,7 +69,7 @@ namespace VGears{
             /**
              * Sets the texture name.
              *
-             * @param[in] The name of the texture.
+             * @param[in] texture_name The name of the texture.
              */
             virtual void SetTextureName(const String &texture_name);
 
@@ -84,7 +83,7 @@ namespace VGears{
             /**
              * Sets the background range.
              *
-             * @param[in] Range vector.
+             * @param[in] range Range vector.
              * @todo What is this range?
              */
             virtual void SetRange(const Ogre::Vector4& range);
@@ -100,7 +99,7 @@ namespace VGears{
             /**
              * Sets the background clip.
              *
-             * @param[in] Clip vector.
+             * @param[in] clip Clip vector.
              * @todo What is this clip?
              */
             virtual void SetClip(const Ogre::Vector2& clip);
@@ -116,7 +115,7 @@ namespace VGears{
             /**
              * Sets the background position.
              *
-             * @param[in] Position vector.
+             * @param[in] position Position vector.
              */
             virtual void SetPosition(const Ogre::Vector3 &position);
 
@@ -131,7 +130,7 @@ namespace VGears{
             /**
              * Sets the background orientation.
              *
-             * @param orientation[in] The new orientation.
+             * @param[in] orientation The new orientation.
              */
             virtual void SetOrientation(const Ogre::Quaternion &orientation);
 
@@ -145,7 +144,7 @@ namespace VGears{
             /**
              * Sets the background field of view.
              *
-             * @param fow[in] Field of view angle.
+             * @param[in] fov Field of view angle.
              */
             virtual void SetFov(const Ogre::Radian &fov);
 

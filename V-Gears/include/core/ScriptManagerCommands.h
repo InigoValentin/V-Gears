@@ -19,7 +19,7 @@
 /**
  * Runs a script string.
  *
- * @param params[in] Script parameters. Exactly three are required. The first
+ * @param[in] params Script parameters. Exactly three are required. The first
  * one is the command name and it's not evaluated here. The second one must be
  * the line to execute. If less than three parameter are passed, a usage string
  * will be printed instead, and nothing will be done.
@@ -37,7 +37,7 @@ void CmdScriptRunString(const Ogre::StringVector& params){
 /**
  * Runs a script string.
  *
- * @param params[in] Script parameters. Exactly three are required. The first
+ * @param[in] params Script parameters. Exactly three are required. The first
  * one is the command name and it's not evaluated here. The second one must be
  * the path to the file to execute. If less than three parameter are passed, a
  * usage string will be printed instead, and nothing will be done.

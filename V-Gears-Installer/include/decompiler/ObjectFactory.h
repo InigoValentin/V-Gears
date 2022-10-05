@@ -33,7 +33,7 @@ template<typename KeyType, typename BaseType> class ObjectFactory{
         /**
          * Register a new entry.
          *
-         * @param key[in] The key to register the class under.
+         * @param[in] key The key to register the class under.
          */
         template<typename Type> void AddEntry(const KeyType &key) {
             registry_[key] = &CreateObject<BaseType, Type>;
@@ -42,7 +42,7 @@ template<typename KeyType, typename BaseType> class ObjectFactory{
         /**
          * Creates an instance of some registered class.
          *
-         * @param key[in] The key associated with the desired class.
+         * @param[in] key The key associated with the desired class.
          * @return NULL if the name is not registered, else an instance of the
          * associated class.
          */

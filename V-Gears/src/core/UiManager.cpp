@@ -65,7 +65,7 @@ void UiManager::AddFont(UiFont* font){fonts_.push_back(font);}
 /**
  * Turns a string to lowercase.
  *
- * @param s[in] String to convert.
+ * @param[in] s String to convert.
  * @return Lowercase string.
  */
 std::string toLower(std::string s) {

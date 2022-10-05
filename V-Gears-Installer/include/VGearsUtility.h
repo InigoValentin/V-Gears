@@ -30,8 +30,8 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param argc[in] Number of arguments passed to the application.
-             * @param argv[in] List of arguments passed to the application.
+             * @param[in] argc Number of arguments passed to the application.
+             * @param[in] argv List of arguments passed to the application.
              */
             Utility(int argc, char *argv[]);
 

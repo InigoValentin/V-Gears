@@ -33,7 +33,7 @@ class MainWindow : public QMainWindow{
         /**
          * Constructor.
          *
-         * @param parent[in] Widget to be made parent of the window.
+         * @param[in] parent Widget to be made parent of the window.
          */
         explicit MainWindow(QWidget *parent = 0);
 
@@ -119,7 +119,7 @@ class MainWindow : public QMainWindow{
         /**
          * Enables or disables the UI.
          *
-         * @param enable[in] True to enable the UI, false to disable it.
+         * @param[in] enable True to enable the UI, false to disable it.
          */
         void EnableUi(bool enable);
 

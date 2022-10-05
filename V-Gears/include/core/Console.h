@@ -44,7 +44,7 @@ class Console : public Ogre::Singleton<Console>, public Ogre::LogListener{
         /**
          * Processes an input event.
          *
-         * @param event[in] Event to process.
+         * @param[in] event Event to process.
          */
         void Input(const VGears::Event& event);
 
@@ -88,18 +88,17 @@ class Console : public Ogre::Singleton<Console>, public Ogre::LogListener{
         /**
          * Writes text to the console.
          *
-         * @param text[in] Text to write.
-         * @param color[in] Color for the text. Default is white.
+         * @param[in] text Text to write.
+         * @param[in] colour Color for the text. Default is white.
          */
         void AddTextToOutput(
-          const Ogre::String& text,
-          const Ogre::ColourValue& colour = Ogre::ColourValue::White
-       );
+          const Ogre::String& text, const Ogre::ColourValue& colour = Ogre::ColourValue::White
+        );
 
         /**
          * Executes a command in the console
          *
-         * @param command[in] Command to execute.
+         * @param[in] command Command to execute.
          */
         void ExecuteCommand(const Ogre::String& command);
 
@@ -131,12 +130,12 @@ class Console : public Ogre::Singleton<Console>, public Ogre::LogListener{
         /**
          * Logs a message to the console.
          *
-         * @param message[in] The message to log.
-         * @param lml[in] Log level for the message.
+         * @param[in] message The message to log.
+         * @param[in] lml Log level for the message.
          * @param maskDebug Indicates if the mesage is beinng printed to the
          * console or not.
-         * @param logName[in] Name of the log.
-         * @param skipThisMessage[in] If true, the message will not be logged.
+         * @param[in] logName Name of the log.
+         * @param[in] skipThisMessage If true, the message will not be logged.
          */
         virtual void messageLogged(
           const Ogre::String& message, Ogre::LogMessageLevel lml,
@@ -163,7 +162,7 @@ class Console : public Ogre::Singleton<Console>, public Ogre::LogListener{
         /**
          * Translates numpad key events to regular number events.
          *
-         * @param event[in] Event to translate.
+         * @param[in] event Event to translate.
          */
         char TranslateNumpad(const VGears::Event& event);
 

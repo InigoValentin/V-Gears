@@ -27,7 +27,7 @@ class XmlBackground2DFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the file with the background data.
+         * @param[in] file Path to the file with the background data.
          */
         XmlBackground2DFile(const Ogre::String& file);
 

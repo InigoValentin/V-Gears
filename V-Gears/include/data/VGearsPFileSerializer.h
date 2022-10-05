@@ -41,8 +41,8 @@ namespace VGears{
             /**
              * Imports a P file.
              *
-             * @param stream[in] The contents of the P file.
-             * @param dest[out] The formed P file.
+             * @param[in] stream The contents of the P file.
+             * @param[out] dest The formed P file.
              */
             virtual void ImportPFile(Ogre::DataStreamPtr &stream, PFile* dest);
 
@@ -154,31 +154,31 @@ namespace VGears{
             /**
              * Reads a file header and sets the instance data.
              *
-             * @param stream[in] The contents of the P file.
+             * @param[in] stream The contents of the P file.
              */
             virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
 
             /**
              * Reads an object as a colour.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed colour data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed colour data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Colour &dest);
 
             /**
              * Reads an object as an edge.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed edge data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed edge data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Edge &dest);
 
             /**
              * Reads an object as a polygon definition.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed poligon definition data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed poligon definition data.
              */
             virtual void readObject(
               Ogre::DataStreamPtr &stream, PolygonDefinition &dest
@@ -187,16 +187,16 @@ namespace VGears{
             /**
              * Reads an object as a group.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed group data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed group data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Group &dest);
 
             /**
              * Reads an object as a bounding box.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed bounding box data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed bounding box data.
              */
             virtual void readObject(
               Ogre::DataStreamPtr &stream, BBoxEntry &dest
@@ -207,9 +207,9 @@ namespace VGears{
             /**
              * Reads a stream as a vector.
              *
-             * @param stream[in] The input stream.
-             * @param dest[out] The vector data will be loaded here.
-             * @param count[in] Data units to copy.
+             * @param[in] stream The input stream.
+             * @param[out] dest The vector data will be loaded here.
+             * @param[in] count Data units to copy.
              */
             template<typename ValueType> void ReadVector(
               Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,

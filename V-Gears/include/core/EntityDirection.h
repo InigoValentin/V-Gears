@@ -38,7 +38,7 @@ class EntityDirection : public Ogre::SimpleRenderable{
         /**
          * Retrieves the view depth, relative to a camera.
          *
-         * @param camera[in] The camera
+         * @param[in] cam The camera
          * @return The squared view depth (always 0).
          */
         Ogre::Real getSquaredViewDepth(const Ogre::Camera* cam) const;

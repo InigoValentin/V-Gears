@@ -21,9 +21,9 @@
 /**
  * Converts an hexadecimal value to a string.
  *
- * @param value[in] The value to convert.
- * @param width[in] Word width.
- * @param fill[in] Filling character for word alignment.
+ * @param[in] value The value to convert.
+ * @param[in] width Word width.
+ * @param[in] fill Filling character for word alignment.
  * @return String representation of the value.
  */
 Ogre::String HexToString(int value, unsigned short width, char fill);
@@ -31,7 +31,7 @@ Ogre::String HexToString(int value, unsigned short width, char fill);
 /**
  * Converts a boolean value to a string.
  *
- * @param value[in] The value to convert.
+ * @param[in] value The value to convert.
  * @return String representation of the value. 'true' if the value is true,
  * 'false' otherwise.
  */
@@ -40,7 +40,7 @@ Ogre::String BoolToString(bool value);
 /**
  * Converts an integer value to a string.
  *
- * @param value[in] The value to convert.
+ * @param[in] value The value to convert.
  * @return String representation of the value.
  */
 Ogre::String IntToString(int value);
@@ -48,7 +48,7 @@ Ogre::String IntToString(int value);
 /**
  * Converts a real value to a string.
  *
- * @param value[in] The value to convert.
+ * @param[in] value The value to convert.
  * @return String representation of the value.
  */
 Ogre::String FloatToString(float value);
@@ -63,7 +63,7 @@ class Logger{
         /**
          * Constructor.
          *
-         * @param log_file_name[in] Path to the log file.
+         * @param[in] log_file_name Path to the log file.
          */
         explicit Logger(const Ogre::String& log_file_name);
 
@@ -75,21 +75,21 @@ class Logger{
         /**
          * Logs a message.
          *
-         * @param text[in] Message to log.
+         * @param[in] text Message to log.
          */
         void Log(const Ogre::String& text);
 
         /**
          * Logs a message.
          *
-         * @param text[in] Message to log.
+         * @param[in] text Message to log.
          */
         void LogW(const Ogre::UTFString& text);
 
         /**
          * Logs messages.
          *
-         * @param text[in] Messages to log.
+         * @param[in] text Messages to log.
          */
         void Log(std::vector<unsigned char>& text);
 

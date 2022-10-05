@@ -35,21 +35,19 @@ namespace VGears{
              *
              * Initializes a resource.
              *
-             * @param creator[in] The resource manager that handles the
+             * @param[in] creator The resource manager that handles the
              * resource creation.
-             * @param name[in] A name for the resource.
-             * @param handle[in] Ogre object that will handle the resource.
-             * @param group[in] Name of the group to include the resource in.
-             * @pram manual[in] Indicates if the resource is a {@see
+             * @param[in] name A name for the resource.
+             * @param[in] handle Ogre object that will handle the resource.
+             * @param[in] group Name of the group to include the resource in.
+             * @param[in] manual Indicates if the resource is a {@see
              * VGearsManualObject}.
-             * @param loader[in] Ogre resource loader for the resource.
+             * @param[in] loader Ogre resource loader for the resource.
              */
             Resource(
-              Ogre::ResourceManager *creator, const String &name,
-              Ogre::ResourceHandle handle, const String &group,
-              bool manual, Ogre::ManualResourceLoader *loader
-            ): Ogre::Resource(creator, name, handle, group, manual, loader)
-            {}
+              Ogre::ResourceManager *creator, const String &name, Ogre::ResourceHandle handle,
+              const String &group, bool manual, Ogre::ManualResourceLoader *loader
+            ): Ogre::Resource(creator, name, handle, group, manual, loader){}
 
             /**
              * Destructor.
@@ -71,7 +69,6 @@ namespace VGears{
                 );
             }
 
-        private:
     };
 }
 

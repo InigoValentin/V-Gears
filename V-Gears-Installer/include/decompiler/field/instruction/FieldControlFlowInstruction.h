@@ -38,13 +38,13 @@ class FieldControlFlowInstruction : public KernelCallInstruction{
         /**
          * Processes the instruction.
          *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine.
-         * @param code_gen[in] Code generator.
+         * @param[in] func Function to process.
+         * @param[out] stack Function stack.
+         * @param[in] engine Engine.
+         * @param[in] code_gen Code generator.
          */
         virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+          Function& func, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
         ) override;
 
     private:
@@ -72,8 +72,8 @@ class FieldControlFlowInstruction : public KernelCallInstruction{
          * finish. If the specified priority is already busy executing, the
          * request will fail silently.
          *
-         * @param codegen[in|out] Code generator to append lines.
-         * @param engine[in] The engine.
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] engine The engine.
          */
         void ProcessREQ(CodeGenerator* code_gen, const FieldEngine& engine);
 
@@ -101,8 +101,8 @@ class FieldControlFlowInstruction : public KernelCallInstruction{
          * only then return. The remote execution is still carried out
          * asynchronously, with no notification of completion.
          *
-         * @param codegen[in|out] Code generator to append lines.
-         * @param engine[in] The engine.
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] engine The engine.
          */
         void ProcessREQSW(CodeGenerator* code_gen, const FieldEngine& engine);
 
@@ -127,8 +127,8 @@ class FieldControlFlowInstruction : public KernelCallInstruction{
          * at a specified priority. The request will block until remote
          * execution has finished before returning.
          *
-         * @param codegen[in|out] Code generator to append lines.
-         * @param engine[in] The engine.
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] engine The engine.
          */
         void ProcessREQEW(CodeGenerator* code_gen, const FieldEngine& engine);
 
@@ -156,7 +156,7 @@ class FieldControlFlowInstruction : public KernelCallInstruction{
          * script control is passed to the script F within the current entity
          * with the priority P.
          *
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         void ProcessRETTO(CodeGenerator* code_gen);
 
@@ -180,7 +180,7 @@ class FieldControlFlowInstruction : public KernelCallInstruction{
          * WAIT(30) in decimal) will pause script execution for 1 second,
          * WAIT(0x96) will pause for 5 seconds, and so on.
          *
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         void ProcessWAIT(CodeGenerator* code_gen);
 };

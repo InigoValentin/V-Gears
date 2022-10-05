@@ -27,7 +27,7 @@ class XmlTextFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the text file
+         * @param[in] file Path to the text file
          */
         XmlTextFile(const Ogre::String& file);
 

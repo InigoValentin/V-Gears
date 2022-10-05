@@ -72,8 +72,8 @@ namespace VGears{
             /**
              * Imports an camera matrix file.
              *
-             * @param stream[in] The contents of the file.
-             * @param dest[out] The formad camera matrix file.
+             * @param[in] stream The contents of the file.
+             * @param[out] dest The formad camera matrix file.
              */
             virtual void ImportCameraMatrixFile(
               Ogre::DataStreamPtr &stream, CameraMatrixFile* dest

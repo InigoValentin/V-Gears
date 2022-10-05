@@ -53,7 +53,8 @@ class FieldEngine : public Engine{
                  *
                  * Instantiates an entity with a name.
                  *
-                 * @param name[in] Entity name.
+                 * @param[in] name Entity name.
+                 * @param[in] index Entity index.
                  */
                 Entity(const std::string& name, size_t index);
 
@@ -79,7 +80,7 @@ class FieldEngine : public Engine{
                  *
                  * Retrieves the name of a function from it's index.
                  *
-                 * @param index[in] Function index.
+                 * @param[in] index Function index.
                  * @return Function name.
                  * @throws DecompilerException if there is no function with
                  * the specified index.
@@ -91,20 +92,20 @@ class FieldEngine : public Engine{
                  *
                  * Must be added by name and index.
                  *
-                 * @param name[in] Function name. If the entity is a line, the
+                 * @param[in] name Function name. If the entity is a line, the
                  * name will be overridden.
-                 * @param index[in] Function index.
+                 * @param[in] index Function index.
                  */
                 void AddFunction(const std::string& name, size_t index);
 
                 /**
                  * Marks the entity as a line.
                  *
-                 * @param line[in] True to mark the entity as a line, false to
+                 * @param[in] line True to mark the entity as a line, false to
                  * unmark it.
-                 * @param point_a[in] First point of the line. Can be null if
+                 * @param[in] point_a First point of the line. Can be null if
                  * line is false.
-                 * @param point_b[in] Second point of the line. Can be null if
+                 * @param[in] point_b Second point of the line. Can be null if
                  * line is false.
                  */
                 void MarkAsLine(bool line, std::vector<float> point_a, std::vector<float> point_b);
@@ -180,30 +181,30 @@ class FieldEngine : public Engine{
         /**
          * Constructor.
          *
-         * @param formatter[in] The formatter to be used by the engine.
-         * @param script_name[in] The script name.
+         * @param[in] formatter The formatter to be used by the engine.
+         * @param[in] script_name The script name.
          */
         FieldEngine(FieldScriptFormatter& formatter, std::string script_name);
 
         /**
          * Copy constructor, disabled.
          *
-         * @param engine[in] The engine to copy.
+         * @param[in] engine The engine to copy.
          */
         FieldEngine(const FieldEngine& engine) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param engine[in] The engine to copy.
+         * @param[in] engine The engine to copy.
          */
         FieldEngine& operator = (const FieldEngine& engine) = delete;
 
         /**
          * Retrieves the disasembler.
          *
-         * @param insts[in] List of instructions.
-         * @param raw_script_data[in] Script data, raw format.
+         * @param[in] insts List of instructions.
+         * @param[in] raw_script_data Script data, raw format.
          * @return Pointer to the disasembler.
          */
         virtual std::unique_ptr<Disassembler> GetDisassembler(
@@ -213,7 +214,7 @@ class FieldEngine : public Engine{
         /**
          * Retrieves the dissasembler.
          *
-         * @param insts[in] List of instructions.
+         * @param[in] insts List of instructions.
          * @return Pointer to the dissasembler.
          */
         virtual std::unique_ptr<Disassembler> GetDisassembler(InstVec &insts) override;
@@ -221,8 +222,8 @@ class FieldEngine : public Engine{
         /**
          * Retrieves the code generator.
          *
-         * @param insts[in] List of instructions.
-         * @param output[in] Pointer to the output (file, stream...).
+         * @param[in] insts List of instructions.
+         * @param[in] output Pointer to the output (file, stream...).
          * @return Pointer to the generator.
          */
         virtual std::unique_ptr<CodeGenerator> GetCodeGenerator(
@@ -234,8 +235,8 @@ class FieldEngine : public Engine{
          *
          * It actually does nothing. CFG stands for control flow group.
          *
-         * @param insts[in] Instruction list.
-         * @param graph[in] Code graph.
+         * @param[in] insts Instruction list.
+         * @param[in] graph Code graph.
          */
         virtual void PostCFG(InstVec &insts, Graph graph) override;
 
@@ -277,10 +278,10 @@ class FieldEngine : public Engine{
         /**
          * Adds a function to an entity.
          *
-         * @param entity_name[in] Name of the entity.
-         * @param entity_index[in] Index of the entity.
-         * @param func_name[in] Name of the function.
-         * @param func_index[in] Index of the function.
+         * @param[in] entity_name Name of the entity.
+         * @param[in] entity_index Index of the entity.
+         * @param[in] func_name Name of the function.
+         * @param[in] func_index Index of the function.
          */
         void AddEntityFunction(
           const std::string& entity_name, size_t entity_index,
@@ -291,11 +292,11 @@ class FieldEngine : public Engine{
          * Marks an entity as a line.
          *
          * @param entity_index Index of the entity.
-         * @param line[in] True to mark the entity as a line, false to unmark
+         * @param[in] line True to mark the entity as a line, false to unmark
          * it.
-         * @param point_a[in] First point of the line. Can be null if line is
+         * @param[in] point_a First point of the line. Can be null if line is
          * false.
-         * @param point_b[in] Second point of the line. Can be null if line is
+         * @param[in] point_b Second point of the line. Can be null if line is
          * false.
          */
         void MarkEntityAsLine(
@@ -305,7 +306,7 @@ class FieldEngine : public Engine{
         /**
          * Checks if an entity has been marked as a line.
          *
-         * @param entity_index[in] Index of the entity to check.
+         * @param[in] entity_index Index of the entity to check.
          * @return True if the entity is a line. False if it isn't, or if
          * there is no such entity.
          */
@@ -314,7 +315,7 @@ class FieldEngine : public Engine{
         /**
          * Retrieves an entity.
          *
-         * @param index[in] Index of the entity to retrieve.
+         * @param[in] index Index of the entity to retrieve.
          * @throws DecompilerException if there is no entity at the specified
          * index.
          */
@@ -341,9 +342,9 @@ class FieldEngine : public Engine{
          *
          * Useful for scripts that only contain one one return statement.
          *
-         * @param insts[in|out] List of instructions to process. Extraneous
+         * @param[in,out] insts List of instructions to process. Extraneous
          * return statements will be deleted from the instructions.
-         * @param graph[in] Code graph. Unused.
+         * @param[in] graph Code graph. Unused.
          */
         void RemoveExtraneousReturnStatements(InstVec& insts, Graph graph);
 
@@ -354,9 +355,9 @@ class FieldEngine : public Engine{
          * VGears this isn't required, and can cause infinite loops, so they
          * can be removed.
          *
-         * @param insts[in|out] List of instructions to proccess. Trailing
+         * @param[in,out] insts List of instructions to proccess. Trailing
          * infinite loops will be deleted from the instructions.
-         * @param g[in] Code graph.
+         * @param[in] graph Code graph.
          */
         void RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph);
 

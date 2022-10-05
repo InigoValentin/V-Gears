@@ -48,12 +48,12 @@ class InputManager : public Ogre::Singleton<InputManager>{
         /**
          * Triggered when a keyboard button is pressed or released.
          *
-         * Creates an {@Event}.
+         * Creates an {@see Event}.
          *
-         * @param button[in] Pressed button ID.
-         * @param text[in] @todo The key code? It gets assigned to parameter 1
+         * @param[in] button Pressed button ID.
+         * @param[in] text @todo The key code? It gets assigned to parameter 1
          * of the generated event.
-         * @param down[in] True if the button has been pressed, false if it has
+         * @param[in] down True if the button has been pressed, false if it has
          * been released. It gets assigned to parameter 2 of the event.
          */
         void ButtonPressed(int button, char text, bool down);
@@ -61,10 +61,10 @@ class InputManager : public Ogre::Singleton<InputManager>{
         /**
          * Triggered when a mouse button is pressed or released.
          *
-         * Creates an {@Event}.
+         * Creates an {@see Event}.
          *
-         * @param button[in] Pressed button ID.
-         * @param down[in] True if the button has been pressed, false if it has
+         * @param[in] button Pressed button ID.
+         * @param[in] down True if the button has been pressed, false if it has
          * been released. It gets assigned to parameter 1 of the event.
          */
         void MousePressed(int button, bool down);
@@ -72,11 +72,11 @@ class InputManager : public Ogre::Singleton<InputManager>{
         /**
          * Triggered when a mouse moves.
          *
-         * Creates an {@Event}.
+         * Creates an {@see Event}.
          *
-         * @param x[in] New mouse's X coordinate. It gets assigned to parameter
+         * @param[in] x New mouse's X coordinate. It gets assigned to parameter
          * 1 of the event.
-         * @param y[in] New mouse's Y coordinate. It gets assigned to parameter
+         * @param[in] y New mouse's Y coordinate. It gets assigned to parameter
          * 2 of the event.
          */
         void MouseMoved(int x, int y);
@@ -84,9 +84,9 @@ class InputManager : public Ogre::Singleton<InputManager>{
         /**
          * Triggered when a mouse scrolls.
          *
-         * Creates an {@Event}.
+         * Creates an {@see Event}.
          *
-         * @param value[in] Number of lines scrolled. Positive for scroll down,
+         * @param[in] value Number of lines scrolled. Positive for scroll down,
          * negative for scroll up. It gets assigned to parameter 1 of the
          * event.
          */
@@ -112,7 +112,7 @@ class InputManager : public Ogre::Singleton<InputManager>{
          *
          * The input event queue will be empty after calling this function.
          *
-         * @param input_events[out] The current events will be loaded here.
+         * @param[out] input_events The current events will be loaded here.
          */
         void GetInputEvents(InputEventArray& input_events);
 
@@ -124,9 +124,9 @@ class InputManager : public Ogre::Singleton<InputManager>{
         /**
          * Binds a command to an input event.
          *
-         * @param cmd[in] Command to bind.
-         * @param params[in] Command arguments.
-         * @param buttons[in] Buttons to bind to the command.
+         * @param[in] cmd Command to bind.
+         * @param[in] params Command arguments.
+         * @param[in] buttons Buttons to bind to the command.
          */
         void BindCommand(
           ConfigCmd* cmd, const Ogre::StringVector& params,
@@ -136,8 +136,8 @@ class InputManager : public Ogre::Singleton<InputManager>{
         /**
          * Binds a game event to an input event.
          *
-         * @param event[in] The game event to bind.
-         * @param buttons[in] Buttons to bind to the event.
+         * @param[in] event The game event to bind.
+         * @param[in] buttons Buttons to bind to the event.
          */
         void BindGameEvent(
           const Ogre::String& event, const ButtonList& buttons
@@ -146,15 +146,15 @@ class InputManager : public Ogre::Singleton<InputManager>{
         /**
          * Activates all bindings for a button.
          *
-         * @param button[in] ID of the button.
+         * @param[in] button ID of the button.
          */
         void ActivateBinds(const int button);
 
         /**
-         * @tdo Understand and document.
+         * Adds a game event associated to a button.
          *
-         * @param button[in] ID of the button.
-         * @param type[in] Event type.
+         * @param[in] button ID of the button.
+         * @param[in] type Event type.
          */
         void AddGameEvents(const int button, const VGears::EventType type);
 

@@ -31,13 +31,13 @@ class FieldModuleInstruction : public KernelCallInstruction{
         /**
          * Processes the instruction.
          *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine. Unused.
-         * @param code_gen[in] Code generator.
+         * @param[in] func Function to process.
+         * @param[out] stack Function stack.
+         * @param[in] engine Engine. Unused.
+         * @param[in] code_gen Code generator.
          */
         virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+          Function& func, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
         ) override;
 
     private:
@@ -61,7 +61,7 @@ class FieldModuleInstruction : public KernelCallInstruction{
          * in the argument, or the value retrieved from memory location N if B
          * is non-zero. Battle 1, 2, and 999 (0x03E7) are debug battles.
          *
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         void ProcessBATTLE(CodeGenerator* code_gen);
 
@@ -83,7 +83,7 @@ class FieldModuleInstruction : public KernelCallInstruction{
          * battles will not occur regardless of the argument passed with this
          * opcode.
          *
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         void ProcessBTLON(CodeGenerator* code_gen);
 
@@ -111,8 +111,8 @@ class FieldModuleInstruction : public KernelCallInstruction{
          * more than 12 gateways by simulating their behavior through a LINE
          * which, when crossed, executes a MAPJUMP.
          *
-         * @param codegen[in|out] Code generator to append lines.
-         * @param func[in] Function to get the spawn point from.
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] func Function to get the spawn point from.
          */
         void ProcessMAPJUMP(CodeGenerator* code_gen, Function& func);
 };

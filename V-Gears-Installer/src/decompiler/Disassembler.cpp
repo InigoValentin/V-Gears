@@ -41,7 +41,7 @@ void Disassembler::DumpDisassembly(std::ostream &output){
 /**
  * NIB is probably for nibble.
  *
- * @param v[in] @todo Understand and document.
+ * @param[in] v @todo Understand and document.
  * @return @todo Understand and document.
  */
 static inline unsigned int Nib2(unsigned int v){return (v & 0xF);}
@@ -49,7 +49,7 @@ static inline unsigned int Nib2(unsigned int v){return (v & 0xF);}
 /**
  * NIB is probably for nibble.
  *
- * @param v[in] @todo Understand and document.
+ * @param[in] v @todo Understand and document.
  * @return @todo Understand and document.
  */
 static inline unsigned int Nib1(unsigned int v){return (v >> 4) & 0xF;}

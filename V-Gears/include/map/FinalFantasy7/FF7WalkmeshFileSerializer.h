@@ -41,8 +41,8 @@ namespace VGears{
             /**
              * Imports a walkmesh file.
              *
-             * @param stream[in] The contents of the walkmesh file.
-             * @param dest[out] The formed walkmesh file.
+             * @param[in] stream The contents of the walkmesh file.
+             * @param[out] dest The formed walkmesh file.
              */
             virtual void ImportWalkmeshFile(Ogre::DataStreamPtr &stream, WalkmeshFile *dest);
 
@@ -119,24 +119,24 @@ namespace VGears{
             /**
              * Reads an object as a walkmesh triangle.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed triangle data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed triangle data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Triangle &dest);
 
             /**
              * Reads an object as a 3-dimensional vector.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed vector data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed vector data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Ogre::Vector3 &dest);
 
             /**
              * Reads an object as a triangle access point.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed access point data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed access point data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Access &dest);
 
@@ -145,9 +145,9 @@ namespace VGears{
             /**
              * Reads an object as a vector.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed vector data.
-             * @param count[in] The size of the data to read.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed vector data.
+             * @param[in] count The size of the data to read.
              */
             template<typename ValueType> void ReadVector(
               Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest, size_t count

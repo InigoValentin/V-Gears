@@ -49,7 +49,7 @@ class ParticleSystemFactory : public Ogre::MovableObjectFactory{
         /**
          * Destroys a particle system.
          *
-         * @param obj[in|out] System to destroy.
+         * @param[in,out] obj System to destroy.
          */
         void DestroyInstance(Ogre::MovableObject* obj);
 
@@ -58,8 +58,8 @@ class ParticleSystemFactory : public Ogre::MovableObjectFactory{
         /**
          * Creates an instance from a template.
          *
-         * @param name[in] Name for the particle system
-         * @param params[in] List of parameters for the particle system.
+         * @param[in] name Name for the particle system
+         * @param[in] params List of parameters for the particle system.
          */
         Ogre::MovableObject* createInstanceImpl(
           const Ogre::String& name, const Ogre::NameValuePairList* params

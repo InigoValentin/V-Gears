@@ -40,8 +40,8 @@ namespace VGears{
             /**
              * Imports a HRC file.
              *
-             * @param stream[in] The contents of the HRC file.
-             * @param dest[out] The formed HRC file.
+             * @param[in] stream The contents of the HRC file.
+             * @param[out] dest The formed HRC file.
              */
             virtual void ImportHRCFile(
               Ogre::DataStreamPtr &stream, HRCFile* dest
@@ -76,23 +76,23 @@ namespace VGears{
             /**
              * Reads a file header and sets the instance data.
              *
-             * @param stream[in] The contents of the HRC file.
+             * @param[in] stream The contents of the HRC file.
              */
             virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
 
             /**
              * Reads an object as a block.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed block data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed block data.
              */
             virtual void ReadBlock(Ogre::DataStreamPtr &stream, Block& dest);
 
             /**
              * Reads an object as a bone.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed bone data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed bone data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Bone &dest);
 

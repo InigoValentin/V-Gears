@@ -28,7 +28,7 @@ class XmlFontFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the XMl file with the font data.
+         * @param[in] file Path to the XMl file with the font data.
          */
         explicit XmlFontFile(const Ogre::String& file);
 

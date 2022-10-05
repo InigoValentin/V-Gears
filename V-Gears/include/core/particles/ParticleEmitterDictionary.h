@@ -36,7 +36,8 @@ namespace ParticleEmitterDictionary{
             /**
              * Sets the emission rate
              *
-             * @param val[in] The emission rate.
+             * @param[in] target The target.
+             * @param[in] val The emission rate.
              */
             void doSet(void* target, const Ogre::String& val);
     };
@@ -58,7 +59,8 @@ namespace ParticleEmitterDictionary{
             /**
              * Sets the total time to live.
              *
-             * @param val[in] Total time to live.
+             * @param[in] target The target.
+             * @param[in] val Total time to live.
              */
             void doSet(void* target, const Ogre::String& val);
     };
@@ -80,7 +82,8 @@ namespace ParticleEmitterDictionary{
             /**
              * Sets the direction.
              *
-             * @param val[in] The direction.
+             * @param[in] target The target.
+             * @param[in] val The direction.
              */
             void doSet(void* target, const Ogre::String& val);
     };

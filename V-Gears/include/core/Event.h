@@ -88,37 +88,25 @@ namespace VGears{
          *
          * Sets the type to {@see ET_NULL}, and the parameters to 0.
          */
-        Event():
-          type(ET_NULL),
-          param1(0),
-          param2(0)
-        {};
+        Event(): type(ET_NULL), param1(0), param2(0){};
 
         /**
          * Constructor.
          *
          * Sets the parameters to 0.
          *
-         * @param n[in] The event type.
+         * @param[in] n The event type.
          */
-        Event(EventType n):
-          type(n),
-          param1(0),
-          param2(0)
-        {};
+        Event(EventType n): type(n), param1(0), param2(0){};
 
         /**
          * Constructor.
          *
-         * @param n[in] The event type.
-         * @param p1[in] First parameter.
-         * @param p1[in] Second parameter.
+         * @param[in] n The event type.
+         * @param[in] p1 First parameter.
+         * @param[in] p2 Second parameter.
          */
-        Event(EventType n, float p1, float p2) :
-          type(n),
-          param1(p1),
-          param2(p2)
-        {};
+        Event(EventType n, float p1, float p2): type(n), param1(p1), param2(p2){};
 
         /**
          * The type of the event.

@@ -28,8 +28,8 @@ class ParticleEmitterTranslator : public Ogre::ScriptTranslator{
         /**
          * Translates the emitter script to Ogre format.
          *
-         * @param compiler[in] The compiler.
-         * @param node[in] The node to translate.
+         * @param[in] compiler The compiler.
+         * @param[in] node The node to translate.
          */
         void translate(
           Ogre::ScriptCompiler *compiler, const Ogre::AbstractNodePtr &node

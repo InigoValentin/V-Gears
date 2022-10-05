@@ -20,15 +20,6 @@ void FieldScriptFormatter::AddSpawnPoint(
   unsigned int address, int x, int y, int triangle_id, int angle
 ){}
 
-/**
- * Retrieves the name of a spawn point.
- *
- * @param map_id[in] The target map ID.
- * @param entity[in] The entity that acts as the spawn point.
- * @param function_name[in] The spawn function name.
- * @param address[in] @todo Understand and document.
- * @return The name of the spawn point.
- */
 std::string FieldScriptFormatter::GetSpawnPointName(
   unsigned int map_id, const std::string& entity,
   const std::string& function_name, unsigned int address
@@ -37,12 +28,4 @@ std::string FieldScriptFormatter::GetSpawnPointName(
       + "_" + entity + "_" + function_name + "_" + std::to_string(address);
 }
 
-/**
- * Retrieves the name of a map.
- *
- * The name of a map is usually it's ID.
- *
- * @param map_id[in] The map ID.
- * @return The map name.
- */
 std::string FieldScriptFormatter::GetMapName(unsigned int map_id) { return std::to_string(map_id);}

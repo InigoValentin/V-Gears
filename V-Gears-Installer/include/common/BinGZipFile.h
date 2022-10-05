@@ -27,32 +27,32 @@ class BinGZipFile : public File{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the BIN file.
+         * @param[in] file Path to the BIN file.
          */
         BinGZipFile(const Ogre::String& file);
 
         /**
          * Constructor.
          *
-         * @param file[in] The BIN file.
+         * @param[in] file The BIN file.
          */
         BinGZipFile(File* file);
 
         /**
          * Constructor.
          *
-         * @param file[in] The BIN file.
-         * @param offset[in] The offset at which to start reading the file.
-         * @param length[in] Length of the data to read.
+         * @param[in] file The BIN file.
+         * @param[in] offset The offset at which to start reading the file.
+         * @param[in] length Length of the data to read.
          */
         BinGZipFile(File* file, u32 offset, u32 length);
 
         /**
          * Constructor.
          *
-         * @param buffer[in] Buffer with the contents of the BIN file.
-         * @param offset[in] The offset at which to start reading the file.
-         * @param length[in] Length of the data to read.
+         * @param[in] buffer Buffer with the contents of the BIN file.
+         * @param[in] offset The offset at which to start reading the file.
+         * @param[in] length Length of the data to read.
          */
         BinGZipFile(u8* buffer, u32 offset, u32 length);
 
@@ -64,7 +64,7 @@ class BinGZipFile : public File{
         /**
          * Extracts a file from the compressed BIN file.
          *
-         * @param file_index[in] The index of the file to extract.
+         * @param[in] file_index The index of the file to extract.
          * @return The extracted file, or NULL if there is no file at the
          * specified index.
          */
@@ -87,7 +87,7 @@ class BinGZipFile : public File{
         /**
          * Retrieves a file offset.
          *
-         * @param file_index[in] The file which offset to calculate.
+         * @param[in] file_index The file which offset to calculate.
          * @return The offset to the specified file, or 0 if there is no such
          * file.
          */

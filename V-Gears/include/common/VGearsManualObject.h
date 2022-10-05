@@ -36,7 +36,7 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param mesh[in] The object mesh
+             * @param[in] mesh The object mesh
              */
             explicit ManualObject(Ogre::Mesh *mesh);
 
@@ -81,10 +81,10 @@ namespace VGears{
              *
              * It doesn't set position, normal or texture.
              *
-             * @param name[in] Name for the object.
-             * @param material_name[in] Name of the object's material.
-             * @param vertex_count[in] Number of vertices in the object.
-             * @param index_count[in]
+             * @param[in] name Name for the object.
+             * @param[in] material_name Name of the object's material.
+             * @param[in] vertex_count Number of vertices in the object.
+             * @param[in] index_count
              * @todo Undestand and document index_count.
              */
             virtual void begin(
@@ -95,7 +95,7 @@ namespace VGears{
             /**
              * Sets the object position.
              *
-             * @param position[in] Position vector.
+             * @param[in] position Position vector.
              * @todo It applies to the object or the current section?
              */
             virtual void position(const Ogre::Vector3 &position);
@@ -103,7 +103,7 @@ namespace VGears{
             /**
              * Sets the object normal vector.
              *
-             * @param normal[in] Normal vector.
+             * @param[in] normal Normal vector.
              * @todo It applies to the object or the current section?
              */
             virtual void normal(const Ogre::Vector3 &normal);
@@ -119,7 +119,7 @@ namespace VGears{
             /**
              * Sets the object texture coordinates.
              *
-             * @param texture_coordinate[in] Coordinate vector.
+             * @param[in] texture_coordinate Coordinate vector.
              * @todo It applies to the object or the current section?
              */
             virtual void textureCoord(const Ogre::Vector2 &texture_coordinate);
@@ -127,7 +127,7 @@ namespace VGears{
             /**
              * Sets the object index.
              *
-             * @param idx[in] Object index.
+             * @param[in] idx Object index.
              * @todo It applies to the object or the current section?
              */
             virtual void index( const uint32 idx );
@@ -135,9 +135,9 @@ namespace VGears{
             /**
              * Adds a bone to the object.
              *
-             * @param idx[in] Index of the vertex index to add the bone to.
-             * @param bone_handle[in] Index of the bone objct.
-             * @param weight[in] Bone weight. In most cases, 1 is ok.
+             * @param[in] idx Index of the vertex index to add the bone to.
+             * @param[in] bone_handle Index of the bone objct.
+             * @param[in] weight Bone weight. In most cases, 1 is ok.
              * @todo It applies to the object or the current section?
              */
             virtual void bone(
@@ -160,9 +160,9 @@ namespace VGears{
             /**
              * Creates a buffer
              *
-             * @param binding[in] Buffer binding.
-             * @param type[in] Type Buffer type.
-             * @param semantic[in] Buffer semantic.
+             * @param[in] binding Buffer binding.
+             * @param[in] type Type Buffer type.
+             * @param[in] semantic Buffer semantic.
              * @todo I'm no really sure what this function does...
              */
             template<typename BufferType>

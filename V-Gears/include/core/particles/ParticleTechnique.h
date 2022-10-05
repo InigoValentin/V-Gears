@@ -47,7 +47,7 @@ class ParticleTechnique{
         /**
          * Sets the parent system for the technique.
          *
-         * @param
+         * @param[in] parent_system The parent particle system.
          */
         void SetParentSystem(ParticleSystem* parent_system){
             parent_system_ = parent_system;
@@ -63,7 +63,7 @@ class ParticleTechnique{
         /**
          * Adds the technique to the scene render queue.
          *
-         * @param queue[in|out] The queue to update.
+         * @param[in,out] queue The queue to update.
          */
         void UpdateRenderQueue(Ogre::RenderQueue* queue);
 
@@ -77,7 +77,7 @@ class ParticleTechnique{
          *
          * Updates the technique status based on the elapsed time.
          *
-         * @param time_elapsed[in] The elapsed time.
+         * @param[in] time_elapsed The elapsed time.
          */
         void Update(Ogre::Real time_elapsed);
 
@@ -86,7 +86,7 @@ class ParticleTechnique{
          *
          * The renderer gets assigned to the technique.
          *
-         * @param renderer_type[in] The type for the renderer.
+         * @param[in] renderer_type The type for the renderer.
          * @return The newly created renderer.
          */
         ParticleRenderer* CreateRenderer(const Ogre::String& renderer_type);
@@ -94,7 +94,7 @@ class ParticleTechnique{
         /**
          * Sets the renderer for the technique.
          *
-         * @paramater renderer[in] Renderer for the technique.
+         * @param[in] renderer Renderer for the technique.
          */
         void SetRenderer(ParticleRenderer* renderer);
 
@@ -108,7 +108,7 @@ class ParticleTechnique{
          *
          * The emitter gets added to the technique.
          *
-         * @param emitter_type[in] The type for the emitter.
+         * @param[in] emitter_type The type for the emitter.
          * @return The newly created emitter.
          */
         ParticleEmitter* CreateEmitter(const Ogre::String& emitter_type);
@@ -116,7 +116,7 @@ class ParticleTechnique{
         /**
          * Adds a particle emitter to the technique
          *
-         * @param emitter[in] The emitter to add to the technique.
+         * @param[in] emitter The emitter to add to the technique.
          */
         void AddEmitter(ParticleEmitter* emitter);
 
@@ -148,9 +148,9 @@ class ParticleTechnique{
         /**
          * Initializes the particles of an emitter for emission.
          *
-         * @param eitter[in] The emited to mark.
-         * @param requested[in] The number of particles to emit.
-         * @param time_elapsed[in] Unused.
+         * @param[in] emitter The emited to mark.
+         * @param[in] requested The number of particles to emit.
+         * @param[in] time_elapsed Unused.
          * @todo Understand and document properly.
          */
         void ExecuteEmitParticles(

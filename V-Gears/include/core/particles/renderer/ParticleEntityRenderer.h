@@ -40,7 +40,7 @@ class ParticleEntityRenderer : public ParticleRenderer{
         /**
          * Copies the atributtes to other renderer.
          *
-         * @param renderer[out] Renderer to copy the attributes to.
+         * @param[out] renderer Renderer to copy the attributes to.
          */
         virtual void CopyAttributesTo(ParticleRenderer* renderer);
 
@@ -54,7 +54,7 @@ class ParticleEntityRenderer : public ParticleRenderer{
         /**
          * Sets the emitter's mesh name.
          *
-         * @param mesh_name[in] The name for the emitter's mesh.
+         * @param[in] mesh_name The name for the emitter's mesh.
          */
         void SetMeshName(const Ogre::String& mesh_name);
 
@@ -66,7 +66,7 @@ class ParticleEntityRenderer : public ParticleRenderer{
         /**
          * Toggles the particle entity visibility.
          *
-         * @param visible[in] True to make the particle visible, false to make
+         * @param[in] visible True to make the particle visible, false to make
          * it invisible.
          */
         virtual void SetVisible(bool visible);
@@ -80,7 +80,7 @@ class ParticleEntityRenderer : public ParticleRenderer{
          * Adds the particle to the scene render queue.
          *
          * @param queue[] Unused
-         * @param pool[in] The particle pool.
+         * @param[in] pool The particle pool.
          */
         virtual void UpdateRenderQueue(
           Ogre::RenderQueue* queue, ParticlePool<VisualParticle>& pool

@@ -49,8 +49,8 @@ namespace VGears{
             /**
              * Creates a new LGP archive.
              *
-             * @param name[in] Name of the archive to create.
-             * @param readOnly[in] True to make the archive read-only, false to
+             * @param[in] name Name of the archive to create.
+             * @param[in] readOnly True to make the archive read-only, false to
              * enable writting.
              * @return A new LGP archive.
              */
@@ -63,7 +63,7 @@ namespace VGears{
             /**
              * Destroys a LGP archive created by this factory.
              *
-             * @param arch[in] The archive to destroy.
+             * @param[in] arch The archive to destroy.
              */
             void destroyInstance( Ogre::Archive* arch ) override final{
                 OGRE_DELETE arch;

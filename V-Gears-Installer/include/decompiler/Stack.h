@@ -35,7 +35,7 @@ template<typename T> class Stack {
         /**
          * Push an item onto the stack.
          *
-         * @param item[in] The item to push.
+         * @param[in] item The item to push.
          */
         void Push(const T &item){stack_.push_front(item);}
 
@@ -67,7 +67,7 @@ template<typename T> class Stack {
         /**
          * Gets item on a specified stack position without removing it.
          *
-         * @param pos[in] The number of items to skip on the stack.
+         * @param[in] pos The number of items to skip on the stack.
          * @return The desired item from the stack.
          */
         T &PeekPos(size_t pos){
@@ -78,7 +78,7 @@ template<typename T> class Stack {
         /**
          * Gets item on a specified stack position without removing it.
          *
-         * @param pos[in] The number of items to skip on the stack.
+         * @param[in] pos The number of items to skip on the stack.
          * @return The desired item from the stack.
          */
         const T &PeekPos(size_t pos) const{

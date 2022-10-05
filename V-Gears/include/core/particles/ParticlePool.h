@@ -129,7 +129,7 @@ class ParticlePool{
          *
          * A particle is added in locked state.
          *
-         * @param element[in] Particle to add to the pool.
+         * @param[in] element Particle to add to the pool.
          */
         void AddElement(T* element) {
             locked_.push_back(element);

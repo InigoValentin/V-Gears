@@ -50,8 +50,8 @@ namespace VGears{
              *
              * Unimplemented, not required.
              *
-             * @param input[in] Data to encode.
-             * @param output[out] Encoded data.
+             * @param[in] input Data to encode.
+             * @param[out] output Encoded data.
              */
             virtual Ogre::DataStreamPtr encode(
               Ogre::MemoryDataStreamPtr& input, CodecDataPtr& output
@@ -62,9 +62,9 @@ namespace VGears{
              *
              * Unimplemented, not required.
              *
-             * @param input[in] Data to encode.
-             * @param output[in] Nome for the file with the encoded data.
-             * @param extra[in] Extra information for the encoder.
+             * @param[in] input Data to encode.
+             * @param[in] output Nome for the file with the encoded data.
+             * @param[in] extra Extra information for the encoder.
              */
             virtual void encodeToFile(
               Ogre::MemoryDataStreamPtr& input, const Ogre::String& output,
@@ -74,7 +74,7 @@ namespace VGears{
             /**
              * Decodes data.
              *
-             * @param input[in] Data to encode.
+             * @param[in] input Data to encode.
              * @return Decoded data.
              */
             Ogre::Codec::DecodeResult decode(Ogre::DataStreamPtr& input) const;
@@ -82,11 +82,11 @@ namespace VGears{
             /**
              * Maps a magic number header to a file extension.
              *
-             * @param magic_number[in] Pointer to a stream of bytes which
+             * @param[in] magic_number Pointer to a stream of bytes which
              * should identify the file. Note that this may be more than
              * needed - each codec may be looking for a different size magic
              * number.
-             * @param max_bytes[in] The number of bytes passed.
+             * @param[in] max_bytes The number of bytes passed.
              * @return A blank string if the magic number was unknown, or a
              * file extension.
              */

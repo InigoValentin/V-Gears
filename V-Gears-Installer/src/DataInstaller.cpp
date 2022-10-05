@@ -141,7 +141,7 @@ std::vector<std::string> materials_;
  *
  * The image is saved in data/models/ffvii/field/units/
  *
- * @param name[in] Path to the tex file to convert.
+ * @param[in] name Path to the tex file to convert.
  */
 void TexToPng(const std::string name){
     Ogre::DataStreamPtr stream(
@@ -181,8 +181,8 @@ void TexToPng(const std::string name){
  *
  * The file will have the mesh name.
  *
- * @param outdir[in] Path to the directory where the file will be saved.
- * @param mesh[in] The mesh to export.
+ * @param[in] outdir Path to the directory where the file will be saved.
+ * @param[in] mesh The mesh to export.
  */
 static void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
 
@@ -284,7 +284,7 @@ static void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
  *
  * It prefixes a name witg "ffvii_".
  *
- * @param name[in] The field name.
+ * @param[in] name The field name.
  * @return The normalized field name.
  */
 static std::string FieldName(const std::string& name){return "ffvii_" + name;}
@@ -312,9 +312,9 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         /**
          * Constructor.
          *
-         * @param field_name[in] The field name.
-         * @param field_id_to_name_lookup[in] Field name lookup table to use.
-         * @param spawn_points[in] The list of spawn points.
+         * @param[in] field_name The field name.
+         * @param[in] field_id_to_name_lookup Field name lookup table to use.
+         * @param[in] spawn_points The list of spawn points.
          */
         BaseFF7FieldScriptFormatter(
           const std::string& field_name, const std::vector<std::string>& field_id_to_name_lookup,
@@ -330,10 +330,10 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
          * The name will have the format
          * {FIELD_NAME}_{ENTITY}_{FUNCTION_NAME}_addr_{ADDRESS}
          *
-         * @param map_id[in] Unused.
-         * @param entity[in] Entity name.
-         * @param function_name[in] Name of the function.
-         * @param address[in] @todo Understand and document.
+         * @param[in] map_id Unused.
+         * @param[in] entity Entity name.
+         * @param[in] function_name Name of the function.
+         * @param[in] address @todo Understand and document.
          * @return The composed spawn point name.
          */
         virtual std::string GetSpawnPointName(
@@ -347,7 +347,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         /**
          * Retrieves a map name from it's ID.
          *
-         * @param[in] The map ID.
+         * @param[in] map_id The map ID.
          * @return The map name.
          */
         virtual std::string GetMapName(unsigned int map_id) override{
@@ -357,8 +357,8 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         /**
          * Retrieves a user friendly variable name.
          *
-         * @param bank[in] Variable bank.
-         * @param address[in] Variable address.
+         * @param[in] bank Variable bank.
+         * @param[in] addr Variable address.
          * @return Friendly name for the variable, or an empty string if it
          * doesn't have one assigned.
          */
@@ -371,7 +371,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         /**
          * Retrieves a user friendly entity name.
          *
-         * @param entity[in] Entity name.
+         * @param[in] entity Entity name.
          * @return Friendly name for the entity, or the current name if it
          * doesn't have one assigned.
          */
@@ -382,7 +382,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         /**
          * Retrieves a user friendly character name.
          *
-         * @param char_id[in] Character ID.
+         * @param[in] char_id Character ID.
          * @return Friendly name for the entity, or an empty string if it
          * doesn't have one assigned.
          */
@@ -393,8 +393,8 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         /**
          * Retrieves a user friendly function name.
          *
-         * @param entity[in] The name of the entity the function belongs to.
-         * @param function_name[in] Function name.
+         * @param[in] entity The name of the entity the function belongs to.
+         * @param[in] function_name Function name.
          * @return Friendly name for the function, or the current name if it
          * doesn't have one assigned.
          */
@@ -409,8 +409,8 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         /**
          * Retrieves the header comment for a function in an entity.
          *
-         * @param entity[in] The name of the entity the function belongs to.
-         * @param function_name[in] Function name.
+         * @param[in] entity The name of the entity the function belongs to.
+         * @param[in] function_name Function name.
          * @return Friendly comment for the function, or an empty string if it
          * doesn't have one assigned.
          */
@@ -450,10 +450,10 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
         /**
          * Constructor.
          *
-         * @param field_name[in] The field name.
-         * @param models[in] The list of field models.
-         * @param field_id_to_name_lookup[in] Field name lookup table to use.
-         * @param spawn_points[in] The list of spawn points.
+         * @param[in] field_name The field name.
+         * @param[in] models The list of field models.
+         * @param[in] field_id_to_name_lookup Field name lookup table to use.
+         * @param[in] spawn_points The list of spawn points.
          */
         FF7FieldScriptFormatter(
           const std::string& field_name, const VGears::ModelListFilePtr& models,
@@ -468,8 +468,8 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
         /**
          * Retreieves an animation name from iths ID.
          *
-         * @param char_id[in] ID of the character the animation belogs to.
-         * @param id[in] Animation ID.
+         * @param[in] char_id ID of the character the animation belogs to.
+         * @param[in] id Animation ID.
          * @return The animation name. If there is no name assigned, or it
          * can't be found, a string with the animation ID.
          */
@@ -508,9 +508,9 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
 /**
  * Creates a gateway script.
  *
- * @param gateway_entity_name[in] Name of the gateway entity.
- * @param target_map_name[in] Name of the target map.
- * @param source_spawn_point_name[in] The spawn point name.
+ * @param[in] gateway_entity_name Name of the gateway entity.
+ * @param[in] target_map_name Name of the target map.
+ * @param[in] source_spawn_point_name The spawn point name.
  * @return Gateway LUA script.
  */
 static std::string CreateGateWayScript(
@@ -545,15 +545,15 @@ static std::string CreateGateWayScript(
 }
 
 /**
- * Gateways to whis map ID are considered to be inactive.
+ * Gateways whith map ID are considered to be inactive.
  */
 const int INACTIVE_GATEWAY_ID = 32767;
 
 /**
  * Retrieves a field ID from a name.
  *
- * @param name[in] The name of the field.
- * @param field_id_to_name_lookup[in] Lookup table to use.
+ * @param[in] name The name of the field.
+ * @param[in] field_id_to_name_lookup Lookup table to use.
  * @return The field ID for the specified name.
  * @throws std::runtime_error If there is no ID for the field name.
  */
@@ -567,11 +567,11 @@ static size_t FieldId(
 }
 
 /**
- * Retrievs a field scale factor.
+ * Retrieves a field scale factor.
  *
- * @param name[in] The name of the field.
- * @param field_id_to_name_lookup[in] Lookup table to use.
- * @return The field ID for the specified name.
+ * @param[in] scale_factor_map Lookup table of map scale factors.
+ * @param[in] field_id The id (name) of the field.
+ * @return The scale factor for the map.
  * @throws std::runtime_error If there is no ID for the field name.
  */
 static float FieldScaleFactor(
@@ -586,17 +586,17 @@ static float FieldScaleFactor(
 /**
  * Converts a FFVII PC field to a V-Gears field.
  *
- * @param field_text_writter[in] The field text writer.
- * @param field[in] The field map.
- * @param out_dir[in] The path to the directory where to save the map file.
- * @param field_id_to_name_lookup[in] Lookup table used to relate map IDs and
+ * @param[in] field_text_writter The field text writer.
+ * @param[in] field The field map.
+ * @param[in] out_dir The path to the directory where to save the map file.
+ * @param[in] field_id_to_name_lookup Lookup table used to relate map IDs and
  * names
- * @param spawn_map[in] List of spawn points.
- * @param scale_factor_map[in] List of scale factors.
- * @param model_animation_db[in] Database of model animations.
- * @param maps[out] The list of maps. The converted one will be added at the
+ * @param[in] spawn_map List of spawn points.
+ * @param[in] scale_factor_map List of scale factors.
+ * @param[in] model_animation_db Database of model animations.
+ * @param[out] maps The list of maps. The converted one will be added at the
  * end.
- * @param write_output_line[in] Functon to print output to console.
+ * @param[in] write_output_line Functon to print output to console.
  */
 static void FF7PcFieldToVGearsField(
   FieldTextWriter& field_text_writter,
@@ -1019,14 +1019,14 @@ class FF7FieldScriptGatewayCollector : public BaseFF7FieldScriptFormatter{
          * database. If it was already there, update the record to add the
          * origin.
          *
-         * @param map_id[in] The target map ID.
-         * @param entity[in] The entity that acts as the spawn point.
-         * @param function_name[in] The spawn function name.
-         * @param address[in] @todo Understand and document.
-         * @param x[in] X coordinate of the field target at which to spawn.
-         * @param y[in] Y coordinate of the field target at which to spawn.
-         * @param z[in] Z coordinate of the field target at which to spawn.
-         * @param angle[in] Orientation at which to spawn.
+         * @param[in] map_id The target map ID.
+         * @param[in] entity The entity that acts as the spawn point.
+         * @param[in] function_name The spawn function name.
+         * @param[in] address @todo Understand and document.
+         * @param[in] x X coordinate of the field target at which to spawn.
+         * @param[in] y Y coordinate of the field target at which to spawn.
+         * @param[in] z Z coordinate of the field target at which to spawn.
+         * @param[in] angle Orientation at which to spawn.
          */
         virtual void AddSpawnPoint(
           unsigned int map_id, const std::string& entity, const std::string& function_name,
@@ -1081,10 +1081,10 @@ class FF7FieldScriptGatewayCollector : public BaseFF7FieldScriptFormatter{
  * If a spawn is new, a new record will be added to the spawn point database.
  * If it was already there, update the record to add the origin.
  *
- * @param field[in] The field to collect from.
- * @param field_id_to_name_lookup[in] Lookup table to relate field IDs and
+ * @param[in] field The field to collect from.
+ * @param[in] field_id_to_name_lookup Lookup table to relate field IDs and
  * names.
- * @param spawn_points[out] Spawn points will be added sequentially to the end
+ * @param[out] spawn_points Spawn points will be added sequentially to the end
  * of this map.
  */
 static void CollectSpawnPoints(
@@ -1145,7 +1145,7 @@ static void CollectSpawnPoints(
  * To verify it, it just checks that the extension is not '.tex', '.tut' or
  * '.siz' and that the name is not 'maplist'.
  *
- * @param resource_name[in] The name of the file to test.
+ * @param[in] resource_name The name of the file to test.
  * @return False if the file is surely not a field file, true otherwise.
  */
 static bool IsAFieldFile(const Ogre::String& resource_name){
@@ -1167,7 +1167,7 @@ static bool IsAFieldFile(const Ogre::String& resource_name){
  * NOTE: Even so, conversion of all models will fail with a bone index out of
  * bounds.
  *
- * @param resource_name[in] The name of the map file to test.
+ * @param[in] resource_name The name of the map file to test.
  * @return True if the map will crash, false otherwise.
  */
 static bool WillCrash(const Ogre::String& resource_name){
@@ -1190,7 +1190,7 @@ static bool WillCrash(const Ogre::String& resource_name){
  * It uses a hardcoded list of maps that are known to be test maps. Unused maps
  * are considered to be test maps.
  *
- * @param resource_name[in] The name of the map file to test.
+ * @param[in] resource_name The name of the map file to test.
  * @return True if the map is a test map, false otherwise.
  */
 static bool IsTestField(const Ogre::String& resource_name){
@@ -1218,10 +1218,10 @@ static bool IsTestField(const Ogre::String& resource_name){
 /**
  * Collects the scale factor from a map.
  *
- * @param field[in] The field to collect from.
- * @param scale_factors[out] The scale factor for the map will be set here, in
+ * @param[in] field The field to collect from.
+ * @param[out] scale_factors The scale factor for the map will be set here, in
  * the appropiate map entry.
- * @param field_id_to_name_lookup[in] Lookup table to relate field IDs and
+ * @param[in] field_id_to_name_lookup Lookup table to relate field IDs and
  * names.
  */
 static void CollectFieldScaleFactors(

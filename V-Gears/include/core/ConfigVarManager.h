@@ -34,7 +34,7 @@ class ConfigVarManager : public Ogre::Singleton<ConfigVarManager>{
         /**
          * Finds a variable by name.
          *
-         * @param name[in] Name of the variable to retrieve.
+         * @param[in] name Name of the variable to retrieve.
          * @return The variable by the specified name, nullptr if there is no
          * one by that name.
          */
@@ -50,7 +50,7 @@ class ConfigVarManager : public Ogre::Singleton<ConfigVarManager>{
         /**
          * Retrieves a configuration variable by index.
          *
-         * @param i[in] Index of the configuration variable.
+         * @param[in] i Index of the configuration variable.
          * @return Variable at the specified index.
          */
         ConfigVar* GetConfigVar(const unsigned int i) const;

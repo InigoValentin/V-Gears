@@ -40,7 +40,7 @@ class ParticleSystemTranslatorManager : public Ogre::ScriptTranslatorManager{
         /**
          * Retreieves the translator for a node.
          *
-         * @param node[in] The node for whose type to get the translator.
+         * @param[in] node The node for whose type to get the translator.
          * @return The translator for the type of NODE, of nullptr if there is
          * no translator for it's type of node.
          */

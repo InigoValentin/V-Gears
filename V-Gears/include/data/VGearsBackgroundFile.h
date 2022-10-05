@@ -36,15 +36,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -343,7 +343,7 @@ namespace VGears{
             /**
              * Creates an image from a palette.
              *
-             * @param palette[in] The color palette for the image.
+             * @param[in] palette The color palette for the image.
              * @return The image.
              */
             Ogre::Image* CreateImage(const PaletteFilePtr &palette);
@@ -351,7 +351,7 @@ namespace VGears{
             /**
              * Adds all sprites to the background.
              *
-             * @param sprites[in] The list of sprites to add.
+             * @param[in] sprites The list of sprites to add.
              */
             void AddAllSprites(SpritePtrList& sprites) ;
 
@@ -379,7 +379,7 @@ namespace VGears{
             /**
              * Calculates the size of a background layer.
              *
-             * @param layer[in] The layer to calculate size from.
+             * @param[in] layer The layer to calculate size from.
              * @return The total size of the background layer, in bytes.
              */
             virtual size_t CalculateSize(const Layer &layer) const;
@@ -387,7 +387,7 @@ namespace VGears{
             /**
              * Calculates the size of a background page.
              *
-             * @param page[in] The layer to calculate size from.
+             * @param[in] page The layer to calculate size from.
              * @return The total size of the background page, in bytes.
              */
             virtual size_t CalculateSize(const Page &page) const;

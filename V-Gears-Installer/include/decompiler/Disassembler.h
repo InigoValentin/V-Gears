@@ -32,7 +32,7 @@ class Disassembler{
         /**
          * Constructor for Disassembler.
          *
-         * @param insts[in] Where disassembled instructions will be placed.
+         * @param[in] insts Where disassembled instructions will be placed.
          */
         Disassembler(InstVec &insts);
 
@@ -44,7 +44,7 @@ class Disassembler{
         /**
          * Open a file for disassembly.
          *
-         * @param filename[in] The file to Disassemble.
+         * @param[in] filename The file to Disassemble.
          */
         virtual void Open(const char *filename);
 
@@ -58,7 +58,7 @@ class Disassembler{
          *
          * Disassembles code if this has not already been done.
          *
-         * @param output[out] The output stream.
+         * @param[out] output The output stream.
          */
         void DumpDisassembly(std::ostream &output);
 
@@ -75,15 +75,15 @@ class Disassembler{
         /**
          * Outputs the disassembled code.
          *
-         * @param output[out] The output stream.
+         * @param[out] output The output stream.
          */
         virtual void DoDumpDisassembly(std::ostream &output);
 
         /**
          * Read parameters and associate them with an instruction.
          *
-         * @param inst[in] The instruction to associate the parameters with.
-         * @param types[in] NUL-terminated string describing the type of each
+         * @param[in] inst The instruction to associate the parameters with.
+         * @param[in] types NUL-terminated string describing the type of each
          * parameter.
          */
         void ReadParams(InstPtr inst, const char *types);
@@ -91,11 +91,11 @@ class Disassembler{
         /**
          * Read parameters but it doesn't associate them with an instruction.
          *
-         * @param inst[in] The instruction to associate the parameters with.
+         * @param[in] inst The instruction to associate the parameters with.
          * Unused.
-         * @param types[in] NUL-terminated string describing the type of each
+         * @param[in] types NUL-terminated string describing the type of each
          * parameter.
-         * @param params[in] Unused.
+         * @param[in] params Unused.
          */
         void ReadParams(InstPtr inst, const char *types, const std::vector<std::string>& params);
 

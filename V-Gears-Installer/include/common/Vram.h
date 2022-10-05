@@ -57,7 +57,7 @@ class Vram{
         /**
          * Saves the contents of the VRAM block to a file.
          *
-         * @param file[in] Path to the file to save.
+         * @param[in] file Path to the file to save.
          */
         void Save(const Ogre::String& file);
 
@@ -65,28 +65,28 @@ class Vram{
         /**
          * Adds an image buffer to an existing buffer.
          *
-         * @param x[in] X coordinate for the start of the image buffer.
-         * @param y[in] Y coordinate for the start of the image buffer.
-         * @param width[in] Width of the image buffer.
-         * @param height[in] Height of the image buffer.
-         * @param buffer[out] The buffer to add the image buffer to.
+         * @param[in] x X coordinate for the start of the image buffer.
+         * @param[in] y Y coordinate for the start of the image buffer.
+         * @param[in] width Width of the image buffer.
+         * @param[in] height Height of the image buffer.
+         * @param[out] buffer The buffer to add the image buffer to.
          */
         void AddImageBuffer(u16 x, u16 y, u16 width, u16 height, u8* buffer);
 
         /**
          * Writes 8 bytes to the VRAM block.
          *
-         * @param x[in] X coordinate of the block where to write.
-         * @param y[in] Y coordinate of the block where to write.
-         * @param byte[in] The data to write.
+         * @param[in] x X coordinate of the block where to write.
+         * @param[in] y Y coordinate of the block where to write.
+         * @param[in] byte The data to write.
          */
         void PutU8(u16 x, u16 y, u8 byte);
 
         /**
          * Reads 8 bytes from the VRAM block.
          *
-         * @param x[in] X coordinate of the block where to read.
-         * @param y[in] Y coordinate of the block where to read.
+         * @param[in] x X coordinate of the block where to read.
+         * @param[in] y Y coordinate of the block where to read.
          * @return The read bytes.
          */
         u8 GetU8(u16 x, u16 y) const;
@@ -94,17 +94,17 @@ class Vram{
         /**
          * Writes 16 bytes to the VRAM block.
          *
-         * @param x[in] X coordinate of the block where to write.
-         * @param y[in] Y coordinate of the block where to write.
-         * @param byte[in] The data to write.
+         * @param[in] x X coordinate of the block where to write.
+         * @param[in] y Y coordinate of the block where to write.
+         * @param[in] bytes The data to write.
          */
         void PutU16(u16 x, u16 y, u16 bytes);
 
         /**
          * Reads 16 bytes from the VRAM block.
          *
-         * @param x[in] X coordinate of the block where to read.
-         * @param y[in] Y coordinate of the block where to read.
+         * @param[in] x X coordinate of the block where to read.
+         * @param[in] y Y coordinate of the block where to read.
          * @return The read bytes.
          */
         u16 GetU16(u16 x, u16 y) const;

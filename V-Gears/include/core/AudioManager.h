@@ -67,7 +67,7 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         /**
          * Plays a music track.
          *
-         * @param name[in] Name of the track to play.
+         * @param[in] name Name of the track to play.
          */
         void MusicPlay(const Ogre::String& name);
 
@@ -107,14 +107,14 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         /**
          * Adds a music track to the audio manager.
          *
-         * @param music[in] The track to add.
+         * @param[in] music The track to add.
          */
         void AddMusic(const AudioManager::Music& music);
 
         /**
          * Retrieves a muisc track by name.
          *
-         * @param name[in] The track name
+         * @param[in] name The track name
          * @return The music track, or nullptr if there is no track by that
          * name.
          */
@@ -154,7 +154,7 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
                 /**
                  * Constructor.
                  *
-                 * @param mutex[in] Mutex to handle concurrent updates.
+                 * @param[in] mutex Mutex to handle concurrent updates.
                  */
                 Player(boost::recursive_mutex* mutex);
 
@@ -171,7 +171,7 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
                 /**
                  * Plays an audio file.
                  *
-                 * @param file[in] Path to the file to play
+                 * @param[in] file Path to the file to play
                  */
                 void Play(const Ogre::String& file);
 
@@ -183,7 +183,7 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
                 /**
                  * Sets the loop for the current track.
                  *
-                 * @param loop[in] Loop point
+                 * @param[in] loop Loop point
                  */
                 void SetLoop(const float loop);
 

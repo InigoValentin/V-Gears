@@ -40,15 +40,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -79,21 +79,21 @@ namespace VGears{
             /**
              * Sets the name of the polygon.
              *
-             * @param polygon_name[in] The name for the polygon.
+             * @param[in] polygon_name The name for the polygon.
              */
             virtual void SetPolygonName(const String &polygon_name);
 
             /**
              * Sets the material type.
              *
-             * @param material_name[in] The material name.
+             * @param[in] material_name The material name.
              */
             virtual void SetMaterialName(const String &material_name);
 
             /**
              * Sets the group name.
              *
-             * @param group_name[in] The name for the group.
+             * @param[in] group_name The name for the group.
              */
             virtual void SetGroupName(const String &group_name);
 
@@ -162,8 +162,8 @@ namespace VGears{
             /**
              * Adds a texture.
              *
-             * @param pass[in|out] Render pas options.
-             * @param index[in] Index of the texture to add
+             * @param[in,out] pass Render pas options.
+             * @param[in] index Index of the texture to add
              */
             virtual void AddTexture(Ogre::Pass *pass, const size_t index) const;
 

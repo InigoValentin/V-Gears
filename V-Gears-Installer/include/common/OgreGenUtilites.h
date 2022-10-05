@@ -107,7 +107,7 @@ struct TexForGen{
      * It compares texture coordinates, palette coordinates and colour BPP
      * modes.
      *
-     * @param i[in] Texture to compare this one with
+     * @param[in] i Texture to compare this one with
      * @return True if the texture coordinates, palette coordinates and colour
      * BPP modes of both textures are equal, false otherwise.
      */
@@ -126,10 +126,10 @@ typedef std::vector< TexForGen > VectorTexForGen;
 /**
  * Creates a texture from video memory and saves it to a file.
  *
- * @param vram[in] Memory block to load the texture from.
- * @param mesh_data[in] Information about the mesh the texture is assigned to.
- * @param texture_file_name[in] Path to the texture file to save.
- * @parm textures[in] @todo It's used to get some coordinates, but for what?
+ * @param[in] vram Memory block to load the texture from.
+ * @param[in] mesh_data Information about the mesh the texture is assigned to.
+ * @param[in] texture_file_name Path to the texture file to save.
+ * @param[in] textures @todo It's used to get some coordinates, but for what?
  */
 void CreateTexture(
   Vram* vram, const MeshData& mesh_data,
@@ -137,13 +137,13 @@ void CreateTexture(
 );
 
 /**
- * Creates a material from video memory and saves it to a file.
+ * Creates a material and saves it to a file.
  *
- * @param vram[in] Memory block to load the material from.
- * @param texture_file_name[in] Path to the texture file to save.
- * @param texture_name[in] Name of the texture to assign to the material.
- * @param vertex_program[in] @todo Understand and document. Can be empty.
- * @param fragment_program[in] @todo Understand and document. Can be empty.
+ * @param[in] material_name The material name.
+ * @param[in] material_file_name Path to the material file to save.
+ * @param[in] texture_name Name of the texture to assign to the material.
+ * @param[in] vertex_program @todo Understand and document. Can be empty.
+ * @param[in] fragment_program @todo Understand and document. Can be empty.
  */
 void CreateMaterial(
   const Ogre::String& material_name, const Ogre::String& material_file_name,
@@ -154,16 +154,16 @@ void CreateMaterial(
 /**
  * Creates a material from video memory and adds it to the texture list.
  *
- * @param pixel_box[in] Texture image descriptor.
- * @param vram[in] Memory block to load the material from.
- * @param start_x[in] X coordinate for the texture.
- * @param start_y[in] Y coordinate for the texture.
- * @param clut_x[in] X coordinate for the texture CLUT.
- * @param clut_y[in] Y coordinate for the texture CLUT.
- * @param texture_x[in] X coordinate for the texture.
- * @param texture_y[in] Y coordinate for the texture.
- * @param bpp[in] BPP mode for the texture colour.
- * @param transparency[in] Indicates if the texture has transparencies.
+ * @param[in] pixel_box Texture image descriptor.
+ * @param[in] vram Memory block to load the material from.
+ * @param[in] start_x X coordinate for the texture.
+ * @param[in] start_y Y coordinate for the texture.
+ * @param[in] clut_x X coordinate for the texture CLUT.
+ * @param[in] clut_y Y coordinate for the texture CLUT.
+ * @param[in] texture_x X coordinate for the texture.
+ * @param[in] texture_y Y coordinate for the texture.
+ * @param[in] bpp BPP mode for the texture colour.
+ * @param[in] transparency Indicates if the texture has transparencies.
  * @todo What's the difference between start_x/start_y and texture_x/texture_y?
  */
 void CreateTextureFromVram(
@@ -175,10 +175,10 @@ void CreateTextureFromVram(
 /**
  * Adds a texture to the list.
  *
- * @param texture[in] Texture information/
- * @param data[in] Mesh information.
- * @param textures[in|out] The texture will be added to this list.
- * @param logger[in] Custom logger to print info about the process. It can be
+ * @param[in] texture Texture information.
+ * @param[in] data Mesh information.
+ * @param[in,out] textures The texture will be added to this list.
+ * @param[in] logger Custom logger to print info about the process. It can be
  * NULL, but then nothing will be printed.
  */
 void AddTexture(
@@ -188,8 +188,8 @@ void AddTexture(
 /**
  * Adds or removes a transparency to a colour.
  *
- * @param colour[in|out] The colour to add or remove the transparency to.
- * @param transparency[in] True to add transparency, false to remove it.
+ * @param[in,out] colour The colour to add or remove the transparency to.
+ * @param[in] transparency True to add transparency, false to remove it.
  * @param stp @todo Understand and document.
  */
 void AddTransparency(u32& colour, const bool transparency, const bool stp);

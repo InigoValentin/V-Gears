@@ -22,7 +22,8 @@ class File;
 /**
  * Loads a TIM image file into an VRAM block.
  *
- * @param file[in] The TIM file to load.
- * @param vram[out] The VRAM block to load the image to.
+ * @param[in] file The TIM file to load.
+ * @param[in] tim_offset Offset of the TIM file.
+ * @param[out] vram The VRAM block to load the image to.
  */
 void LoadTimFileToVram(File* file, int tim_offset, Vram* vram);

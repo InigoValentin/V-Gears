@@ -62,10 +62,10 @@ class CodeGenerator {
         /**
          * Constructor
          *
-         * @param engine[in] The engine used for the script.
-         * @param output[out] The stream to output the code to.
-         * @param bin_order[in] Order of arguments for binary operators.
-         * @param call_order[in] Order of arguments for function calls.
+         * @param[in] engine The engine used for the script.
+         * @param[out] output The stream to output the code to.
+         * @param[in] bin_order Order of arguments for binary operators.
+         * @param[in] call_order Order of arguments for function calls.
          */
         CodeGenerator(
           Engine *engine, std::ostream &output, ARGUMENT_ORDER bin_order, ARGUMENT_ORDER call_order
@@ -86,11 +86,11 @@ class CodeGenerator {
         /**
          * Writes a function call.
          *
-         * @param function_name[in] The name of the function.
-         * @param param_format[in] Characters indicating the parameter format.
+         * @param[in] function_name The name of the function.
+         * @param[in] param_format Characters indicating the parameter format.
          * 'b' for boolean parameters, 'n' for integers (treated as unsigned)
          * or 'f' for floats.
-         * @param params[in] The list of parameters.
+         * @param[in] params The list of parameters.
          */
         void WriteFunctionCall(
           std::string function_name, std::string param_format, const std::vector<ValuePtr>& params
@@ -99,18 +99,18 @@ class CodeGenerator {
         /**
          * Generates code from the provided graph and outputs it to stdout.
          *
-         * @param insts[in] The list of instructions.
-         * @param graph[in] The annotated graph of the script.
+         * @param[in] insts The list of instructions.
+         * @param[in] graph The annotated graph of the script.
          */
         virtual void Generate(InstVec& insts, const Graph &graph);
 
         /**
          * Adds a line of code to the current group.
          *
-         * @param line[in] The line to add.
-         * @param unindent_before[in] Whether or not to remove an indentation
+         * @param[in] line The line to add.
+         * @param[in] unindent_before Whether or not to remove an indentation
          * level before the line. Defaults to false.
-         * @param indent_after[in] Whether or not to add an indentation level
+         * @param[in] indent_after Whether or not to add an indentation level
          * after the line. Defaults to false.
          */
         virtual void AddOutputLine(
@@ -120,34 +120,33 @@ class CodeGenerator {
         /**
          * Writes a comment line indicating an unimplemented opcode.
          *
-         * @param code_gen[in|out] The code generator.
-         * @param class_name[in] The class where the instruction is. Unused.
-         * @param instruction[in] The unimplemented instruction.
+         * @param[in] class_name The class where the instruction is. Unused.
+         * @param[in] instruction The unimplemented instruction.
          */
         void WriteTodo(std::string class_name, std::string instruction);
 
         /**
          * Generate an assignment statement.
          *
-         * @param dst[in] The variable being assigned to.
-         * @param src[in] The value being assigned.
+         * @param[in] dst The variable being assigned to.
+         * @param[in] src The value being assigned.
          */
         void WriteAssignment(ValuePtr dst, ValuePtr src);
 
         /**
          * Add an argument to the argument list.
          *
-         * @param arg[in] The argument to add.
+         * @param[in] arg The argument to add.
          */
         void AddArg(ValuePtr arg);
 
         /**
          * Process a single character of metadata.
          *
-         * @param inst[in] The instruction being processed. Unused.
-         * @param c[in] The character signifying the action to be taken. The
+         * @param[in] inst The instruction being processed. Unused.
+         * @param[in] c The character signifying the action to be taken. The
          * only valid one is 'p'.
-         * @param pos[in] The position at which c occurred in the metadata.
+         * @param[in] pos The position at which c occurred in the metadata.
          * Unused.
          */
         virtual void ProcessSpecialMetadata(const InstPtr inst, char c, int pos);
@@ -174,9 +173,9 @@ class CodeGenerator {
          * handled by an implemented engine, or where the base class
          * implementation is preferable.
          *
-         * @param function[in] The function the instruction is is.
-         * @param inst[in] The instruction to process.
-         * @param insts[in] Every instruction in the function.
+         * @param[in] function The function the instruction is is.
+         * @param[in] inst The instruction to process.
+         * @param[in] insts Every instruction in the function.
          */
         void ProcessInst(Function& function, InstVec& insts, const InstPtr inst);
 
@@ -186,9 +185,9 @@ class CodeGenerator {
          * implementation for opcodes not handled by an implemented engine,
          * or where the base class implementation is preferable.
          *
-         * @param function[in] The function the instruction is is.
-         * @param inst[in] The instruction to process.
-         * @param insts[in] Every instruction in the function.
+         * @param[in] function The function the instruction is is.
+         * @param[in] inst The instruction to process.
+         * @param[in] insts Every instruction in the function.
          */
         void ProcessUncondJumpInst(Function& function, InstVec& insts, const InstPtr inst);
 
@@ -198,14 +197,14 @@ class CodeGenerator {
          * implementation for opcodes not handled by an implemented engine,
          * or where the base class implementation is preferable.
          *
-         * @param inst[in] The instruction to process.
+         * @param[in] inst The instruction to process.
          */
         void ProcessCondJumpInst(const InstPtr inst);
 
         /**
          * Indents a string according to the current indentation level.
          *
-         * @param s[in] The string to indent.
+         * @param[in] s The string to indent.
          * @result The indented string.
          */
         std::string IndentString(std::string s);
@@ -213,7 +212,7 @@ class CodeGenerator {
         /**
          * Construct the signature for a function.
          *
-         * @param function[in] Reference to the function to construct the
+         * @param[in] function Reference to the function to construct the
          * signature for.
          * @return For this base class, an empty string.
          */
@@ -225,7 +224,7 @@ class CodeGenerator {
          * Called before writing a function start. For this base class, it
          * does nothing.
          *
-         * @param function[in] The function about to start.
+         * @param[in] function The function about to start.
          */
         virtual void OnBeforeStartFunction(const Function& function);
 
@@ -235,7 +234,7 @@ class CodeGenerator {
          * Called after writing a function. For this base class, it adds a
          * closing bracer "}".
          *
-         * @param function[in] The function about to end.
+         * @param[in] function The function about to end.
          */
         virtual void OnEndFunction(const Function& function);
 
@@ -245,7 +244,7 @@ class CodeGenerator {
          * Called after writing a function start. For this base class, it
          * does nothing.
          *
-         * @param function[in] The function starting.
+         * @param[in] function The function starting.
          */
         virtual void OnStartFunction(const Function& function);
 
@@ -259,11 +258,11 @@ class CodeGenerator {
         /**
          * Generates a pass.
          *
-         * @param insts[in] The list of instructions.
-         * @param graph[in] The code graph.
+         * @param[in] insts The list of instructions.
+         * @param[in] graph The code graph.
          * @todo Understand and explain.
          */
-        void GeneratePass(InstVec& insts, const Graph& g);
+        void GeneratePass(InstVec& insts, const Graph& graph);
 
         /**
          * Indicates if a label is being processed.
@@ -310,7 +309,9 @@ class CodeGenerator {
         /**
          * Processes a GraphVertex.
          *
-         * @param vertex[in] The vertex to process.
+         * @param[in] function The function to process.
+         * @param[in] insts The list of instructions.
+         * @param[in] vertex The vertex to process.
          */
         void Process(Function& function, InstVec& insts, GraphVertex vertex);
 

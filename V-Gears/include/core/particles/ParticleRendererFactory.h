@@ -51,7 +51,7 @@ class ParticleRendererFactory{
         /**
          * Destroys a renderer.
          *
-         * @param renderer[in|out] The renderer to destroy.
+         * @param[in,out] renderer The renderer to destroy.
          */
         void DestroyRenderer (ParticleRenderer* renderer){
             if (renderer != NULL) delete renderer;

@@ -27,6 +27,6 @@ bool Engine::SupportsCodeFlow() const{return true;}
 
 bool Engine::SupportsCodeGen() const{return true;}
 
-void Engine::GetVariants(std::vector<std::string>&) const{};
+void Engine::GetVariants(std::vector<std::string>& variants) const{};
 
 bool Engine::UsePureGrouping() const{return false;}

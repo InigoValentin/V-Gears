@@ -40,11 +40,11 @@ class ConfigCmdManager : public Ogre::Singleton<ConfigCmdManager>{
         /**
          * Adds a command to the manager.
          *
-         * @param name[in] Command name.
-         * @param description[in] Command description.
-         * @param params_description[in] Command parameters description.
-         * @param handler[in] Command handler.
-         * @param completion[in] Command completion.
+         * @param[in] name Command name.
+         * @param[in] description Command description.
+         * @param[in] params_description Command parameters description.
+         * @param[in] handler Command handler.
+         * @param[in] completion Command completion.
          */
         void AddCommand(
           const Ogre::String& name, const Ogre::String& description,
@@ -55,14 +55,14 @@ class ConfigCmdManager : public Ogre::Singleton<ConfigCmdManager>{
         /**
          * Executes a command.
          *
-         * @param cmd_string[in] The command, in string format.
+         * @param[in] cmd_string The command, in string format.
          */
         void ExecuteString( const Ogre::String& cmd_string );
 
         /**
          * Finds a command by name.
          *
-         * @param name[in] Name of the command.
+         * @param[in] name Name of the command.
          * @return The command by the name, or nullptr if there is none.
          */
         ConfigCmd* Find(const Ogre::String& name) const;
@@ -87,14 +87,14 @@ class ConfigCmdManager : public Ogre::Singleton<ConfigCmdManager>{
         /**
          * Forbidden copy constructor.
          *
-         * @param rhs[in] Manager to not copy.
+         * @param[in] rhs Manager to not copy.
          */
         ConfigCmdManager(const ConfigCmdManager& rhs) = delete;
 
         /**
          * Forbidden copy constructor.
          *
-         * @param rhs[in] Manager to not copy.
+         * @param[in] rhs Manager to not copy.
          */
         ConfigCmdManager operator =(const ConfigCmdManager& rhs) = delete;
 

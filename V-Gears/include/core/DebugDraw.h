@@ -39,14 +39,14 @@ class DebugDraw :
         /**
          * Sets the colour of the element to draw.
          *
-         * @param colour[in] The color to apply.
+         * @param[in] colour The color to apply.
          */
         void SetColour(const Ogre::ColourValue& colour);
 
         /**
          * Sets the screen space.
          *
-         * @param screen_space[in] The screen space.
+         * @param[in] screen_space The screen space.
          * @todo Understand and document properly.
          */
         void SetScreenSpace(const bool screen_space);
@@ -54,15 +54,15 @@ class DebugDraw :
         /**
          * Set the Z coordinate.
          *
-         * @param z[in] The Z coordinate.
+         * @param[in] z The Z coordinate.
          */
         void SetZ(const float z);
 
         /**
          * Sets the fade distance for text.
          *
-         * @param fade_s[in] The text starts fading at this distance.
-         * @param fade_e[in] The text has faded completely at this distance.
+         * @param[in] fade_s The text starts fading at this distance.
+         * @param[in] fade_e The text has faded completely at this distance.
          */
         void SetFadeDistance(const float fade_s, const float fade_e);
 
@@ -95,10 +95,10 @@ class DebugDraw :
          * exceeded by drawing the line, a warning message will be printed and
          * nothing will be done.
          *
-         * @param x1[in] X coordinate of the starting point.
-         * @param y1[in] Y coordinate of the starting point.
-         * @param x2[in] X coordinate of the ending point.
-         * @param y2[in] Y coordinate of the ending point.
+         * @param[in] x1 X coordinate of the starting point.
+         * @param[in] y1 Y coordinate of the starting point.
+         * @param[in] x2 X coordinate of the ending point.
+         * @param[in] y2 Y coordinate of the ending point.
          */
         void Line(
           const float x1, const float y1, const float x2, const float y2
@@ -111,8 +111,8 @@ class DebugDraw :
          * exceeded by drawing the line, a warning message will be printed and
          * nothing will be done.
          *
-         * @param point1[in] Starting point.
-         * @param point2[in] Ending point.
+         * @param[in] point1 Starting point.
+         * @param[in] point2 Ending point.
          */
         void Line3d(const Ogre::Vector3& point1, const Ogre::Vector3& point2);
 
@@ -123,9 +123,9 @@ class DebugDraw :
          * exceeded by drawing the triangle, a warning message will be printed
          * and nothing will be done.
          *
-         * @param point1[in] A triangle vertex point.
-         * @param point2[in] A triangle vertex point.
-         * @param point3[in] A triangle vertex point.
+         * @param[in] point1 A triangle vertex point.
+         * @param[in] point2 A triangle vertex point.
+         * @param[in] point3 A triangle vertex point.
          */
         void Triangle3d(
           const Ogre::Vector3& point1, const Ogre::Vector3& point2,
@@ -139,14 +139,14 @@ class DebugDraw :
          * exceeded by drawing the quad, a warning message will be printed and
          * nothing will be done.
          *
-         * @param x1[in] X coordinate of the first point.
-         * @param y1[in] Y coordinate of the first point.
-         * @param x2[in] X coordinate of the second point.
-         * @param y2[in] Y coordinate of the second point.
-         * @param x3[in] X coordinate of the third point.
-         * @param y3[in] Y coordinate of the third point.
-         * @param x4[in] X coordinate of the fourth point.
-         * @param y4[in] Y coordinate of the fourth point.
+         * @param[in] x1 X coordinate of the first point.
+         * @param[in] y1 Y coordinate of the first point.
+         * @param[in] x2 X coordinate of the second point.
+         * @param[in] y2 Y coordinate of the second point.
+         * @param[in] x3 X coordinate of the third point.
+         * @param[in] y3 Y coordinate of the third point.
+         * @param[in] x4 X coordinate of the fourth point.
+         * @param[in] y4 Y coordinate of the fourth point.
          */
         void Quad(
           const float x1, const float y1, const float x2, const float y2,
@@ -161,9 +161,9 @@ class DebugDraw :
          * writing, a warning message will be printed to console and nothing
          * will be done.
          *
-         * @param x[in] Left position of the text in the screen.
-         * @param y[in] Left position of the text in the screen.
-         * @param text[in] The text to write.
+         * @param[in] x Left position of the text in the screen.
+         * @param[in] y Left position of the text in the screen.
+         * @param[in] text The text to write.
          */
         void Text(const float x, const float y, const Ogre::String& text);
 
@@ -175,11 +175,11 @@ class DebugDraw :
          * writing, a warning message will be printed to console and nothing
          * will be done.
          *
-         * @param point[in] Top left point of the screen where the text will be
+         * @param[in] point Top left point of the screen where the text will be
          * written.
-         * @param x[in] Text width.
-         * @param y[in] Text height.
-         * @param text[in] The text to write.
+         * @param[in] x Text width.
+         * @param[in] y Text height.
+         * @param[in] text The text to write.
          */
         void Text(
           const Ogre::Vector3& point, const float x, const float y,
@@ -189,9 +189,9 @@ class DebugDraw :
         /**
          * Ends the render queue.
          *
-         * @param queueGroupId[in] The group id of the queue to end.
-         * @param invocation[in]
-         * @param repeatThisInvocation[in]
+         * @param[in] queueGroupId The group id of the queue to end.
+         * @param[in] invocation
+         * @param[in] repeatThisInvocation
          * @todo Understand and document.
          */
         void renderQueueEnded(

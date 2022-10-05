@@ -44,7 +44,7 @@ class Engine {
         /**
          * Retrieve the disassembler for the engine.
          *
-         * @param insts[out] Vector to place the Instructions in.
+         * @param[out] insts Vector to place the Instructions in.
          * @return Pointer to a disassembler for the engine.
          */
         virtual std::unique_ptr<Disassembler> GetDisassembler(InstVec &insts) = 0;
@@ -52,7 +52,8 @@ class Engine {
         /**
          * Retrieve the code generator for the engine.
          *
-         * @param output[out] Stream to output the code to.
+         * @param[in] insts The list of instructions.
+         * @param[out] output Stream to output the code to.
          * @return Pointer to a CodeGenerator for the engine.
          */
         virtual std::unique_ptr<CodeGenerator> GetCodeGenerator(
@@ -61,8 +62,8 @@ class Engine {
 
         /**
          * Post-processing step after CFG analysis.
-         * @param insts[out] Vector to place the Instructions in.
-         * @param graph[in] Graph generated from the CFG analysis.
+         * @param[out] insts Vector to place the Instructions in.
+         * @param[in] graph Graph generated from the CFG analysis.
          */
         virtual void PostCFG(InstVec& insts, Graph graph);
 
@@ -88,9 +89,9 @@ class Engine {
          * If variants are not used by this engine, it will be empty (default
          * implementation).
          *
-         * @param variants Vector with the supported variants.
+         * @param[out] variants Vector with the supported variants.
          */
-        virtual void GetVariants(std::vector<std::string>&) const;
+        virtual void GetVariants(std::vector<std::string>& variants) const;
 
 
         /**

@@ -69,7 +69,7 @@ class Background2D : public Ogre::RenderQueueListener{
 
         /**
          * @todo Understand and document.
-         * @param event[in] Event.
+         * @param[in] event Event.
          */
         void InputDebug(const VGears::Event& event);
 
@@ -115,10 +115,10 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Scrolls the background to a position.
          *
-         * @param x[in] X coordinate to scroll to.
-         * @param y[in] Y coordinate to scroll to.
-         * @param type[in] Scroll type.
-         * @param seconds[in] Duration of the scroll.
+         * @param[in] x X coordinate to scroll to.
+         * @param[in] y Y coordinate to scroll to.
+         * @param[in] type Scroll type.
+         * @param[in] seconds Duration of the scroll.
          */
         void ScriptScrollToPosition(
           const float x, const float y,
@@ -171,7 +171,7 @@ class Background2D : public Ogre::RenderQueueListener{
          * It represents the time the current scroll action has been going on
          * for.
          *
-         * @param seconds[in] Time taken by the current scroll action.
+         * @param[in] seconds Time taken by the current scroll action.
          */
         void SetScrollCurrentSeconds(const float seconds);
 
@@ -188,7 +188,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Scroll position in screen coordinates.
          *
-         * @param position[in] Position to set the scroll.
+         * @param[in] position Position to set the scroll.
          */
         void SetScreenScroll(const Ogre::Vector2& position);
 
@@ -202,7 +202,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Sets the scroll in game internal screen coordinates.
          *
-         * @param position[in] Position to set the scroll.
+         * @param[in] position Position to set the scroll.
          */
         void SetScroll(const Ogre::Vector2& position);
 
@@ -216,7 +216,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Sets the background image.
          *
-         * @param image[in] Image name.
+         * @param[in] image Image name.
          */
         void SetImage( const Ogre::String& image );
 
@@ -225,10 +225,10 @@ class Background2D : public Ogre::RenderQueueListener{
          *
          * The range is applied in game internal screen coordinates.
          *
-         * @param min_x[in] Min scrollabe x coordinate.
-         * @param min_y[in] Min scrollabe y coordinate.
-         * @param max_x[in] Max scrollabe x coordinate.
-         * @param max_y[in] Max scrollabe y coordinate.
+         * @param[in] min_x Min scrollabe x coordinate.
+         * @param[in] min_y Min scrollabe y coordinate.
+         * @param[in] max_x Max scrollabe x coordinate.
+         * @param[in] max_y Max scrollabe y coordinate.
          */
         void SetRange(
           const int min_x, const int min_y, const int max_x, const int max_y
@@ -239,23 +239,23 @@ class Background2D : public Ogre::RenderQueueListener{
          *
          * The range is applied in game internal screen coordinates.
          *
-         * @param range[in] Range bounds vector.
+         * @param[in] range Range bounds vector.
          */
         void SetRange(const Ogre::Vector4& range);
 
         /**
          * Adds a tile to the background
          *
-         * @param x[in] X coordinate for the tile.
-         * @param y[in] Y coordinate for the tile.
-         * @param width[in] Tile width.
-         * @param height[in] Tile height.
-         * @param depth[in] Depth of the tile.
-         * @param u1[in]
-         * @param v1[in]
-         * @param u2[in]
-         * @param v2[in]
-         * @param blending[in] Blending mode for the tile
+         * @param[in] x X coordinate for the tile.
+         * @param[in] y Y coordinate for the tile.
+         * @param[in] width Tile width.
+         * @param[in] height Tile height.
+         * @param[in] depth Depth of the tile.
+         * @param[in] u1
+         * @param[in] v1
+         * @param[in] u2
+         * @param[in] v2
+         * @param[in] blending Blending mode for the tile
          * @todo Depth is z-index??
          * @todo What are v1, v2, u1 and u2?
          */
@@ -268,12 +268,12 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Adds a tile to the background
          *
-         * @param destination[in] Coordinates for the tile.
-         * @param width[in] Tile width.
-         * @param height[in] Tile height.
-         * @param depth[in] Depth of the tile.
-         * @param uv[in]
-         * @param blending[in] Blending mode for the tile
+         * @param[in] destination Coordinates for the tile.
+         * @param[in] width Tile width.
+         * @param[in] height Tile height.
+         * @param[in] depth Depth of the tile.
+         * @param[in] uv
+         * @param[in] blending Blending mode for the tile
          * @todo Depth is z-index??
          * @todo What is uv?
          */
@@ -285,18 +285,18 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Adds a tile to the background
          *
-         * @param tile[in] The tile to add.
+         * @param[in] tile The tile to add.
          */
         void AddTile(const VGears::Tile& tile);
 
         /**
          * Updates the UV vector of a tile
          *
-         * @param tile_id[in] ID of the tile to update.
-         * @param u1[in]
-         * @param v1[in]
-         * @param u2[in]
-         * @param v2[in]
+         * @param[in] tile_id ID of the tile to update.
+         * @param[in] u1
+         * @param[in] v1
+         * @param[in] u2
+         * @param[in] v2
          * @todo What are v1, v2, u1 and u2?
          */
         void UpdateTileUV(
@@ -307,15 +307,15 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Adds an animation to the background.
          *
-         * @param animation[in] Animation to add.
+         * @param[in] animation Animation to add.
          */
         void AddAnimation(Background2DAnimation* animation);
 
         /**
          * Plays an animation.
          *
-         * @param animation[in] The animation to play.
-         * @param state[in] Animation state.
+         * @param[in] animation The animation to play.
+         * @param[in] state Animation state.
          */
         void PlayAnimation(
           const Ogre::String& animation, const Background2DAnimation::State state
@@ -326,7 +326,7 @@ class Background2D : public Ogre::RenderQueueListener{
          *
          * The animation is played asynchronously.
          *
-         * @param name[in] Animation name.
+         * @param[in] name Animation name.
          */
         void ScriptPlayAnimationLooped(const char* name);
 
@@ -335,7 +335,7 @@ class Background2D : public Ogre::RenderQueueListener{
          *
          * The animation is played asynchronously.
          *
-         * @param name[in] Animation name.
+         * @param[in] name Animation name.
          */
         void ScriptPlayAnimationOnce(const char* name);
 
@@ -345,16 +345,17 @@ class Background2D : public Ogre::RenderQueueListener{
          * The animation is played synchronously, and the thread is locked
          * until it ends.
          *
-         * @param name[in] Animation name.
+         * @param[in] name Animation name.
          */
         int ScriptAnimationSync(const char* name);
 
         /**
          * Ends the render queue.
          *
-         * @param queueGroupId[in] The group id of the queue to end.
-         * @param invocation[in]
-         * @param repeatThisInvocation[in]
+         * @param[in] queueGroupId The group id of the queue to end.
+         * @param[in] invocation
+         * @param[in] repeatThisInvocation Indicates if the invocation must be
+         * repeated.
          * @todo Understand and document.
          */
         void renderQueueEnded(
@@ -403,7 +404,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Loads a background.
          *
-         * @param background[in] The background to load.
+         * @param[in] background The background to load.
          */
         virtual void load(const VGears::Background2DFilePtr &background);
 
@@ -412,15 +413,15 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Loads a tile list to the background.
          *
-         * @param tiles[in] The list of tiles to load.
+         * @param[in] tiles The list of tiles to load.
          */
         virtual void load(const VGears::Background2DFile::TileList &tiles);
 
         /**
          * Loads an animation list to the background.
          *
-         * @param tiles_index[in]
-         * @param animations[in] List of animations to load.
+         * @param[in] tile_index The index of the tile.
+         * @param[in] animations List of animations to load.
          */
         virtual void load(
           const size_t tile_index, const VGears::AnimationMap &animations
@@ -429,7 +430,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Apply the camera position to match the current scroll.
          */
-        virtual void applyScroll(void);
+        virtual void applyScroll();
 
         /**
          * Calculates the screen scale.
@@ -437,13 +438,13 @@ class Background2D : public Ogre::RenderQueueListener{
          * The scale is calculated as the proportion between the viewport and
          * the virtual screen.
          */
-        virtual void calculateScreenScale(void);
+        virtual void calculateScreenScale();
 
 
         /**
          * Sets the virtual screen to world space.
          *
-         * @param pos[in]
+         * @param[in] pos
          * @todo Understand and document.
          */
         virtual void virtualScreenToWorldSpace(Ogre::Vector2 &pos) const;

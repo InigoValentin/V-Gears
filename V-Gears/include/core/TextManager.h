@@ -44,7 +44,7 @@ class TextManager : public Ogre::Singleton<TextManager>{
         /**
          * Sets the language for texts.
          *
-         * @param language[in] Language identifier. Must be the name of one of
+         * @param[in] language Language identifier. Must be the name of one of
          * the folders in the data/text/.
          */
         void SetLanguage(const Ogre::String& language);
@@ -59,18 +59,18 @@ class TextManager : public Ogre::Singleton<TextManager>{
         /**
          * Adds text.
          *
-         * @param name[in] Text name or identifier.
-         * @param node[in] Text node in an XML file.
+         * @param[in] name Text name or identifier.
+         * @param[in] node Text node in an XML file.
          */
         void AddText(const Ogre::String& name, TiXmlNode* node);
 
         /**
          * Adds a text dialog.
          *
-         * @param name[in] Text name or identifier.
-         * @param node[in] Text node in an XML file.
-         * @param width[in] Text width.
-         * @param height[in] Text height.
+         * @param[in] name Text name or identifier.
+         * @param[in] node Text node in an XML file.
+         * @param[in] width Text width.
+         * @param[in] height Text height.
          */
         void AddDialog(
           const Ogre::String& name, TiXmlNode* node,
@@ -80,7 +80,7 @@ class TextManager : public Ogre::Singleton<TextManager>{
         /**
          * Retrieves a text by name.
          *
-         * @param name[in] Text name or identifier.
+         * @param[in] name Text name or identifier.
          * @return Text node in an XML file, or NULL if there is none.
          */
         TiXmlNode* GetText(const Ogre::String& name) const;
@@ -88,10 +88,10 @@ class TextManager : public Ogre::Singleton<TextManager>{
         /**
          * Retrieves a dialog and it's dimensions by name.
          *
-         * @param name[in] Text name or identifier.
-         * @param width[out] The text width will be saved here. It won't change
+         * @param[in] name Text name or identifier.
+         * @param[out] width The text width will be saved here. It won't change
          * if the dialog is not found.
-         * @param height[out] The text height will be saved here. It won't
+         * @param[out] height The text height will be saved here. It won't
          * change if the dialog is not found.
          * @return Text node in an XML file, or NULL if there is none.
          */

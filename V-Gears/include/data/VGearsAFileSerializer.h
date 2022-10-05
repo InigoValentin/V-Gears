@@ -41,8 +41,8 @@ namespace VGears{
             /**
              * Imports an A file.
              *
-             * @param stream[in] The contents of the A file.
-             * @param dest[out] The A file.
+             * @param[in] stream The contents of the A file.
+             * @param[out] dest The A file.
              */
             void ImportAFile(Ogre::DataStreamPtr &stream, AFile* dest);
 
@@ -82,15 +82,15 @@ namespace VGears{
             /**
              * Reads a file header and sets the instance data.
              *
-             * @param stream[in] The contents of the A file.
+             * @param[in] stream The contents of the A file.
              */
             virtual void ReadFileHeader(Ogre::DataStreamPtr &stream) final;
 
             /**
              * Reads an object as an A file.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed A file.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed A file.
              */
             void readObject(Ogre::DataStreamPtr &stream, AFile::Frame &dest);
 
@@ -99,9 +99,9 @@ namespace VGears{
             /**
              * Reads a stream as a vector.
              *
-             * @param stream[in] The input stream.
-             * @param dest[out] The vector data will be loaded here.
-             * @param count[in] Data units to copy.
+             * @param[in] stream The input stream.
+             * @param[out] dest The vector data will be loaded here.
+             * @param[in] count Data units to copy.
              */
             template<typename ValueType> void ReadVector(
               Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,

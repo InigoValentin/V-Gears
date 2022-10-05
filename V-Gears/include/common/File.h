@@ -28,32 +28,32 @@ class File{
         /**
          * Opens a file.
          *
-         * @param file[in] Path to the file.
+         * @param[in] file Path to the file.
          */
         File(const Ogre::String& file);
 
         /**
          * Opens a file.
          *
-         * @param file[in] Pointer to the file.
+         * @param[in] file Pointer to the file.
          */
         File(const File* file);
 
         /**
          * Loads a file fragment.
          *
-         * @param file[in] Pointer to the file.
-         * @param offset[in] Offset to the data to load.
-         * @param length[in] Length of the data to load.
+         * @param[in] file Pointer to the file.
+         * @param[in] offset Offset to the data to load.
+         * @param[in] length Length of the data to load.
          */
         File(const File* file, u32 offset, u32 length);
 
         /**
          * Loads a file fragment from a buffer.
          *
-         * @param buffer[in] Pointer to the buffer to load from.
-         * @param offset[in] Offset to the data to load.
-         * @param length[in] Length of the data to load.
+         * @param[in] buffer Pointer to the buffer to load from.
+         * @param[in] offset Offset to the data to load.
+         * @param[in] length Length of the data to load.
          */
         File(const u8* buffer, u32 offset, u32 length);
 
@@ -72,7 +72,7 @@ class File{
         /**
          * Retrieves the file name.
          *
-         * @The file name, without path.
+         * @return The file name, without path.
          */
         const Ogre::String& GetFileName() const;
 
@@ -86,9 +86,9 @@ class File{
         /**
          * Loads a buffer with the file data.
          *
-         * @param buffer[out] Pointer to the buffer to load.
-         * @param start[in] Offset to the data to load.
-         * @param length[in] Length of the data to load.
+         * @param[out] buffer Pointer to the buffer to load.
+         * @param[in] start Offset to the data to load.
+         * @param[in] length Length of the data to load.
          */
         void GetFileBuffer(
           u8* buffer, const u32 &start, const u32 &length
@@ -97,7 +97,7 @@ class File{
         /**
          * Retrieves a pointer to a byte address in the file.
          *
-         * @param offset[in] The offset to the requested address.
+         * @param[in] offset The offset to the requested address.
          */
         u8 GetU8(u32 offset) const;
 
@@ -106,7 +106,7 @@ class File{
          *
          * The data must b considered to be in little endian.
          *
-         * @param offset[in] The offset to the requested address.
+         * @param[in] offset The offset to the requested address.
          */
         u16 GetU16LE(u32 offset) const;
 
@@ -115,7 +115,7 @@ class File{
          *
          * The data must b considered to be in little endian.
          *
-         * @param offset[in] The offset to the requested address.
+         * @param[in] offset The offset to the requested address.
          */
         u32 GetU32LE(u32 offset) const;
 

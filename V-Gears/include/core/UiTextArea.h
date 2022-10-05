@@ -117,16 +117,16 @@ class UiTextArea : public UiWidget{
         /**
          * Creates a UiTextArea.
          *
-         * @param name[in] Name for the textarea.
+         * @param[in] name Name for the textarea.
          */
         UiTextArea(const Ogre::String& name);
 
         /**
          * Creates a UiTextArea.
          *
-         * @param name[in] Name for the textarea.
-         * @param path_name[in] Path for the widget.
-         * @param parent[in] Pointer to the widget that will parent the
+         * @param[in] name Name for the textarea.
+         * @param[in] path_name Path for the widget.
+         * @param[in] parent Pointer to the widget that will parent the
          * UiTextArea.
          */
         UiTextArea(
@@ -200,17 +200,17 @@ class UiTextArea : public UiWidget{
         /**
          * Sets the text alignment in the text area.
          *
-         * @param align[in] The text alignment.
+         * @param[in] align The text alignment.
          */
         void SetTextAlign(const TextAlign align);
 
         /**
          * Sets the paddings in the text area.
          *
-         * @param top[in] Padding from the top, in pixels.
-         * @param right[in] Padding from the right, in pixels.
-         * @param bottom[in] Padding from the bottom, in pixels.
-         * @param left[in] Padding from the left, in pixels.
+         * @param[in] top Padding from the top, in pixels.
+         * @param[in] right Padding from the right, in pixels.
+         * @param[in] bottom Padding from the bottom, in pixels.
+         * @param[in] left Padding from the left, in pixels.
          */
         void SetPadding(
           const float top, const float right,
@@ -220,14 +220,14 @@ class UiTextArea : public UiWidget{
         /**
          * Sets the text from a string.
          *
-         * @param text[in] Text to set.
+         * @param[in] text Text to set.
          */
         void SetText(const Ogre::UTFString& text);
 
         /**
          * Sets the text from an XML node.
          *
-         * @param text[in] XML node with the text to set.
+         * @param[in] text XML node with the text to set.
          */
         void SetText(TiXmlNode* text);
 
@@ -239,14 +239,14 @@ class UiTextArea : public UiWidget{
         /**
          * @todo Understand and document.
          *
-         * @param end[in] @todo Understand and document.
+         * @param[in] end @todo Understand and document.
          */
         void RemoveSpritesFromText(const unsigned int end);
 
         /**
          * Set the font for the text.
          *
-         * @param font[in] The font to set.
+         * @param[in] font The font to set.
          */
         void SetFont(const Ogre::String& font);
 
@@ -260,7 +260,7 @@ class UiTextArea : public UiWidget{
         /**
          * Sets the printing speed.
          *
-         * @param speed[in] The text speed. -1 for instant text.
+         * @param[in] speed The text speed. -1 for instant text.
          * @todo Explain units or references.
          */
         void SetTextPrintSpeed(const float speed);
@@ -268,7 +268,7 @@ class UiTextArea : public UiWidget{
         /**
          * Sets the scroll duration.
          *
-         * @param time[in] Time to scroll a line.
+         * @param[in] time Time to scroll a line.
          * @todo Units or references.
          */
         void SetTextScrollTime(const float time);
@@ -276,8 +276,8 @@ class UiTextArea : public UiWidget{
         /**
          * Sets a variable in the text.
          *
-         * @param name[in] Variable name.
-         * @param value[in] Variable value.
+         * @param[in] name Variable name.
+         * @param[in] value Variable value.
          */
         void SetVariable(
           const Ogre::String& name, const Ogre::UTFString& value
@@ -286,7 +286,7 @@ class UiTextArea : public UiWidget{
         /**
          * Gets the value of a variable in the text.
          *
-         * @param name[in] The variable name.
+         * @param[in] name The variable name.
          * @return The variable value, in string format, or an empty string if
          * there is no such variable.
          */
@@ -334,8 +334,8 @@ class UiTextArea : public UiWidget{
         /**
          * Prepares text from a XML node.
          *
-         * @param node[in] The XML node to get the text from.
-         * @param colour[in] The text colour.
+         * @param[in] node The XML node to get the text from.
+         * @param[in] colour The text colour.
          * @todo Does this call setText?
          */
         void PrepareTextFromNode(
@@ -345,8 +345,8 @@ class UiTextArea : public UiWidget{
         /**
          * Prepares text from a string.
          *
-         * @param text[in] The text to prepare.
-         * @param colour[in] The text colour.
+         * @param[in] text The text to prepare.
+         * @param[in] colour The text colour.
          * @todo Does this call setText?
          */
         void PrepareTextFromText(

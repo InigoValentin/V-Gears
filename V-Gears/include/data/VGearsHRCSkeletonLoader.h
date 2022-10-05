@@ -31,7 +31,7 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param hrc_file[in] The HRC file to load from.
+             * @param[in] hrc_file The HRC file to load from.
              */
             explicit HRCSkeletonLoader(HRCFile &hrc_file);
 
@@ -43,7 +43,7 @@ namespace VGears{
             /**
              * Loads a resource.
              *
-             * @param resource[in] The resource to load.
+             * @param[in] resource The resource to load.
              */
             virtual void loadResource( Ogre::Resource *resource );
 

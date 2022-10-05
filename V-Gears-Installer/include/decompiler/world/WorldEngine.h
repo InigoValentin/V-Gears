@@ -42,7 +42,7 @@ class WorldEngine : public Engine{
                 /**
                  * Constructor.
                  *
-                 * @param name[in] Variable name.
+                 * @param[in] name Variable name.
                  */
                 BankValue(std::string name);
         };
@@ -50,14 +50,14 @@ class WorldEngine : public Engine{
         /**
          * Constructor.
          *
-         * @param script_number[in] The script number.
+         * @param[in] script_number The script number.
          */
         WorldEngine(int script_number);
 
         /**
          * Retrieves the disassembler.
          *
-         * @param insts[in] List of instructions.
+         * @param[in] insts List of instructions.
          * @return Pointer to the disassembler.
          */
         std::unique_ptr<Disassembler> GetDisassembler(InstVec &insts) override;
@@ -65,8 +65,8 @@ class WorldEngine : public Engine{
         /**
          * Retrieves the code generator.
          *
-         * @param insts[in] List of instructions. Unused.
-         * @param output[in] Pointer to the output (file, stream...).
+         * @param[in] insts List of instructions. Unused.
+         * @param[in] output Pointer to the output (file, stream...).
          * @return Pointer to the generator.
          */
         std::unique_ptr<CodeGenerator> GetCodeGenerator(
@@ -78,8 +78,8 @@ class WorldEngine : public Engine{
          *
          * It actually does nothing. CFG stands for control flow group.
          *
-         * @param insts[in] Instruction list.
-         * @param graph[in] Code graph.
+         * @param[in] insts Instruction list.
+         * @param[in] graph Code graph.
          */
         virtual void PostCFG(InstVec &insts, Graph graph) override;
 

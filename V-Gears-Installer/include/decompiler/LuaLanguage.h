@@ -81,7 +81,7 @@ class LuaLanguage{
         /**
          * A Lua "goto" instruction.
          *
-         * @param target[in] A memory address label.
+         * @param[in] target A memory address label.
          * @return "goto label_0x<target>X".
          */
         virtual std::string Goto(uint32 target);
@@ -96,7 +96,7 @@ class LuaLanguage{
         /**
          * The Lua parts of a do-loop footer
          *
-         * @param before_expr[in] True to fetch the initial part of the
+         * @param[in] before_expr True to fetch the initial part of the
          * footer, false for the ending part.
          * @return "until (" if before_expr is true, ")" if not.
          */
@@ -105,7 +105,7 @@ class LuaLanguage{
         /**
          * The Lua parts of a if control sentence
          *
-         * @param before_expr[in] True to fetch the initial part of the
+         * @param[in] before_expr True to fetch the initial part of the
          * sentence, false for the ending part.
          * @return "if (" if before_expr is true, ") then" if not.
          */
@@ -114,7 +114,7 @@ class LuaLanguage{
         /**
          * The Lua parts of a while control sentence
          *
-         * @param before_expr[in] True to fetch the initial part of the
+         * @param[in] before_expr True to fetch the initial part of the
          * sentence, false for the ending part.
          * @return "while (" if before_expr is true, ") do" if not.
          */
@@ -144,7 +144,7 @@ class LuaLanguage{
         /**
          * Generates a Lua label to use with goto.
          *
-         * @param addr[in] Target address label.
+         * @param[in] addr Target address label.
          * @return "::label_0x<target>X::"
          */
         virtual std::string Label(uint32 addr);
@@ -160,7 +160,7 @@ class LuaLanguage{
         /**
          * The Lua block starter (none).
          *
-         * @param context[in] Unused.
+         * @param[in] context Unused.
          * @return An empty string.
          */
         virtual std::string StartBlock(CONTEXT context);
@@ -168,7 +168,7 @@ class LuaLanguage{
         /**
          * A Lua block ender.
          *
-         * @param context[in] The current context.
+         * @param[in] context The current context.
          * @return "end", unles the current context is {@see TO_ELSE_BLOCK},
          * in which case it will return an empty string, because "end" is not
          * needed before an else.

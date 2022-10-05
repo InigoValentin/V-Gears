@@ -40,7 +40,7 @@ class ParticleSystem : public Ogre::MovableObject{
         /**
          * Copies the system attributes to another ParticleSystem.
          *
-         * @param ps[out] The ParticleSystem to copy the attributes to.
+         * @param[out] ps The ParticleSystem to copy the attributes to.
          */
         void CopyAttributesTo(ParticleSystem* ps);
 
@@ -71,15 +71,15 @@ class ParticleSystem : public Ogre::MovableObject{
         /**
          * Adds the system to the scene render queue.
          *
-         * @param queue[in|out] The queue to update.
+         * @param[in,out] queue The queue to update.
          */
         void _updateRenderQueue(Ogre::RenderQueue* queue);
 
         /**
          * Visits renderables.
          *
-         * @param visitor[in] The visitor.
-         * @param debug_renderables[in] True to debug the renderables, default
+         * @param[in] visitor The visitor.
+         * @param[in] debug_renderables True to debug the renderables, default
          * is false
          * @todo Understand and document.
          */
@@ -92,7 +92,7 @@ class ParticleSystem : public Ogre::MovableObject{
          *
          * Updates the system status based on the elapsed time.
          *
-         * @param time_elapsed[in] The elapsed time.
+         * @param[in] time_elapsed The elapsed time.
          */
         void Update(Ogre::Real time_elapsed);
 
@@ -108,7 +108,7 @@ class ParticleSystem : public Ogre::MovableObject{
         /**
          * Adds a technique to the system.
          *
-         * @param techique[in] Technique to add to the system
+         * @param[in] technique Technique to add to the system
          */
         void AddTechnique(ParticleTechnique* technique);
 

@@ -27,7 +27,7 @@ class XmlScriptsFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the mian scripts file.
+         * @param[in] file Path to the mian scripts file.
          */
         XmlScriptsFile(const Ogre::String& file);
 

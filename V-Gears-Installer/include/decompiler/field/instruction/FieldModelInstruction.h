@@ -30,13 +30,13 @@ class FieldModelInstruction : public KernelCallInstruction{
         /**
          * Processes the instruction.
          *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine.
-         * @param code_gen[in] Code generator.
+         * @param[in] func Function to process.
+         * @param[out] stack Function stack.
+         * @param[in] engine Engine.
+         * @param[in] code_gen Code generator.
          */
         virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+          Function& func, ValueStack &stack, Engine* engine, CodeGenerator* code_gen
         ) override;
 
     private:
@@ -70,7 +70,7 @@ class FieldModelInstruction : public KernelCallInstruction{
          * from there. This is not normally the required behaviour and should
          * be avoided.
          *
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         void ProcessJOIN(CodeGenerator* code_gen);
 
@@ -130,7 +130,7 @@ class FieldModelInstruction : public KernelCallInstruction{
          * plays a run or walk animation. Also, all characters take the same
          * time irrespective of distance.
          *
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         void ProcessSPLIT(CodeGenerator* code_gen);
 
@@ -222,8 +222,8 @@ class FieldModelInstruction : public KernelCallInstruction{
          * animation opcode such as DFANM, and a SOUND played, before the
          * jump.
          *
-         * @param codegen[in|out] Code generator to append lines.
-         * @param entity[in] The name of the entity.
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity The name of the entity.
          */
         void ProcessJUMP(CodeGenerator* code_gen, const std::string& entity);
 
@@ -256,7 +256,7 @@ class FieldModelInstruction : public KernelCallInstruction{
          * given that does not have a field object, this opcode will store
          * zero in each of the four address specified.
          *
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         void ProcessAXYZI(CodeGenerator* code_gen);
 
@@ -325,8 +325,8 @@ class FieldModelInstruction : public KernelCallInstruction{
          * entity, the NPC object will automatically climb from the start to
          * the end point without need for player interaction.
          *
-         * @param codegen[in|out] Code generator to append lines.
-         * @param entity[in] The name of the entity.
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity The name of the entity.
          */
         void ProcessLADER(CodeGenerator* code_gen, const std::string& entity);
 
@@ -383,9 +383,9 @@ class FieldModelInstruction : public KernelCallInstruction{
          * halted until the gradual offset has been completed. For this, see
          * OFSTW.
          *
-         * @param codegen[in|out] Code generator to append lines.
-         * @param entity[in] The entity name.
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity The entity name.
          */
-        void ProcessOFST(CodeGenerator* codegen, const std::string& entity);
+        void ProcessOFST(CodeGenerator* code_gen, const std::string& entity);
 };
 

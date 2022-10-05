@@ -33,7 +33,7 @@ class XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the XML file.
+         * @param[in] file Path to the XML file.
          */
         XmlFile(const Ogre::String& file);
 
@@ -45,9 +45,9 @@ class XmlFile{
         /**
          * Retrieves a boolean from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found or it's
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found or it's
          * not a boolean value.
          * @return Boolean value of the tag. If it's not found or it's not a
          * boolean, def is returned.
@@ -59,9 +59,9 @@ class XmlFile{
         /**
          * Retrieves an integer from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found or it's
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found or it's
          * not a numeric value.
          * @return Integer value of the tag. If it's not found or it's not a
          * number, def is returned.
@@ -71,9 +71,9 @@ class XmlFile{
         /**
          * Retrieves a defcimal from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found or it's
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found or it's
          * not a numeric value.
          * @return Decimal value of the tag. If it's not found or it's not a
          * number, def is returned.
@@ -85,9 +85,9 @@ class XmlFile{
         /**
          * Retrieves a string from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found.
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found.
          * @return String value of the tag. If it's not found, def is returned.
          */
         const Ogre::String GetString(
@@ -97,9 +97,9 @@ class XmlFile{
         /**
          * Retrieves a string from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found.
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found.
          * @return String value of the tag, in UFT8. If not found, def is
          * returned.
          */
@@ -111,9 +111,9 @@ class XmlFile{
         /**
          * Retrieves a 2-dimensional vector from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found.
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found.
          * @return Vector in the tag. If it's not found, def is returned.
          */
         const Ogre::Vector2 GetVector2(
@@ -124,9 +124,9 @@ class XmlFile{
         /**
          * Retrieves a 3-dimensional vector from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found.
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found.
          * @return Vector in the tag. If it's not found, def is returned.
          */
         const Ogre::Vector3 GetVector3(
@@ -137,9 +137,9 @@ class XmlFile{
         /**
          * Retrieves a 4-dimensional vector from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found.
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found.
          * @return Vector in the tag. If it's not found, def is returned.
          */
         const Ogre::Vector4 GetVector4(
@@ -150,9 +150,9 @@ class XmlFile{
         /**
          * Retrieves a 4-dimensional matrix from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found.
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found.
          * @return The matrix in the tag. If it's not found, def is returned.
          */
         const Ogre::Matrix4 GetMatrix4(
@@ -163,9 +163,9 @@ class XmlFile{
         /**
          * Retrieves a quaternion from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found.
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found.
          * @return Quaternion in the tag. If it's not found, def is returned.
          */
         const Ogre::Quaternion GetQuaternion(
@@ -176,9 +176,9 @@ class XmlFile{
         /**
          * Retrieves a colour from an XMl tag.
          *
-         * @param node[in] The XML node.
-         * @param tag[in] The name of the tag.
-         * @param def[in] Default value, in case the tag is not found.
+         * @param[in] node The XML node.
+         * @param[in] tag The name of the tag.
+         * @param[in] def Default value, in case the tag is not found.
          * @return Colour in the tag. If it's not found, def is returned.
          */
         const Ogre::ColourValue GetColourValue(

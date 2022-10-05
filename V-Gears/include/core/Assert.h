@@ -20,8 +20,8 @@
 /**
  * Assertion check.
  *
- * @param exp[in] Expression to evaluate.
- * @param text[in] Error message to be displayed when the expression is not
+ * @param[in] exp Expression to evaluate.
+ * @param[in] text Error message to be displayed when the expression is not
  * true.
  */
 #define VGEARS_ASSERT(exp, text) assert(exp && text)

@@ -91,7 +91,7 @@ class Character{
         /**
          * Retrieves a character ID from it's name.
          *
-         * @param name[in] Chaarcter name.
+         * @param[in] name Chaarcter name.
          * @return ID of the character with the specified name, or {@see
          * UNKNOWN} if the character doesn't exist.
          */

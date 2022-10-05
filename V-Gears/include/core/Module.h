@@ -74,7 +74,7 @@ class Module {
         /**
          * Sets the module state.
          *
-         * @param state[in] Module's new state.
+         * @param[in] state Module's new state.
          */
         void SetState(const MODULE_STATE state){state_ = state;}
 

@@ -114,19 +114,19 @@ namespace VGears{
         protected:
 
             /**
-             * Reads the file header and sets instance data..
+             * Reads the file header and sets instance data.
              *
-             * @param stream[in] Contents of the file.
+             * @param[in] stream Contents of the file.
              */
             void ReadFileHeader(Ogre::DataStreamPtr &stream);
 
             /**
              * Reads a section data.
              *
-             * @param stream[in] Contents of the file.
-             * @param out_buffer[out] The contents of the section are loaded
+             * @param[in] stream Contents of the file.
+             * @param[out] out_buffer The contents of the section are loaded
              * here.
-             * @param section_size[in] Size of the section to read, in bytes.
+             * @param[in] section_size Size of the section to read, in bytes.
              */
             void ReadSectionData(
               Ogre::DataStreamPtr &stream, Ogre::DataStreamPtr &out_buffer,
@@ -136,9 +136,9 @@ namespace VGears{
             /**
              * Reads a file section.
              *
-             * @param stream[in] Contents of the file.
-             * @param dest[out] The section data will be loaded here.
-             * @param section_index[in] Index of the section to read.
+             * @param[in] stream Contents of the file.
+             * @param[out] dest The section data will be loaded here.
+             * @param[in] section_index Index of the section to read.
              */
             virtual void ReadSection(
               Ogre::DataStreamPtr &stream, FLevelFile* dest,
@@ -148,8 +148,8 @@ namespace VGears{
             /**
              * Creates a resource.
              *
-             * @param dest[out] The crteated resource.
-             * @param extension[in] The resource file extension.
+             * @param[out] dest The crteated resource.
+             * @param[in] extension The resource file extension.
              */
             template<typename ResourceManagerType>
               Ogre::ResourcePtr CreateResource(
@@ -159,8 +159,8 @@ namespace VGears{
             /**
              * Reads camera matrix data from a flevel file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The data will be set on this file.
+             * @param[in] stream Input stream.
+             * @param[out] dest The data will be set on this file.
              */
             void ReadCameraMatrix(
               Ogre::DataStreamPtr &stream, FLevelFile* dest
@@ -169,56 +169,56 @@ namespace VGears{
             /**
              * Reads model list data from a flevel file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The data will be set on this file.
+             * @param[in] stream Input stream.
+             * @param[out] dest The data will be set on this file.
              */
             void ReadModelList(Ogre::DataStreamPtr &stream, FLevelFile* dest);
 
             /**
              * Reads color palette data from a flevel file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The data will be set on this file.
+             * @param[in] stream Input stream.
+             * @param[out] dest The data will be set on this file.
              */
             void ReadPalette(Ogre::DataStreamPtr &stream, FLevelFile* dest);
 
             /**
              * Reads walkmesh data from a flevel file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The data will be set on this file.
+             * @param[in] stream Input stream.
+             * @param[out] dest The data will be set on this file.
              */
             void ReadWalkmesh(Ogre::DataStreamPtr &stream, FLevelFile* dest);
 
             /**
              * Reads background data from a flevel file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The data will be set on this file.
+             * @param[in] stream Input stream.
+             * @param[out] dest The data will be set on this file.
              */
             void ReadBackground(Ogre::DataStreamPtr &stream, FLevelFile* dest);
 
             /**
              * Reads trigger data from a flevel file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The data will be set on this file.
+             * @param[in] stream Input stream.
+             * @param[out] dest The data will be set on this file.
              */
             void ReadTriggers(Ogre::DataStreamPtr &stream, FLevelFile* dest);
 
             /**
              * @todo Understand and document.
              *
-             * @param stream[in] Input stream.
+             * @param[in] stream Input stream.
              */
             void ReadEnd(Ogre::DataStreamPtr &stream);
 
             /**
              * Reads a stream as a vector.
              *
-             * @param stream[in] The input stream.
-             * @param dest[out] The vector data will be loaded here.
-             * @param count[in] Data units to copy.
+             * @param[in] stream The input stream.
+             * @param[out] dest The vector data will be loaded here.
+             * @param[in] count Data units to copy.
              */
             template<typename ValueType> void ReadVector(
               Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
@@ -228,7 +228,7 @@ namespace VGears{
             /**
              * Retrieves the base name of a flevel file.
              *
-             * @param dest[in] Flevel file.
+             * @param[in] dest Flevel file.
              * @return The filename, without path or extension.
              */
             virtual String GetBaseName(const FLevelFile* dest) const;

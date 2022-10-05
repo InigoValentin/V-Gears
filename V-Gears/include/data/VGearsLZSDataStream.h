@@ -33,10 +33,10 @@ namespace VGears{
             /**
              * Writes to the buffer from other buffer.
              *
-             * @param in_buffer[in] The buffer to write from.
+             * @param[in] in_buffer The buffer to write from.
              */
-            void Write(const void *in_buffer_){
-                buffer_[position_] = *(static_cast<const uint8*>(in_buffer_));
+            void Write(const void *in_buffer){
+                buffer_[position_] = *(static_cast<const uint8*>(in_buffer));
                 ++ position_ %= buffer_size;
                 ++ available_ = std::min(available_, buffer_size);
             }
@@ -44,8 +44,8 @@ namespace VGears{
             /**
              * Reads data from the buffer and extracts it into other buffer.
              *
-             * @param out_buffer[out] Buffer to copy the data from this buffer.
-             * @param count[in] Number of bytes to read.
+             * @param[out] out_buffer Buffer to copy the data from this buffer.
+             * @param[in] count Number of bytes to read.
              */
             size_t Read(void *out_buffer, size_t count){
                 assert(available_ && "Can't read if no data is available");
@@ -63,7 +63,7 @@ namespace VGears{
             /**
              * Gets data from the buffer at an offset.
              *
-             * @param offset[in] Offset to the data to read.
+             * @param[in] offset Offset to the data to read.
              * @return The data at the offset.
              * @todo Explain the size of the returned data and offset.
              */
@@ -113,15 +113,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param compressed_stream[in] The compressed stream.
+             * @param[in] compressed_stream The compressed stream.
              */
             LZSDataStream(const Ogre::DataStreamPtr &compressed_stream);
 
             /**
              * Constructor.
              *
-             * @param name[in] NAme for th stream.
-             * @param compressed_stream[in] The compressed stream.
+             * @param[in] name NAme for th stream.
+             * @param[in] compressed_stream The compressed stream.
              */
             LZSDataStream(
               const String &name, const Ogre::DataStreamPtr &compressed_stream
@@ -137,8 +137,8 @@ namespace VGears{
              *
              * It also advances the stream cursor.
              *
-             * @param buf[out] Buffer to read to.
-             * @param count[in] Number of data to read. If the end of the
+             * @param[out] buf Buffer to read to.
+             * @param[in] count Number of data to read. If the end of the
              * stream is reached before reading this much, it will stop
              * reading.
              */
@@ -156,7 +156,7 @@ namespace VGears{
              *
              * Not required, can use read instead.
              *
-             * @param count[in] Unused.
+             * @param[in] count Unused.
              */
             virtual void skip(long count) override;
 
@@ -165,7 +165,7 @@ namespace VGears{
              *
              * Not required.
              *
-             * @param count[in] Unused.
+             * @param[in] pos Unused.
              */
             virtual void seek(size_t pos) override;
 
@@ -182,22 +182,18 @@ namespace VGears{
             virtual void close() override;
 
             /**
-             * @todo Understand and document.
+             * Checks how many data still remains compresses.
              *
-             * @return @todo.
+             * @return The number of compressed bytes.
              */
-            size_t AvailableCompressed() const {
-                return available_compressed_;
-            }
+            size_t AvailableCompressed() const {return available_compressed_;}
 
             /**
-             * @todo Understand and document.
+             * Checks how many data still has been uncompressesed.
              *
-             * @return @todo.
+             * @return The number of uncompressed bytes.
              */
-            size_t AvailableUncompressed() const{
-                return buffer_.Available();
-            }
+            size_t AvailableUncompressed() const{return buffer_.Available();}
 
             /**
              * Flips the endian mode of some data.
@@ -205,7 +201,7 @@ namespace VGears{
              * Little endian data will be transformed into big endian, and big
              * endian data will be transformed into little endian.
              *
-             * @param inout_data[in|out] The data to flip.
+             * @param[in,out] inout_data The data to flip.
              */
             void FlipEndian(uint32 &inout_data);
 

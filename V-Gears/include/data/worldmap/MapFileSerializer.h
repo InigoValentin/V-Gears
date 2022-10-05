@@ -444,8 +444,8 @@ namespace VGears {
             /**
              * Imports and parses a map file.
              *
-             * @param stream[in] Map file contents.
-             * @param dest[in] Unused
+             * @param[in] stream Map file contents.
+             * @param[in] dest Unused
              */
             void ImportMapFile(Ogre::DataStreamPtr& stream, WorldMapFile& dest);
 

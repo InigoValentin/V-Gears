@@ -41,8 +41,8 @@ namespace VGears{
             /**
              * Imports a 2D background XML file.
              *
-             * @param stream[in] The contents of the background file.
-             * @param dest[out] The formed background file.
+             * @param[in] stream The contents of the background file.
+             * @param[out] dest The formed background file.
              */
             virtual void ImportBackground2DFile(
               Ogre::DataStreamPtr &stream, Background2DFile *dest
@@ -53,23 +53,23 @@ namespace VGears{
             /**
              * Reads a file header and sets the instance data.
              *
-             * @param stream[in] The contents of the HRC file.
+             * @param[in] node The XML node to read from.
              */
             virtual void ReadHeader(TiXmlNode *node);
 
             /**
              * Reads an XMl node attribute as tile blending information.
              *
-             * @param node[in] The XML node.
-             * @param attribute[in] The name of the attribute to read.
-             * @param dest[out] The value of the specified attribute. If the
+             * @param[in] node The XML node.
+             * @param[in] attribute The name of the attribute to read.
+             * @param[out] dest The value of the specified attribute. If the
              * attribute doesn't exists, the value of def will be set here.
+             * @param[in] def Default value.
              * @return True if the attribute was actually read, false if it
              * didn't exist and the default value was loaded into dest.
              */
             virtual bool ReadAttribute(
-              TiXmlNode &node, const String &attribute, Blending &dest,
-              const Blending &def
+              TiXmlNode &node, const String &attribute, Blending &dest, const Blending &def
             );
 
             using XMLSerializer::ReadAttribute;
@@ -77,24 +77,24 @@ namespace VGears{
             /**
              * Reads an XML node as a tile.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The formed tile data.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The formed tile data.
              */
             virtual void readObject(TiXmlNode &node, Tile &dest);
 
             /**
              * Reads an XML node as an animation.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The formed animation data.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The formed animation data.
              */
             virtual void readObject(TiXmlNode &node, Animation &dest);
 
             /**
              * Reads an XML node as a key frame.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The formed key frame data.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The formed key frame data.
              */
             virtual void readObject(TiXmlNode &node, KeyFrame &dest);
 
@@ -116,9 +116,9 @@ namespace VGears{
             /**
              * Reads a XML node as a vector.
              *
-             * @param node[in] The XML node to read.
-             * @param tag[in] XML tag to read.
-             * @param dest[out] The vector data will be loaded here.
+             * @param[in] node The XML node to read.
+             * @param[in] tag XML tag to read.
+             * @param[out] dest The vector data will be loaded here.
              */
             template<typename ValueType> void ReadVector(
               TiXmlNode &node, const String &tag, std::vector<ValueType> &dest
@@ -141,10 +141,10 @@ namespace VGears{
             /**
              * Reads a XML node as a map.
              *
-             * @param node[in] The XML node to read.
-             * @param tag[in] XML tag to read.
-             * @param key_attribute[in] @todo Understand and document.
-             * @param dest[out] The map data will be loaded here.
+             * @param[in] node The XML node to read.
+             * @param[in] tag XML tag to read.
+             * @param[in] key_attribute @todo Understand and document.
+             * @param[out] dest The map data will be loaded here.
              */
             template<typename KeyType, typename ValueType> void ReadMap(
               TiXmlNode& node, const String& tag, const String& key_attribute,

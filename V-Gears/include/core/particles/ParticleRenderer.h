@@ -42,14 +42,14 @@ class ParticleRenderer : public Ogre::StringInterface{
         /**
          * Copies the renderer attributes to other renderer.
          *
-         * @param renderer[out] The renderer to copy the attributes to.
+         * @param[out] renderer The renderer to copy the attributes to.
          */
         virtual void CopyAttributesTo(ParticleRenderer* renderer);
 
         /**
          * Toggles renderer initialization state.
          *
-         * @param renderer_initialised[in] True to mark the renderer as
+         * @param[in] renderer_initialised True to mark the renderer as
          * initialized, false to mark it as not initialized.
          */
         void SetRendererInitialised(bool renderer_initialised);
@@ -64,7 +64,7 @@ class ParticleRenderer : public Ogre::StringInterface{
         /**
          * Sets the renderer type.
          *
-         * @param renderer_type[in] The renderer type.
+         * @param[in] renderer_type The renderer type.
          */
         void SetRendererType(Ogre::String renderer_type);
 
@@ -78,7 +78,7 @@ class ParticleRenderer : public Ogre::StringInterface{
         /**
          * Sets the renderer parent technique.
          *
-         * @param parent_technique[in] Parent technique for the renderer.
+         * @param[in] parent_technique Parent technique for the renderer.
          */
         void SetParentTechnique(ParticleTechnique* parent_technique);
 
@@ -92,7 +92,7 @@ class ParticleRenderer : public Ogre::StringInterface{
         /**
          * Toggles the visibility of the particle renderer.
          *
-         * @param visible[in] True to make th renderer visibible, false to make
+         * @param[in] visible True to make th renderer visibible, false to make
          * it invisible.
          */
         virtual void SetVisible(bool visible = true) = 0;
@@ -106,7 +106,7 @@ class ParticleRenderer : public Ogre::StringInterface{
          * Adds the particle to the scene render queue.
          *
          * @param queue[] Unused
-         * @param pool[in] The particle pool.
+         * @param[in] pool The particle pool.
          */
         virtual void UpdateRenderQueue(
           Ogre::RenderQueue* queue,

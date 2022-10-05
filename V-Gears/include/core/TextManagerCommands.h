@@ -21,7 +21,7 @@
 /**
  * Sets the language for texts.
  *
- * @param params[in] Command parameters. Exactly three are required. The first
+ * @param[in] params Command parameters. Exactly three are required. The first
  * one is the command name and it's not evaluated here. The second one must be
  * the language to set. If less than three parameter are passed, a usage string
  * will be printed instead, and nothing will be done.
@@ -42,7 +42,7 @@ void CmdSetLanguage(const Ogre::StringVector& params){
  *
  * To do so, it uses the folders in data/texts.
  *
- * @param complete_params[out] The list of languages will be saved here.
+ * @param[out] complete_params The list of languages will be saved here.
  */
 void CmdSetLanguageCompletition(Ogre::StringVector& complete_params){
     XmlTextsFile texts( "./data/texts.xml" );

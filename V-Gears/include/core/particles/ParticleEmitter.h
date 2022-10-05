@@ -41,7 +41,7 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
         /**
          * Copies attributes to other particle emmiter.
          *
-         * @param emitter[out] The particle emmite to copy the attributes to.
+         * @param[out] emitter The particle emmite to copy the attributes to.
          */
         virtual void CopyAttributesTo(ParticleEmitter* emitter);
 
@@ -53,7 +53,7 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
         /**
          * Calculates how many particles are to be emitted in a given time.
          *
-         * @param time_elapsed[in] The elapsed time since the emitter has been
+         * @param[in] time_elapsed The elapsed time since the emitter has been
          * emitting.
          * @todo Understand and document.
          */
@@ -62,14 +62,14 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
         /**
          * Initializes a article to be emmited.
          *
-         * @param particle[out] The particle to be initialized.
+         * @param[out] particle The particle to be initialized.
          */
         virtual void InitParticleForEmission(Particle* particle);
 
         /**
          * Sets the parent technique for emitter.
          *
-         * @param tech[in] Technique.
+         * @param[in] tech Technique.
          * @todo Understand and document.
          */
         void SetParentTechnique(ParticleTechnique* tech){
@@ -89,7 +89,7 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
         /**
          * Set a name for the emitter.
          *
-         * @param name[in] Name for the emitter.
+         * @param[in] name Name for the emitter.
          */
         void SetName(const Ogre::String& name){name_ = name;};
 
@@ -103,7 +103,7 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
         /**
          * Sets the emitter type.
          *
-         * @param emitter_type[in] The emitter type.
+         * @param[in] emitter_type The emitter type.
          */
         void SetEmitterType(const Ogre::String& emitter_type){
             emitter_type_ = emitter_type;
@@ -121,7 +121,7 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
          *
          * When changed, notifies the technique of the change.
          *
-         * @param emits_name[in] Name for the emits.
+         * @param[in] emits_name Name for the emits.
          * @todo What are the emits?
          */
         void SetEmitsName(const Ogre::String& emits_name);
@@ -137,7 +137,7 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
         /**
          * Sets the type of the emits.
          *
-         * @param emits_type[in] Type for the emits.
+         * @param[in] emits_type Type for the emits.
          * @todo What are the emits?
          */
         void SetEmitsType(ParticleType emits_type) {emits_type_ = emits_type;};
@@ -153,7 +153,7 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
         /**
          * Set the emission rate for the emitter.
          *
-         * @param rate[in] Emission rate.
+         * @param[in] rate Emission rate.
          */
         void SetEmissionRate(int rate) {emission_rate_ = rate;};
 
@@ -170,7 +170,7 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
          * It sets a fixed direction. For a variable, ranged direction, use
          * {@see setEmitDirectionRange}.
          *
-         * @param dir[in] Particle direction.
+         * @param[in] dir Particle direction.
          */
         void SetEmitDirection(const Ogre::Vector3& dir){
             emit_direction_1_ = dir;
@@ -184,8 +184,8 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
          * between DIR_1 and DIR_2 will be assigned. For a fixed direction, use
          * {@see setEmitDirection}.
          *
-         * @param dir_1[in] One of the limits for the range of directions.
-         * @param dir_2[in] One of the limits for the range of directions.
+         * @param[in] dir_1 One of the limits for the range of directions.
+         * @param[in] dir_2 One of the limits for the range of directions.
          */
         void SetEmitDirectionRange(
           const Ogre::Vector3& dir_1, const Ogre::Vector3& dir_2
@@ -198,7 +198,7 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
          * Sets the time the particles must be displayed between being emitted
          * and disappearing.
          *
-         * @param time[in] Duration of the particles.
+         * @param[in] time Duration of the particles.
          * @todo Time is in secons? milliseconds? frames?
          */
         void SetEmitTotalTimeToLive(float time){

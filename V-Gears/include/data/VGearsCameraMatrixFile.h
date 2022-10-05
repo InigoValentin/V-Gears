@@ -30,15 +30,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -71,7 +71,7 @@ namespace VGears{
             /**
              * Sets the camera matrix.
              *
-             * @param matrix[in] The camera matrix.
+             * @param[in] matrix The camera matrix.
              */
             void SetMatrix(const Ogre::Matrix3& matrix);
 
@@ -85,7 +85,7 @@ namespace VGears{
             /**
              * Sets the camera position.
              *
-             * @param position[in] The camera position.
+             * @param[in] position The camera position.
              */
             void SetPosition(const Ogre::Vector3& position);
 
@@ -99,7 +99,7 @@ namespace VGears{
             /**
              * Sets the camera offset.
              *
-             * @param offset[in] The camera offset, as a {@see Pixel}.
+             * @param[in] offset The camera offset, as a {@see Pixel}.
              */
             void SetOffset(const Pixel& offset);
 
@@ -114,7 +114,7 @@ namespace VGears{
             /**
              * Sets the number of ???
              *
-             * @param count[in] The number of ???
+             * @param[in] count The number of ???
              * @todo What is this number?
              */
             void SetCount(const size_t count);
@@ -129,7 +129,7 @@ namespace VGears{
             /**
              * Sets the focal length.
              *
-             * @param focal_length[in] The focal length.
+             * @param[in] focal_length The focal length.
              */
             void SetFocalLength(const Ogre::Real focal_length);
 

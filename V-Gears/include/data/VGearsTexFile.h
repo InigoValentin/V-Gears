@@ -45,21 +45,21 @@ namespace VGears{
             /**
              * Reads texture data.
              *
-             * @param input[in] The contents of the TEX file.
+             * @param[in] input The contents of the TEX file.
              */
             void Read(Ogre::DataStreamPtr& input);
 
             /**
              * Reads the TEX file header and sets the instance data.
              *
-             * @param input[in] The contents of the TEX file.
+             * @param[in] input The contents of the TEX file.
              */
             void ReadHeader(Ogre::DataStreamPtr& input);
 
             /**
              * Reads texture data and matches it with the color palette.
              *
-             * @param input[in] The contents of the TEX file.
+             * @param[in] input The contents of the TEX file.
              */
             void ReadPalleted(Ogre::DataStreamPtr& input);
 
@@ -494,9 +494,9 @@ namespace VGears{
              * endian. If it was little endian, it will be converted to big
              * endian.
              *
-             * @param data[in|out] Data to flip.
-             * @param size[in] Size of data.
-             * @param count[in] How much data to flip.
+             * @param[in,out] data Data to flip.
+             * @param[in] size Size of data.
+             * @param[in] count How much data to flip.
              */
             void FlipEndian(void * data, size_t size, size_t count) const;
 
@@ -507,8 +507,8 @@ namespace VGears{
              * endian. If it was little endian, it will be converted to big
              * endian.
              *
-             * @param data[in|out] Data to flip.
-             * @param size[in] Size of data.
+             * @param[in,out] data Data to flip.
+             * @param[in] size Size of data.
              */
             void FlipEndian(void * data, size_t size) const;
 

@@ -35,9 +35,10 @@ class UncondJumpInstruction: public JumpInstruction{
         /**
          * Process an instruction for code generation.
          *
-         * @param stack[in] The current stack.
-         * @param engine[in] The Engine used for code generation.
-         * @param code_gen[in] The CodeGenerator used for code generation.
+         * @param[in] function The function the instruction is in.
+         * @param[in] stack The current stack.
+         * @param[in] engine The Engine used for code generation.
+         * @param[in] code_gen The CodeGenerator used for code generation.
          */
         virtual void ProcessInst(
           Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen

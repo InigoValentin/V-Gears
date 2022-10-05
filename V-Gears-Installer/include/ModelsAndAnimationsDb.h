@@ -32,7 +32,7 @@ class ModelsAndAnimationsDb{
          * Generates a normalized file name, without path, lowercase, and an
          * '.a' extension.
          *
-         * @param name[in] Current name.
+         * @param[in] name Current name.
          * @return The normalized name.
          */
         std::string NormalizeAnimationName(const std::string& name);
@@ -40,7 +40,7 @@ class ModelsAndAnimationsDb{
         /**
          * @todo Understand and document.
          *
-         * @param model[in] @todo Understand and document.
+         * @param[in] model @todo Understand and document.
          * @return @todo Understand and document.
          */
         std::set<std::string>& ModelAnimations(const std::string model);
@@ -48,7 +48,7 @@ class ModelsAndAnimationsDb{
         /**
          * Retrieves the metadata file name associated to a model.
          *
-         * @param model_name[in] The model name.
+         * @param[in] model_name The model name.
          * @return Name of the metadata file.
          */
         std::string ModelMetaDataName(const std::string& model_name);

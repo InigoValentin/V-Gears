@@ -85,7 +85,7 @@ class UnknownOpcodeParameterException : public DecompilerException{
         /**
          * Constructor.
          *
-         * @param param[in] The unknown parameter.
+         * @param[in] param The unknown parameter.
          */
         explicit UnknownOpcodeParameterException(std::string param);
 
@@ -116,8 +116,8 @@ class UnknownConditionalOperatorException : public DecompilerException{
         /**
          * Constructor.
          *
-         * @param address[in] Address at which the operator has been found.
-         * @param op[in] The unknown operator.
+         * @param[in] address Address at which the operator has been found.
+         * @param[in] op The unknown operator.
          */
         UnknownConditionalOperatorException(unsigned int address, unsigned int op);
 
@@ -148,8 +148,8 @@ class UnknownOpcodeException : public DecompilerException{
         /**
          * Constructor.
          *
-         * @param address[in] Address where the invalid opcode was found.
-         * @param opcode[in] The value of the invalid opcode.
+         * @param[in] address Address where the invalid opcode was found.
+         * @param[in] opcode The value of the invalid opcode.
          */
         UnknownOpcodeException(unsigned int address, unsigned int opcode);
 
@@ -198,8 +198,8 @@ class UnknownJumpTypeException : public DecompilerException{
         /**
          * Constructor.
          *
-         * @param address[in] Address where the jump opcode was found.
-         * @param opcode[in] The value of the jump opcode.
+         * @param[in] address Address where the jump opcode was found.
+         * @param[in] opcode The value of the jump opcode.
          */
         UnknownJumpTypeException(unsigned int address, unsigned int opcode);
 
@@ -230,8 +230,8 @@ class UnknownSubOpcodeException : public UnknownOpcodeException{
         /**
          * Constructor.
          *
-         * @param address[in] Address where the invalid subopcode was found.
-         * @param opcode[in] The value of the invalid subopcode.
+         * @param[in] address Address where the invalid subopcode was found.
+         * @param[in] opcode The value of the invalid subopcode.
          */
         UnknownSubOpcodeException(unsigned int address, unsigned int opcode);
 

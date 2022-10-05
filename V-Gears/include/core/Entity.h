@@ -178,8 +178,8 @@ class Entity{
         /**
          * Constructor.
          *
-         * @param name[in] Entity name.
-         * @param node[in] Scene node to which the entity should be attached.
+         * @param[in] name Entity name.
+         * @param[in] node Scene node to which the entity should be attached.
          */
         Entity(const Ogre::String& name, Ogre::SceneNode* node);
 
@@ -208,7 +208,7 @@ class Entity{
         /**
          * Sets the entity position.
          *
-         * @param position[in] Entity's new position.
+         * @param[in] position Entity's new position.
          */
         void SetPosition(const Ogre::Vector3& position);
 
@@ -218,9 +218,9 @@ class Entity{
          * It also resets the walkmesh triangle to reattach entity to walkmesh
          * again if needed.
          *
-         * @param x[in] Entity's new position X coordinate.
-         * @param y[in] Entity's new position Y coordinate.
-         * @param z[in] Entity's new position Z coordinate.
+         * @param[in] x Entity's new position X coordinate.
+         * @param[in] y Entity's new position Y coordinate.
+         * @param[in] z Entity's new position Z coordinate.
          */
         void ScriptSetPosition(const float x, const float y, const float z);
 
@@ -241,7 +241,7 @@ class Entity{
         /**
          * Sets the entity position.
          *
-         * @param position[in] The entity new position.
+         * @param[in] position The entity new position.
          * @todo Offset to what?
          */
         void SetOffset(const Ogre::Vector3& position);
@@ -257,14 +257,14 @@ class Entity{
         /**
          * Sets the entity rotation.
          *
-         * @param rotation[in] The entity rotation, in degrees.
+         * @param[in] rotation The entity rotation, in degrees.
          */
         void SetRotation(const Ogre::Degree& rotation);
 
         /**
          * Sets the entity rotation.
          *
-         * @param rotation[in] The entity rotation (0-360).
+         * @param[in] rotation The entity rotation (0-360).
          */
         void ScriptSetRotation(const float rotation);
 
@@ -285,14 +285,14 @@ class Entity{
         /**
          * Sets the entity scale.
          *
-         * @param scale[in] Three dimensional scale.
+         * @param[in] scale Three dimensional scale.
          */
         virtual void setScale(const Ogre::Vector3 &scale);
 
         /**
          * Sets the entity index in the field.
          *
-         * @param index[in] Index of the entity.
+         * @param[in] index Index of the entity.
          */
         void SetIndex(const int index);
 
@@ -306,7 +306,7 @@ class Entity{
         /**
          * Sets the entity's absolute orientation.
          *
-         * @param root_orientation[in] The entity's new orientation.
+         * @param[in] root_orientation The entity's new orientation.
          */
         virtual void setRootOrientation(
           const Ogre::Quaternion &root_orientation
@@ -324,7 +324,7 @@ class Entity{
          *
          * The solid radius is used to detect collisions.
          *
-         * @param radius[in] The solid radius.
+         * @param[in] radius The solid radius.
          * @todo Is it in pixels?
          */
         void SetSolidRadius(const float radius);
@@ -344,7 +344,7 @@ class Entity{
          *
          * Solid entities can produce collisions.
          *
-         * @param solid[in] True to make the entity solid, false otherwise.
+         * @param[in] solid True to make the entity solid, false otherwise.
          */
         void SetSolid(const bool solid);
 
@@ -363,7 +363,7 @@ class Entity{
          * The talk radius is the maximum distance at which an entity can be
          * talked to or interacted with.
          *
-         * @param radius[in] The talk radius.
+         * @param[in] radius The talk radius.
          * @todo Is it in pixels?
          */
         void SetTalkRadius(const float radius);
@@ -384,7 +384,7 @@ class Entity{
          *
          * Talkable units can be talked to or interacted with.
          *
-         * @param talkable[in] True to make the entity talkable, false to make
+         * @param[in] talkable True to make the entity talkable, false to make
          * it non-talkable.
          */
         void SetTalkable(const bool talkable);
@@ -403,7 +403,7 @@ class Entity{
          *
          * Invisible entities can't be interacted with.
          *
-         * @param visible[in] True to make the unit visible, false to make it
+         * @param[in] visible True to make the unit visible, false to make it
          * invisible.
          */
         virtual void SetVisible(const bool visible) = 0;
@@ -420,7 +420,7 @@ class Entity{
         /**
          * Sets the entity's state.
          *
-         * @param state[in] The entity's state.
+         * @param[in] state The entity's state.
          */
         void SetState(const State state);
 
@@ -434,7 +434,7 @@ class Entity{
         /**
          * Sets the entity's automatic movement speed.
          *
-         * @param speed[in] Automatic movement speed.
+         * @param[in] speed Automatic movement speed.
          * @todo Describe where this speed is used, and max and mins or
          * references.
          */
@@ -452,7 +452,7 @@ class Entity{
         /**
          * Sets the entity's walking movement speed.
          *
-         * @param speed[in] Walking speed.
+         * @param[in] speed Walking speed.
          * @todo Describe where this speed is used, and max and mins or
          * references.
          */
@@ -470,7 +470,7 @@ class Entity{
         /**
          * Sets the entity's running movement speed.
          *
-         * @param speed[in] Running speed.
+         * @param[in] speed Running speed.
          * @todo Describe where this speed is used, and max and mins or
          * references.
          */
@@ -488,7 +488,7 @@ class Entity{
         /**
          * Sets the entity's movement destination position.
          *
-         * @param target[in] The destination position.
+         * @param[in] target The destination position.
          */
         void SetMovePosition(const Ogre::Vector3& target);
 
@@ -516,7 +516,7 @@ class Entity{
          * Sets the units destination to one of the walkmesh triangles. The
          * movement will stop once the unit enters the triangle.
          *
-         * @param triangle[in] Destination triangle in the walkmesh.
+         * @param[in] triangle Destination triangle in the walkmesh.
          */
         void SetMoveTriangleId(const int triangle);
 
@@ -530,7 +530,7 @@ class Entity{
         /**
          * Enables or disables autorotation while the entity is moving.
          *
-         * @param rotate[in] If true, the entity will rotate automatically
+         * @param[in] rotate If true, the entity will rotate automatically
          * while moving. If false, the entity will not rotate.
          */
         void SetMoveAutoRotation(const bool rotate);
@@ -546,7 +546,7 @@ class Entity{
         /**
          * Enables or disables autoanimation while the entity is moving.
          *
-         * @param animate[in] If true, the entity will animate automatically
+         * @param[in] animate If true, the entity will animate automatically
          * while moving. If false, the entity will not animate.
          */
         void SetMoveAutoAnimation(const bool animate);
@@ -576,15 +576,15 @@ class Entity{
         /**
          * Makes the entity move to a point in the map.
          *
-         * @param x[in] X coordinate of the destination point.
-         * @param y[in] Y coordinate of the destination point.
+         * @param[in] x X coordinate of the destination point.
+         * @param[in] y Y coordinate of the destination point.
          */
         void ScriptMoveToPosition(const float x, const float y);
 
         /**
          * Makes the unit move towards another in the map.
          *
-         * @param entity[in] entity to move towards.
+         * @param[in] entity entity to move towards.
          */
         void ScriptMoveToEntity(Entity* entity);
 
@@ -612,13 +612,13 @@ class Entity{
         /**
          * Linearly moves the entity.
          *
-         * @param x[in] X coordinate of the destination point.
-         * @param y[in] Y coordinate of the destination point.
-         * @param z[in] Z coordinate of the destination point.
-         * @param movement[in] Movement direction.
-         * @param animation[in] Movement animation.
-         * @param orientation[in] Orientation during the animation.
-         * @param dest_triangle[in] Triangle to place the entity after the
+         * @param[in] x X coordinate of the destination point.
+         * @param[in] y Y coordinate of the destination point.
+         * @param[in] z Z coordinate of the destination point.
+         * @param[in] movement Movement direction.
+         * @param[in] animation Movement animation.
+         * @param[in] orientation Orientation during the animation.
+         * @param[in] dest_triangle Triangle to place the entity after the
          * linear movement.
          */
         void ScriptLinearToPosition(
@@ -637,11 +637,11 @@ class Entity{
         /**
          * Linearly moves the entity.
          *
-         * @param end[in] Destination point.
-         * @param movement[in] Movement direction.
-         * @param animation[in] Movement animation.
-         * @param orientation[in] Orientation during the animation.
-         * @param dest_triangle[in] Triangle to place the entity after the
+         * @param[in] end Destination point.
+         * @param[in] movement Movement direction.
+         * @param[in] animation Movement animation.
+         * @param[in] orientation Orientation during the animation.
+         * @param[in] dest_triangle Triangle to place the entity after the
          * linear movement.
          */
         void SetLinear(
@@ -687,10 +687,10 @@ class Entity{
         /**
          * Makes the unit jump to a point in the field.
          *
-         * @param x[in] X coordinate of the jump destination point.
-         * @param y[in] Y coordinate of the jump destination point.
-         * @param z[in] Maximum height of the jump.
-         * @param seconds[in] Jump duration.
+         * @param[in] x X coordinate of the jump destination point.
+         * @param[in] y Y coordinate of the jump destination point.
+         * @param[in] z Maximum height of the jump.
+         * @param[in] seconds Jump duration.
          * @param dest_triangle Triangle to place the entity after the jump.
          */
         void ScriptJumpToPosition(
@@ -700,8 +700,8 @@ class Entity{
         /**
          * Makes the unit jump to a point in the field.
          *
-         * @param jump_to[in] The jump destination point.
-         * @param seconds[in] Jump duration.
+         * @param[in] jump_to The jump destination point.
+         * @param[in] seconds Jump duration.
          * @param dest_triangle Triangle to place the entity after the jump.
          */
         void SetJump(const Ogre::Vector3& jump_to, const float seconds, const int dest_triangle);
@@ -730,21 +730,21 @@ class Entity{
         /**
          * Gets the total duration of the jump.
          *
-         * @param Jump total duration, in seconds.
+         * @return Jump total duration, in seconds.
          */
         float GetJumpSeconds() const;
 
         /**
          * Sets the current duration of the jump.
          *
-         * @param Jump current duration, in seconds.
+         * @param[in] seconds Jump current duration, in seconds.
          */
         void SetJumpCurrentSeconds(const float seconds);
 
         /**
          * Gets the current duration of the jump.
          *
-         * @param Jump current duration, in seconds.
+         * @return Jump current duration, in seconds.
          */
         float GetJumpCurrentSeconds() const;
 
@@ -758,11 +758,11 @@ class Entity{
         /**
          * @todo Understand and document.
          *
-         * @param x[in] X coordinate of the destination point.
-         * @param y[in] Y coordinate of the destination point.
-         * @param z[in] Z coordinate of the destination point.
-         * @param type[in] Type of action.
-         * @param seconds[in] Duration of the action, in seconds.
+         * @param[in] x X coordinate of the destination point.
+         * @param[in] y Y coordinate of the destination point.
+         * @param[in] z Z coordinate of the destination point.
+         * @param[in] type Type of action.
+         * @param[in] seconds Duration of the action, in seconds.
          */
         void ScriptOffsetToPosition(
           const float x, const float y, const float z,
@@ -812,7 +812,7 @@ class Entity{
         /**
          * @todo Understand and document.
          *
-         * @param seconds[in] Action current duration in seconds.
+         * @param[in] seconds Action current duration in seconds.
          */
         void SetOffsetCurrentSeconds(const float seconds);
 
@@ -826,10 +826,10 @@ class Entity{
         /**
          * Makes the entity turn to a fixed direction.
          *
-         * @param direction[in] Final direction to turn the entity's to.
-         * @param turn_direction[in] Direction of the turn.
-         * @param turn_type[in] Turn mode.
-         * @param seconds[in] Total turn duration, in seconds.
+         * @param[in] direction Final direction to turn the entity's to.
+         * @param[in] turn_direction Direction of the turn.
+         * @param[in] turn_type Turn mode.
+         * @param[in] seconds Total turn duration, in seconds.
          */
         void ScriptTurnToDirection(
           const float direction, const TurnDirection turn_direction,
@@ -839,10 +839,9 @@ class Entity{
         /**
          * Makes the entity turn towards another entity.
          *
-         * @param entity[in] Entity to turn to.
-         * @param turn_direction[in] Direction of the turn.
-         * @param turn_type[in] Turn mode.
-         * @param seconds[in] Total turn duration, in seconds.
+         * @param[in] entity Entity to turn to.
+         * @param[in] turn_direction Direction of the turn.
+         * @param[in] seconds Total turn duration, in seconds.
          */
         void ScriptTurnToEntity(
           Entity* entity, const TurnDirection turn_direction,
@@ -860,11 +859,11 @@ class Entity{
         /**
          * Makes the entity turn towards a point or another entity.
          *
-         * @param direction_to[in] Final direction to turn the entity's to.
-         * @param entity[in] Entity to turn to.
-         * @param turn_direction[in] Direction of the turn.
-         * @param turn_type[in] Turn mode.
-         * @param seconds[in] Total turn duration, in seconds.
+         * @param[in] direction_to Final direction to turn the entity's to.
+         * @param[in] entity Entity to turn to.
+         * @param[in] turn_direction Direction of the turn.
+         * @param[in] turn_type Turn mode.
+         * @param[in] seconds Total turn duration, in seconds.
          * @todo What if the point
          */
         void SetTurn(
@@ -886,13 +885,11 @@ class Entity{
          * smallest angle between the two orientations. Otherwise, is the angle
          * in the specified turn direction.
          *
-         * @param start[in] Starting angle.
-         * @param start[in] Ending angle.
+         * @param[in] start Starting angle.
+         * @param[in] end Ending angle.
          * @return[in] Calculated turn angle.
          */
-        Ogre::Degree CalculateTurnAngle(
-          const Ogre::Degree& start, const Ogre::Degree& end
-        ) const;
+        Ogre::Degree CalculateTurnAngle(const Ogre::Degree& start, const Ogre::Degree& end) const;
 
         /**
          * Retrieves the turn staring orientation.
@@ -925,7 +922,7 @@ class Entity{
         /**
          * Sets the turn current duration.
          *
-         * @param seconds[in] The turn current duration, in seconds.
+         * @param[in] seconds The turn current duration, in seconds.
          */
         void SetTurnCurrentSeconds(const float seconds);
 
@@ -939,7 +936,7 @@ class Entity{
         /**
          * Sets the animation speed.
          *
-         * @param speed[in] The animation speed.
+         * @param[in] speed The animation speed.
          * @todo Indicate units, max and mins, or references.
          */
         void ScriptSetAnimationSpeed(const float speed);
@@ -968,12 +965,12 @@ class Entity{
         /**
          * Plays one of the entity's animations.
          *
-         * @param animation[in] Name of the animation to play.
-         * @param state[in] The animation initial state.
-         * @param play_type[in] The animation play type, to play it once or in
+         * @param[in] animation Name of the animation to play.
+         * @param[in] state The animation initial state.
+         * @param[in] play_type The animation play type, to play it once or in
          * a loop.
-         * @param start[in] Animation starting point in time, in seconds.
-         * @param start[in] Animation ending point in time, in seconds.
+         * @param[in] start Animation starting point in time, in seconds.
+         * @param[in] end Animation ending point in time, in seconds.
          */
         virtual void PlayAnimation(
           const Ogre::String& animation, AnimationState state,
@@ -983,57 +980,53 @@ class Entity{
         /**
          * Resumes an animation.
          *
-         * @param animation[in] Name of the animation to resume.
+         * @param[in] animation Name of the animation to resume.
          */
         virtual void PlayAnimationContinue(const Ogre::String& animation) = 0;
 
         /**
          * Updates the animation state.
          *
-         * @param delta[in] @todo.
+         * @param[in] delta The animation delta.
          */
         virtual void UpdateAnimation(const float delta) = 0;
 
         /**
          * Plays one of the entity's animations.
          *
-         * @param name[in] Name of the animation to play.
+         * @param[in] name Name of the animation to play.
          */
         void ScriptPlayAnimation(const char* name);
 
         /**
          * Stops one of the entity's animations.
          *
-         * @param name[in] Name of the animation to stop.
+         * @param[in] name Name of the animation to stop.
          */
         void ScriptPlayAnimationStop(const char* name);
 
         /**
          * Plays one of the entity's animations.
          *
-         * @param name[in] Name of the animation to play.
-         * @param start[in] Animation starting point in time, in seconds.
-         * @param start[in] Animation ending point in time, in seconds.
+         * @param[in] name Name of the animation to play.
+         * @param[in] start Animation starting point in time, in seconds.
+         * @param[in] end Animation ending point in time, in seconds.
          */
-        void ScriptPlayAnimation(
-          const char* name, const float start, const float end
-        );
+        void ScriptPlayAnimation(const char* name, const float start, const float end);
 
         /**
          * Stops one of the entity's animations.
          *
-         * @param name[in] Name of the animation to stop.
-         * @param start[in] Animation starting point in time, in seconds.
-         * @param start[in] Animation ending point in time, in seconds.
+         * @param[in] name Name of the animation to stop.
+         * @param[in] start Animation starting point in time, in seconds.
+         * @param[in] end Animation ending point in time, in seconds.
          */
-        void ScriptPlayAnimationStop(
-          const char* name, const float start, const float end
-        );
+        void ScriptPlayAnimationStop(const char* name, const float start, const float end);
 
         /**
          * Sets the default animation of the entity.
          *
-         * @param animation[in] Name of the default animation.
+         * @param[in] animation Name of the default animation.
          */
         void ScriptSetDefaultAnimation(const char* animation);
 
@@ -1051,7 +1044,7 @@ class Entity{
          * Marks the entity as a character, and assigns a character name and
          * ID.
          *
-         * @param character_name[in] The character name.
+         * @param[in] character_name The character name.
          */
         void SetCharacter(const char* character_name);
 
@@ -1399,7 +1392,7 @@ class Entity{
         /**
          * Calculates the angular distance to an entity.
          *
-         * @param entity[in] Entity to calculate the angular distance to.
+         * @param[in] entity Entity to calculate the angular distance to.
          * @return Angular distance to the specified entity.
          */
         Ogre::Degree GetDirectionToEntity(Entity* entity) const;

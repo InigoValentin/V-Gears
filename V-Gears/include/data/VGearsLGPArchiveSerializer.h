@@ -40,8 +40,8 @@ namespace VGears{
             /**
              * Imports an A file.
              *
-             * @param stream[in] The contents of the archive.
-             * @param dest[out] The formed LGP archive file.
+             * @param[in] stream The contents of the archive.
+             * @param[out] dest The formed LGP archive file.
              */
             virtual void ImportLGPArchive(
               Ogre::DataStreamPtr &stream, LGPArchive* dest
@@ -68,15 +68,15 @@ namespace VGears{
             /**
              * Reads an archive header and sets the instance data.
              *
-             * @param stream[in] The contents of the LGP archive.
+             * @param[in] stream The contents of the LGP archive.
              */
             virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
 
             /**
              * Reads an object as a LGP archive.
              *
-             * @param stream[in] Input data.
-             * @param file_entry[out] The formed LGP archive.
+             * @param[in] stream Input data.
+             * @param[out] file_entry The formed LGP archive.
              */
             virtual void readObject(
               Ogre::DataStreamPtr &stream, FileEntry& file_entry

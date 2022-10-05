@@ -39,11 +39,11 @@ class ConfigCmd{
          *
          * It should only be created only by ConfigCmdManager.
          *
-         * @param name[in] Command name.
-         * @param description[in] Command description.
-         * @param params_description[in] Command parameters description.
-         * @param handler[in] Command handler.
-         * @param completion[in] Command completion.
+         * @param[in] name Command name.
+         * @param[in] description Command description.
+         * @param[in] params_description Command parameters description.
+         * @param[in] handler Command handler.
+         * @param[in] completion Command completion.
          */
         ConfigCmd(
           const Ogre::String& name, const Ogre::String& description,
@@ -91,14 +91,14 @@ class ConfigCmd{
         /**
          * Forbidden copy constructor.
          *
-         * @param rhs[in] Command to not copy.
+         * @param[in] rhs Command to not copy.
          */
         ConfigCmd(const ConfigCmd& rhs) = delete;
 
         /**
          * Forbidden copy constructor.
          *
-         * @param rhs[in] Command to not copy.
+         * @param[in] rhs Command to not copy.
          */
         ConfigCmd& operator =(const ConfigCmd& rhs) = delete;
 

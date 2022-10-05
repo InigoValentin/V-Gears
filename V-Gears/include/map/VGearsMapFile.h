@@ -36,15 +36,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -52,10 +52,8 @@ namespace VGears{
              * ManualResourceLoader instance is strongly recommended.
              */
             MapFile(
-              Ogre::ResourceManager* creator, const String &name,
-              Ogre::ResourceHandle handle, const String& group,
-              bool is_manual = false,
-              Ogre::ManualResourceLoader* loader = NULL
+              Ogre::ResourceManager* creator, const String &name, Ogre::ResourceHandle handle,
+              const String& group, bool is_manual = false, Ogre::ManualResourceLoader* loader = NULL
             );
 
             /**
@@ -119,21 +117,21 @@ namespace VGears{
             /**
              * Sets the map script name.
              *
-             * @param[in] The script name.
+             * @param[in] script_name The script name.
              */
             virtual void SetScriptName(const String &script_name);
 
             /**
              * Sets the map background name.
              *
-             * @param[in] The background name.
+             * @param[in] background2d_name The background name.
              */
             virtual void SetBackground2dName(const String &background2d_name);
 
             /**
              * Sets the map walkmesh name.
              *
-             * @param[in] The walkmesh name.
+             * @param[in] walkmesh_name The walkmesh name.
              */
             virtual void SetWalkmeshName(const String &walkmesh_name);
 
@@ -143,11 +141,9 @@ namespace VGears{
              * The forward direction is the direction the playable character
              * moves when 'up' is pressed.
              *
-             * @param forward_direction[in] The forward direction.
+             * @param[in] forward_direction The forward direction.
              */
-            virtual void SetForwardDirection(
-              const Ogre::Real &forward_direction
-            );
+            virtual void SetForwardDirection(const Ogre::Real &forward_direction);
 
         protected:
 

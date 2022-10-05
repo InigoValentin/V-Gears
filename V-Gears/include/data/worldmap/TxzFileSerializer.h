@@ -204,7 +204,7 @@ namespace VGears {
         /**
          * Retrieves a texture color pixels from a texture ID.
          *
-         * @param id[in] ID of the texture.
+         * @param[in] id ID of the texture.
          * @return List of color pixels conforming the texture, or an empty
          * vector if the texture doesn't exist.
          */
@@ -220,17 +220,17 @@ namespace VGears {
         /**
          * Imports a texture from decompressed file contents.
          *
-         * @param stream[in] Contents of the decompressed file.
-         * @dest[out] The texture data will be loaded here.
+         * @param[in] stream Contents of the decompressed file.
+         * @param[out] dest The texture data will be loaded here.
          */
         void ImportDecompressed(Ogre::DataStream& stream, TxzFile& dest);
 
         /**
          * Partially imports a texture from decompressed file contents.
          *
-         * @param stream[in] Contents of the decompressed file.
-         * @dest[out] The texture data will be loaded here.
-         * @param section_end[in] Bytes to import.
+         * @param[in] stream Contents of the decompressed file.
+         * @param[out] dest The texture data will be loaded here.
+         * @param[in] section_end Bytes to import.
          * @todo Sure it is decompressed?
          */
         void ImportTextureSection(
@@ -240,7 +240,7 @@ namespace VGears {
         /**
          * @todo Understand and document. Where is this implemented?
          *
-         * @param pallete_table[in] @todo.
+         * @param[in] pallete_table @todo.
          *
          */
         void ExtractTexture(

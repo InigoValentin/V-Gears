@@ -25,7 +25,7 @@ struct ParticleEntityAdditionalData : public ParticleAdditionalData{
     /**
      * Constructor.
      *
-     * @param scene_node[in] The scene node.
+     * @param[in] scene_node The scene node.
      */
     ParticleEntityAdditionalData(Ogre::SceneNode* scene_node)
     : node(scene_node)
@@ -34,7 +34,7 @@ struct ParticleEntityAdditionalData : public ParticleAdditionalData{
     /**
      * Toggles the particle entity visibility.
      *
-     * @param visible[in] True to make the particle visible, false to make it
+     * @param[in] visible True to make the particle visible, false to make it
      * invisible.
      */
     void SetVisible(bool visible){

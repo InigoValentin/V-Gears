@@ -53,16 +53,16 @@ namespace VGears{
             /**
              * Reads an object as a 2 dimensional vector.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed vector data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed vector data.
              */
             void readObject(Ogre::DataStreamPtr &stream, Ogre::Vector2 &dest);
 
             /**
              * Reads an object as a 3 dimensional vector.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed vector data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed vector data.
              */
             void readObject(Ogre::DataStreamPtr &stream, Ogre::Vector3 &dest);
 
@@ -71,8 +71,8 @@ namespace VGears{
              *
              * Can be used for bounding boxes.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed box data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed box data.
              */
             void readObject(
               Ogre::DataStreamPtr &stream, Ogre::AxisAlignedBox &dest
@@ -81,17 +81,17 @@ namespace VGears{
             /**
              * Reads an object as a pixel.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed pixel data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed pixel data.
              */
             void readObject(Ogre::DataStreamPtr &stream, Pixel &dest);
 
             /**
              * Reads a stream as text.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The read characters will be stored here.
-             * @param count[in] Read this many characters.
+             * @param[in] stream Input data.
+             * @param[out] dest The read characters will be stored here.
+             * @param[in] count Read this many characters.
              */
             void ReadChars(
               Ogre::DataStreamPtr& stream, char* dest, size_t count
@@ -100,8 +100,8 @@ namespace VGears{
             /**
              * Reads one byte from a stream and evaluates it as a boolean.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated boolean.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated boolean.
              * @todo 1 is true?
              */
             void Read1ByteBool(Ogre::DataStreamPtr &stream, bool &dest);
@@ -109,8 +109,8 @@ namespace VGears{
             /**
              * Reads two bytes from a stream and evaluates them as a boolean.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated boolean.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated boolean.
              * @todo 1 is true?
              */
             void Read2ByteBool(Ogre::DataStreamPtr &stream, bool &dest);
@@ -118,88 +118,88 @@ namespace VGears{
             /**
              * Reads 16 bytes from a stream and evaluates as an unsigned short.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadShort(Ogre::DataStreamPtr &stream, uint16 &dest);
 
             /**
              * Reads 16 bytes from a stream and evaluates as a signed integer.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadInt16(Ogre::DataStream &stream, sint16 &dest);
 
             /**
              * Reads 16 bytes from a stream and evaluates as an unsigned int.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadUInt16(Ogre::DataStream &stream, uint16 &dest);
 
             /**
              * Reads 16 bytes from a stream and evaluates as a signed integer.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadInt16(Ogre::DataStreamPtr &stream, sint16 &dest);
 
             /**
              * Reads 16 bytes from a stream and evaluates as an unsigned int.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadUInt16(Ogre::DataStreamPtr &stream, uint16 &dest);
 
             /**
              * Reads 32 bytes from a stream and evaluates as an unsigned int.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadUInt32(Ogre::DataStreamPtr &stream, uint32 &dest);
 
             /**
              * Reads 32 bytes from a stream and evaluates as a signed int.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadSInt32(Ogre::DataStreamPtr &stream, sint32 &dest);
 
             /**
              * Reads 32 bytes from a stream and evaluates as an unsigned int.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadUInt32(Ogre::DataStream &stream, uint32 &dest);
 
             /**
              * Reads 8 bytes from a stream and evaluates as an unsigned int.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadUInt8(Ogre::DataStream& stream, uint8 &dest);
 
             /**
              * Reads 8 bytes from a stream and evaluates as an unsigned int.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadUInt8(Ogre::DataStreamPtr &stream, uint8 &dest);
 
             /**
              * Reads bytes from a stream and evaluates them as a float.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The evaluated number.
+             * @param[in] stream Input data.
+             * @param[out] dest The evaluated number.
              */
             void ReadFloat(Ogre::DataStreamPtr &stream, float &dest);
 

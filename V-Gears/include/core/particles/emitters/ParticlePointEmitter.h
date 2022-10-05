@@ -34,7 +34,7 @@ class PointEmitter : public ParticleEmitter{
         /**
          * Copies all atributes to a ParticleEmitter.
          *
-         * @param emitter[out] Emmiter to copy attributes to.
+         * @param[out] emitter Emmiter to copy attributes to.
          */
         virtual void CopyAttributesTo(ParticleEmitter* emitter);
 };

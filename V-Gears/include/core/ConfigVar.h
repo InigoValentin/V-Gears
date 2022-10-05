@@ -30,10 +30,10 @@ class ConfigVar{
         /**
          * Constructor.
          *
-         * @param name[in] The variable name.
-         * @param description[in] A human-friendly description for the
+         * @param[in] name The variable name.
+         * @param[in] description A human-friendly description for the
          * variable.
-         * @param default_value[in] The default value for the variable.
+         * @param[in] default_value The default value for the variable.
          */
         ConfigVar(
           const Ogre::String& name, const Ogre::String& description,
@@ -71,28 +71,28 @@ class ConfigVar{
         /**
          * Sets the integer value of the variable.
          *
-         * @param value[in] The variable value.
+         * @param[in] value The variable value.
          */
         void SetI(int value);
 
         /**
          * Sets the float value of the variable.
          *
-         * @param value[in] The variable value.
+         * @param[in] value The variable value.
          */
         void SetF(float value);
 
         /**
          * Sets the boolean value of the variable.
          *
-         * @param value[in] The variable value.
+         * @param[in] value The variable value.
          */
         void SetB(bool value);
 
         /**
          * Sets the string value of the variable.
          *
-         * @param value[in] The variable value.
+         * @param[in] value The variable value.
          */
         void SetS(const Ogre::String& value);
 

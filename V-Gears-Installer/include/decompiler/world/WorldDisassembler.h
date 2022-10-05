@@ -26,9 +26,9 @@ class WorldDisassembler : public Disassembler{
         /**
          * CConstructor.
          *
-         * @param engine[in] The engine to use to disassemble.
-         * @param insts[in] The list of instructions.
-         * @param script_number[in] The script number to process.
+         * @param[in] engine The engine to use to disassemble.
+         * @param[in] insts The list of instructions.
+         * @param[in] script_number The script number to process.
          */
         WorldDisassembler(WorldEngine* engine, InstVec& insts, int script_number);
 
@@ -50,13 +50,13 @@ class WorldDisassembler : public Disassembler{
          * Adds properties to an instruction, and adds the instruction to the
          * list.
          *
-         * @param opcode[in] The opcode code.
-         * @param name[in] the opcode name.
-         * @param instruction[in][out] A newly created instruction of the type
+         * @param[in] opcode The opcode code.
+         * @param[in] name the opcode name.
+         * @param[in] instruction A newly created instruction of the type
          * the opcode belongs to.
-         * @param stack_change[in] Indicates how much the instruction changes
+         * @param[in] stack_change Indicates how much the instruction changes
          * the stack pointer by.
-         * @param argument_format[in] The opcode argument format.
+         * @param[in] argument_format The opcode argument format.
          */
         template<typename T> void ParseOpcode(
           int opcode, std::string name, T instruction, int stack_change, const char* argument_format

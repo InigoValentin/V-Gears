@@ -23,9 +23,9 @@
 /**
  * Parses a list of keys to retrieve their keycodes.
  *
- * @param string[in] Every character in this string will be processed, and the
+ * @param[in] string Every character in this string will be processed, and the
  * correspondant keycodes will be added to 'key_codes'.
- * @param key_codes[out] Every keycode assigned to a character in 'string' will
+ * @param[out] key_codes Every keycode assigned to a character in 'string' will
  * be added here, even repeated ones.
  * @return True if there were no errors, false if at least one of the
  * characters in 'string' doesn't have an associated keycode. Every case wil be
@@ -53,7 +53,7 @@ bool ParseKeys(const Ogre::String& string, ButtonList& key_codes){
 /**
  * Binds a key combination to a command.
  *
- * @param params[in] Binding parameters. Exactly three are required. The first
+ * @param[in] params Binding parameters. Exactly three are required. The first
  * one is the binding command name and it's not evaluated here. The second one
  * must be one or more keycodes. The third one is the command string. If more
  * or less than three parameter are passed, a usage string will be printed
@@ -93,7 +93,7 @@ void CmdBind(const Ogre::StringVector& params){
 /**
  * Binds a key combination to a game event.
  *
- * @param params[in] Binding parameters. Exactly three are required. The first
+ * @param[in] params Binding parameters. Exactly three are required. The first
  * one is the binding command name and it's not evaluated here. The second one
  * must be one or more keycodes. The third one is the game event string. If
  * more or less than three parameter are passed, a usage string will be printed

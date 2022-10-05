@@ -23,7 +23,7 @@
 /**
  * Prints an error log message.
  *
- * @param message[in] Message to print.
+ * @param[in] message Message to print.
  */
 #define LOG_ERROR(message) Ogre::LogManager::getSingleton().logMessage( \
   "[ERROR] " + Ogre::String(__FILE__) + " " \
@@ -34,7 +34,7 @@
 /**
  * Prints  awarning log message.
  *
- * @param message[in] Message to print.
+ * @param[in] message Message to print.
  */
 #define LOG_WARNING(message) Ogre::LogManager::getSingleton().logMessage( \
   "[WARNING] " + Ogre::String(__FILE__) + " " \
@@ -45,7 +45,7 @@
 /**
  * Prints a trivial log message.
  *
- * @param message[in] Message to print.
+ * @param[in] message Message to print.
  */
 #define LOG_TRIVIAL(message) Ogre::LogManager::getSingleton().logMessage( \
   message, Ogre::LML_TRIVIAL \
@@ -54,7 +54,7 @@
 /**
  * Prints a log message to the console with normal priority.
  *
- * @param message[in] Message to print.
+ * @param[in] message Message to print.
  */
 #define LOG_CONSOLE(message) Ogre::LogManager::getSingleton().logMessage( \
   message, Ogre::LML_NORMAL \
@@ -68,7 +68,7 @@
  *
  * It includes the filename, line, and function name. The priority is critical
  *
- * @param message[in] Message to print.
+ * @param[in] message Message to print.
  */
 #define LOG_DEBUG_EX(message) Ogre::LogManager::getSingleton().logMessage( \
   "[DEBUG] (" +  __FILE__ + " " + Ogre::StringConverter::toString(__LINE__) \
@@ -81,7 +81,7 @@
  *
  * It includes the function name. The priority is critical
  *
- * @param message[in] Message to print.
+ * @param[in] message Message to print.
  */
 #define LOG_DEBUG(message) Ogre::LogManager::getSingleton().logMessage(\
   "[DEBUG] (" + std::string(__FUNCTION__) + "): " + message, \
@@ -94,7 +94,7 @@
  *
  * It includes the filename, line, and function name. The priority is critical
  *
- * @param message[in] Message to print.
+ * @param[in] message Message to print.
  */
 #define LOG_DEBUG_EX(message) Ogre::LogManager::getSingleton().logMessage( \
   "[DEBUG] (" +  __FILE__ + " " + Ogre::StringConverter::toString(__LINE__) \
@@ -107,7 +107,7 @@
  *
  * It includes the function name. The priority is critical
  *
- * @param message[in] Message to print.
+ * @param[in] message Message to print.
  */
 #define LOG_DEBUG(message) Ogre::LogManager::getSingleton().logMessage( \
   "[DEBUG] (" + std::string(__PRETTY_FUNCTION__) + "): " + message, \

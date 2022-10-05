@@ -27,7 +27,7 @@ class XmlScreensFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the mian screens file.
+         * @param[in] file Path to the mian screens file.
          */
         XmlScreensFile(const Ogre::String& file);
 

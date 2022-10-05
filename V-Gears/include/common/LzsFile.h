@@ -22,8 +22,8 @@
 /**
  * Represents an LZS file.
  *
- * More info about lzs fromat: {@link
- * https://wiki.ffrtt.ru/index.php?title=FF7/LZSS_format}
+ * More info about lzs fromat:
+ * https://wiki.ffrtt.ru/index.php?title=FF7/LZSS_format
  */
 class LzsFile : public File{
 
@@ -32,34 +32,34 @@ class LzsFile : public File{
         /**
          * Opens a lzs file and extracts it's contents
          *
-         * @param file[in] Path to the file.
+         * @param[in] file Path to the file.
          */
         LzsFile(const Ogre::String& file);
 
         /**
          * Opens a lzs file and extracts it's contents
          *
-         * @param file[in] Pointer to the file.
+         * @param[in] file Pointer to the file.
          */
         LzsFile(File* file);
 
         /**
          * Opens a lzs file fragment and extracts it's contents
          *
-         * @param file[in] Path to the file.
-         * @param offset[in] Offset to the file contents a which to start
+         * @param[in] file Path to the file.
+         * @param[in] offset Offset to the file contents a which to start
          * reading.
-         * @param ength[in] Length of the data to read from the file, in bytes.
+         * @param[in] length Length of the data to read from the file, in bytes.
          */
         LzsFile(File* file, u32 offset, u32 length);
 
         /**
          * Opens a lzs file fragment from a buffer and extracts it's contents
          *
-         * @param file[in] Pointer to the buffer which holds the data.
-         * @param offset[in] Offset to the buffer contents a which to start
+         * @param[in] buffer Pointer to the buffer which holds the data.
+         * @param[in] offset Offset to the buffer contents a which to start
          * reading.
-         * @param ength[in] Length of the data to read, in bytes.
+         * @param[in] length Length of the data to read, in bytes.
          */
         LzsFile(const u8* buffer, u32 offset, u32 length);
 
@@ -93,7 +93,7 @@ class LzsBuffer{
         /**
          * Decompresses lzs data in a buffer.
          *
-         * @param buffer[in] Buffer with the data of the lzs file.
+         * @param[in] buffer Buffer with the data of the lzs file.
          * @return Decompressed data.
          */
         static std::vector<VGears::uint8> Decompress(

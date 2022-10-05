@@ -28,22 +28,22 @@ class ControlFlow {
         /**
          * Constructor for the control flow graph.
          *
-         * @param insts[in] The instructions to analyze control flow for.
-         * @param engine[in] Pointer to the Engine used for the script.
+         * @param[in] insts The instructions to analyze control flow for.
+         * @param[in] engine Pointer to the Engine used for the script.
          */
         ControlFlow(InstVec& insts, Engine& engine);
 
         /**
          * Copy constructor disabled.
          *
-         * @param control_flow[in] The control flow to copy.
+         * @param[in] control_flow The control flow to copy.
          */
         ControlFlow(const ControlFlow& control_flow) = delete;
 
         /**
          * Copy constructor disabled.
          *
-         * @param control_flow[in] The control flow to copy.
+         * @param[in] control_flow The control flow to copy.
          */
         ControlFlow& operator = (const ControlFlow& control_flow) = delete;
 
@@ -98,21 +98,21 @@ class ControlFlow {
         /**
          * Finds a graph vertex through an instruction.
          *
-         * @param inst[in] The instruction to find the vertex for.
+         * @param[in] inst The instruction to find the vertex for.
          */
         GraphVertex Find(const InstPtr inst);
 
         /**
          * Finds a graph vertex through an instruction iterator.
          *
-         * @param it[in] The iterator to find the vertex for.
+         * @param[in] it The iterator to find the vertex for.
          */
         GraphVertex Find(ConstInstIterator it);
 
         /**
          * Finds a graph vertex through an address.
          *
-         * @param address[in] The address to find the vertex for.
+         * @param[in] address The address to find the vertex for.
          */
         GraphVertex Find(uint32 address);
 
@@ -121,16 +121,16 @@ class ControlFlow {
          *
          * graph_2 will be merged into graph_1.
          *
-         * @param g1[in|out] The first vertex to merge.
-         * @param g2[in] The second vertex to merge.
+         * @param[in,out] graph_1 The first vertex to merge.
+         * @param[in] graph_2 The second vertex to merge.
          */
         void Merge(GraphVertex graph_1, GraphVertex graph_2);
 
         /**
          * Sets the stack level for all instructions, using depth-first search.
          *
-         * @param graph[in] The GraphVertex to search from.
-         * @param level[in] The stack level when g is reached.
+         * @param[in] graph The GraphVertex to search from.
+         * @param[in] level The stack level when g is reached.
          */
         void SetStackLevel(GraphVertex graph, int level);
 
@@ -170,8 +170,8 @@ class ControlFlow {
         /**
          * Checks if a candidate break/continue goes to the closest loop.
          *
-         * @param group[in] The group containing the candidate break/continue.
-         * @param condition_group[in] The group containing the respective loop
+         * @param[in] group The group containing the candidate break/continue.
+         * @param[in] condition_group The group containing the respective loop
          * condition.
          * @returns True if the validation succeeded, false if it did not.
          */
@@ -194,10 +194,10 @@ class ControlFlow {
         /**
          * Checks if a candidate else block will cross block boundaries.
          *
-         * @param if_group[in] The group containing the if this else candidate
+         * @param[in] if_group The group containing the if this else candidate
          * is associated with.
-         * @param start[in] The group containing the start of the else.
-         * @param end[in] The group immediately after the group ending the
+         * @param[in] start The group containing the start of the else.
+         * @param[in] end The group immediately after the group ending the
          * else.
          * @returns True if the validation succeeded, false if it did not.
          */

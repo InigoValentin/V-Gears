@@ -62,14 +62,14 @@ class UiManager
         /**
          * Adds a font to the manager.
          *
-         * @param font[in] The font to add.
+         * @param[in] font The font to add.
          */
         void AddFont(UiFont* font);
 
         /**
          * Retrieves a font by name.
          *
-         * @param name[in] Name of the font.
+         * @param[in] name Name of the font.
          * @return The font by the specified name, or NULL if there is none.
          */
         UiFont* GetFont(const Ogre::String& name);
@@ -77,8 +77,8 @@ class UiManager
         /**
          * Adds a prototype to the manager.
          *
-         * @param name[in] The prototype manager.
-         * @param prototype[in] The prototyme, as an XML node.
+         * @param[in] name The prototype manager.
+         * @param[in] prototype The prototyme, as an XML node.
          * @todo What exactly is a prototype here?
          */
         void AddPrototype(const Ogre::String& name, TiXmlNode* prototype);
@@ -86,7 +86,7 @@ class UiManager
         /**
          * Retrieves a prototype by name.
          *
-         * @param name[in] Name of the prototype.
+         * @param[in] name Name of the prototype.
          * @return The prototype by the specified name, or NULL if there is
          * none.
          * @todo What exactly is a prototype here?
@@ -96,14 +96,14 @@ class UiManager
         /**
          * Adds a UI widget to the manager.
          *
-         * @param widget[in] The widget to add.
+         * @param[in] widget The widget to add.
          */
         void AddWidget(UiWidget* widget);
 
         /**
          * Retrieves a UI widget by name.
          *
-         * @param name[in] Name of the widget.
+         * @param[in] name Name of the widget.
          * @return The widget by the specified name, or NULL if there is none.
          */
         UiWidget* GetWidget(const Ogre::String& name);
@@ -111,7 +111,7 @@ class UiManager
         /**
          * Retrieves a UI widget by name.
          *
-         * @param name[in] Name of the widget.
+         * @param[in] name Name of the widget.
          * @return The widget by the specified name, or NULL if there is none.
          */
         UiWidget* ScriptGetWidget(const char* name);
@@ -119,9 +119,9 @@ class UiManager
         /**
          * Updates the render queue.
          *
-         * @param queueGroupId[in] The queue group ID.
-         * @param invocation[in] Unused.
-         * @param skipThisInvocation[in] Unused.
+         * @param[in] queueGroupId The queue group ID.
+         * @param[in] invocation Unused.
+         * @param[in] skipThisInvocation Unused.
          */
         void renderQueueStarted(
           Ogre::uint8 queueGroupId, const Ogre::String& invocation,

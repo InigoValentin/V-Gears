@@ -32,7 +32,7 @@ class Engine;
 /**
  * Changes whether or not to output the stack effect for an instruction.
  *
- * @param value[in] True to output the effect, false not to.
+ * @param[in] value True to output the effect, false not to.
  */
 void SetOutputStackEffect(bool value);
 
@@ -120,8 +120,8 @@ class Instruction : public RefCounted {
         /**
          * Operator overload to output an Instruction to a stream.
          *
-         * @param output[out] The stream to output to.
-         * @param inst[in] The Instruction to output.
+         * @param[out] output The stream to output to.
+         * @param[in] inst The Instruction to output.
          * @return The stream used for output.
          */
         friend std::ostream& operator<<(std::ostream &output, const Instruction *inst) {
@@ -131,7 +131,7 @@ class Instruction : public RefCounted {
         /**
          * Print the instruction to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const;
@@ -218,9 +218,10 @@ class Instruction : public RefCounted {
         /**
          * Process an instruction for code generation.
          *
-         * @param stack[in] The current stack.
-         * @param engine[in] The Engine used for code generation.
-         * @param code_gen[in] The CodeGenerator used for code generation.
+         * @param[in] function The function the instruction is in.
+         * @param[in] stack The current stack.
+         * @param[in] engine The Engine used for code generation.
+         * @param[in] code_gen The CodeGenerator used for code generation.
          */
         virtual void ProcessInst(
           Function& function, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
@@ -236,7 +237,7 @@ class Instruction : public RefCounted {
         /**
          * Sets the instruction opcode.
          *
-         * @param opcode[in] The opcode.
+         * @param[in] opcode The opcode.
          */
         void SetOpcode(uint32 opcode);
 
@@ -250,7 +251,7 @@ class Instruction : public RefCounted {
         /**
          * Sets the instruction address.
          *
-         * @param address[in] The address.
+         * @param[in] address The address.
          */
         void SetAddress(uint32 address);
 
@@ -273,7 +274,7 @@ class Instruction : public RefCounted {
         /**
          * Defines how much the instruction changes the stack pointer.
          *
-         * @param stack_change[in] Bytes the instruction changes the stack
+         * @param[in] stack_change Bytes the instruction changes the stack
          * pointer by.
          */
         void SetStackChange(int16 stack_change);
@@ -288,7 +289,7 @@ class Instruction : public RefCounted {
         /**
          * Retrieves a instruction parameter.
          *
-         * @param index[in] Index of the parameter to retrieve.
+         * @param[in] index Index of the parameter to retrieve.
          * @return The parameter at the specified index, or nullptr if there
          * is not that many parameters.
          */
@@ -297,14 +298,14 @@ class Instruction : public RefCounted {
         /**
          * Sets the instructions parameters.
          *
-         * @param params[in] The list of instruction parameters.
+         * @param[in] params The list of instruction parameters.
          */
         void SetParams(std::vector<ValuePtr> params);
 
         /**
          * Adds a parameter to the instructions.
          *
-         * @param value[in] The parameter to add.
+         * @param[in] value The parameter to add.
          */
         void AddParam(ValuePtr value);
 
@@ -322,7 +323,7 @@ class Instruction : public RefCounted {
          *
          * See the extended documentation for details.
          *
-         * @params code_gen_data[in] Code generator metadata.
+         * @param[in] code_gen_data Code generator metadata.
          */
         void SetCodeGenData(std::string code_gen_data);
 

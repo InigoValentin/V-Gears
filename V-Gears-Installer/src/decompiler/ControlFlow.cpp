@@ -24,31 +24,31 @@
 /**
  * Adds a vertex to a group.
  *
- * @param vertex[in] Vertex to add.
- * @param group[in] Group to add the vertex to.
+ * @param[in] vertex Vertex to add.
+ * @param[in] group Group to add the vertex to.
  */
 #define PUT(vertex, group) boost::put(boost::vertex_name, graph_, vertex, group);
 
 /**
  * Adds an edge to the graph.
  *
- * @param edge[in] The edge to add.
- * @param is_jump[in] Indicates if the edge is a jump.
+ * @param[in] edge The edge to add.
+ * @param[in] is_jump Indicates if the edge is a jump.
  */
 #define PUT_EDGE(edge, is_jump) boost::put(boost::edge_attribute, graph_, edge, is_jump);
 
 /**
  * Adds a vertex to the graph.
  *
- * @param vertex[in] The vertex to add.
- * @param id[in] The vertext index.
+ * @param[in] vertex The vertex to add.
+ * @param[in] id The vertext index.
  */
 #define PUT_ID(vertex, id) boost::put(boost::vertex_index, graph_, vertex, id);
 
 /**
  * Retrieves a vertex.
  *
- * @param vertex[in] The vertex.
+ * @param[in] vertex The vertex.
  * @return The retrieved vertex.
  */
 #define GET(vertex) (boost::get(boost::vertex_name, graph_, vertex))
@@ -56,7 +56,7 @@
 /**
  * Retrieves an edge.
  *
- * @param edge[in] The edge.
+ * @param[in] edge The edge.
  * @return The retrieved edge.
  */
 #define GET_EDGE(edge) (boost::get(boost::edge_attribute, graph_, edge))

@@ -31,7 +31,7 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param background_file[in] The background file.
+             * @param[in] background_file The background file.
              */
             explicit BackgroundTextureLoader(BackgroundFile &background_file);
 
@@ -43,7 +43,7 @@ namespace VGears{
             /**
              * Loads a resource.
              *
-             * @param resource[in] The resource to load.
+             * @param[in] resource The resource to load.
              */
             virtual void loadResource(Ogre::Resource *resource);
 

@@ -32,9 +32,9 @@ class Background2DAnimation{
         /**
          * Constructor.
          *
-         * @param name[in] The animation name.
-         * @param background[in] The background to animate.
-         * @param tile_index[in] The tile the animation applies to.
+         * @param[in] name The animation name.
+         * @param[in] background The background to animate.
+         * @param[in] tile_index The tile the animation applies to.
          */
         Background2DAnimation(
           const Ogre::String& name, Background2D* background,
@@ -65,7 +65,7 @@ class Background2DAnimation{
         /**
          * Adds time, so the animation state is changed according to it.
          *
-         * @param time[in] The time passed
+         * @param[in] time The time passed
          * @todo time is in seconds?
          */
         void AddTime(const float time);
@@ -80,7 +80,7 @@ class Background2DAnimation{
         /**
          * Sets the time the animation has been running.
          *
-         * @param time[in] The time the animation has been running.
+         * @param[in] time The time the animation has been running.
          * @todo time is in seconds?
          */
         void  SetTime( const float time );
@@ -96,7 +96,7 @@ class Background2DAnimation{
         /**
          * Sets the duration of the animation.
          *
-         * @param time[in] The duration of the animation.
+         * @param[in] time The duration of the animation.
          * @todo time is in seconds?
          */
         void  SetLength(const float time);
@@ -112,15 +112,15 @@ class Background2DAnimation{
         /**
          * Adds a keyframe to the animation.
          *
-         * @param key_frame[in] The keyframe to add.
+         * @param[in] key_frame The keyframe to add.
          */
         virtual void AddUVKeyFrame(const VGears::KeyFrame key_frame);
 
         /**
          * Adds a keyframe to the animation.
          *
-         * @param time[in] Time to add the keyframe at.
-         * @param uv[in] Animation vector.
+         * @param[in] time Time to add the keyframe at.
+         * @param[in] uv Animation vector.
          * @todo time is in seconds?
          */
         virtual void AddUVKeyFrame(const float time, const Ogre::Vector4& uv);
@@ -128,11 +128,11 @@ class Background2DAnimation{
         /**
          * Adds a keyframe to the animation.
          *
-         * @param time[in] Time to add the keyframe at.
-         * @param u1[in] Animation vector component.
-         * @param v1[in] Animation vector component.
-         * @param u2[in] Animation vector component.
-         * @param v2[in] Animation vector component.
+         * @param[in] time Time to add the keyframe at.
+         * @param[in] u1 Animation vector component.
+         * @param[in] v1 Animation vector component.
+         * @param[in] u2 Animation vector component.
+         * @param[in] v2 Animation vector component.
          * @todo time is in seconds?
          */
         virtual void AddUVKeyFrame(

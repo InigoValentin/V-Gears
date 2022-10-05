@@ -41,8 +41,8 @@ namespace VGears{
             /**
              * Imports a map file.
              *
-             * @param stream[in] The contents of the map file.
-             * @param dest[out] The formed map file.
+             * @param[in] stream The contents of the map file.
+             * @param[out] dest The formed map file.
              */
             virtual void ImportMapFile(Ogre::DataStreamPtr &stream, MapFile *dest);
 
@@ -59,72 +59,72 @@ namespace VGears{
             /**
              * Reads a file header from an XML node and sets the instance data.
              *
-             * @param node[in] The XML node to read.
+             * @param[in] node The XML node to read.
              */
             virtual void ReadHeader(TiXmlNode *node);
 
             /**
              * Reads a XML node as a script.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The script data will be loaded here.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The script data will be loaded here.
              */
             virtual void ReadScript(TiXmlNode &node, MapFile *dest);
 
             /**
              * Reads a XML node as a 2D background.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The background data will be loaded here.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The background data will be loaded here.
              */
             virtual void ReadBackground2D(TiXmlNode &node, MapFile *dest);
 
             /**
              * Reads a XML node as a walkmesh.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The walkmesh data will be loaded here.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The walkmesh data will be loaded here.
              */
             virtual void ReadWalkmesh(TiXmlNode &node, MapFile *dest);
 
             /**
              * Reads a XML node as a forward direction.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The direction data will be loaded here.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The direction data will be loaded here.
              */
             virtual void ReadForwardDirection(TiXmlNode &node, MapFile *dest);
 
             /**
              * Reads a XML node as a list of entities.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The entity data will be loaded here.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The entity data will be loaded here.
              */
             virtual void ReadEntities(TiXmlNode &node, MapFile *dest);
 
             /**
              * Reads an XML node as an entity point.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The formed point data.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The formed point data.
              */
             virtual void readObject(TiXmlNode &node, Point &dest);
 
             /**
              * Reads an XML node as a trigger.
              *
-             * @param node[in] The XML node to read.
-             * @param dest[out] The formed trigger data.
+             * @param[in] node The XML node to read.
+             * @param[out] dest The formed trigger data.
              */
             virtual void readObject(TiXmlNode &node, Trigger &dest);
 
             /**
-             * Reads an object as a vector.
+             * Reads entities from a map.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed vector data.
-             * @param count[in] The size of the data to read.
+             * @param[in] node Input data.
+             * @param[in] tag Entity section tag.
+             * @param[out] dest The formed vector data.
              */
             template<typename ValueType> void ReadEntities(
               TiXmlNode &node, const String &tag, std::vector<ValueType> &dest

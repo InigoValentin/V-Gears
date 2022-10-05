@@ -40,7 +40,7 @@ class FunctionMetaData{
          * - start_entityname
          * - end_entity_name
          *
-         * @param meta_data[in] Metadata to parse.
+         * @param[in] meta_data Metadata to parse.
          */
         FunctionMetaData(std::string meta_data);
 
@@ -94,7 +94,7 @@ class FunctionMetaData{
         /**
          * Parses metadata.
          *
-         * @param meta_data[in] Metadata to parse.
+         * @param[in] meta_data Metadata to parse.
          */
         void Parse(std::string meta_data);
 
@@ -104,8 +104,8 @@ class FunctionMetaData{
          * If it finds it, marks the metadata as the first function of a
          * class. It also * calls {@see ParseEnd} with the next token.
          *
-         * @param item[in] The item to check for a start mark.
-         * @param item[in] All the metadata tokens.
+         * @param[in] item The item to check for a start mark.
+         * @param[in] strs All the metadata tokens.
          */
         void ParseStart(const std::string& item, std::deque<std::string>& strs);
 
@@ -115,8 +115,8 @@ class FunctionMetaData{
          * If it finds it, marks the metadata as the last function of a class.
          * It also calls {@see ParseCharId}.
          *
-         * @param item[in] The item to check for a start mark.
-         * @param item[in] Metadata tokens, first removed.
+         * @param[in] item The item to check for a start mark.
+         * @param[in] strs Metadata tokens, first removed.
          */
         void ParseEnd(const std::string& item, std::deque<std::string>& strs);
 
@@ -126,8 +126,8 @@ class FunctionMetaData{
          * If it finds it, sets the character ID. It also calls
          * {@see ParseEntity}.
          *
-         * @param item[in] The item to check for a start mark.
-         * @param item[in] Metadata tokens, first two removed.
+         * @param[in] item The item to check for a start mark.
+         * @param[in] strs Metadata tokens, first two removed.
          */
         void ParseCharId(const std::string& item, std::deque<std::string>& strs);
 
@@ -136,8 +136,8 @@ class FunctionMetaData{
          *
          * It sets the entity name.
          *
-         * @param item[in] The item to check for a start mark.
-         * @param item[in] Metadata tokens, first three removed.
+         * @param[in] item The item to check for a start mark.
+         * @param[in] strs Metadata tokens, first three removed.
          */
         void ParseEntity(const std::string& item, std::deque<std::string>& strs);
 
@@ -193,9 +193,9 @@ class FieldCodeGenerator : public CodeGenerator{
          * The code will actually be a comment, indicating where the function
          * call must have been.
          *
-         * @param entity[in] The entity name.
-         * @param address[in] The address of the instruction.
-         * @param opcode[in] The opcode not implemented.
+         * @param[in] entity The entity name.
+         * @param[in] address The address of the instruction.
+         * @param[in] opcode The opcode not implemented.
          */
         static const std::string FormatInstructionNotImplemented(
           const std::string& entity, uint32 address, uint32 opcode
@@ -207,9 +207,9 @@ class FieldCodeGenerator : public CodeGenerator{
          * The code will actually be a comment, indicating where the function
          * call must have been.
          *
-         * @param entity[in] The entity name.
-         * @param address[in] The address of the instruction.
-         * @param opcode[in] The unimplemented instruction.
+         * @param[in] entity The entity name.
+         * @param[in] address The address of the instruction.
+         * @param[in] instruction The unimplemented instruction.
          */
         static const std::string FormatInstructionNotImplemented(
           const std::string& entity, uint32 address, const Instruction& instruction
@@ -218,7 +218,7 @@ class FieldCodeGenerator : public CodeGenerator{
         /**
          * Formats a value as a boolean.
          *
-         * @param value[in] The value to format.
+         * @param[in] value The value to format.
          * @return "false" if the value is 0, "true" otherwise.
          */
         static const std::string FormatBool(uint32 value);
@@ -226,7 +226,7 @@ class FieldCodeGenerator : public CodeGenerator{
         /**
          * Formats a value as a boolean.
          *
-         * @param value[in] The value to format.
+         * @param[in] value The value to format.
          * @return "true" if the value is 0, "false" otherwise.
          */
         static const std::string FormatInvertedBool(uint32 value);
@@ -236,14 +236,14 @@ class FieldCodeGenerator : public CodeGenerator{
          *
          * If possible, it will look for friendly names for variables.
          *
-         * @param formatter[in] Formatter to look up variable friendly names.
-         * @param bank[in] The memory bank to use.
-         * @param value_or_address[in] The value or memory address to use.
+         * @param[in] formatter Formatter to look up variable friendly names.
+         * @param[in] bank The memory bank to use.
+         * @param[in] value_or_address The value or memory address to use.
          * When bank is 0, it will be considered as a value. When bank is non
          * 0, it will be considered an address of the bank.
-         * @param value_type[in] Data type to use. Used only when getting a
+         * @param[in] type Data type to use. Used only when getting a
          * value, not a bank address.
-         * @param scale[in] Scale to scale values to. Used only when using
+         * @param[in] scale Scale to scale values to. Used only when using
          * float values, unused when type is integer or when using a bank
          * address.
          * @return String with the friendly variable name, value, or bank
@@ -296,10 +296,10 @@ class FieldCodeGenerator : public CodeGenerator{
         /**
          * Constructor.
          *
-         * @param engine[in] The engine.
-         * @param insts[in] The list of instructions to parse.
-         * @param output[out] The generated script.
-         * @param formatter[in] The code formatter.
+         * @param[in] engine The engine.
+         * @param[in] insts The list of instructions to parse.
+         * @param[out] output The generated script.
+         * @param[in] formatter The code formatter.
          */
         FieldCodeGenerator(
           Engine *engine, const InstVec& insts, std::ostream &output,
@@ -312,18 +312,18 @@ class FieldCodeGenerator : public CodeGenerator{
         /**
          * Generates the script from the instructions.
          *
-         * @param insts[in] The list of instructions.
-         * @param graph[in] Code graph, unused.
+         * @param[in] insts The list of instructions.
+         * @param[in] graph Code graph, unused.
          */
         virtual void Generate(InstVec& insts, const Graph &graph) override;
 
         /**
          * Adds a line to the script.
          *
-         * @param line[in] The line to add.
-         * @param unindent_before[in] If true, the current script indentation
+         * @param[in] line The line to add.
+         * @param[in] unindent_before If true, the current script indentation
          * will be moved back one position before the line.
-         * @param indent_after[in] If true, the current script indentation
+         * @param[in] indent_after If true, the current script indentation
          * will be moved forward one position after the line.
          */
         virtual void AddOutputLine(
@@ -352,9 +352,9 @@ class FieldCodeGenerator : public CodeGenerator{
          * The function signature is the LUA function declaration, and it
          * looks like this:
          *
-         * <function_name> = function(self)
+         * function_name = function(self)
          *
-         * @param function[in] The function to construct the signature for.
+         * @param[in] function The function to construct the signature for.
          * @return The function signature.
          */
         virtual std::string ConstructFuncSignature(const Function &function) override;
@@ -365,7 +365,7 @@ class FieldCodeGenerator : public CodeGenerator{
          * It appends an "end" to finalize the function. If the function is
          * the last of a class, it also closes the class braces.
          *
-         * @param function[in] The function to end.
+         * @param[in] function The function to end.
          */
         virtual void OnEndFunction(const Function& function) override;
 
@@ -377,7 +377,7 @@ class FieldCodeGenerator : public CodeGenerator{
          * variable for the character. If the function has a comment
          * associated, it will also be added before the function.
          *
-         * @param function[in] The function about to start.
+         * @param[in] function The function about to start.
          */
         virtual void OnBeforeStartFunction(const Function& function) override;
 
@@ -386,7 +386,7 @@ class FieldCodeGenerator : public CodeGenerator{
          *
          * It adds a comment with the function opcodes.
          *
-         * @param function[in] The function to start.
+         * @param[in] function The function to start.
          */
         virtual void OnStartFunction(const Function& function) override;
 

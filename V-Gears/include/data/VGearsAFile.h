@@ -34,15 +34,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -50,9 +50,8 @@ namespace VGears{
              * ManualResourceLoader instance is strongly recommended.
              */
             AFile(
-              Ogre::ResourceManager *creator, const String &name,
-              Ogre::ResourceHandle handle, const String &group,
-              bool is_manual = false, Ogre::ManualResourceLoader *loader = NULL
+              Ogre::ResourceManager *creator, const String &name, Ogre::ResourceHandle handle,
+              const String &group, bool is_manual = false, Ogre::ManualResourceLoader *loader = NULL
             );
 
             /**
@@ -73,8 +72,8 @@ namespace VGears{
             /**
              * Adds an animation to an skeleton.
              *
-             * @parma skeleton[in|out] Skeleton to add the animation to.
-             * @param name[in] Animation name.
+             * @param[in,out] skeleton Skeleton to add the animation to.
+             * @param[in] name Animation name.
              */
             void AddTo(Ogre::SkeletonPtr skeleton, const String &name) const;
 
@@ -113,7 +112,7 @@ namespace VGears{
             /**
              * Sets the number of bones.
              *
-             * @param bone_count[in] The number of bones.
+             * @param[in] bone_count The number of bones.
              */
             void SetBoneCount(const uint32 bone_count);
 
@@ -140,8 +139,8 @@ namespace VGears{
             /**
              * Sets the rotation for a frame.
              *
-             * @param key_frame[in] The frame.
-             * @param rotation[in] The rotation for the frame
+             * @param[in] key_frame The frame.
+             * @param[in] rotation The rotation for the frame
              */
             void SetFrameRotation(
               Ogre::TransformKeyFrame *key_frame,

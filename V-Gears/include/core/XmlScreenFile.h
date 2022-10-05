@@ -28,7 +28,7 @@ class XmlScreenFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the XMl screen file.
+         * @param[in] file Path to the XMl screen file.
          */
         explicit XmlScreenFile(const Ogre::String& file);
 
@@ -45,9 +45,9 @@ class XmlScreenFile : public XmlFile{
         /**
          * Parses a XML node and recursively loads all of it's components.
          *
-         * @param node[in] Node to parse.
-         * @param base_name[in] Name for the top widget in the XML node.
-         * @param widget[in] Top parent widget.
+         * @param[in] node Node to parse.
+         * @param[in] base_name Name for the top widget in the XML node.
+         * @param[in] widget Top parent widget.
          */
         void LoadScreenRecursive(
           TiXmlNode* node, const Ogre::String& base_name, UiWidget* widget

@@ -26,12 +26,7 @@ struct WalkmeshTriangle{
     /**
      * Constructor.
      */
-    WalkmeshTriangle():
-      a(0, 0, 0),
-      b(0, 0, 0),
-      c(0, 0, 0),
-      locked(false)
-    {
+    WalkmeshTriangle(): a(0, 0, 0), b(0, 0, 0), c(0, 0, 0), locked(false){
         access_side[0] = -1;
         access_side[1] = -1;
         access_side[2] = -1;
@@ -94,23 +89,24 @@ class Walkmesh{
         /**
          * Adds a triangle to the walkmesh.
          *
-         * @param triangle[in] Triangle to add.
+         * @param[in] triangle Triangle to add.
          */
         void AddTriangle(const WalkmeshTriangle& triangle);
 
         /**
-         * @todo Understand and document.
+         * Checks which other triangle is accessed from one side of a triangle.
          *
-         * @param triangle[in] Triangle.
-         * @param side[in] The side index in the triangle.
-         * @return @todo.
+         * @param[in] triangle_id Triangle.
+         * @param[in] side The side index in the triangle.
+         * @return The id of the triangle accessed from the indicated triangle
+         * and side, or -1 if no triangle can be accessed.
          */
         int GetAccessSide(unsigned int triangle_id, unsigned char side) const;
 
         /**
          * Retrieves the first side of a triangle.
          *
-         * @param triangle_id[in] ID of the triangle.
+         * @param[in] triangle_id ID of the triangle.
          * @return The side of the triangle. Ogre::Vector3::ZERO if the
          * triangle doesn't exist.
          */
@@ -119,7 +115,7 @@ class Walkmesh{
         /**
          * Retrieves the second side of a triangle.
          *
-         * @param triangle_id[in] ID of the triangle.
+         * @param[in] triangle_id ID of the triangle.
          * @return The side of the triangle. Ogre::Vector3::ZERO if the
          * triangle doesn't exist.
          */
@@ -128,7 +124,7 @@ class Walkmesh{
         /**
          * Retrieves the third side of a triangle.
          *
-         * @param triangle_id[in] ID of the triangle.
+         * @param[in] triangle_id ID of the triangle.
          * @return The side of the triangle. Ogre::Vector3::ZERO if the
          * triangle doesn't exist.
          */
@@ -144,15 +140,15 @@ class Walkmesh{
         /**
          * Locks or unlocks a triangle.
          *
-         * @param triangle_id[in] ID of the triangle.
-         * @param lock[in] True to lock, false to unlock.
+         * @param[in] triangle_id ID of the triangle.
+         * @param[in] lock True to lock, false to unlock.
          */
         void LockWalkmesh(unsigned int triangle_id, bool lock);
 
         /**
          * Checks if a triangle is locked.
          *
-         * @param triangle_id[in] ID of the trinagle.
+         * @param[in] triangle_id ID of the trinagle.
          * @return True if the triangle is locked, false otherwise.
          */
         bool IsLocked(unsigned int triangle_id) const;
@@ -160,7 +156,7 @@ class Walkmesh{
         /**
          * Loads a walkmesh from a file.
          *
-         * @param walkmesh[in] Walkmesh file.
+         * @param[in] walkmesh Walkmesh file.
          */
         virtual void load(const VGears::WalkmeshFilePtr &walkmesh);
 

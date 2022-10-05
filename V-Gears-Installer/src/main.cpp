@@ -20,8 +20,8 @@
 /**
  * Installer main function.
  *
- * @param argc[in] Number of arguments passed to the application.
- * @param argv[in] List of arguments passed to the application.
+ * @param[in] argc Number of arguments passed to the application.
+ * @param[in] argv List of arguments passed to the application.
  * @return The application return code. 0 is OK.
  */
 int main(int argc, char *argv[]){

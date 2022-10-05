@@ -47,15 +47,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -130,49 +130,49 @@ namespace VGears{
             /**
              * Sets the scripts for the level.
              *
-             * @param script_data[in] The scripts for the level.
+             * @param[in] script_data The scripts for the level.
              */
             void SetRawScript(const std::vector<u8>& script_data);
 
             /**
              * Sets the background for the level.
              *
-             * @param background[in] The background for the level.
+             * @param[in] background The background for the level.
              */
             void SetBackground(const BackgroundFilePtr &background);
 
             /**
              * Sets the camera matrix for the level.
              *
-             * @param camera_matrix[in] The camera matrix for the level.
+             * @param[in] camera_matrix The camera matrix for the level.
              */
             void SetCameraMatrix(const CameraMatrixFilePtr &camera_matrix);
 
             /**
              * Sets the model list for the level.
              *
-             * @param model_list[in] The model list for the level.
+             * @param[in] model_list The model list for the level.
              */
             void SetModelList(const ModelListFilePtr &model_list);
 
             /**
              * Sets the color palette for the level.
              *
-             * @param palette[in] The color palette for the level.
+             * @param[in] palette The color palette for the level.
              */
             void SetPalette(const PaletteFilePtr &palette);
 
             /**
              * Sets the level walkmesh.
              *
-             * @param walkmesh[in] The walkmesh for the level.
+             * @param[in] walkmesh The walkmesh for the level.
              */
             void SetWalkmesh(const WalkmeshFilePtr &walkmesh);
 
             /**
              * Sets the triggers for the level.
              *
-             * @param triggers[in] The triggers for the level.
+             * @param[in] triggers The triggers for the level.
              */
             void SetTriggers(const TriggersFilePtr& triggers);
 

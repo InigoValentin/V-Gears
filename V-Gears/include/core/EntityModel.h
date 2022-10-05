@@ -27,9 +27,9 @@ class EntityModel : public Entity{
         /**
          * Constructor.
          *
-         * @param name[in] Entity name.
-         * @param file_name[in] File with the model data.
-         * @param node[in] Scene node to attach the model to.
+         * @param[in] name Entity name.
+         * @param[in] file_name File with the model data.
+         * @param[in] node Scene node to attach the model to.
          */
         EntityModel(
           const Ogre::String& name, const Ogre::String file_name,
@@ -45,7 +45,7 @@ class EntityModel : public Entity{
         /**
          * Toggles the model visibility.
          *
-         * @param visible[in] True to make the model visible, false to turn it
+         * @param[in] visible True to make the model visible, false to turn it
          * invisible.
          */
         virtual void SetVisible(const bool visible);
@@ -60,11 +60,11 @@ class EntityModel : public Entity{
         /**
          * Plays an animation of the model.
          *
-         * @param animation[in] Name of the animation to play.
-         * @param state[in] Initial state of the animation.
-         * @param play_type[in] Play mode, for single or looped playbacks.
-         * @param start[in] Start point in time of the animation, in seconds.
-         * @param end[in] End point in time of the animation, in seconds.
+         * @param[in] animation Name of the animation to play.
+         * @param[in] state Initial state of the animation.
+         * @param[in] play_type Play mode, for single or looped playbacks.
+         * @param[in] start Start point in time of the animation, in seconds.
+         * @param[in] end End point in time of the animation, in seconds.
          */
         virtual void PlayAnimation(
           const Ogre::String& animation, AnimationState state,
@@ -74,14 +74,14 @@ class EntityModel : public Entity{
         /**
          * Resumes an animation.
          *
-         * @param animation[in] The name of the animation to resume.
+         * @param[in] animation The name of the animation to resume.
          */
         virtual void PlayAnimationContinue(const Ogre::String& animation);
 
         /**
          * Updates the animation.
          *
-         * @param delta[in] Ellapsed time.
+         * @param[in] delta Ellapsed time.
          */
         virtual void UpdateAnimation(const float delta);
 

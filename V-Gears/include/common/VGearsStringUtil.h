@@ -32,8 +32,8 @@ namespace VGears{
              * Extracts a file path from a fully qualified file name (i.e: full
              * filepath + filename).
              *
-             * @param nameame[in] Fully qualified file name.
-             * @param path[out] Path to the file, without the file name.
+             * @param[in] name Fully qualified file name.
+             * @param[out] path Path to the file, without the file name.
              */
             static void splitPath(const String &name, String &path);
 
@@ -43,8 +43,8 @@ namespace VGears{
              * Extracts a file name, without the file extension, from a fully
              * qualified file name (i.e: full filepath + filename).
              *
-             * @param name[in] Fully qualified file name.
-             * @param basename[out] File name, without extension.
+             * @param[in] name Fully qualified file name.
+             * @param[out] basename File name, without extension.
              */
             static void splitBase(const String &name, String &basename);
 
@@ -54,8 +54,8 @@ namespace VGears{
              * Extracts a file name, without the file extension, from a full
              * file name without path.
              *
-             * @param name[in] File name.
-             * @param basename[out] File name, without extension.
+             * @param[in] name File name.
+             * @param[out] basename File name, without extension.
              */
             static void splitFull(const String &name, String &basename);
     };

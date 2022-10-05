@@ -26,7 +26,7 @@ class EntityPoint{
         /**
          * Constructor.
          *
-         * @param name[in] Name of the entity point.
+         * @param[in] name Name of the entity point.
          */
         EntityPoint(const Ogre::String& name);
 
@@ -50,7 +50,7 @@ class EntityPoint{
         /**
          * Sets the point position.
          *
-         * @param point[in] The new point position
+         * @param[in] point The new point position
          */
         void SetPosition(const Ogre::Vector3& point);
 
@@ -69,7 +69,7 @@ class EntityPoint{
         /**
          * Sets the point orientation.
          *
-         * @param rotation[in] The new orientation (0-360).
+         * @param[in] rotation The new orientation (0-360).
          */
         void SetRotation(const float rotation);
 

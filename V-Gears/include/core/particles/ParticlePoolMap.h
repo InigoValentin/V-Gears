@@ -122,8 +122,8 @@ class ParticlePoolMap{
          *
          * A particle is added in locked state.
          *
-         * @param key[in] PArticle key in the map.
-         * @param element[in] Particle to add to the pool.
+         * @param[in] key PArticle key in the map.
+         * @param[in] element Particle to add to the pool.
          */
         void AddElement(const Ogre::String& key, T* element){
             locked_.insert(make_pair(key, element));
@@ -132,7 +132,7 @@ class ParticlePoolMap{
         /**
          * Releases a locked particle.
          *
-         * @param key[in] The key of the particle to unlock.
+         * @param[in] key The key of the particle to unlock.
          * @return A pointer to the previously locked and now released
          * particle, or 0 if there were no more locked particles.
          */

@@ -99,15 +99,15 @@ struct IsJump {
     /**
      * Constructor.
      *
-     * @param jump[is] Whether or not the edge is a jump.
+     * @param[in] jump Whether or not the edge is a jump.
      */
     IsJump(bool jump);
 
     /**
      * Output edge information as a graphviz edge property.
      *
-     * @param output[out] The stream to output to.
-     * @param is_jump[in] The IsJump to output.
+     * @param[out] output The stream to output to.
+     * @param[in] is_jump The IsJump to output.
      * @return The stream used for output.
      */
     friend std::ostream &operator<<(std::ostream &output, IsJump is_jump){
@@ -129,15 +129,15 @@ namespace boost {
             /**
              * Constructor.
              *
-             * @param name[in] The name of the attribute to use.
+             * @param[in] name The name of the attribute to use.
              */
             explicit ArrowheadWriter(Name name): name(name){}
 
             /**
              * Outputs the arrowhead edge property.
              *
-             * @param out[out] The stream to output to.
-             * @param v[in] The vertex or edge to output the attribute for.
+             * @param[out] out The stream to output to.
+             * @param[in] v The vertex or edge to output the attribute for.
              */
             template <class VertexOrEdge> void operator()(
               std::ostream& out, const VertexOrEdge& v
@@ -156,7 +156,7 @@ namespace boost {
     /**
      * Creates an arrowhead property writer.
      *
-     * @param _name The name of the attribute to use.
+     * @param[in] n The name of the attribute to use.
      */
     template <class Name> inline ArrowheadWriter<Name> MakeArrowheadWriter(Name n) {
         return ArrowheadWriter<Name>(n);
@@ -207,10 +207,10 @@ struct CodeLine {
     /**
      * Constructor for CodeLine.
      *
-     * @param line[in] The line of code.
-     * @param unindent_before[in] Whether or not to remove an indentation
+     * @param[in] line The line of code.
+     * @param[in] unindent_before Whether or not to remove an indentation
      * level before the line. Defaults to false.
-     * @param indent_after[in] Whether or not to add an indentation level
+     * @param[in] indent_after Whether or not to add an indentation level
      * after the line. Defaults to false.
      */
     CodeLine(const std::string& line, bool unindent_before, bool indent_after);
@@ -296,10 +296,10 @@ struct Group : public RefCounted {
         /**
          * Constructor.
          *
-         * @param vertex[in] The vertex the group belongs to.
-         * @param start[in] First instruction in the group.
-         * @param end[in] Last instruction in the group.
-         * @param prev[in] Pointer to the previous group, when ordered by
+         * @param[in] vertex The vertex the group belongs to.
+         * @param[in] start First instruction in the group.
+         * @param[in] end Last instruction in the group.
+         * @param[in] prev Pointer to the previous group, when ordered by
          * address.
          */
         Group(GraphVertex vertex, InstIterator start, InstIterator end, GroupPtr prev);
@@ -307,8 +307,8 @@ struct Group : public RefCounted {
         /**
          * Output a group to an stream as a graphviz label.
          *
-         * @param output[out] The stream to output to.
-         * @param group[in] The Group to output.
+         * @param[out] output The stream to output to.
+         * @param[in] group The Group to output.
          * @return The stream used for output.
          */
         friend std::ostream &operator<<(std::ostream &output, GroupPtr group){
@@ -361,23 +361,23 @@ struct GraphProperties {
         /**
          * Constructor.
          *
-         * @param engine[in] The engine with function information for the
+         * @param[in] engine The engine with function information for the
          * script.
-         * @param greaph[in] he graph for the script.
+         * @param[in] graph he graph for the script.
          */
         GraphProperties(Engine *engine, const Graph &graph);
 
         /**
          * Copy constructor.
          *
-         * @param rhs[in] Graph properties to copy.
+         * @param[in] rhs Graph properties to copy.
          */
         GraphProperties(const GraphProperties& rhs);
 
         /**
          * Copy constructor.
          *
-         * @param rhs[in] Graph properties to copy.
+         * @param[in] rhs Graph properties to copy.
          */
         GraphProperties& operator = (const GraphProperties& rhs);
 
@@ -386,7 +386,7 @@ struct GraphProperties {
          *
          * Called by write_graphviz from Boost.Graph
          *
-         * @param out[out] The stream write_graphviz is writing to.
+         * @param[out] out The stream write_graphviz is writing to.
          */
         void operator()(std::ostream& out) const;
 

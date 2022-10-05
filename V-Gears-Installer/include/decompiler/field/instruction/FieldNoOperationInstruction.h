@@ -39,12 +39,12 @@ class FieldNoOperationInstruction : public Instruction{
          *
          * It doesn't do anything.
          *
-         * @param func[in] Function to process. Unused.
-         * @param stack[out] Function stack. Unused.
-         * @param engine[in] Engine. Unused.
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in] func Function to process. Unused.
+         * @param[out] stack Function stack. Unused.
+         * @param[in] engine Engine. Unused.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+          Function& func, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
         ) override;
 };

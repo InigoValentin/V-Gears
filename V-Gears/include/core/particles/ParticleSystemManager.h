@@ -44,7 +44,7 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Creates a particle system template.
          *
-         * @param name[in] Name for the template.
+         * @param[in] name Name for the template.
          * @return A new particle system template.
          */
         ParticleSystem* CreateParticleSystemTemplate(const Ogre::String& name);
@@ -52,7 +52,7 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Retrieves a particle system template.
          *
-         * @param template_name[in] The name of the template to retrieve.
+         * @param[in] template_name The name of the template to retrieve.
          * @return The template. 0 if no template with that name was found.
          */
         ParticleSystem* GetParticleSystemTemplate(
@@ -62,15 +62,15 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Gets all template names.
          *
-         * @param v[out] List where the names will be loaded.
+         * @param[out] v List where the names will be loaded.
          */
         void ParticleSystemTemplateNames(std::vector<Ogre::String>& v);
 
         /**
          * Creates a particle system.
          *
-         * @param name[in] Name for the template system.
-         * @param template_name[in] Name for the system template.
+         * @param[in] name Name for the template system.
+         * @param[in] template_name Name for the system template.
          */
         ParticleSystem* CreateParticleSystem(
           const Ogre::String& name, const Ogre::String& template_name
@@ -79,7 +79,7 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Destroys a particle system.
          *
-         * @param particle_system[out] Particle system to destroy.
+         * @param[out] particle_system Particle system to destroy.
          */
         void DestroyParticleSystem(ParticleSystem* particle_system);
 
@@ -93,7 +93,7 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Duplicates a technique.
          *
-         * @param technique[in] Technique to duplicate.
+         * @param[in] technique Technique to duplicate.
          * @return The new, duplicated technique.
          */
         ParticleTechnique* CloneTechnique(ParticleTechnique* technique);
@@ -101,21 +101,21 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Destroys a technique.
          *
-         * @param technique[out] Technique to destroy.
+         * @param[out] technique Technique to destroy.
          */
         void DestroyTechnique(ParticleTechnique* technique);
 
         /**
          * Creates a new particle emitter.
          *
-         * @param emitter_type[in] Type for the emitter.
+         * @param[in] emitter_type Type for the emitter.
          */
         ParticleEmitter* CreateEmitter(const Ogre::String& emitter_type);
 
         /**
          * Duplicates a particle emitter.
          *
-         * @param emitter[in] Emitter to duplicate.
+         * @param[in] emitter Emitter to duplicate.
          * @return The new, duplicated emitter.
          */
         ParticleEmitter* CloneEmitter(ParticleEmitter* emitter);
@@ -123,14 +123,14 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Destroys a particle emitter.
          *
-         * @param emitter[out] Emitter to destroy.
+         * @param[out] emitter Emitter to destroy.
          */
         void DestroyEmitter(ParticleEmitter* emitter);
 
         /**
          * Creates a new particle renderer.
          *
-         * @param renderer_type[in] Type for the renderer.
+         * @param[in] renderer_type Type for the renderer.
          * @return The newly created renderer.
          */
         ParticleRenderer* CreateRenderer(const Ogre::String& renderer_type);
@@ -138,7 +138,7 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Duplicates a renderer.
          *
-         * @param renderer[in] renderer to duplicate.
+         * @param[in] renderer renderer to duplicate.
          * @return The new, duplicated renderer.
          */
         ParticleRenderer* CloneRenderer(ParticleRenderer* renderer);
@@ -146,7 +146,7 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Destroys a renderer.
          *
-         * @param renderer[out] The renderer to destroy.
+         * @param[out] renderer The renderer to destroy.
          */
         void DestroyRenderer(ParticleRenderer* renderer);
 
@@ -155,14 +155,14 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         /**
          * Adds a new {@see ParticleEmitterFactory} to the manager.
          *
-         * @param factory[in] The factory to add to the manager.
+         * @param[in] factory The factory to add to the manager.
          */
         void AddEmitterFactory(ParticleEmitterFactory* factory);
 
         /**
          * Adds a new {@see ParticleRendererFactory} to the manager.
          *
-         * @param factory[in] The factory to add to the manager.
+         * @param[in] factory The factory to add to the manager.
          */
         void AddRendererFactory(ParticleRendererFactory* factory);
 

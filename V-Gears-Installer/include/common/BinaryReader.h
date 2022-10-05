@@ -31,7 +31,7 @@ class BinaryReader{
         /**
          * Reads a file, from start to end.
          *
-         * @oaram file_name[in] Path and name of the file to read.
+         * @param[in] file_name Path and name of the file to read.
          * @return Read bytes.
          * @throws std::runtime_error if the file can't be opened for reading.
          */
@@ -50,7 +50,7 @@ class BinaryReader{
         /**
          * Constructor.
          *
-         * @param data[in] Bytes for the reader
+         * @param[in] data Bytes for the reader
          */
         BinaryReader(std::vector<unsigned char>&& data){
             size_ = data.size();
@@ -68,7 +68,7 @@ class BinaryReader{
         /**
          * Moves the stream cursor.
          *
-         * @param position[in] Position (offset) of the cursor.
+         * @param[in] position Position (offset) of the cursor.
          * @throws DecompilerException if the position is invalid.
          */
         void Seek(unsigned int position){

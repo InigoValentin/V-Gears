@@ -48,9 +48,9 @@ class DataInstaller{
         /**
          * Installer constructor
          *
-         * @param input_dir[in] Path to the directory containing the original
+         * @param[in] input_dir Path to the directory containing the original
          * data to parse.
-         * @param output_dir[in] Path to the directory to write generated data
+         * @param[in] output_dir Path to the directory to write generated data
          * to.
          * @param write_output_line Pointer to function to write output.
          */
@@ -83,7 +83,7 @@ class DataInstaller{
         /**
          * Creates a directory in the outputh path.
          *
-         * @param dir[in] Path of the directory to create, relative to the
+         * @param[in] dir Path of the directory to create, relative to the
          * output path..
          * @throws std::runtime_error If the directory can't be created.
          */

@@ -32,13 +32,12 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param pluginsFileName[in] Path to the plugins file.
-             * @param resourcesFile[in] Path to the resources file.
-             * @param logFileName[in] Path to the log file.
+             * @param[in] pluginsFileName Path to the plugins file.
+             * @param[in] resourcesFile Path to the resources file.
+             * @param[in] logFileName Path to the log file.
              */
             Application(
-              Ogre::String pluginsFileName,
-              Ogre::String resourcesFile, Ogre::String logFileName
+              Ogre::String pluginsFileName, Ogre::String resourcesFile, Ogre::String logFileName
             ): plugins_filename_(pluginsFileName),
                resources_filename_(resourcesFile), log_filename_(logFileName)
             {}
@@ -46,8 +45,8 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param argc[in] Number of command line arguments.
-             * @param argv[in] List of command line arguments.
+             * @param[in] argc Number of command line arguments.
+             * @param[in] argv List of command line arguments.
              */
             Application(int argc, char *argv[]);
 
@@ -59,7 +58,7 @@ namespace VGears{
             /**
              * Initializes the Ogre rendering system.
              *
-             * @param hideWindow[in] True to not show the main window, false to
+             * @param[in] hideWindow True to not show the main window, false to
              * show it.
              * @return True if the system was succesfully initiated, false
              * if there were errors or it was already initialized.
@@ -106,8 +105,8 @@ namespace VGears{
             /**
              * Processes command line arguments.
              *
-             * @param argc[in] Number of command line arguments.
-             * @param argv[in] List of command line arguments.
+             * @param[in] argc Number of command line arguments.
+             * @param[in] argv List of command line arguments.
              * @return True if all arguments were successfully processed, false
              * on error
              */
@@ -247,7 +246,7 @@ namespace VGears{
             bool _initialized = false;
 
             /**
-             * Ogre main component..
+             * Ogre main component.
              */
             std::unique_ptr<Ogre::Root> _root;
 

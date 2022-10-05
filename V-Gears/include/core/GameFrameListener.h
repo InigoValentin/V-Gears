@@ -34,7 +34,7 @@ class GameFrameListener :
         /**
          * Constructor.
          *
-         * @param win[in] Render window.
+         * @param[in] win Render window.
          */
         GameFrameListener(Ogre::RenderWindow* win);
 
@@ -67,63 +67,65 @@ class GameFrameListener :
         /**
          * Event triggered when the window moves.
          *
-         * @param rw[in] The render window.
+         * @param[in] rw The render window.
          */
         virtual void windowMoved(Ogre::RenderWindow *rw);
 
         /**
          * Event triggered when the window changes it's size.
          *
-         * @param rw[in] The render window.
+         * @param[in] rw The render window.
          */
         virtual void windowResized(Ogre::RenderWindow *rw);
 
         /**
          * Event triggered when the window is closed.
          *
-         * @param rw[in] The render window.
+         * @param[in] rw The render window.
          */
         virtual void windowClosed(Ogre::RenderWindow* rw);
 
         /**
          * Event triggered when the window losses or gains the focus.
          *
-         * @param rw[in] The render window.
+         * @param[in] rw The render window.
          */
         virtual void windowFocusChange(Ogre::RenderWindow *rw);
 
         /**
          * Triggered when a key is pressed.
          *
-         * @param e[in] Keyboard event.
+         * @param[in] e Keyboard event.
          */
         bool keyPressed(const OIS::KeyEvent& e);
 
         /**
          * Triggered when a key is released.
          *
-         * @param e[in] Keyboard event.
+         * @param[in] e Keyboard event.
          */
         bool keyReleased(const OIS::KeyEvent& e);
 
         /**
          * Triggered when the mouse moves.
          *
-         * @param e[in] Mouse event.
+         * @param[in] e Mouse event.
          */
         bool mouseMoved(const OIS::MouseEvent &e);
 
         /**
          * Triggered when a mouse button is pressed.
          *
-         * @param e[in] Mouse event.
+         * @param[in] e Mouse event.
+         * @param[in] id ID of the presses mouse button.
          */
         bool mousePressed(const OIS::MouseEvent &e, OIS::MouseButtonID id);
 
         /**
          * Triggered when a mouse button is released.
          *
-         * @param e[in] Mouse event.
+         * @param[in] e Mouse event.
+         * @param[in] id ID of the presses mouse button.
          */
         bool mouseReleased(const OIS::MouseEvent &e, OIS::MouseButtonID id);
 

@@ -33,7 +33,7 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param flevel_file[in] Level file.
+             * @param[in] flevel_file Level file.
              */
             explicit FLevelBackground2DLoader(FLevelFile& flevel_file);
 
@@ -45,7 +45,7 @@ namespace VGears{
             /**
              * Loads a resource.
              *
-             * @param resource[in] The resource to load.
+             * @param[in] resource The resource to load.
              */
             virtual void loadResource(Ogre::Resource *resource);
 

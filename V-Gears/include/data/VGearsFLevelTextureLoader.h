@@ -31,7 +31,7 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param flevel_file[in] The file to load textures from.
+             * @param[in] flevel_file The file to load textures from.
              */
             explicit FLevelTextureLoader(FLevelFile &flevel_file);
 
@@ -43,7 +43,7 @@ namespace VGears{
             /**
              * Loads a resource.
              *
-             * @param resource[in] the resource to load.
+             * @param[in] resource the resource to load.
              */
             virtual void loadResource(Ogre::Resource *resource);
 

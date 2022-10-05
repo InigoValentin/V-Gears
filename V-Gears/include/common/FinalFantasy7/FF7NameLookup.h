@@ -34,7 +34,7 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param file[in] The XML file.
+             * @param[in] file The XML file.
              */
             FF7Metadata(Ogre::String file) : XmlFile(file){
                 TiXmlNode* node = file_.RootElement();
@@ -70,7 +70,7 @@ namespace VGears{
              * animation names. Defined names are more user friendly, more
              * readable and more descriptive.
              *
-             * @param key[in] Original game animation name.
+             * @param[in] key Original game animation name.
              * @return Friendly name associated to the animation, or the
              * original name if there is no name associated.
              */
@@ -91,7 +91,7 @@ namespace VGears{
              * model names. Defined names are more user friendly, more
              * readable and more descriptive.
              *
-             * @param key[in] Original game model name.
+             * @param[in] key Original game model name.
              * @return Friendly name associated to the model, or the
              * original name if there is no name associated.
              */
@@ -110,7 +110,7 @@ namespace VGears{
             /**
              * Reads all models from an XML node.
              *
-             * @param node[in] XML node to read.
+             * @param[in] node XML node to read.
              */
             void ReadModels(TiXmlNode* node){
                 while (node){
@@ -124,7 +124,7 @@ namespace VGears{
             /**
              * Reads all models from an XML node.
              *
-             * @param node[in] XML node to read.
+             * @param[in] node XML node to read.
              */
             void ReadAnimations(TiXmlNode* node){
                 while (node){
@@ -139,7 +139,7 @@ namespace VGears{
             /**
              * Reads all scripts from an XML node.
              *
-             * @param node[in] XML node to read.
+             * @param[in] node XML node to read.
              */
             void ReadScripts(TiXmlNode* node){
                 while (node){
@@ -148,16 +148,14 @@ namespace VGears{
                       && node->ValueStr() == "CharacterIds"
                     ){ReadCharacterIds(node->FirstChild());}
                     else if (
-                      node->Type() == TiXmlNode::TINYXML_ELEMENT
-                      && node->ValueStr() == "var_names"
+                      node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "var_names"
                     ){ReadVarNames(node->FirstChild());}
                     else if (
                       node->Type() == TiXmlNode::TINYXML_ELEMENT
                       && node->ValueStr() == "entity_names"
                     ){ReadEntityNames(node->FirstChild());}
                     else if (
-                      node->Type() == TiXmlNode::TINYXML_ELEMENT
-                      && node->ValueStr() == "field"
+                      node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "field"
                     ){
                         const auto name = GetString(node, "name");
                         ReadField(node->FirstChild(), name);
@@ -169,7 +167,8 @@ namespace VGears{
             /**
              * Reads field information from an XML node.
              *
-             * @param node[in] XML node to read.
+             * @param[in] node XML node to read.
+             * @param[in] name Unused.
              */
             void ReadField(TiXmlNode* node, const std::string& name){
                 while (node){
@@ -190,11 +189,10 @@ namespace VGears{
             /**
              * Reads a function of a field from an XML node.
              *
-             * @param node[in] XML node to read.
+             * @param[in] node XML node to read.
+             * @param[in] field_name The anme of the field.
              */
-            void ReadFunction(
-              TiXmlNode* node, const std::string& field_name
-            ){
+            void ReadFunction(TiXmlNode* node, const std::string& field_name){
                 const auto entity_name = GetString(node, "entity_name");
                 const auto old_name = GetString(node, "name");
                 const auto new_name = GetString(node, "new");
@@ -206,7 +204,7 @@ namespace VGears{
             /**
              * Reads all entity from an XML node.
              *
-             * @param node[in] XML node to read.
+             * @param[in] node XML node to read.
              */
             void ReadEntityNames(TiXmlNode* node){
                 while (node){
@@ -222,7 +220,7 @@ namespace VGears{
             /**
              * Reads all variable names from an XML node.
              *
-             * @param node[in] XML node to read.
+             * @param[in] node XML node to read.
              */
             void ReadVarNames(TiXmlNode* node){
                 while (node){
@@ -239,7 +237,7 @@ namespace VGears{
             /**
              * Reads all character identifiers from an XML node.
              *
-             * @param node[in] XML node to read.
+             * @param[in] node XML node to read.
              */
             void ReadCharacterIds(TiXmlNode* node){
                 while (node){
@@ -256,11 +254,11 @@ namespace VGears{
             /**
              * Retrieves a field script function data.
              *
-             * @param field_name[in] The name of the field from witch to
+             * @param[in] field_name The name of the field from witch to
              * get the data.
-             * @param entity_name[in] Name of the entity rom witch to
+             * @param[in] entity_name Name of the entity rom witch to
              * get the data.
-             * @param old_function_name[in] The original function name.
+             * @param[in] old_function_name The original function name.
              * @return Associated function name pair. An empty pair if the
              * field, entity or function don't exist.
              * @todo Verify documentation for old_function name and return
@@ -369,7 +367,7 @@ namespace VGears{
              * animation names. Defined names are more user friendly, more
              * readable and more descriptive.
              *
-             * @param key[in] Original game animation name.
+             * @param[in] key Original game animation name.
              * @return Friendly name associated to the animation, or the
              * original name if there is no name associated.
              */
@@ -382,7 +380,7 @@ namespace VGears{
              * names. Defined names are more user friendly, more readable and
              * more descriptive.
              *
-             * @param key[in] Original game model name.
+             * @param[in] key Original game model name.
              * @return Friendly name associated to the model, or the original
              * name if there is no name associated.
              */
@@ -394,8 +392,8 @@ namespace VGears{
              * Variables that are frequently used across the game may have an
              * associated name, more fiendly and descriptive.
              *
-             * @param bank[in] Variable bank.
-             * @param addr[in] Variable address.
+             * @param[in] bank Variable bank.
+             * @param[in] addr Variable address.
              * @return Friendly name associated to the variable, or an empty
              * string if it has no associated friendly name.
              */
@@ -418,7 +416,7 @@ namespace VGears{
              * name. Defined names are more user friendly, more readable and
              * more descriptive.
              *
-             * @param old_entity_name[in] Original game entity name.
+             * @param[in] old_entity_name Original game entity name.
              * @return Friendly name associated to the entity, or the original
              * name if there is no name associated.
              */
@@ -431,11 +429,11 @@ namespace VGears{
             /**
              * Matches function comments.
              *
-             * @param field_name[in] The name of the field from witch to
+             * @param[in] field_name The name of the field from witch to
              * get the data.
-             * @param entity_name[in] Name of the entity rom witch to
+             * @param[in] entity_name Name of the entity rom witch to
              * get the data.
-             * @param old_function_name[in] The original function name.
+             * @param[in] old_function_name The original function name.
              * @return Associated function name pair. An empty pair if the
              * field, entity or function don't exist.
              * @todo Does this maps comments, or functions with comments?
@@ -455,11 +453,11 @@ namespace VGears{
              * function name. Defined names are more user friendly, more
              * readable and more descriptive.
              *
-             * @param field_name[in] The name of the field from witch to
+             * @param[in] field_name The name of the field from witch to
              * get the data.
-             * @param entity_name[in] Name of the entity rom witch to
+             * @param[in] entity_name Name of the entity rom witch to
              * get the data.
-             * @param old_function_name[in] The original function name.
+             * @param[in] old_function_name The original function name.
              * @return Associated function name, or the original name if
              * there is no name associated.
              */

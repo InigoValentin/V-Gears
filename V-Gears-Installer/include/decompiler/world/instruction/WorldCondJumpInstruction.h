@@ -30,10 +30,10 @@ class WorldCondJumpInstruction : public CondJumpInstruction{
         /**
          * Processes the instruction.
          *
-         * @param function[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine.
-         * @param code_gen[in] Code generator.
+         * @param[in] function Function to process.
+         * @param[out] stack Function stack.
+         * @param[in] engine Engine.
+         * @param[in] code_gen Code generator.
          */
         virtual void ProcessInst(
           Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
@@ -49,7 +49,7 @@ class WorldCondJumpInstruction : public CondJumpInstruction{
         /**
          * Prints the instruction.
          *
-         * @param output[in] The output to print.
+         * @param[in] output The output to print.
          * @return The same as output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;

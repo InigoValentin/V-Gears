@@ -135,7 +135,7 @@ namespace VGears {
      *
      * The pixels will be 6 bytes in size.
      *
-     * @param block[in] The video RAM block to convert.
+     * @param[in] block The video RAM block to convert.
      * @return A list of pixels.
      */
     static std::vector<std::vector<TxzFileSerializer::PsxPixel>> To2D16bit(
@@ -162,7 +162,7 @@ namespace VGears {
      *
      * The pixels will be 8 bytes in size.
      *
-     * @param block[in] The video RAM block to convert.
+     * @param[in] block The video RAM block to convert.
      * @return A list of pixels.
      */
     static std::vector<std::vector<TxzFileSerializer::PsxPixel4Bit>> To2D8bit(
@@ -185,7 +185,7 @@ namespace VGears {
     /**
      * Turns a component to a 24 byte value.
      *
-     * @param v[in] The component to convert.
+     * @param[in] v The component to convert.
      * @return The component, in 24 bytes.
      */
     static uint8 To24Bit(uint8 v){

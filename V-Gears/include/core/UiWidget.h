@@ -32,16 +32,16 @@ class UiWidget{
         /**
          * Constructor.
          *
-         * @param name[in] Name for the widget.
+         * @param[in] name Name for the widget.
          */
         UiWidget(const Ogre::String& name);
 
         /**
          * Constructor.
          *
-         * @param name[in] Name for the widget.
-         * @param path_name[in] @todo Understand and document.
-         * @param parent[in] Widget to be made parent of the new one.
+         * @param[in] name Name for the widget.
+         * @param[in] path_name @todo Understand and document.
+         * @param[in] parent Widget to be made parent of the new one.
          */
         UiWidget(
           const Ogre::String& name, const Ogre::String& path_name,
@@ -81,7 +81,7 @@ class UiWidget{
         /**
          * Toggles the widget visibility.
          *
-         * @param vivible[in] True to make the widget visible, false to make it
+         * @param[in] visible True to make the widget visible, false to make it
          * invisible.
          */
         void SetVisible(const bool visible);
@@ -103,14 +103,14 @@ class UiWidget{
         /**
          * Add other widget as the widget's child.
          *
-         * @param widget[in] Widget to be made children of this one.
+         * @param[in] widget Widget to be made children of this one.
          */
         void AddChild(UiWidget* widget);
 
         /**
          * Retrieves a children by name.
          *
-         * @param name[in] Name of the children widget to retrieve.
+         * @param[in] name Name of the children widget to retrieve.
          * @return The children widget by the specified name. NULL if the
          * widgets has no direct children by that name.
          */
@@ -119,7 +119,7 @@ class UiWidget{
         /**
          * Retrieves a children by ID.
          *
-         * @param name[in] ID of the children widget to retrieve.
+         * @param[in] id ID of the children widget to retrieve.
          * @return The children widget by the specified name. NULL if the
          * widgets has no direct children by that ID.
          */
@@ -140,7 +140,7 @@ class UiWidget{
         /**
          * Adds an animation to the widget.
          *
-         * @param animation[in] The animation to add.
+         * @param[in] animation The animation to add.
          */
         void AddAnimation(UiAnimation* animation);
 
@@ -162,10 +162,10 @@ class UiWidget{
         /**
          * Plays an animation.
          *
-         * @param animation[in] Animation to play.
-         * @param state[in] Initial animation state.
-         * @param start[in] Seconds at which to start the animation.
-         * @param start[in] Seconds at which to end the animation. -1 to play
+         * @param[in] animation Animation to play.
+         * @param[in] state Initial animation state.
+         * @param[in] start Seconds at which to start the animation.
+         * @param[in] end Seconds at which to end the animation. -1 to play
          * it in full.
          */
         void PlayAnimation(
@@ -178,8 +178,8 @@ class UiWidget{
          *
          * The animation will be played from the start for it's full length.
          *
-         * @param animation[in] The name of the animation to play.
-         * @todo It uses the parameter UiAnimation::DEFAULT. Whats does it do?
+         * @param[in] name The name of the animation to play.
+         * @todo It uses the parameter UiAnimation::DEFAULT. What does it do?
          * Does it play the animation in a loop, or uses a default value of the
          * specific animation.
          */
@@ -191,38 +191,37 @@ class UiWidget{
          * The animation will be played from the start for it's full length,
          * only once.
          *
-         * @param animation[in] The name of the animation to play.
+         * @param[in] name The name of the animation to play.
          */
         void ScriptPlayAnimationStop(const char* name);
 
         /**
-         * @param name[in] Name of the animation to play.
-         * @param start[in] Seconds at which to start the animation.
-         * @param start[in] Seconds at which to end the animation. -1 to play
+         * @param[in] name Name of the animation to play.
+         * @param[in] start Seconds at which to start the animation.
+         * @param[in] end Seconds at which to end the animation. -1 to play
          * it in full.
          * @todo It uses the parameter UiAnimation::DEFAULT. Whats does it do?
          * Does it play the animation in a loop, or uses a default value of the
          * specific animation.
          */
-        void ScriptPlayAnimation(
-          const char* name, const float start, const float end
-        );
+        void ScriptPlayAnimation(const char* name, const float start, const float end);
 
         /**
          * Plays an animation.
          *
          * The animation will be played only once.
          *
-         * @param animation[in] The name of the animation to play.
+         * @param[in] name The name of the animation to play.
+         * @param[in] start Seconds at which to start the animation.
+         * @param[in] end Seconds at which to end the animation. -1 to play
+         * it in full.
          */
-        void ScriptPlayAnimationStop(
-          const char* name, const float start, const float end
-        );
+        void ScriptPlayAnimationStop(const char* name, const float start, const float end);
 
         /**
          * Sets the default animation for the widget.
          *
-         * @param animation[in] The name of the default animation.
+         * @param[in] animation The name of the default animation.
          */
         void ScriptSetDefaultAnimation(const char* animation);
 
@@ -292,14 +291,14 @@ class UiWidget{
         /**
          * Sets the widget horizontal alignment.
          *
-         * @poaram align[in] Widget alignment.
+         * @param[in] align Widget alignment.
          */
         void SetAlign(const UiWidget::Align align);
 
         /**
          * Sets the widget vertical alignment.
          *
-         * @poaram align[in] Widget alignment.
+         * @param[in] valign Widget alignment.
          */
         void SetVerticalAlign(const UiWidget::VerticalAlign valign);
 
@@ -313,7 +312,7 @@ class UiWidget{
         /**
          * Retrieves the coordinates of the widget after a transformation.
          *
-         * @return The final coordinater.
+         * @return The final coordinates.
          */
         Ogre::Vector2 GetFinalOrigin() const;
 
@@ -347,120 +346,126 @@ class UiWidget{
          * @todo What is a scissor?
          */
         Ogre::Vector4 GetFinalScissor(bool& scissor) const;
+
+        /**
+         * Retrieves the final rotation of the widget.
+         *
+         * @return The final orientation.
+         */
         float GetFinalRotation() const;
 
         /**
          * Sets the X coordinate origin for the widget.
          *
-         * @param percent[in] @todo
-         * @param x[in] Origin X coordinate.
+         * @param[in] percent @todo
+         * @param[in] x Origin X coordinate.
          */
         void SetOriginX(const float percent, const float x);
 
         /**
          * Sets the Y coordinate origin for the widget.
          *
-         * @param percent[in] @todo
-         * @param y[in] Origin Y coordinate.
+         * @param[in] percent @todo
+         * @param[in] y Origin Y coordinate.
          */
         void SetOriginY(const float percent, const float y);
 
         /**
          * Sets the X coordinate for the widget.
          *
-         * @param percent[in] @todo
-         * @param x[in] The X coordinate.
+         * @param[in] percent @todo
+         * @param[in] x The X coordinate.
          */
         void SetX(const float percent, const float x);
 
         /**
          * Retrieves the X coordinate for the widget.
          *
-         * @param percent[out] @todo
-         * @param x[out] The X coordinate will be loaded here.
+         * @param[out] percent @todo
+         * @param[out] x The X coordinate will be loaded here.
          */
         void GetX(float& percent, float& x);
 
         /**
          * Sets the Y coordinate for the widget.
          *
-         * @param percent[in] @todo
-         * @param y[in] The Y coordinate.
+         * @param[in] percent @todo
+         * @param[in] y The Y coordinate.
          */
         void SetY(const float percent, const float y);
 
         /**
          * Retrieves the Y coordinate for the widget.
          *
-         * @param percent[out] @todo
-         * @param y[out] The Y coordinate will be loaded here.
+         * @param[out] percent @todo
+         * @param[out] y The Y coordinate will be loaded here.
          */
         void GetY(float& percent, float& y);
 
         /**
          * Sets the widget Z-index.
          *
-         * @param z[in] The Z-index.
+         * @param[in] z The Z-index.
          */
         void SetZ(const float z);
 
         /**
          * Sets the width the widget.
          *
-         * @param percent[in] @todo
-         * @param width[in] The widget width.
+         * @param[in] percent @todo
+         * @param[in] width The widget width.
          */
         void SetWidth(const float percent, const float width);
 
         /**
          * Retrieves the width of the widget.
          *
-         * @param percent[out] @todo
-         * @param width[out] The width will be loaded here.
+         * @param[out] percent @todo
+         * @param[out] width The width will be loaded here.
          */
         void GetWidth(float& percent, float& width);
 
         /**
          * Sets the height the widget.
          *
-         * @param percent[in] @todo
-         * @param height[in] The widget height.
+         * @param[in] percent @todo
+         * @param[in] height The widget height.
          */
         void SetHeight(const float percent, const float height);
 
         /**
          * Retrieves the height of the widget.
          *
-         * @param percent[out] @todo
-         * @param height[out] The height will be loaded here.
+         * @param[out] percent @todo
+         * @param[out] height The height will be loaded here.
          */
         void GetHeight(float& percent, float& height);
 
         /**
          * Sets the widget scale.
          *
-         * @param scale[in] The new widget scale.
+         * @param[in] scale The new widget scale.
          */
         void SetScale(const Ogre::Vector2& scale);
 
         /**
          * Sets the widget rotation.
          *
-         * @param scale[in] The new widget rotation.
+         * @param[in] degree The new widget rotation.
          */
         void SetRotation(const float degree);
 
         /**
          * Sets the widget scissor area.
          *
-         * @param percent_x1[in] @todo Undersnd and document.
-         * @param x1[in] @todo Undersnd and document.
-         * @param percent_y1[in] @todo Undersnd and document.
-         * @param y1[in] @todo Undersnd and document.
-         * @param percent_x2[in] @todo Undersnd and document.
-         * @param x2[in] @todo Undersnd and document.
-         * @param percent_y2[in] @todo Undersnd and document.
-         * @param y2[in] @todo Undersnd and document.
+         * @param[in] percent_x1 @todo Undersnd and document.
+         * @param[in] x1 @todo Undersnd and document.
+         * @param[in] percent_y1 @todo Undersnd and document.
+         * @param[in] y1 @todo Undersnd and document.
+         * @param[in] percent_x2 @todo Undersnd and document.
+         * @param[in] x2 @todo Undersnd and document.
+         * @param[in] percent_y2 @todo Undersnd and document.
+         * @param[in] y2 @todo Undersnd and document.
          */
         void SetScissorArea(
           const float percent_x1, const float x1, const float percent_y1,
@@ -471,7 +476,7 @@ class UiWidget{
         /**
          * @todo Understand and document.
          *
-         * @param global[in] @todo Understand and document.
+         * @param[in] global @todo Understand and document.
          */
         void SetGlobalScissor(const bool global);
 
@@ -480,9 +485,9 @@ class UiWidget{
          *
          * It set the same colour for all corners.
          *
-         * @param r[in] Colour red component (0-255).
-         * @param g[in] Colour green component (0-255).
-         * @param b[in] Colour blue component (0-255).
+         * @param[in] r Colour red component (0-255).
+         * @param[in] g Colour green component (0-255).
+         * @param[in] b Colour blue component (0-255).
          */
         void SetColour(const float r, const float g, const float b);
 
@@ -492,24 +497,24 @@ class UiWidget{
          * It set the same colours for each corner, and blends it in the
          * interior.
          *
-         * @param r1[in] Colour red component for the top-left corner (0-255).
-         * @param g1[in] Colour green component for the top-left corner
+         * @param[in] r1 Colour red component for the top-left corner (0-255).
+         * @param[in] g1 Colour green component for the top-left corner
          * (0-255).
-         * @param b1[in] Colour blue component for the top-left corner (0-255).
-         * @param r2[in] Colour red component for the top-right corner (0-255).
-         * @param g2[in] Colour green component for the top-right corner
+         * @param[in] b1 Colour blue component for the top-left corner (0-255).
+         * @param[in] r2 Colour red component for the top-right corner (0-255).
+         * @param[in] g2 Colour green component for the top-right corner
          * (0-255).
-         * @param b2[in] Colour blue component for the top-right corner (0-255).
-         * @param r3[in] Colour red component for the bottom-right corner (0-255).
-         * @param g3[in] Colour green component for the bottom-right corner
+         * @param[in] b2 Colour blue component for the top-right corner (0-255).
+         * @param[in] r3 Colour red component for the bottom-right corner (0-255).
+         * @param[in] g3 Colour green component for the bottom-right corner
          * (0-255).
-         * @param b3[in] Colour blue component for the bottom-right corner
+         * @param[in] b3 Colour blue component for the bottom-right corner
          * (0-255).
-         * @param r4[in] Colour red component for the bottom-left corner
+         * @param[in] r4 Colour red component for the bottom-left corner
          * (0-255).
-         * @param g4[in] Colour green component for the bottom-left corner
+         * @param[in] g4 Colour green component for the bottom-left corner
          * (0-255).
-         * @param b4[in] Colour blue component for the bottom-left corner
+         * @param[in] b4 Colour blue component for the bottom-left corner
          * (0-255).
          */
         void SetColours(
@@ -522,7 +527,7 @@ class UiWidget{
         /**
          * Sets the widget transparency.
          *
-         * @param a[in] Alpha value (0 opaque, 255 fully transparent).
+         * @param[in] a Alpha value (0 opaque, 255 fully transparent).
          */
         void SetAlpha(const float a);
 

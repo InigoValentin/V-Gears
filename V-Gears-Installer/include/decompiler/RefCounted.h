@@ -48,14 +48,14 @@ class RefCounted{
 /**
  * Add a reference to a pointer.
  *
- * @param ptr[in] Pointer to reference.
+ * @param[in] ptr Pointer to reference.
  */
 inline void intrusive_ptr_add_ref(RefCounted *ptr){++ (ptr->ref_count_);}
 
 /**
  * Remove a reference from a pointer.
  *
- * @param ptr[in] Pointer to de-reference.
+ * @param[in] ptr Pointer to de-reference.
  */
 inline void intrusive_ptr_release(RefCounted *ptr){
     if (-- (ptr->ref_count_) == 0) delete ptr;

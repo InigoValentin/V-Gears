@@ -29,7 +29,7 @@ class EntityTrigger{
         /**
          * Constructor.
          *
-         * @param name[in] The trigger name.
+         * @param[in] name The trigger name.
          */
         EntityTrigger(const Ogre::String& name);
 
@@ -55,7 +55,7 @@ class EntityTrigger{
          *
          * When disabled, all the activators are removed.
          *
-         * @param enabled[in] True to enable the trigger, false to disable it.
+         * @param[in] enabled True to enable the trigger, false to disable it.
          */
         void SetEnabled(const bool enabled);
 
@@ -69,21 +69,21 @@ class EntityTrigger{
         /**
          * Adds an activator to the trigger.
          *
-         * @param activator[in] Trigger activator entity.
+         * @param[in] activator Trigger activator entity.
          */
         void AddActivator(Entity* activator);
 
         /**
          * Removes an activator from the trigger.
          *
-         * @param activator[in] Entity to remove as activator.
+         * @param[in] activator Entity to remove as activator.
          */
         void RemoveActivator(Entity* activator);
 
         /**
          * Checks if an entity is an activator of the trigger.
          *
-         * @param activator[in] Entity to test as an activator.
+         * @param[in] activator Entity to test as an activator.
          * @return True if the entity is an activator, false otherwise.
          */
         bool IsActivator(Entity* activator);
@@ -91,8 +91,8 @@ class EntityTrigger{
         /**
          * Sets the vertices of the line that acts as the trigger.
          *
-         * @param point1[in] One of the vertices of the line.
-         * @param point2[in] One of the vertices of the line.
+         * @param[in] point1 One of the vertices of the line.
+         * @param[in] point2 One of the vertices of the line.
          */
         void SetPoints(
           const Ogre::Vector3& point1, const Ogre::Vector3& point2

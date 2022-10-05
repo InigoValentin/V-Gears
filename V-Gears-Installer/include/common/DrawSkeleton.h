@@ -43,17 +43,17 @@ typedef std::vector<Bone> Skeleton;
 /**
  * Draws a skeleton.
  *
- * @param skeleton[in] The skeleton to draw.
- * @param mesh[in] Parent mesh for the skeleton.
+ * @param[in] skeleton The skeleton to draw.
+ * @param[in] mesh Parent mesh for the skeleton.
  */
 void DrawSkeleton(const Skeleton& skeleton, const Ogre::MeshPtr& mesh);
 
 /**
  * Draws a bone.
  *
- * @param skeleton[in] Skeleton the bone belongs to.
- * @param parent_index[in] The parent bone ID.
- * @param colours[in] Colour for the bone.
+ * @param[in] skeleton Skeleton the bone belongs to.
+ * @param[in] parent_index The parent bone ID.
+ * @param[in] colours Colour for the bone.
  */
 void DrawBone(const Skeleton& skeleton, int parent_index, Ogre::RGBA* colours);
 

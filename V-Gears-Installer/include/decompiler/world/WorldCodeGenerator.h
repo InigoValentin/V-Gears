@@ -27,8 +27,8 @@ class WorldCodeGenerator : public CodeGenerator{
         /**
          * Constructor.
          *
-         * @param engine[in] The engine.
-         * @param output[out] The generated script.
+         * @param[in] engine The engine.
+         * @param[out] output The generated script.
          */
         WorldCodeGenerator(Engine *engine, std::ostream &output);
 
@@ -49,9 +49,9 @@ class WorldCodeGenerator : public CodeGenerator{
         /**
          * Processes special metadata in an instruction.
          *
-         * @param inst[in] The instruction to process.
-         * @param c[in]
-         * @param pos[in]
+         * @param[in] inst The instruction to process.
+         * @param[in] c
+         * @param[in] pos
          * @todo understand and document.
          */
         virtual void ProcessSpecialMetadata(const InstPtr inst, char c, int pos);
@@ -64,9 +64,9 @@ class WorldCodeGenerator : public CodeGenerator{
          * The function signature is the LUA function declaration, and it
          * looks like this:
          *
-         * <function_name> = function(self)
+         * function_name = function(self)
          *
-         * @param function[in] The function to construct the signature for.
+         * @param[in] function The function to construct the signature for.
          * @return The function signature.
          */
         std::string ConstructFuncSignature(const Function &function);

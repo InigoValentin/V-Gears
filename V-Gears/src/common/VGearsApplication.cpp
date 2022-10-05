@@ -39,8 +39,7 @@
 #include "data/VGearsMapListFile.h"
 #include "vgears_version.h"
 
-template<> VGears::Application
-  *Ogre::Singleton<VGears::Application>::msSingleton = nullptr;
+template<> VGears::Application* Ogre::Singleton<VGears::Application>::msSingleton = nullptr;
 
 namespace VGears{
 

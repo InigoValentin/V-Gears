@@ -34,35 +34,34 @@ ConfigVar cv_debug_grid("debug_grid", "Draw debug grid", "false");
 ConfigVar cv_debug_axis("debug_axis", "Draw debug axis", "false");
 
 /**
- * Calculates the point elevation.
+ * Calculates the point elevation over a plane.
  *
- * @param point[in] Point to calculate the elevation of.
- * @param A[in] @todo
- * @param B[in] @todo
- * @param C[in] @todo
+ * @param[in] point Point to calculate the elevation of.
+ * @param[in] a First point of the plane.
+ * @param[in] b Second point of the plane.
+ * @param[in] c Third  point of the plane.
  * @return The elevation of the point.
- * @todo Understand and document better.
  */
 float PointElevation(
   const Ogre::Vector2& point,
-  const Ogre::Vector3& A, const Ogre::Vector3& B, const Ogre::Vector3& C
+  const Ogre::Vector3& a, const Ogre::Vector3& b, const Ogre::Vector3& c
 ){
     // TODO: Declare function in header file.
-    float _A = A.z * (B.y - C.y) + B.z * (C.y - A.y) + C.z * (A.y - B.y);
-    float _B = A.y * (B.x - C.x) + B.y * (C.x - A.x) + C.y * (A.x - B.x);
-    float _C = A.x * (B.z - C.z) + B.x * (C.z - A.z) + C.x * (A.z - B.z);
-    float _D
-      = A.x * (B.z * C.y - C.z * B.y) + B.x * (C.z * A.y - A.z * C.y)
-        + C.x * (A.z * B.y - B.z * A.y);
-    return (_D - _C * point.y - _A * point.x) / _B;
+    float _a = a.z * (b.y - c.y) + b.z * (c.y - a.y) + c.z * (a.y - b.y);
+    float _b = a.y * (b.x - c.x) + b.y * (c.x - a.x) + c.y * (a.x - b.x);
+    float _c = a.x * (b.z - c.z) + b.x * (c.z - a.z) + c.x * (a.z - b.z);
+    float _d
+      = a.x * (b.z * c.y - c.z * b.y) + b.x * (c.z * a.y - a.z * c.y)
+        + c.x * (a.z * b.y - b.z * a.y);
+    return (_d - _c * point.y - _a * point.x) / _b;
 }
 
 /**
  * @todo Understand and document.
  *
- * @param point[in] @todo
- * @param p1[in] @todo
- * @param p2[in] @todo
+ * @param[in] point @todo
+ * @param[in] p1 @todo
+ * @param[in] p2 @todo
  * @return @todo
  */
 float SideOfVector(
@@ -77,12 +76,14 @@ float SideOfVector(
 /**
  * Calculates the square distance between a point and a line.
  *
- * @param
+ * The calculated distance is the vector orthogonal to the line that
+ * passes by the point, i.e. the shortest distance.
  *
- * @param point[in] @todo
- * @param p1[in] @todo
- * @param p2[in] @todo
- * @return @todo
+ * @param[in] point The point.
+ * @param[in] point_a First point of the line.
+ * @param[in] point_b Second point of the line.
+ * @param[out] proj Vector representing the shortest distance.
+ * @return The distance from the point to the line.
  */
 float SquareDistanceToLine(
   const Ogre::Vector3& point, const Ogre::Vector3& point_a, const Ogre::Vector3& point_b,
@@ -114,8 +115,8 @@ float SquareDistanceToLine(
 /**
  * Calculates the direction degree between to points.
  *
- * @param current_point[in] Origin point.
- * @param current_point[in] Destination point.
+ * @param[in] current_point Origin point.
+ * @param[in] direction_point Next point in the direction.
  * @return Degrees between the two points
  */
 Ogre::Degree GetDirectionToPoint(

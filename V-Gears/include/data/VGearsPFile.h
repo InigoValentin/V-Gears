@@ -43,15 +43,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -91,10 +91,10 @@ namespace VGears{
              * A resource group includes a bone, a mesh and a graphical
              * resource.
              *
-             * @param mesh[in] The mesh to add to the group.
-             * @param bone_name[in] The bone in the skeleton to which to add
+             * @param[in] mesh The mesh to add to the group.
+             * @param[in] bone_name The bone in the skeleton to which to add
              * the group. The bone must be in a skeleton assigned to MESH.
-             * @param rsd[in] File with the resource to add to the group.
+             * @param[in] rsd File with the resource to add to the group.
              */
             virtual void AddGroups(
               Ogre::Mesh *mesh, const String &bone_name, const RSDFilePtr &rsd
@@ -379,11 +379,11 @@ namespace VGears{
              * A resource group includes a bone, a mesh and a graphical
              * resource.
              *
-             * @param group[in] The group to add to the file.
-             * @param mo[in|out] The object to add to the group.
-             * @param sub_name[in] Name for mo.
-             * @param material_base_name[in] Name of the material for mo.
-             * @param bone[in] The bone to assign to bo.
+             * @param[in] group The group to add to the file.
+             * @param[in,out] mo The object to add to the group.
+             * @param[in] sub_name Name for mo.
+             * @param[in] material_base_name Name of the material for mo.
+             * @param[in] bone The bone to assign to bo.
              */
             virtual void AddGroup(
               const Group &group, ManualObject &mo, const String &sub_name,
@@ -393,7 +393,7 @@ namespace VGears{
             /**
              * Retrieves the position of a bone.
              *
-             * @param bone[in] The bone.
+             * @param[in] bone The bone.
              * @return The position of the bone.
              */
             virtual Ogre::Vector3 GetPosition(const Ogre::Bone *bone) const;

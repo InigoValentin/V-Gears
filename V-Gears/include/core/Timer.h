@@ -65,7 +65,7 @@ class Timer : public Ogre::Singleton<Timer>{
          *
          * It can also be used to subtract time, but it will never get below 0.
          *
-         * @param time[in] The time to add?
+         * @param[in] time The time to add?
          * @todo What are the units? seconds?
          */
         void AddTime(const float time);
@@ -73,7 +73,7 @@ class Timer : public Ogre::Singleton<Timer>{
         /**
          * Sets the game timer.
          *
-         * @param timer[in] The new game timer.
+         * @param[in] timer The new game timer.
          * @todo Understand and document.
          */
         void SetGameTimer(const float timer);

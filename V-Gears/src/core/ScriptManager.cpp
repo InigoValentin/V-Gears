@@ -33,8 +33,8 @@ Ogre::String script_entity_type[] = {"SYSTEM", "ENTITY", "UI"};
 /**
  * Compares the priority of two scripts.
  *
- * @param a[in] The first script to compare.
- * @param b[in] The second script to compare.
+ * @param[in] a The first script to compare.
+ * @param[in] b The second script to compare.
  * @return True if the script a has a lower priority number than b, false if a
  * has a higher or equal priority than b.
  */

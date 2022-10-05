@@ -30,25 +30,25 @@ class FontFile : public File{
         /**
          * Constructor.
          *
-         * @param file[in] The font file.
+         * @param[in] file The font file.
          */
         explicit  FontFile(File* file);
 
         /**
          * Constructor.
          *
-         * @param file[in] The font file.
-         * @param offset[in] The offset at which to start reading the file.
-         * @param length[in] Length of the data to read.
+         * @param[in] file The font file.
+         * @param[in] offset The offset at which to start reading the file.
+         * @param[in] length Length of the data to read.
          */
         FontFile(File* file, const u32& offset, const u32& length);
 
         /**
          * Constructor.
          *
-         * @param file[in] Buffer with the contents of the font file.
-         * @param offset[in] The offset at which to start reading the file.
-         * @param length[in] Length of the data to read.
+         * @param[in] buffer Buffer with the contents of the font file.
+         * @param[in] offset The offset at which to start reading the file.
+         * @param[in] length Length of the data to read.
          */
         FontFile(u8* buffer, const u32& offset, const u32& length);
 

@@ -97,7 +97,7 @@ class FieldDecompiler: public Decompiler{
         /**
          * Retrieves the scale factor of a field.
          *
-         * @param script_bytes[in] Vector of raw byte data that makes up
+         * @param[in] script_bytes Vector of raw byte data that makes up
          * the script.
          * @return The scale fctor.
          */
@@ -106,15 +106,15 @@ class FieldDecompiler: public Decompiler{
         /**
          * Decompiles a field script.
          *
-         * @param script_name[in] Name of the script to be converted,
+         * @param[in] script_name Name of the script to be converted,
          * should match file name.
-         * @param script_bytes[in] Vector of raw byte data that makes up
+         * @param[in] script_bytes Vector of raw byte data that makes up
          * the script.
-         * @param formatter[in] Formatter used to rename variables, drop
+         * @param[in] formatter Formatter used to rename variables, drop
          * functions...
-         * @param text_after[in] Raw text that is added at to the end of
+         * @param[in] text_after Raw text that is added at to the end of
          * the decompiled output.
-         * @param text_before[in] Raw text that is added at to the start of
+         * @param[in] text_before Raw text that is added at to the start of
          * the decompiled output.
          * @return A string with the decompiled script.
          * @throws DecompilerException on failure.

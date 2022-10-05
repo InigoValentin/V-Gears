@@ -31,7 +31,7 @@
 /**
  * Command to quit the application.
  *
- * @param params[in] Command parameters. Ignored.
+ * @param[in] params Command parameters. Ignored.
  */
 void CmdQuit(const Ogre::StringVector& params){
     VGears::g_ApplicationState = VGears::G_EXIT;
@@ -40,7 +40,7 @@ void CmdQuit(const Ogre::StringVector& params){
 /**
  * Command to print to console.
  *
- * @param params[in] Command parameters. All of them will be concatenated and
+ * @param[in] params Command parameters. All of them will be concatenated and
  * printed. If none are supplied, a command usage text will be printed instead.
  */
 void CmdEcho(const Ogre::StringVector& params){
@@ -61,7 +61,7 @@ void CmdEcho(const Ogre::StringVector& params){
 /**
  * Searches variables in the variable list and prints them.
  *
- * @param params[in] Command parameters. The first one is the command name. If
+ * @param[in] params Command parameters. The first one is the command name. If
  * no more are passed, all variables will be printed. If another parameter is
  * passed, the variables with that name (if any) will be printed. If more than
  * two parameter are passed, a command usage string will be printed instead.
@@ -104,7 +104,7 @@ void CmdConfigVarList(const Ogre::StringVector& params){
 /**
  * Searches the command list and prints the comands.
  *
- * @param params[in] Command parameters. The first one is the command name. If
+ * @param[in] params Command parameters. The first one is the command name. If
  * no more is passed, all commands will be printed. If another parameter is
  * passed, the command with that name (if any) will be printed. If more than
  * two parameter are passed, a command usage string will be printed instead.
@@ -141,7 +141,7 @@ void CmdConfigCmdList(const Ogre::StringVector& params){
 /**
  * Sets the value of a configuration value.
  *
- * @param params[in] Command parameters. The first one is the command name. The
+ * @param[in] params Command parameters. The first one is the command name. The
  * second one is a variable name. The third one is optional and is a value for
  * the variable. If a value is supplied, the variable will be given that value.
  * If not, the variable will be reset to it's default value. If there is no
@@ -182,7 +182,7 @@ void CmdSetConfigVar(const Ogre::StringVector& params)
 /**
  * Changes the value of a configuration value conditionally.
  *
- * @param params[in] Command parameters. The first one is the command name. The
+ * @param[in] params Command parameters. The first one is the command name. The
  * next ones are possible values for the variables. If the value of the
  * variable is the current one, the next one will be assigned. Once the value
  * is changed once, no more steps will be taken and the function will return.
@@ -219,7 +219,7 @@ void CmdToggleConfigVar(const Ogre::StringVector& params){
 /**
  * Increments the value of a configuration variable.
  *
- * @param params[in] Command parameters. Exactly five must be provided. The
+ * @param[in] params Command parameters. Exactly five must be provided. The
  * first one is the command name. The second one is the variable to increment.
  * The third one is the minimum value the variable will take. The fourth one is
  * the maximum value the variable will take. The fifth value is the increment
@@ -254,7 +254,7 @@ void CmdIncrementConfigVar(const Ogre::StringVector& params){
 /**
  * Configures the log level.
  *
- * @param params[in] Command parameters. Exactly two must be provided. The
+ * @param[in] params Command parameters. Exactly two must be provided. The
  * first one is the command name. The second one is the log level. Accepted
  * values are 1 (only errors), 2 (errors and warnings) and 3 (all). If there
  * are more or less than five parameters, a usage text will be printed and
@@ -303,7 +303,7 @@ void CmdSetLogLevel(const Ogre::StringVector& params){
 /**
  * Changes the game map.
  *
- * @param params[in] Command parameters. Exactly two must be provided. The
+ * @param[in] params Command parameters. Exactly two must be provided. The
  * first one is the command name. The second one is the map ID. If there
  * are more or less than five parameters, a usage text will be printed and
  * nothing will be done.
@@ -323,7 +323,7 @@ void CmdMap(const Ogre::StringVector& params){
 /**
  * Loads a list of map names.
  *
- * @param complete_params[in] The map names will be loaded here.
+ * @param[in] complete_params The map names will be loaded here.
  */
 void CmdMapCompletion(Ogre::StringVector& complete_params){
     XmlMapsFile xml("./data/maps.xml");
@@ -333,7 +333,7 @@ void CmdMapCompletion(Ogre::StringVector& complete_params){
 /**
  * Sets the resolution and full screen mode.
  *
- * @param params[in] Command parameters. Three or four must be provided. The
+ * @param[in] params Command parameters. Three or four must be provided. The
  * first one is the command name. The second one is the resolution width. The
  * third one is the resolution height. The fourth one is optional and can be
  * used to toggle the full screen. "true", "yes" or 1 will set the game in full
@@ -371,7 +371,7 @@ void CmdResolution(const Ogre::StringVector& params){
  * in pixels and [f] is the full screen state (0 for windowed mode, 1 for full
  * screen)
  *
- * @param complete_params[in] The resolution modes will be loaded here.
+ * @param[in] complete_params The resolution modes will be loaded here.
  */
 void CmdResolutionCompletition(Ogre::StringVector& complete_params){
     complete_params.push_back("640 480 0");

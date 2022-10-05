@@ -35,8 +35,8 @@ struct Function {
         /**
          * Constructor.
          *
-         * @param start_addr[in] Address of the first instruction in the function.
-         * @param end_addr[in] Address of the last instruction in the function
+         * @param[in] start_addr Address of the first instruction in the function.
+         * @param[in] end_addr Address of the last instruction in the function
          */
         Function(uint32 start_addr, uint32 end_addr):
           start_addr(start_addr), end_addr(end_addr), num_instructions(0), ret_val(true){}

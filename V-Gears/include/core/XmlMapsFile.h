@@ -28,7 +28,7 @@ class XmlMapsFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the maps file.
+         * @param[in] file Path to the maps file.
          */
         XmlMapsFile(const Ogre::String& file);
 
@@ -40,7 +40,7 @@ class XmlMapsFile : public XmlFile{
         /**
          * Retrieves a map file by map name.
          *
-         * @param name[in] Name of the map to look for.
+         * @param[in] name Name of the map to look for.
          * @return Path to the specified map file, or an empty string if there
          * is no file for such map.
          */
@@ -49,7 +49,7 @@ class XmlMapsFile : public XmlFile{
         /**
          * Retrieves a list of map names.
          *
-         * @param complete_params[out] The list of map names will be loaded
+         * @param[out] complete_params The list of map names will be loaded
          * here.
          */
         void GetMapNames(Ogre::StringVector& complete_params);

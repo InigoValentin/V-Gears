@@ -25,7 +25,7 @@ namespace VGears{
     /**
      * A manager for map list files.
      */
-    class MapListFileManager :
+    class MapListFileManager:
       public Ogre::ResourceManager, public Ogre::Singleton<MapListFileManager>
     {
 
@@ -58,19 +58,19 @@ namespace VGears{
             /**
              * Loads the manager.
              *
-             * @param name[in] The unique name of the manager.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the manager.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
              * ever causes it to unload. Therefore provision of a proper
              * ManualResourceLoader instance is strongly recommended.
-             * @param create_params[in] Unused.
+             * @param[in] create_params Unused.
              */
             virtual Ogre::Resource *createImpl(
               const Ogre::String &name, Ogre::ResourceHandle handle,
@@ -90,15 +90,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -176,8 +176,8 @@ namespace VGears{
             /**
              * Imports a map list file.
              *
-             * @param stream[in] The contents of the map list file.
-             * @param dest[out] The formed map list file.
+             * @param[in] stream The contents of the map list file.
+             * @param[out] dest The formed map list file.
              */
             void ImportMapListFile(
               Ogre::DataStreamPtr &stream, MapListFile& dest

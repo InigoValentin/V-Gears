@@ -178,14 +178,14 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Handles an input event.
          *
-         * @param event[in] The event to handle.
+         * @param[in] event The event to handle.
          */
         void Input(const VGears::Event& event);
 
         /**
          * Updates the state of all scripts of a given type.
          *
-         * @param type[in] Type of the scripts to update.
+         * @param[in] type Type of the scripts to update.
          */
         void Update(const Type type);
 
@@ -194,7 +194,7 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
          *
          * No errors are handled, and nothing is returned
          *
-         * @param lua[in] Lua string to run.
+         * @param[in] lua Lua string to run.
          */
         void RunString(const Ogre::String& lua);
 
@@ -203,7 +203,7 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
          *
          * No errors are handled, and nothing is returned
          *
-         * @param file[in] Path to the lua file to run (relative to the
+         * @param[in] file Path to the lua file to run (relative to the
          * data directory).
          */
         void RunFile(const Ogre::String& file);
@@ -223,9 +223,9 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Adds an entity to the manager.
          *
-         * @param type[in] Type of entity to add.
-         * @param entity_name[in] The entity name.
-         * @param entity[in] The entity to add.
+         * @param[in] type Type of entity to add.
+         * @param[in] entity_name The entity name.
+         * @param[in] entity The entity to add.
          */
         void AddEntity(
           const Type type, const Ogre::String& entity_name, Entity* entity
@@ -237,17 +237,17 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
          * If there is no entity with name ENTITY_NAME and type TYPE, nothing
          * will be done.
          *
-         * @param type[in] Type of the entity to remove.
-         * @param entity_name[in] NAme of the entity to remove.
+         * @param[in] type Type of the entity to remove.
+         * @param[in] entity_name NAme of the entity to remove.
          */
         void RemoveEntity(const Type type, const Ogre::String& entity_name);
 
         /**
          * Adds an script to an entity.
          *
-         * @param entity_name[in] Name of the entity to add a script to.
-         * @param function_name[in] Name of the script to add.
-         * @param priority[in] Script priority. Lower numbers have higher
+         * @param[in] entity_name Name of the entity to add a script to.
+         * @param[in] function_name Name of the script to add.
+         * @param[in] priority Script priority. Lower numbers have higher
          * priority.
          */
         void AddEntityScript(
@@ -258,17 +258,18 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Removes the top script of an entity.
          *
-         * @param entiry[in] Enthity whose first script to remove.
+         * @param[in] entity Enthity whose first script to remove.
          */
         void RemoveEntityTopScript(ScriptEntity& entity);
 
         /**
-         * @todo Understand and document.
+         * Retrieves a table.
          *
-         * @param type[in] Type of script.
-         * @param name[in] Script name.
-         * @param state[in] Initial script state.
-         * @return @todo.
+         * @param[in] type Type of script.
+         * @param[in] name Script name.
+         * @param[in] state Initial script state.
+         * @return The table.
+         * @todo Understand and document.
          */
         luabind::object GetTableByEntityName(
           const ScriptManager::Type type, const Ogre::String& name,
@@ -278,7 +279,7 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Retrieves a script from it's ID.
          *
-         * @param script[in] Script ID.
+         * @param[in] script Script ID.
          * @return The script with the corresponding ID, or nullptr if there is
          * none
          */
@@ -287,8 +288,8 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Retrieves a script entity by it's name and type.
          *
-         * @param type[in] Entity type.
-         * @param entity_name[in] The entity name.
+         * @param[in] type Entity type.
+         * @param[in] entity_name The entity name.
          * @return The entity by that type and name, or nullptr if there is
          * no one that matches.
          */
@@ -306,14 +307,14 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * continues the execution of a script.
          *
-         * @param script[in] The ID of the script to resume.
+         * @param[in] script The ID of the script to resume.
          */
         void ContinueScriptExecution(const ScriptId& script);
 
         /**
          * Makes an script wait.
          *
-         * @param seconds[in] Number of seconds to wait.
+         * @param[in] seconds Number of seconds to wait.
          * @todo Does it refer to the current script?
          */
         int ScriptWait(const float seconds);
@@ -321,11 +322,11 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Request an script execution.
          *
-         * @param type[in] Script type.
-         * @param entity[in] Entity the scripts belong to.
-         * @param function[in] Name of the function of the selected entity to
+         * @param[in] type Script type.
+         * @param[in] entity Entity the scripts belong to.
+         * @param[in] function Name of the function of the selected entity to
          * execute.
-         * @param priority[in] Execution priority.
+         * @param[in] priority Execution priority.
          */
         void ScriptRequest(
           const Type type, const char* entity,
@@ -335,11 +336,11 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Request a synchronous script execution to start.
          *
-         * @param type[in] Script type.
-         * @param entity[in] Entity the scripts belong to.
-         * @param function[in] Name of the function of the selected entity to
+         * @param[in] type Script type.
+         * @param[in] entity Entity the scripts belong to.
+         * @param[in] function Name of the function of the selected entity to
          * execute.
-         * @param priority[in] Execution priority.
+         * @param[in] priority Execution priority.
          * @return -1 on success, 1 if the entity or the script don't exist.
          */
         int ScriptRequestStartSync(
@@ -349,11 +350,11 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Request a synchronous script execution to end.
          *
-         * @param type[in] Script type.
-         * @param entity[in] Entity the scripts belong to.
-         * @param function[in] Name of the function of the selected entity to
+         * @param[in] type Script type.
+         * @param[in] entity Entity the scripts belong to.
+         * @param[in] function Name of the function of the selected entity to
          * execute.
-         * @param priority[in] Execution priority.
+         * @param[in] priority Execution priority.
          * @return -1 if the execution stops or if the script was not running,
          * 1 if the entity or the script don't exist.
          */
@@ -365,15 +366,15 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Request a script execution.
          *
-         * @param script_entity[in] Entity the scripts belong to.
-         * @param function[in] Name of the function of the selected entity to
+         * @param[in] script_entity Entity the scripts belong to.
+         * @param[in] function Name of the function of the selected entity to
          * execute.
-         * @param priority[in] Execution priority.
-         * @param argument1[in] First argument for the script.
-         * @param argument2[in] Second argument for the script.
-         * @param start_sync[in] If true, the script will be started
+         * @param[in] priority Execution priority.
+         * @param[in] argument1 First argument for the script.
+         * @param[in] argument2 Second argument for the script.
+         * @param[in] start_sync If true, the script will be started
          * synchronously.
-         * @param end_sync[in] @todo Understand and document.
+         * @param[in] end_sync @todo Understand and document.
          * @return True on success, false on error (i.e. if the entity or the
          * script don't exist)
          */
@@ -386,7 +387,7 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Adds a script to the stack.
          *
-         * @param value[in] ID of the script to add.
+         * @param[in] value ID of the script to add.
          * @todo Verify this documentation.
          */
         void AddValueToStack(const float value);

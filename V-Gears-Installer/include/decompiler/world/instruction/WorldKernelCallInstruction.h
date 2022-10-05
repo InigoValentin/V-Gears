@@ -30,10 +30,10 @@ class WorldKernelCallInstruction : public KernelCallInstruction{
         /**
          * Processes the instruction.
          *
-         * @param function[in] Function to process. Unused.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine. Unused.
-         * @param code_gen[in] Code generator.
+         * @param[in] function Function to process. Unused.
+         * @param[out] stack Function stack.
+         * @param[in] engine Engine. Unused.
+         * @param[in] code_gen Code generator.
          */
         virtual void ProcessInst(
           Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen

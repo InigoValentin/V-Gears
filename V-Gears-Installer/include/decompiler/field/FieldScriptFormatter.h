@@ -35,14 +35,14 @@ class FieldScriptFormatter: public ScriptFormatter{
          * database. If it was already there, update the record to add the
          * origin.
          *
-         * @param map_id[in] The target map ID.
-         * @param entity[in] The entity that acts as the spawn point.
-         * @param function_name[in] The spawn function name.
-         * @param address[in] @todo Understand and document.
-         * @param x[in] X coordinate of the field at which to spawn.
-         * @param y[in] Y coordinate of the field at which to spawn.
-         * @param z[in] Z coordinate of the field at which to spawn.
-         * @param angle[in] Orientation at which to spawn.
+         * @param[in] map_id The target map ID.
+         * @param[in] entity The entity that acts as the spawn point.
+         * @param[in] function_name The spawn function name.
+         * @param[in] address @todo Understand and document.
+         * @param[in] x X coordinate of the field at which to spawn.
+         * @param[in] y Y coordinate of the field at which to spawn.
+         * @param[in] triangle_id Triangle at which to spawn.
+         * @param[in] angle Orientation at which to spawn.
          */
         virtual void AddSpawnPoint(
           unsigned int map_id, const std::string& entity, const std::string& function_name,
@@ -52,10 +52,10 @@ class FieldScriptFormatter: public ScriptFormatter{
         /**
          * Retrieves the name of a spawn point.
          *
-         * @param map_id[in] The target map ID.
-         * @param entity[in] The entity that acts as the spawn point.
-         * @param function_name[in] The spawn function name.
-         * @param address[in] @todo Understand and document.
+         * @param[in] map_id The target map ID.
+         * @param[in] entity The entity that acts as the spawn point.
+         * @param[in] function_name The spawn function name.
+         * @param[in] address @todo Understand and document.
          * @return The name of the spawn point.
          */
         virtual std::string GetSpawnPointName(
@@ -68,7 +68,7 @@ class FieldScriptFormatter: public ScriptFormatter{
          *
          * The name of a map is usually it's ID.
          *
-         * @param map_id[in] The map ID.
+         * @param[in] map_id The map ID.
          * @return The map name.
          */
         virtual std::string GetMapName(unsigned int map_id);

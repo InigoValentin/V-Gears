@@ -30,8 +30,8 @@ class ScriptFormatter{
         /**
          * Retrieves a friendly name for a variable.
          *
-         * @param bank[in] Variable memory bank.
-         * @param address[in] Variable memory address.
+         * @param[in] bank Variable memory bank.
+         * @param[in] addr Variable memory address.
          * @return Friendly name assigned to the variable, or an empty
          * string if there is none.
          */
@@ -40,8 +40,8 @@ class ScriptFormatter{
         /**
          * Retrieves a friendly name for an entity.
          *
-         * @param entity_name[in] Name of the entity.
-         * @return Friendly name assigned to the entity, or <entity_name>
+         * @param[in] entity_name Name of the entity.
+         * @return Friendly name assigned to the entity, or entity_name
          * if there is none.
          */
         virtual std::string GetFriendlyEntityName(const std::string& entity_name);
@@ -49,7 +49,8 @@ class ScriptFormatter{
         /**
          * Retrieves a friendly name for an animation.
          *
-         * @param animation_id[in] ID of the animation.
+         * @param[in] animation_id ID of the animation.
+         * @param[in] id Unused.
          * @return Friendly name assigned to the animation. If there is
          * no one, the ID in string format.
          */
@@ -58,7 +59,7 @@ class ScriptFormatter{
         /**
          * Retrieves a friendly name for a character.
          *
-         * @param char_id[in] ID of the character.
+         * @param[in] char_id ID of the character.
          * @return Friendly name assigned to the character. If there is
          * no one, the ID in string format.
          */
@@ -67,10 +68,10 @@ class ScriptFormatter{
         /**
          * Retrieves a friendly name for a function.
          *
-         * @param entity_name[in] Name of the entity.
-         * @param function_name[in] Name of the function.
+         * @param[in] entity_name Name of the entity.
+         * @param[in] function_name Name of the function.
          * @return Friendly name assigned to the entity, or
-         * <function_name> if there is none.
+         * function_name if there is none.
          */
         virtual std::string GetFriendlyFunctionName(
           const std::string& entity_name, const std::string& function_name
@@ -79,8 +80,8 @@ class ScriptFormatter{
         /**
          * Retrieves the header comment for a function in an entity.
          *
-         * @param entity_name[in] Name of the entity.
-         * @param function_name[in] Name of the function.
+         * @param[in] entity_name Name of the entity.
+         * @param[in] function_name Name of the function.
          * @return The function comment. An empty string if the entity or
          * the function don't exist.
          */

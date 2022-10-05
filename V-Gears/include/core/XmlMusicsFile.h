@@ -27,7 +27,7 @@ class XmlMusicsFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the main musics file.
+         * @param[in] file Path to the main musics file.
          */
         XmlMusicsFile(const Ogre::String& file);
 

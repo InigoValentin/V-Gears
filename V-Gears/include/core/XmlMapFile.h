@@ -27,7 +27,7 @@ class XmlMapFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the XML map file.
+         * @param[in] file Path to the XML map file.
          */
         explicit XmlMapFile(const Ogre::String& file);
 

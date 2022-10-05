@@ -28,7 +28,7 @@ class XmlTextsFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the main texts file.
+         * @param[in] file Path to the main texts file.
          */
         XmlTextsFile(const Ogre::String& file);
 
@@ -40,7 +40,7 @@ class XmlTextsFile : public XmlFile{
         /**
          * Retrieves a list of all the available text languages.
          *
-         * @param languages[out] The list of languages will be loaded here.
+         * @param[out] languages The list of languages will be loaded here.
          */
         void GetAvailableLanguages(Ogre::StringVector& languages);
 

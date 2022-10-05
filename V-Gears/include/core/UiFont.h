@@ -68,8 +68,8 @@ class UiFont{
         /**
          * Constructor.
          *
-         * @param name[in] The font name.
-         * @param language[in] The font language.
+         * @param[in] name The font name.
+         * @param[in] language The font language.
          */
         UiFont(const Ogre::String& name, const Ogre::String& language);
 
@@ -97,9 +97,9 @@ class UiFont{
          *
          * The image is a character map.
          *
-         * @param image[in] Path to the font image, relative to data/fonts.
-         * @param width[in] Image width.
-         * @param height[in] Image height.
+         * @param[in] image Path to the font image, relative to data/fonts.
+         * @param[in] width Image width.
+         * @param[in] height Image height.
          */
         void SetImage(
           const Ogre::String& image, const int width, const int height
@@ -129,7 +129,7 @@ class UiFont{
         /**
          * Sets the character height for the font.
          *
-         * @param height[in] Character height.
+         * @param[in] height Character height.
          */
         void SetHeight(const int height);
 
@@ -143,14 +143,14 @@ class UiFont{
         /**
          * Adds data for a character.
          *
-         * @param data[in] The character data to add.
+         * @param[in] data The character data to add.
          */
         void AddCharData(const UiCharData& data);
 
         /**
          * Retrieves character data from a char code.
          *
-         * @param char_code[in] The code of the character to retrieve data
+         * @param[in] char_code The code of the character to retrieve data
          * about.
          * @return Character data associated to the char code. A default {@see
          * UiCharData} structure wil be returnd if there is no data for the

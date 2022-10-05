@@ -33,14 +33,14 @@ class FieldCondJumpInstruction : public CondJumpInstruction{
          * Checks if the condition is a function or a comparison, and adds the
          * function to the stack.
          *
-         * @param function[in] Function to process. Unused.
-         * @param stack[out] Function stack. The instruction will be added
+         * @param[in] function Function to process. Unused.
+         * @param[out] stack Function stack. The instruction will be added
          * here.
-         * @param engine[in] Engine. Unused.
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in] engine Engine. Unused.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         virtual void ProcessInst(
-          Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+          Function& function, ValueStack &stack, Engine* engine, CodeGenerator* code_gen
         ) override;
 
         /**

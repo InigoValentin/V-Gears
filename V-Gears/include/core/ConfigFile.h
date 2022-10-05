@@ -32,7 +32,7 @@ class ConfigFile{
          *
          * Executing a file will sequentially execute all the commands in it.
          *
-         * @param name[in] Configuration file path.
+         * @param[in] name Configuration file path.
          */
         void Execute(const Ogre::String& name);
 };

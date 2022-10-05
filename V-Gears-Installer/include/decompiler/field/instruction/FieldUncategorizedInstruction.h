@@ -30,12 +30,12 @@ class FieldUncategorizedInstruction : public KernelCallInstruction{
         /**
          * Processes the instruction.
          *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine. Unused.
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in] func Function to process.
+         * @param[out] stack Function stack.
+         * @param[in] engine Engine. Unused.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+          Function& func, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
         ) override;
 };

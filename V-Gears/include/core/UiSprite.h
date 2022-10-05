@@ -30,16 +30,16 @@ class UiSprite : public UiWidget{
         /**
          * Constructor.
          *
-         * @param name[in] The sprite name.
+         * @param[in] name The sprite name.
          */
         UiSprite(const Ogre::String& name);
 
         /**
          * Constructor.
          *
-         * @param name[in] The sprinte name.
-         * @param path_name[in] Path to the sprite file.
-         * @param parent[in] Widget to be set as parent of the sprite.
+         * @param[in] name The sprinte name.
+         * @param[in] path_name Path to the sprite file.
+         * @param[in] parent Widget to be set as parent of the sprite.
          * @todo path_name is relative to data? Filename is needed?
          */
         UiSprite(
@@ -75,21 +75,21 @@ class UiSprite : public UiWidget{
         /**
          * Sets the sprite image.
          *
-         * @param image[in] @todo file path or just a name?
+         * @param[in] image @todo file path or just a name?
          */
         void SetImage(const Ogre::String& image);
 
         /**
          * Sets the vertex shader for the sprite.
          *
-         * @param shader[in] The shader to set.
+         * @param[in] shader The shader to set.
          */
         void SetVertexShader(const Ogre::String& shader);
 
         /**
          * Sets the fragment shader for the sprite.
          *
-         * @param shader[in] The shader to set.
+         * @param[in] shader The shader to set.
          */
         void SetFragmentShader(const Ogre::String& shader);
 

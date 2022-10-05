@@ -77,14 +77,14 @@ class Particle{
          *
          * Updates it position based on the time lived by the particle.
          *
-         * @param time_elapsed[in] Time lived by the particle.
+         * @param[in] time_elapsed Time lived by the particle.
          */
         virtual void Update(Ogre::Real time_elapsed);
 
         /**
          * Copies the particle attributes to another particle.
          *
-         * @param particle[out] The particl to copy the atttributes to.
+         * @param[out] particle The particl to copy the atttributes to.
          */
         virtual void CopyAttributesTo(Particle* particle);
 
@@ -98,7 +98,7 @@ class Particle{
         /**
          * Sets the particle emitter.
          *
-         * @param parent_emitter[in] The emitter for the particle.
+         * @param[in] parent_emitter The emitter for the particle.
          * @todo Check if parent_emitter is an in or out parameter.
          */
         void SetParentEmitter(ParticleEmitter* parent_emitter){
@@ -115,7 +115,7 @@ class Particle{
         /**
          * Enables or disables the particle
          *
-         * @param enabled[in] True to enable the particle, false to disable it.
+         * @param[in] enabled True to enable the particle, false to disable it.
          */
         void SetEnabled(bool enabled) {enabled_ = enabled;};
 
@@ -129,7 +129,7 @@ class Particle{
         /**
          * Toggles the particle emitability.
          *
-         * @param emittable[in] True to make the particle emittable, false to
+         * @param[in] emittable True to make the particle emittable, false to
          * prevent it to be emitted.
          */
         void SetEmittable(bool emittable) {emittable_ = emittable;};

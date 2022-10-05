@@ -32,7 +32,7 @@ class FileSystem{
         /**
          * Retrieves a file size.
          *
-         * @param path[in] Path to the file.
+         * @param[in] path Path to the file.
          * @return File size, in bytes. 0 on error.
          */
         static unsigned int GetFileSize(const Ogre::String& path);
@@ -40,10 +40,10 @@ class FileSystem{
         /**
          * Reads a file contents and saves them to a buffer.
          *
-         * @param path[in] Path to the file to read.
-         * @param buffer[out] The buffer to populate with file data.
-         * @param start[in] Offset at which to start reading.
-         * @param lenght[in] Size of the data to read, in bytes.
+         * @param[in] path Path to the file to read.
+         * @param[out] buffer The buffer to populate with file data.
+         * @param[in] start Offset at which to start reading.
+         * @param[in] length Size of the data to read, in bytes.
          * @return True if the file was successfully read, false on error.
          */
         static bool ReadFile(
@@ -56,9 +56,9 @@ class FileSystem{
          *
          * The file must exists, and the new data will be appended at the end.
          *
-         * @param path[in] Path to the file to write.
-         * @param buffer[in] Buffer with the data.
-         * @param length[in] Size of the data to write, in bytes.
+         * @param[in] path Path to the file to write.
+         * @param[in] buffer Buffer with the data.
+         * @param[in] length Size of the data to write, in bytes.
          * @return True if the file was successfully written, false on error.
          */
         static bool WriteFile(
@@ -71,9 +71,9 @@ class FileSystem{
          *
          * If the file exists, it will be deleted before adding the new data.
          *
-         * @param path[in] Path to the file to write.
-         * @param buffer[in] Buffer with the data.
-         * @param length[in] Size of the data to write, in bytes.
+         * @param[in] path Path to the file to write.
+         * @param[in] buffer Buffer with the data.
+         * @param[in] length Size of the data to write, in bytes.
          * @return True if the file was successfully written, false on error.
          */
         static bool WriteNewFile(

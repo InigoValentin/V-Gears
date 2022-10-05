@@ -155,7 +155,7 @@ class Value : public RefCounted{
         /**
          * Print the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const = 0;
@@ -170,7 +170,7 @@ class Value : public RefCounted{
         /**
          * Duplicates a value.
          *
-         * @param output[out] The stream to output any necessary assignment.
+         * @param[out] output The stream to output any necessary assignment.
          * @return A Value corresponding to a duplicate of this entry.
          */
         virtual ValuePtr Dup(std::ostream &output);
@@ -197,8 +197,8 @@ class Value : public RefCounted{
         /**
          * Output a value to a stream.
          *
-         * @param output[out] The  stream to output to.
-         * @param value[in] Reference counted pointer to the value to output.
+         * @param[out] output The  stream to output to.
+         * @param[in] value Reference counted pointer to the value to output.
          * @return The stream used for output.
          */
         friend std::ostream &operator<<(std::ostream &output, Value *value) {
@@ -217,30 +217,30 @@ class IntValue : public Value {
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         IntValue(const IntValue& value) = delete;
 
         /**
          * Copy constructor, disabled
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         IntValue& operator = (const IntValue& value) = delete;
 
         /**
          * Constructor for IntValue.
          *
-         * @param val The integer value to be contained.
-         * @param isSigned Whether or not the value is signed. This will affect output.
+         * @param[in] val The integer value to be contained.
+         * @param[in] is_signed Whether or not the value is signed. This will affect output.
          */
         IntValue(int32 val, bool is_signed);
 
         /**
          * Constructor for IntValue.
          *
-         * @param val The integer value to be contained.
-         * @param isSigned Whether or not the value is signed. This will affect output.
+         * @param[in] val The integer value to be contained.
+         * @param[in] is_signed Whether or not the value is signed. This will affect output.
          */
         IntValue(uint32 val, bool is_signed);
 
@@ -276,7 +276,7 @@ class IntValue : public Value {
         /**
          * Duplicates the value.
          *
-         * @param output[out] The stream to output any necessary assignment.
+         * @param[out] output The stream to output any necessary assignment.
          * @return A Value corresponding to a duplicate of the value.
          */
         ValuePtr Dup(std::ostream &output) override;
@@ -284,7 +284,7 @@ class IntValue : public Value {
         /**
          * Print the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -312,21 +312,21 @@ class AddressValue: public IntValue{
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         AddressValue(const AddressValue& value) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         AddressValue& operator = (const AddressValue& value) = delete;
 
         /**
          * Constructor for AddressValue.
          *
-         * @param addr The absolute address represented by the value.
+         * @param[in] addr The absolute address represented by the value.
          */
         explicit AddressValue(uint32 addr);
 
@@ -350,7 +350,7 @@ class AddressValue: public IntValue{
         /**
          * Duplicates the value.
          *
-         * @param output[out] The stream to output any necessary assignment.
+         * @param[out] output The stream to output any necessary assignment.
          * @return A Value corresponding to a duplicate of the value.
          */
         ValuePtr Dup(std::ostream &output) override;
@@ -358,7 +358,7 @@ class AddressValue: public IntValue{
         /**
          * Print the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -377,22 +377,22 @@ class RelAddressValue : public IntValue{
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         RelAddressValue(const RelAddressValue& value) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         RelAddressValue& operator = (const RelAddressValue& value) = delete;
 
         /**
          * Constructor.
          *
-         * @param base_addr[in] The base address for the offset.
-         * @param offset[in] The relative offset to the base address.
+         * @param[in] base_addr The base address for the offset.
+         * @param[in] offset The relative offset to the base address.
          */
         RelAddressValue(uint32 base_addr, int32 offset);
 
@@ -414,7 +414,7 @@ class RelAddressValue : public IntValue{
         /**
          * Duplicates the value.
          *
-         * @param output[out] The stream to output any necessary assignment.
+         * @param[out] output The stream to output any necessary assignment.
          * @return A Value corresponding to a duplicate of the value.
          */
         ValuePtr Dup(std::ostream &output) override;
@@ -422,7 +422,7 @@ class RelAddressValue : public IntValue{
         /**
          * Print the relative address to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -445,14 +445,14 @@ class DupValue : public Value {
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         DupValue(const DupValue& value) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         DupValue& operator = (const DupValue& value) = delete;
 
@@ -466,7 +466,7 @@ class DupValue : public Value {
         /**
          * Duplicates the value.
          *
-         * @param output[out] The stream to output any necessary assignment.
+         * @param[out] output The stream to output any necessary assignment.
          * @return A Value corresponding to a duplicate of the value.
          */
         ValuePtr Dup(std::ostream &output) override;
@@ -474,7 +474,7 @@ class DupValue : public Value {
         /**
          * Print the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -497,28 +497,28 @@ class StringValue : public Value {
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         StringValue(const StringValue& value) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         StringValue& operator = (const StringValue& value) = delete;
 
         /**
          * Constructor.
          *
-         * @param str[in] The string value.
+         * @param[in] str The string value.
          */
         explicit StringValue(std::string str);
 
         /**
          * Print the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -541,14 +541,14 @@ class UnquotedStringValue : public StringValue{
         /**
          * Constructor.
          *
-         * @param str[in] The string value.
+         * @param[in] str The string value.
          */
         explicit UnquotedStringValue(std::string str);
 
         /**
          * Prints the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -569,7 +569,7 @@ class VarValue : public Value {
         /**
          * Print the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -592,14 +592,14 @@ class ArrayValue : public VarValue {
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         ArrayValue(const ArrayValue& value) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         ArrayValue& operator = (const ArrayValue& value) = delete;
 
@@ -617,7 +617,7 @@ class ArrayValue : public VarValue {
          *
          * Every item in the array will be printed.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -641,30 +641,30 @@ class BinaryOpValue : public Value {
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         BinaryOpValue(const BinaryOpValue& value) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         BinaryOpValue& operator = (const BinaryOpValue& value) = delete;
 
         /**
          * Constructor.
          *
-         * @param left[in] Value representing the left side of the operator.
-         * @param right[in] Value representing the right side of the operator.
-         * @param operator[in] The operator for this value.
+         * @param[in] left Value representing the left side of the operator.
+         * @param[in] right Value representing the right side of the operator.
+         * @param[in] oper The operator for this value.
          */
         BinaryOpValue(ValuePtr left, ValuePtr right, std::string oper);
 
         /**
          * Print the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -717,23 +717,23 @@ class UnaryOpValue : public Value{
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         UnaryOpValue(const UnaryOpValue& value) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         UnaryOpValue& operator = (const UnaryOpValue& value) = delete;
 
         /**
-         * Constructor..
+         * Constructor.
          *
-         * @param operand[in] Value representing the operand of the operation.
-         * @param oper[in] The operator for this value.
-         * @param postfix[in] Whether or not the operator should be postfixed
+         * @param[in] operand Value representing the operand of the operation.
+         * @param[in] oper The operator for this value.
+         * @param[in] postfix Whether or not the operator should be postfixed
          * to the operand.
          */
         UnaryOpValue(ValuePtr operand, std::string oper, bool postfix);
@@ -741,7 +741,7 @@ class UnaryOpValue : public Value{
         /**
          * Print the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
@@ -785,21 +785,21 @@ class NegatedValue : public UnaryOpValue{
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         NegatedValue(const NegatedValue& value) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         NegatedValue& operator = (const NegatedValue& value) = delete;
 
         /**
          * Constructor.
          *
-         * @param val[in] The value to negate.
+         * @param[in] val The value to negate.
          */
         explicit NegatedValue(ValuePtr val);
 
@@ -821,29 +821,29 @@ class CallValue : public Value {
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         CallValue(const CallValue& value) = delete;
 
         /**
          * Copy constructor, disabled.
          *
-         * @param value[in] The value to copy.
+         * @param[in] value The value to copy.
          */
         CallValue& operator = (const CallValue& value) = delete;
 
         /**
          * Constructor for CallValue.
          *
-         * @param function[in] The name of the function.
-         * @param args[in] List of values representing the arguments used.
+         * @param[in] function The name of the function.
+         * @param[in] args List of values representing the arguments used.
          */
         CallValue(std::string function, ValueList args);
 
         /**
          * Print the value to a stream.
          *
-         * @param output[out] The stream to write to.
+         * @param[out] output The stream to write to.
          * @return The stream used for output.
          */
         virtual std::ostream& Print(std::ostream &output) const override;

@@ -60,24 +60,23 @@ namespace VGears{
             /**
              * Loads the manager.
              *
-             * @param name[in] The unique name of the manager.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the manager.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
              * ever causes it to unload. Therefore provision of a proper
              * ManualResourceLoader instance is strongly recommended.
-             * @param create_params[in] Unused.
+             * @param[in] create_params Unused.
              */
             Ogre::Resource *createImpl(
-              const Ogre::String &name, Ogre::ResourceHandle handle,
-              const Ogre::String &group, bool is_manual,
-              Ogre::ManualResourceLoader *loader,
+              const Ogre::String &name, Ogre::ResourceHandle handle, const Ogre::String &group,
+              bool is_manual, Ogre::ManualResourceLoader *loader,
               const Ogre::NameValuePairList *create_params
             );
     };
@@ -92,15 +91,15 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param creator[in] Pointer to the ResourceManager that is
+             * @param[in] creator Pointer to the ResourceManager that is
              * creating this resource.
-             * @param name[in] The unique name of the resource.
-             * @param handle[in] @todo Understand and document.
-             * @param group[in] The name of the resource group to which this
+             * @param[in] name The unique name of the resource.
+             * @param[in] handle @todo Understand and document.
+             * @param[in] group The name of the resource group to which this
              * resource belong.
-             * @param is_manual[in] True if the resource is manually loaded,
+             * @param[in] is_manual True if the resource is manually loaded,
              * false otherwise.
-             * @param loader[in] Pointer to a ManualResourceLoader
+             * @param[in] loader Pointer to a ManualResourceLoader
              * implementation which will be called when the Resource wishes to
              * load (should be supplied if is_manual is set to true). It can be
              * null, but the Resource will never be able to reload if anything
@@ -108,9 +107,8 @@ namespace VGears{
              * ManualResourceLoader instance is strongly recommended.
              */
             TriggersFile(
-              Ogre::ResourceManager* creator, const String &name,
-              Ogre::ResourceHandle handle, const String& group,
-              bool is_manual = false,
+              Ogre::ResourceManager* creator, const String &name, Ogre::ResourceHandle handle,
+              const String& group, bool is_manual = false,
               Ogre::ManualResourceLoader* loader = nullptr
             );
 
@@ -389,9 +387,7 @@ namespace VGears{
              *
              * @return The camera range.
              */
-            const Range& GetCameraRange() const{
-                return trigger_data_->camera_range;
-            }
+            const Range& GetCameraRange() const{return trigger_data_->camera_range;}
 
             /**
              * Retrieves the movement rotation.
@@ -408,9 +404,7 @@ namespace VGears{
             /**
              * Retrieves the list of gateways.
              */
-            const std::array<Gateway, 12>& GetGateways() const{
-                return trigger_data_->doors;
-            }
+            const std::array<Gateway, 12>& GetGateways() const{return trigger_data_->doors;}
 
         protected:
 
@@ -459,20 +453,18 @@ namespace VGears{
             /**
              * Imports a trigger file.
              *
-             * @param stream[in] The contents of the trigger file.
-             * @param dest[out] The formed trigger file.
+             * @param[in] stream The contents of the trigger file.
+             * @param[out] dest The formed trigger file.
              */
-            void ImportTriggerFile(
-              Ogre::DataStreamPtr &stream, TriggersFile *dest
-            );
+            void ImportTriggerFile(Ogre::DataStreamPtr &stream, TriggersFile *dest);
 
         private:
 
             /**
              * Reads trigger vertex data from the trigger file.
              *
-             * @param stream[in] The contents of the trigger file.
-             * @param vertex[out] The vertex data.
+             * @param[in] stream The contents of the trigger file.
+             * @param[out] vertex The vertex data.
              */
             void ReadTriggerVertex(
               Ogre::DataStreamPtr& stream, TriggersFile::TriggerVertex& vertex
@@ -481,42 +473,34 @@ namespace VGears{
             /**
              * Reads range data from the trigger file.
              *
-             * @param stream[in] The contents of the trigger file.
-             * @param vertex[out] The range data.
+             * @param[in] stream The contents of the trigger file.
+             * @param[out] range The range data.
              */
-            void ReadRange(
-              Ogre::DataStreamPtr& stream, TriggersFile::Range& range
-            );
+            void ReadRange(Ogre::DataStreamPtr& stream, TriggersFile::Range& range);
 
             /**
              * Reads gateway data from the trigger file.
              *
-             * @param stream[in] The contents of the trigger file.
-             * @param vertex[out] The gateway data.
+             * @param[in] stream The contents of the trigger file.
+             * @param[out] exit The gateway data.
              */
-            void ReadGateway(
-              Ogre::DataStreamPtr& stream, TriggersFile::Gateway& exit
-            );
+            void ReadGateway(Ogre::DataStreamPtr& stream, TriggersFile::Gateway& exit);
 
             /**
              * Reads arrow data from the trigger file.
              *
-             * @param stream[in] The contents of the trigger file.
-             * @param vertex[out] The arrow data.
+             * @param[in] stream The contents of the trigger file.
+             * @param[out] arrow The arrow data.
              */
-            void ReadArrow(
-              Ogre::DataStreamPtr& stream, TriggersFile::Arrow& arrow
-            );
+            void ReadArrow(Ogre::DataStreamPtr& stream, TriggersFile::Arrow& arrow);
 
             /**
              * Reads trigger data from the trigger file.
              *
-             * @param stream[in] The contents of the trigger file.
-             * @param vertex[out] The trigger data.
+             * @param[in] stream The contents of the trigger file.
+             * @param[out] trigger The trigger data.
              */
-            void ReadTrigger(
-              Ogre::DataStreamPtr& stream, TriggersFile::Trigger& trigger
-            );
+            void ReadTrigger(Ogre::DataStreamPtr& stream, TriggersFile::Trigger& trigger);
     };
 
     typedef Ogre::SharedPtr<TriggersFile> TriggersFilePtr;

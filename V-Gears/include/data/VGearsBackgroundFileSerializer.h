@@ -41,12 +41,10 @@ namespace VGears{
             /**
              * Imports a background file.
              *
-             * @param stream[in] The contents of the background file.
-             * @param dest[out] The background file.
+             * @param[in] stream The contents of the background file.
+             * @param[out] dest The background file.
              */
-            void ImportBackgroundFile(
-              Ogre::DataStreamPtr &stream, BackgroundFile *dest
-          );
+            void ImportBackgroundFile(Ogre::DataStreamPtr &stream, BackgroundFile *dest);
 
             enum {
 
@@ -112,91 +110,79 @@ namespace VGears{
             /**
              * Reads a background file header.
              *
-             * @param stream[in] The contents of the header.
+             * @param[in] stream The contents of the header.
              */
             virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
 
             /**
              * Reads a section of a background file header.
              *
-             * @param stream[in] The contents of the header.
-             * @param section_name[in] The name of the section to read.
+             * @param[in] stream The contents of the header.
+             * @param[in] section_name The name of the section to read.
              */
-            virtual void ReadSectionHeader(
-              Ogre::DataStreamPtr &stream, const String &section_name
-           );
+            virtual void ReadSectionHeader(Ogre::DataStreamPtr &stream, const String &section_name);
 
             /**
              * Reads pallete data from a background file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The data will be set on this file.
+             * @param[in] stream Input stream.
+             * @param[out] dest The data will be set on this file.
              */
-            virtual void ReadPallete(
-              Ogre::DataStreamPtr &stream, BackgroundFile *dest
-            );
+            virtual void ReadPallete(Ogre::DataStreamPtr &stream, BackgroundFile *dest);
 
             /**
              * Reads background data from a background file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The data will be set on this file.
+             * @param[in] stream Input stream.
+             * @param[out] dest The data will be set on this file.
              */
-            virtual void ReadBackground(
-              Ogre::DataStreamPtr &stream, BackgroundFile *dest
-            );
+            virtual void ReadBackground(Ogre::DataStreamPtr &stream, BackgroundFile *dest);
 
             /**
              * Reads texture data from a background file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The data will be set on this file.
+             * @param[in] stream Input stream.
+             * @param[out] dest The data will be set on this file.
              */
-            virtual void ReadTexture(
-              Ogre::DataStreamPtr &stream, BackgroundFile *dest
-            );
+            virtual void ReadTexture(Ogre::DataStreamPtr &stream, BackgroundFile *dest);
 
             /**
              * @todo Understand and document.
              *
-             * @param stream[in] Input stream.
+             * @param[in] stream Input stream.
              */
             virtual void ReadEnd(Ogre::DataStreamPtr &stream);
 
             /**
              * Reads a layer from a background file.
              *
-             * @param stream[in] Input stream.
-             * @param dest[out] The layer info will be loaded here.
-             * @param layer_index[in] Index of the layer to read.
+             * @param[in] stream Input stream.
+             * @param[out] dest The layer info will be loaded here.
+             * @param[in] layer_index Index of the layer to read.
              */
-            virtual void ReadLayer(
-              Ogre::DataStreamPtr &stream, Layer *dest, size_t layer_index
-            );
+            virtual void ReadLayer(Ogre::DataStreamPtr &stream, Layer *dest, size_t layer_index);
 
             /**
              * Reads an object as a sprite.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed sprite.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed sprite.
              */
-            virtual void readObject(
-              Ogre::DataStreamPtr &stream, SpriteData &dest
-            );
+            virtual void readObject(Ogre::DataStreamPtr &stream, SpriteData &dest);
 
             /**
              * Reads an object as colour data.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed colour data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed colour data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Color &dest);
 
             /**
              * Reads an object as a background page.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed page.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed page.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Page &dest);
 
@@ -205,17 +191,16 @@ namespace VGears{
             /**
              * Reads a stream as a vector.
              *
-             * @param stream[in] The input stream.
-             * @param dest[out] The vector data will be loaded here.
-             * @param count[in] Data units to copy.
+             * @param[in] stream The input stream.
+             * @param[out] dest The vector data will be loaded here.
+             * @param[in] count Data units to copy.
              */
             template<typename ValueType> void ReadVector(
-              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
-              size_t count
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest, size_t count
             ){
                 dest.clear();
                 dest.reserve(count);
-                for(size_t i(count); i --;){
+                for (size_t i(count); i --;){
                     ValueType in_tmp;
                     readObject(stream, in_tmp);
                     dest.push_back(in_tmp);
@@ -252,7 +237,7 @@ namespace VGears{
             /**
              * Removes malformed sprites from the map.
              *
-             * @param[in|out] The list from which to remove malformed sprites.
+             * @param[in,out] sprites The list from which to remove malformed sprites.
              * @todo Why are they malformed?
              */
             void RemoveBuggySprites(SpriteList &sprites);

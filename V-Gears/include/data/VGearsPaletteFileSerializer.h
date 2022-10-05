@@ -42,12 +42,10 @@ namespace VGears{
             /**
              * Imports a colour palette file.
              *
-             * @param stream[in] The contents of the palette file.
-             * @param dest[out] The formed palette file.
+             * @param[in] stream The contents of the palette file.
+             * @param[out] dest The formed palette file.
              */
-            virtual void ImportPaletteFile(
-              Ogre::DataStreamPtr &stream, PaletteFile* dest
-            );
+            virtual void ImportPaletteFile(Ogre::DataStreamPtr &stream, PaletteFile* dest);
 
             enum {
 
@@ -126,23 +124,23 @@ namespace VGears{
             /**
              * Reads a file header and sets the instance data.
              *
-             * @param stream[in] The contents of the HRC file.
+             * @param[in] stream The contents of the HRC file.
              */
             virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
 
             /**
              * Reads an object as a colour.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed colour data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed colour data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Color &dest);
 
             /**
              * Reads an object as a palette page.
              *
-             * @param stream[in] Input data.
-             * @param dest[out] The formed page data.
+             * @param[in] stream Input data.
+             * @param[out] dest The formed page data.
              */
             virtual void readObject(Ogre::DataStreamPtr &stream, Page &dest);
 
@@ -151,7 +149,7 @@ namespace VGears{
             /**
              * Converts a colour.
              *
-             * @param [in|out] Colour to convert.
+             * @param[in,out] colour Colour to convert.
              * @todo What kind of conversion is it doing?
              */
             virtual void ConvertColour(uint16 &colour) const;
@@ -164,13 +162,12 @@ namespace VGears{
             /**
              * Reads a stream as a vector.
              *
-             * @param stream[in] The input stream.
-             * @param dest[out] The vector data will be loaded here.
-             * @param count[in] Data units to copy.
+             * @param[in] stream The input stream.
+             * @param[out] dest The vector data will be loaded here.
+             * @param[in] count Data units to copy.
              */
             template<typename ValueType> void ReadVector(
-              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
-              size_t count
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest, size_t count
             ){
                 dest.clear();
                 dest.reserve(count);

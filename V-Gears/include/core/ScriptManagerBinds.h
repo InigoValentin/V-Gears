@@ -29,7 +29,7 @@
 /**
  * Prints to the game console.
  *
- * @param text[in] The text to be printed.
+ * @param[in] text The text to be printed.
  */
 void ScriptPrint(const char* text){
     std::cout << "[SCRIPT] " << text << std::endl;
@@ -42,7 +42,7 @@ void ScriptPrint(const char* text){
  * Reads the data for the next map, initializes all it's entities, scripts, etc
  * and loads it.
  *
- * @param text[in] The new map name.
+ * @param[in] text The new map name.
  */
 void ScriptMap(const char* text){
     EntityManager::getSingleton().Clear();
@@ -58,7 +58,7 @@ void ScriptMap(const char* text){
  * It should not be related to the game itself. The script output will be
  * written to the game console.
  *
- * @param text[in] The script command to execute.
+ * @param[in] text The script command to execute.
  */
 void ScriptConsole(const char* text){
     Console::getSingleton().ExecuteCommand(text);

@@ -41,26 +41,25 @@ namespace VGears{
             /**
              * Imports a RSD file.
              *
-             * @param stream[in] The contents of the RSD file.
-             * @param dest[out] The formed RSD file.
+             * @param[in] stream The contents of the RSD file.
+             * @param[out] dest The formed RSD file.
              */
-            virtual void ImportRSDFile(
-              Ogre::DataStreamPtr &stream, RSDFile* dest
-            );
+            virtual void ImportRSDFile(Ogre::DataStreamPtr &stream, RSDFile* dest);
 
         protected:
 
             /**
              * Reads a file header and sets the instance data.
              *
-             * @param stream[in] The contents of the RSD file.
+             * @param[in] stream The contents of the RSD file.
              */
             virtual void ReadFileHeader(Ogre::DataStreamPtr &stream);
 
             /**
              * Parses a line of the RSD file.
              *
-             * @param line[in] The line to parse.
+             * @param[in] line The line to parse.
+             * @param[out] dest Generated file contents.
              */
             virtual void ParseLine(const String &line, RSDFile* dest);
 
@@ -109,6 +108,6 @@ namespace VGears{
             /**
              * The texture count (if any).
              */
-            size_t  texture_count_;
+            size_t texture_count_;
     };
 }

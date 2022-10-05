@@ -72,8 +72,8 @@ struct Surface{
 /**
  * Creates an empty surface
  *
- * @param width[in] The width for the new surface.
- * @param height[in] The height for the new surface.
+ * @param[in] width The width for the new surface.
+ * @param[in] height The height for the new surface.
  */
 Surface* CreateSurface(const int width, const int height);
 
@@ -82,10 +82,10 @@ Surface* CreateSurface(const int width, const int height);
  *
  * It can copy just sections of surfaces, but always from the top left corner.
  *
- * @param dest[out] The target surface.
- * @param x_d[in] Number of columns to copy.
- * @param y_d[in] Number of rows to copy.
- * @param src[in] The source surface.
+ * @param[out] dest The target surface.
+ * @param[in] x_d Number of columns to copy.
+ * @param[in] y_d Number of rows to copy.
+ * @param[in] src The source surface.
  *
  */
 void CopyToSurface(Surface* dest, const int x_d, const int y_d, Surface* src);
@@ -93,11 +93,11 @@ void CopyToSurface(Surface* dest, const int x_d, const int y_d, Surface* src);
 /**
  * Creates a partial surface from a surface.
  *
- * @param x[in] Starting column to copy from the original surface.
- * @param y[in] Starting row to copy from the original surface.
- * @param width[in] Number of columns to copy.
- * @param height[in] Number of rows to copy.
- * @param surface[in] The original surface.
+ * @param[in] x Starting column to copy from the original surface.
+ * @param[in] y Starting row to copy from the original surface.
+ * @param[in] width Number of columns to copy.
+ * @param[in] height Number of rows to copy.
+ * @param[in] surface The original surface.
  * @return the resulting subsurface.
  */
 Surface* CreateSubSurface(
@@ -107,9 +107,9 @@ Surface* CreateSubSurface(
 /**
  * Creates a surface from a list of pixels.
  *
- * @param width[in] The width of the surface.
- * @param height[in] The height of the surface.
- * @param pixels[in] The list of pixels for the new surface. If there are not
+ * @param[in] width The width of the surface.
+ * @param[in] height The height of the surface.
+ * @param[in] pixels The list of pixels for the new surface. If there are not
  * enough pixels to cover the entire surface, the rest of pixels will be NULL.
  * @return The new surface.
  */

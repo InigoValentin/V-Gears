@@ -374,10 +374,9 @@ class FieldDisassembler : public Disassembler{
         /**
          * Finds the ID of the character a function refers to.
          *
-         * @param start_addr[in] The starting address of the function.
-         * @param start_addr[in] The starting address of the function.
-         * @param end_addr[in] The ending address of the instruction.
-         * @param insts[in] The lsit of instructions to search.
+         * @param[in] start_addr The starting address of the function.
+         * @param[in] end_addr The ending address of the instruction.
+         * @param[in] insts The list of instructions to search.
          * @return The ID of the character the function refers to, or -1 if
          * the function doesn't belong to a character.
          */
@@ -386,19 +385,19 @@ class FieldDisassembler : public Disassembler{
         /**
          * Constructor.
          *
-         * @param formatter[in] The code formatter.
-         * @param engine[in] The engine to use to disassemble.
-         * @param insts[in] The list of instructions.
+         * @param[in] formatter The code formatter.
+         * @param[in] engine The engine to use to disassemble.
+         * @param[in] insts The list of instructions.
          */
         FieldDisassembler(FieldScriptFormatter& formatter, FieldEngine* engine, InstVec& insts);
 
         /**
          * Constructor.
          *
-         * @param formatter[in] The code formatter.
-         * @param engine[in] The engine to use to disassemble.
-         * @param insts[in] The list of instructions.
-         * @param raw_script_data[in] @todo Understand and document.
+         * @param[in] formatter The code formatter.
+         * @param[in] engine The engine to use to disassemble.
+         * @param[in] insts The list of instructions.
+         * @param[in] raw_script_data @todo Understand and document.
          */
         FieldDisassembler(
           FieldScriptFormatter& formatter, FieldEngine* engine,
@@ -574,7 +573,7 @@ class FieldDisassembler : public Disassembler{
             /**
              * Reads the header.
              *
-             * @param reader[in] The reader used to read the header.
+             * @param[in] reader The reader used to read the header.
              * @throws ScriptHeaderInvalidException If the magic number for
              * the field is wrong.
              */
@@ -608,7 +607,7 @@ class FieldDisassembler : public Disassembler{
         /**
          * Open a file for disassembly.
          *
-         * @param filename[in] The file to disassemble.
+         * @param[in] filename The file to disassemble.
          * @deprecated Do not use. Load the instructions from the constructor.
          */
         virtual void Open(const char *filename) override;
@@ -616,18 +615,18 @@ class FieldDisassembler : public Disassembler{
         /**
          * Disassembles a script (function).
          *
-         * @param entity_name[in] Name of the entity the script belongs to.
-         * @param entity_index[in] Index of the entity the script belongs to.
-         * @param script_entry_point[in] Address of the first instruction of
-         * the script to disassemble.
-         * @param script index[in] Index of the script, relative to the entity
+         * @param[in] entity_name Name of the entity the script belongs to.
+         * @param[in] entity_index Index of the entity the script belongs to.
+         * @param[in] script_index Index of the script, relative to the entity
          * scripts.
-         * @param next_script_entry_point[in] Address of the first instruction
+         * @param[in] script_entry_point Address of the first instruction of
+         * the script to disassemble.
+         * @param[in] next_script_entry_point Address of the first instruction
          * of the script next to the one to disassemble (i.e. the last address
          * of the script to disassemble, plus one).
-         * @param is_start[in] Indicates if the script is the first one for
+         * @param[in] is_start Indicates if the script is the first one for
          * it's entity.
-         * @param is_end[in] Indicates if the script is the last one for it's
+         * @param[in] is_end Indicates if the script is the last one for it's
          * entity.
          * @throws DecompilerException for malformed scripts.
          */
@@ -639,16 +638,16 @@ class FieldDisassembler : public Disassembler{
         /**
          * Adds a function to the engine.
          *
-         * @param entity_name[in] Name of the entity that owns the function.
-         * @param entity_index[in] Index of the entity that owns the function.
-         * @param script_index[in] Index of the script within the entity.
-         * @param next_script_entry_point[in] Start position of the next
+         * @param[in] entity_name Name of the entity that owns the function.
+         * @param[in] entity_index Index of the entity that owns the function.
+         * @param[in] script_index Index of the script within the entity.
+         * @param[in] next_script_entry_point Start position of the next
          * script (or the ending position of this one, plus one).
-         * @param is_start[in] @todo Understand and document.
-         * @param is_end[in] @todo Understand and document.
-         * @param to_return_only[in] True to read the script only until the
+         * @param[in] is_start @todo Understand and document.
+         * @param[in] is_end @todo Understand and document.
+         * @param[in] to_return_only True to read the script only until the
          * first return.
-         * @param func_name[in] Name of the function. If the entity is a line,
+         * @param[in] func_name Name of the function. If the entity is a line,
          * the provided name will be overridden and set to the standard line
          * entity script names.
          */
@@ -665,11 +664,11 @@ class FieldDisassembler : public Disassembler{
          * whatever comes first. It also detects if one of the read opcodes
          * LINE, which means that the entity is a line
          *
-         * @param end_pos[in] The last position to read. Opcodes will be read
+         * @param[in] end_pos The last position to read. Opcodes will be read
          * until this, or until a RET is found.
-         * @param point_a[out] If a LINE opcode is found, the first point will
+         * @param[out] point_a If a LINE opcode is found, the first point will
          * be saved here.
-         * @param point_b[out] If a LINE opcode is found, the second point
+         * @param[out] point_b If a LINE opcode is found, the second point
          * will be saved here.
          * @return True if LINE opcode found, false if not.
          */
@@ -680,9 +679,9 @@ class FieldDisassembler : public Disassembler{
         /**
          * Initializes a function for an entity.
          *
-         * @param script_index[in] Index of the script.
+         * @param[in] script_index Index of the script.
          */
-        std::unique_ptr<Function> StartFunction(size_t scriptIndex);
+        std::unique_ptr<Function> StartFunction(size_t script_index);
 
         /**
          * Reads the header.
@@ -692,16 +691,16 @@ class FieldDisassembler : public Disassembler{
         /**
          * Reads the header.
          *
-         * @param reader[in] Reader to use to read.
+         * @param[in] reader Reader to use to read.
          */
         void ReadHeader(BinaryReader& reader);
 
         /**
          * Retrieves the offset of the end of a script.
          *
-         * @param cur_entry_point[in] @todo Understand and document.
-         * @param entity_index[in] Index of the entity the script belongs to.
-         * @param script_index[in] The script index.
+         * @param[in] cur_entry_point @todo Understand and document.
+         * @param[in] entity_index Index of the entity the script belongs to.
+         * @param[in] script_index The script index.
          * @return The address of the end of the script.
          */
         uint32 GetEndOfScriptOffset(
@@ -714,13 +713,13 @@ class FieldDisassembler : public Disassembler{
          * Adds properties to an instruction, and adds the instruction to the
          * list.
          *
-         * @param opcode[in] The opcode code.
-         * @param name[in] the opcode name.
-         * @param instruction[in][out] A newly created instruction of the type
-         * the opcode belongs to.
-         * @param stack_change[in] Indicates how much the instruction changes
+         * @param[in] opcode The opcode code.
+         * @param[in] name the opcode name.
+         * @param[in] instruction A newly created instruction of the type the
+         * opcode belongs to.
+         * @param[in] stack_change Indicates how much the instruction changes
          * the stack pointer by.
-         * @param argument_format[in] The opcode argument format.
+         * @param[in] argument_format The opcode argument format.
          */
         template<typename T> void ParseOpcode(
           int opcode, std::string name, T instruction, int stack_change, const char* argument_format

@@ -366,7 +366,7 @@ namespace VGears {
     /**
      * Creates a reference texture.
      *
-     * @param s[out] The texture will be loaded here.
+     * @param[out] s The texture will be loaded here.
      * @todo Understand and document properly.
      */
     static void CreateReferenceTextureFileInstance(
@@ -402,14 +402,11 @@ namespace VGears {
     /**
      * Creates a reference file.
      *
-     * @param callBack[in|out] The callBack function.
+     * @param[in,out] callBack The callBack function.
      * @todo Understand and document properly.
      */
     static void CreateReferenceFileInstance(
-      std::function<
-        void(Ogre::DataStreamPtr& stream,
-        VGears::WorldMapFile& file)
-      > callBack
+      std::function<void(Ogre::DataStreamPtr& stream, VGears::WorldMapFile& file)> callBack
     ){
         /**
          * A test file.
@@ -428,9 +425,7 @@ namespace VGears {
         const char* file_name = "data/wm/WM0.MAP";
         std::ifstream ifs(file_name, std::ifstream::binary);
         if (!ifs.is_open()){
-            LogManager::getSingleton().logMessage(
-              "ERROR: Failed to open data/wm/WM0.MAP"
-            );
+            LogManager::getSingleton().logMessage("ERROR: Failed to open data/wm/WM0.MAP");
             return;
         }
         {
@@ -450,7 +445,7 @@ namespace VGears {
     /**
      * Creates a 16 bit point from coordinates.
      *
-     * @parma coord[in] The coordinates.
+     * @param[in] coord The coordinates.
      * @return Coordinate point.
      */
     static float From16BitFixedPoint(VGears::sint16 coord){
@@ -461,7 +456,7 @@ namespace VGears {
     /**
      * Tests something.
      *
-     * @param data[in] @todo.
+     * @param[in] data The test data.
      * @todo Understand and document properly.
      */
     void Test(const std::vector<std::vector<TxzFileSerializer::Rgba>>& data){
@@ -506,8 +501,8 @@ namespace VGears {
     /**
      * Converts a coordinate to a texture U component coordinate.
      *
-     * @param coord[in] The coordinate to convert.
-     * @param id[in] Texture ID.
+     * @param[in] coord The coordinate to convert.
+     * @param[in] id Texture ID.
      * @return Texture coordinate U component.
      * @todo Understand and document properly.
      */
@@ -520,8 +515,8 @@ namespace VGears {
     /**
      * Converts a coordinate to a texture V component coordinate.
      *
-     * @param coord[in] The coordinate to convert.
-     * @param id[in] Texture ID.
+     * @param[in] coord The coordinate to convert.
+     * @param[in] id Texture ID.
      * @return Texture coordinate V component.
      * @todo Understand and document properly.
      */
@@ -580,7 +575,7 @@ namespace VGears {
     /**
      * Creates a test map.
      *
-     * @param scene_manager[in] The scene manager.
+     * @param[in] scene_manager The scene manager.
      */
     void CreateTestMap(SceneManager* scene_manager){
         std::vector<VGears::MapFileSerializer::Block> blocks;

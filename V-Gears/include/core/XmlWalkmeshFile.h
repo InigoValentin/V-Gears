@@ -26,7 +26,7 @@ class XmlWalkmeshFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the walkmesh file.
+         * @param[in] file Path to the walkmesh file.
          */
         XmlWalkmeshFile( const Ogre::String& file );
 

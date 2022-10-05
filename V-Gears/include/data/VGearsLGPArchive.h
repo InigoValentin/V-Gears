@@ -30,8 +30,8 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param name[in] Name for the archive.
-             * @param arch_type[in] Archive type code.
+             * @param[in] name Name for the archive.
+             * @param[in] arch_type Archive type code.
              */
             LGPArchive(const String &name, const String &arch_type);
 
@@ -60,8 +60,8 @@ namespace VGears{
             /**
              * Opens a stream on a LGP compressed file.
              *
-             * @param filename[in] Path to open the stream on.
-             * @param readOnly[in] TRue to open the stream in read-only mode,
+             * @param[in] filename Path to open the stream on.
+             * @param[in] readOnly TRue to open the stream in read-only mode,
              * false to allow writting.
              */
             Ogre::DataStreamPtr open(
@@ -73,7 +73,7 @@ namespace VGears{
              *
              * If the archive is read-only then this method will fail.
              *
-             * @param filename[in] Path to the file.
+             * @param[in] filename Path to the file.
              */
             Ogre::DataStreamPtr create(const String& filename) const;
 
@@ -82,47 +82,43 @@ namespace VGears{
              *
              * Not possible on read-only archives
              *
-             * @param filename[in] Path to the file.
+             * @param[in] filename Path to the file.
              */
             void remove(const String& filename) const;
 
             /**
              * Lists all file names in the archive.
              *
-             * @param rercursive[in] Whether all paths of the archive are
+             * @param[in] recursive Whether all paths of the archive are
              * to be searched (if the archive has a concept of that).
-             * @param dirs[in] True to list only directories, false to list
+             * @param[in] dirs True to list only directories, false to list
              * only files.
              * @return A list of filenames matching the criteria, all fully
              * qualified.
              */
-            Ogre::StringVectorPtr list(
-              bool recursive = true, bool dirs = false
-            ) const;
+            Ogre::StringVectorPtr list(bool recursive = true, bool dirs = false) const;
 
             /**
              * Lists all files in the archive with accompanying information.
              *
-             * @param rercursive[in] Whether all paths of the archive are
+             * @param[in] recursive Whether all paths of the archive are
              * to be searched (if the archive has a concept of that).
-             * @param dirs[in] True to list only directories, false to list
+             * @param[in] dirs True to list only directories, false to list
              * only files.
              * @return A list of structures detailing quite a lot of
              * information about all the files in the archive.
              */
-            Ogre::FileInfoListPtr listFileInfo(
-              bool recursive = true, bool dirs = false
-            ) const;
+            Ogre::FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false) const;
 
             /**
              * Finds all file or directory names matching a given pattern in the
              * archive.
              *
-             * @param pattern[in] The pattern to search for; wildcards (*) are
-             * allowed
-             * @param recursive[in ]Whether all paths of the archive are
+             * @param[in] pattern The pattern to search for, wildcards (*) are
+             * allowed.
+             * @param[in] recursive Whether all paths of the archive are
              * searched (if the archive has a concept of that).
-             * @param dirs[in] True to list only directories, false to list
+             * @param[in] dirs True to list only directories, false to list
              * only files.
              * @return A list of filenames matching the criteria, all fully
              * qualified.
@@ -135,11 +131,11 @@ namespace VGears{
              * Finds all files or directories matching a given pattern in this
              * archive and get some detailed information about them.
              *
-             * @param pattern[in] The pattern to search for; wildcards (*) are
-             * allowed
-             * @param recursive[in ]Whether all paths of the archive are
+             * @param[in] pattern The pattern to search for, wildcards (*) are
+             * allowed.
+             * @param[in] recursive Whether all paths of the archive are
              * searched (if the archive has a concept of that).
-             * @param dirs[in] True to list only directories, false to list
+             * @param[in] dirs True to list only directories, false to list
              * only files.
              * @return A list of file information structures for all files
              * matching the criteria.
@@ -149,9 +145,9 @@ namespace VGears{
             ) const;
 
             /**
-             * checks if the named file exists.
+             * Checks if the named file exists.
              *
-             * @param filename[in] Fully qualified filename.
+             * @param[in] filename Fully qualified filename.
              * @return True if FILENAME exists in the archive, false otherwise.
              */
             bool exists(const String& filename) const;
@@ -159,7 +155,7 @@ namespace VGears{
             /**
              * Retrieve the modification time of a given file.
              *
-             * @param filename[in] Fully qualified filename.
+             * @param[in] filename Fully qualified filename.
              * @return Last-modified timestamp.
              */
             time_t getModifiedTime(const String& filename) const;
@@ -219,7 +215,7 @@ namespace VGears{
             /**
              * Loads a LGP archive.
              *
-             * @param lgp[in] The contents of the archive.
+             * @param[in] lgp The contents of the archive.
              */
             void Load(Ogre::DataStream* lgp);
 

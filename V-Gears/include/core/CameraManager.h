@@ -44,8 +44,8 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
          *
          * Handles the scene manager camera actions based on events.
          *
-         * @param event[in] Event that triggers the camera action.
-         * @param time_since_last_frame[in] For speed calculation.
+         * @param[in] event Event that triggers the camera action.
+         * @param[in] time_since_last_frame For speed calculation.
          */
         void Input(
           const VGears::Event& event , Ogre::Real time_since_last_frame
@@ -71,16 +71,16 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
          * A free camera moves depending on player input, not according to a
          * script. For example, a camera following the PC is a free camera.
          *
-         * @param enable[in] True to enable free camera, false to disable it.
+         * @param[in] enable True to enable free camera, false to disable it.
          */
         void SetCameraFree(const bool enable);
 
         /**
          * Sets the camera properties.
          *
-         * @param position[in] Camera coordinates.
-         * @param orientation[in] Camera rotation, in quaternion format.
-         * @param fov[in] Field of view, in radians.
+         * @param[in] position Camera coordinates.
+         * @param[in] orientation Camera rotation, in quaternion format.
+         * @param[in] fov Field of view, in radians.
          */
         void Set2DCamera(
           const Ogre::Vector3 position, const Ogre::Quaternion orientation,
@@ -93,7 +93,7 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
          * Moves the camera to the desired position. If the camera is in free
          * mode, it sets the position, but it won't actually move the camera.
          *
-         * @param position[in] Position to scroll the camera to.
+         * @param[in] position Position to scroll the camera to.
          */
         void Set2DScroll(const Ogre::Vector2& position);
 
@@ -109,7 +109,7 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
          *
          * The calculation is done using A map position and the camera scroll.
          *
-         * @param point[in] Position of the map to be translated to screen
+         * @param[in] point Position of the map to be translated to screen
          * position.
          * @return Position of POINT in screen coordinates.
          */
@@ -134,7 +134,7 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
          *
          * In wireframe mode, faces will not be rendered, only edges
          *
-         * @param enable[in] True to enable wireframe mode, false to disable.
+         * @param[in] enable True to enable wireframe mode, false to disable.
          */
         void EnableWireFrame(bool enable);
 

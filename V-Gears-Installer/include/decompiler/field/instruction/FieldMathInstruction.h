@@ -30,13 +30,13 @@ class FieldMathInstruction : public StoreInstruction{
         /**
          * Processes the instruction.
          *
-         * @param func[in] Function to process.
-         * @param stack[out] Function stack.
-         * @param engine[in] Engine. Unused.
-         * @param code_gen[in] Code generator.
+         * @param[in] func Function to process.
+         * @param[out] stack Function stack.
+         * @param[in] engine Engine. Unused.
+         * @param[in] code_gen Code generator.
          */
         virtual void ProcessInst(
-          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+          Function& func, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
         ) override;
 
     private:
@@ -83,7 +83,7 @@ class FieldMathInstruction : public StoreInstruction{
          * taken from "Bit". If the Source Bank is an 8 bit bank, then the bit
          * is the address in that bank where the operand is.
          *
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         void ProcessBITON(CodeGenerator* code_gen);
 
@@ -109,7 +109,7 @@ class FieldMathInstruction : public StoreInstruction{
          * taken from "Bit". If the Source Bank is an 8 bit bank, then the bit
          * is the address in that bank where the operand is.
          *
-         * @param codegen[in|out] Code generator to append lines.
+         * @param[in,out] code_gen Code generator to append lines.
          */
         void ProcessBITOFF(CodeGenerator* code_gen);
 

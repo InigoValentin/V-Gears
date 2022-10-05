@@ -32,16 +32,16 @@ class FieldTextWriter{
          *
          * Writes the  XML text section opening tag.
          *
-         * @param file_name[in] Path to the file to write te text to.
+         * @param[in] file_name Path to the file to write te text to.
          */
         void Begin(std::string file_name);
 
         /**
          * Writes text to the XML file.
          *
-         * @param script_section_buffer[in] The text data to write.
-         * @param field_name[in] The field of the text.
-         * @param english[in] True if the language to write is english.
+         * @param[in] script_section_buffer The text data to write.
+         * @param[in] field_name The field of the text.
+         * @param[in] english True if the language to write is english.
          */
         void Write(
           const std::vector<u8>& script_section_buffer, std::string field_name, bool english = true
@@ -59,14 +59,14 @@ class FieldTextWriter{
         /**
          * Adds text.
          *
-         * @param text[in] The text to add.
+         * @param[in] text The text to add.
          */
         void AddText(std::vector<unsigned char>& text);
 
         /**
          * Reads 16 bytes of data from the data (little endian).
          *
-         * @param offset[in] Offset at which to read.
+         * @param[in] offset Offset at which to read.
          * @return 16 bytes of data at the specified offset.
          * @throws std::out_of_range If the offset is out of the data.
          */
@@ -75,7 +75,7 @@ class FieldTextWriter{
         /**
          * Reads 8 bytes of data from the data.
          *
-         * @param offset[in] Offset at which to read.
+         * @param[in] offset Offset at which to read.
          * @return 8 bytes of data at the specified offset.
          * @throws std::out_of_range If the offset is out of the data.
          */

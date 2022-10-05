@@ -20,7 +20,7 @@
 /**
  * Handles the main prototypes file.
  *
- * @tpdp What are prototypes? What's in the file?
+ * @todo What are prototypes? What's in the file?
  */
 class XmlPrototypesFile : public XmlFile{
 
@@ -29,7 +29,7 @@ class XmlPrototypesFile : public XmlFile{
         /**
          * Constructor.
          *
-         * @param file[in] Path to the main prototypes file.
+         * @param[in] file Path to the main prototypes file.
          */
         XmlPrototypesFile(const Ogre::String& file);
 

@@ -63,8 +63,8 @@ class UiAnimation{
         /**
          * Constructor.
          *
-         * @param name[in] Animation name.
-         * @param widget[in] Widget to animate.
+         * @param[in] name Animation name.
+         * @param[in] widget Widget to animate.
          */
         UiAnimation(const Ogre::String& name, UiWidget* widget);
 
@@ -92,7 +92,7 @@ class UiAnimation{
         /**
          * Adds time to the animation and updates it.
          *
-         * @param time[in] Time to add, in seconds.
+         * @param[in] time Time to add, in seconds.
          */
         void AddTime(const float time);
 
@@ -106,7 +106,7 @@ class UiAnimation{
         /**
          * Sets the time of the animation and updates it.
          *
-         * @param time[i] The time of the animation.
+         * @param[in] time The time of the animation.
          */
         void SetTime(const float time);
 
@@ -120,7 +120,7 @@ class UiAnimation{
         /**
          * Sets the animation length.
          *
-         * @param time[in] The animation length, in seconds.
+         * @param[in] time The animation length, in seconds.
          */
         void SetLength(const float time);
 
@@ -134,59 +134,59 @@ class UiAnimation{
         /**
          * Adds a scale keyframe to the animation.
          *
-         * @param key_frame[in] The keyframe to add.
+         * @param[in] key_frame The keyframe to add.
          */
         void AddScaleKeyFrame(const UiKeyFrameVector2& key_frame);
 
         /**
          * Adds a X position keyframe to the animation.
          *
-         * @param key_frame[in] The keyframe to add.
+         * @param[in] key_frame The keyframe to add.
          */
         void AddXKeyFrame(const UiKeyFrameVector2& key_frame);
 
         /**
          * Adds a Y position keyframe to the animation.
          *
-         * @param key_frame[in] The keyframe to add.
+         * @param[in] key_frame The keyframe to add.
          */
         void AddYKeyFrame(const UiKeyFrameVector2& key_frame);
 
         /**
          * Adds a width keyframe to the animation.
          *
-         * @param key_frame[in] The keyframe to add.
+         * @param[in] key_frame The keyframe to add.
          */
         void AddWidthKeyFrame(const UiKeyFrameVector2& key_frame);
 
         /**
          * Adds a height keyframe to the animation.
          *
-         * @param key_frame[in] The keyframe to add.
+         * @param[in] key_frame The keyframe to add.
          */
         void AddHeightKeyFrame(const UiKeyFrameVector2& key_frame);
 
         /**
          * Adds a rotation keyframe to the animation.
          *
-         * @param key_frame[in] The keyframe to add.
+         * @param[in] key_frame The keyframe to add.
          */
         void AddRotationKeyFrame(const UiKeyFrameFloat& key_frame);
 
         /**
          * Adds an alpha keyframe to the animation.
          *
-         * @param key_frame[in] The keyframe to add.
+         * @param[in] key_frame The keyframe to add.
          */
         void AddAlphaKeyFrame(const UiKeyFrameFloat& key_frame);
 
         /**
          * Adds an scissor keyframe to the animation.
          *
-         * @param x1[in] @todo Understand and document.
-         * @param y1[in] @todo Understand and document.
-         * @param x2[in] @todo Understand and document.
-         * @param y2[in] @todo Understand and document.
+         * @param[in] x1 @todo Understand and document.
+         * @param[in] y1 @todo Understand and document.
+         * @param[in] x2 @todo Understand and document.
+         * @param[in] y2 @todo Understand and document.
          * @todo What is an scissor keyframe?.
          */
         void AddScissorKeyFrame(

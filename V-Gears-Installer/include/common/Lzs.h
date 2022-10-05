@@ -20,7 +20,7 @@ namespace Lzs{
     /**
      * Decompresses LZS data.
      *
-     * @param compressed[in] Compressed data.
+     * @param[in] compressed Compressed data.
      * @return Decompressed data.
      */
     inline std::vector<unsigned char> Decompress(const std::vector<unsigned char>& compressed){

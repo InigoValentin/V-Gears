@@ -42,7 +42,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Handles an input event.
          *
-         * @param event[in] Event to handle.
+         * @param[in] event Event to handle.
          */
         void Input(const VGears::Event& event);
 
@@ -71,7 +71,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Pauses or resumes an entity scripts.
          *
-         * @param paused[in] True to pause, false to resume.
+         * @param[in] paused True to pause, false to resume.
          * @todo Verify the description.
          */
         void ScriptSetPaused(const bool paused);
@@ -93,11 +93,11 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Adds an entity to the manager.
          *
-         * @param name[in] Entity name.
-         * @param file_name[in] Path to the entity model file.
-         * @param position[in] Entity position in the map.
-         * @param direction[in] Entity face direction.
-         * @param index[in] Index of the entity on the map.
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] position Entity position in the map.
+         * @param[in] direction Entity face direction.
+         * @param[in] index Index of the entity on the map.
          */
         void AddEntity(
           const Ogre::String& name, const Ogre::String& file_name,
@@ -107,13 +107,13 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Adds an entity to the manager.
          *
-         * @param name[in] Entity name.
-         * @param file_name[in] Path to the entity model file.
-         * @param position[in] Entity position in the map.
-         * @param rotation[in] Entity face direction.
-         * @param scale[in] Entity scale.
-         * @param root_orientation[in] Map orientation.
-         * @param index[in] Index of the entity on the map.
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] position Entity position in the map.
+         * @param[in] rotation Entity face direction.
+         * @param[in] scale Entity scale.
+         * @param[in] root_orientation Map orientation.
+         * @param[in] index Index of the entity on the map.
          */
         void AddEntity(
           const Ogre::String& name, const Ogre::String& file_name,
@@ -124,13 +124,13 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Adds an entity to the manager.
          *
-         * @param name[in] Entity name.
-         * @param file_name[in] Path to the entity model file.
-         * @param x[in] X coordinate of the entity position in the map.
-         * @param y[in] Y coordinate of the entity position in the map.
-         * @param z[in] Z coordinate of the entity position in the map.
-         * @param direction[in] Entity face direction.
-         * @param index[in] Index of the entity on the map.
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] x X coordinate of the entity position in the map.
+         * @param[in] y Y coordinate of the entity position in the map.
+         * @param[in] z Z coordinate of the entity position in the map.
+         * @param[in] direction Entity face direction.
+         * @param[in] index Index of the entity on the map.
          */
         void ScriptAddEntity(
           const char* name, const char* file_name,
@@ -142,10 +142,10 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          *
          * A trigger is a line that does something when approached or crossed.
          *
-         * @param name[in] Entity trigger name.
-         * @param point1[in] One point of the trigger line.
-         * @param point2[in] One point of the trigger line.
-         * @param enabled[in] True to enable the trigger, false to leave it
+         * @param[in] name Entity trigger name.
+         * @param[in] point1 One point of the trigger line.
+         * @param[in] point2 One point of the trigger line.
+         * @param[in] enabled True to enable the trigger, false to leave it
          * disabled.
          */
         void AddEntityTrigger(
@@ -156,9 +156,9 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Adds an entity point to the manager.
          *
-         * @param name[in] Entity point name.
-         * @param position[in] Entity point position.
-         * @param rotation[in] The point orientation.
+         * @param[in] name Entity point name.
+         * @param[in] position Entity point position.
+         * @param[in] rotation The point orientation.
          */
         void AddEntityPoint(
           const Ogre::String& name, const Ogre::Vector3& position,
@@ -168,21 +168,21 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Adds an entity script to the manager.
          *
-         * @param name[in] Entity script name.
+         * @param[in] name Entity script name.
          */
         void AddEntityScript(const Ogre::String& name);
 
         /**
          * Adds an entity script to the manager.
          *
-         * @param name[in] Entity script name.
+         * @param[in] name Entity script name.
          */
         void ScriptAddEntityScript(const char* name);
 
         /**
          * Retrieves an entity by name.
          *
-         * @param name[in] Name of the entity to retrieve.
+         * @param[in] name Name of the entity to retrieve.
          * @return The entity by the specified name, or nullptr if there is no
          * one.
          */
@@ -191,7 +191,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Retrieves an entity by it's index in the field.
          *
-         * @param index[in] Index of the entity to retrieve.
+         * @param[in] id Index of the entity to retrieve.
          * @return The entity with the ID, or nullptr if there is no one.
          */
         Entity* GetEntityFromIndex(const int id) const;
@@ -199,7 +199,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Retrieves an entity by it's assigned character ID.
          *
-         * @param id[in] Character ID of the entity to retrieve.
+         * @param[in] id Character ID of the entity to retrieve.
          * @return The entity assigned to the character, or nullptr if there
          * is no one.
          */
@@ -208,7 +208,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Retrieves an entity by name.
          *
-         * @param name[in] Name of the entity to retrieve.
+         * @param[in] name Name of the entity to retrieve.
          * @return The entity by the specified name, or nullptr if there is no
          * one.
          */
@@ -217,7 +217,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Retrieves an entity point by name.
          *
-         * @param name[in] Name of the entity point to retrieve.
+         * @param[in] name Name of the entity point to retrieve.
          * @return The entity point by the specified name, or nullptr if there
          * is no one.
          */
@@ -230,7 +230,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * previous playable entity will remain so, and no warning will be
          * issued.
          *
-         * @param name[in] Name of the entity to make playable.
+         * @param[in] name Name of the entity to make playable.
          */
         void ScriptSetPlayerEntity(const char* name);
 
@@ -249,14 +249,14 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Locks or unlocks player control of the playable entity.
          *
-         * @param lock[in] True to lock, false to unlock.
+         * @param[in] lock True to lock, false to unlock.
          */
         void ScriptPlayerLock(const bool lock);
 
         /**
          * Sets the baseline rotation for the player controlled entity.
          *
-         * @param rotation[in] Baseline rotation.
+         * @param[in] rotation Baseline rotation.
          * @todo Verify this description.
          */
         void SetPlayerMoveRotation(const Ogre::Radian rotation);
@@ -271,7 +271,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Enables or disables random encounters in the field.
          *
-         * @param active[in] True to enable encounters, false to deactivate
+         * @param[in] active True to enable encounters, false to deactivate
          * them.
          */
         void SetRandomEncounters(bool active);
@@ -286,14 +286,14 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Sets the battle encounter rate.
          *
-         * @param rate[in] The encounter rate (0-1).
+         * @param[in] rate The encounter rate (0-1).
          */
         void SetEncounterRate(float rate);
 
         /**
          * Starts a battle.
          *
-         * @param formation[in] The enemy formation to fight.
+         * @param[in] formation The enemy formation to fight.
          * @return True if the battle victory conditions are met, false
          * otherwise.
          * @todo Implement
@@ -303,7 +303,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Starts a battle.
          *
-         * @param formation[in] The enemy formation to fight.
+         * @param[in] formation The enemy formation to fight.
          * @todo Implement
          */
         void StartBattle(unsigned int formation);
@@ -311,7 +311,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Checks if a key is being pressed.
          *
-         * @param key_code[in] The code of the key to test.
+         * @param[in] key_code The code of the key to test.
          * @return True if the key is being pressed, false otherwise.
          */
         bool IsKeyOn(unsigned int key_code);
@@ -319,7 +319,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Checks if a key is not being pressed.
          *
-         * @param key_code[in] The code of the key to test.
+         * @param[in] key_code The code of the key to test.
          * @return False if the key is being pressed, true otherwise.
          */
         bool IsKeyOff(unsigned int key_code);
@@ -327,8 +327,8 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Assigns a character to an entity.
          *
-         * @param entity_name[in] The entity name.
-         * @param character name[in] The character name. Usually the same as
+         * @param[in] entity_name The entity name.
+         * @param[in] character_name The character name. Usually the same as
          * the entity.
          */
         void SetEntityToCharacter(const char* entity_name, const char* character_name);
@@ -343,40 +343,40 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * the X and Y coordinates, and automatically sets the Z one to the
          * closest triangle.
          *
-         * @param entity[in] Entity to attach.
+         * @param[in] entity Entity to attach.
          * @return True if the entity was assigned to a walkmesh triangle,
          * false if the entity is not in a triangle.
          */
         bool SetEntityOnWalkmesh(Entity* entity);
 
         /**
-         * @todo Understand and document.
+         * Moves an entity in the walkmesh.
          *
-         * @param entity[in] Entity to move.
-         * @param speed[in] Movement speed.
-         * @return @todo.
+         * @param[in] entity Entity to move.
+         * @param[in] speed Movement speed.
+         * @return True if the movement was possible and the entity was moved,
+         * false otherwise.
          */
         bool PerformWalkmeshMove(Entity* entity, const float speed);
 
         /**
          * Cheks if the entity is crossing a walkmesh triangle border.
          *
-         * @param entity[in] Entity to check.
-         * @param position[in] @todo.
-         * @param move_vector[in] @todo.
+         * @param[in] entity Entity to check.
+         * @param[in] position The position. @todo document more.
+         * @param[in] move_vector The move vector. @todo document more.
          * @return True if the entity is crossing a triangle border, false
          * otherwise.
          */
         bool WalkmeshBorderCross(
-          Entity* entity, Ogre::Vector3& position,
-          const Ogre::Vector2& move_vector
+          Entity* entity, Ogre::Vector3& position, const Ogre::Vector2& move_vector
         );
 
         /**
          * Checks for collisions of the entity with other entities.
          *
-         * @param entity[in] Entity to check for collisions.
-         * @param position[in] Position of the entity.
+         * @param[in] entity Entity to check for collisions.
+         * @param[in] position Position of the entity.
          * @return True if the entity is colliding with another, false
          * otherwise. If the entity is not solid, always false.
          */
@@ -385,12 +385,10 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Sets an entity direction
          *
-         * @param entity[in] Entity whose direction is to be set.
-         * @param vector[in] Direction vector.
+         * @param[in] entity Entity whose direction is to be set.
+         * @param[in] vector Direction vector.
          */
-        void SetEntityDirectionByVector(
-          Entity* entity, const Ogre::Vector2& vector
-        );
+        void SetEntityDirectionByVector(Entity* entity, const Ogre::Vector2& vector);
 
         /**
          * Checks for entity triggers near a entity.
@@ -400,8 +398,8 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * every time an entity moves. If the entity is not solid, it will do
          * nothing.
          *
-         * @param entity[in] Entity to check for nearby triggers.
-         * @param position[in] The position of the entity.
+         * @param[in] entity Entity to check for nearby triggers.
+         * @param[in] position The position of the entity.
          */
         void CheckTriggers(Entity* entity, const Ogre::Vector3& position);
 
@@ -416,30 +414,30 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         void CheckEntityInteract();
 
         /**
-         * @todo Understand and document.
+         * Calculates the next offset step for an entity
          *
-         * @param entity[in] @todo.
+         * @param[in] entity The entity.
          */
         void SetNextOffsetStep(Entity* entity);
 
         /**
-         * @todo Understand and document.
+         * Calculates the next turn step for an entity
          *
-         * @param entity[in] @todo.
+         * @param[in] entity The entity.
          */
         void SetNextTurnStep(Entity* entity);
 
         /**
          * Calculates and sets the next position during a linear movement.
          *
-         * @param entity[in] The moving entity.
+         * @param[in] entity The moving entity.
          */
         void SetNextLinearStep(Entity* entity);
 
         /**
          * Calculates and sets the next position during a jump.
          *
-         * @param entity[in] The jump entity.
+         * @param[in] entity The jump entity.
          */
         void SetNextJumpStep(Entity* entity);
 

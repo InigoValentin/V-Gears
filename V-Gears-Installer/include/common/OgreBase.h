@@ -68,7 +68,7 @@ class DisplayFrameListener :
         /**
          * Constructor.
          *
-         * @param win[in] The render window. Used to determine input context.
+         * @param[in] win The render window. Used to determine input context.
          */
         DisplayFrameListener(Ogre::RenderWindow* win):
           window_(win), input_manager_(0), keyboard_(0),
@@ -128,7 +128,7 @@ class DisplayFrameListener :
          * This event happens before any render targets have begun updating.
          * It captures input events and checks the state of entities.
          *
-         * @param evt[in] Triggering event. Unused.
+         * @param[in] evt Triggering event. Unused.
          * @return True to go ahead, false to abort rendering and drop out of
          * the rendering loop.
          */
@@ -187,7 +187,7 @@ class DisplayFrameListener :
          *
          * Parses keyboard events.
          *
-         * @param event[in] Triggering event.
+         * @param[in] e Triggering event.
          * @return Always true
          */
         bool keyPressed(const OIS::KeyEvent& e){
@@ -283,7 +283,7 @@ class DisplayFrameListener :
          *
          * It does nothing.
          *
-         * @param e[in] Triggering event.
+         * @param[in] e Triggering event.
          * @return Always true.
          */
         bool keyReleased(const OIS::KeyEvent& e){return true;}
@@ -291,7 +291,7 @@ class DisplayFrameListener :
         /**
          * Handles mouse movement events.
          *
-         * @param e[in] Triggering event.
+         * @param[in] e Triggering event.
          * @return Always true.
          */
         bool mouseMoved(const OIS::MouseEvent& e){
@@ -303,8 +303,8 @@ class DisplayFrameListener :
         /**
          * Handles mouse button-down events.
          *
-         * @param e[in] Triggering event.
-         * @param id[in] Button ID.
+         * @param[in] e Triggering event.
+         * @param[in] id Button ID.
          * @return Always true.
          */
         bool mousePressed(const OIS::MouseEvent& e, OIS::MouseButtonID id){
@@ -315,8 +315,8 @@ class DisplayFrameListener :
         /**
          * Handles mouse button-up events.
          *
-         * @param e[in] Triggering event.
-         * @param id[in] Button ID.
+         * @param[in] e Triggering event.
+         * @param[in] id Button ID.
          * @return Always true.
          */
         bool mouseReleased(const OIS::MouseEvent& e, OIS::MouseButtonID id){
@@ -390,7 +390,7 @@ class DisplayFrameListener :
 /**
  * Initializes the Ogre system.
  *
- * @param name[in] Application title.
+ * @param[in] name Application title.
  */
 void InitializeOgreBase(const Ogre::String& name);
 

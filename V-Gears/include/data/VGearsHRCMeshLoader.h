@@ -30,7 +30,7 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param hrc_file[in] The HRC file to load from.
+             * @param[in] hrc_file The HRC file to load from.
              */
             explicit HRCMeshLoader(HRCFile &hrc_file);
 
@@ -42,7 +42,7 @@ namespace VGears{
             /**
              * Loads a resource.
              *
-             * @param resource[in] The resource to load.
+             * @param[in] resource The resource to load.
              */
             virtual void loadResource(Ogre::Resource *resource);
 
@@ -51,9 +51,9 @@ namespace VGears{
             /**
              * Loads a bone.
              *
-             * @param mesh[in|out] The mesh to add the bone to.
-             * @param bone[in] The bone to add.
-             * @param path[in] Path to the file with the bone info.
+             * @param[in,out] mesh The mesh to add the bone to.
+             * @param[in] bone The bone to add.
+             * @param[in] path Path to the file with the bone info.
              */
             virtual void LoadBone(
               Ogre::Mesh *mesh, const HRCFile::Bone &bone, const String &path
