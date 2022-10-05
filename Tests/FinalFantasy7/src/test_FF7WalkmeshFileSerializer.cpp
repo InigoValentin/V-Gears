@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE( read_file )
     BOOST_REQUIRE( stream->isReadable() );
 
     Ogre::LogManager                    logMgr;
-    VGears::FF7::WalkmeshFileSerializer ser;
+    VGears::WalkmeshFileSerializer ser;
     TestFile                            f;
 
     logMgr.createLog( "Default Log", true, true, true );

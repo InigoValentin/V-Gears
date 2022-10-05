@@ -19,37 +19,34 @@
 
 namespace VGears{
 
-    namespace FF7{
+    /**
+     * Defines game dimensions.
+     */
+    enum{
 
         /**
-         * Defines game dimensions.
+         * Game horizontal resolution, in pixels.
          */
-        enum{
-
-            /**
-             * Game horizontal resolution, in pixels.
-             */
-            SCREEN_WIDTH = 320,
-
-            /**
-             * Game vertical resolution, in pixels.
-             */
-            SCREEN_HEIGHT = 240,
-
-            /**
-             * @todo Understand and document.
-             */
-            FIELD_POSITION_SCALE = 128,
-
-            /**
-             * @todo Understand and document.
-             */
-            FIELD_DEPTH_SCALE = 32
-        };
+        SCREEN_WIDTH = 320,
 
         /**
-         * Extension for A files.
+         * Game vertical resolution, in pixels.
          */
-        extern const String EXT_A;
-    }
+        SCREEN_HEIGHT = 240,
+
+        /**
+         * @todo Understand and document.
+         */
+        FIELD_POSITION_SCALE = 128,
+
+        /**
+         * @todo Understand and document.
+         */
+        FIELD_DEPTH_SCALE = 32
+    };
+
+    /**
+     * Extension for A files.
+     */
+    extern const String EXT_A;
 }

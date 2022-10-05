@@ -30,10 +30,6 @@
 namespace VGears{
     // TODO: move flevel stuff to ff7 as it is ff7 related!?
 
-    using FF7::ModelListFile;
-
-    using FF7::ModelListFilePtr;
-
     class FLevelTextureLoader;
 
     class FLevelBackground2DLoader;

@@ -27,10 +27,10 @@
 #include "decompiler/world/instruction/WorldSubStackInstruction.h"
 #include "decompiler/world/instruction/WorldUncondJumpInstruction.h"
 
-FF7::WorldDisassembler::WorldDisassembler(WorldEngine*, InstVec &insts, int script_number):
+WorldDisassembler::WorldDisassembler(WorldEngine*, InstVec &insts, int script_number):
   Disassembler(insts), script_number_(script_number){}
 
-FF7::WorldDisassembler::~WorldDisassembler(){}
+WorldDisassembler::~WorldDisassembler(){}
 
 /*
 00000202: reset stack (0)
@@ -63,7 +63,7 @@ if(!Read(897))
 }
 
 */
-void FF7::WorldDisassembler::DoDisassemble(){
+void WorldDisassembler::DoDisassemble(){
     struct WorldScriptData{
         uint16 type = 0;
         uint16 instruction_pointer = 0;
@@ -93,9 +93,7 @@ void FF7::WorldDisassembler::DoDisassemble(){
             else{
                 switch (opcode){
                     case 0x100:
-                        ParseOpcode(
-                          opcode, "reset stack", new WorldNoOutputInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "reset stack", new WorldNoOutputInstruction(), 0, "");
                         break;
                     case 0x201:
                         ParseOpcode(
@@ -141,9 +139,7 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         ParseOpcode(opcode, "push special", new WorldLoadInstruction(), 2, "w");
                         break;
                     case 0x117:
-                        ParseOpcode(
-                          opcode, "push special", new WorldLoadBankInstruction(), 2, "w"
-                        );
+                        ParseOpcode(opcode, "push special", new WorldLoadBankInstruction(), 2, "w");
                         break;
 
                     case 0x0e0:
@@ -169,7 +165,9 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         ParseOpcode(opcode, "push logicand", new WorldSubStackInstruction(), 2, "");
                         break;
                     case 0x062:
-                        ParseOpcode(opcode, "push lessequal", new WorldSubStackInstruction(), 2, "");
+                        ParseOpcode(
+                          opcode, "push lessequal", new WorldSubStackInstruction(), 2, ""
+                        );
                         break;
                     case 0x030:
                         ParseOpcode(opcode, "push mul", new WorldSubStackInstruction(), 2, "");
@@ -184,7 +182,9 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         ParseOpcode(opcode, "push or", new WorldSubStackInstruction(), 2, "");
                         break;
                     case 0x070:
-                        ParseOpcode(opcode, "push equal", new WorldBinaryEqualStackInstruction(), 2, "");
+                        ParseOpcode(
+                          opcode, "push equal", new WorldBinaryEqualStackInstruction(), 2, ""
+                        );
                         break;
                     case 0x041:
                         ParseOpcode(opcode, "push sub", new WorldSubStackInstruction(), 2, "");
@@ -211,94 +211,58 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         break;
 
                     case 0x320:
-                        ParseOpcode(
-                          opcode, "unknown 320", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 320", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x34a:
-                        ParseOpcode(
-                          opcode, "unknown 34a", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 34a", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x334:
-                        ParseOpcode(
-                          opcode, "unknown 334", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 334", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x33a:
-                        ParseOpcode(
-                          opcode, "unknown 33a", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 33a", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x31c:
-                        ParseOpcode(
-                          opcode, "unknown 31c", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 31c", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x32f:
-                        ParseOpcode(
-                          opcode, "unknown 32f", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 32f", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x339:
-                        ParseOpcode(
-                          opcode, "unknown 339", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 339", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x30d:
-                        ParseOpcode(
-                          opcode, "unknown 30d", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 30d", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x354:
-                        ParseOpcode(
-                          opcode, "unknown 354", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 354", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x332:
-                        ParseOpcode(
-                          opcode, "unknown 332", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 332", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x31f:
-                        ParseOpcode(
-                          opcode, "unknown 31f", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 31f", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x329:
-                        ParseOpcode(
-                          opcode, "unknown 329", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 329", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x32a:
-                        ParseOpcode(
-                          opcode, "unknown 32a", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 32a", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x34d:
-                        ParseOpcode(
-                          opcode, "unknown 3d4", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 3d4", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x34e:
-                        ParseOpcode(
-                          opcode, "unknown 3de", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 3de", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x30a:
-                        ParseOpcode(
-                          opcode, "unknown 30a", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 30a", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x333:
-                        ParseOpcode(
-                          opcode, "unknown 333", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 333", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x331:
-                        ParseOpcode(
-                          opcode, "unknown 331", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 331", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x319:
                         ParseOpcode(
@@ -306,9 +270,7 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         );
                         break;
                     case 0x353:
-                        ParseOpcode(
-                          opcode, "unknown 353", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 353", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x33e:
                         ParseOpcode(
@@ -316,9 +278,7 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         );
                         break;
                     case 0x321:
-                        ParseOpcode(
-                          opcode, "unknown 321", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 321", new WorldKernelCallInstruction(), 0, "");
                         break;
 
                     case 0x31d:
@@ -340,8 +300,7 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         break;
                     case 0x33d:
                         ParseOpcode(
-                          opcode, "set field entry point2?",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "set field entry point2?", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x351:
@@ -351,8 +310,7 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         break;
                     case 0x352:
                         ParseOpcode(
-                          opcode, "shake camera on / off",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "shake camera on / off", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x34f:
@@ -400,20 +358,17 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         break;
                     case 0x32c:
                         ParseOpcode(
-                          opcode, "set window parameters",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "set window parameters", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x32d:
                         ParseOpcode(
-                          opcode, "wait for window ready",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "wait for window ready", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x324:
                         ParseOpcode(
-                          opcode, "set window dimensions",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "set window dimensions", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x325:
@@ -536,8 +491,7 @@ void FF7::WorldDisassembler::DoDisassemble(){
                         break;
                     case 0x313:
                         ParseOpcode(
-                          opcode, "set point terrain BGR",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "set point terrain BGR", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x314:
@@ -561,8 +515,7 @@ void FF7::WorldDisassembler::DoDisassemble(){
                           opcode, "trigger battle", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
-                    default:
-                        throw UnknownOpcodeException(this->address_, opcode);
+                    default: throw UnknownOpcodeException(this->address_, opcode);
                 }
             }
             this->address_ += 2;

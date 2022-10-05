@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,31 +20,28 @@
 #include "decompiler/instruction/KernelCallInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 
-namespace FF7{
+/**
+ * A party instruction
+ */
+class FieldPartyInstruction : public KernelCallInstruction{
 
-    /**
-     * A party instruction
-     */
-    class FieldPartyInstruction : public KernelCallInstruction{
+    public:
 
-        public:
+        /**
+         * Processes the instruction.
+         *
+         * @param func[in] Function to process.
+         * @param stack[out] Function stack.
+         * @param engine[in] The engine. Unused
+         * @param codegen[in|out] Code generator to append lines.
+         */
+        virtual void ProcessInst(
+          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
 
-            /**
-             * Processes the instruction.
-             *
-             * @param func[in] Function to process.
-             * @param stack[out] Function stack.
-             * @param engine[in] The engine. Unused
-             * @param codegen[in|out] Code generator to append lines.
-             */
-            virtual void ProcessInst(
-              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
+    private:
 
-        private:
+        void ProcessSTITM(CodeGenerator* code_gen);
 
-            void ProcessSTITM(CodeGenerator* code_gen);
-            void ProcessPRTYE(CodeGenerator* code_gen);
-    };
-
-}
+        void ProcessPRTYE(CodeGenerator* code_gen);
+};

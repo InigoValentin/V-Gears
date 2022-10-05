@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -23,7 +23,7 @@
 float FieldDecompiler::ScaleFactor(const std::vector<unsigned char>& script_bytes){
     // Could be cleaner, but just does enough work to pull out the fields scale.
     FieldScriptFormatter formatter;
-    ::FF7::FieldEngine engine(formatter, "Unused");
+    FieldEngine engine(formatter, "Unused");
     InstVec insts;
     engine.GetDisassembler(insts, script_bytes);
     return engine.GetScaleFactor();
@@ -34,7 +34,7 @@ FieldDecompiler::DecompiledScript FieldDecompiler::Decompile(
   FieldScriptFormatter& formatter, std::string text_after, std::string text_before
 ){
     // Disassemble the script.
-    ::FF7::FieldEngine engine(formatter, script_name);
+    FieldEngine engine(formatter, script_name);
     InstVec insts;
     auto disassembler = engine.GetDisassembler(insts, script_bytes);
     disassembler->Disassemble();

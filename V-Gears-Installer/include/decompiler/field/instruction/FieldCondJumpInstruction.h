@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,44 +20,41 @@
 
 #include "decompiler/instruction/CondJumpInstruction.h"
 
-namespace FF7{
+/**
+ * A conditional map jump instruction.
+ */
+class FieldCondJumpInstruction : public CondJumpInstruction{
 
-    /**
-     * A conditional map jump instruction.
-     */
-    class FieldCondJumpInstruction : public CondJumpInstruction{
+    public:
 
-        public:
+        /**
+         * Processes a conditional jump instruction.
+         *
+         * Checks if the condition is a function or a comparison, and adds the
+         * function to the stack.
+         *
+         * @param function[in] Function to process. Unused.
+         * @param stack[out] Function stack. The instruction will be added
+         * here.
+         * @param engine[in] Engine. Unused.
+         * @param codegen[in|out] Code generator to append lines.
+         */
+        virtual void ProcessInst(
+          Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
 
-            /**
-             * Processes a conditional jump instruction.
-             *
-             * Checks if the condition is a function or a comparison, and
-             * adds the function to the stack.
-             *
-             * @param function[in] Function to process. Unused.
-             * @param stack[out] Function stack. The instruction will be added
-             * here.
-             * @param engine[in] Engine. Unused.
-             * @param codegen[in|out] Code generator to append lines.
-             */
-            virtual void ProcessInst(
-              Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
+        /**
+         * Retrieves the destination address of the jump.
+         *
+         * @return The offset (number of bytes) to jump from the beginning of
+         * the instruction.
+         */
+        virtual uint32 GetDestAddress() const override;
 
-            /**
-             * Retrieves the destination address of the jump.
-             *
-             * @return The offset (number of bytes) to jump from the beginning
-             * of the instruction.
-             */
-            virtual uint32 GetDestAddress() const override;
-
-            /**
-             * Prints the instruction
-             *
-             * @param output The stream to print the instruction to.
-             */
-            virtual std::ostream& Print(std::ostream &output) const override;
-    };
-}
+        /**
+         * Prints the instruction
+         *
+         * @param output The stream to print the instruction to.
+         */
+        virtual std::ostream& Print(std::ostream &output) const override;
+};

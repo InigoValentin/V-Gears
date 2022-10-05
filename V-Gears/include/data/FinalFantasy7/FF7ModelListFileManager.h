@@ -21,62 +21,57 @@
 
 namespace VGears{
 
-    namespace FF7{
+    /**
+     * A manager for model list files.
+     */
+    class _VGearsExport ModelListFileManager:
+      public Ogre::ResourceManager, public Ogre::Singleton<ModelListFileManager>
+    {
+        public:
 
-        /**
-         * A manager for model list files.
-         */
-        class _VGearsExport ModelListFileManager :
-          public Ogre::ResourceManager,
-          public Ogre::Singleton<ModelListFileManager>
-        {
-            public:
+            /**
+             * Constructor.
+             */
+            ModelListFileManager();
 
-                /**
-                 * Constructor.
-                 */
-                ModelListFileManager();
+            /**
+             * Destructor.
+             */
+            virtual ~ModelListFileManager();
 
-                /**
-                 * Destructor.
-                 */
-                virtual ~ModelListFileManager();
+            /**
+             * Retrieves a singleton to the manager.
+             */
+            static ModelListFileManager& GetSingleton();
 
-                /**
-                 * Retrieves a singleton to the manager.
-                 */
-                static ModelListFileManager& GetSingleton();
+            /**
+             * Retrieves a pointer to the manager singleton.
+             */
+            static ModelListFileManager *GetSingletonPtr();
 
-                /**
-                 * Retrieves a pointer to the manager singleton.
-                 */
-                static ModelListFileManager *GetSingletonPtr();
+        protected:
 
-            protected:
-
-                /**
-                 * Loads the manager.
-                 *
-                 * @param name[in] The unique name of the manager.
-                 * @param handle[in] @todo Understand and document.
-                 * @param group[in] The name of the resource group to which this
-                 * resource belong.
-                 * @param is_manual[in] True if the resource is manually loaded,
-                 * false otherwise.
-                 * @param loader[in] Pointer to a ManualResourceLoader
-                 * implementation which will be called when the Resource wishes to
-                 * load (should be supplied if is_manual is set to true). It can be
-                 * null, but the Resource will never be able to reload if anything
-                 * ever causes it to unload. Therefore provision of a proper
-                 * ManualResourceLoader instance is strongly recommended.
-                 * @param create_params[in] Unused.
-                 */
-                Ogre::Resource *createImpl(
-                  const Ogre::String &name, Ogre::ResourceHandle handle,
-                  const Ogre::String &group, bool is_manual,
-                  Ogre::ManualResourceLoader *loader,
-                  const Ogre::NameValuePairList *create_params
-                );
-        };
-    }
+            /**
+             * Loads the manager.
+             *
+             * @param name[in] The unique name of the manager.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can
+             * be null, but the Resource will never be able to reload if
+             * anything ever causes it to unload. Therefore provision of a
+             * proper ManualResourceLoader instance is strongly recommended.
+             * @param create_params[in] Unused.
+             */
+            Ogre::Resource *createImpl(
+              const Ogre::String &name, Ogre::ResourceHandle handle,
+              const Ogre::String &group, bool is_manual,
+              Ogre::ManualResourceLoader *loader, const Ogre::NameValuePairList *create_params
+            );
+    };
 }

@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,7 +24,7 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FF7::FieldMathInstruction::ProcessInst(
+void FieldMathInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
@@ -62,12 +62,12 @@ void FF7::FieldMathInstruction::ProcessInst(
             {
                 const uint32 source_bank = params_[0]->GetUnsigned();
                 const uint32 sourceaddress__or_value = params_[2]->GetUnsigned();
-                auto source = FF7::FieldCodeGenerator::FormatValueOrVariable(
+                auto source = FieldCodeGenerator::FormatValueOrVariable(
                   cg->GetFormatter(), source_bank, sourceaddress__or_value
                 );
                 const uint32 dest_bank = params_[1]->GetUnsigned();
                 const uint32 destaddress_ = params_[3]->GetUnsigned();
-                auto dest = FF7::FieldCodeGenerator::FormatValueOrVariable(
+                auto dest = FieldCodeGenerator::FormatValueOrVariable(
                   cg->GetFormatter(), dest_bank, destaddress_
                 );
                 code_gen->AddOutputLine(
@@ -97,19 +97,19 @@ void FF7::FieldMathInstruction::ProcessInst(
         case OPCODES::SIN: code_gen->WriteTodo(md.GetEntityName(), "SIN"); break;
         case OPCODES::COS: code_gen->WriteTodo(md.GetEntityName(), "COS"); break;
         default:
-            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_
             ));
     }
 }
 
-void FF7::FieldMathInstruction::ProcessSaturatedPLUS(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessSaturatedPLUS(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& lhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& lhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& rhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& rhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     // TODO: Respect destination bank sizes and negative wrap-around.
@@ -117,13 +117,13 @@ void FF7::FieldMathInstruction::ProcessSaturatedPLUS(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("--if (%1% > 255); %1% = 255; end") % lhs).str());
 }
 
-void FF7::FieldMathInstruction::ProcessSaturatedPLUS2(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessSaturatedPLUS2(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& lhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& lhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& rhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& rhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     // TODO: Respect destination bank sizes and negative wrap-around.
@@ -131,13 +131,13 @@ void FF7::FieldMathInstruction::ProcessSaturatedPLUS2(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("--if (%1% > 32767); %1% = 32767; end") % lhs).str());
 }
 
-void FF7::FieldMathInstruction::ProcessSaturatedMINUS(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessSaturatedMINUS(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& lhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& lhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& rhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& rhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     // TODO: Respect destination bank sizes and positive wrap-around.
@@ -145,13 +145,13 @@ void FF7::FieldMathInstruction::ProcessSaturatedMINUS(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("--if (%1% < 0); %1% = 0; end") % lhs).str());
 }
 
-void FF7::FieldMathInstruction::ProcessSaturatedMINUS2(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessSaturatedMINUS2(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& lhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& lhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& rhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& rhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     // TODO: Respect destination bank sizes and positive wrap-around.
@@ -159,10 +159,10 @@ void FF7::FieldMathInstruction::ProcessSaturatedMINUS2(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("--if (%1% < 0); %1% = 0; end") % lhs).str());
 }
 
-void FF7::FieldMathInstruction::ProcessSaturatedINC(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessSaturatedINC(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& dest = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& dest = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
     );
     // TODO: Respect destination bank sizes and negative wrap-around.
@@ -170,10 +170,10 @@ void FF7::FieldMathInstruction::ProcessSaturatedINC(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("--if (%1% > 255); %1% = 255; end") % dest).str());
 }
 
-void FF7::FieldMathInstruction::ProcessSaturatedINC2(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessSaturatedINC2(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& dest = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& dest = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
     );
     // TODO: Respect destination bank sizes and negative wrap-around.
@@ -181,10 +181,10 @@ void FF7::FieldMathInstruction::ProcessSaturatedINC2(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("--if (%1% > 32767); %1% = 32767; end") % dest).str());
 }
 
-void FF7::FieldMathInstruction::ProcessSaturatedDEC(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessSaturatedDEC(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& dest = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& dest = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
     );
     // TODO: Respect destination bank sizes and positive wrap-around.
@@ -192,10 +192,10 @@ void FF7::FieldMathInstruction::ProcessSaturatedDEC(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("--if (%1% < 0); %1% = 0; end") % dest).str());
 }
 
-void FF7::FieldMathInstruction::ProcessSaturatedDEC2(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessSaturatedDEC2(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& dest = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& dest = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
     );
     // TODO: Respect destination bank sizes and positive wrap-around.
@@ -203,64 +203,64 @@ void FF7::FieldMathInstruction::ProcessSaturatedDEC2(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("--if (%1% < 0); %1% = 0; end") % dest).str());
 }
 
-void FF7::FieldMathInstruction::ProcessRDMSD(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessRDMSD(CodeGenerator* code_gen){
     // TODO: we don't have os.time...
     // TODO: RNG emulation?
     code_gen->AddOutputLine("math.randomseed(os.time())");
 }
 
-void FF7::FieldMathInstruction::ProcessSETBYTE_SETWORD(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessSETBYTE_SETWORD(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     // TODO: respect destination bank sizes (16-bit writes only affect low byte)
     code_gen->AddOutputLine((boost::format("%1% = %2%") % destination % source).str());
 }
 
-void FF7::FieldMathInstruction::ProcessBITON(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessBITON(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("bit_on(%1%, %2%, %3%)")
       % params_[0]->GetUnsigned() % params_[2]->GetUnsigned() % params_[3]->GetUnsigned()
     ).str());
 }
 
-void FF7::FieldMathInstruction::ProcessBITOFF(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessBITOFF(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("bit_off(%1%, %2%, %3%)")
       % params_[0]->GetUnsigned() % params_[2]->GetUnsigned() % params_[3]->GetUnsigned()
     ).str());
 }
 
-void FF7::FieldMathInstruction::ProcessPLUSx_MINUSx(CodeGenerator* code_gen, const std::string& op){
+void FieldMathInstruction::ProcessPLUSx_MINUSx(CodeGenerator* code_gen, const std::string& op){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& lhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& lhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& rhs = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& rhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     // TODO: repect destination bank sizes and wraparound
     code_gen->AddOutputLine((boost::format("%1% = %1% %2% %3%") % lhs % op % rhs).str());
 }
 
-void FF7::FieldMathInstruction::ProcessINCx_DECx(CodeGenerator* code_gen, const std::string& op){
+void FieldMathInstruction::ProcessINCx_DECx(CodeGenerator* code_gen, const std::string& op){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
     );
     // TODO: repect destination bank sizes and wraparound
     code_gen->AddOutputLine((boost::format("%1% = %1% %2% 1") % destination % op).str());
 }
 
-void FF7::FieldMathInstruction::ProcessRANDOM(CodeGenerator* code_gen){
+void FieldMathInstruction::ProcessRANDOM(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
-    const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
     );
     // TODO: Respect destination bank sizes (16-bit writes only affect low byte).

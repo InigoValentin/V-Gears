@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,7 +24,7 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FF7::FieldModuleInstruction::ProcessInst(
+void FieldModuleInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
@@ -95,28 +95,28 @@ void FF7::FieldModuleInstruction::ProcessInst(
         case OPCODES::PMJMP2: code_gen->AddOutputLine("-- Prepare map change 2"); break;
         case OPCODES::GAMEOVER: code_gen->WriteTodo(md.GetEntityName(), "GAMEOVER"); break;
         default:
-            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_
             ));
     }
 }
 
-void FF7::FieldModuleInstruction::ProcessBATTLE(CodeGenerator* code_gen){
+void FieldModuleInstruction::ProcessBATTLE(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& battle_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& battle_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
     );
     code_gen->AddOutputLine((boost::format("entity_manager:battle_run(%1%)") % battle_id).str());
 }
 
-void FF7::FieldModuleInstruction::ProcessBTLON(CodeGenerator* code_gen){
+void FieldModuleInstruction::ProcessBTLON(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("entity_manager:random_encounters_on(%1%)")
-      % FF7::FieldCodeGenerator::FormatInvertedBool(params_[0]->GetUnsigned())
+      % FieldCodeGenerator::FormatInvertedBool(params_[0]->GetUnsigned())
     ).str());
 }
 
-void FF7::FieldModuleInstruction::ProcessMAPJUMP(CodeGenerator* code_gen, Function& func){
+void FieldModuleInstruction::ProcessMAPJUMP(CodeGenerator* code_gen, Function& func){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto target_map_id = params_[0]->GetUnsigned();
     FunctionMetaData md(func.metadata);

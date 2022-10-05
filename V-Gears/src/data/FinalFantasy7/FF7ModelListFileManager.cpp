@@ -15,47 +15,34 @@
 
 #include "data/FinalFantasy7/FF7ModelListFileManager.h"
 
-template<> VGears::FF7::ModelListFileManager
-  *Ogre::Singleton<VGears::FF7::ModelListFileManager>::msSingleton = NULL;
+template<> VGears::ModelListFileManager
+  *Ogre::Singleton<VGears::ModelListFileManager>::msSingleton = NULL;
 
 namespace VGears{
 
-    namespace FF7{
+    ModelListFileManager *ModelListFileManager::GetSingletonPtr(){return msSingleton;}
 
-        ModelListFileManager *ModelListFileManager::GetSingletonPtr(){
-            return msSingleton;
-        }
-
-        ModelListFileManager &ModelListFileManager::GetSingleton(){
-            assert( msSingleton );
-            return(*msSingleton );
-        }
-
-        ModelListFileManager::ModelListFileManager(){
-            mResourceType = ModelListFile::RESOURCE_TYPE;
-            // Low, because it will likely reference other resources.
-            mLoadOrder = 30.0f;
-            // This is how the ResourceManager registers with OGRE.
-            Ogre::ResourceGroupManager::getSingleton()._registerResourceManager(
-              mResourceType, this
-            );
-        }
-
-        ModelListFileManager::~ModelListFileManager(){
-            Ogre::ResourceGroupManager::getSingleton()
-              ._unregisterResourceManager(mResourceType);
-        }
-
-        Ogre::Resource *ModelListFileManager::createImpl(
-          const Ogre::String &name, Ogre::ResourceHandle handle,
-          const Ogre::String &group, bool is_manual,
-          Ogre::ManualResourceLoader *loader,
-          const Ogre::NameValuePairList *create_params
-        ){
-            return new ModelListFile(
-              this, name, handle, group, is_manual, loader
-            );
-        }
-
+    ModelListFileManager &ModelListFileManager::GetSingleton(){
+        assert(msSingleton);
+        return(*msSingleton);
     }
+
+    ModelListFileManager::ModelListFileManager(){
+        mResourceType = ModelListFile::RESOURCE_TYPE;
+        // Low, because it will likely reference other resources.
+        mLoadOrder = 30.0f;
+        // This is how the ResourceManager registers with OGRE.
+        Ogre::ResourceGroupManager::getSingleton()._registerResourceManager(mResourceType, this);
+    }
+
+    ModelListFileManager::~ModelListFileManager(){
+        Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(mResourceType);
+    }
+
+    Ogre::Resource *ModelListFileManager::createImpl(
+      const Ogre::String &name, Ogre::ResourceHandle handle,
+      const Ogre::String &group, bool is_manual,
+      Ogre::ManualResourceLoader *loader, const Ogre::NameValuePairList *create_params
+    ){return new ModelListFile(this, name, handle, group, is_manual, loader);}
+
 }

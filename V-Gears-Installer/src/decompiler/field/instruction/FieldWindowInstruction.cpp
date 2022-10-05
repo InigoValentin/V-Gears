@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,10 +24,10 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FF7::FieldWindowInstruction::ProcessInst(
+void FieldWindowInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
-    FF7::FieldEngine& eng = static_cast<FF7::FieldEngine&>(*engine);
+    FieldEngine& eng = static_cast<FieldEngine&>(*engine);
     FunctionMetaData md(func.metadata);
     switch (opcode_){
         case OPCODES::TUTOR: code_gen->WriteTodo(md.GetEntityName(), "TUTOR"); break;
@@ -52,13 +52,13 @@ void FF7::FieldWindowInstruction::ProcessInst(
         case OPCODES::GWCOL: code_gen->WriteTodo(md.GetEntityName(), "GWCOL"); break;
         case OPCODES::SWCOL: code_gen->WriteTodo(md.GetEntityName(), "SWCOL"); break;
         default:
-            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_
             ));
     }
 }
 
-void FF7::FieldWindowInstruction::ProcessWINDOW(CodeGenerator* code_gen){
+void FieldWindowInstruction::ProcessWINDOW(CodeGenerator* code_gen){
     // Initializes a new window. It won't be displayed until MESSAGE is used.
     auto windowId = params_[0]->GetUnsigned();
     auto x = params_[1]->GetUnsigned();
@@ -71,7 +71,7 @@ void FF7::FieldWindowInstruction::ProcessWINDOW(CodeGenerator* code_gen){
     ).str());
 }
 
-void FF7::FieldWindowInstruction::ProcessMESSAGE(
+void FieldWindowInstruction::ProcessMESSAGE(
   CodeGenerator* code_gen, const std::string& script_name
 ){
     // Displays a dialog in the WINDOW that has previously been initialized to display this dialog.
@@ -87,21 +87,21 @@ void FF7::FieldWindowInstruction::ProcessMESSAGE(
 
 }
 
-void FF7::FieldWindowInstruction::ProcessWCLSE(CodeGenerator* code_gen){
+void FieldWindowInstruction::ProcessWCLSE(CodeGenerator* code_gen){
     // Close a dialog.
     auto windowId = params_[0]->GetUnsigned();
     code_gen->AddOutputLine((boost::format("dialog:dialog_close(\"%1%\")") % windowId).str());
 }
 
-void FF7::FieldWindowInstruction::ProcessMPNAM(CodeGenerator* code_gen){
+void FieldWindowInstruction::ProcessMPNAM(CodeGenerator* code_gen){
     code_gen->AddOutputLine(
       (boost::format("-- field:map_name(%1%)") % params_[0]->GetUnsigned()).str()
     );
 }
 
-void FF7::FieldWindowInstruction::ProcessMENU2(CodeGenerator* code_gen){
+void FieldWindowInstruction::ProcessMENU2(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("-- field:menu_lock(%1%)")
-      % FF7::FieldCodeGenerator::FormatBool(params_[0]->GetUnsigned())
+      % FieldCodeGenerator::FormatBool(params_[0]->GetUnsigned())
     ).str());
 }

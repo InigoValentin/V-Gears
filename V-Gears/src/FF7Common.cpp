@@ -16,9 +16,5 @@
 
 namespace VGears{
 
-    namespace FF7{
-
-        const String EXT_A(".a");
-
-    }
+    const String EXT_A(".a");
 }

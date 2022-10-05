@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,96 +21,91 @@
 #include <string>
 #include <vector>
 
-#include "../Engine.h"
+#include "decompiler/Engine.h"
 
-namespace FF7{
+/**
+ * Represents the FF7 world map engine.
+ */
+class WorldEngine : public Engine{
 
-    /**
-     * Represents the FF7 world map engine.
-     */
-    class WorldEngine : public Engine{
+    public:
 
-        public:
+        /**
+         * A bank value.
+         *
+         * @todo Understand and document.
+         */
+        class BankValue : public VarValue{
 
-            /**
-             * A bank value.
-             *
-             * @todo Understand and document.
-             */
-            class BankValue : public VarValue{
+            public:
 
-                public:
+                /**
+                 * Constructor.
+                 *
+                 * @param name[in] Variable name.
+                 */
+                BankValue(std::string name);
+        };
 
-                    /**
-                     * Constructor.
-                     *
-                     * @param name[in] Variable name.
-                     */
-                    BankValue(std::string name);
-            };
+        /**
+         * Constructor.
+         *
+         * @param script_number[in] The script number.
+         */
+        WorldEngine(int script_number);
 
-            /**
-             * Constructor.
-             *
-             * @param script_number[in] The script number.
-             */
-            WorldEngine(int script_number);
+        /**
+         * Retrieves the disassembler.
+         *
+         * @param insts[in] List of instructions.
+         * @return Pointer to the disassembler.
+         */
+        std::unique_ptr<Disassembler> GetDisassembler(InstVec &insts) override;
 
-            /**
-             * Retrieves the disassembler.
-             *
-             * @param insts[in] List of instructions.
-             * @return Pointer to the disassembler.
-             */
-            std::unique_ptr<Disassembler> GetDisassembler(InstVec &insts) override;
+        /**
+         * Retrieves the code generator.
+         *
+         * @param insts[in] List of instructions. Unused.
+         * @param output[in] Pointer to the output (file, stream...).
+         * @return Pointer to the generator.
+         */
+        std::unique_ptr<CodeGenerator> GetCodeGenerator(
+          const InstVec& insts, std::ostream &output
+        ) override;
 
-            /**
-             * Retrieves the code generator.
-             *
-             * @param insts[in] List of instructions. Unused.
-             * @param output[in] Pointer to the output (file, stream...).
-             * @return Pointer to the generator.
-             */
-            std::unique_ptr<CodeGenerator> GetCodeGenerator(
-              const InstVec& insts, std::ostream &output
-            ) override;
+        /**
+         * Post-processing actions to apply to the scripts.
+         *
+         * It actually does nothing. CFG stands for control flow group.
+         *
+         * @param insts[in] Instruction list.
+         * @param graph[in] Code graph.
+         */
+        virtual void PostCFG(InstVec &insts, Graph graph) override;
 
-            /**
-             * Post-processing actions to apply to the scripts.
-             *
-             * It actually does nothing. CFG stands for control flow group.
-             *
-             * @param insts[in] Instruction list.
-             * @param graph[in] Code graph.
-             */
-            virtual void PostCFG(InstVec &insts, Graph graph) override;
+        /**
+         * Retrieves the variants.
+         *
+         * @todo Variants of what? What is this supposed to do?
+         */
+        virtual void GetVariants(std::vector<std::string> &variants) const override;
 
-            /**
-             * Retrieves the variants.
-             *
-             * @todo Variants of what? What is this supposed to do?
-             */
-            virtual void GetVariants(std::vector<std::string> &variants) const override;
+        /**
+         * Indicates if instructions are purely grouped.
+         *
+         * @return True if instructions are purely grouped. Always false.
+         */
+        virtual bool UsePureGrouping() const override;
 
-            /**
-             * Indicates if instructions are purely grouped.
-             *
-             * @return True if instructions are purely grouped. Always false.
-             * @todo What is pure grouping?
-             */
-            virtual bool UsePureGrouping() const override;
+    private:
 
-        private:
+        /**
+         * The script number.
+         */
+        int script_number_;
 
-            /**
-             * The script number.
-             */
-            int script_number_;
-
-            /**
-             * Container for strings from the TEXT chunk.
-             */
-            std::vector<std::string> text_strings_;
-    };
-
-}
+        /**
+         * Container for strings from the TEXT chunk.
+         */
+        std::vector<std::string> text_strings_;
+};

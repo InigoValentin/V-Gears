@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -18,59 +18,56 @@
 
 #pragma once
 
-#include "../CodeGenerator.h"
+#include "decompiler/CodeGenerator.h"
 
-namespace FF7{
+class WorldCodeGenerator : public CodeGenerator{
 
-    class WorldCodeGenerator : public CodeGenerator{
+    public:
 
-        public:
+        /**
+         * Constructor.
+         *
+         * @param engine[in] The engine.
+         * @param output[out] The generated script.
+         */
+        WorldCodeGenerator(Engine *engine, std::ostream &output);
 
-            /**
-             * Constructor.
-             *
-             * @param engine[in] The engine.
-             * @param output[out] The generated script.
-             */
-            WorldCodeGenerator(Engine *engine, std::ostream &output);
+        /**
+         * Finds the first function call.
+         *
+         * @return A pointer to the first call instruction.
+         */
+        const InstPtr FindFirstCall();
 
-            /**
-             * Finds the first function call.
-             *
-             * @return A pointer to the first call instruction.
-             */
-            const InstPtr FindFirstCall();
+        /**
+         * Finds the last function call.
+         *
+         * @return A pointer to the last call instruction.
+         */
+        const InstPtr FindLastCall();
 
-            /**
-             * Finds the last function call.
-             *
-             * @return A pointer to the last call instruction.
-             */
-            const InstPtr FindLastCall();
+        /**
+         * Processes special metadata in an instruction.
+         *
+         * @param inst[in] The instruction to process.
+         * @param c[in]
+         * @param pos[in]
+         * @todo understand and document.
+         */
+        virtual void ProcessSpecialMetadata(const InstPtr inst, char c, int pos);
 
-            /**
-             * Processes special metadata in an instruction.
-             *
-             * @param inst[in] The instruction to process.
-             * @param c[in]
-             * @param pos[in]
-             * @todo understand and document.
-             */
-            virtual void ProcessSpecialMetadata(const InstPtr inst, char c, int pos);
+    protected:
 
-        protected:
-
-            /**
-             * Constructs the function signature.
-             *
-             * The function signature is the LUA function declaration, and it
-             * looks like this:
-             *
-             * <function_name> = function(self)
-             *
-             * @param function[in] The function to construct the signature for.
-             * @return The function signature.
-             */
-            std::string ConstructFuncSignature(const Function &function);
-    };
-}
+        /**
+         * Constructs the function signature.
+         *
+         * The function signature is the LUA function declaration, and it
+         * looks like this:
+         *
+         * <function_name> = function(self)
+         *
+         * @param function[in] The function to construct the signature for.
+         * @return The function signature.
+         */
+        std::string ConstructFuncSignature(const Function &function);
+};

@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,16 +24,17 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-FF7::FieldUncondJumpInstruction::FieldUncondJumpInstruction() : is_func_call_(false) {}
+FieldUncondJumpInstruction::FieldUncondJumpInstruction() : is_func_call_(false) {}
 
-bool FF7::FieldUncondJumpInstruction::IsFuncCall() const{return is_func_call_;}
+bool FieldUncondJumpInstruction::IsFuncCall() const{return is_func_call_;}
 
-bool FF7::FieldUncondJumpInstruction::IsUncondJump() const{return !is_func_call_;}
+bool FieldUncondJumpInstruction::IsUncondJump() const{return !is_func_call_;}
 
-uint32 FF7::FieldUncondJumpInstruction::GetDestAddress() const{
+uint32 FieldUncondJumpInstruction::GetDestAddress() const{
     if (
       static_cast<OPCODES>(opcode_) == OPCODES::JMPF
-      || static_cast<OPCODES>(opcode_) == OPCODES::JMPFL){
+      || static_cast<OPCODES>(opcode_) == OPCODES::JMPFL
+    ){
         // Short or long forward jump.
         return address_ + params_[0]->GetUnsigned() + 1;
     }
@@ -41,14 +42,14 @@ uint32 FF7::FieldUncondJumpInstruction::GetDestAddress() const{
     return address_ - params_[0]->GetUnsigned();
 }
 
-std::ostream& FF7::FieldUncondJumpInstruction::Print(std::ostream &output) const{
+std::ostream& FieldUncondJumpInstruction::Print(std::ostream &output) const{
     Instruction::Print(output);
     output << " (Jump target address: 0x" << std::hex << GetDestAddress() << std::dec << ")";
     return output;
 }
 
 
-void FF7::FieldUncondJumpInstruction::ProcessInst(
+void FieldUncondJumpInstruction::ProcessInst(
   Function& func, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
 ){
     switch (opcode_){

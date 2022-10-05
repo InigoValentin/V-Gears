@@ -20,184 +20,179 @@
 
 namespace VGears{
 
-    namespace FF7{
+    /**
+     * Handles model list files.
+     */
+    class ModelListFile : public Resource{
 
-        /**
-         * Handles model list files.
-         */
-        class ModelListFile : public Resource{
+        public:
 
-            public:
+            /**
+             * Constructor.
+             *
+             * @param creator[in] Pointer to the ResourceManager that is
+             * this resource.
+             * @param name[in] The unique name of the resource.
+             * @param handle[in] @todo Understand and document.
+             * @param group[in] The name of the resource group to which this
+             * resource belong.
+             * @param is_manual[in] True if the resource is manually loaded,
+             * false otherwise.
+             * @param loader[in] Pointer to a ManualResourceLoader
+             * implementation which will be called when the Resource wishes to
+             * load (should be supplied if is_manual is set to true). It can
+             * be null, but the Resource will never be able to reload if
+             * anything ever causes it to unload. Therefore provision of a
+             * proper ManualResourceLoader instance is strongly recommended.
+             */
+            ModelListFile(
+              Ogre::ResourceManager* creator, const String &name,
+              Ogre::ResourceHandle handle, const String& group,
+              bool is_manual = false, Ogre::ManualResourceLoader* loader = NULL
+            );
+
+            /**
+            * Destructor.
+            */
+            virtual ~ModelListFile();
+
+            /**
+             * The type of resource.
+             */
+            static const String RESOURCE_TYPE;
+
+            /**
+             * An animation description.
+             */
+            struct AnimationDescription{
 
                 /**
-                 * Constructor.
+                 * The animation name.
+                 */
+                String  name;
+
+                /**
+                 * Unknown data.
+                 */
+                uint16  unknown;
+            };
+
+            typedef std::vector<AnimationDescription> AnimationList;
+
+            /**
+             * Types of models.
+             */
+            enum ModelType{
+
+                /**
+                 * Playable character.
+                 */
+                PLAYER = 0,
+
+                /**
+                 * Non playable character.
+                 */
+                NPC = 1,
+
+                /**
+                 * Unknown character type
+                 */
+                UNKNOWN
+            };
+
+            /**
+             * A model.
+             */
+            struct ModelDescription{
+
+                /**
+                 * The model name.
+                 */
+                String name;
+
+                /**
+                 * The model type.
+                 */
+                ModelType type;
+
+                /**
+                 * HRC file name.
                  *
-                 * @param creator[in] Pointer to the ResourceManager that is
-                 * creating this resource.
-                 * @param name[in] The unique name of the resource.
-                 * @param handle[in] @todo Understand and document.
-                 * @param group[in] The name of the resource group to which this
-                 * resource belong.
-                 * @param is_manual[in] True if the resource is manually loaded,
-                 * false otherwise.
-                 * @param loader[in] Pointer to a ManualResourceLoader
-                 * implementation which will be called when the Resource wishes to
-                 * load (should be supplied if is_manual is set to true). It can be
-                 * null, but the Resource will never be able to reload if anything
-                 * ever causes it to unload. Therefore provision of a proper
-                 * ManualResourceLoader instance is strongly recommended.
+                 * HRC files describe bone hierarchy.
                  */
-                ModelListFile(
-                  Ogre::ResourceManager* creator, const String &name,
-                  Ogre::ResourceHandle handle, const String& group,
-                  bool is_manual = false,
-                  Ogre::ManualResourceLoader* loader = NULL
-                );
+                String hrc_name;
 
                 /**
-                * Destructor.
-                */
-                virtual ~ModelListFile();
+                 * Scale for the model.
+                 */
+                String scale;
+
+
+                Ogre::ColourValue   light_colors[10];
 
                 /**
-                 * The type of resource.
+                 * List of animations assigned to the model.
                  */
-                static const String RESOURCE_TYPE;
+                AnimationList animations;
+            };
 
-                /**
-                 * An animation description.
-                 */
-                struct AnimationDescription{
+            typedef std::vector<ModelDescription>   ModelList;
 
-                    /**
-                     * The animation name.
-                     */
-                    String  name;
+            /**
+             * Retrieves the scale for the models.
+             *
+             * @return The scale.
+             */
+            virtual uint16 GetScale() const;
 
-                    /**
-                     * Unknown data.
-                     */
-                    uint16  unknown;
-                };
+            /**
+             * Sets the scale for the models.
+             *
+             * @param scale[in] The scale.
+             */
+            virtual void SetScale(uint16 scale);
 
-                typedef std::vector<AnimationDescription> AnimationList;
+            /**
+             * Retrieves the model list.
+             */
+            virtual ModelList& GetModels();
 
-                /**
-                 * Types of models.
-                 */
-                enum ModelType{
+        protected:
 
-                    /**
-                     * Playable character.
-                     */
-                    PLAYER = 0,
+            /**
+             * Loads the file.
+             */
+            virtual void loadImpl() override;
 
-                    /**
-                     * Non playable character.
-                     */
-                    NPC = 1,
+            /**
+             * Unloads the file.
+             */
+            virtual void unloadImpl() override;
 
-                    /**
-                     * Unknown character type
-                     */
-                    UNKNOWN
-                };
+            /**
+             * Calculates the size of the palette.
+             *
+             * @return The size of the palette.
+             * @todo Units?
+             */
+            virtual size_t calculateSize( void ) const;
 
-                /**
-                 * A model.
-                 */
-                struct ModelDescription{
+        private:
 
-                    /**
-                     * The model name.
-                     */
-                    String name;
+            /**
+             * The models scale.
+             *
+             * @todo Each model has it's own scale. Is this some kind of
+             * global scale? If so, is it to be applied over each model
+             * scale, or instead of it?
+             */
+            uint16 scale_;
 
-                    /**
-                     * The model type.
-                     */
-                    ModelType type;
+            /**
+             * The list of models.
+             */
+            ModelList models_;
+    };
 
-                    /**
-                     * HRC file name.
-                     *
-                     * HRC files describe bone hierarchy.
-                     */
-                    String hrc_name;
-
-                    /**
-                     * Scale for the model.
-                     */
-                    String scale;
-
-
-                    Ogre::ColourValue   light_colors[10];
-
-                    /**
-                     * List of animations assigned to the model.
-                     */
-                    AnimationList animations;
-                };
-
-                typedef std::vector<ModelDescription>   ModelList;
-
-                /**
-                 * Retrieves the scale for the models.
-                 *
-                 * @return The scale.
-                 */
-                virtual uint16 GetScale() const;
-
-                /**
-                 * Sets the scale for the models.
-                 *
-                 * @param scale[in] The scale.
-                 */
-                virtual void SetScale(uint16 scale);
-
-                /**
-                 * Retrieves the model list.
-                 */
-                virtual ModelList& GetModels();
-
-            protected:
-
-
-                /**
-                 * Loads the file.
-                 */
-                virtual void loadImpl() override;
-
-                /**
-                 * Unloads the file.
-                 */
-                virtual void unloadImpl() override;
-
-                /**
-                 * Calculates the size of the palette.
-                 *
-                 * @return The size of the palette.
-                 * @todo Units?
-                 */
-                virtual size_t calculateSize( void ) const;
-
-            private:
-
-                /**
-                 * The models scale.
-                 *
-                 * @todo Each model has it's own scale. Is this some kind of
-                 * global scale? If so, is it to be applied over each model
-                 * scale, or instead of it?
-                 */
-                uint16 scale_;
-
-                /**
-                 * The list of models.
-                 */
-                ModelList models_;
-        };
-
-        typedef Ogre::SharedPtr<ModelListFile> ModelListFilePtr;
-    }
+    typedef Ogre::SharedPtr<ModelListFile> ModelListFilePtr;
 }

@@ -18,37 +18,32 @@
 
 namespace VGears{
 
-    namespace FF7{
-        const String ModelListFile::RESOURCE_TYPE("FF7ModelListFile");
+    const String ModelListFile::RESOURCE_TYPE("FF7ModelListFile");
 
-        ModelListFile::ModelListFile(
-          Ogre::ResourceManager *creator, const String &name,
-          Ogre::ResourceHandle handle, const String &group, bool is_manual,
-          Ogre::ManualResourceLoader *loader
-        ) :
-            Resource(creator, name, handle, group, is_manual, loader),
-            scale_(0){}
+    ModelListFile::ModelListFile(
+      Ogre::ResourceManager *creator, const String &name, Ogre::ResourceHandle handle,
+      const String &group, bool is_manual, Ogre::ManualResourceLoader *loader
+    ): Resource(creator, name, handle, group, is_manual, loader), scale_(0){}
 
-        ModelListFile::~ModelListFile(){unload();}
+    ModelListFile::~ModelListFile(){unload();}
 
-        void ModelListFile::loadImpl(){
-            ModelListFileSerializer serializer;
-            Ogre::DataStreamPtr stream(openResource());
-            serializer.ImportModelListFile(stream, this);
-        }
-
-        void ModelListFile::unloadImpl(){
-            scale_ = 0;
-            models_.clear();
-        }
-
-        size_t ModelListFile::calculateSize() const{return 0;}
-
-        ModelListFile::ModelList&ModelListFile::GetModels(){return models_;}
-
-        uint16 ModelListFile::GetScale() const{return scale_;}
-
-        void ModelListFile::SetScale(uint16 scale){scale_ = scale;}
-
+    void ModelListFile::loadImpl(){
+        ModelListFileSerializer serializer;
+        Ogre::DataStreamPtr stream(openResource());
+        serializer.ImportModelListFile(stream, this);
     }
+
+    void ModelListFile::unloadImpl(){
+        scale_ = 0;
+        models_.clear();
+    }
+
+    size_t ModelListFile::calculateSize() const{return 0;}
+
+    ModelListFile::ModelList&ModelListFile::GetModels(){return models_;}
+
+    uint16 ModelListFile::GetScale() const{return scale_;}
+
+    void ModelListFile::SetScale(uint16 scale){scale_ = scale;}
+
 }

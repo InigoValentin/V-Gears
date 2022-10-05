@@ -10,7 +10,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -25,15 +25,15 @@
 #include "decompiler/world/WorldCodeGenerator.h"
 #include "decompiler/world/WorldDisassembler.h"
 
-void FF7::WorldCondJumpInstruction::ProcessInst(Function&, ValueStack&, Engine*, CodeGenerator*){
+void WorldCondJumpInstruction::ProcessInst(Function&, ValueStack&, Engine*, CodeGenerator*){
     // TODO
 }
 
-uint32 FF7::WorldCondJumpInstruction::GetDestAddress() const{
+uint32 WorldCondJumpInstruction::GetDestAddress() const{
     return 0x200 + params_[0]->GetUnsigned();
 }
 
-std::ostream& FF7::WorldCondJumpInstruction::Print(std::ostream &output) const{
+std::ostream& WorldCondJumpInstruction::Print(std::ostream &output) const{
     Instruction::Print(output);
     return output;
 }

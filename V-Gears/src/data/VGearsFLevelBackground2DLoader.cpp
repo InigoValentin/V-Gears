@@ -34,15 +34,15 @@ namespace VGears{
         background_2d->_notifyOrigin(flevel_file_.getName());
         background_2d->SetTextureName(flevel_file_.GetBackgroundTextureName());
         background_2d->SetClip(
-          Ogre::Vector2(FF7::SCREEN_WIDTH, FF7::SCREEN_HEIGHT)
+          Ogre::Vector2(SCREEN_WIDTH, SCREEN_HEIGHT)
         );
         CameraMatrixFilePtr camera_matrix(flevel_file_.GetCameraMatrix());
         Ogre::Real scale(Ogre::Real(camera_matrix->GetCount()));
         background_2d->SetPosition(
-          camera_matrix->GetPosition() / -(scale * FF7::FIELD_POSITION_SCALE)
+          camera_matrix->GetPosition() / -(scale * FIELD_POSITION_SCALE)
         );
         background_2d->SetOrientation(camera_matrix->GetOrientation());
-        background_2d->SetFov(camera_matrix->GetFov(FF7::SCREEN_WIDTH));
+        background_2d->SetFov(camera_matrix->GetFov(SCREEN_WIDTH));
         Ogre::Vector4 range(0, 0, 0, 0);
         TileList& tiles(background_2d->GetTiles());
         BackgroundFilePtr background(flevel_file_.GetBackground());
@@ -60,7 +60,7 @@ namespace VGears{
             tile.width  = BackgroundFile::SPRITE_WIDTH;
             tile.height = BackgroundFile::SPRITE_HEIGHT;
             tile.blending = B_ALPHA;
-            tile.depth = sprite.depth / (scale * FF7::FIELD_DEPTH_SCALE);
+            tile.depth = sprite.depth / (scale * FIELD_DEPTH_SCALE);
             /*
             if depth >= 1
                 if(??? / 4.0 < depth)

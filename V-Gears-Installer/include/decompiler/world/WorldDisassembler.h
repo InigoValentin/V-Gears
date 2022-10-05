@@ -17,67 +17,62 @@
 
 #include "decompiler/Disassembler.h"
 
-namespace FF7{
+class WorldEngine;
 
-    class WorldEngine;
+class WorldDisassembler : public Disassembler{
 
-    class WorldDisassembler : public Disassembler{
+    public:
 
-        public:
+        /**
+         * CConstructor.
+         *
+         * @param engine[in] The engine to use to disassemble.
+         * @param insts[in] The list of instructions.
+         * @param script_number[in] The script number to process.
+         */
+        WorldDisassembler(WorldEngine* engine, InstVec& insts, int script_number);
 
-            /**
-             * CConstructor.
-             *
-             * @param engine[in] The engine to use to disassemble.
-             * @param insts[in] The list of instructions.
-             * @param script_number[in] The script number to process.
-             */
-            WorldDisassembler(WorldEngine* engine, InstVec& insts, int script_number);
+        /**
+         * Destructor.
+         */
+        ~WorldDisassembler();
 
-            /**
-             * Destructor.
-             */
-            ~WorldDisassembler();
+        /**
+         * Disassembles the instructions.
+         */
+        void DoDisassemble() override;
 
-            /**
-             * Disassembles the instructions.
-             */
-            void DoDisassemble() override;
+    private:
 
-        private:
+        /**
+         * Parses an opcode.
+         *
+         * Adds properties to an instruction, and adds the instruction to the
+         * list.
+         *
+         * @param opcode[in] The opcode code.
+         * @param name[in] the opcode name.
+         * @param instruction[in][out] A newly created instruction of the type
+         * the opcode belongs to.
+         * @param stack_change[in] Indicates how much the instruction changes
+         * the stack pointer by.
+         * @param argument_format[in] The opcode argument format.
+         */
+        template<typename T> void ParseOpcode(
+          int opcode, std::string name, T instruction, int stack_change, const char* argument_format
+        ){
+            uint32 full_opcode = (full_opcode << 8) + opcode;
+            this->insts_.push_back(instruction);
+            this->insts_.back()->SetOpcode(full_opcode);
+            this->insts_.back()->SetAddress(this->address_);
+            this->insts_.back()->SetStackChange(0);
+            this->insts_.back()->SetName(std::string(name));
+            this->insts_.back()->SetCodeGenData("");
+            this->ReadParams(this->insts_.back(), argument_format);
+        }
 
-            /**
-             * Parses an opcode.
-             *
-             * Adds properties to an instruction, and adds the instruction to
-             * the list.
-             *
-             * @param opcode[in] The opcode code.
-             * @param name[in] the opcode name.
-             * @param instruction[in][out] A newly created instruction of the
-             * type the opcode belongs to.
-             * @param stack_change[in] Indicates how much the instruction
-             * changes the stack pointer by.
-             * @param argument_format[in] The opcode argument format.
-             */
-            template<typename T> void ParseOpcode(
-              int opcode, std::string name, T instruction,
-              int stack_change, const char* argument_format
-            ){
-                uint32 full_opcode = (full_opcode << 8) + opcode;
-                this->insts_.push_back(instruction);
-                this->insts_.back()->SetOpcode(full_opcode);
-                this->insts_.back()->SetAddress(this->address_);
-                this->insts_.back()->SetStackChange(0);
-                this->insts_.back()->SetName(std::string(name));
-                this->insts_.back()->SetCodeGenData("");
-                this->ReadParams(this->insts_.back(), argument_format);
-            }
-
-            /**
-             * The script number.
-             */
-            int script_number_ = 0;
-    };
-
-} 
+        /**
+         * The script number.
+         */
+        int script_number_ = 0;
+};

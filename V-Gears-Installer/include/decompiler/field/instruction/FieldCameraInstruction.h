@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,33 +20,30 @@
 #include "decompiler/instruction/KernelCallInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 
-namespace FF7{
+/**
+ * A camera instruction.
+ */
+class FieldCameraInstruction : public KernelCallInstruction{
 
-    /**
-     * A camera instruction.
-     */
-    class FieldCameraInstruction : public KernelCallInstruction{
+    public:
 
-        public:
+        /**
+         * Processes the instruction.
+         *
+         * @param func[in] Function to process.
+         * @param stack[out] Function stack.
+         * @param engine[in] Engine. Unused
+         * @param codegen[in|out] Code generator to append lines.
+         */
+        virtual void ProcessInst(
+          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
 
-            /**
-             * Processes the instruction.
-             *
-             * @param func[in] Function to process.
-             * @param stack[out] Function stack.
-             * @param engine[in] Engine. Unused
-             * @param codegen[in|out] Code generator to append lines.
-             */
-            virtual void ProcessInst(
-              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
+    private:
 
-        private:
+        void ProcessNFADE(CodeGenerator* code_gen);
+        void ProcessSCR2D(CodeGenerator* code_gen);
+        void ProcessSCR2DC(CodeGenerator* code_gen);
+        void ProcessFADE(CodeGenerator* code_gen);
+};
 
-            void ProcessNFADE(CodeGenerator* code_gen);
-            void ProcessSCR2D(CodeGenerator* code_gen);
-            void ProcessSCR2DC(CodeGenerator* code_gen);
-            void ProcessFADE(CodeGenerator* code_gen);
-    };
-
-}

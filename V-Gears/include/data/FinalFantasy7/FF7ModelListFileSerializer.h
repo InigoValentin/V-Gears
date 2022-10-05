@@ -22,92 +22,81 @@
 
 namespace VGears{
 
-    namespace FF7{
+    /**
+     * Handles the serialization of model list files.
+     */
+    class ModelListFileSerializer : public Serializer{
 
-        /**
-         * Handles the serialization of model list files.
-         */
-        class ModelListFileSerializer : public Serializer{
+        public:
 
-            public:
+            /**
+             * Constructor.
+             */
+            ModelListFileSerializer();
 
-                /**
-                 * Constructor.
-                 */
-                ModelListFileSerializer();
+            /**
+             * Destructor.
+             */
+            virtual ~ModelListFileSerializer();
 
-                /**
-                 * Destructor.
-                 */
-                virtual ~ModelListFileSerializer();
+            /**
+             * Imports a model list file.
+             *
+             * @param stream[in] The contents of the model list file.
+             * @param dest[out] The formed model list file.
+             */
+            virtual void ImportModelListFile(Ogre::DataStreamPtr &stream, ModelListFile *dest);
 
-                /**
-                 * Imports a model list file.
-                 *
-                 * @param stream[in] The contents of the model list file.
-                 * @param dest[out] The formed model list file.
-                 */
-                virtual void ImportModelListFile(
-                  Ogre::DataStreamPtr &stream, ModelListFile *dest
-                );
+            typedef ModelListFile::AnimationDescription AnimationDescription;
 
-                typedef ModelListFile::AnimationDescription
-                  AnimationDescription;
+            typedef ModelListFile::ModelDescription ModelDescription;
 
-                typedef ModelListFile::ModelDescription ModelDescription;
-
-                /**
-                 * Data sizes in the file.
-                 */
-                enum {
-
-                    /**
-                     * Length of the name of the HRC file assigned to a model.
-                     */
-                    HRC_NAME_LENGTH = 8,
-
-                    /**
-                     * Scale data length.
-                     */
-                    SCALE_LENGTH = 4
-                };
-
-            protected:
+            /**
+             * Data sizes in the file.
+             */
+            enum {
 
                 /**
-                 * Reads an object as an animation description.
-                 *
-                 * @param stream[in] Input data.
-                 * @param dest[out] The formed animation description data.
+                 * Length of the name of the HRC file assigned to a model.
                  */
-                virtual void readObject(
-                  Ogre::DataStreamPtr &stream, AnimationDescription &dest
-                );
+                HRC_NAME_LENGTH = 8,
 
                 /**
-                 * Reads an object as a model description.
-                 *
-                 * @param stream[in] Input data.
-                 * @param dest[out] The formed model description data.
+                 * Scale data length.
                  */
-                virtual void readObject(
-                  Ogre::DataStreamPtr &stream, ModelDescription &dest
-                );
+                SCALE_LENGTH = 4
+            };
 
-                using Serializer::readObject;
+        protected:
 
-                /**
-                 * Reads an object as a vector.
-                 *
-                 * @param stream[in] Input data.
-                 * @param dest[out] The formed vector data.
-                 * @param count[in] The size of the data to read.
-                 */
-                template<typename ValueType> void ReadVector(
-                  Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
-                  size_t count
-                );
+            /**
+             * Reads an object as an animation description.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed animation description data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, AnimationDescription &dest);
 
-        };
-    }
+            /**
+             * Reads an object as a model description.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed model description data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, ModelDescription &dest);
+
+            using Serializer::readObject;
+
+            /**
+             * Reads an object as a vector.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed vector data.
+             * @param count[in] The size of the data to read.
+             */
+            template<typename ValueType> void ReadVector(
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest, size_t count
+            );
+
+    };
 }

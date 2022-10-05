@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,39 +20,35 @@
 #include "decompiler/instruction/KernelCallInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 
-namespace FF7{
+/**
+ * A background instruction.
+ */
+class FieldBackgroundInstruction : public KernelCallInstruction{
 
-    /**
-     * A background instruction.
-     */
-    class FieldBackgroundInstruction : public KernelCallInstruction{
+    public:
 
-        public:
+        /**
+         * Processes the instruction.
+         *
+         * @param func[in] Function to process.
+         * @param stack[out] Function stack.
+         * @param engine[in] Engine. Unused
+         * @param codegen[in|out] Code generator to append lines.
+         */
+        virtual void ProcessInst(
+          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
 
-            /**
-             * Processes the instruction.
-             *
-             * @param func[in] Function to process.
-             * @param stack[out] Function stack.
-             * @param engine[in] Engine. Unused
-             * @param codegen[in|out] Code generator to append lines.
-             */
-            virtual void ProcessInst(
-              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
+    private:
 
-        private:
-
-            void ProcessBGON(CodeGenerator* code_gen);
-            void ProcessBGOFF(CodeGenerator* code_gen);
-            void ProcessBGCLR(CodeGenerator* code_gen);
-            void ProcessSTPAL(CodeGenerator* code_gen);
-            void ProcessLDPAL(CodeGenerator* code_gen);
-            void ProcessCPPAL(CodeGenerator* code_gen);
-            void ProcessADPAL(CodeGenerator* code_gen);
-            void ProcessMPPAL2(CodeGenerator* code_gen);
-            void ProcessSTPLS(CodeGenerator* code_gen);
-            void ProcessLDPLS(CodeGenerator* code_gen);
-    };
-
-}
+        void ProcessBGON(CodeGenerator* code_gen);
+        void ProcessBGOFF(CodeGenerator* code_gen);
+        void ProcessBGCLR(CodeGenerator* code_gen);
+        void ProcessSTPAL(CodeGenerator* code_gen);
+        void ProcessLDPAL(CodeGenerator* code_gen);
+        void ProcessCPPAL(CodeGenerator* code_gen);
+        void ProcessADPAL(CodeGenerator* code_gen);
+        void ProcessMPPAL2(CodeGenerator* code_gen);
+        void ProcessSTPLS(CodeGenerator* code_gen);
+        void ProcessLDPLS(CodeGenerator* code_gen);
+};

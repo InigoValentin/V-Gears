@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,10 +24,12 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FF7::FF7ControlFlowInstruction::ProcessInst(
+InstPtr FieldControlFlowInstruction::Create(){return new FieldControlFlowInstruction();}
+
+void FieldControlFlowInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
-    FF7::FieldEngine& eng = static_cast<FF7::FieldEngine&>(*engine);
+    FieldEngine& eng = static_cast<FieldEngine&>(*engine);
     FunctionMetaData md(func.metadata);
     switch (opcode_){
         case OPCODES::RET:
@@ -50,13 +52,13 @@ void FF7::FF7ControlFlowInstruction::ProcessInst(
         case OPCODES::RETTO: ProcessRETTO(code_gen); break;
         case OPCODES::WAIT: ProcessWAIT(code_gen); break;
         default:
-            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_
             ));
     }
 }
 
-void FF7::FF7ControlFlowInstruction::ProcessREQ(
+void FieldControlFlowInstruction::ProcessREQ(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
@@ -71,7 +73,7 @@ void FF7::FF7ControlFlowInstruction::ProcessREQ(
     ).str());
 }
 
-void FF7::FF7ControlFlowInstruction::ProcessREQSW(
+void FieldControlFlowInstruction::ProcessREQSW(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
@@ -86,7 +88,7 @@ void FF7::FF7ControlFlowInstruction::ProcessREQSW(
     ).str());
 }
 
-void FF7::FF7ControlFlowInstruction::ProcessREQEW(
+void FieldControlFlowInstruction::ProcessREQEW(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
     try{
@@ -109,7 +111,7 @@ void FF7::FF7ControlFlowInstruction::ProcessREQEW(
     }
 }
 
-void FF7::FF7ControlFlowInstruction::ProcessRETTO(CodeGenerator* code_gen){
+void FieldControlFlowInstruction::ProcessRETTO(CodeGenerator* code_gen){
     auto entity_index = params_[0]->GetUnsigned();
     auto priority = params_[1]->GetUnsigned();
     code_gen->AddOutputLine((
@@ -118,7 +120,7 @@ void FF7::FF7ControlFlowInstruction::ProcessRETTO(CodeGenerator* code_gen){
     ).str());
 }
 
-void FF7::FF7ControlFlowInstruction::ProcessWAIT(CodeGenerator* code_gen){
+void FieldControlFlowInstruction::ProcessWAIT(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("script:wait(%1%)") % (params_[0]->GetUnsigned() / 30.0f)
     ).str());

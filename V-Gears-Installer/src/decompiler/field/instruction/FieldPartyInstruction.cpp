@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,7 +24,7 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FF7::FieldPartyInstruction::ProcessInst(
+void FieldPartyInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
@@ -56,24 +56,24 @@ void FF7::FieldPartyInstruction::ProcessInst(
         case OPCODES::MMBUK: code_gen->WriteTodo(md.GetEntityName(), "MMBUK"); break;
         case OPCODES::CHGLD: code_gen->WriteTodo(md.GetEntityName(), "CHGLD"); break;
         default:
-            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_
             ));
     }
 }
 
-void FF7::FieldPartyInstruction::ProcessSTITM(CodeGenerator* code_gen){
+void FieldPartyInstruction::ProcessSTITM(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& item_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& item_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& amount = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& amount = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     code_gen->AddOutputLine((boost::format("FFVII.add_item(%1%, %2%)") % item_id % amount).str());
 }
 
-void FF7::FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
+void FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
     FieldCodeGenerator* gc = static_cast<FieldCodeGenerator*>(code_gen);
     auto char_id_1 = gc->GetFormatter().GetFriendlyCharName(params_[0]->GetUnsigned());
     char_id_1 = (char_id_1 == "") ? "nil" : ("\"" + char_id_1 + "\"");

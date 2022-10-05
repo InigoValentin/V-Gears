@@ -10,7 +10,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -25,12 +25,12 @@
 #include "decompiler/world/WorldCodeGenerator.h"
 #include "decompiler/world/WorldDisassembler.h"
 
-void FF7::WorldStoreInstruction::ProcessInst(
+void WorldStoreInstruction::ProcessInst(
   Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
     std::string value = stack.Pop()->GetString();
     // If the bank address is from a load bank instruction, then only
-    // the bank address is needed, not whats *at* the bank address.
+    // the bank address is needed, not what's *at* the bank address.
     ValuePtr bank_addr = stack.Pop();
     code_gen->AddOutputLine("Write(" + bank_addr->GetString() + ", " + value + ");");
 }

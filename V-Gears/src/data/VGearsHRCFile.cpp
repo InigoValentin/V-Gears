@@ -137,7 +137,7 @@ namespace VGears{
     String HRCFile::GetMeshFileName(void) const{
         String base_name;
         StringUtil::splitBase(getName(), base_name);
-        return FF7::NameLookup::model(base_name) + EXT_MESH;
+        return NameLookup::model(base_name) + EXT_MESH;
     }
 
     Ogre::SkeletonPtr HRCFile::GetSkeleton(void) const{

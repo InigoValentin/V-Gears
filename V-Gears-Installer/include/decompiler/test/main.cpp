@@ -43,7 +43,7 @@ static InstPtr DoReadParameterTest(std::string str, std::vector<unsigned char> d
 {
     InstVec insts;
     TestReadParameterDisassembler d(std::move(data), insts);
-    InstPtr inst = new FF7::FieldNoOperationInstruction();
+    InstPtr inst = new FieldNoOperationInstruction();
     d.readParams(inst, str.c_str());
     return inst;
 }
@@ -124,7 +124,7 @@ TEST(SimpleDisassembler, readParameter_d)
 
 TEST(FF7Field, FunctionMetaData_Parse_Empty)
 {
-    FF7::FunctionMetaData meta("");
+    FunctionMetaData meta("");
     ASSERT_EQ("", meta.EntityName());
     ASSERT_EQ(false, meta.IsEnd());
     ASSERT_EQ(false, meta.IsStart());
@@ -132,7 +132,7 @@ TEST(FF7Field, FunctionMetaData_Parse_Empty)
 
 TEST(FF7Field, FunctionMetaData_Parse_Empties)
 {
-    FF7::FunctionMetaData meta("__________________");
+    FunctionMetaData meta("__________________");
     ASSERT_EQ("", meta.EntityName());
     ASSERT_EQ(false, meta.IsEnd());
     ASSERT_EQ(false, meta.IsStart());
@@ -140,7 +140,7 @@ TEST(FF7Field, FunctionMetaData_Parse_Empties)
 
 TEST(FF7Field, FunctionMetaData_Parse_Start)
 {
-    FF7::FunctionMetaData meta("start_-1_entity");
+    FunctionMetaData meta("start_-1_entity");
     ASSERT_EQ("entity", meta.EntityName());
     ASSERT_EQ(false, meta.IsEnd());
     ASSERT_EQ(true, meta.IsStart());
@@ -148,7 +148,7 @@ TEST(FF7Field, FunctionMetaData_Parse_Start)
 
 TEST(FF7Field, FunctionMetaData_Parse_End)
 {
-    FF7::FunctionMetaData meta("end_-1_entity");
+    FunctionMetaData meta("end_-1_entity");
     ASSERT_EQ("entity", meta.EntityName());
     ASSERT_EQ(true, meta.IsEnd());
     ASSERT_EQ(false, meta.IsStart());
@@ -156,7 +156,7 @@ TEST(FF7Field, FunctionMetaData_Parse_End)
 
 TEST(FF7Field, FunctionMetaData_Parse_EntityName)
 {
-    FF7::FunctionMetaData meta("end_-1_TheName");
+    FunctionMetaData meta("end_-1_TheName");
     ASSERT_EQ("TheName", meta.EntityName());
     ASSERT_EQ(true, meta.IsEnd());
     ASSERT_EQ(false, meta.IsStart());
@@ -166,7 +166,7 @@ TEST(FF7Field, FunctionMetaData_Parse_EntityName)
 
 TEST(FF7Field, FunctionMetaData_Parse_EntityNameAndId)
 {
-    FF7::FunctionMetaData meta("end_99_The_Name");
+    FunctionMetaData meta("end_99_The_Name");
     ASSERT_EQ("The_Name", meta.EntityName());
     ASSERT_EQ(99, meta.CharacterId());
 
@@ -177,7 +177,7 @@ TEST(FF7Field, FunctionMetaData_Parse_EntityNameAndId)
 
 TEST(FF7Field, FunctionMetaData_Parse_StartEnd)
 {
-    FF7::FunctionMetaData meta("start_end_-1_entity");
+    FunctionMetaData meta("start_end_-1_entity");
     ASSERT_EQ("entity", meta.EntityName());
     ASSERT_EQ(true, meta.IsEnd());
     ASSERT_EQ(true, meta.IsStart());
@@ -188,7 +188,7 @@ TEST(FF7World, DisAsm)
 {
     for (int i = 0; i < 256; i++)
     {
-        FF7::WorldEngine engine(i);
+        WorldEngine engine(i);
 
 
         InstVec insts;
@@ -1151,7 +1151,7 @@ private:
 
     void ParseInstruction(const Tokenzier::Token& inst, std::deque<Tokenzier::Token>& tokens, Assembler::Method& method)
     {
-        const auto insts = FF7::FieldInstructions();
+        const auto insts = FieldInstructions();
         auto it = insts.find(inst.AsString());
         if (it == std::end(insts))
         {
@@ -1159,7 +1159,7 @@ private:
         }
 
         // TODO: Handle arguments correctly, validate labels
-        const FF7::TInstructRecord* rec = it->second;
+        const TInstructRecord* rec = it->second;
         const char* fmt = rec->mArgumentFormat;
 
         // method.AddInstruction(rec->mOpCode, rec->mOpCodeSize);
@@ -1507,10 +1507,10 @@ TEST(Parser, ZeroGapIf)
 TEST(FF7Field, Asm)
 {
     DummyFormatter dummy;
-    FF7::FieldEngine eng(dummy, "test");
+    FieldEngine eng(dummy, "test");
 
     InstVec insts;
-    FF7::FieldDisassembler d(dummy, &eng, insts);
+    FieldDisassembler d(dummy, &eng, insts);
 
 
 }

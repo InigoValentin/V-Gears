@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE( read_file )
     VGears::PaletteFileManager          pmgr;
     VGears::BackgroundFileManager       bmgr;
     VGears::Background2DFileManager     b2mgr;
-    VGears::FF7::ModelListFileManager   mmgr;
+    VGears::ModelListFileManager   mmgr;
     VGears::HRCFileManager              hmgr;
     VGears::LZSFLevelFileManager        fmgr;
     logMgr.createLog( "Default Log", true, true, true );
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE( read_file )
 
     VGears::BackgroundFilePtr       background   ( file.getBackground() );
     VGears::CameraMatrixFilePtr     camera_matrix( file.getCameraMatrix() );
-    VGears::FF7::ModelListFilePtr   model_list   ( file.getModelList() );
+    VGears::ModelListFilePtr   model_list   ( file.getModelList() );
     VGears::PaletteFilePtr          palette      ( file.getPalette() );
     VGears::WalkmeshFilePtr         walkmesh     ( file.getWalkmesh() );
 

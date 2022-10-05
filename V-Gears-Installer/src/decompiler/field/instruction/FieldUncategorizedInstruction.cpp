@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,7 +24,7 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FF7::FieldUncategorizedInstruction::ProcessInst(
+void FieldUncategorizedInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
@@ -34,7 +34,7 @@ void FF7::FieldUncategorizedInstruction::ProcessInst(
         case OPCODES::GETX: code_gen->WriteTodo(md.GetEntityName(), "GETX"); break;
         case OPCODES::SEARCHX: code_gen->WriteTodo(md.GetEntityName(), "SEARCHX"); break;
         default:
-            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_)
             );
     }

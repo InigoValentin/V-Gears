@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,7 +24,7 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FF7::FieldWalkmeshInstruction::ProcessInst(
+void FieldWalkmeshInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
@@ -36,26 +36,26 @@ void FF7::FieldWalkmeshInstruction::ProcessInst(
             code_gen->AddOutputLine(
                 (boost::format("walkmesh:lock_walkmesh(%1%, %2%)")
                 % params_[0]->GetUnsigned()
-                % FF7::FieldCodeGenerator::FormatBool(params_[1]->GetUnsigned())).str());
+                % FieldCodeGenerator::FormatBool(params_[1]->GetUnsigned())).str());
             break;
         case OPCODES::LINE: ProcessLINE(code_gen, md.GetEntityName()); break;
         case OPCODES::LINON: code_gen->WriteTodo(md.GetEntityName(), "LINON"); break;
         case OPCODES::SLINE: code_gen->WriteTodo(md.GetEntityName(), "SLINE"); break;
         default:
-            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_
             ));
     }
 }
 
-void FF7::FieldWalkmeshInstruction::ProcessUC(CodeGenerator* code_gen){
+void FieldWalkmeshInstruction::ProcessUC(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("entity_manager:player_lock(%1%)")
-      % FF7::FieldCodeGenerator::FormatBool(params_[0]->GetUnsigned())
+      % FieldCodeGenerator::FormatBool(params_[0]->GetUnsigned())
     ).str());
 }
 
-void FF7::FieldWalkmeshInstruction::ProcessLINE(CodeGenerator* code_gen, const std::string& entity){
+void FieldWalkmeshInstruction::ProcessLINE(CodeGenerator* code_gen, const std::string& entity){
     float xa = params_[0]->GetSigned();
     float ya = params_[1]->GetSigned();
     float za = params_[2]->GetSigned();

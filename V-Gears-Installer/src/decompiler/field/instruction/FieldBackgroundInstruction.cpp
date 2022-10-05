@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,7 +24,7 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FF7::FieldBackgroundInstruction::ProcessInst(
+void FieldBackgroundInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
@@ -49,18 +49,18 @@ void FF7::FieldBackgroundInstruction::ProcessInst(
         case OPCODES::ADPAL2: code_gen->WriteTodo(md.GetEntityName(), "ADPAL2"); break;
         case OPCODES::RTPAL2: code_gen->WriteTodo(md.GetEntityName(), "RTPAL2"); break;
         default:
-            code_gen->AddOutputLine(FF7::FieldCodeGenerator::FormatInstructionNotImplemented(
+            code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_
             ));
     }
 }
 
-void FF7::FieldBackgroundInstruction::ProcessBGON(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessBGON(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& background_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& background_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& layer_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& layer_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     code_gen->AddOutputLine(
@@ -68,12 +68,12 @@ void FF7::FieldBackgroundInstruction::ProcessBGON(CodeGenerator* code_gen){
     );
 }
 
-void FF7::FieldBackgroundInstruction::ProcessBGOFF(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessBGOFF(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& background_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& background_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& layer_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& layer_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     code_gen->AddOutputLine(
@@ -81,9 +81,9 @@ void FF7::FieldBackgroundInstruction::ProcessBGOFF(CodeGenerator* code_gen){
     );
 }
 
-void FF7::FieldBackgroundInstruction::ProcessBGCLR(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessBGCLR(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& background_id = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& background_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[2]->GetUnsigned()
     );
     code_gen->AddOutputLine(
@@ -91,12 +91,12 @@ void FF7::FieldBackgroundInstruction::ProcessBGCLR(CodeGenerator* code_gen){
     );
 }
 
-void FF7::FieldBackgroundInstruction::ProcessSTPAL(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessSTPAL(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     auto num_entries = params_[4]->GetUnsigned() + 1;
@@ -106,12 +106,12 @@ void FF7::FieldBackgroundInstruction::ProcessSTPAL(CodeGenerator* code_gen){
     ).str());
 }
 
-void FF7::FieldBackgroundInstruction::ProcessLDPAL(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessLDPAL(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     auto num_entries = params_[4]->GetUnsigned() + 1;
@@ -121,12 +121,12 @@ void FF7::FieldBackgroundInstruction::ProcessLDPAL(CodeGenerator* code_gen){
     ).str());
 }
 
-void FF7::FieldBackgroundInstruction::ProcessCPPAL(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessCPPAL(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     auto num_entries = params_[4]->GetUnsigned() + 1;
@@ -136,21 +136,21 @@ void FF7::FieldBackgroundInstruction::ProcessCPPAL(CodeGenerator* code_gen){
     ).str());
 }
 
-void FF7::FieldBackgroundInstruction::ProcessADPAL(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessADPAL(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[6]->GetUnsigned()
     );
-    const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[7]->GetUnsigned()
     );
-    const auto& r = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& r = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[4]->GetUnsigned(), params_[10]->GetUnsigned()
     );
-    const auto& g = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& g = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[3]->GetUnsigned(), params_[9]->GetUnsigned()
     );
-    const auto& b = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& b = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[2]->GetUnsigned(), params_[8]->GetUnsigned()
     );
     auto num_entries = params_[11]->GetUnsigned() + 1;
@@ -162,21 +162,21 @@ void FF7::FieldBackgroundInstruction::ProcessADPAL(CodeGenerator* code_gen){
     ).str());
 }
 
-void FF7::FieldBackgroundInstruction::ProcessMPPAL2(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessMPPAL2(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[6]->GetUnsigned()
     );
-    const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[7]->GetUnsigned()
     );
-    const auto& r = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& r = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[4]->GetUnsigned(), params_[10]->GetUnsigned()
     );
-    const auto& g = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& g = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[3]->GetUnsigned(), params_[9]->GetUnsigned()
     );
-    const auto& b = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& b = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[2]->GetUnsigned(), params_[8]->GetUnsigned()
     );
     auto num_entries = params_[11]->GetUnsigned() + 1;
@@ -187,7 +187,7 @@ void FF7::FieldBackgroundInstruction::ProcessMPPAL2(CodeGenerator* code_gen){
       ) % source % destination % r % g % b % num_entries).str());
 }
 
-void FF7::FieldBackgroundInstruction::ProcessSTPLS(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessSTPLS(CodeGenerator* code_gen){
     auto source = params_[0]->GetUnsigned();
     auto destination = params_[1]->GetUnsigned();
     auto start_clut = params_[2]->GetUnsigned();
@@ -198,7 +198,7 @@ void FF7::FieldBackgroundInstruction::ProcessSTPLS(CodeGenerator* code_gen){
     ).str());
 }
 
-void FF7::FieldBackgroundInstruction::ProcessLDPLS(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessLDPLS(CodeGenerator* code_gen){
     auto source = params_[0]->GetUnsigned();
     auto destination = params_[1]->GetUnsigned();
     auto startClut = params_[2]->GetUnsigned();

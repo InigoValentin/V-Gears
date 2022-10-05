@@ -39,6 +39,6 @@ std::string ModelsAndAnimationsDb::ModelMetaDataName(const std::string& model_na
     // If not in meta data then just replace .hrc with .mesh.
     Ogre::String base_name;
     VGears::StringUtil::splitBase(model_name, base_name);
-    return VGears::FF7::NameLookup::model(base_name) + ".mesh";
+    return VGears::NameLookup::model(base_name) + ".mesh";
 }
 

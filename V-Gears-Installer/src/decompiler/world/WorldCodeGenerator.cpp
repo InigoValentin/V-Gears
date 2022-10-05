@@ -14,18 +14,17 @@
  */
 
 #include "decompiler/world/WorldCodeGenerator.h"
-
 #include "decompiler/world/WorldEngine.h"
 
-FF7::WorldCodeGenerator::WorldCodeGenerator(Engine *engine, std::ostream &output)
+WorldCodeGenerator::WorldCodeGenerator(Engine *engine, std::ostream &output)
 : CodeGenerator(engine, output, FIFO_ARGUMENT_ORDER, LIFO_ARGUMENT_ORDER){}
 
-std::string FF7::WorldCodeGenerator::ConstructFuncSignature(const Function& function){
+std::string WorldCodeGenerator::ConstructFuncSignature(const Function& function){
     // TODO: Implement.
     return function.name + " = function(self)";
 }
 
-const InstPtr FF7::WorldCodeGenerator::FindFirstCall(){
+const InstPtr WorldCodeGenerator::FindFirstCall(){
     ConstInstIterator it = cur_group_->start;
     do{
         if ((*it)->IsFuncCall() || (*it)->IsKernelCall()) return *it;
@@ -33,7 +32,7 @@ const InstPtr FF7::WorldCodeGenerator::FindFirstCall(){
     return *cur_group_->start;
 }
 
-const InstPtr FF7::WorldCodeGenerator::FindLastCall(){
+const InstPtr WorldCodeGenerator::FindLastCall(){
     ConstInstIterator it = cur_group_->end;
     do {
         if ((*it)->IsFuncCall() || (*it)->IsKernelCall()) return *it;
@@ -41,4 +40,4 @@ const InstPtr FF7::WorldCodeGenerator::FindLastCall(){
     return *cur_group_->end;
 }
 
-void FF7::WorldCodeGenerator::ProcessSpecialMetadata(const InstPtr inst, char c, int pos){}
+void WorldCodeGenerator::ProcessSpecialMetadata(const InstPtr inst, char c, int pos){}

@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,68 +20,65 @@
 
 #include "decompiler/instruction/UncondJumpInstruction.h"
 
-namespace FF7{
+/**
+ * An unconditional map jump instruction.
+ */
+class FieldUncondJumpInstruction : public UncondJumpInstruction{
 
-    /**
-     * An unconditional map jump instruction.
-     */
-    class FieldUncondJumpInstruction : public UncondJumpInstruction{
+    public:
 
-        public:
+        /**
+         * Constructor.
+         */
+        FieldUncondJumpInstruction();
 
-            /**
-             * Constructor.
-             */
-            FieldUncondJumpInstruction();
+        /**
+         * Indicates if the instruction is a function call.
+         *
+         * @return true if the instruction is a function call, false if not.
+         */
+        virtual bool IsFuncCall() const;
 
-            /**
-             * Indicates if the instruction is a function call.
-             *
-             * @return true if the instruction is a function call, false if not.
-             */
-            virtual bool IsFuncCall() const;
+        /**
+         * Indicates if the instruction is an unconditional jump.
+         *
+         * @return true if the instruction is an unconditional jump, false if
+         * it's not.
+         */
+        virtual bool IsUncondJump() const;
 
-            /**
-             * Indicates if the instruction is an unconditional jump.
-             *
-             * @return true if the instruction is an unconditional jump, false
-             * if it's not.
-             */
-            virtual bool IsUncondJump() const;
+        /**
+         * Retrieves the destination address of the jump.
+         *
+         * @return The offset (number of bytes) to jump from the beginning of
+         * the instruction.
+         */
+        virtual uint32 GetDestAddress() const;
 
-            /**
-             * Retrieves the destination address of the jump.
-             *
-             * @return The offset (number of bytes) to jump from the beginning
-             * of the instruction.
-             */
-            virtual uint32 GetDestAddress() const;
+        /**
+         * Processes the instruction.
+         *
+         * @param func[in] Function to process.
+         * @param stack[out] Function stack. Unused.
+         * @param engine[in] The engine. Unused
+         * @param codegen[in|out] Code generator to append lines.
+         */
+        virtual void ProcessInst(
+          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
 
-            /**
-             * Processes the instruction.
-             *
-             * @param func[in] Function to process.
-             * @param stack[out] Function stack. Unused.
-             * @param engine[in] The engine. Unused
-             * @param codegen[in|out] Code generator to append lines.
-             */
-            virtual void ProcessInst(
-              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
+        /**
+         * Prints the instruction
+         *
+         * @param[in] output The stream to print the instruction to.
+         * @return The same output.
+         */
+        virtual std::ostream& Print(std::ostream &output) const override;
 
-            /**
-             * Prints the instruction
-             *
-             * @param[in] output The stream to print the instruction to.
-             * @return The same output.
-             */
-            virtual std::ostream& Print(std::ostream &output) const override;
+    private:
 
-        private:
-
-            /**
-             * Whether or not this is really a call to a script function.
-             */
-            bool is_func_call_;
-    };
-}
+        /**
+         * Whether or not this is really a call to a script function.
+         */
+        bool is_func_call_;
+};

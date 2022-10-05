@@ -33,12 +33,6 @@
 namespace VGears{
     // TODO: move flevel stuff to ff7 as it is ff7 related
 
-    using FF7::ModelListFileManager;
-
-    using FF7::ModelListFileSerializer;
-
-    using FF7::WalkmeshFileSerializer;
-
     const String FLevelFileSerializer::TAG_FILE_END("FINAL FANTASY7");
 
     FLevelFileSerializer::FLevelFileSerializer() : Serializer(){}
@@ -239,7 +233,7 @@ namespace VGears{
         WalkmeshFile::TriangleList::const_iterator it_end(triangles.end());
         Ogre::Real scale
           = static_cast<Ogre::Real>(dest->GetCameraMatrix()->GetCount());
-        scale *= FF7::FIELD_POSITION_SCALE;
+        scale *= FIELD_POSITION_SCALE;
         while (it != it_end){
             it->a /= scale;
             it->b /= scale;

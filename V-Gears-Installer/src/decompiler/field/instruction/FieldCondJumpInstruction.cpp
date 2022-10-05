@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,10 +24,10 @@
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
 
-void FF7::FieldCondJumpInstruction::ProcessInst(
+void FieldCondJumpInstruction::ProcessInst(
   Function& function, ValueStack &stack, Engine* engine, CodeGenerator* code_gen
 ){
-    FF7::FieldCodeGenerator* cg = static_cast<FF7::FieldCodeGenerator*>(code_gen);
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     std::string func_name;
     if (opcode_ == OPCODES::IFKEYON) func_name = "entity_manager:is_key_on";
     else if (opcode_ == OPCODES::IFKEYOFF) func_name = "entity_manager:is_key_off";
@@ -55,10 +55,10 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
     }
     std::string op;
     uint32 type = params_[4]->GetUnsigned();
-    const auto& source = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& destination = FF7::FieldCodeGenerator::FormatValueOrVariable(
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
 
@@ -94,7 +94,7 @@ void FF7::FieldCondJumpInstruction::ProcessInst(
     stack.Push(v);
 }
 
-uint32 FF7::FieldCondJumpInstruction::GetDestAddress() const{
+uint32 FieldCondJumpInstruction::GetDestAddress() const{
     uint32 params_size = 0;
     uint32 jump_param_index = 5;
     switch (opcode_){
@@ -120,7 +120,7 @@ uint32 FF7::FieldCondJumpInstruction::GetDestAddress() const{
     return address_ + params_[jump_param_index]->GetUnsigned() + params_size;
 }
 
-std::ostream& FF7::FieldCondJumpInstruction::Print(std::ostream &output) const{
+std::ostream& FieldCondJumpInstruction::Print(std::ostream &output) const{
     Instruction::Print(output);
     output << " (False target address: 0x" << std::hex << GetDestAddress() << std::dec << ")";
     return output;

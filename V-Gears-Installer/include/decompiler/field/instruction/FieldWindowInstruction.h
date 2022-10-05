@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,34 +20,34 @@
 #include "decompiler/instruction/KernelCallInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 
-namespace FF7{
+/**
+ * A window instruction.
+ */
+class FieldWindowInstruction : public KernelCallInstruction{
 
-    /**
-     * A window instruction.
-     */
-    class FieldWindowInstruction : public KernelCallInstruction{
+    public:
 
-        public:
+        /**
+         * Processes the instruction.
+         *
+         * @param func[in] Function to process.
+         * @param stack[out] Function stack. Unused.
+         * @param engine[in] Engine.
+         * @param codegen[in|out] Code generator to append lines.
+         */
+        virtual void ProcessInst(
+          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
 
-            /**
-             * Processes the instruction.
-             *
-             * @param func[in] Function to process.
-             * @param stack[out] Function stack. Unused.
-             * @param engine[in] Engine.
-             * @param codegen[in|out] Code generator to append lines.
-             */
-            virtual void ProcessInst(
-              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
+    private:
 
-        private:
+        void ProcessMESSAGE(CodeGenerator* code_gen, const std::string& script_name);
 
-            void ProcessMESSAGE(CodeGenerator* code_gen, const std::string& script_name);
-            void ProcessMPNAM(CodeGenerator* code_gen);
-            void ProcessMENU2(CodeGenerator* code_gen);
-            void ProcessWINDOW(CodeGenerator* code_gen);
-            void ProcessWCLSE(CodeGenerator* code_gen);
-    };
+        void ProcessMPNAM(CodeGenerator* code_gen);
 
-}
+        void ProcessMENU2(CodeGenerator* code_gen);
+
+        void ProcessWINDOW(CodeGenerator* code_gen);
+
+        void ProcessWCLSE(CodeGenerator* code_gen);
+};

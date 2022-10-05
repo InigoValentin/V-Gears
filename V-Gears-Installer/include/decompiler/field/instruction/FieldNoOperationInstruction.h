@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,35 +20,31 @@
 #include "decompiler/instruction/Instruction.h"
 #include "decompiler/field/FieldEngine.h"
 
-namespace FF7{
+/**
+ * An instruction that does nothing.
+ */
+class FieldNoOperationInstruction : public Instruction{
 
-    /**
-     * An instruction that does nothing.
-     */
-    class FieldNoOperationInstruction : public Instruction{
+    public:
 
-        public:
+        /**
+         * Generates a instruction that does nothing.
+         *
+         * @return The generated instruction.
+         */
+        static InstPtr Create(){return new FieldNoOperationInstruction();}
 
-            /**
-             * Generates a instruction that does nothing.
-             *
-             * @return The generated instruction.
-             */
-            static InstPtr Create(){return new FieldNoOperationInstruction();}
-
-            /**
-             * Processes the instruction.
-             *
-             * It doesn't do anything.
-             *
-             * @param func[in] Function to process. Unused.
-             * @param stack[out] Function stack. Unused.
-             * @param engine[in] Engine. Unused.
-             * @param codegen[in|out] Code generator to append lines.
-             */
-            virtual void ProcessInst(
-              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
-    };
-
-}
+        /**
+         * Processes the instruction.
+         *
+         * It doesn't do anything.
+         *
+         * @param func[in] Function to process. Unused.
+         * @param stack[out] Function stack. Unused.
+         * @param engine[in] Engine. Unused.
+         * @param codegen[in|out] Code generator to append lines.
+         */
+        virtual void ProcessInst(
+          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
+};

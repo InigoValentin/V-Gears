@@ -365,7 +365,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         virtual std::string GetFriendlyVarName(
           unsigned int bank, unsigned int addr
         ) override{
-            return VGears::FF7::NameLookup::FieldScriptVarName(bank, addr);
+            return VGears::NameLookup::FieldScriptVarName(bank, addr);
         }
 
         /**
@@ -376,7 +376,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
          * doesn't have one assigned.
          */
         virtual std::string GetFriendlyEntityName(const std::string& entity) override{
-            return VGears::FF7::NameLookup::FieldScriptEntityName(entity);
+            return VGears::NameLookup::FieldScriptEntityName(entity);
         }
 
         /**
@@ -387,7 +387,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
          * doesn't have one assigned.
          */
         virtual std::string GetFriendlyCharName(int char_id) override{
-            return VGears::FF7::NameLookup::CharName(char_id);
+            return VGears::NameLookup::CharName(char_id);
         }
 
         /**
@@ -401,7 +401,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         virtual std::string GetFriendlyFunctionName(
           const std::string& entity, const std::string& function_name
         ) override{
-            return VGears::FF7::NameLookup::FieldScriptFunctionName(
+            return VGears::NameLookup::FieldScriptFunctionName(
               field_name_, entity, function_name
             );
         }
@@ -417,7 +417,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         virtual std::string GetFunctionComment(
           const std::string& entity, const std::string& function_name
         ) override{
-            return VGears::FF7::NameLookup::FieldScriptFunctionComment(
+            return VGears::NameLookup::FieldScriptFunctionComment(
               field_name_, entity, function_name
             );
         }
@@ -494,7 +494,7 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
             Ogre::String base_name;
             VGears::StringUtil::splitBase(raw_name, base_name);
             VGears::StringUtil::toLowerCase(base_name);
-            return VGears::FF7::NameLookup::Animation(base_name);
+            return VGears::NameLookup::Animation(base_name);
         }
 
     private:
@@ -1390,7 +1390,7 @@ void DataInstaller::ConvertFieldModelsIteration(){
                   );
                 Ogre::String base_name;
                 VGears::StringUtil::splitBase(model_animation_map_iterator_->first, base_name);
-                auto mesh_name = VGears::FF7::NameLookup::model(base_name) + ".mesh";
+                auto mesh_name = VGears::NameLookup::model(base_name) + ".mesh";
                 Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
                 Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
                 for (auto& anim : model_animation_map_iterator_->second){
@@ -1398,7 +1398,7 @@ void DataInstaller::ConvertFieldModelsIteration(){
                     VGears::AFilePtr a = afl_mgr.load(anim, "FFVII").staticCast<VGears::AFile>();
                     // Convert the FF7 name to a more readable name set in the meta data.
                     VGears::StringUtil::splitBase(anim, base_name);
-                    a->AddTo(skeleton, VGears::FF7::NameLookup::Animation(base_name));
+                    a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
                 }
                 ExportMesh(output_dir_ + "/" + FieldModelDir() + "/", mesh);
             }

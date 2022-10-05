@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,27 +20,23 @@
 #include "decompiler/instruction/LoadInstruction.h"
 #include "decompiler/world/WorldEngine.h"
 
-namespace FF7{
+/**
+ * A bank loading instruction.
+ */
+class WorldLoadBankInstruction : public LoadInstruction{
 
-    /**
-     * A bank loading instruction.
-     */
-    class WorldLoadBankInstruction : public LoadInstruction{
+    public:
 
-        public:
+        /**
+         * Processes the instruction.
+         *
+         * @param function[in] Function to process. Unused.
+         * @param stack[out] Function stack.
+         * @param engine[in] Engine. Unused.
+         * @param code_gen[in] Code generator. Unused.
+         */
+        virtual void ProcessInst(
+          Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
 
-            /**
-             * Processes the instruction.
-             *
-             * @param function[in] Function to process. Unused.
-             * @param stack[out] Function stack.
-             * @param engine[in] Engine. Unused.
-             * @param code_gen[in] Code generator. Unused.
-             */
-            virtual void ProcessInst(
-              Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
-
-    };
-
-}
+};

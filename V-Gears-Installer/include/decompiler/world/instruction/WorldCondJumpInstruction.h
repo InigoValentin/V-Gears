@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,41 +20,37 @@
 #include "decompiler/instruction/CondJumpInstruction.h"
 #include "decompiler/world/WorldEngine.h"
 
-namespace FF7{
+/**
+ * A conditional jump instruction.
+ */
+class WorldCondJumpInstruction : public CondJumpInstruction{
 
-    /**
-     * A conditional jump instruction.
-     */
-    class WorldCondJumpInstruction : public CondJumpInstruction{
+    public:
 
-        public:
+        /**
+         * Processes the instruction.
+         *
+         * @param function[in] Function to process.
+         * @param stack[out] Function stack.
+         * @param engine[in] Engine.
+         * @param code_gen[in] Code generator.
+         */
+        virtual void ProcessInst(
+          Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
 
-            /**
-             * Processes the instruction.
-             *
-             * @param function[in] Function to process.
-             * @param stack[out] Function stack.
-             * @param engine[in] Engine.
-             * @param code_gen[in] Code generator.
-             */
-            virtual void ProcessInst(
-              Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
+        /**
+         * Retrieves the destination address of the jump.
+         *
+         * @return The destination address.
+         */
+        virtual uint32 GetDestAddress() const;
 
-            /**
-             * Retrieves the destination address of the jump.
-             *
-             * @return The destination address.
-             */
-            virtual uint32 GetDestAddress() const;
-
-            /**
-             * Prints the instruction.
-             *
-             * @param output[in] The output to print.
-             * @return The same as output.
-             */
-            virtual std::ostream& Print(std::ostream &output) const override;
-        };
-
-}
+        /**
+         * Prints the instruction.
+         *
+         * @param output[in] The output to print.
+         * @return The same as output.
+         */
+        virtual std::ostream& Print(std::ostream &output) const override;
+    };

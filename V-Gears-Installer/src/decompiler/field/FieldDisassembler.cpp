@@ -38,11 +38,11 @@
 #include "common/Lzs.h"
 
 
-const int FF7::FieldDisassembler::MAGIC(0x0502);
+const int FieldDisassembler::MAGIC(0x0502);
 
-const int FF7::FieldDisassembler::NUM_SECTIONS(7);
+const int FieldDisassembler::NUM_SECTIONS(7);
 
-FF7::FieldDisassembler::FieldDisassembler(
+FieldDisassembler::FieldDisassembler(
   FieldScriptFormatter& formatter, FieldEngine* engine,
   InstVec& insts, const std::vector<unsigned char>& raw_script_data
 ): Disassembler(insts), engine_(engine), formatter_(formatter){
@@ -54,17 +54,17 @@ FF7::FieldDisassembler::FieldDisassembler(
     ReadHeader();
 }
 
-FF7::FieldDisassembler::FieldDisassembler(
+FieldDisassembler::FieldDisassembler(
   FieldScriptFormatter& formatter, FieldEngine *engine, InstVec &insts
 ): Disassembler(insts), engine_(engine), formatter_(formatter){
     section_pointers_size_ = (sizeof(uint32) * NUM_SECTIONS);
 }
 
-float FF7::FieldDisassembler::GetScaleFactor() const{return scale_factor_;}
+float FieldDisassembler::GetScaleFactor() const{return scale_factor_;}
 
-FF7::FieldDisassembler::~FieldDisassembler(){}
+FieldDisassembler::~FieldDisassembler(){}
 
-void FF7::FieldDisassembler::ReadHeader(){
+void FieldDisassembler::ReadHeader(){
     if (!loaded_from_raw_data_){
         // First read the file section pointers.
         for (int i = 0; i < NUM_SECTIONS; i ++) sections_[i] = stream_->ReadU32();
@@ -80,13 +80,13 @@ void FF7::FieldDisassembler::ReadHeader(){
     scale_factor_ = static_cast<float>(header_.scale) / 512.0f;
 }
 
-void FF7::FieldDisassembler::Open(const char *filename){
+void FieldDisassembler::Open(const char *filename){
     // Read all of the file, decompress it, then stuff it into a stream.
     stream_ = std::make_unique<BinaryReader>(Lzs::Decompress(BinaryReader::ReadAll(filename)));
     ReadHeader();
 }
 
-uint32 FF7::FieldDisassembler::GetEndOfScriptOffset(
+uint32 FieldDisassembler::GetEndOfScriptOffset(
   uint16 cur_entry_point, size_t entity_index, size_t script_index
 ){
     uint16 next_entry_point = cur_entry_point;
@@ -108,7 +108,7 @@ uint32 FF7::FieldDisassembler::GetEndOfScriptOffset(
     return next_entry_point;
 }
 
-std::unique_ptr<Function> FF7::FieldDisassembler::StartFunction(size_t script_index){
+std::unique_ptr<Function> FieldDisassembler::StartFunction(size_t script_index){
     auto func = std::make_unique<Function>();
     func->ret_val = false;
     func->num_args = 0;
@@ -117,7 +117,7 @@ std::unique_ptr<Function> FF7::FieldDisassembler::StartFunction(size_t script_in
     return func;
 }
 
-void FF7::FieldDisassembler::DoDisassemble(){
+void FieldDisassembler::DoDisassemble(){
     // Loop through the scripts for each entity.
     for (size_t entity_number = 0; entity_number < header_.entity_scripts.size(); entity_number ++){
         std::string original_name = header_.field_entity_names[entity_number].data();
@@ -158,17 +158,17 @@ void FF7::FieldDisassembler::DoDisassemble(){
     }
 }
 
-int FF7::FieldDisassembler::FindId(uint32 start_addr, uint32 end_addr, const InstVec& insts){
+int FieldDisassembler::FindId(uint32 start_addr, uint32 end_addr, const InstVec& insts){
     for (const InstPtr& instruction : insts){
         if (instruction->GetAddress() >= start_addr && instruction->GetAddress() <= end_addr){
-            if (instruction->GetOpcode() == FF7::OPCODES::opCodeCHAR)
+            if (instruction->GetOpcode() == OPCODES::opCodeCHAR)
                 return instruction->GetParam(0)->GetSigned();
         }
     }
     return -1;
 }
 
-void FF7::FieldDisassembler::AddFunc(
+void FieldDisassembler::AddFunc(
   std::string entity_name, size_t entity_index, size_t script_index, uint32 next_script_entry_point,
   const bool is_start, bool is_end, bool to_return_only, std::string func_name
 ){
@@ -248,7 +248,7 @@ void FF7::FieldDisassembler::AddFunc(
     if (is_line) engine_->MarkEntityAsLine(entity_index, true, point_a, point_b);
 }
 
-void FF7::FieldDisassembler::DisassembleIndivdualScript(
+void FieldDisassembler::DisassembleIndivdualScript(
   std::string entity_name, size_t entity_index, size_t script_index,
   size_t script_entry_point, uint32 next_script_entry_point, bool is_start, bool is_end)
 {
@@ -294,17 +294,17 @@ void FF7::FieldDisassembler::DisassembleIndivdualScript(
 }
 
 
-FF7::FieldDisassembler::InstructionRecord FF7::FieldDisassembler::FLOW_OPCODES[] ={
-    {1, FF7::OPCODES::RET, "RET", "", FF7::FF7ControlFlowInstruction::Create},
-    {1, FF7::OPCODES::REQ, "REQ", "BU", FF7::FF7ControlFlowInstruction::Create},
-    {1, FF7::OPCODES::REQSW, "REQSW", "BU", FF7::FF7ControlFlowInstruction::Create},
-    {1, FF7::OPCODES::REQEW, "REQEW", "BU", FF7::FF7ControlFlowInstruction::Create},
-    {1, FF7::OPCODES::NOP, "NOP", "", FF7::FieldNoOperationInstruction::Create},
-    {1, FF7::OPCODES::IFUB, "IFUB", "NNBBBL", FF7::FieldNoOperationInstruction::Create}
+FieldDisassembler::InstructionRecord FieldDisassembler::FLOW_OPCODES[] ={
+    {1, OPCODES::RET, "RET", "", FieldControlFlowInstruction::Create},
+    {1, OPCODES::REQ, "REQ", "BU", FieldControlFlowInstruction::Create},
+    {1, OPCODES::REQSW, "REQSW", "BU", FieldControlFlowInstruction::Create},
+    {1, OPCODES::REQEW, "REQEW", "BU", FieldControlFlowInstruction::Create},
+    {1, OPCODES::NOP, "NOP", "", FieldNoOperationInstruction::Create},
+    {1, OPCODES::IFUB, "IFUB", "NNBBBL", FieldNoOperationInstruction::Create}
 };
 
-std::map<std::string, const FF7::FieldDisassembler::InstructionRecord*>
-  FF7::FieldDisassembler::FieldInstructions(){
+std::map<std::string, const FieldDisassembler::InstructionRecord*>
+  FieldDisassembler::FieldInstructions(){
     // Convert the array to a map that we can query on by opcode name.
     std::map<std::string, const InstructionRecord*> name_to_instruction_records;
     for (size_t i = 0; i < boost::size(FLOW_OPCODES); i ++)
@@ -312,7 +312,7 @@ std::map<std::string, const FF7::FieldDisassembler::InstructionRecord*>
     return name_to_instruction_records;
 }
 
-bool FF7::FieldDisassembler::ReadOpCodesToPositionOrReturn(
+bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
   size_t end_pos, std::vector<float>& point_a, std::vector<float>& point_b
 ){
     bool is_line = false;
@@ -328,28 +328,28 @@ bool FF7::FieldDisassembler::ReadOpCodesToPositionOrReturn(
                 ParseOpcode(full_opcode, "IFUB", new FieldCondJumpInstruction(), 0, "NBBBB");
                 break;
             case OPCODES::RET:
-                ParseOpcode(full_opcode, "RET", new FF7ControlFlowInstruction(), 0, "");
+                ParseOpcode(full_opcode, "RET", new FieldControlFlowInstruction(), 0, "");
                 break;
             case OPCODES::REQ:
-                ParseOpcode(full_opcode, "REQ", new FF7ControlFlowInstruction(), 0, "BU");
+                ParseOpcode(full_opcode, "REQ", new FieldControlFlowInstruction(), 0, "BU");
                 break;
             case OPCODES::REQSW:
-                ParseOpcode(full_opcode, "REQSW", new FF7ControlFlowInstruction(), 0, "BU");
+                ParseOpcode(full_opcode, "REQSW", new FieldControlFlowInstruction(), 0, "BU");
                 break;
             case OPCODES::REQEW:
-                ParseOpcode(full_opcode, "REQEW", new FF7ControlFlowInstruction(), 0, "BU");
+                ParseOpcode(full_opcode, "REQEW", new FieldControlFlowInstruction(), 0, "BU");
                 break;
             case OPCODES::PREQ:
-                ParseOpcode(full_opcode, "PREQ", new FF7ControlFlowInstruction(), 0, "BU");
+                ParseOpcode(full_opcode, "PREQ", new FieldControlFlowInstruction(), 0, "BU");
                 break;
             case OPCODES::PRQSW:
-                ParseOpcode(full_opcode, "PRQSW", new FF7ControlFlowInstruction(), 0, "BU");
+                ParseOpcode(full_opcode, "PRQSW", new FieldControlFlowInstruction(), 0, "BU");
                 break;
             case OPCODES::PRQEW:
-                ParseOpcode(full_opcode, "PRQEW", new FF7ControlFlowInstruction(), 0, "BU");
+                ParseOpcode(full_opcode, "PRQEW", new FieldControlFlowInstruction(), 0, "BU");
                 break;
             case OPCODES::RETTO:
-                ParseOpcode(full_opcode, "RETTO", new FF7ControlFlowInstruction(), 0, "U");
+                ParseOpcode(full_opcode, "RETTO", new FieldControlFlowInstruction(), 0, "U");
                 break;
             case OPCODES::JMPF:
                 ParseOpcode(full_opcode, "JMPF", new FieldUncondJumpInstruction(), 0, "B");
@@ -379,7 +379,7 @@ bool FF7::FieldDisassembler::ReadOpCodesToPositionOrReturn(
                 ParseOpcode(full_opcode, "IFUWL", new FieldCondJumpInstruction(), 0, "NwwBw");
                 break;
             case OPCODES::WAIT:
-                ParseOpcode(full_opcode, "WAIT", new FF7ControlFlowInstruction(), 0, "w");
+                ParseOpcode(full_opcode, "WAIT", new FieldControlFlowInstruction(), 0, "w");
                 break;
             case OPCODES::IFKEY:
                 ParseOpcode(full_opcode, "IFKEY", new FieldCondJumpInstruction(), 0, "wB");

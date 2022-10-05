@@ -21,148 +21,137 @@
 
 namespace VGears{
 
-    namespace FF7{
+    /**
+     * Handles the serialization of walkmesh files.
+     */
+    class WalkmeshFileSerializer : public Serializer{
 
-        /**
-         * Handles the serialization of walkmesh files.
-         */
-        class WalkmeshFileSerializer : public Serializer{
+        public:
 
-            public:
+            /**
+             * Constructor.
+             */
+            WalkmeshFileSerializer();
 
-                /**
-                 * Constructor.
-                 */
-                WalkmeshFileSerializer();
+            /**
+             * Destructor.
+             */
+            virtual ~WalkmeshFileSerializer();
 
-                /**
-                 * Destructor.
-                 */
-                virtual ~WalkmeshFileSerializer();
+            /**
+             * Imports a walkmesh file.
+             *
+             * @param stream[in] The contents of the walkmesh file.
+             * @param dest[out] The formed walkmesh file.
+             */
+            virtual void ImportWalkmeshFile(Ogre::DataStreamPtr &stream, WalkmeshFile *dest);
 
-                /**
-                 * Imports a walkmesh file.
-                 *
-                 * @param stream[in] The contents of the walkmesh file.
-                 * @param dest[out] The formed walkmesh file.
-                 */
-                virtual void ImportWalkmeshFile(
-                  Ogre::DataStreamPtr &stream, WalkmeshFile *dest
-                );
+            typedef WalkmeshFile::Triangle WalkmeshTriangle;
 
-                typedef WalkmeshFile::Triangle WalkmeshTriangle;
-                typedef WalkmeshFile::TriangleList WalkmeshTriangleList;
+            typedef WalkmeshFile::TriangleList WalkmeshTriangleList;
+
+            /**
+             * @todo Understand and document.
+             */
+            enum{
 
                 /**
                  * @todo Understand and document.
                  */
-                enum{
-
-                    /**
-                     * @todo Understand and document.
-                     */
-                    VERTEX_PADDING_COUNT = 1,
-
-                    /**
-                     * @todo Understand and document.
-                     */
-                    VERTEX_COMPONENT_COUNT = 3 + VERTEX_PADDING_COUNT,
-
-                    /**
-                     * @todo Understand and document.
-                     */
-                    ACCESS_COMPONENT_COUNT = 3
-                };
+                VERTEX_PADDING_COUNT = 1,
 
                 /**
-                 * A walkmesh triangle.
+                 * @todo Understand and document.
                  */
-                struct Triangle{
-
-                    /**
-                     * A side of the triangle.
-                     */
-                    Ogre::Vector3 a;
-
-                    /**
-                     * A side of the triangle.
-                     */
-                    Ogre::Vector3 b;
-
-                    /**
-                     * A side of the triangle.
-                     */
-                    Ogre::Vector3 c;
-                };
+                VERTEX_COMPONENT_COUNT = 3 + VERTEX_PADDING_COUNT,
 
                 /**
-                 * Defines the access to a triangle.
+                 * @todo Understand and document.
                  */
-                struct Access{
-                    /**
-                     * @todo Understand and document.
-                     */
-                    sint16 a;
-                    /**
-                     * @todo Understand and document.
-                     */
-                    sint16 b;
-                    /**
-                     * @todo Understand and document.
-                     */
-                    sint16 c;
-                };
+                ACCESS_COMPONENT_COUNT = 3
+            };
 
-                typedef std::vector<Triangle> TriangleList;
-
-                typedef std::vector<Access> AccessList;
-
-            protected:
+            /**
+             * A walkmesh triangle.
+             */
+            struct Triangle{
 
                 /**
-                 * Reads an object as a walkmesh triangle.
-                 *
-                 * @param stream[in] Input data.
-                 * @param dest[out] The formed triangle data.
+                 * A side of the triangle.
                  */
-                virtual void readObject(
-                  Ogre::DataStreamPtr &stream, Triangle &dest
-                );
+                Ogre::Vector3 a;
 
                 /**
-                 * Reads an object as a 3-dimensional vector.
-                 *
-                 * @param stream[in] Input data.
-                 * @param dest[out] The formed vector data.
+                 * A side of the triangle.
                  */
-                virtual void readObject(
-                  Ogre::DataStreamPtr &stream, Ogre::Vector3 &dest
-                );
+                Ogre::Vector3 b;
 
                 /**
-                 * Reads an object as a triangle access point.
-                 *
-                 * @param stream[in] Input data.
-                 * @param dest[out] The formed access point data.
+                 * A side of the triangle.
                  */
-                virtual void readObject(
-                  Ogre::DataStreamPtr &stream, Access &dest
-                );
+                Ogre::Vector3 c;
+            };
 
-                using Serializer::readObject;
-
+            /**
+             * Defines the access to a triangle.
+             */
+            struct Access{
                 /**
-                 * Reads an object as a vector.
-                 *
-                 * @param stream[in] Input data.
-                 * @param dest[out] The formed vector data.
-                 * @param count[in] The size of the data to read.
+                 * @todo Understand and document.
                  */
-                template<typename ValueType> void ReadVector(
-                  Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest,
-                  size_t count
-                );
+                sint16 a;
+                /**
+                 * @todo Understand and document.
+                 */
+                sint16 b;
+                /**
+                 * @todo Understand and document.
+                 */
+                sint16 c;
+            };
 
-        };
-    }
+            typedef std::vector<Triangle> TriangleList;
+
+            typedef std::vector<Access> AccessList;
+
+        protected:
+
+            /**
+             * Reads an object as a walkmesh triangle.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed triangle data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Triangle &dest);
+
+            /**
+             * Reads an object as a 3-dimensional vector.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed vector data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Ogre::Vector3 &dest);
+
+            /**
+             * Reads an object as a triangle access point.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed access point data.
+             */
+            virtual void readObject(Ogre::DataStreamPtr &stream, Access &dest);
+
+            using Serializer::readObject;
+
+            /**
+             * Reads an object as a vector.
+             *
+             * @param stream[in] Input data.
+             * @param dest[out] The formed vector data.
+             * @param count[in] The size of the data to read.
+             */
+            template<typename ValueType> void ReadVector(
+              Ogre::DataStreamPtr &stream, std::vector<ValueType> &dest, size_t count
+            );
+
+    };
 }

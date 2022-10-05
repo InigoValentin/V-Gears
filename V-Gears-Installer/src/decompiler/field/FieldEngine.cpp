@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -52,25 +52,24 @@
  * TURNW
  */
 
-FF7::FieldEngine::Entity::Entity(const std::string& name, size_t index):
-  name_(name), index_(index), is_line_(false)
-{}
+FieldEngine::Entity::Entity(const std::string& name, size_t index):
+  name_(name), index_(index), is_line_(false){}
 
-std::string FF7::FieldEngine::Entity::GetName() const{return name_;}
+std::string FieldEngine::Entity::GetName() const{return name_;}
 
-size_t FF7::FieldEngine::Entity::GetIndex() const{return index_;}
+size_t FieldEngine::Entity::GetIndex() const{return index_;}
 
-std::string FF7::FieldEngine::Entity::FunctionByIndex(size_t index) const{
+std::string FieldEngine::Entity::FunctionByIndex(size_t index) const{
     auto it = functions_.find(index);
     if (it == std::end(functions_)) throw DecompilerException();
     return it->second;
 }
 
-void FF7::FieldEngine::Entity::AddFunction(const std::string& name, size_t index){
+void FieldEngine::Entity::AddFunction(const std::string& name, size_t index){
     functions_[index] = name;
 }
 
-void FF7::FieldEngine::Entity::MarkAsLine(
+void FieldEngine::Entity::MarkAsLine(
   bool line, std::vector<float> point_a, std::vector<float> point_b
 ){
     is_line_ = line;
@@ -95,17 +94,17 @@ void FF7::FieldEngine::Entity::MarkAsLine(
     AddFunction("on_leave_line", 4);
 }
 
-bool FF7::FieldEngine::Entity::IsLine(){return is_line_;}
+bool FieldEngine::Entity::IsLine(){return is_line_;}
 
-std::vector<float> FF7::FieldEngine::Entity::GetLinePointA(){return point_a_;}
+std::vector<float> FieldEngine::Entity::GetLinePointA(){return point_a_;}
 
-std::vector<float> FF7::FieldEngine::Entity::GetLinePointB(){return point_b_;}
+std::vector<float> FieldEngine::Entity::GetLinePointB(){return point_b_;}
 
-FF7::FieldEngine::FieldEngine(FieldScriptFormatter& formatter, std::string script_name) :
+FieldEngine::FieldEngine(FieldScriptFormatter& formatter, std::string script_name) :
   formatter_(formatter), script_name_(script_name), scale_factor_(1.0f)
 {SetOutputStackEffect(false);}
 
-std::unique_ptr<Disassembler> FF7::FieldEngine::GetDisassembler(
+std::unique_ptr<Disassembler> FieldEngine::GetDisassembler(
   InstVec &insts, const std::vector<unsigned char>& raw_script_data
 ){
     auto ret = std::make_unique<FieldDisassembler>(formatter_, this, insts, raw_script_data);
@@ -113,22 +112,22 @@ std::unique_ptr<Disassembler> FF7::FieldEngine::GetDisassembler(
     return std::move(ret);
 }
 
-std::unique_ptr<Disassembler> FF7::FieldEngine::GetDisassembler(InstVec &insts){
+std::unique_ptr<Disassembler> FieldEngine::GetDisassembler(InstVec &insts){
     auto ret = std::make_unique<FieldDisassembler>(formatter_, this, insts);
     scale_factor_ = ret->GetScaleFactor();
     return std::move(ret);
 }
 
-std::unique_ptr<CodeGenerator> FF7::FieldEngine::GetCodeGenerator(
+std::unique_ptr<CodeGenerator> FieldEngine::GetCodeGenerator(
   const InstVec& insts, std::ostream &output
 ){
     // The broken version:
     //return std::make_unique<FieldCodeGenerator>(this, insts, output);
     // The not-as-nice-but-at-least-it-works version:
-    return std::make_unique<FF7::FieldCodeGenerator>(this, insts, output, formatter_);
+    return std::make_unique<FieldCodeGenerator>(this, insts, output, formatter_);
 }
 
-void FF7::FieldEngine::PostCFG(InstVec& insts, Graph graph){
+void FieldEngine::PostCFG(InstVec& insts, Graph graph){
     // In FF7 some scripts ends with an infinite loop to "keep it alive"
     // in V-Gears this isn't required so they can be removed.
     //RemoveTrailingInfiniteLoops(insts, graph);
@@ -142,13 +141,13 @@ void FF7::FieldEngine::PostCFG(InstVec& insts, Graph graph){
     //RemoveExtraneousReturnStatements(insts, graph);
 }
 
-bool FF7::FieldEngine::UsePureGrouping() const{return false;}
+bool FieldEngine::UsePureGrouping() const{return false;}
 
-std::map<std::string, int> FF7::FieldEngine::GetEntities() const{
+std::map<std::string, int> FieldEngine::GetEntities() const{
     std::map<std::string, int> r;
     for (auto& f : functions){
         const Function& func = f.second;
-        FF7::FunctionMetaData meta(func.metadata);
+        FunctionMetaData meta(func.metadata);
         auto it = r.find(meta.GetEntityName());
         if (it != std::end(r)){
             // Try to find a function in this entity has that has a char id.
@@ -161,7 +160,7 @@ std::map<std::string, int> FF7::FieldEngine::GetEntities() const{
     return r;
 }
 
-std::vector<FieldDecompiler::FieldEntity> FF7::FieldEngine::GetEntityList() const{
+std::vector<FieldDecompiler::FieldEntity> FieldEngine::GetEntityList() const{
     std::vector<FieldDecompiler::FieldEntity> entities;
     for (auto entity: entity_index_map_){
         if (entity.second.IsLine() == false){
@@ -174,7 +173,7 @@ std::vector<FieldDecompiler::FieldEntity> FF7::FieldEngine::GetEntityList() cons
             std::map<std::string, int> r;
             for (auto& f : functions){
                 const Function& func = f.second;
-                FF7::FunctionMetaData meta(func.metadata);
+                FunctionMetaData meta(func.metadata);
                 if (meta.GetEntityName() == ent.name){
                     ent.char_id = meta.GetCharacterId();
                     break;
@@ -186,7 +185,7 @@ std::vector<FieldDecompiler::FieldEntity> FF7::FieldEngine::GetEntityList() cons
     return entities;
 }
 
-std::vector<FieldDecompiler::Line> FF7::FieldEngine::GetLineList() const{
+std::vector<FieldDecompiler::Line> FieldEngine::GetLineList() const{
     std::vector<FieldDecompiler::Line> lines;
     for (auto entity: entity_index_map_){
         if (entity.second.IsLine() == true){
@@ -200,7 +199,7 @@ std::vector<FieldDecompiler::Line> FF7::FieldEngine::GetLineList() const{
     return lines;
 }
 
-void FF7::FieldEngine::AddEntityFunction(
+void FieldEngine::AddEntityFunction(
   const std::string& entity_name, size_t entity_index,
   const std::string& func_name, size_t func_index
 ){
@@ -213,7 +212,7 @@ void FF7::FieldEngine::AddEntityFunction(
     }
 }
 
-void FF7::FieldEngine::MarkEntityAsLine(
+void FieldEngine::MarkEntityAsLine(
   size_t entity_index, bool line, std::vector<float> point_a, std::vector<float> point_b
 ){
     auto it = entity_index_map_.find(entity_index);
@@ -222,23 +221,23 @@ void FF7::FieldEngine::MarkEntityAsLine(
     }
 }
 
-bool FF7::FieldEngine::EntityIsLine(size_t entity_index){
+bool FieldEngine::EntityIsLine(size_t entity_index){
     auto it = entity_index_map_.find(entity_index);
     if (it != std::end(entity_index_map_)) return (*it).second.IsLine();
     return false;
 }
 
-const FF7::FieldEngine::Entity& FF7::FieldEngine::EntityByIndex(size_t index) const{
+const FieldEngine::Entity& FieldEngine::EntityByIndex(size_t index) const{
     auto it = entity_index_map_.find(index);
     if (it == std::end(entity_index_map_)) throw DecompilerException();
     return it->second;
 }
 
-float FF7::FieldEngine::GetScaleFactor() const {return scale_factor_;}
+float FieldEngine::GetScaleFactor() const {return scale_factor_;}
 
-const std::string& FF7::FieldEngine::GetScriptName() const {return script_name_;}
+const std::string& FieldEngine::GetScriptName() const {return script_name_;}
 
-void FF7::FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph graph){
+void FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph graph){
     for (auto& f : functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
@@ -259,7 +258,7 @@ void FF7::FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph gr
     }
 }
 
-void FF7::FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph){
+void FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph){
     for (auto& f : functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){
@@ -280,7 +279,7 @@ void FF7::FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph){
     }
 }
 
-void FF7::FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph graph){
+void FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph graph){
     for (auto& f : functions){
         Function& func = f.second;
         for (auto it = insts.begin(); it != insts.end(); it ++){

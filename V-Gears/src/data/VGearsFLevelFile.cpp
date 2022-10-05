@@ -116,12 +116,12 @@ namespace VGears{
             String animation_name;
             StringUtil::splitBase(it->name, animation_name);
             StringUtil::toLowerCase(animation_name);
-            String animation_filename(animation_name + FF7::EXT_A);
+            String animation_filename(animation_name + EXT_A);
             AFilePtr animation
               = a_mgr.load(
                 animation_filename, model->getGroup()
               ).staticCast<AFile>();
-            animation_name = FF7::NameLookup::Animation(animation_name);
+            animation_name = NameLookup::Animation(animation_name);
             Ogre::LogManager::getSingleton().stream() << " Adding Animation: "
               << animation_name;
             animation->AddTo(model->GetSkeleton(), animation_name);

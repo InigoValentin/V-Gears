@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -20,37 +20,41 @@
 #include "decompiler/instruction/KernelCallInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 
-namespace FF7{
+/**
+ * An audio or video (or both) instruction.
+ */
+class FieldMediaInstruction : public KernelCallInstruction{
 
-    /**
-     * An audio or video (or both) instruction.
-     */
-    class FieldMediaInstruction : public KernelCallInstruction{
+    public:
 
-        public:
+        /**
+         * Processes the instruction.
+         *
+         * @param func[in] Function to process.
+         * @param stack[out] Function stack.
+         * @param engine[in] Engine. Unused
+         * @param codegen[in|out] Code generator to append lines.
+         */
+        virtual void ProcessInst(
+          Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
+        ) override;
 
-            /**
-             * Processes the instruction.
-             *
-             * @param func[in] Function to process.
-             * @param stack[out] Function stack.
-             * @param engine[in] Engine. Unused
-             * @param codegen[in|out] Code generator to append lines.
-             */
-            virtual void ProcessInst(
-              Function& func, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-            ) override;
+    private:
 
-        private:
+        void ProcessAKAO2(CodeGenerator* code_gen);
 
-            void ProcessAKAO2(CodeGenerator* code_gen);
-            void ProcessMUSIC(CodeGenerator* code_gen);
-            void ProcessSOUND(CodeGenerator* code_gen);
-            void ProcessAKAO(CodeGenerator* code_gen);
-            void ProcessMULCK(CodeGenerator* code_gen);
-            void ProcessPMVIE(CodeGenerator* code_gen);
-            void ProcessMOVIE(CodeGenerator* code_gen);
-            void ProcessMVIEF(CodeGenerator* code_gen);
-    };
+        void ProcessMUSIC(CodeGenerator* code_gen);
 
-}
+        void ProcessSOUND(CodeGenerator* code_gen);
+
+        void ProcessAKAO(CodeGenerator* code_gen);
+
+        void ProcessMULCK(CodeGenerator* code_gen);
+
+        void ProcessPMVIE(CodeGenerator* code_gen);
+
+        void ProcessMOVIE(CodeGenerator* code_gen);
+
+        void ProcessMVIEF(CodeGenerator* code_gen);
+};
+

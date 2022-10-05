@@ -231,7 +231,7 @@ namespace VGears{
           std::make_shared<VGears::WalkmeshFileManager>()
         );
         _resource_managers.emplace_back(
-          std::make_shared<VGears::FF7::ModelListFileManager>()
+          std::make_shared<VGears::ModelListFileManager>()
         );
         _resource_managers.emplace_back(
           std::make_shared<VGears::HRCFileManager>()

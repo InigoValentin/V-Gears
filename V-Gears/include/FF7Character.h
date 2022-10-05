@@ -15,106 +15,103 @@
 
 #include "common/TypeDefine.h"
 
-namespace FFVII{
+/**
+ * A playable character.
+ */
+class Character{
 
-    /**
-     * A playable character.
-     */
-    class Character{
+    public:
 
-        public:
+        /**
+         * Constructor.
+         */
+        Character();
 
-            /**
-             * Constructor.
-             */
-            Character();
+        /**
+         * Destructor.
+         */
+        virtual ~Character();
 
-            /**
-             * Destructor.
-             */
-            virtual ~Character();
-
-            /**
-             * List of character IDs.
-             */
-            enum CharacterId{
-
-                /**
-                 * Cloud's ID.
-                 */
-                CLOUD   = 0,
-
-                /**
-                 * Tifa's ID.
-                 */
-                TIFA = 1,
-
-                /**
-                 * Aerith's ID.
-                 */
-                AERIS = 2,
-
-                /**
-                 * Barret's ID.
-                 */
-                BARRET = 3,
-
-                /**
-                 * Red XIII's ID.
-                 */
-                RED = 4,
-
-                /**
-                 * Cid's ID.
-                 */
-                CID = 5,
-
-                /**
-                 * Vincent's ID.
-                 */
-                VINCENT = 6,
-
-                /**
-                 * Yuffie's ID.
-                 */
-                YUVI = 7,
-
-                /**
-                 * Cait Sith's ID.
-                 */
-                KETCY = 8,
-
-                /**
-                 * Unknown character ID.
-                 */
-                UNKNOWN = 9
-            };
+        /**
+         * List of character IDs.
+         */
+        enum CharacterId{
 
             /**
-             * Retrieves a character ID from it's name.
-             *
-             * @param name[in] Chaarcter name.
-             * @return ID of the character with the specified name, or {@see
-             * UNKNOWN} if the character doesn't exist.
+             * Cloud's ID.
              */
-            static CharacterId GetIdByName( const VGears::String& name);
-
-        private:
-
-            typedef std::map<VGears::String, CharacterId> CharacterIdLookupMap;
+            CLOUD   = 0,
 
             /**
-             * Creates a lookup map for character names.
-             *
-             * Names frequently used in the field scripts for the playable
-             * characters are included in the lookup map.
-             *
-             * @return The character name lookup map.
+             * Tifa's ID.
              */
-            static CharacterIdLookupMap CreateLookupMap();
+            TIFA = 1,
+
+            /**
+             * Aerith's ID.
+             */
+            AERIS = 2,
+
+            /**
+             * Barret's ID.
+             */
+            BARRET = 3,
+
+            /**
+             * Red XIII's ID.
+             */
+            RED = 4,
+
+            /**
+             * Cid's ID.
+             */
+            CID = 5,
+
+            /**
+             * Vincent's ID.
+             */
+            VINCENT = 6,
+
+            /**
+             * Yuffie's ID.
+             */
+            YUVI = 7,
+
+            /**
+             * Cait Sith's ID.
+             */
+            KETCY = 8,
+
+            /**
+             * Unknown character ID.
+             */
+            UNKNOWN = 9
+        };
+
+        /**
+         * Retrieves a character ID from it's name.
+         *
+         * @param name[in] Chaarcter name.
+         * @return ID of the character with the specified name, or {@see
+         * UNKNOWN} if the character doesn't exist.
+         */
+        static CharacterId GetIdByName( const VGears::String& name);
+
+    private:
+
+        typedef std::map<VGears::String, CharacterId> CharacterIdLookupMap;
+
+        /**
+         * Creates a lookup map for character names.
+         *
+         * Names frequently used in the field scripts for the playable
+         * characters are included in the lookup map.
+         *
+         * @return The character name lookup map.
+         */
+        static CharacterIdLookupMap CreateLookupMap();
 
 
-            static const CharacterIdLookupMap character_id_lookup_;
-    };
-}
+        static const CharacterIdLookupMap character_id_lookup_;
+};
 

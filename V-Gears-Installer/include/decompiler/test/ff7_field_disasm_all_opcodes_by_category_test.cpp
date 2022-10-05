@@ -69,7 +69,7 @@ TEST(FF7Field, BugFixes)
     const int kNumSections = 7;
     scriptBytes.erase(scriptBytes.begin(), scriptBytes.begin() + kNumSections * sizeof(uint32));
     DummyFormatter formatter;
-    SUDM::FF7::Field::DecompiledScript ds = SUDM::FF7::Field::Decompile("bug_fixes", scriptBytes, formatter, "", "EntityContainer = {}\n\n");
+    SUDM::Field::DecompiledScript ds = SUDM::Field::Decompile("bug_fixes", scriptBytes, formatter, "", "EntityContainer = {}\n\n");
     ASSERT_FALSE(ds.luaScript.empty());
 
     // TODO: This check should be more robust
@@ -106,7 +106,7 @@ TEST(FF7Field, DisasmAllOpcodes)
 
     InstVec insts;
     DummyFormatter formatter;
-    FF7::FieldEngine engine(formatter, "test");
+    FieldEngine engine(formatter, "test");
 
     auto d = engine.GetDisassembler(insts);
     d->open("decompiler/test/ff7_all_opcodes_by_category.dat");
@@ -133,67 +133,67 @@ void checkFlow(const InstVec& insts)
 {
     int index = FLOW_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::RET, 0);
+    ASSERT_OP_LEN(eOpcodes::RET, 0);
     index++;
     
-    ASSERT_OP_LEN(FF7::eOpcodes::REQ, 3);
+    ASSERT_OP_LEN(eOpcodes::REQ, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::REQSW, 3);
+    ASSERT_OP_LEN(eOpcodes::REQSW, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::REQEW, 3);
+    ASSERT_OP_LEN(eOpcodes::REQEW, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PREQ, 3);
+    ASSERT_OP_LEN(eOpcodes::PREQ, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PRQSW, 3);
+    ASSERT_OP_LEN(eOpcodes::PRQSW, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PRQEW, 3);
+    ASSERT_OP_LEN(eOpcodes::PRQEW, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::RETTO, 2);
+    ASSERT_OP_LEN(eOpcodes::RETTO, 2);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::JMPF, 1);
+    ASSERT_OP_LEN(eOpcodes::JMPF, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::JMPFL, 1);
+    ASSERT_OP_LEN(eOpcodes::JMPFL, 1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::JMPB, 1);
+    ASSERT_OP_LEN(eOpcodes::JMPB, 1);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::JMPBL, 1);
+    ASSERT_OP_LEN(eOpcodes::JMPBL, 1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFUB, 6);
+    ASSERT_OP_LEN(eOpcodes::IFUB, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(4);
     ASSERT_PARAM_UNSIGNED(2);
@@ -202,7 +202,7 @@ void checkFlow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFUBL, 6);
+    ASSERT_OP_LEN(eOpcodes::IFUBL, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(4);
     ASSERT_PARAM_UNSIGNED(2);
@@ -211,7 +211,7 @@ void checkFlow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFSW, 6);
+    ASSERT_OP_LEN(eOpcodes::IFSW, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(4);
     ASSERT_PARAM_UNSIGNED(2);
@@ -220,7 +220,7 @@ void checkFlow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFSWL, 6);
+    ASSERT_OP_LEN(eOpcodes::IFSWL, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(4);
     ASSERT_PARAM_UNSIGNED(2);
@@ -229,7 +229,7 @@ void checkFlow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFUW, 6);
+    ASSERT_OP_LEN(eOpcodes::IFUW, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(4);
     ASSERT_PARAM_UNSIGNED(2);
@@ -238,7 +238,7 @@ void checkFlow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFUWL, 6);
+    ASSERT_OP_LEN(eOpcodes::IFUWL, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(4);
     ASSERT_PARAM_UNSIGNED(2);
@@ -247,34 +247,34 @@ void checkFlow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WAIT, 1);
+    ASSERT_OP_LEN(eOpcodes::WAIT, 1);
     ASSERT_PARAM_UNSIGNED(1000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFKEY, 2);
+    ASSERT_OP_LEN(eOpcodes::IFKEY, 2);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFKEYON, 2);
+    ASSERT_OP_LEN(eOpcodes::IFKEYON, 2);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFKEYOFF, 2);
+    ASSERT_OP_LEN(eOpcodes::IFKEYOFF, 2);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::NOP, 0);
+    ASSERT_OP_LEN(eOpcodes::NOP, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFPRTYQ, 2);
+    ASSERT_OP_LEN(eOpcodes::IFPRTYQ, 2);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IFMEMBQ, 2);
+    ASSERT_OP_LEN(eOpcodes::IFMEMBQ, 2);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
@@ -285,53 +285,53 @@ void checkModule(const InstVec& insts)
 {
     int index = MODULE_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DSKCG, 1);
+    ASSERT_OP_LEN(eOpcodes::DSKCG, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::ARROW, 1);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::ARROW, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::PNAME, 1);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::PNAME, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::GMSPD, 1);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::GMSPD, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::SMSPD, 2);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    index++;
-
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::FLMAT, 0);
-    index++;
-
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::FLITM, 0);
-    index++;
-
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::BTLCK, 1);
-    ASSERT_PARAM_UNSIGNED(1);
-    index++;
-
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::MVLCK, 1);
-    ASSERT_PARAM_UNSIGNED(1);
-    index++;
-
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::SPCNM, 2);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::SMSPD, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::RSGLB, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::FLMAT, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::SPECIAL, FF7::eSpecialOpcodes::CLITM, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::FLITM, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MINIGAME, 6);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::BTLCK, 1);
+    ASSERT_PARAM_UNSIGNED(1);
+    index++;
+
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::MVLCK, 1);
+    ASSERT_PARAM_UNSIGNED(1);
+    index++;
+
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::SPCNM, 2);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    index++;
+
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::RSGLB, 0);
+    index++;
+
+    ASSERT_OP_SUBOP_LEN(eOpcodes::SPECIAL, eSpecialOpcodes::CLITM, 0);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::MINIGAME, 6);
     ASSERT_PARAM_UNSIGNED(786);
     ASSERT_PARAM_SIGNED(-2000);
     ASSERT_PARAM_SIGNED(-3000);
@@ -340,21 +340,21 @@ void checkModule(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(6);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BTMD2, 1);
+    ASSERT_OP_LEN(eOpcodes::BTMD2, 1);
     ASSERT_PARAM_UNSIGNED(0xFFFFFFFF);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BTRLD, 3);
+    ASSERT_OP_LEN(eOpcodes::BTRLD, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BTLTB, 1);
+    ASSERT_OP_LEN(eOpcodes::BTLTB, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MAPJUMP, 5);
+    ASSERT_OP_LEN(eOpcodes::MAPJUMP, 5);
     ASSERT_PARAM_UNSIGNED(786);
     ASSERT_PARAM_SIGNED(-2000);
     ASSERT_PARAM_SIGNED(-3000);
@@ -362,38 +362,38 @@ void checkModule(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::LSTMP, 3);
+    ASSERT_OP_LEN(eOpcodes::LSTMP, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BATTLE, 3);
+    ASSERT_OP_LEN(eOpcodes::BATTLE, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BTLON, 1);
+    ASSERT_OP_LEN(eOpcodes::BTLON, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BTLMD, 1);
+    ASSERT_OP_LEN(eOpcodes::BTLMD, 1);
     ASSERT_PARAM_UNSIGNED(0xFFFF);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MPJPO, 1);
+    ASSERT_OP_LEN(eOpcodes::MPJPO, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PMJMP, 1);
+    ASSERT_OP_LEN(eOpcodes::PMJMP, 1);
     ASSERT_PARAM_UNSIGNED(786);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PMJMP2, 0);
+    ASSERT_OP_LEN(eOpcodes::PMJMP2, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::GAMEOVER, 0);
+    ASSERT_OP_LEN(eOpcodes::GAMEOVER, 0);
     index++;
 }
 
@@ -402,247 +402,247 @@ void checkMath(const InstVec& insts)
 {
     int index = MATH_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PLUS_, 4);
+    ASSERT_OP_LEN(eOpcodes::PLUS_, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PLUS2_, 4);
+    ASSERT_OP_LEN(eOpcodes::PLUS2_, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MINUS_, 4);
+    ASSERT_OP_LEN(eOpcodes::MINUS_, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MINUS2_, 4);
+    ASSERT_OP_LEN(eOpcodes::MINUS2_, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::INC_, 2);
+    ASSERT_OP_LEN(eOpcodes::INC_, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::INC2_, 2);
+    ASSERT_OP_LEN(eOpcodes::INC2_, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DEC_, 2);
+    ASSERT_OP_LEN(eOpcodes::DEC_, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DEC2_, 2);
+    ASSERT_OP_LEN(eOpcodes::DEC2_, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::RDMSD, 3);
+    ASSERT_OP_LEN(eOpcodes::RDMSD, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SETBYTE, 4);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(3);
-    ASSERT_PARAM_UNSIGNED(2);
-    ASSERT_PARAM_UNSIGNED(4);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::SETWORD, 4);
+    ASSERT_OP_LEN(eOpcodes::SETBYTE, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BITON, 4);
+    ASSERT_OP_LEN(eOpcodes::SETWORD, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BITOFF, 4);
+    ASSERT_OP_LEN(eOpcodes::BITON, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BITXOR, 4);
+    ASSERT_OP_LEN(eOpcodes::BITOFF, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PLUS, 4);
+    ASSERT_OP_LEN(eOpcodes::BITXOR, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PLUS2, 4);
+    ASSERT_OP_LEN(eOpcodes::PLUS, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MINUS, 4);
+    ASSERT_OP_LEN(eOpcodes::PLUS2, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MINUS2, 4);
+    ASSERT_OP_LEN(eOpcodes::MINUS, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MUL, 4);
+    ASSERT_OP_LEN(eOpcodes::MINUS2, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MUL2, 4);
+    ASSERT_OP_LEN(eOpcodes::MUL, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DIV, 4);
+    ASSERT_OP_LEN(eOpcodes::MUL2, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DIV2, 4);
+    ASSERT_OP_LEN(eOpcodes::DIV, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MOD, 4);
+    ASSERT_OP_LEN(eOpcodes::DIV2, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MOD2, 4);
+    ASSERT_OP_LEN(eOpcodes::MOD, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::AND, 4);
+    ASSERT_OP_LEN(eOpcodes::MOD2, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::AND2, 4);
+    ASSERT_OP_LEN(eOpcodes::AND, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::OR, 4);
+    ASSERT_OP_LEN(eOpcodes::AND2, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::OR2, 4);
+    ASSERT_OP_LEN(eOpcodes::OR, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::XOR, 4);
+    ASSERT_OP_LEN(eOpcodes::OR2, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::XOR2, 4);
+    ASSERT_OP_LEN(eOpcodes::XOR, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::INC, 2);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::INC2, 2);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::DEC, 2);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::DEC2, 2);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::RANDOM, 2);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::LBYTE, 4);
+    ASSERT_OP_LEN(eOpcodes::XOR2, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::HBYTE, 4);
+    ASSERT_OP_LEN(eOpcodes::INC, 2);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::INC2, 2);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::DEC, 2);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::DEC2, 2);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::RANDOM, 2);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::LBYTE, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::TWOBYTE, 7);
+    ASSERT_OP_LEN(eOpcodes::HBYTE, 4);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(3);
+    ASSERT_PARAM_UNSIGNED(2);
+    ASSERT_PARAM_UNSIGNED(4);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::TWOBYTE, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -652,7 +652,7 @@ void checkMath(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SIN, 8);
+    ASSERT_OP_LEN(eOpcodes::SIN, 8);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -663,7 +663,7 @@ void checkMath(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(8);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::COS, 8);
+    ASSERT_OP_LEN(eOpcodes::COS, 8);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -680,15 +680,15 @@ void checkWindow(const InstVec& insts)
 {
     int index = WINDOW_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::TUTOR, 1);
+    ASSERT_OP_LEN(eOpcodes::TUTOR, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WCLS, 1);
+    ASSERT_OP_LEN(eOpcodes::WCLS, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WSIZW, 5);
+    ASSERT_OP_LEN(eOpcodes::WSIZW, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2000);
     ASSERT_PARAM_UNSIGNED(3000);
@@ -696,14 +696,14 @@ void checkWindow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WSPCL, 4);
+    ASSERT_OP_LEN(eOpcodes::WSPCL, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WNUMB, 6);
+    ASSERT_OP_LEN(eOpcodes::WNUMB, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -712,7 +712,7 @@ void checkWindow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(6);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::STTIM, 7);
+    ASSERT_OP_LEN(eOpcodes::STTIM, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -722,20 +722,12 @@ void checkWindow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MESSAGE, 2);
+    ASSERT_OP_LEN(eOpcodes::MESSAGE, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MPARA, 5);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    ASSERT_PARAM_UNSIGNED(3);
-    ASSERT_PARAM_UNSIGNED(4);
-    ASSERT_PARAM_UNSIGNED(5);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::MPRA2, 5);
+    ASSERT_OP_LEN(eOpcodes::MPARA, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -743,11 +735,19 @@ void checkWindow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MPNAM, 1);
+    ASSERT_OP_LEN(eOpcodes::MPRA2, 5);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    ASSERT_PARAM_UNSIGNED(3);
+    ASSERT_PARAM_UNSIGNED(4);
+    ASSERT_PARAM_UNSIGNED(5);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::MPNAM, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::ASK, 7);
+    ASSERT_OP_LEN(eOpcodes::ASK, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -757,18 +757,18 @@ void checkWindow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MENU, 4);
+    ASSERT_OP_LEN(eOpcodes::MENU, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MENU2, 1);
+    ASSERT_OP_LEN(eOpcodes::MENU2, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WINDOW, 5);
+    ASSERT_OP_LEN(eOpcodes::WINDOW, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2000);
     ASSERT_PARAM_UNSIGNED(3000);
@@ -776,32 +776,32 @@ void checkWindow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WMOVE, 3);
+    ASSERT_OP_LEN(eOpcodes::WMOVE, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_SIGNED(-2000);
     ASSERT_PARAM_SIGNED(-3000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WMODE, 3);
+    ASSERT_OP_LEN(eOpcodes::WMODE, 3);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WREST, 1);
+    ASSERT_OP_LEN(eOpcodes::WREST, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WCLSE, 1);
+    ASSERT_OP_LEN(eOpcodes::WCLSE, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::WROW, 2);
+    ASSERT_OP_LEN(eOpcodes::WROW, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::GWCOL, 8);
+    ASSERT_OP_LEN(eOpcodes::GWCOL, 8);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -812,7 +812,7 @@ void checkWindow(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(8);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SWCOL, 8);
+    ASSERT_OP_LEN(eOpcodes::SWCOL, 8);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -829,7 +829,7 @@ void checkParty(const InstVec& insts)
 {
     int index = PARTY_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SPTYE, 7);
+    ASSERT_OP_LEN(eOpcodes::SPTYE, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -839,7 +839,7 @@ void checkParty(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::GTPYE, 7);
+    ASSERT_OP_LEN(eOpcodes::GTPYE, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -849,89 +849,89 @@ void checkParty(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::GOLDU, 4);
+    ASSERT_OP_LEN(eOpcodes::GOLDU, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     ASSERT_PARAM_UNSIGNED(4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::GOLDD, 4);
+    ASSERT_OP_LEN(eOpcodes::GOLDD, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     ASSERT_PARAM_UNSIGNED(4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CHGLD, 4);
+    ASSERT_OP_LEN(eOpcodes::CHGLD, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::HMPMAX1, 0);
+    ASSERT_OP_LEN(eOpcodes::HMPMAX1, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::HMPMAX2, 0);
+    ASSERT_OP_LEN(eOpcodes::HMPMAX2, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MHMMX, 0);
+    ASSERT_OP_LEN(eOpcodes::MHMMX, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::HMPMAX3, 0);
+    ASSERT_OP_LEN(eOpcodes::HMPMAX3, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MPU, 4);
+    ASSERT_OP_LEN(eOpcodes::MPU, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MPD, 4);
+    ASSERT_OP_LEN(eOpcodes::MPD, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::HPU, 4);
+    ASSERT_OP_LEN(eOpcodes::HPU, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::HPD, 4);
+    ASSERT_OP_LEN(eOpcodes::HPD, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::STITM, 4);
+    ASSERT_OP_LEN(eOpcodes::STITM, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DLITM, 4);
+    ASSERT_OP_LEN(eOpcodes::DLITM, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CKITM, 4);
+    ASSERT_OP_LEN(eOpcodes::CKITM, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SMTRA, 8);
+    ASSERT_OP_LEN(eOpcodes::SMTRA, 8);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -942,7 +942,7 @@ void checkParty(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(8);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DMTRA, 9);
+    ASSERT_OP_LEN(eOpcodes::DMTRA, 9);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -954,7 +954,7 @@ void checkParty(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(9);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CMTRA, 12);
+    ASSERT_OP_LEN(eOpcodes::CMTRA, 12);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -969,37 +969,37 @@ void checkParty(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(12);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::GETPC, 4);
+    ASSERT_OP_LEN(eOpcodes::GETPC, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PRTYP, 1);
+    ASSERT_OP_LEN(eOpcodes::PRTYP, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PRTYM, 1);
+    ASSERT_OP_LEN(eOpcodes::PRTYM, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PRTYE, 3);
+    ASSERT_OP_LEN(eOpcodes::PRTYE, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MMBUD, 2);
+    ASSERT_OP_LEN(eOpcodes::MMBUD, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MMBLK, 1);
+    ASSERT_OP_LEN(eOpcodes::MMBLK, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MMBUK, 1);
+    ASSERT_OP_LEN(eOpcodes::MMBUK, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 }
@@ -1009,11 +1009,11 @@ void checkModel(const InstVec& insts)
 {
     int index = MODEL_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::JOIN, 1);
+    ASSERT_OP_LEN(eOpcodes::JOIN, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SPLIT, 13);
+    ASSERT_OP_LEN(eOpcodes::SPLIT, 13);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1029,22 +1029,22 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(13);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BLINK, 1);
+    ASSERT_OP_LEN(eOpcodes::BLINK, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::EYETX, 4);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::EYETX, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(72);
     ASSERT_PARAM_UNSIGNED(137);
     ASSERT_PARAM_UNSIGNED(206);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::TRNSP, 1);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::TRNSP, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::AMBNT, 7);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::AMBNT, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(232);
     ASSERT_PARAM_UNSIGNED(111);
@@ -1054,67 +1054,67 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(139);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::Unknown03, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::Unknown03, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::Unknown04, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::Unknown04, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::Unknown05, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::Unknown05, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::LIGHT, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::LIGHT, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::Unknown07, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::Unknown07, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::Unknown08, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::Unknown08, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::Unknown09, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::Unknown09, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::SBOBJ, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::SBOBJ, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::Unknown0B, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::Unknown0B, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::Unknown0C, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::Unknown0C, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::SHINE, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::SHINE, 0);
     index++;
 
-    ASSERT_OP_SUBOP_LEN(FF7::eOpcodes::KAWAI, FF7::eKawaiOpcodes::RESET, 0);
+    ASSERT_OP_SUBOP_LEN(eOpcodes::KAWAI, eKawaiOpcodes::RESET, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::KAWIW, 0);
+    ASSERT_OP_LEN(eOpcodes::KAWIW, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PMOVA, 1);
+    ASSERT_OP_LEN(eOpcodes::PMOVA, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PDIRA, 1);
+    ASSERT_OP_LEN(eOpcodes::PDIRA, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PTURA, 3);
+    ASSERT_OP_LEN(eOpcodes::PTURA, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PGTDR, 4);
+    ASSERT_OP_LEN(eOpcodes::PGTDR, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PXYZI, 9);
+    ASSERT_OP_LEN(eOpcodes::PXYZI, 9);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1126,33 +1126,33 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(9);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::TLKON, 1);
+    ASSERT_OP_LEN(eOpcodes::TLKON, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::PC, 1);
+    ASSERT_OP_LEN(eOpcodes::PC, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::opCodeCHAR, 1);
+    ASSERT_OP_LEN(eOpcodes::opCodeCHAR, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DFANM, 2);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::ANIME1, 2);
+    ASSERT_OP_LEN(eOpcodes::DFANM, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::VISI, 1);
+    ASSERT_OP_LEN(eOpcodes::ANIME1, 2);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::VISI, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::XYZI, 8);
+    ASSERT_OP_LEN(eOpcodes::XYZI, 8);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1163,7 +1163,7 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(8000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::XYI, 7);
+    ASSERT_OP_LEN(eOpcodes::XYI, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1173,7 +1173,7 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::XYZ, 7);
+    ASSERT_OP_LEN(eOpcodes::XYZ, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1183,76 +1183,76 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_SIGNED(-7000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MOVE, 4);
+    ASSERT_OP_LEN(eOpcodes::MOVE, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_SIGNED(-3000);
     ASSERT_PARAM_SIGNED(-4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CMOVE, 4);
+    ASSERT_OP_LEN(eOpcodes::CMOVE, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_SIGNED(-3000);
     ASSERT_PARAM_SIGNED(-4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MOVA, 1);
+    ASSERT_OP_LEN(eOpcodes::MOVA, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::TURA, 3);
+    ASSERT_OP_LEN(eOpcodes::TURA, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::ANIMW, 0);
+    ASSERT_OP_LEN(eOpcodes::ANIMW, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::FMOVE, 4);
+    ASSERT_OP_LEN(eOpcodes::FMOVE, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_SIGNED(-3000);
     ASSERT_PARAM_SIGNED(-4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::ANIME2, 2);
+    ASSERT_OP_LEN(eOpcodes::ANIME2, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::ANIM_1, 2);
+    ASSERT_OP_LEN(eOpcodes::ANIM_1, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CANIM1, 4);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    ASSERT_PARAM_UNSIGNED(3);
-    ASSERT_PARAM_UNSIGNED(4);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::CANM_1, 4);
+    ASSERT_OP_LEN(eOpcodes::CANIM1, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MSPED, 3);
+    ASSERT_OP_LEN(eOpcodes::CANM_1, 4);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    ASSERT_PARAM_UNSIGNED(3);
+    ASSERT_PARAM_UNSIGNED(4);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::MSPED, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DIR, 2);
+    ASSERT_OP_LEN(eOpcodes::DIR, 2);
     ASSERT_PARAM_UNSIGNED(0x12);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::TURNGEN, 6);
+    ASSERT_OP_LEN(eOpcodes::TURNGEN, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1261,7 +1261,7 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(6);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::TURN, 6);
+    ASSERT_OP_LEN(eOpcodes::TURN, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1270,18 +1270,18 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(6);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::DIRA, 1);
+    ASSERT_OP_LEN(eOpcodes::DIRA, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::GETDIR, 4);
+    ASSERT_OP_LEN(eOpcodes::GETDIR, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::GETAXY, 5);
+    ASSERT_OP_LEN(eOpcodes::GETAXY, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1289,43 +1289,43 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::GETAI, 4);
+    ASSERT_OP_LEN(eOpcodes::GETAI, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::ANIM_2, 2);
+    ASSERT_OP_LEN(eOpcodes::ANIM_2, 2);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CANIM2, 4);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    ASSERT_PARAM_UNSIGNED(3);
-    ASSERT_PARAM_UNSIGNED(4);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::CANM_2, 4);
+    ASSERT_OP_LEN(eOpcodes::CANIM2, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::ASPED, 3);
+    ASSERT_OP_LEN(eOpcodes::CANM_2, 4);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    ASSERT_PARAM_UNSIGNED(3);
+    ASSERT_PARAM_UNSIGNED(4);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::ASPED, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CC, 1);
+    ASSERT_OP_LEN(eOpcodes::CC, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::JUMP, 8);
+    ASSERT_OP_LEN(eOpcodes::JUMP, 8);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1336,7 +1336,7 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(8000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::AXYZI, 9);
+    ASSERT_OP_LEN(eOpcodes::AXYZI, 9);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1348,7 +1348,7 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(9);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::LADER, 12);
+    ASSERT_OP_LEN(eOpcodes::LADER, 12);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1363,7 +1363,7 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(12);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::OFST, 9);
+    ASSERT_OP_LEN(eOpcodes::OFST, 9);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1375,51 +1375,51 @@ void checkModel(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(9000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::OFSTW, 0);
+    ASSERT_OP_LEN(eOpcodes::OFSTW, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::TALKR, 3);
+    ASSERT_OP_LEN(eOpcodes::TALKR, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SLIDR, 3);
+    ASSERT_OP_LEN(eOpcodes::SLIDR, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SOLID, 1);
+    ASSERT_OP_LEN(eOpcodes::SOLID, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::TLKR2, 3);
+    ASSERT_OP_LEN(eOpcodes::TLKR2, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SLDR2, 3);
+    ASSERT_OP_LEN(eOpcodes::SLDR2, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CCANM, 3);
+    ASSERT_OP_LEN(eOpcodes::CCANM, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::FCFIX, 1);
+    ASSERT_OP_LEN(eOpcodes::FCFIX, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::ANIMB, 0);
+    ASSERT_OP_LEN(eOpcodes::ANIMB, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::TURNW, 0);
+    ASSERT_OP_LEN(eOpcodes::TURNW, 0);
     index++;
 }
 
@@ -1428,20 +1428,20 @@ void checkWalkmesh(const InstVec& insts)
 {
     int index = WALKMESH_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SLIP, 1);
+    ASSERT_OP_LEN(eOpcodes::SLIP, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::UC, 1);
+    ASSERT_OP_LEN(eOpcodes::UC, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::IDLCK, 2);
+    ASSERT_OP_LEN(eOpcodes::IDLCK, 2);
     ASSERT_PARAM_UNSIGNED(1000);
     ASSERT_PARAM_UNSIGNED(2);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::LINE, 6);
+    ASSERT_OP_LEN(eOpcodes::LINE, 6);
     ASSERT_PARAM_SIGNED(-1000);
     ASSERT_PARAM_SIGNED(-2000);
     ASSERT_PARAM_SIGNED(-3000);
@@ -1450,11 +1450,11 @@ void checkWalkmesh(const InstVec& insts)
     ASSERT_PARAM_SIGNED(-6000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::LINON, 1);
+    ASSERT_OP_LEN(eOpcodes::LINON, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SLINE, 12);
+    ASSERT_OP_LEN(eOpcodes::SLINE, 12);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1475,14 +1475,14 @@ void checkBackgnd(const InstVec& insts)
 {
     int index = BACKGND_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BGPDH, 4);
+    ASSERT_OP_LEN(eOpcodes::BGPDH, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_SIGNED(-4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BGSCR, 5);
+    ASSERT_OP_LEN(eOpcodes::BGSCR, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1490,7 +1490,7 @@ void checkBackgnd(const InstVec& insts)
     ASSERT_PARAM_SIGNED(-5000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MPPAL, 13);
+    ASSERT_OP_LEN(eOpcodes::MPPAL, 13);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1506,47 +1506,39 @@ void checkBackgnd(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(13);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BGON, 4);
+    ASSERT_OP_LEN(eOpcodes::BGON, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BGOFF, 4);
+    ASSERT_OP_LEN(eOpcodes::BGOFF, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BGROL, 3);
+    ASSERT_OP_LEN(eOpcodes::BGROL, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BGROL2, 3);
+    ASSERT_OP_LEN(eOpcodes::BGROL2, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BGCLR, 3);
+    ASSERT_OP_LEN(eOpcodes::BGCLR, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::STPAL, 5);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    ASSERT_PARAM_UNSIGNED(3);
-    ASSERT_PARAM_UNSIGNED(4);
-    ASSERT_PARAM_UNSIGNED(5);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::LDPAL, 5);
+    ASSERT_OP_LEN(eOpcodes::STPAL, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1554,7 +1546,7 @@ void checkBackgnd(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CPPAL, 5);
+    ASSERT_OP_LEN(eOpcodes::LDPAL, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1562,18 +1554,15 @@ void checkBackgnd(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::RTPAL, 8);
+    ASSERT_OP_LEN(eOpcodes::CPPAL, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     ASSERT_PARAM_UNSIGNED(5);
-    ASSERT_PARAM_UNSIGNED(6);
-    ASSERT_PARAM_UNSIGNED(7);
-    ASSERT_PARAM_UNSIGNED(8);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::ADPAL, 12);
+    ASSERT_OP_LEN(eOpcodes::RTPAL, 8);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1582,13 +1571,9 @@ void checkBackgnd(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(6);
     ASSERT_PARAM_UNSIGNED(7);
     ASSERT_PARAM_UNSIGNED(8);
-    ASSERT_PARAM_UNSIGNED(9);
-    ASSERT_PARAM_UNSIGNED(10);
-    ASSERT_PARAM_UNSIGNED(11);
-    ASSERT_PARAM_UNSIGNED(12);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MPPAL2, 12);
+    ASSERT_OP_LEN(eOpcodes::ADPAL, 12);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1603,21 +1588,36 @@ void checkBackgnd(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(12);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::STPLS, 4);
+    ASSERT_OP_LEN(eOpcodes::MPPAL2, 12);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    ASSERT_PARAM_UNSIGNED(3);
+    ASSERT_PARAM_UNSIGNED(4);
+    ASSERT_PARAM_UNSIGNED(5);
+    ASSERT_PARAM_UNSIGNED(6);
+    ASSERT_PARAM_UNSIGNED(7);
+    ASSERT_PARAM_UNSIGNED(8);
+    ASSERT_PARAM_UNSIGNED(9);
+    ASSERT_PARAM_UNSIGNED(10);
+    ASSERT_PARAM_UNSIGNED(11);
+    ASSERT_PARAM_UNSIGNED(12);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::STPLS, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::LDPLS, 4);
+    ASSERT_OP_LEN(eOpcodes::LDPLS, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CPPAL2, 7);
+    ASSERT_OP_LEN(eOpcodes::CPPAL2, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1627,7 +1627,7 @@ void checkBackgnd(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::RTPAL2, 7);
+    ASSERT_OP_LEN(eOpcodes::RTPAL2, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1637,7 +1637,7 @@ void checkBackgnd(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::ADPAL2, 10);
+    ASSERT_OP_LEN(eOpcodes::ADPAL2, 10);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1656,7 +1656,7 @@ void checkCamera(const InstVec& insts)
 {
     int index = CAMERA_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::NFADE, 10);
+    ASSERT_OP_LEN(eOpcodes::NFADE, 10);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1669,7 +1669,7 @@ void checkCamera(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(10);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SHAKE, 7);
+    ASSERT_OP_LEN(eOpcodes::SHAKE, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1679,18 +1679,18 @@ void checkCamera(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SCRLO, 1);
+    ASSERT_OP_LEN(eOpcodes::SCRLO, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SCRLC, 4);
+    ASSERT_OP_LEN(eOpcodes::SCRLC, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SCRLA, 5);
+    ASSERT_OP_LEN(eOpcodes::SCRLA, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
@@ -1698,17 +1698,17 @@ void checkCamera(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SCR2D, 4);
+    ASSERT_OP_LEN(eOpcodes::SCR2D, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_SIGNED(-3000);
     ASSERT_PARAM_SIGNED(-4000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SCRCC, 0);
+    ASSERT_OP_LEN(eOpcodes::SCRCC, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SCR2DC, 7);
+    ASSERT_OP_LEN(eOpcodes::SCR2DC, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1718,10 +1718,10 @@ void checkCamera(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SCRLW, 0);
+    ASSERT_OP_LEN(eOpcodes::SCRLW, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SCR2DL, 7);
+    ASSERT_OP_LEN(eOpcodes::SCR2DL, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1731,7 +1731,7 @@ void checkCamera(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::VWOFT, 5);
+    ASSERT_OP_LEN(eOpcodes::VWOFT, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_SIGNED(-3000);
@@ -1739,7 +1739,7 @@ void checkCamera(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::FADE, 10);
+    ASSERT_OP_LEN(eOpcodes::FADE, 10);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1752,10 +1752,10 @@ void checkCamera(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(10);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::FADEW, 0);
+    ASSERT_OP_LEN(eOpcodes::FADEW, 0);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SCRLP, 5);
+    ASSERT_OP_LEN(eOpcodes::SCRLP, 5);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
@@ -1763,7 +1763,7 @@ void checkCamera(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(5);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MVCAM, 1);
+    ASSERT_OP_LEN(eOpcodes::MVCAM, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 }
@@ -1773,11 +1773,11 @@ void checkAv(const InstVec& insts)
 {
     int index = AV_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BGMOVIE, 1);
+    ASSERT_OP_LEN(eOpcodes::BGMOVIE, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::AKAO2, 12);
+    ASSERT_OP_LEN(eOpcodes::AKAO2, 12);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1792,18 +1792,18 @@ void checkAv(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(12000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MUSIC, 1);
+    ASSERT_OP_LEN(eOpcodes::MUSIC, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SOUND, 4);
+    ASSERT_OP_LEN(eOpcodes::SOUND, 4);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3000);
     ASSERT_PARAM_UNSIGNED(4);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::AKAO, 12);
+    ASSERT_OP_LEN(eOpcodes::AKAO, 12);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1818,46 +1818,46 @@ void checkAv(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(12000);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MUSVT, 1);
+    ASSERT_OP_LEN(eOpcodes::MUSVT, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MUSVM, 1);
+    ASSERT_OP_LEN(eOpcodes::MUSVM, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MULCK, 1);
+    ASSERT_OP_LEN(eOpcodes::MULCK, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::BMUSC, 1);
+    ASSERT_OP_LEN(eOpcodes::BMUSC, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CHMPH, 3);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    ASSERT_PARAM_UNSIGNED(3);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::PMVIE, 1);
-    ASSERT_PARAM_UNSIGNED(1);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::MOVIE, 0);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::MVIEF, 3);
+    ASSERT_OP_LEN(eOpcodes::CHMPH, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::FMUSC, 1);
+    ASSERT_OP_LEN(eOpcodes::PMVIE, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CMUSC, 7);
+    ASSERT_OP_LEN(eOpcodes::MOVIE, 0);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::MVIEF, 3);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    ASSERT_PARAM_UNSIGNED(3);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::FMUSC, 1);
+    ASSERT_PARAM_UNSIGNED(1);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::CMUSC, 7);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1867,7 +1867,7 @@ void checkAv(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(7);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::CHMST, 3);
+    ASSERT_OP_LEN(eOpcodes::CHMST, 3);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1879,20 +1879,11 @@ void checkUncat(const InstVec& insts)
 {
     int index = UNCAT_BASE, paramIndex = 0;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::MPDSP, 1);
+    ASSERT_OP_LEN(eOpcodes::MPDSP, 1);
     ASSERT_PARAM_UNSIGNED(1);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SETX, 6);
-    ASSERT_PARAM_UNSIGNED(1);
-    ASSERT_PARAM_UNSIGNED(2);
-    ASSERT_PARAM_UNSIGNED(3);
-    ASSERT_PARAM_UNSIGNED(4);
-    ASSERT_PARAM_UNSIGNED(5);
-    ASSERT_PARAM_UNSIGNED(6);
-    index++;
-
-    ASSERT_OP_LEN(FF7::eOpcodes::GETX, 6);
+    ASSERT_OP_LEN(eOpcodes::SETX, 6);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1901,7 +1892,16 @@ void checkUncat(const InstVec& insts)
     ASSERT_PARAM_UNSIGNED(6);
     index++;
 
-    ASSERT_OP_LEN(FF7::eOpcodes::SEARCHX, 10);
+    ASSERT_OP_LEN(eOpcodes::GETX, 6);
+    ASSERT_PARAM_UNSIGNED(1);
+    ASSERT_PARAM_UNSIGNED(2);
+    ASSERT_PARAM_UNSIGNED(3);
+    ASSERT_PARAM_UNSIGNED(4);
+    ASSERT_PARAM_UNSIGNED(5);
+    ASSERT_PARAM_UNSIGNED(6);
+    index++;
+
+    ASSERT_OP_LEN(eOpcodes::SEARCHX, 10);
     ASSERT_PARAM_UNSIGNED(1);
     ASSERT_PARAM_UNSIGNED(2);
     ASSERT_PARAM_UNSIGNED(3);
@@ -1964,7 +1964,7 @@ TEST(FF7Field, Decomp_AllOpcodes)
     const int kNumSections = 7;
     scriptBytes.erase(scriptBytes.begin(), scriptBytes.begin() + kNumSections * sizeof(uint32));
     DummyFormatter formatter;
-    SUDM::FF7::Field::DecompiledScript ds = SUDM::FF7::Field::Decompile("ff7_all_opcodes_by_category", scriptBytes, formatter, "", "EntityContainer = {}\n\n");
+    SUDM::Field::DecompiledScript ds = SUDM::Field::Decompile("ff7_all_opcodes_by_category", scriptBytes, formatter, "", "EntityContainer = {}\n\n");
     ASSERT_FALSE(ds.luaScript.empty());
 
 

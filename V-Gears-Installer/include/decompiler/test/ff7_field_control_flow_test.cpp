@@ -13,7 +13,7 @@ static uint32 Is3Nops(InstVec& insts, uint32& pos)
     for (int i = 0; i < 3; i++)
     {
         pos++;
-        EXPECT_EQ(insts[pos]->opcode_, FF7::eOpcodes::NOP);
+        EXPECT_EQ(insts[pos]->opcode_, eOpcodes::NOP);
         EXPECT_EQ(insts[pos]->params_.size(), 0);
     }
     return insts[pos]->_address;
@@ -22,7 +22,7 @@ static uint32 Is3Nops(InstVec& insts, uint32& pos)
 // Each forward jump type has its own script that starts with the
 // jump opcode followed by 2 NOP's, the 3rd NOP is the end of the script
 // and should be the target address of the jump.
-static void CheckForwardJump(FF7::eOpcodes opCode, size_t paramsSize, InstVec& insts, uint32& pos)
+static void CheckForwardJump(eOpcodes opCode, size_t paramsSize, InstVec& insts, uint32& pos)
 {
     pos++;
     const InstPtr& jumpInst = insts[pos];
@@ -37,7 +37,7 @@ static void CheckForwardJump(FF7::eOpcodes opCode, size_t paramsSize, InstVec& i
 static uint32 IsNop(InstVec& insts, uint32& pos)
 {
     pos++;
-    EXPECT_EQ(insts[pos]->opcode_, FF7::eOpcodes::NOP);
+    EXPECT_EQ(insts[pos]->opcode_, eOpcodes::NOP);
     EXPECT_EQ(insts[pos]->params_.size(), 0);
     return insts[pos]->_address;
 }
@@ -45,7 +45,7 @@ static uint32 IsNop(InstVec& insts, uint32& pos)
 
 // For a backwards jump we start with 3 NOPS and the last instruction is the jump itself which
 // should be targeting the second/middle NOP
-static void CheckBackwardJump(FF7::eOpcodes opCode, size_t paramsSize, InstVec& insts, uint32& pos)
+static void CheckBackwardJump(eOpcodes opCode, size_t paramsSize, InstVec& insts, uint32& pos)
 {
     IsNop(insts, pos);
 
@@ -69,7 +69,7 @@ TEST(FF7Field, ControlFlow)
 {
     InstVec insts;
     DummyFormatter formatter;
-    FF7::FieldEngine engine(formatter, "test");
+    FieldEngine engine(formatter, "test");
 
     auto d = engine.GetDisassembler(insts);
     d->open("decompiler/test/ff7_control_flow_test.dat");
@@ -78,18 +78,18 @@ TEST(FF7Field, ControlFlow)
     std::cout << std::endl;
 
     uint32 pos = 0;
-    ASSERT_EQ(insts[pos]->opcode_, FF7::eOpcodes::RET);
+    ASSERT_EQ(insts[pos]->opcode_, eOpcodes::RET);
     ASSERT_EQ(insts[pos]->params_.size(), 0);
 
-    CheckForwardJump(FF7::eOpcodes::IFUB, 6, insts, pos);
-    CheckForwardJump(FF7::eOpcodes::IFSWL, 6, insts, pos);
-    CheckForwardJump(FF7::eOpcodes::JMPF, 1, insts, pos);
-    CheckForwardJump(FF7::eOpcodes::JMPFL, 1, insts, pos);
-    CheckForwardJump(FF7::eOpcodes::IFKEY, 2, insts, pos);
-    CheckForwardJump(FF7::eOpcodes::IFKEYON, 2, insts, pos);
-    CheckForwardJump(FF7::eOpcodes::IFKEYOFF, 2, insts, pos);
-    CheckForwardJump(FF7::eOpcodes::IFPRTYQ, 2, insts, pos);
-    CheckForwardJump(FF7::eOpcodes::IFMEMBQ, 2, insts, pos);
-    CheckBackwardJump(FF7::eOpcodes::JMPB, 1, insts, pos);
-    CheckBackwardJump(FF7::eOpcodes::JMPBL, 1, insts, pos);
+    CheckForwardJump(eOpcodes::IFUB, 6, insts, pos);
+    CheckForwardJump(eOpcodes::IFSWL, 6, insts, pos);
+    CheckForwardJump(eOpcodes::JMPF, 1, insts, pos);
+    CheckForwardJump(eOpcodes::JMPFL, 1, insts, pos);
+    CheckForwardJump(eOpcodes::IFKEY, 2, insts, pos);
+    CheckForwardJump(eOpcodes::IFKEYON, 2, insts, pos);
+    CheckForwardJump(eOpcodes::IFKEYOFF, 2, insts, pos);
+    CheckForwardJump(eOpcodes::IFPRTYQ, 2, insts, pos);
+    CheckForwardJump(eOpcodes::IFMEMBQ, 2, insts, pos);
+    CheckBackwardJump(eOpcodes::JMPB, 1, insts, pos);
+    CheckBackwardJump(eOpcodes::JMPBL, 1, insts, pos);
 }
