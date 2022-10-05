@@ -53,6 +53,8 @@ void InitNegateMap() {
     negate_map[">"] = "<=";
 }
 
+Value::~Value(){}
+
 bool Value::IsInteger(){return false;}
 
 bool Value::IsAddress(){return false;}
@@ -144,6 +146,9 @@ std::ostream& UnquotedStringValue::Print(std::ostream& output) const{return outp
 VarValue::VarValue(std::string name): name_(name){}
 
 std::ostream &VarValue::Print(std::ostream &output) const{return output << name_;}
+
+ArrayValue::ArrayValue(const std::string name, const ValueList indexes):
+  VarValue(name), indexes_(indexes){}
 
 std::ostream &ArrayValue::Print(std::ostream &output) const {
     output << name_;

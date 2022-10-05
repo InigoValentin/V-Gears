@@ -30,7 +30,7 @@ struct Function {
          *
          * Required for use with STL, should not be called manually.
          */
-        Function(): start_addr(0), end_addr(0), num_instructions(0){}
+        Function(): start_addr(0), end_addr(0), num_instructions(0), ret_val(true){}
 
         /**
          * Constructor.
@@ -39,7 +39,7 @@ struct Function {
          * @param end_addr[in] Address of the last instruction in the function
          */
         Function(uint32 start_addr, uint32 end_addr):
-          start_addr(start_addr), end_addr(end_addr), num_instructions(0){}
+          start_addr(start_addr), end_addr(end_addr), num_instructions(0), ret_val(true){}
 
         /**
          * The function starting address.

@@ -87,7 +87,7 @@ class UnknownOpcodeParameterException : public DecompilerException{
          *
          * @param param[in] The unknown parameter.
          */
-        UnknownOpcodeParameterException(std::string param);
+        explicit UnknownOpcodeParameterException(std::string param);
 
         /**
          * Produces an error message.

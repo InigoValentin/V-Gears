@@ -55,7 +55,7 @@ class DataInstaller{
          * @param write_output_line Pointer to function to write output.
          */
         DataInstaller(
-          std::string input_dir, std::string output_dir,
+          const std::string input_dir, const std::string output_dir,
           std::function<void(std::string)> write_output_line
         );
 

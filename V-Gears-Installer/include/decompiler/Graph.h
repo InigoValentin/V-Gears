@@ -131,7 +131,7 @@ namespace boost {
              *
              * @param name[in] The name of the attribute to use.
              */
-            ArrowheadWriter(Name name): name(name){}
+            explicit ArrowheadWriter(Name name): name(name){}
 
             /**
              * Outputs the arrowhead edge property.

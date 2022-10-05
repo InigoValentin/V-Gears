@@ -199,15 +199,12 @@ void MainWindow::on_btn_data_run_clicked(){
         // Start data conversion
         try{
             installer_created = true;
-            std::cout << "[INSTALLER] Started";
-            std::cout << "[INSTALLER] Input path: "
-              << QDir::toNativeSeparators(input).toStdString() << std::endl;
-            std::cout << "[INSTALLER] Output path: "
-              << QDir::toNativeSeparators(output).toStdString() << std::endl;
             installer_ = std::make_unique<DataInstaller>(
               QDir::toNativeSeparators(input).toStdString(),
               QDir::toNativeSeparators(output).toStdString(),
-              [this](std::string outputLine){main_window_->data_log->append(outputLine.c_str());}
+              [this](const std::string outputLine){
+                main_window_->data_log->append(outputLine.c_str());
+              }
             );
             OnInstallStarted();
         }

@@ -57,17 +57,16 @@
 float DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
 
 DataInstaller::DataInstaller(
-  std::string input_dir, std::string output_dir,
+  const std::string input_dir, const std::string output_dir,
   std::function<void(std::string)> write_output_line
 )
 #ifdef _DEBUG
     : application_("plugins_d.cfg", "resources_d.cfg", "install_d.log"),
 #else
-    : application_("plugins.cfg", "resources.cfg", "install.log"),
+  : application_("plugins.cfg", "resources.cfg", "install.log"),
 #endif
-    input_dir_(input_dir),
-    output_dir_(output_dir),
-    write_output_line(write_output_line)
+  input_dir_(input_dir), output_dir_(output_dir), write_output_line(write_output_line),
+  iterator_counter_(0), conversion_step_(0), progress_step_num_elements_(0)
 {
     if (!application_.initOgre(true)) throw std::runtime_error("Ogre init failure");
     Ogre::Log* default_log( Ogre::LogManager::getSingleton().getDefaultLog());
@@ -185,7 +184,7 @@ void TexToPng(const std::string name){
  * @param outdir[in] Path to the directory where the file will be saved.
  * @param mesh[in] The mesh to export.
  */
-static void ExportMesh(std::string outdir, const Ogre::MeshPtr &mesh){
+static void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
 
     // TODO: Share function with pc model exporter
     VGears::String base_mesh_name;
@@ -804,7 +803,7 @@ static void FF7PcFieldToVGearsField(
                 const VGears::ModelListFile::ModelDescription& desc
                   = models->GetModels().at(char_id);
                 auto& animations = model_animation_db.ModelAnimations(desc.hrc_name);
-                for (auto& anim : desc.animations)
+                for (const auto& anim : desc.animations)
                     animations.insert(model_animation_db.NormalizeAnimationName(anim.name));
                 std::unique_ptr<TiXmlElement> xml_entity_script(new TiXmlElement("entity_model"));
                 xml_entity_script->SetAttribute("name", entity.name);
@@ -845,7 +844,6 @@ static void FF7PcFieldToVGearsField(
             }
         }
         const float downscaler_this = 128.0f * FieldScaleFactor(scale_factor_map, this_field_id);
-        const auto& gateways = triggers->GetGateways();
         for (size_t i = 0; i < gateways.size(); i ++){
             const VGears::TriggersFile::Gateway& gateway = gateways[i];
             // If non-inactive gateway:
@@ -885,8 +883,8 @@ static void FF7PcFieldToVGearsField(
         bg_image->encode("png");
         bg_image->save(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/tiles.png");
         {
-            TiXmlDocument doc;
-            std::unique_ptr<TiXmlElement> element(new TiXmlElement("background2d"));
+            TiXmlDocument bg_doc;
+            std::unique_ptr<TiXmlElement> bg_element(new TiXmlElement("background2d"));
             // Magic constants.
             const int BG_SCALE_UP_FACTOR = 3;
             const int BG_PSX_SCREEN_WIDTH = 320;
@@ -904,16 +902,16 @@ static void FF7PcFieldToVGearsField(
             const int min_y = triggers->GetCameraRange().top * BG_SCALE_UP_FACTOR;
             const int max_x = triggers->GetCameraRange().right * BG_SCALE_UP_FACTOR;
             const int max_y = triggers->GetCameraRange().bottom * BG_SCALE_UP_FACTOR;
-            element->SetAttribute("image", FieldMapDir() + "/" + field->getName() + "/tiles.png");
-            element->SetAttribute("position", Ogre::StringConverter::toString(position));
-            element->SetAttribute("orientation", Ogre::StringConverter::toString(orientation));
-            element->SetAttribute("fov", Ogre::StringConverter::toString(fov));
-            element->SetAttribute(
+            bg_element->SetAttribute("image", FieldMapDir() + "/" + field->getName() + "/tiles.png");
+            bg_element->SetAttribute("position", Ogre::StringConverter::toString(position));
+            bg_element->SetAttribute("orientation", Ogre::StringConverter::toString(orientation));
+            bg_element->SetAttribute("fov", Ogre::StringConverter::toString(fov));
+            bg_element->SetAttribute(
               "range",
               std::to_string(min_x) + " " + std::to_string(min_y) + " "
               + std::to_string(max_x) + " " + std::to_string(max_y)
             );
-            element->SetAttribute(
+            bg_element->SetAttribute(
               "clip",
               std::to_string(BG_PSX_SCREEN_WIDTH * BG_SCALE_UP_FACTOR) + " "
               + std::to_string(BG_PSX_SCREEN_HEIGHT * BG_SCALE_UP_FACTOR)
@@ -939,12 +937,10 @@ static void FF7PcFieldToVGearsField(
                     );
                     // Each tile is added to a big texture atlas with hard coded size of 1024x1024,
                     // convert UV's to the 0.0f to 1.0f range.
-                    const float u0 = static_cast<float>(sprite.src.x) / bg_image->getWidth();
-                    const float v0 = static_cast<float>(sprite.src.y) / bg_image->getHeight();
-                    const float u1
-                      = static_cast<float>(sprite.src.x + sprite.width) / bg_image->getWidth();
-                    const float v1
-                      = static_cast<float>(sprite.src.y + sprite.height) / bg_image->getHeight();
+                    const float u0 = static_cast<float>(sprite.src.x) / width;
+                    const float v0 = static_cast<float>(sprite.src.y) / height;
+                    const float u1 = static_cast<float>(sprite.src.x + sprite.width) / width;
+                    const float v1 = static_cast<float>(sprite.src.y + sprite.height) / height;
                     xml_element->SetAttribute(
                       "uv",
                       Ogre::StringConverter::toString(u0) + " "
@@ -967,19 +963,19 @@ static void FF7PcFieldToVGearsField(
                     // TODO: Should probably throw to fail conversion:
                     else blending_str = "unknown";
                     xml_element->SetAttribute("blending", blending_str);
-                    element->LinkEndChild(xml_element.release());
+                    bg_element->LinkEndChild(xml_element.release());
                 }
                 //}
             }
-            doc.LinkEndChild(element.release());
-            doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/bg.xml");
+            bg_doc.LinkEndChild(bg_element.release());
+            bg_doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/bg.xml");
         }
     }
     {
         // Save out the walk mesh as XML.
         const VGears::WalkmeshFilePtr& walkmesh = field->GetWalkmesh();
         TiXmlDocument doc;
-        std::unique_ptr<TiXmlElement> element(new TiXmlElement("walkmesh"));
+        std::unique_ptr<TiXmlElement> wmesh_element(new TiXmlElement("walkmesh"));
         for (VGears::WalkmeshFile::Triangle& tri : walkmesh->GetTriangles()){
             std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("triangle"));
             xml_element->SetAttribute("a", Ogre::StringConverter::toString(tri.a));
@@ -988,9 +984,9 @@ static void FF7PcFieldToVGearsField(
             xml_element->SetAttribute("a_b", std::to_string(tri.access_side[0]));
             xml_element->SetAttribute("b_c", std::to_string(tri.access_side[1]));
             xml_element->SetAttribute("c_a", std::to_string(tri.access_side[2]));
-            element->LinkEndChild(xml_element.release());
+            wmesh_element->LinkEndChild(xml_element.release());
         }
-        doc.LinkEndChild(element.release());
+        doc.LinkEndChild(wmesh_element.release());
         doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/wm.xml");
     }
     maps.insert(field->getName());
@@ -1152,7 +1148,7 @@ static void CollectSpawnPoints(
  * @param resource_name[in] The name of the file to test.
  * @return False if the file is surely not a field file, true otherwise.
  */
-static bool IsAFieldFile(Ogre::String& resource_name){
+static bool IsAFieldFile(const Ogre::String& resource_name){
     return (
       !VGears::StringUtil::endsWith(resource_name, ".tex")
       && !VGears::StringUtil::endsWith(resource_name, ".tut")
@@ -1174,7 +1170,7 @@ static bool IsAFieldFile(Ogre::String& resource_name){
  * @param resource_name[in] The name of the map file to test.
  * @return True if the map will crash, false otherwise.
  */
-static bool WillCrash(Ogre::String& resource_name){
+static bool WillCrash(const Ogre::String& resource_name){
     if (
       resource_name == "bugin1a" // crashes in back ground image generation
       || resource_name == "frcyo" // Hangs in decompliation
@@ -1197,7 +1193,7 @@ static bool WillCrash(Ogre::String& resource_name){
  * @param resource_name[in] The name of the map file to test.
  * @return True if the map is a test map, false otherwise.
  */
-static bool IsTestField(Ogre::String& resource_name){
+static bool IsTestField(const Ogre::String& resource_name){
     if (
       resource_name == "startmap"
       || resource_name == "md1stin"
@@ -1353,8 +1349,8 @@ void DataInstaller::WriteMapsXmlIteration(){
         xml_element->SetAttribute("name", FieldName(map));
         xml_element->SetAttribute("file_name", FieldMapDir() + "/" + map + "/map.xml");
         element_->LinkEndChild(xml_element.release());
-        iterator_counter_++;
-        converted_map_list_iterator_++;
+        iterator_counter_ ++;
+        ++ converted_map_list_iterator_;
     }
     else installation_state_ = WRITE_MAPS_CLEAN;
 }
@@ -1401,7 +1397,6 @@ void DataInstaller::ConvertFieldModelsIteration(){
                     VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
                     VGears::AFilePtr a = afl_mgr.load(anim, "FFVII").staticCast<VGears::AFile>();
                     // Convert the FF7 name to a more readable name set in the meta data.
-                    Ogre::String base_name;
                     VGears::StringUtil::splitBase(anim, base_name);
                     a->AddTo(skeleton, VGears::FF7::NameLookup::Animation(base_name));
                 }
@@ -1423,8 +1418,8 @@ void DataInstaller::ConvertFieldModelsIteration(){
                 std::cerr << "[ERROR] Exception converting model "
                   << model_animation_map_iterator_->first << ": " << ex.what() << std::endl;
             }
-            iterator_counter_++;
-            model_animation_map_iterator_++;
+            iterator_counter_ ++;
+            ++ model_animation_map_iterator_;
             conversion_step_ = 0;
         }
     }
