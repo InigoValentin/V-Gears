@@ -291,7 +291,7 @@ class FieldEngine : public Engine{
         /**
          * Marks an entity as a line.
          *
-         * @param entity_index Index of the entity.
+         * @param[in] entity_index Index of the entity.
          * @param[in] line True to mark the entity as a line, false to unmark
          * it.
          * @param[in] point_a First point of the line. Can be null if line is

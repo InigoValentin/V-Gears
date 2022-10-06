@@ -459,7 +459,7 @@ class DupValue : public Value {
         /**
          * Constructor.
          *
-         * @param idx Index to distinguish multiple duplicated entries.
+         * @param[in] idx Index to distinguish multiple duplicated entries.
          */
         explicit DupValue(int idx);
 
@@ -563,7 +563,7 @@ class VarValue : public Value {
         /**
          * Constructor for VarValue.
          *
-         * @param name The variable name.
+         * @param[in] name The variable name.
          */
         explicit VarValue(std::string name);
         /**
@@ -606,9 +606,9 @@ class ArrayValue : public VarValue {
         /**
          * Constructor for ArrayValue.
          *
-         * @param name The name of the array.
-         * @param indexes List of stack entries representing the indexes used
-         * (left-to-right).
+         * @param[in] name The name of the array.
+         * @param[in] indexes List of stack entries representing the indexes
+         * used (left-to-right).
          */
         ArrayValue(const std::string name, const ValueList indexes);
 

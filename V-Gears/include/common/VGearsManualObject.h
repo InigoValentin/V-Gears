@@ -111,7 +111,7 @@ namespace VGears{
             /**
              * Sets the object colour.
              *
-             * @param colour Object colour.
+             * @param[in] colour Object colour.
              * @todo It applies to the object or the current section?
              */
             virtual void colour(const Ogre::ColourValue &colour);
@@ -204,7 +204,7 @@ namespace VGears{
             /**
              * Resets any of the buffers in {@see BufferBinding}.
              *
-             * @param buffer Buffer to reset.
+             * @param[in] buffer Buffer to reset.
              */
             template<typename BufferSharedPtr>
             void resetBuffer(BufferSharedPtr &buffer) const;
@@ -212,6 +212,7 @@ namespace VGears{
         private:
 
             typedef Ogre::HardwareVertexBufferSharedPtr VertexBuffer;
+
             typedef Ogre::HardwareIndexBufferSharedPtr IndexBuffer;
 
             /**

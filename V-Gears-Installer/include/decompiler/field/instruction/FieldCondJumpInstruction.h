@@ -54,7 +54,7 @@ class FieldCondJumpInstruction : public CondJumpInstruction{
         /**
          * Prints the instruction
          *
-         * @param output The stream to print the instruction to.
+         * @param[in] output The stream to print the instruction to.
          */
         virtual std::ostream& Print(std::ostream &output) const override;
 };

@@ -49,8 +49,8 @@
 /**
  * Main application function
  *
- * @param argc Number of command line arguments.
- * @param argv List of command line arguments.
+ * @param[in] argc Number of command line arguments.
+ * @param[in] argv List of command line arguments.
  * @return 0 on sucess, an error code on error.
  */
 int main(int argc, char *argv[]){

@@ -190,7 +190,7 @@ void AddTexture(
  *
  * @param[in,out] colour The colour to add or remove the transparency to.
  * @param[in] transparency True to add transparency, false to remove it.
- * @param stp @todo Understand and document.
+ * @param[in] stp @todo Understand and document.
  */
 void AddTransparency(u32& colour, const bool transparency, const bool stp);
 

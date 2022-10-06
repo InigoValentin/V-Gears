@@ -190,7 +190,7 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
                 /**
                  * Updates the audio player.
                  *
-                 * @param Understand and document.
+                 * @todo Understand and document.
                  */
                 void Update();
 

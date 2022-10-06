@@ -691,7 +691,8 @@ class Entity{
          * @param[in] y Y coordinate of the jump destination point.
          * @param[in] z Maximum height of the jump.
          * @param[in] seconds Jump duration.
-         * @param dest_triangle Triangle to place the entity after the jump.
+         * @param[in] dest_triangle Triangle to place the entity after the
+         * jump.
          */
         void ScriptJumpToPosition(
           const float x, const float y, const float z, const float seconds, const int dest_triangle
@@ -702,7 +703,8 @@ class Entity{
          *
          * @param[in] jump_to The jump destination point.
          * @param[in] seconds Jump duration.
-         * @param dest_triangle Triangle to place the entity after the jump.
+         * @param[in] dest_triangle Triangle to place the entity after the
+         * jump.
          */
         void SetJump(const Ogre::Vector3& jump_to, const float seconds, const int dest_triangle);
 

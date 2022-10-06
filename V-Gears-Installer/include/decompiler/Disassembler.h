@@ -102,8 +102,9 @@ class Disassembler{
         /**
          * Reads data for a single parameter.
          *
-         * @param inst The instruction the parameter will belong to. Unused.
-         * @param type Character describing the type of the parameter.
+         * @param[in] inst The instruction the parameter will belong to.
+         * Unused.
+         * @param[in] type Character describing the type of the parameter.
          * @return The read data.
          */
         virtual ValuePtr ReadParameter(InstPtr inst, std::string type);

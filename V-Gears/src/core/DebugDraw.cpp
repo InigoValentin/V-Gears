@@ -424,7 +424,7 @@ void DebugDraw::Text(
           CameraManager::getSingleton().GetCurrentCamera()->getPosition()
         );
         //std::cout << "[DEBUG TEXT ORIG]: " << dist_sq << "\n";
-        // TODO: This always give fixed values
+        // TODO: This always give fixed values.
         //dist_sq = point.squaredDistance(
         //  Ogre::Root::getSingleton().getSceneManager("Scene")
         //  ->getRootSceneNode()->get->getPosition()

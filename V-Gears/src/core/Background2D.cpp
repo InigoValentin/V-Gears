@@ -266,7 +266,7 @@ void Background2D::ScriptAutoScrollToEntity(Entity* entity){scroll_entity_ = ent
 Entity* Background2D::GetAutoScrollEntity() const{return scroll_entity_;}
 
 void Background2D::ScriptScrollToPosition(
-  const float x, const float y, const ScrollType type, const float seconds
+  const float x, const float y, const SCROLL_TYPE type, const float seconds
 ){
     LOG_TRIVIAL(
       "[SCRIPT] Background2d set scroll to position \""
@@ -306,7 +306,7 @@ const Ogre::Vector2& Background2D::GetScrollPositionStart() const{return scroll_
 
 const Ogre::Vector2& Background2D::GetScrollPositionEnd() const{return scroll_position_end_;}
 
-Background2D::ScrollType Background2D::GetScrollType() const{return scroll_type_;}
+Background2D::SCROLL_TYPE Background2D::GetScrollType() const{return scroll_type_;}
 
 float Background2D::GetScrollSeconds() const{return scroll_seconds_;}
 

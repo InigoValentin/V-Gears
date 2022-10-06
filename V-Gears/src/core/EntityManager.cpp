@@ -1286,7 +1286,7 @@ void EntityManager::SetNextJumpStep(Entity* entity){
 }
 
 void EntityManager::SetNextScrollStep(){
-    Background2D::ScrollType type = background_2d_.GetScrollType();
+    Background2D::SCROLL_TYPE type = background_2d_.GetScrollType();
     float total = background_2d_.GetScrollSeconds();
     float current = background_2d_.GetScrollCurrentSeconds();
     current += Timer::getSingleton().GetGameTimeDelta();

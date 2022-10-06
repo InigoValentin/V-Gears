@@ -389,7 +389,7 @@ void CmdResolutionCompletition(Ogre::StringVector& complete_params){
 /**
  * Saves a screenshot of the current game window.
  *
- * @param params Command parameters. Unused.
+ * @param[in] params Command parameters. Unused.
  */
 void CmdScreenshot(const Ogre::StringVector& params){
     Ogre::RenderWindow* window

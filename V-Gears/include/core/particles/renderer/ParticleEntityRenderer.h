@@ -79,7 +79,7 @@ class ParticleEntityRenderer : public ParticleRenderer{
         /**
          * Adds the particle to the scene render queue.
          *
-         * @param queue[] Unused
+         * @param[in] queue Unused.
          * @param[in] pool The particle pool.
          */
         virtual void UpdateRenderQueue(

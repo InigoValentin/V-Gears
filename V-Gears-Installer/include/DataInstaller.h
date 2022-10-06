@@ -43,6 +43,12 @@ class DataInstaller{
 
     public:
 
+        /**
+         * The scale factor for line point coordinates.
+         *
+         * When a LINE opcode is found in the game scripts, the line points X and Y coordinates
+         * must be scaled down by this factor.
+         */
         static float LINE_SCALE_FACTOR;
 
         /**
@@ -52,7 +58,7 @@ class DataInstaller{
          * data to parse.
          * @param[in] output_dir Path to the directory to write generated data
          * to.
-         * @param write_output_line Pointer to function to write output.
+         * @param[in] write_output_line Pointer to function to write output.
          */
         DataInstaller(
           const std::string input_dir, const std::string output_dir,

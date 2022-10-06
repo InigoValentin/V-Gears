@@ -132,8 +132,8 @@ class Console : public Ogre::Singleton<Console>, public Ogre::LogListener{
          *
          * @param[in] message The message to log.
          * @param[in] lml Log level for the message.
-         * @param maskDebug Indicates if the mesage is beinng printed to the
-         * console or not.
+         * @param[in] maskDebug Indicates if the mesage is being printed to
+         * the console or not.
          * @param[in] logName Name of the log.
          * @param[in] skipThisMessage If true, the message will not be logged.
          */

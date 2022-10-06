@@ -35,7 +35,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * How to scroll the background.
          */
-        enum ScrollType{
+        enum SCROLL_TYPE{
 
             /**
              * Don't scroll the background.
@@ -100,7 +100,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Flags the background to automatically scroll to an entity position.
          *
-         * @param entity The entity to track.
+         * @param[in] entity The entity to track.
          */
         void ScriptAutoScrollToEntity(Entity* entity);
 
@@ -122,7 +122,7 @@ class Background2D : public Ogre::RenderQueueListener{
          */
         void ScriptScrollToPosition(
           const float x, const float y,
-          const ScrollType type, const float seconds
+          const SCROLL_TYPE type, const float seconds
         );
 
         /**
@@ -156,7 +156,7 @@ class Background2D : public Ogre::RenderQueueListener{
          *
          * @return The type of the current scroll action.
          */
-        ScrollType GetScrollType() const;
+        SCROLL_TYPE GetScrollType() const;
 
         /**
          * Retrieves the total duration the current scroll action.
@@ -572,7 +572,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Type of the current scroll action.
          */
-        ScrollType scroll_type_;
+        SCROLL_TYPE scroll_type_;
 
         /**
          * Total duration of the current scroll action, in seconds

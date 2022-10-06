@@ -62,8 +62,7 @@ class FileSystem{
          * @return True if the file was successfully written, false on error.
          */
         static bool WriteFile(
-          const Ogre::String &path, const void* buffer,
-          const unsigned int length
+          const Ogre::String &path, const void* buffer, const unsigned int length
         );
 
         /**
@@ -77,14 +76,13 @@ class FileSystem{
          * @return True if the file was successfully written, false on error.
          */
         static bool WriteNewFile(
-          const Ogre::String &path, const void* buffer,
-          const unsigned int length
+          const Ogre::String &path, const void* buffer,const unsigned int length
         );
 
         /**
          * Deletes a file.
          *
-         * @param path Path to the file to delete.
+         * @param[in] path Path to the file to delete.
          * @return True if the file was successfully deleted, false on error.
          */
         static bool RemoveFile(const Ogre::String &path);

@@ -264,7 +264,7 @@ void ScriptManager::InitBinds(){
           .def(
             "scroll_to_position",
             (void(Background2D::*)(
-              const float, const float, const Background2D::ScrollType, const float
+              const float, const float, const Background2D::SCROLL_TYPE, const float
             )) &Background2D::ScriptScrollToPosition
           )
           .def(

@@ -65,7 +65,7 @@ class File{
         /**
          * Writes the contents of the buffer to a file.
          *
-         * @param file Path of the file to save
+         * @param[in] file Path of the file to save
          */
         void WriteFile(const Ogre::String& file) const;
 
