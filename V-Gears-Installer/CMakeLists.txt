@@ -93,6 +93,7 @@ set(HEADER_FILES
     include/ModelsAndAnimationsDb.h
     include/ScopedLgp.h
     include/SpawnPointDb.h
+    include/KernelDataInstaller.h
 )
 
 
@@ -165,6 +166,7 @@ set(SOURCE_FILES
     src/decompiler/world/WorldEngine.cpp
     src/ModelsAndAnimationsDb.cpp
     src/ScopedLgp.cpp
+    src/KernelDataInstaller.cpp
 )
 
 # For SUDM. TODO: Add elses.

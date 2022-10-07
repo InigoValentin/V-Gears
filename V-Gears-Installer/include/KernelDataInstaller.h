@@ -15,14 +15,41 @@
 
 #pragma once
 
-#include <tinyxml.h>
 #include "common/BinGZipFile.h"
 #include "common/TypeDefine.h"
 #include "Characters.h"
 
-class KernelFile{
+class KernelDataInstaller{
 
     public:
+
+        /**
+         * Constructor.
+         *
+         * @param[in] path Absolute path to the KERNEL.BIN file
+         */
+        KernelDataInstaller(std::string path);
+
+        /**
+         * Destructor.
+         */
+        ~KernelDataInstaller();
+
+        /**
+         * Reads the items from the kernel.
+         *
+         * @return The number of items read.
+         */
+        int ReadItems();
+
+        /**
+         * Saves item data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteItems(std::string file);
+
+    private:
 
         enum KERNEL_SECTIONS{
 
@@ -292,6 +319,14 @@ class KernelFile{
             bool default_multiple;
 
             /**
+             * The selection can change between groups and individuals.
+             *
+             * When true, the target can be changed between groups and individuals When false,
+             * only {@see default_multiple} determines if the target is an individual or a group.
+             */
+            bool toggle_multiple;
+
+            /**
              * The target group can be changed.
              *
              * When true, the target cannot be changed between enemies and allies. In this case
@@ -496,7 +531,7 @@ class KernelFile{
             /**
              * The character has deathforce.
              */
-            DEATHFORCE,
+            DEATH_FORCE,
 
             /**
              * The character has resist.
@@ -638,7 +673,7 @@ class KernelFile{
             /**
              * Special flags. 1 byte.
              *
-             * @tod Document and retrieve with info from
+             * @todo Document and retrieve with info from
              * https://wiki.ffrtt.ru/index.php?title=FF7/Battle/Attack_Special_Effects
              */
             u8 additional_effects_raw;
@@ -646,13 +681,17 @@ class KernelFile{
             /**
              * Special flags. 1 byte.
              *
-             * @todop Document and retrieve with info from
+             * @todo Document and retrieve with info from
              * https://wiki.ffrtt.ru/index.php?title=FF7/Item_data
              */
             u8 additional_effects_mod_raw;
 
             /**
-             * Information about what status can be inflicted or cured.  4 bytes.
+             * Information about what status can be inflicted or cured. 4 bytes.
+             *
+             * The first six bits are the chance of inflicting/curing (out of 63). If the seventh
+             * bit is set, the status is cured instead of inflicted. If the eighth bit is set, then
+             * the status is toggled (cured if present, inflicted if not present).
              */
             u32 status_raw;
 
@@ -755,155 +794,14 @@ class KernelFile{
 
         };
 
-        KernelFile(std::string path): kernel_(path){}
-
-        ~KernelFile(){}
-
-        int ReadItems(){
-
-            // Empty the item list
-            items_.clear();
-
-            //kernel_ = BinGZipFile(folder_path + "/KERNEL.BIN");
-            //BinGZipFile kernel_ = BinGZipFile(folder_path + "/KERNEL.BIN");
-            //std::cout << "KERNEL FILES " << kernel_.GetNumberOfFiles() << "\n";
-            File items_file = kernel_.ExtractGZip(KERNEL_ITEM_DATA);
-            File items_name_file = kernel_.ExtractGZip(KERNEL_ITEM_NAMES);
-            File items_desc_file = kernel_.ExtractGZip(KERNEL_ITEM_DESCRIPTIONS);
-            int name_offset = 0;
-            int desc_offset = 0;
-            int item_count = 0;
-
-            std::cout <<
-              "|  ID | cam | sel | bat | men | tar | eff | dmg | pow | con | sch | eff | efm | sta | elm |  spe  |\n";
-
-            for (int i = 0; i < 128; i ++){
-
-                ItemData data;
-
-                // From the current name file offset, read 16 bytes.
-                // This is the pointer to the offset for the item name.
-                // Start reading there until 0xFF is found.
-                data.name = "";
-                u8 ch = 1;
-                name_offset = items_name_file.readU16LE();
-                while (ch != 0xFF){
-                    ch = items_name_file.GetU8(name_offset);
-                    if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
-                    name_offset ++;
-                }
-
-                // For descriptions, do the same as for names.
-                data.description = "";
-                ch = 1;
-                desc_offset = items_desc_file.readU16LE();
-                while (ch != 0xFF){
-                    ch = items_desc_file.GetU8(desc_offset);
-                    if (ch != 0xFF){
-                        // Warning: If the char is 0xF9, special function!
-                        // the next byte (in bits, aaoooooo) means to read aa data at offset oooooo.
-                        // This is to compress information in the kernel.
-                        if (ch == 0xF9){
-                            // Get how much to read, two upper bits of the next byte.
-                            // Multiply by 2 and add 4. That's just how it is.
-                            u8 comp_size = (items_desc_file.GetU8(desc_offset + 1) >> 6) * 2 + 4;
-                            // Get new offset, lower six bits of the next byte.
-                            // The offset goes backwards from the position of the 0xF9 byte.
-                            u8 comp_offset = items_desc_file.GetU8(desc_offset + 1) & 63;
-
-                            for (int i = 0; i < comp_size; i ++){
-                                data.description += ENGLISH_CHARS[
-                                  items_desc_file.GetU8(desc_offset - 1 - comp_offset + i)
-                                ];
-                            }
-                            desc_offset ++;
-                        }
-                        else{
-                            data.description += ENGLISH_CHARS[ch];
-                        }
-                    }
-                    desc_offset ++;
-                }
-
-                // If the item doesn't have a name, it means all items have been read.
-                // break the loop.
-                if ("" == data.name) break;
-
-                // Read data from the item data section.
-                data.unknown_0 = items_file.readU32LE();
-                //std::cout << "1st read " << data.unknown_0 << "\n";
-                data.unknown_1 = items_file.readU32LE();
-                data.camera = items_file.readU16LE();
-                data.restrict_raw = items_file.readU16LE();
-                data.target_raw = items_file.readU8();
-                data.effect = items_file.readU8();
-                data.damage_raw = items_file.readU8();
-                data.power = items_file.readU8();
-                data.condition_raw = items_file.readU8();
-                data.status_change_raw = items_file.readU8();
-                data.additional_effects_raw = items_file.readU8();
-                data.additional_effects_mod_raw = items_file.readU8();
-                data.status_raw = items_file.readU32LE();
-                data.element_raw = items_file.readU16LE();
-                data.special_raw = items_file.readU16LE();
-
-                // Derive data from the read data.
-                data.id = i;
-                data.sellable = !(data.restrict_raw & (1 << 0));
-                data.useable_battle = !(data.restrict_raw & (2 << 0));
-                data.useable_menu = !(data.restrict_raw & (4 << 0));
-
-                // Add to the list of items.
-                items_.push_back(data);
-                item_count ++;
-
-                printf(
-                  "| %3d | %3d | %3d | %3d | %3d | %3d | %3d | %3d | %3d | %3d | %3d | %3d | %3d | %3d | %5d | ",
-                  i, data.camera,
-                  data.sellable, data.useable_battle, data.useable_menu, data.target_raw,
-                  data.effect, data.damage_raw, data.power, data.condition_raw, data.status_change_raw,
-                  data.additional_effects_raw, data.additional_effects_mod_raw, data.status, data.element_raw, data.special_raw
-                );
-                std::cout << data.name << ": " << data.description << std::endl;
-
-
-            }
-
-            std::cout << "READ ITEMS END" << std::endl;
-            return item_count;
-        }
-
-        void WriteItems(std::string file){
-            std::cout << "WRITE ITEMS START" << std::endl;
-            TiXmlDocument xml;
-            std::unique_ptr<TiXmlElement> container(new TiXmlElement("items"));
-            for (ItemData item : items_){
-                std::unique_ptr<TiXmlElement> xml_item(new TiXmlElement("item"));
-                xml_item->SetAttribute("id", item.id);
-                xml_item->SetAttribute("name", item.name);
-                xml_item->SetAttribute("description", item.description);
-                xml_item->SetAttribute("sell", item.sellable);
-                xml_item->SetAttribute("battle", item.useable_battle);
-                xml_item->SetAttribute("menu", item.useable_menu);
-                xml_item->SetAttribute("effect", item.effect);
-                xml_item->SetAttribute("dmg_formula", item.damage_formula);
-                xml_item->SetAttribute("dmg_modifier", item.damage_modifier);
-                xml_item->SetAttribute("power", item.power);
-                container->LinkEndChild(xml_item.release());
-
-            }
-            xml.LinkEndChild(container.release());
-            xml.SaveFile(file);
-            std::cout << "WRITE ITEMS END" << std::endl;
-        }
-
-    private:
-
+        /**
+         * Items read from the kernel
+         */
         std::vector<ItemData> items_;
 
-
+        /**
+         * The kernel file.
+         */
         BinGZipFile kernel_;
-
-        //BinGZipFile kernel_2_;*/
 
 };

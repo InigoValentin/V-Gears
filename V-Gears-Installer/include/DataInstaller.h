@@ -23,9 +23,9 @@
 #include "data/VGearsTriggersFile.h"
 #include "data/VGearsFLevelFile.h"
 #include "FieldTextWriter.h"
+#include "KernelDataInstaller.h"
 #include "ModelsAndAnimationsDb.h"
 #include "ScopedLgp.h"
-#include "KernelFile.h"
 #include "SpawnPointDb.h"
 
 // TODO: Separate classes in files.
@@ -241,9 +241,9 @@ class DataInstaller{
         std::unique_ptr<ScopedLgp> fields_lgp_;
 
         /**
-         * BIN/GZ Kernel files.
+         * The installer for kernel data.
          */
-        std::unique_ptr<KernelFile> kernel_bin_;
+        std::unique_ptr<KernelDataInstaller> kernel_installer_;
 
         /**
          * LGP archive with texture data.
