@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<map>
+    <script file_name="maps/ffvii/field/nmkin_2.lua" />
+    <background2d file_name="maps/ffvii/field/nmkin_2_bg.xml" />
+    <walkmesh file_name="maps/ffvii/field/nmkin_2_wm.xml" />
+    <text file_name="maps/ffvii/field/nmkin_2_text.xml" />
+    <movement_rotation degree="-5.625" />
+
+    <entity_script name="Director" />
+    <entity_model name="Cloud" file_name="models/ffvii/field/units/cloud.mesh" position="-1.07813 0.4375 0.0390624" direction="0" />
+    <entity_script name="View" />
+    <entity_model name="Jessie" file_name="models/ffvii/field/units/jessie.mesh" position="0 0 0.0390624" direction="0" />
+
+    <entity_trigger name="Gateway0" point1="-5.67 2.74 12.27" point2="-5.68 2.26 12.27" enabled="true" />
+	<entity_trigger name="Gateway1" point1="-5.70313 -1.67969 0" point2="-5.25 -2.21875 0" enabled="true" />
+    <entity_point name="Spawn_slide" position="5.20313 21.0078 14.4319" rotation="67.7647" />
+    <entity_point name="Spawn_elevtr1" position="-5.40 2.47 12.27" rotation="67.7647" />
+</map>

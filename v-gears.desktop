@@ -1,0 +1,13 @@
+[Desktop Entry]
+Categories=Application;Game;
+Encoding=UTF-8
+Exec=/usr/bin/v-gears-launcher
+#Path=/usr/share/v-gears
+GenericName=V Gears
+Icon=v-gears.png
+Name=V Gears
+StartupNotify=true
+Terminal=false
+Type=Application
+Version=0.21
+X-KDE-SubstituteUID=false

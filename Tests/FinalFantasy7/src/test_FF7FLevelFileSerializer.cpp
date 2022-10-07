@@ -27,25 +27,25 @@ THE SOFTWARE.
 
 #include <Ogre.h>
 
-#include "data/QGearsFLevelFileSerializer.h"
+#include "data/VGearsFLevelFileSerializer.h"
 
-#include "data/QGearsBackgroundFileManager.h"
-#include "data/QGearsCameraMatrixFileManager.h"
-#include "data/QGearsHRCFileManager.h"
-#include "data/QGearsPaletteFileManager.h"
-#include "data/QGearsLZSFLevelFileManager.h"
+#include "data/VGearsBackgroundFileManager.h"
+#include "data/VGearsCameraMatrixFileManager.h"
+#include "data/VGearsHRCFileManager.h"
+#include "data/VGearsPaletteFileManager.h"
+#include "data/VGearsLZSFLevelFileManager.h"
 #include "data/FF7ModelListFileManager.h"
-#include "map/QGearsBackground2DFileManager.h"
-#include "map/QGearsWalkmeshFileManager.h"
+#include "map/VGearsBackground2DFileManager.h"
+#include "map/VGearsWalkmeshFileManager.h"
 
 using namespace Ogre;
 
 BOOST_AUTO_TEST_CASE( read_file )
 {
-    class TestFile : public QGears::FLevelFile
+    class TestFile : public VGears::FLevelFile
     {
     public:
-        TestFile() : QGears::FLevelFile( NULL, "reference.flevel", 0, "General" ) {}
+        TestFile() : VGears::FLevelFile( NULL, "reference.flevel", 0, "General" ) {}
     };
 
     class TestTexture : public Texture
@@ -59,7 +59,8 @@ BOOST_AUTO_TEST_CASE( read_file )
     protected:
         virtual void loadImpl() {}
         virtual void unloadImpl() {}
-        virtual HardwarePixelBufferSharedPtr getBuffer( size_t, size_t ){ return HardwarePixelBufferSharedPtr( NULL ); }
+        // IVV compiler error
+        //virtual HardwarePixelBufferSharedPtr getBuffer( size_t, size_t ){ return HardwarePixelBufferSharedPtr( NULL ); }
         virtual void createInternalResourcesImpl(){}
         virtual void freeInternalResourcesImpl(){}
     };
@@ -91,14 +92,14 @@ BOOST_AUTO_TEST_CASE( read_file )
     Root                                root("","");
     ResourceGroupManager               &rgm( ResourceGroupManager::getSingleton() );
     TestTextureManager                  tmgr;
-    QGears::CameraMatrixFileManager     cmgr;
-    QGears::WalkmeshFileManager         wmgr;
-    QGears::PaletteFileManager          pmgr;
-    QGears::BackgroundFileManager       bmgr;
-    QGears::Background2DFileManager     b2mgr;
-    QGears::FF7::ModelListFileManager   mmgr;
-    QGears::HRCFileManager              hmgr;
-    QGears::LZSFLevelFileManager        fmgr;
+    VGears::CameraMatrixFileManager     cmgr;
+    VGears::WalkmeshFileManager         wmgr;
+    VGears::PaletteFileManager          pmgr;
+    VGears::BackgroundFileManager       bmgr;
+    VGears::Background2DFileManager     b2mgr;
+    VGears::ModelListFileManager   mmgr;
+    VGears::HRCFileManager              hmgr;
+    VGears::LZSFLevelFileManager        fmgr;
     logMgr.createLog( "Default Log", true, true, true );
 
     rgm.addResourceLocation( "misc", "FileSystem" );
@@ -108,21 +109,21 @@ BOOST_AUTO_TEST_CASE( read_file )
     DataStreamPtr   stream( rgm.openResource( file.getName(), file.getGroup() ) );
     BOOST_REQUIRE( stream->isReadable() );
 
-    QGears::FLevelFileSerializer    ser;
+    VGears::FLevelFileSerializer    ser;
     ser.importFLevelFile( stream, &file );
     BOOST_CHECK_EQUAL( 757890, stream->tell() );
 
-    QGears::BackgroundFilePtr       background   ( file.getBackground() );
-    QGears::CameraMatrixFilePtr     camera_matrix( file.getCameraMatrix() );
-    QGears::FF7::ModelListFilePtr   model_list   ( file.getModelList() );
-    QGears::PaletteFilePtr          palette      ( file.getPalette() );
-    QGears::WalkmeshFilePtr         walkmesh     ( file.getWalkmesh() );
+    VGears::BackgroundFilePtr       background   ( file.getBackground() );
+    VGears::CameraMatrixFilePtr     camera_matrix( file.getCameraMatrix() );
+    VGears::ModelListFilePtr   model_list   ( file.getModelList() );
+    VGears::PaletteFilePtr          palette      ( file.getPalette() );
+    VGears::WalkmeshFilePtr         walkmesh     ( file.getWalkmesh() );
 
-    BOOST_REQUIRE( !background.isNull() );
-    BOOST_REQUIRE( !camera_matrix.isNull() );
-    BOOST_REQUIRE( !model_list.isNull() );
-    BOOST_REQUIRE( !palette.isNull() );
-    BOOST_REQUIRE( !walkmesh.isNull() );
+    BOOST_REQUIRE(background != nullptr);
+    BOOST_REQUIRE(camera_matrix != nullptr);
+    BOOST_REQUIRE(model_list != nullptr);
+    BOOST_REQUIRE(palette != nullptr);
+    BOOST_REQUIRE(walkmesh != nullptr);
     BOOST_CHECK_EQUAL( "reference.background", background->getName() );
     BOOST_CHECK_EQUAL( "reference.cam_matrix", camera_matrix->getName() );
     BOOST_CHECK_EQUAL( "reference.model_list", model_list->getName() );
@@ -144,16 +145,16 @@ BOOST_AUTO_TEST_CASE( read_file )
     //image->save( file.getName() + ".png" );
     delete image;
 
-    QGears::FLevelFilePtr lzs_file = fmgr.load( "reference_compressed.flevel", "General" ).staticCast<QGears::FLevelFile>();
-    BOOST_CHECK( !lzs_file->getPalette().isNull() );
-    BOOST_CHECK( !lzs_file->getBackground().isNull() );
+    VGears::FLevelFilePtr lzs_file = fmgr.load( "reference_compressed.flevel", "General" ).staticCast<VGears::FLevelFile>();
+    BOOST_CHECK(lzs_file->getPalette() != nullptr);
+    BOOST_CHECK(lzs_file->getBackground() != nullptr);
 
     image = lzs_file->getBackground()->createImage( lzs_file->getPalette() );
     // TODO: FIX ME ON OSX
     //image->save( lzs_file->getName() + ".png" );
     delete image;
 
-    lzs_file.setNull();
+    lzs_file.reset();
     logMgr.destroyLog( "Default Log" );
     stream->close();
 }

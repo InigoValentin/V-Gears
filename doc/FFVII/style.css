@@ -1,0 +1,47 @@
+body{
+    background-color: #000000;
+    color: #ffffff;
+    max-width: 80em;
+    margin: auto;
+}
+
+a{
+    color: #0000ff;
+}
+
+a:hover{
+    color: #6666ff;
+}
+
+a{
+    color: #cc00ff;
+}
+
+ul.no_bullet{
+    list-style-type: none;
+}
+
+ul.no_bullet li span.index_num{
+    font-family: monospace;
+    margin-right: 8px;
+    font-size: 1.2em;
+    color: #999;
+    font-weight: bold;
+}
+
+table#kernel-functionality{
+    margin: auto;
+    border-collapse: collapse;
+}
+
+table#kernel-functionality td{
+    border: 2px solid #ffffff;
+    text-align: center;
+}
+
+table#kernel-functionality td span#kernel-psyq{
+    display: block;
+    margin: 0.5em 0.5em 0.2em 4.2em;
+    padding: 0.2em;
+    border: 2px solid #ffffff;
+}

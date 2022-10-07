@@ -1,4 +1,4 @@
 set(SRC_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
 set(BIN_DIR "@CMAKE_CURRENT_BINARY_DIR@")
-set(QGEARS_VERSION "@QGEARS_VERSION@")
-configure_file(${SRC_DIR}/QGearsMain/include/qgears_version.h.in ${SRC_DIR}/QGearsMain/include/qgears_version.h @ONLY)
+set(VGEARS_VERSION "@VGEARS_VERSION@")
+configure_file(${SRC_DIR}/V-Gears/include/vgears_version.h.in ${SRC_DIR}/V-Gears/include/vgears_version.h @ONLY)

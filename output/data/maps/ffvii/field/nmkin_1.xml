@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<map>
+    <script file_name="maps/ffvii/field/nmkin_1.lua" />
+    <background2d file_name="maps/ffvii/field/nmkin_1_bg.xml" />
+    <walkmesh file_name="maps/ffvii/field/nmkin_1_wm.xml" />
+    <movement_rotation degree="-5.625" />
+
+    <entity_script name="Director" />
+    <entity_script name="Time" />
+    <entity_model name="Cloud" file_name="models/ffvii/field/units/cloud.mesh" position="-1 29 -2.125" direction="0" />
+    <entity_model name="Chest" file_name="models/ffvii/field/units/treasure_chest.mesh" position="3.00781 24.4141 -2.125" direction="0" />
+    <entity_model name="Barret" file_name="models/ffvii/field/units/barret.mesh" position="0 0 0" direction="0" />
+    <entity_script name="View" />
+    <entity_model name="Biggs" file_name="models/ffvii/field/units/biggs.mesh" position="0 0 0" direction="0" />
+    <entity_model name="Jessie" file_name="models/ffvii/field/units/jessie.mesh" position="0 0 0" direction="0" />
+    <entity_model name="Wedge" file_name="models/ffvii/field/units/wedge.mesh" position="0 0 0" direction="0" />
+
+    <entity_trigger name="Gateway0" point1="-6.5 9 -3.20313" point2="-4.5 9 -3.20313" enabled="true" />
+	<entity_trigger name="Gateway1" point1="-13 35.2 -2.14063" point2="-10 35.2 -2.14063" enabled="true" />
+    <entity_point name="Spawn_nrthmk" position="-5.5 10 -3.20313" rotation="180.7647" />
+    <entity_point name="Spawn_elevtr1" position="-12 34.2 -2.14063" rotation="180.7647" />
+</map>

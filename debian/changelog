@@ -1,11 +1,5 @@
-q-gears (0.22) trusty; urgency=low
+v-gears (0.0.1) bullseye; urgency=low
 
-  Second QGears Package
+  First VGears Package
 
- -- Chris Rizzitello <sithlord48@gmail.com>  Fri, 06 Feb 2015 21:08:00 -0400
-
-q-gears (0.21) saucy; urgency=low
-
-  First QGears Package
-
- -- Chris Rizzitello <sithlord48@gmail.com>  Mon, 07 Oct 2013 12:00:00 -0400
+ -- Iñigo Valentin <i@inigovalentin.com>  Tue, 26 Jul 2022 22:07:00 -0100

@@ -28,93 +28,93 @@ THE SOFTWARE.
 
 #include <OgreDataStream.h>
 
-#include "data/QGearsTexFile.h"
+#include "data/VGearsTexFile.h"
 
-#define BOOST_TEST_MODULE QGearsTexFile
+#define BOOST_TEST_MODULE VGearsTexFile
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE( header_size )
 {
-    BOOST_CHECK_EQUAL( 0x18, sizeof( QGears::TexFile::BitData     ) );
-    BOOST_CHECK_EQUAL( 0x10, sizeof( QGears::TexFile::ImageData   ) );
-    BOOST_CHECK_EQUAL( 0x14, sizeof( QGears::TexFile::PaletteData ) );
-    BOOST_CHECK_EQUAL( 0x10, sizeof( QGears::TexFile::RGBAData    ) );
-    BOOST_CHECK_EQUAL( 0x58, sizeof( QGears::TexFile::PixelFormat ) );
-    BOOST_CHECK_EQUAL( 0xEC, sizeof( QGears::TexFile::Header      ) );
+    BOOST_CHECK_EQUAL( 0x18, sizeof( VGears::TexFile::BitData     ) );
+    BOOST_CHECK_EQUAL( 0x10, sizeof( VGears::TexFile::ImageData   ) );
+    BOOST_CHECK_EQUAL( 0x14, sizeof( VGears::TexFile::PaletteData ) );
+    BOOST_CHECK_EQUAL( 0x10, sizeof( VGears::TexFile::RGBAData    ) );
+    BOOST_CHECK_EQUAL( 0x58, sizeof( VGears::TexFile::PixelFormat ) );
+    BOOST_CHECK_EQUAL( 0xEC, sizeof( VGears::TexFile::Header      ) );
 
-    QGears::TexFile::Header header;
-    BOOST_CHECK_EQUAL( sizeof( QGears::TexFile::Header ), sizeof( header ) );
+    VGears::TexFile::Header header;
+    BOOST_CHECK_EQUAL( sizeof( VGears::TexFile::Header ), sizeof( header ) );
 }
 
 BOOST_AUTO_TEST_CASE( bit_data_offset )
 {
-    BOOST_CHECK_EQUAL( 0x00, offsetof( QGears::TexFile::BitData, color_min ) );
-    BOOST_CHECK_EQUAL( 0x04, offsetof( QGears::TexFile::BitData, color_max ) );
-    BOOST_CHECK_EQUAL( 0x08, offsetof( QGears::TexFile::BitData, alpha_min ) );
-    BOOST_CHECK_EQUAL( 0x0C, offsetof( QGears::TexFile::BitData, alpha_max ) );
-    BOOST_CHECK_EQUAL( 0x10, offsetof( QGears::TexFile::BitData, pixel_min ) );
-    BOOST_CHECK_EQUAL( 0x14, offsetof( QGears::TexFile::BitData, pixel_max ) );
+    BOOST_CHECK_EQUAL( 0x00, offsetof( VGears::TexFile::BitData, color_min ) );
+    BOOST_CHECK_EQUAL( 0x04, offsetof( VGears::TexFile::BitData, color_max ) );
+    BOOST_CHECK_EQUAL( 0x08, offsetof( VGears::TexFile::BitData, alpha_min ) );
+    BOOST_CHECK_EQUAL( 0x0C, offsetof( VGears::TexFile::BitData, alpha_max ) );
+    BOOST_CHECK_EQUAL( 0x10, offsetof( VGears::TexFile::BitData, pixel_min ) );
+    BOOST_CHECK_EQUAL( 0x14, offsetof( VGears::TexFile::BitData, pixel_max ) );
 }
 
 BOOST_AUTO_TEST_CASE( palette_data_offset )
 {
-    BOOST_CHECK_EQUAL( 0x00, offsetof( QGears::TexFile::PaletteData, flag        ) );
-    BOOST_CHECK_EQUAL( 0x04, offsetof( QGears::TexFile::PaletteData, index_bits  ) );
-    BOOST_CHECK_EQUAL( 0x08, offsetof( QGears::TexFile::PaletteData, index_8bit  ) );
-    BOOST_CHECK_EQUAL( 0x0C, offsetof( QGears::TexFile::PaletteData, total_color_count ) );
-    BOOST_CHECK_EQUAL( 0x10, offsetof( QGears::TexFile::PaletteData, colors_per_palette ) );
+    BOOST_CHECK_EQUAL( 0x00, offsetof( VGears::TexFile::PaletteData, flag        ) );
+    BOOST_CHECK_EQUAL( 0x04, offsetof( VGears::TexFile::PaletteData, index_bits  ) );
+    BOOST_CHECK_EQUAL( 0x08, offsetof( VGears::TexFile::PaletteData, index_8bit  ) );
+    BOOST_CHECK_EQUAL( 0x0C, offsetof( VGears::TexFile::PaletteData, total_color_count ) );
+    BOOST_CHECK_EQUAL( 0x10, offsetof( VGears::TexFile::PaletteData, colors_per_palette ) );
 }
 
 BOOST_AUTO_TEST_CASE( image_data_offset )
 {
-    BOOST_CHECK_EQUAL( 0x0, offsetof( QGears::TexFile::ImageData, bit_depth  ) );
-    BOOST_CHECK_EQUAL( 0x4, offsetof( QGears::TexFile::ImageData, width  ) );
-    BOOST_CHECK_EQUAL( 0x8, offsetof( QGears::TexFile::ImageData, height ) );
-    BOOST_CHECK_EQUAL( 0xC, offsetof( QGears::TexFile::ImageData, pitch  ) );
+    BOOST_CHECK_EQUAL( 0x0, offsetof( VGears::TexFile::ImageData, bit_depth  ) );
+    BOOST_CHECK_EQUAL( 0x4, offsetof( VGears::TexFile::ImageData, width  ) );
+    BOOST_CHECK_EQUAL( 0x8, offsetof( VGears::TexFile::ImageData, height ) );
+    BOOST_CHECK_EQUAL( 0xC, offsetof( VGears::TexFile::ImageData, pitch  ) );
 }
 
 BOOST_AUTO_TEST_CASE( rgba_data_offset )
 {
-    BOOST_CHECK_EQUAL( 0x0, offsetof( QGears::TexFile::RGBAData, red   ) );
-    BOOST_CHECK_EQUAL( 0x4, offsetof( QGears::TexFile::RGBAData, green ) );
-    BOOST_CHECK_EQUAL( 0x8, offsetof( QGears::TexFile::RGBAData, blue  ) );
-    BOOST_CHECK_EQUAL( 0xC, offsetof( QGears::TexFile::RGBAData, alpha ) );
+    BOOST_CHECK_EQUAL( 0x0, offsetof( VGears::TexFile::RGBAData, red   ) );
+    BOOST_CHECK_EQUAL( 0x4, offsetof( VGears::TexFile::RGBAData, green ) );
+    BOOST_CHECK_EQUAL( 0x8, offsetof( VGears::TexFile::RGBAData, blue  ) );
+    BOOST_CHECK_EQUAL( 0xC, offsetof( VGears::TexFile::RGBAData, alpha ) );
 }
 
 BOOST_AUTO_TEST_CASE( pixel_format_offset )
 {
-    BOOST_CHECK_EQUAL( 0x00, offsetof( QGears::TexFile::PixelFormat, bits_per_pixel   ) );
-    BOOST_CHECK_EQUAL( 0x04, offsetof( QGears::TexFile::PixelFormat, bytes_per_pixel  ) );
-    BOOST_CHECK_EQUAL( 0x08, offsetof( QGears::TexFile::PixelFormat, bit_count        ) );
-    BOOST_CHECK_EQUAL( 0x18, offsetof( QGears::TexFile::PixelFormat, bit_mask         ) );
-    BOOST_CHECK_EQUAL( 0x28, offsetof( QGears::TexFile::PixelFormat, bit_shift        ) );
-    BOOST_CHECK_EQUAL( 0x38, offsetof( QGears::TexFile::PixelFormat, bit_count_unused ) );
-    BOOST_CHECK_EQUAL( 0x48, offsetof( QGears::TexFile::PixelFormat, shades           ) );
+    BOOST_CHECK_EQUAL( 0x00, offsetof( VGears::TexFile::PixelFormat, bits_per_pixel   ) );
+    BOOST_CHECK_EQUAL( 0x04, offsetof( VGears::TexFile::PixelFormat, bytes_per_pixel  ) );
+    BOOST_CHECK_EQUAL( 0x08, offsetof( VGears::TexFile::PixelFormat, bit_count        ) );
+    BOOST_CHECK_EQUAL( 0x18, offsetof( VGears::TexFile::PixelFormat, bit_mask         ) );
+    BOOST_CHECK_EQUAL( 0x28, offsetof( VGears::TexFile::PixelFormat, bit_shift        ) );
+    BOOST_CHECK_EQUAL( 0x38, offsetof( VGears::TexFile::PixelFormat, bit_count_unused ) );
+    BOOST_CHECK_EQUAL( 0x48, offsetof( VGears::TexFile::PixelFormat, shades           ) );
 }
 
 BOOST_AUTO_TEST_CASE( header_offset )
 {
-    BOOST_CHECK_EQUAL( 0x00, offsetof( QGears::TexFile::Header, version              ) );
-    BOOST_CHECK_EQUAL( 0x08, offsetof( QGears::TexFile::Header, color_key_flag       ) );
-    BOOST_CHECK_EQUAL( 0x14, offsetof( QGears::TexFile::Header, bit_data             ) );
-    BOOST_CHECK_EQUAL( 0x30, offsetof( QGears::TexFile::Header, palette_count        ) );
-    BOOST_CHECK_EQUAL( 0x34, offsetof( QGears::TexFile::Header, palette_total_color_count  ) );
-    BOOST_CHECK_EQUAL( 0x38, offsetof( QGears::TexFile::Header, image_data           ) );
-    BOOST_CHECK_EQUAL( 0x4C, offsetof( QGears::TexFile::Header, palette_data         ) );
-    BOOST_CHECK_EQUAL( 0x64, offsetof( QGears::TexFile::Header, pixel_format         ) );
-    BOOST_CHECK_EQUAL( 0xBC, offsetof( QGears::TexFile::Header, color_key_array_flag ) );
-    BOOST_CHECK_EQUAL( 0xC4, offsetof( QGears::TexFile::Header, reference_alpha      ) );
-    BOOST_CHECK_EQUAL( 0xCC, offsetof( QGears::TexFile::Header, unknown_0xCC         ) );
+    BOOST_CHECK_EQUAL( 0x00, offsetof( VGears::TexFile::Header, version              ) );
+    BOOST_CHECK_EQUAL( 0x08, offsetof( VGears::TexFile::Header, color_key_flag       ) );
+    BOOST_CHECK_EQUAL( 0x14, offsetof( VGears::TexFile::Header, bit_data             ) );
+    BOOST_CHECK_EQUAL( 0x30, offsetof( VGears::TexFile::Header, palette_count        ) );
+    BOOST_CHECK_EQUAL( 0x34, offsetof( VGears::TexFile::Header, palette_total_color_count  ) );
+    BOOST_CHECK_EQUAL( 0x38, offsetof( VGears::TexFile::Header, image_data           ) );
+    BOOST_CHECK_EQUAL( 0x4C, offsetof( VGears::TexFile::Header, palette_data         ) );
+    BOOST_CHECK_EQUAL( 0x64, offsetof( VGears::TexFile::Header, pixel_format         ) );
+    BOOST_CHECK_EQUAL( 0xBC, offsetof( VGears::TexFile::Header, color_key_array_flag ) );
+    BOOST_CHECK_EQUAL( 0xC4, offsetof( VGears::TexFile::Header, reference_alpha      ) );
+    BOOST_CHECK_EQUAL( 0xCC, offsetof( VGears::TexFile::Header, unknown_0xCC         ) );
 }
 
 BOOST_AUTO_TEST_CASE( color_offset )
 {
-    BOOST_CHECK_EQUAL( 0x0, offsetof( QGears::TexFile::Color, all        ) );
-    BOOST_CHECK_EQUAL( 0x0, offsetof( QGears::TexFile::Color, comp       ) );
-    BOOST_CHECK_EQUAL( 0x3, offsetof( QGears::TexFile::Color, comp.alpha ) );
-    BOOST_CHECK_EQUAL( 0x2, offsetof( QGears::TexFile::Color, comp.red   ) );
-    BOOST_CHECK_EQUAL( 0x1, offsetof( QGears::TexFile::Color, comp.green ) );
-    BOOST_CHECK_EQUAL( 0x0, offsetof( QGears::TexFile::Color, comp.blue  ) );
+    BOOST_CHECK_EQUAL( 0x0, offsetof( VGears::TexFile::Color, all        ) );
+    BOOST_CHECK_EQUAL( 0x0, offsetof( VGears::TexFile::Color, comp       ) );
+    BOOST_CHECK_EQUAL( 0x3, offsetof( VGears::TexFile::Color, comp.alpha ) );
+    BOOST_CHECK_EQUAL( 0x2, offsetof( VGears::TexFile::Color, comp.red   ) );
+    BOOST_CHECK_EQUAL( 0x1, offsetof( VGears::TexFile::Color, comp.green ) );
+    BOOST_CHECK_EQUAL( 0x0, offsetof( VGears::TexFile::Color, comp.blue  ) );
 }
 
 BOOST_AUTO_TEST_CASE( read_file )
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE( read_file )
 
     BOOST_REQUIRE( input->isReadable() );
 
-    QGears::TexFile tex;
+    VGears::TexFile tex;
     tex.read( input );
 
     BOOST_CHECK_EQUAL( 0x80, tex.m_header.image_data.width );
