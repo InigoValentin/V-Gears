@@ -97,4 +97,4 @@ class BinGZipFile : public File{
          * The number of files in the archive.
          */
         u32 file_count_;
-    };
+};

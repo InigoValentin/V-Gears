@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include <cassert>
 #include <string.h>
 #include "common/File.h"
@@ -22,7 +23,8 @@
 File::File(const Ogre::String& file):
   file_name_(file),
   buffer_(nullptr),
-  buffer_size_(0)
+  buffer_size_(0),
+  offset_(0)
 {
     LOG_TRIVIAL("Loading file: " + file_name_ + "\n");
     buffer_size_ = FileSystem::GetFileSize(file_name_);
@@ -34,24 +36,27 @@ File::File(const Ogre::String& file):
 
 File::File(const File* file, u32 offset, u32 length):
   buffer_(nullptr),
-  buffer_size_(length)
+  buffer_size_(length),
+  offset_(offset)
 {
     assert(file != nullptr);
 
     file_name_ = file->GetFileName();
 
     buffer_ = (u8 *) malloc(sizeof(u8) * buffer_size_);
-    file->GetFileBuffer(buffer_, offset, buffer_size_);
+    file->GetFileBuffer(buffer_, offset_, buffer_size_);
 }
 
 File::File(const u8* buffer, u32 offset, u32 length):
   file_name_("BUFFER"),
   buffer_(nullptr),
-  buffer_size_(length)
+  buffer_size_(length),
+  offset_(offset)
 {
     assert(buffer != nullptr);
     buffer_ = (u8*) malloc(sizeof(u8) * buffer_size_);
     memcpy(buffer_, buffer + offset, buffer_size_);
+    std::cout << "New file from buffer. Size " << length << " Offset: " << offset << "/" << offset_ << "\n";
 }
 
 File::File(const File* file){
@@ -110,4 +115,8 @@ u32 File::readU32LE(){
     u32 data(GetU32LE(offset_));
     offset_ += 4;
     return data;
+}
+
+u32 File::GetCurrentOffset(){
+    return offset_;
 }

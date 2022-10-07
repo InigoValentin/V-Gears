@@ -27,4 +27,4 @@ ScopedLgp::ScopedLgp(Ogre::Root* root, std::string full_path, std::string type, 
 ScopedLgp::~ScopedLgp(){
      if (root_)
          Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(full_path_, group_);
- }
+}

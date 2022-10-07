@@ -92,9 +92,15 @@ int DataInstaller::Progress(){
             progress_step_num_elements_ = 1;
             iterator_counter_ = 0;
             fields_lgp_ = std::make_unique<ScopedLgp>(
-              application_.getRoot(), input_dir_ + "field/flevel.lgp",
-              "LGP", "FFVIIFields"
+              application_.getRoot(), input_dir_ + "field/flevel.lgp", "LGP", "FFVIIFields"
             );
+            kernel_bin_ = std::make_unique<KernelFile>(input_dir_ += "kernel/KERNEL.BIN");
+            if (kernel_bin_->ReadItems() > 0){
+                CreateDir("game");
+                kernel_bin_->WriteItems(output_dir_ + "game/items.xml");
+            }
+            //exit(0);
+
             installation_state_ = SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
             // TODO: DEBUG:
             //installation_state_ = CONVERT_FIELDS;

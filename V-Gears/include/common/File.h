@@ -146,6 +146,16 @@ class File{
          */
         u32 readU32LE();
 
+        /**
+         * Checks the current offset of the file.
+         *
+         * Default is 0. Can be set on instantiation with {@see
+         * File(const File* file, u32 offset, u32 length)} or {@see
+         * File(const u8* buffer, u32 offset, u32 length)} and advanced with
+         * {@see readU8}, {@see readU16LE} or {@see readU32LE}
+         */
+        u32 GetCurrentOffset();
+
     protected:
 
         /**
@@ -161,7 +171,7 @@ class File{
          * File(const u8* buffer, u32 offset, u32 length)} and advanced with
          * {@see readU8}, {@see readU16LE} or {@see readU32LE}
          */
-        u32 offset_;
+        u32 offset_ = 0;
 
         /**
          * The file buffer.

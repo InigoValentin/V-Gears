@@ -25,6 +25,7 @@
 #include "FieldTextWriter.h"
 #include "ModelsAndAnimationsDb.h"
 #include "ScopedLgp.h"
+#include "KernelFile.h"
 #include "SpawnPointDb.h"
 
 // TODO: Separate classes in files.
@@ -35,6 +36,7 @@ typedef std::set<std::string> MapCollection;
 typedef std::map<u16, SpawnPointDb> FieldSpawnPointsMap;
 
 typedef std::map<u16, float> FieldScaleFactorMap;
+
 
 /**
  * The data installer.
@@ -237,6 +239,11 @@ class DataInstaller{
          * LGP archive with field data.
          */
         std::unique_ptr<ScopedLgp> fields_lgp_;
+
+        /**
+         * BIN/GZ Kernel files.
+         */
+        std::unique_ptr<KernelFile> kernel_bin_;
 
         /**
          * LGP archive with texture data.
