@@ -1,4 +1,4 @@
-# <img src="../v-gears.png" alt="V-Gears" width="50"/> V-Gears
+# <img src="doc/v-gears.png" alt="V-Gears" width="50"/> V-Gears
 
 ## What is V-Gears? 
 
@@ -18,7 +18,7 @@ The field engine is almost completly functional. Once the little quircks in the 
 
 ## In the meantime...
 
-If it picked your curiosity, you can check out the [history](HISTORY.md "V-Gears history") behind the project. Or, if you want to try it for yourself, maybe the [build](BUILD.md "Building guide") and [installaton](INSTALL.md "Installation guide") guides are a good place to start.
+If it picked your curiosity, you can check out the [history](doc/HISTORY.md "V-Gears history") behind the project. Or, if you want to try it for yourself, maybe the [build](doc/BUILD.md "Building guide") and [installaton](doc/INSTALL.md "Installation guide") guides are a good place to start.
 
-Or even better, if you want to see this done and want to contribute, clone the repo, read the [style guid](STYLE.md "V-Gears C++ Style Guide") and have a go at it!
+Or even better, if you want to see this done and want to contribute, clone the repo, read the [style guid](doc/STYLE.md "V-Gears C++ Style Guide") and have a go at it!
 

@@ -49,6 +49,20 @@ class KernelDataInstaller{
          */
         void WriteItems(std::string file);
 
+        /**
+         * Reads the command from the kernel.
+         *
+         * @return The number of items read.
+         */
+        int ReadCommands();
+
+        /**
+         * Saves command data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteCommands(std::string file);
+
     private:
 
         enum KERNEL_SECTIONS{
@@ -363,22 +377,27 @@ class KernelDataInstaller{
         /**
          * Determines what an item affects on when used from the menu.
          */
-        struct TargetCondition{
+        enum RESTORE_TYPE{
 
             /**
              * The item affects a party member or group HP.
              */
-            bool party_hp;
+            RESTORE_HP = 0,
 
             /**
              * The item affects a party member or group MP.
              */
-            bool party_mp;
+            RESTORE_MP = 1,
 
             /**
              * The item affects a party member or group status.
              */
-            bool party_status;
+            RESTORE_STATUS = 2,
+
+            /**
+             * The item is not restorative.
+             */
+            RESTORE_NONE = 3
         };
 
         /**
@@ -593,6 +612,76 @@ class KernelDataInstaller{
         };
 
         /**
+         * Data for each command.
+         *
+         * As found in KERNEL.BIN, file 0, in order, up to camera_multiple. Members after
+         * camera_multiple are not found literally in KERNEL.BIN, but are derived from other
+         * members or found in other files of the kernel (text files).
+         */
+        struct CommandData{
+
+            /**
+             * Cursor action when the command is selected.
+             */
+            u8 cursor_action;
+
+            /**
+             * Targeting mode. 1 byte.
+             *
+             * See {@see target} and {@TargetModes} for more information.
+             */
+            u8 target_raw;
+
+            /**
+             * Unknown data (Always 0XFFFF). 2 bytes.
+             */
+            u16 unknown;
+
+            /**
+             * Camera movement ID for single target. 2 bytes.
+             *
+             * Determines the camera movement when the command is executed over a single target.
+             */
+            u16 camera_single;
+
+            /**
+             * Camera movement ID for multiple target. 2 bytes.
+             *
+             * Determines the camera movement when the command is executed over multiple targets.
+             */
+            u16 camera_multiple;
+
+            /**
+             * Command ID.
+             *
+             * Not actually in the item file data, it's the order at which it appears.
+             */
+            int id;
+
+            /**
+             * Command name.
+             *
+             * Not found in the same file as the rest of the data, but on file 17.
+             */
+            std::string name;
+
+            /**
+             * Command description.
+             *
+             * Not found in the same file as the rest of the data, but on file 9.
+             */
+            std::string description;
+
+            /**
+             * Target selection mode.
+             *
+             * Derived from {@see target_raw}.
+             */
+            Target target;
+
+        };
+
+        /**
          * Data for each items
          *
          * As found in KERNEL.BIN, file 4, in order, up to special. Members after special are not
@@ -659,9 +748,9 @@ class KernelDataInstaller{
             u8 power;
 
             /**
-             * Item affected condition when used in menu. 1 byte.
+             * The restore type.
              *
-             * See {@condition} and {@ItemCondition} for more information.
+             * See {@restore_typ} and {@RESTORE_TYPE} for more information.
              */
             u8 condition_raw;
 
@@ -772,11 +861,11 @@ class KernelDataInstaller{
             u8 damage_modifier;
 
             /**
-             * What the item affects when.
+             * What the item restores when used.
              *
-             * Derived from {@see condition_raw}.
+             * Same as {@see condition_raw}, except for the wrong cases.
              */
-            TargetCondition condition;
+            RESTORE_TYPE restore_type;
 
             /**
              * Status effects.
@@ -793,6 +882,11 @@ class KernelDataInstaller{
             std::vector<int> elements;
 
         };
+
+        /**
+         * Items read from the kernel
+         */
+        std::vector<CommandData> commands_;
 
         /**
          * Items read from the kernel

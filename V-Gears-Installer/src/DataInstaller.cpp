@@ -97,6 +97,10 @@ int DataInstaller::Progress(){
             kernel_installer_ = std::make_unique<KernelDataInstaller>(
               input_dir_ += "kernel/KERNEL.BIN"
             );
+            if (kernel_installer_->ReadCommands() > 0){
+                CreateDir("game");
+                kernel_installer_->WriteCommands(output_dir_ + "game/commands.xml");
+            }
             if (kernel_installer_->ReadItems() > 0){
                 CreateDir("game");
                 kernel_installer_->WriteItems(output_dir_ + "game/items.xml");
