@@ -36,6 +36,60 @@ class KernelDataInstaller{
         ~KernelDataInstaller();
 
         /**
+         * Reads the command data from the kernel.
+         *
+         * @return The number of commands read.
+         */
+        int ReadCommands();
+
+        /**
+         * Saves command data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteCommands(std::string file);
+
+        /**
+         * Reads the attack data from the kernel.
+         *
+         * @return The number of attacks read.
+         */
+        int ReadAttacks();
+
+        /**
+         * Saves command data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteAttacks(std::string file);
+
+        /**
+         * Reads character data from the kernel.
+         *
+         * @return The number of characters read.
+         */
+        int ReadCharacters();
+
+        /**
+         * Saves character data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteCharacters(std::string file);
+
+        /**
+         * Reads growth data from the kernel.
+         */
+        void ReadGrowth();
+
+        /**
+         * Saves growth data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteGrowth(std::string file);
+
+        /**
          * Reads the items from the kernel.
          *
          * @return The number of items read.
@@ -50,18 +104,18 @@ class KernelDataInstaller{
         void WriteItems(std::string file);
 
         /**
-         * Reads the command from the kernel.
+         * Reads the weapon info from the kernel.
          *
-         * @return The number of items read.
+         * @return The number of weapons read.
          */
-        int ReadCommands();
+        int ReadWeapons();
 
         /**
-         * Saves command data to an xml file
+         * Saves weapon data to an xml file
          *
          * @param file[in] Absolute path to the target XML file.
          */
-        void WriteCommands(std::string file);
+        void WriteWeapons(std::string file);
 
     private:
 
@@ -682,6 +736,198 @@ class KernelDataInstaller{
         };
 
         /**
+         * Data for each attack.
+         *
+         * As found in KERNEL.BIN, file 1, in order, up to camera_multiple. Members after
+         * special_raw are not found literally in KERNEL.BIN, but are derived from other
+         * members.
+         */
+        struct AttackData{
+
+            /**
+             * Probability of the attack to land. 1 byte.
+             */
+            u8 accuracy;
+
+            /**
+             * Impact effect. 1 byte.
+             *
+             * The sprite shown when the attack hits.
+             */
+            u8 impact_effect;
+
+            /**
+             * Index of the animation played by the target when hit. 1 byte.
+             */
+            u8 hurt_anim;
+
+            /**
+             * Unknown data. 1 bytes.
+             */
+            u8 unknown;
+
+            /**
+             * MP cost. 2 bytes.
+             *
+             * Determines the camera movement when the command is executed over a single target.
+             */
+            u16 mp;
+
+            /**
+             * Impact sound. 2 bytes.
+             *
+             * Determines the camera movement when the command is executed over multiple targets.
+             */
+            u16 sound;
+
+            /**
+             * Camera movement ID for single target. 2 bytes.
+             *
+             * Determines the camera movement when the command is executed over a single target.
+             */
+            u16 camera_single;
+
+            /**
+             * Camera movement ID for multiple target. 2 bytes.
+             *
+             * Determines the camera movement when the command is executed over multiple targets.
+             */
+            u16 camera_multiple;
+
+            /**
+             * Targeting mode. 1 byte.
+             *
+             * See {@see target} and {@TargetModes} for more information.
+             */
+            u8 target_raw;
+
+            /**
+             * Atack effect ID. 1 byte.
+             *
+             * Used for animation in battle.
+             */
+            u8 effect;
+
+            /**
+             * Damage formula. 1 byte.
+             *
+             * This byte is divided into two nybbles (four bits). Upper nybble determines what
+             * considerations are made in calculating damage such as physical/magical, allowing
+             * criticals, how to calculate accuracy, etc. There are also three sets of known
+             * formulae that are paired with the upper nybble values. These are selected in the
+             * Lower Nybble and determine how to calculate pre-defense damage
+             */
+            u8 damage_raw;
+
+            /**
+             * The attack power. 1 byte.
+             *
+             * Used for damage/healing calculation.
+             */
+            u8 power;
+
+            /**
+             * The restore type.
+             *
+             * See {@restore_typ} and {@RESTORE_TYPE} for more information.
+             */
+            u8 condition_raw;
+
+            /**
+             * Information about status change mode and chance. 1 bytes.
+             */
+            u8 status_change_raw;
+
+            /**
+             * Special flags. 1 byte.
+             *
+             * @todo Document and retrieve with info from
+             * https://wiki.ffrtt.ru/index.php?title=FF7/Battle/Attack_Special_Effects
+             */
+            u8 additional_effects_raw;
+
+            /**
+             * Special flags. 1 byte.
+             *
+             * @todo Document and retrieve with info from
+             * https://wiki.ffrtt.ru/index.php?title=FF7/Item_data
+             */
+            u8 additional_effects_mod_raw;
+
+            /**
+             * Information about what status can be inflicted or cured. 4 bytes.
+             *
+             * The first six bits are the chance of inflicting/curing (out of 63). If the seventh
+             * bit is set, the status is cured instead of inflicted. If the eighth bit is set, then
+             * the status is toggled (cured if present, inflicted if not present).
+             */
+            u32 status_raw;
+
+            /**
+             * Information about the item elements. 2 bytes.
+             */
+            u16 element_raw;
+
+            /**
+             * Special flags. 2 bytes.
+             *
+             * @todo document and parse with info from
+             * https://wiki.ffrtt.ru/index.php?title=FF7/Battle/Special_Attack_Flags
+             */
+            u16 special_raw;
+
+            /**
+             * Attack ID.
+             *
+             * Not actually in the item file data, it's the order at which it appears.
+             */
+            int id;
+
+            /**
+             * Target selection mode.
+             *
+             * Derived from {@see target_raw}.
+             */
+            Target target;
+
+            /**
+             * The damage formula.
+             *
+             * It's the upper nybble in {@see damage_raw}.
+             */
+            u8 damage_formula;
+
+            /**
+             * The damage modifier.
+             *
+             * It's the lower nybble in {@see damage_raw}.
+             */
+            u8 damage_modifier;
+
+            /**
+             * What the attack restores when used.
+             *
+             * Same as {@see condition_raw}, except for the wrong cases.
+             */
+            RESTORE_TYPE restore_type;
+
+            /**
+             * Status effects.
+             *
+             * Derived from {@see status_change_raw} and {@see status_raw}.
+             */
+            StatusEffect status;
+
+            /**
+             * Elements of the attack.
+             *
+             * Derived from {@see element_raw}.
+             */
+            std::vector<int> elements;
+
+        };
+
+        /**
          * Data for each items
          *
          * As found in KERNEL.BIN, file 4, in order, up to special. Members after special are not
@@ -884,14 +1130,642 @@ class KernelDataInstaller{
         };
 
         /**
-         * Items read from the kernel
+         * Materia slot types.
+         */
+        enum SLOT_TYPE{
+
+            /**
+             * A non linked slot.
+             */
+            SLOT_UNLINKED = 0,
+
+            /**
+             * A linked slot.
+             *
+             * If the slot is in an even position, it's linked to the one in the right. If it's in
+             * an odd position, it;s linked to the one in the Left. Remember that slot positions
+             * are 0-index.
+             */
+            SLOT_LINKED = 1
+        };
+
+        /**
+         * Bonus in stat givven by weapons or armor.
+         */
+        struct StatBonus{
+
+            /**
+             * ID of the raised stat.
+             */
+            u8 stat;
+
+            /**
+             * Stat value raise.
+             */
+            u32 bonus;
+        };
+
+        /**
+         * Data for each weapon
+         *
+         * As found in KERNEL.BIN, file 5, in order, up to special. Members after special are not
+         * found literally in KERNEL.BIN, but are derived from other members or found in other
+         * files of the kernel (text files).
+         */
+        struct WeaponData{
+
+            /**
+             * Targeting mode. 1 byte.
+             *
+             * See {@see target} and {@TargetModes} for more information.
+             */
+            u8 target_raw;
+
+            /**
+             * Effect ID, unused (Always 0XFFFF). 1 byte.
+             */
+            u8 unused_0;
+
+            /**
+             * Damage formula. 1 byte.
+             *
+             * This byte is divided into two nybbles (four bits). Upper nybble determines what
+             * considerations are made in calculating damage such as physical/magical, allowing
+             * criticals, how to calculate accuracy, etc. There are also three sets of known
+             * formulae that are paired with the upper nybble values. These are selected in the
+             * Lower Nybble and determine how to calculate pre-defense damage
+             */
+            u8 damage_raw;
+
+            /**
+             * Unused data (Always 0XFFFF). 1 byte.
+             */
+            u8 unused_1;
+
+            /**
+             * The weapon power. 1 byte.
+             *
+             * Used for damage calculation.
+             */
+            u8 power;
+
+            /**
+             * The status effect the weapon induces. 1 byte.
+             */
+            u8 status;
+
+            /**
+             * Weapon materia growth multiplier. 1 byte.
+             */
+            u8 growth;
+
+            /**
+             * Weapon critical chance. 1 byte.
+             */
+            u8 critical;
+
+            /**
+             * Weapon accuracy. 1 byte.
+             */
+            u8 accuracy;
+
+            /**
+             * Weapon battle model. 1 byte.
+             *
+             * This byte is divided into two nybbles (four bits). Upper nybble determines the
+             * attack animation modifier, and it's only used for Barret and Vincent. The lower
+             * nybble is actually the index of the weapon model.
+             */
+            u8 model_raw;
+
+            /**
+             * Unused data (Always 0XFF). 1 byte.
+             */
+            u8 unused_2;
+
+            /**
+             * Consider it unused.
+             *
+             * @todo Verify.
+             */
+            u8 high_sound;
+
+            /**
+             * Camera movement ID. 2 bytes.
+             *
+             * Used for both single and multiple targeted attacks with this weapon. Always 0xFFFF.
+             */
+            u16 camera;
+
+            /**
+             * Characters that can equip the weapon. 2 bytes.
+             *
+             * Contains bits indicating the characters that can equip the weapon {@see character}
+             * for more info.
+             */
+            u16 equip_raw;
+
+            /**
+             * Weapon element id.
+             */
+            u16 element_raw;
+
+            /**
+             * Unused data (Always 0XFFFF). 1 byte.
+             */
+            u8 unused_3;
+
+            /**
+             * Stat the weapon raises.
+             *
+             * {@see stat_bonus} for more info.
+             */
+            u32 stat_raw;
+
+            /**
+             * The amount the raised stats are raised by.
+             *
+             * {@see stat_bonus} for more info.
+             */
+            u32 stat_bonus_raw;
+
+            /**
+             * Materia slots.
+             *
+             * {@see slots} for more info.
+             */
+            u8 slots_raw[8];
+
+            /**
+             * Sound effect id for normal hit.
+             */
+            u8 sound;
+
+            /**
+             * Sound effect id for critical hit.
+             */
+            u8 sound_critical;
+
+            /**
+             * Sound effect id for miss hit.
+             */
+            u8 sound_miss;
+
+            /**
+             * Impcat effect ID. 1 byte.
+             *
+             * Used for animation in battle.
+             */
+            u8 effect;
+
+            /**
+             * Special flags. 2 bytes.
+             *
+             * @todo document and parse with info from
+             * https://wiki.ffrtt.ru/index.php?title=FF7/Battle/Special_Attack_Flags
+             */
+            u16 special_raw;
+
+            /**
+             * Weapon restrictions. 2 bytes.
+             *
+             * Contains bits indicating if the item is {@see selleable}, {@see useable_battle} and
+             * {@see useable_menu}and {@see throwable}.
+             */
+            u16 restrict_raw;
+
+            /**
+             * Weapon ID.
+             *
+             * Not actually in the item file data, it's the order at which it appears.
+             */
+            int id;
+
+            /**
+             * Weapon name.
+             *
+             * Not found in the same file as the rest of the data, but on file 20.
+             */
+            std::string name;
+
+            /**
+             * Weapon description.
+             *
+             * Not found in the same file as the rest of the data, but on file 12.
+             */
+            std::string description;
+
+            /**
+             * Indicates if the weapon can be sold.
+             *
+             * True if the bit 0 in {@see restrict_raw} is 0.
+             */
+            bool sellable;
+
+            /**
+             * Indicates if the weapon can be used in battle.
+             *
+             * True if the bit 2 in {@see restrict_raw} is 0.
+             */
+            bool useable_battle;
+
+            /**
+             * Indicates if the weapon can be used in the menu.
+             *
+             * True if the bit 4 in {@see restrict_raw} is 0.
+             */
+            bool useable_menu;
+
+            /**
+             * Indicates if the weapon can be sold.
+             *
+             * True if the bit 8 in {@see restrict_raw} is 0.
+             */
+            bool throwable;
+
+            /**
+             * Target selection mode.
+             *
+             * Derived from {@see target_raw}.
+             */
+            Target target;
+
+            /**
+             * The damage formula.
+             *
+             * It's the upper nybble in {@see damage_raw}.
+             */
+            u8 damage_formula;
+
+            /**
+             * The damage modifier.
+             *
+             * It's the lower nybble in {@see damage_raw}.
+             */
+            u8 damage_modifier;
+
+            /**
+             * Attack animation ID.
+             *
+             * It's the upper nybble in {@see model_raw}. It's only used for Barret and Vincent.
+             */
+            u8 animation_index;
+
+            /**
+             * Weapon model ID.
+             *
+             * It's the lower nybble in {@see model_raw}.
+             */
+            u8 model;
+
+            /**
+             * The weapon battle model index.
+             *
+             * It's the lower nybble in {@see model_raw}.
+             */
+            std::vector<u8> equip;
+
+            /**
+             * Bonus in stats.
+             *
+             * Derived from {@see stat_raw} and {@stat_bonus_raw}.
+             */
+            std::vector<StatBonus> stat_bonus;
+
+            /**
+             * Materia slots.
+             *
+             * Derived and simplified from {@see slots_raw}.
+             */
+            std::vector<u8> materia_slots;
+
+            /**
+             * Elements of the weapon.
+             *
+             * Derived from {@see element_raw}.
+             */
+            std::vector<int> elements;
+
+        };
+
+        /**
+         * Character data.
+         *
+         * Contains information about a character. Contained in the file 3 of the kernel, one
+         * entry for each character. Each section is 56 bytes long. The character ID is not
+         * actually in the data, but it's the order at which they appear. The character name is
+         * also not in the dataand  it must be filled manually.
+         */
+        struct CharacterData{
+
+            /**
+             * Strength stat growth curve. 1 byte.
+             */
+            u8 curve_str;
+
+            /**
+             * Vitality stat growth curve. 1 byte.
+             */
+            u8 curve_vit;
+
+            /**
+             * Magic stat growth curve. 1 byte.
+             */
+            u8 curve_mag;
+
+            /**
+             * Spirit stat growth curve. 1 byte.
+             */
+            u8 curve_spr;
+
+            /**
+             * Dexterity stat growth curve. 1 byte.
+             */
+            u8 curve_dex;
+
+            /**
+             * Luck stat growth curve. 1 byte.
+             */
+            u8 curve_lck;
+
+            /**
+             * HP stat growth curve. 1 byte.
+             */
+            u8 curve_hp;
+
+            /**
+             * MP stat growth curve. 1 byte.
+             */
+            u8 curve_mp;
+
+            /**
+             * Experience-for-next-level growth curve. 1 byte.
+             */
+            u8 curve_exp;
+
+            /**
+             * Ignored data. 1 byte.
+             */
+            u8 unused_0;
+
+            /**
+             * Starting level. 1 byte.
+             */
+            u8 initial_level;
+
+            /**
+             * Ignored data. 1 byte.
+             */
+            u8 unused_1;
+
+            /**
+             * 1-1 limit slot command. 1 byte.
+             */
+            u8 limit_1_1;
+
+            /**
+             * 1-2 limit slot command. 1 byte.
+             */
+            u8 limit_1_2;
+
+            /**
+             * 1-3 limit slot command. 1 byte, unused.
+             */
+            u8 limit_1_3;
+
+            /**
+             * 2-1 limit slot command. 1 byte.
+             */
+            u8 limit_2_1;
+
+            /**
+             * 2-2 limit slot command. 1 byte.
+             */
+            u8 limit_2_2;
+
+            /**
+             * 2-3 limit slot command. 1 byte, unused.
+             */
+            u8 limit_2_3;
+
+            /**
+             * 3-1 limit slot command. 1 byte.
+             */
+            u8 limit_3_1;
+
+            /**
+             * 3-2 limit slot command. 1 byte.
+             */
+            u8 limit_3_2;
+
+            /**
+             * 3-3 limit slot command. 1 byte, unused.
+             */
+            u8 limit_3_3;
+
+            /**
+             * 4-1 limit slot command. 1 byte.
+             */
+            u8 limit_4_1;
+
+            /**
+             * 4-2 limit slot command. 1 byte, unused.
+             */
+            u8 limit_4_2;
+
+            /**
+             * 4-3 limit slot command. 1 byte, unused.
+             */
+            u8 limit_4_3;
+
+            /**
+             * Kills required to unlock limit level 2. 2 bytes.
+             */
+            u16 limit_2_kills;
+
+            /**
+             * Kills required to unlock limit level 3. 2 bytes.
+             */
+            u16 limit_3_kills;
+
+            /**
+             * Kills required to unlock limit 1-2. 2 bytes.
+             */
+            u16 limit_1_2_uses;
+
+            /**
+             * Kills required to unlock limit 1-3. 2 bytes, unused.
+             */
+            u16 limit_1_3_uses;
+
+            /**
+             * Kills required to unlock limit 2-2. 2 bytes.
+             */
+            u16 limit_2_2_uses;
+
+            /**
+             * Kills required to unlock limit 2-3. 2 bytes, unused.
+             */
+            u16 limit_2_3_uses;
+
+            /**
+             * Kills required to unlock limit 3-2. 2 bytes.
+             */
+            u16 limit_3_2_uses;
+
+            /**
+             * Kills required to unlock limit 3-3. 2 bytes, unused.
+             */
+            u16 limit_3_3_uses;
+
+            /**
+             * HP divisor for limit level 1.
+             */
+            u32 limit_1_div;
+
+            /**
+             * HP divisor for limit level 2.
+             */
+            u32 limit_2_div;
+
+            /**
+             * HP divisor for limit level 3.
+             */
+            u32 limit_3_div;
+
+            /**
+             * HP divisor for limit level 4.
+             */
+            u32 limit_4_div;
+
+            /**
+             * Character ID.
+             */
+            int id;
+
+            /**
+             * Character default name.
+             */
+            std::string name;
+
+        };
+
+        /**
+         * Types of stat curves.
+         *
+         * Althought any of them can be used for any stat, this is their intended use.
+         */
+        enum STAT_CURVE_TYPE{
+
+            /**
+             * Normal curve, used for primary stat.
+             */
+            CURVE_PRIMARY = 0,
+
+            /**
+             * HP curve. Base values must be multiplied by 40 when calculating.
+             */
+            CURVE_HP,
+
+            /**
+             * MP curve. Base values must be multiplied by 2 when calculating.
+             */
+            CURVE_MP,
+
+            /**
+             * Experience curve. Base must be ignored when calculating. Gradient is quadratic.
+             */
+            CURVE_EXP
+
+        };
+
+        /**
+         * Stat curve.
+         *
+         * determines value growth
+         */
+        struct StatCurve{
+
+            /**
+             * Curve ID.
+             */
+            int id;
+
+            /**
+             * Type of curve.
+             */
+            STAT_CURVE_TYPE type;
+
+            /**
+             * Curve gradients.
+             */
+            u8 gradient[8];
+
+            /**
+             * Curve bases.
+             */
+            u8 base[8];
+
+        };
+
+        /**
+         * Battle data.
+         *
+         * Contains several pieces of data related to character growth. Contained in the file 3 of
+         * the kernel, after the character data (starts at offset 0x01F8). The kernel contains more
+         * data, but it's not needed for V-Gears (random table, scene lookup...)
+         */
+        struct GrowthData{
+
+            /**
+             * Random bonus to primary stats, 12 entries of 1 byte.
+             */
+            u8 bonus_stat[12];
+
+            /**
+             * Random bonus to HP stat, 12 entries of 1 byte.
+             */
+            u8 bonus_hp[12];
+
+            /**
+             * Random bonus to MP stat, 12 entries of 1 byte.
+             */
+            u8 bonus_mp[12];
+
+            /**
+             * Stat curves. 64 curves of 16 bit each.
+             *
+             * 37 for primary stats, 9 for HP, 9 form MP, 9 for experience.
+             */
+            StatCurve curves[64];
+        };
+
+        /**
+         * Items read from the kernel.
          */
         std::vector<CommandData> commands_;
 
         /**
-         * Items read from the kernel
+         * Attacks read from the kernel.
+         */
+        std::vector<AttackData> attacks_;
+
+        /**
+         * Character info read from the kernel.
+         */
+        std::vector<CharacterData> characters_;
+
+        GrowthData growth_;
+
+        /**
+         * Items read from the kernel.
          */
         std::vector<ItemData> items_;
+
+        /**
+         * Weapons read from the kernel.
+         */
+        std::vector<WeaponData> weapons_;
 
         /**
          * The kernel file.

@@ -1,4 +1,4 @@
-# <img src="doc/v-gears.png" alt="V-Gears" width="50"/> V-Gears
+# <img src="v-gears.png" alt="V-Gears" width="50"/> V-Gears
 
 ## What is V-Gears? 
 

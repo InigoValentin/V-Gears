@@ -103,6 +103,9 @@ u32 File::readU32LE(){
     return data;
 }
 
-u32 File::GetCurrentOffset(){
-    return offset_;
+u32 File::GetCurrentOffset(){return offset_;}
+
+void File::SetOffset(u32 offset){
+    if (offset < buffer_size_) offset_ = offset;
+    else offset_ = buffer_size_ - 1;
 }

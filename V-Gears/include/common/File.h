@@ -156,6 +156,16 @@ class File{
          */
         u32 GetCurrentOffset();
 
+        /**
+         * Sets the file offset for reading.
+         *
+         * If the offset is larger than the file size, the offset will be set to the end of the
+         * file
+         *
+         * @param[in] offset The new offset.
+         */
+        void SetOffset(u32 offset);
+
     protected:
 
         /**

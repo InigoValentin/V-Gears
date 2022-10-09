@@ -101,9 +101,23 @@ int DataInstaller::Progress(){
                 CreateDir("game");
                 kernel_installer_->WriteCommands(output_dir_ + "game/commands.xml");
             }
+            if (kernel_installer_->ReadAttacks() > 0){
+                CreateDir("game");
+                kernel_installer_->WriteAttacks(output_dir_ + "game/attacks.xml");
+            }
+            if (kernel_installer_->ReadCharacters() > 0){
+                CreateDir("game");
+                kernel_installer_->WriteCharacters(output_dir_ + "game/characters.xml");
+            }
             if (kernel_installer_->ReadItems() > 0){
                 CreateDir("game");
                 kernel_installer_->WriteItems(output_dir_ + "game/items.xml");
+            }
+            kernel_installer_->ReadGrowth();
+            kernel_installer_->WriteGrowth(output_dir_ + "game/growth.xml");
+            if (kernel_installer_->ReadWeapons() > 0){
+                CreateDir("game");
+                kernel_installer_->WriteWeapons(output_dir_ + "game/weapons.xml");
             }
             exit(0);
 

@@ -245,7 +245,6 @@ namespace VGears{
                         const auto id = GetInt(node, "Id");
                         const auto name = GetString(node, "Name");
                         character_ids_[id] = name;
-                        node = node->NextSibling();
                     }
                     node = node->NextSibling();
                 }
