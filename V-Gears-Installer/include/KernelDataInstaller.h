@@ -18,6 +18,7 @@
 #include "common/BinGZipFile.h"
 #include "common/TypeDefine.h"
 #include "Characters.h"
+#include "SaveMap.h"
 
 class KernelDataInstaller{
 
@@ -116,6 +117,88 @@ class KernelDataInstaller{
          * @param file[in] Absolute path to the target XML file.
          */
         void WriteWeapons(std::string file);
+
+        /**
+         * Reads the armor info from the kernel.
+         *
+         * @return The number of armor read.
+         */
+        int ReadArmors();
+
+        /**
+         * Saves armor data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteArmors(std::string file);
+
+        /**
+         * Reads the accessory info from the kernel.
+         *
+         * @return The number of accessories read.
+         */
+        int ReadAccessories();
+
+        /**
+         * Saves accessory data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteAccessories(std::string file);
+
+        /**
+         * Reads materia info from the kernel.
+         *
+         * @return The number of accessories read.
+         */
+        int ReadMateria();
+
+        /**
+         * Saves materia data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteMateria(std::string file);
+
+        /**
+         * Reads key item info from the kernel.
+         *
+         * @return The number of key items read.
+         */
+        int ReadKeyItems();
+
+        /**
+         * Saves key item data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteKeyItems(std::string file);
+
+        /**
+         * Reads summon name info from the kernel.
+         *
+         * @return The number of summons read.
+         */
+        int ReadSummonNames();
+
+        /**
+         * Saves summon names data to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteSummonNames(std::string file);
+
+        /**
+         * Reads the initial savemap from the kernel.
+         */
+        void ReadInitialSaveMap();
+
+        /**
+         * Saves the initial savemap to an xml file
+         *
+         * @param file[in] Absolute path to the target XML file.
+         */
+        void WriteInitialSaveMap(std::string file);
 
     private:
 
@@ -1162,7 +1245,7 @@ class KernelDataInstaller{
             /**
              * Stat value raise.
              */
-            u32 bonus;
+            u8 bonus;
         };
 
         /**
@@ -1182,7 +1265,7 @@ class KernelDataInstaller{
             u8 target_raw;
 
             /**
-             * Effect ID, unused (Always 0XFFFF). 1 byte.
+             * Effect ID, unused (Always 0XFF). 1 byte.
              */
             u8 unused_0;
 
@@ -1198,7 +1281,7 @@ class KernelDataInstaller{
             u8 damage_raw;
 
             /**
-             * Unused data (Always 0XFFFF). 1 byte.
+             * Unused data (Always 0XFF). 1 byte.
              */
             u8 unused_1;
 
@@ -1266,7 +1349,7 @@ class KernelDataInstaller{
             u16 equip_raw;
 
             /**
-             * Weapon element id.
+             * Weapon element ids.
              */
             u16 element_raw;
 
@@ -1280,14 +1363,14 @@ class KernelDataInstaller{
              *
              * {@see stat_bonus} for more info.
              */
-            u32 stat_raw;
+            u8 stat_raw[4];
 
             /**
              * The amount the raised stats are raised by.
              *
              * {@see stat_bonus} for more info.
              */
-            u32 stat_bonus_raw;
+            u8 stat_bonus_raw[4];
 
             /**
              * Materia slots.
@@ -1446,6 +1529,557 @@ class KernelDataInstaller{
              */
             std::vector<int> elements;
 
+        };
+
+        /**
+         * Data for each armor
+         *
+         * As found in KERNEL.BIN, file 6, in order, up to unknown_3. Members after unknown_3 are
+         * not found literally in KERNEL.BIN, but are derived from other members or found in other
+         * files of the kernel (text files).
+         */
+        struct ArmorData{
+
+            /**
+             * Unknown (Always 0XFF). 1 byte.
+             */
+            u8 unknown_0;
+
+            /**
+             * Elemental resistance mode. 1 byte.
+             *
+             * For all elements in {@see element_raw}:
+             * If 0: Absorbs.
+             * If 1: Nullifies.
+             * If 2: Halves.
+             * If any other value: normal.
+             */
+            u8 element_defense_mode;
+
+            /**
+             * Defense stat. 1 byte.
+             */
+            u8 defense;
+
+            /**
+             * Magic defense stat. 1 byte.
+             */
+            u8 m_defense;
+
+            /**
+             * Evasion stat. 1 byte.
+             */
+            u8 evasion;
+
+            /**
+             * Magic evasion stat. 1 byte.
+             */
+            u8 m_evasion;
+
+            /**
+             * The status effect the armor protects against. 1 byte.
+             */
+            u8 status;
+
+            /**
+             * Unknown (Always 0XFFFF). 1 byte.
+             */
+            u16 unknown_1;
+
+            /**
+             * Materia slots.
+             *
+             * {@see slots} for more info.
+             */
+            u8 slots_raw[8];
+
+            /**
+             * Armor materia growth multiplier. 1 byte.
+             */
+            u8 growth;
+
+            /**
+             * Characters that can equip the armor. 2 bytes.
+             *
+             * Contains bits indicating the characters that can equip the armor {@see character}
+             * for more info.
+             */
+            u16 equip_raw;
+
+            /**
+             * Elements the armor protects agains.
+             */
+            u16 element_raw;
+
+            /**
+             * Unknown (Always 0XFF). 1 byte.
+             */
+            u16 unknown_2;
+
+            /**
+             * Stat the weapon raises.
+             *
+             * {@see stat_bonus} for more info.
+             */
+            u8 stat_raw[4];
+
+            /**
+             * The amount the raised stats are raised by.
+             *
+             * {@see stat_bonus} for more info.
+             */
+            u8 stat_bonus_raw[4];
+
+            /**
+             * Weapon restrictions. 2 bytes.
+             *
+             * Contains bits indicating if the item is {@see selleable}, {@see useable_battle} and
+             * {@see useable_menu}and {@see throwable}.
+             */
+            u16 restrict_raw;
+
+            /**
+             * Unknown (Always 0XFFFF). 1 byte.
+             */
+            u16 unknown_3;
+
+            /**
+             * Armor ID.
+             *
+             * Not actually in the item file data, it's the order at which it appears.
+             */
+            int id;
+
+            /**
+             * Armor name.
+             *
+             * Not found in the same file as the rest of the data, but on file 20.
+             */
+            std::string name;
+
+            /**
+             * Armor description.
+             *
+             * Not found in the same file as the rest of the data, but on file 12.
+             */
+            std::string description;
+
+            /**
+             * Indicates if the armor can be sold.
+             *
+             * True if the bit 0 in {@see restrict_raw} is 0.
+             */
+            bool sellable;
+
+            /**
+             * Indicates if the armor can be used in battle.
+             *
+             * True if the bit 2 in {@see restrict_raw} is 0.
+             */
+            bool useable_battle;
+
+            /**
+             * Indicates if the armor can be used in the menu.
+             *
+             * True if the bit 4 in {@see restrict_raw} is 0.
+             */
+            bool useable_menu;
+
+            /**
+             * The weapon battle model index.
+             *
+             * It's the lower nybble in {@see model_raw}.
+             */
+            std::vector<u8> equip;
+
+            /**
+             * Bonus in stats.
+             *
+             * Derived from {@see stat_raw} and {@stat_bonus_raw}.
+             */
+            std::vector<StatBonus> stat_bonus;
+
+            /**
+             * Materia slots.
+             *
+             * Derived and simplified from {@see slots_raw}.
+             */
+            std::vector<u8> materia_slots;
+
+            /**
+             * Elements of the weapon.
+             *
+             * Derived from {@see element_raw}.
+             */
+            std::vector<int> elements;
+
+        };
+
+        /**
+         * Data for each accessory
+         *
+         * As found in KERNEL.BIN, file 7, in order, up to unknown_3. Members after unknown_3 are
+         * not found literally in KERNEL.BIN, but are derived from other members or found in other
+         * files of the kernel (text files).
+         */
+        struct AccessoryData{
+
+            /**
+             * Stat the weapon raises.
+             *
+             * {@see stat_bonus} for more info.
+             */
+            u8 stat_raw[2];
+
+            /**
+             * The amount the raised stats are raised by.
+             *
+             * {@see stat_bonus} for more info.
+             */
+            u8 stat_bonus_raw[2];
+
+            /**
+             * Elemental resistance mode. 1 byte.
+             *
+             * For all elements in {@see element_raw}:
+             * If 0: Absorbs.
+             * If 1: Nullifies.
+             * If 2: Halves.
+             * If any other value: normal.
+             */
+            u8 element_defense_mode;
+
+            /**
+             * The special status effect the accesory induces.
+             *
+             * 0: Auto haste.
+             * 1: Auto berserk.
+             * 2: Curse.
+             * 3: Auto reflect.
+             * 4: Steal rate +.
+             * 5: Manipulate rate +.
+             * 6: Barrier + MBarrier.
+             * Other: Nothing.
+             */
+            u8 effect;
+
+            /**
+             * Elements the armor protects against. 2 bytes.
+             *
+             * The defense type is defined in {@see element_defense_mode}.
+             */
+            u16 element_raw;
+
+            /**
+             * The status effect the armor protects against. 4 bytes.
+             */
+            u32 status_raw;
+
+            /**
+             * Characters that can equip the armor. 2 bytes.
+             *
+             * Contains bits indicating the characters that can equip the armor {@see character}
+             * for more info.
+             */
+            u16 equip_raw;
+
+            /**
+             * Weapon restrictions. 2 bytes.
+             *
+             * Contains bits indicating if the item is {@see selleable}, {@see useable_battle} and
+             * {@see useable_menu}and {@see throwable}.
+             */
+            u16 restrict_raw;
+
+            /**
+             * Accessory ID.
+             *
+             * Not actually in the item file data, it's the order at which it appears.
+             */
+            int id;
+
+            /**
+             * Accessory name.
+             *
+             * Not found in the same file as the rest of the data, but on file 20.
+             */
+            std::string name;
+
+            /**
+             * Accessory description.
+             *
+             * Not found in the same file as the rest of the data, but on file 12.
+             */
+            std::string description;
+
+            /**
+             * Indicates if the accessory can be sold.
+             *
+             * True if the bit 0 in {@see restrict_raw} is 0.
+             */
+            bool sellable;
+
+            /**
+             * Indicates if the accessory can be used in battle.
+             *
+             * True if the bit 2 in {@see restrict_raw} is 0.
+             */
+            bool useable_battle;
+
+            /**
+             * Indicates if the accessory can be used in the menu.
+             *
+             * True if the bit 4 in {@see restrict_raw} is 0.
+             */
+            bool useable_menu;
+
+            /**
+             * The weapon battle model index.
+             *
+             * It's the lower nybble in {@see model_raw}.
+             */
+            std::vector<u8> equip;
+
+            /**
+             * Bonus in stats.
+             *
+             * Derived from {@see stat_raw} and {@stat_bonus_raw}.
+             */
+            std::vector<StatBonus> stat_bonus;
+
+            /**
+             * Elements of the accesory.
+             *
+             * Derived from {@see element_raw}.
+             */
+            std::vector<int> elements;
+
+            /**
+             * Statuses the accessory protects against.
+             *
+             * Derived from {@see status_raw}.
+             */
+            std::vector<int> status;
+
+        };
+
+        /**
+         * Types of materia.
+         */
+        enum class MATERIA_TYPE{
+
+            /**
+             * Magic materia.
+             */
+            MAGIC = 1,
+
+            /**
+             * Support materia.
+             */
+            SUPPORT,
+
+            /**
+             * Command materia.
+             */
+            COMMAND,
+
+            /**
+             * Independent materia.
+             */
+            INDEPENDENT,
+
+            /**
+             * Summon materia.
+             */
+            SUMMON
+        };
+
+        /**
+         * Stat bonuses given by equipping materia.
+         *
+         * They can be negative.
+         */
+        struct MateriaStatBonus{
+
+            /**
+             * Strength bonus. Absolute.
+             */
+            int str;
+
+            /**
+             * Vitality bonus. Absolute.
+             */
+            int vit;
+
+            /**
+             * Magic bonus. Absolute.
+             */
+            int mag;
+
+            /**
+             * Spirit bonus. Absolute.
+             */
+            int spr;
+
+            /**
+             * Dexterity bonus. Absolute.
+             */
+            int dex;
+
+            /**
+             * Luck bonus. Absolute.
+             */
+            int lck;
+
+            /**
+             * Max HP bonus. Percentile.
+             */
+            int hp;
+
+            /**
+             * Max MP bonus. Percentile.
+             */
+            int mp;
+
+            /**
+             * Indicates if at least one of the stats is changed by the materia.
+             */
+            bool change;
+        };
+
+        /**
+         * Data for each materia.
+         *
+         * As found in KERNEL.BIN, file 8, in order, up to attributes. Members after attributes are
+         * not found literally in KERNEL.BIN, but are derived from other members or found in other
+         * files of the kernel (text files).
+         */
+        struct MateriaData{
+
+            /**
+             * AP amounts at which the materia levels up. 4 x 1 byte.
+             *
+             * It can be used to determine how many levels the materia has.
+             */
+            u16 level_up_ap[4];
+
+            /**
+             * Index of stat modifier. 1 byte.
+             */
+            u8 stat_raw;
+
+            /**
+             * Status effects. 3 bytes, not 4!
+             */
+            u32 status_raw;
+
+            /**
+             * Materia element. 1 byte.
+             */
+            u8 element;
+
+            /**
+             * Materia type. 1 byte.
+             *
+             * 2 nybbles. The upper one is the subtype, and it's ignored in V-Gears. The lower one
+             * the actual type.
+             */
+            u8 type_raw;
+
+            /**
+             * Materia attributes. 6 x 1 byte.
+             *
+             * They are mostly ignored in V-Gears.
+             */
+            u8 attribute[6];
+
+            /**
+             * Accessory ID.
+             *
+             * Not actually in the item file data, it's the order at which it appears.
+             */
+            int id;
+
+            /**
+             * Accessory name.
+             *
+             * Not found in the same file as the rest of the data, but on file 20.
+             */
+            std::string name;
+
+            /**
+             * Accessory description.
+             *
+             * Not found in the same file as the rest of the data, but on file 12.
+             */
+            std::string description;
+
+            /**
+             * Mateira type.
+             *
+             * Derived from {@see type_raw}.
+             */
+            int type;
+
+            /**
+             * Stat bonuses for equipping the materia.
+             *
+             * Derived from {@see stat_raw}.
+             */
+            MateriaStatBonus stats;
+
+            /**
+             * Statuses the materia inflicts.
+             *
+             * Derived from {@see status_raw}.
+             */
+            std::vector<int> status;
+        };
+
+        /**
+         * Data for each key item.
+         *
+         * There is no data file about key items in KERNEL.BIN, there are only names (file 24) and
+         * descriptions (file 16)
+         */
+        struct KeyItemData{
+
+            /**
+             * Key item ID.
+             *
+             * Not actually in KERNEL.BIN, it;s the order at which they appear.
+             */
+            int id;
+
+            /**
+             * Key item name.
+             */
+            std::string name;
+
+            /**
+             * Key item description.
+             */
+            std::string description;
+        };
+
+        /**
+         * List of summon names.
+         *
+         * There is no data file about key items in KERNEL.BIN, there are only names (file 26).
+         */
+        struct SummonNameData{
+
+            /**
+             * Summon ID.
+             *
+             * Not actually in KERNEL.BIN, it;s the order at which they appear.
+             */
+            int id;
+
+            /**
+             * Summon name.
+             */
+            std::string name;
         };
 
         /**
@@ -1766,6 +2400,33 @@ class KernelDataInstaller{
          * Weapons read from the kernel.
          */
         std::vector<WeaponData> weapons_;
+
+        /**
+         * Armors read from the kernel.
+         */
+        std::vector<ArmorData> armors_;
+
+        /**
+         * Accessories read from the kernel.
+         */
+        std::vector<AccessoryData> accessories_;
+
+        /**
+         * Materia read from the kernel.
+         */
+        std::vector<MateriaData> materia_;
+
+        /**
+         * Key items read from the kernel.
+         */
+        std::vector<KeyItemData> key_items_;
+
+        /**
+         * Summon names read from the kernel.
+         */
+        std::vector<SummonNameData> summon_names_;
+
+        SaveMap savemap_;
 
         /**
          * The kernel file.

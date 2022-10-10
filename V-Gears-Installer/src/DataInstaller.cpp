@@ -119,6 +119,26 @@ int DataInstaller::Progress(){
                 CreateDir("game");
                 kernel_installer_->WriteWeapons(output_dir_ + "game/weapons.xml");
             }
+            if (kernel_installer_->ReadArmors() > 0){
+                CreateDir("game");
+                kernel_installer_->WriteArmors(output_dir_ + "game/armors.xml");
+            }
+            if (kernel_installer_->ReadAccessories() > 0){
+                CreateDir("game");
+                kernel_installer_->WriteAccessories(output_dir_ + "game/accessories.xml");
+            }
+            if (kernel_installer_->ReadMateria() > 0){
+                CreateDir("game");
+                kernel_installer_->WriteMateria(output_dir_ + "game/materia.xml");
+            }
+            if (kernel_installer_->ReadKeyItems() > 0){
+                CreateDir("game");
+                kernel_installer_->WriteKeyItems(output_dir_ + "game/key_items.xml");
+            }
+            if (kernel_installer_->ReadSummonNames() > 0){
+                CreateDir("game");
+                kernel_installer_->WriteSummonNames(output_dir_ + "game/summons.xml");
+            }
             exit(0);
 
             installation_state_ = SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
