@@ -18,9 +18,19 @@
 #include "KernelDataInstaller.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
 
-KernelDataInstaller::KernelDataInstaller(std::string path): kernel_(path){}
+KernelDataInstaller::KernelDataInstaller(std::string path): kernel_(path){
+    for (int i = 0; i < 416; i ++) prices_[i] = 50;
+}
 
 KernelDataInstaller::~KernelDataInstaller(){}
+
+void KernelDataInstaller::ReadPrices(std::string exe_path){
+    File exe_file(exe_path);
+    exe_file.SetOffset(0x00514518); // Items, weapons, armors, accessories start here
+    for (int i = 0; i < 320; i ++) prices_[i] = exe_file.readU32LE();
+    exe_file.SetOffset(0x00514B18); // Materias start here
+    for (int i = 320; i < 416; i ++) prices_[i] = exe_file.readU32LE();
+}
 
 int KernelDataInstaller::ReadCommands(){
 
@@ -836,6 +846,8 @@ void KernelDataInstaller::WriteItems(std::string file){
     for (ItemData item : items_){
         std::unique_ptr<TiXmlElement> xml_item(new TiXmlElement("item"));
         xml_item->SetAttribute("id", item.id);
+        xml_item->SetAttribute("inventory_id", item.id);
+        xml_item->SetAttribute("price", prices_[item.id]);
         xml_item->SetAttribute("name", item.name);
         xml_item->SetAttribute("description", item.description);
         xml_item->SetAttribute("camera", item.camera);
@@ -1066,6 +1078,8 @@ void KernelDataInstaller::WriteWeapons(std::string file){
     for (WeaponData weapon : weapons_){
         std::unique_ptr<TiXmlElement> xml_weapon(new TiXmlElement("weapon"));
         xml_weapon->SetAttribute("id", weapon.id);
+        xml_weapon->SetAttribute("inventory_id", weapon.id + 128);
+        xml_weapon->SetAttribute("price", prices_[weapon.id + 128]);
         xml_weapon->SetAttribute("name", weapon.name);
         xml_weapon->SetAttribute("description", weapon.description);
         xml_weapon->SetAttribute("camera", weapon.camera);
@@ -1149,7 +1163,6 @@ int KernelDataInstaller::ReadArmors(){
     armors_.clear();
 
     File armor_file = kernel_.ExtractGZip(KERNEL_ARMOR_DATA);
-    armor_file.WriteFile("/home/ivalentin/armor");
     File armor_name_file = kernel_.ExtractGZip(KERNEL_ARMOR_NAMES);
     File armor_desc_file = kernel_.ExtractGZip(KERNEL_ARMOR_DESCRIPTIONS);
     int name_offset = 0;
@@ -1300,6 +1313,8 @@ void KernelDataInstaller::WriteArmors(std::string file){
     for (ArmorData armor : armors_){
         std::unique_ptr<TiXmlElement> xml_armor(new TiXmlElement("armor"));
         xml_armor->SetAttribute("id", armor.id);
+        xml_armor->SetAttribute("inventory_id", armor.id + 256);
+        xml_armor->SetAttribute("price", prices_[armor.id + 256]);
         xml_armor->SetAttribute("name", armor.name);
         xml_armor->SetAttribute("description", armor.description);
         xml_armor->SetAttribute("sell", armor.sellable);
@@ -1531,6 +1546,8 @@ void KernelDataInstaller::WriteAccessories(std::string file){
     for (AccessoryData accessory : accessories_){
         std::unique_ptr<TiXmlElement> xml_accessory(new TiXmlElement("accessory"));
         xml_accessory->SetAttribute("id", accessory.id);
+        xml_accessory->SetAttribute("inventory_id", accessory.id + 287);
+        xml_accessory->SetAttribute("price", prices_[accessory.id + 287]);
         xml_accessory->SetAttribute("name", accessory.name);
         xml_accessory->SetAttribute("description", accessory.description);
         xml_accessory->SetAttribute("sell", accessory.sellable);
@@ -1840,6 +1857,7 @@ void KernelDataInstaller::WriteMateria(std::string file){
     for (MateriaData materia : materia_){
         std::unique_ptr<TiXmlElement> xml_materia(new TiXmlElement("materia"));
         xml_materia->SetAttribute("id", materia.id);
+        xml_materia->SetAttribute("price", prices_[materia.id + 320]);
         xml_materia->SetAttribute("name", materia.name);
         xml_materia->SetAttribute("description", materia.description);
         xml_materia->SetAttribute("type", materia.type);
@@ -2088,22 +2106,10 @@ void KernelDataInstaller::ReadInitialSaveMap(){
     // Empty the item list
     attacks_.clear();
 
-    File savemap_file = kernel_.ExtractGZip(KERNEL_ATTACK_DATA);
-
-    savemap_.checksum = savemap_file.readU32LE();
-    for (int i = 0; i < 68; i ++) savemap_.preview[i] = savemap_file.readU8();
-    savemap_.window_colour.top_left.red = savemap_file.readU8();
-    savemap_.window_colour.top_left.green = savemap_file.readU8();
-    savemap_.window_colour.top_left.blue = savemap_file.readU8();
-    savemap_.window_colour.top_right.red = savemap_file.readU8();
-    savemap_.window_colour.top_right.green = savemap_file.readU8();
-    savemap_.window_colour.top_right.blue = savemap_file.readU8();
-    savemap_.window_colour.top_left.red = savemap_file.readU8();
-    savemap_.window_colour.bottom_left.green = savemap_file.readU8();
-    savemap_.window_colour.bottom_left.blue = savemap_file.readU8();
-    savemap_.window_colour.bottom_right.red = savemap_file.readU8();
-    savemap_.window_colour.bottom_right.green = savemap_file.readU8();
-    savemap_.window_colour.bottom_right.blue = savemap_file.readU8();
+    File savemap_file = kernel_.ExtractGZip(KERNEL_INITIALIZATION_DATA);
+    savemap_file.WriteFile("/home/ivalentin/initialsavemap");
+    // The initial savemap in KERNEL.BIN startas at 0x0054, directly into Cloud's level.
+    // It skips the header (PC and PSX, checksum, preview data and window colour).
     for (int i = 0; i < 9; i ++){
         savemap_.characters[i].identifier = savemap_file.readU8();
         savemap_.characters[i].level = savemap_file.readU8();
@@ -2154,62 +2160,213 @@ void KernelDataInstaller::ReadInitialSaveMap(){
         else savemap_.characters[i].back_row = false;
         savemap_.characters[i].level_progress = savemap_file.readU8();
         savemap_.characters[i].learned_limits_raw = savemap_file.readU16LE();
+        for (int j = 0; j < 4; j ++){
+            savemap_.characters[i].limits_learned[j][0] = false;
+            savemap_.characters[i].limits_learned[j][1] = false;
+        }
+        if (savemap_.characters[i].learned_limits_raw == (savemap_.characters[i].learned_limits_raw | 0x0001))
+            savemap_.characters[i].limits_learned[0][0] = true;
+        if (savemap_.characters[i].learned_limits_raw == (savemap_.characters[i].learned_limits_raw | 0x0002))
+            savemap_.characters[i].limits_learned[0][1] = true;
+        if (savemap_.characters[i].learned_limits_raw == (savemap_.characters[i].learned_limits_raw | 0x0008))
+            savemap_.characters[i].limits_learned[1][0] = true;
+        if (savemap_.characters[i].learned_limits_raw == (savemap_.characters[i].learned_limits_raw | 0x0010))
+            savemap_.characters[i].limits_learned[1][1] = true;
+        if (savemap_.characters[i].learned_limits_raw == (savemap_.characters[i].learned_limits_raw | 0x0040))
+            savemap_.characters[i].limits_learned[2][0] = true;
+        if (savemap_.characters[i].learned_limits_raw == (savemap_.characters[i].learned_limits_raw | 0x0080))
+            savemap_.characters[i].limits_learned[2][1] = true;
+        if (savemap_.characters[i].learned_limits_raw == (savemap_.characters[i].learned_limits_raw | 0x0200))
+            savemap_.characters[i].limits_learned[3][0] = true;
+        savemap_.characters[i].kills = savemap_file.readU16LE();
+        savemap_.characters[i].limit_uses[0] = savemap_file.readU16LE();
+        savemap_.characters[i].limit_uses[1] = savemap_file.readU16LE();
+        savemap_.characters[i].limit_uses[2] = savemap_file.readU16LE();
+        savemap_.characters[i].hp = savemap_file.readU16LE();
+        savemap_.characters[i].base_hp = savemap_file.readU16LE();
+        savemap_.characters[i].mp = savemap_file.readU16LE();
+        savemap_.characters[i].base_mp = savemap_file.readU16LE();
+        savemap_.characters[i].unknown = savemap_file.readU32LE();
+        savemap_.characters[i].max_hp = savemap_file.readU16LE();
+        savemap_.characters[i].max_mp = savemap_file.readU16LE();
+        savemap_.characters[i].exp = savemap_file.readU32LE();
+        for (int m = 0; m < 8; m ++){
+            savemap_.characters[i].weapon_materia[m].id = savemap_file.readU8();
+            // TODO: Identify Enemy Skill, do special treatment
+            savemap_.characters[i].weapon_materia[m].ap // WARNING: AP has only three bytes.
+              = savemap_file.readU8()
+              + (savemap_file.readU8() << 8)
+              + (savemap_file.readU8() << 16);
+        }
+        for (int m = 0; m < 8; m ++){
+            savemap_.characters[i].armor_materia[m].id = savemap_file.readU8();
+            // TODO: Identify Enemy Skill, do special treatment
+            savemap_.characters[i].armor_materia[m].ap // WARNING: AP has only three bytes.
+              = savemap_file.readU8()
+              + (savemap_file.readU8() << 8)
+              + (savemap_file.readU8() << 16);
+        }
+        savemap_.characters[i].exp_to_next = savemap_file.readU32LE();
     }
-
+    // The initial savemap ends up after character data, end now.
 }
 
 void KernelDataInstaller::WriteInitialSaveMap(std::string file){
+    // The initial save map only contains character data.
     TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("attacks"));
-    for (AttackData attack : attacks_){
-        std::unique_ptr<TiXmlElement> xml_attack(new TiXmlElement("attack"));
-        xml_attack->SetAttribute("id", attack.id);
-        xml_attack->SetAttribute("accuracy", attack.accuracy);
-        xml_attack->SetAttribute("impact_effect", attack.impact_effect);
-        xml_attack->SetAttribute("hurt_anim", attack.hurt_anim);
-        xml_attack->SetAttribute("mp", attack.mp);
-        xml_attack->SetAttribute("sounds", attack.sound);
-        xml_attack->SetAttribute("camera_1", attack.camera_single);
-        xml_attack->SetAttribute("camera_x", attack.camera_multiple);
-        xml_attack->SetAttribute("effect", attack.effect);
-        xml_attack->SetAttribute("dmg_formula", attack.damage_formula);
-        xml_attack->SetAttribute("dmg_modifier", attack.damage_modifier);
-        xml_attack->SetAttribute("power", attack.power);
-        xml_attack->SetAttribute("restore", attack.restore_type);
-        xml_attack->SetAttribute("target_select", attack.target.selection_enabled);
-        xml_attack->SetAttribute("target_default_enemy", attack.target.default_enemy);
-        xml_attack->SetAttribute("target_default_multiple", attack.target.default_multiple);
-        xml_attack->SetAttribute("target_toggle_multiple", attack.target.toggle_multiple);
-        xml_attack->SetAttribute("target_fixed", attack.target.fixed_row);
-        xml_attack->SetAttribute("target_short_range", attack.target.short_range);
-        xml_attack->SetAttribute("target_all", attack.target.all_rows);
-        xml_attack->SetAttribute("target_random", attack.target.random);
-        // Statuses.
-        if (attack.status.status.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("statuses"));
-            xml_status->SetAttribute("mode", attack.status.mode);
-            xml_status->SetAttribute("chance", attack.status.chance);
-            for (int s : attack.status.status){
-                std::unique_ptr<TiXmlElement> xml_status_status(new TiXmlElement("status"));
-                xml_status_status->SetAttribute("id", s);
-                xml_status->LinkEndChild(xml_status_status.release());
+    std::unique_ptr<TiXmlElement> container(new TiXmlElement("savemap"));
+    std::unique_ptr<TiXmlElement> xml_characters(new TiXmlElement("characters"));
+    int total_count = 0; // Utility to count in loops.
+    // Characters.
+    for (int c = 0; c < 9; c ++){
+        std::unique_ptr<TiXmlElement> xml_character(new TiXmlElement("character"));
+        xml_character->SetAttribute("id", c);
+        xml_character->SetAttribute("char_id", savemap_.characters[c].identifier);
+        xml_character->SetAttribute("name", savemap_.characters[c].name);
+        xml_character->SetAttribute("level", savemap_.characters[c].level);
+        xml_character->SetAttribute("kills", savemap_.characters[c].kills);
+        xml_character->SetAttribute("exp", savemap_.characters[c].exp);
+        xml_character->SetAttribute("exp_to_next_lv", savemap_.characters[c].exp_to_next);
+        // Character stats.
+        std::unique_ptr<TiXmlElement> xml_stats(new TiXmlElement("stats"));
+        // TODO: Lookup stat names or IDs (one or the other, don't hardcode both).
+        std::unique_ptr<TiXmlElement> xml_stat_str(new TiXmlElement("stat"));
+        xml_stat_str->SetAttribute("id", 0);
+        xml_stat_str->SetAttribute("name", "str");
+        xml_stat_str->SetAttribute("value", savemap_.characters[c].str);
+        xml_stat_str->SetAttribute("bonus", savemap_.characters[c].str_bonus);
+        xml_stats->LinkEndChild(xml_stat_str.release());
+        std::unique_ptr<TiXmlElement> xml_stat_vit(new TiXmlElement("stat"));
+        xml_stat_vit->SetAttribute("id", 1);
+        xml_stat_vit->SetAttribute("name", "vit");
+        xml_stat_vit->SetAttribute("value", savemap_.characters[c].vit);
+        xml_stat_vit->SetAttribute("bonus", savemap_.characters[c].vit_bonus);
+        xml_stats->LinkEndChild(xml_stat_vit.release());
+        std::unique_ptr<TiXmlElement> xml_stat_mag(new TiXmlElement("stat"));
+        xml_stat_mag->SetAttribute("id", 2);
+        xml_stat_mag->SetAttribute("name", "mag");
+        xml_stat_mag->SetAttribute("value", savemap_.characters[c].mag);
+        xml_stat_mag->SetAttribute("bonus", savemap_.characters[c].mag_bonus);
+        xml_stats->LinkEndChild(xml_stat_mag.release());
+        std::unique_ptr<TiXmlElement> xml_stat_spr(new TiXmlElement("stat"));
+        xml_stat_spr->SetAttribute("id", 3);
+        xml_stat_spr->SetAttribute("name", "spr");
+        xml_stat_spr->SetAttribute("value", savemap_.characters[c].spr);
+        xml_stat_spr->SetAttribute("bonus", savemap_.characters[c].spr_bonus);
+        xml_stats->LinkEndChild(xml_stat_spr.release());
+        std::unique_ptr<TiXmlElement> xml_stat_dex(new TiXmlElement("stat"));
+        xml_stat_dex->SetAttribute("id", 4);
+        xml_stat_dex->SetAttribute("name", "dex");
+        xml_stat_dex->SetAttribute("value", savemap_.characters[c].dex);
+        xml_stat_dex->SetAttribute("bonus", savemap_.characters[c].dex_bonus);
+        xml_stats->LinkEndChild(xml_stat_dex.release());
+        std::unique_ptr<TiXmlElement> xml_stat_lck(new TiXmlElement("stat"));
+        xml_stat_lck->SetAttribute("id", 5);
+        xml_stat_lck->SetAttribute("name", "lck");
+        xml_stat_lck->SetAttribute("value", savemap_.characters[c].lck);
+        xml_stat_lck->SetAttribute("bonus", savemap_.characters[c].lck_bonus);
+        xml_stats->LinkEndChild(xml_stat_lck.release());
+        std::unique_ptr<TiXmlElement> xml_stat_hp(new TiXmlElement("stat"));
+        xml_stat_hp->SetAttribute("id", 6);
+        xml_stat_hp->SetAttribute("name", "hp");
+        xml_stat_hp->SetAttribute("value", savemap_.characters[c].hp);
+        xml_stat_hp->SetAttribute("base", savemap_.characters[c].base_hp);
+        // TODO: MAX HP always as 0xFF, must be calculated manually.
+        xml_stat_hp->SetAttribute("max", savemap_.characters[c].max_hp);
+        xml_stats->LinkEndChild(xml_stat_hp.release());
+        std::unique_ptr<TiXmlElement> xml_stat_mp(new TiXmlElement("stat"));
+        xml_stat_mp->SetAttribute("id", 6);
+        xml_stat_mp->SetAttribute("name", "mp");
+        xml_stat_mp->SetAttribute("value", savemap_.characters[c].mp);
+        xml_stat_mp->SetAttribute("base", savemap_.characters[c].base_mp);
+        // TODO: MAX MP always as 0xFF, must be calculated manually.
+        xml_stat_mp->SetAttribute("max", savemap_.characters[c].max_mp);
+        xml_stats->LinkEndChild(xml_stat_mp.release());
+        xml_character->LinkEndChild(xml_stats.release());
+        // Character limits
+        std::unique_ptr<TiXmlElement> xml_limits(new TiXmlElement("limits"));
+        xml_limits->SetAttribute("selected", savemap_.characters[c].limit_level);
+        xml_limits->SetAttribute("bar", savemap_.characters[c].limit_bar);
+        for (int l = 0; l < 4; l ++){
+            if (savemap_.characters[c].limits_learned[l][0]){
+                std::unique_ptr<TiXmlElement> xml_limit_level(new TiXmlElement("level"));
+                xml_limit_level->SetAttribute("id", l + 1);
+                std::unique_ptr<TiXmlElement> xml_limit_technique(new TiXmlElement("technique"));
+                xml_limit_technique->SetAttribute("id", 1);
+                if (l < 3)
+                    xml_limit_technique->SetAttribute("uses", savemap_.characters[c].limit_uses[l]);
+                else xml_limit_technique->SetAttribute("uses", 0);
+                xml_limit_level->LinkEndChild(xml_limit_technique.release());
+                if (savemap_.characters[c].limits_learned[l][1]){
+                    std::unique_ptr<TiXmlElement> xml_limit_technique(
+                      new TiXmlElement("technique")
+                    );
+                    xml_limit_technique->SetAttribute("id", 2);
+                    xml_limit_technique->SetAttribute("uses", 0);
+                    xml_limit_level->LinkEndChild(xml_limit_technique.release());
+                }
+                xml_limits->LinkEndChild(xml_limit_level.release());
             }
-            xml_attack->LinkEndChild(xml_status.release());
         }
-        // Add elements.
-        if (attack.elements.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_elements(new TiXmlElement("elements"));
-            for (int s : attack.elements){
-                std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("element"));
-                xml_element->SetAttribute("id", s);
-                xml_elements->LinkEndChild(xml_element.release());
+        xml_character->LinkEndChild(xml_limits.release());
+        // Character equipments.
+        std::unique_ptr<TiXmlElement> xml_equipment(new TiXmlElement("equipment"));
+        std::unique_ptr<TiXmlElement> xml_weapon(new TiXmlElement("weapon"));
+        xml_weapon->SetAttribute("id", savemap_.characters[c].weapon);
+        std::unique_ptr<TiXmlElement> xml_weapon_materias(new TiXmlElement("materias"));
+        total_count = 0;
+        for (int m = 0; m < 8; m ++){
+            if (savemap_.characters[c].weapon_materia[m].id < 255){
+                total_count ++;
+                std::unique_ptr<TiXmlElement> xml_weapon_materia(new TiXmlElement("materia"));
+                xml_weapon_materia->SetAttribute("id", savemap_.characters[c].weapon_materia[m].id);
+                xml_weapon_materia->SetAttribute("ap", savemap_.characters[c].weapon_materia[m].ap);
+                xml_weapon_materias->LinkEndChild(xml_weapon_materia.release());
             }
-            xml_attack->LinkEndChild(xml_elements.release());
         }
-
-        container->LinkEndChild(xml_attack.release());
-
+        // Only add materia section to equipment if at least one is equipped, else ignore section.
+        if (total_count > 0) xml_weapon->LinkEndChild(xml_weapon_materias.release());
+        xml_equipment->LinkEndChild(xml_weapon.release());
+        std::unique_ptr<TiXmlElement> xml_armor(new TiXmlElement("armor"));
+        xml_armor->SetAttribute("id", savemap_.characters[c].armor);
+        std::unique_ptr<TiXmlElement> xml_armor_materias(new TiXmlElement("materias"));
+        total_count = 0;
+        for (int m = 0; m < 8; m ++){
+            if (savemap_.characters[c].armor_materia[m].id < 255){
+                total_count ++;
+                std::unique_ptr<TiXmlElement> xml_armor_materia(new TiXmlElement("materia"));
+                xml_armor_materia->SetAttribute("id", savemap_.characters[c].weapon_materia[m].id);
+                xml_armor_materia->SetAttribute("ap", savemap_.characters[c].weapon_materia[m].ap);
+                xml_armor_materias->LinkEndChild(xml_armor_materia.release());
+            }
+        }
+        // Only add materia section to equipment if at least one is equipped, else ignore section.
+        if (total_count > 0) xml_armor->LinkEndChild(xml_armor_materias.release());
+        xml_equipment->LinkEndChild(xml_armor.release());
+        if (savemap_.characters[c].accessory < 255){
+            std::unique_ptr<TiXmlElement> xml_accessory(new TiXmlElement("accessory"));
+            xml_accessory->SetAttribute("id", savemap_.characters[c].accessory);
+            xml_equipment->LinkEndChild(xml_accessory.release());
+        }
+        xml_character->LinkEndChild(xml_equipment.release());
+        // Statuses (Only saddness/fury)
+        if (savemap_.characters[c].fury || savemap_.characters[c].sadness){
+            std::unique_ptr<TiXmlElement> xml_statuses(new TiXmlElement("statuses"));
+            if (savemap_.characters[c].fury){
+                std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("status"));
+                xml_status->SetAttribute("id", FURY);
+                xml_statuses->LinkEndChild(xml_status.release());
+            }
+            if (savemap_.characters[c].sadness){
+                std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("status"));
+                xml_status->SetAttribute("id", SADNESS);
+                xml_statuses->LinkEndChild(xml_status.release());
+            }
+            xml_character->LinkEndChild(xml_statuses.release());
+        }
+        xml_characters->LinkEndChild(xml_character.release());
     }
+    container->LinkEndChild(xml_characters.release());
     xml.LinkEndChild(container.release());
     xml.SaveFile(file);
 }

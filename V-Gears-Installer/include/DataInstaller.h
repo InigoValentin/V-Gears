@@ -58,13 +58,15 @@ class DataInstaller{
          *
          * @param[in] input_dir Path to the directory containing the original
          * data to parse.
+         * @param[in] exe_path Path to the ff7.exe file. It's optional and it may be empty.
          * @param[in] output_dir Path to the directory to write generated data
          * to.
          * @param[in] write_output_line Pointer to function to write output.
          */
         DataInstaller(
-          const std::string input_dir, const std::string output_dir,
-          std::function<void(std::string)> write_output_line
+          const std::string input_dir, const std::string exe_path, const std::string output_dir,
+          std::function<void(std::string)> write_output_line,
+          std::function<void(std::string)> set_progress_label
         );
 
         /**
@@ -86,7 +88,7 @@ class DataInstaller{
          *
          * @return Installation progress [0-100]
          */
-        int CalcProgress();
+        const int CalcProgress();
 
         /**
          * Creates a directory in the outputh path.
@@ -223,9 +225,29 @@ class DataInstaller{
         std::string input_dir_;
 
         /**
-         * The path to the directory where to sve the V-Gears data.
+         * The path to original PC game executable.
+         */
+        std::string exe_path_;
+
+        /**
+         * The path to the directory where to save the V-Gears data.
          */
         std::string output_dir_;
+
+        /**
+         * Iterator counter.
+         */
+        size_t iterator_counter_;
+
+        /**
+         * Helper variable to indicate internal progress of installation steps.
+         */
+        size_t conversion_step_;
+
+        /**
+         * Helper variable to indicate internal progress of installation steps.
+         */
+        size_t progress_step_num_elements_;
 
         /**
          * The installer application.
@@ -292,21 +314,6 @@ class DataInstaller{
         MapCollection::iterator converted_map_list_iterator_;
 
         /**
-         * Iterator counter.
-         */
-        size_t iterator_counter_;
-
-        /**
-         * Helper variable to indicate internal progress of installation steps.
-         */
-        size_t conversion_step_;
-
-        /**
-         * Helper variable to indicate internal progress of installation steps.
-         */
-        size_t progress_step_num_elements_;
-
-        /**
          * Field currently being processed.
          */
         VGears::FLevelFilePtr field_;
@@ -336,9 +343,14 @@ class DataInstaller{
         ModelAnimationMap::iterator model_animation_map_iterator_;
 
         /**
-         * Function used to print text.
+         * Function used to print text to the log output, line by line.
          */
-        std::function<void(std::string)> write_output_line;
+        std::function<void(std::string)> write_output_line_;
+
+        /**
+         * Function used to print set the current installation progress text.
+         */
+        std::function<void(std::string)> set_progress_label_;
 
         /**
          * Field text writer.

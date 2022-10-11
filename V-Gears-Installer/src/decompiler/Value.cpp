@@ -135,7 +135,7 @@ std::ostream &DupValue::Print(std::ostream &output) const{return output << "temp
 
 StringValue::StringValue(std::string str): str_(str){}
 
-std::ostream &StringValue::Print(std::ostream &output) const{
+std::ostream &StringValue::Print(std::ostream& output) const{
     return output << "\"" << str_ << "\"";
 }
 
@@ -145,9 +145,9 @@ std::ostream& UnquotedStringValue::Print(std::ostream& output) const{return outp
 
 VarValue::VarValue(std::string name): name_(name){}
 
-std::ostream &VarValue::Print(std::ostream &output) const{return output << name_;}
+std::ostream &VarValue::Print(std::ostream& output) const{return output << name_;}
 
-ArrayValue::ArrayValue(const std::string name, const ValueList indexes):
+ArrayValue::ArrayValue(const std::string& name, const ValueList& indexes):
   VarValue(name), indexes_(indexes){}
 
 std::ostream &ArrayValue::Print(std::ostream &output) const {

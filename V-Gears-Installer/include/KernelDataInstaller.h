@@ -36,6 +36,8 @@ class KernelDataInstaller{
          */
         ~KernelDataInstaller();
 
+        void ReadPrices(std::string menu_path);
+
         /**
          * Reads the command data from the kernel.
          *
@@ -2432,5 +2434,16 @@ class KernelDataInstaller{
          * The kernel file.
          */
         BinGZipFile kernel_;
+
+        /**
+         * Item and materia shop prices.
+         *
+         * Indexes 0 - 127: Items.
+         * Indexes 128 - 255: Weapons.
+         * Indexes 256 - 287: Armors.
+         * Indexes 288 - 319: Accessories
+         * Indxes 320 - 415: Materia.
+         */
+        u32 prices_[416];
 
 };

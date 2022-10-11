@@ -13,7 +13,6 @@
  * GNU General Public License for more details.
  */
 
-
 #include <iostream>
 #include <QtCore/QProcess>
 #include <QtWidgets/QFileDialog>
@@ -40,13 +39,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), main_window_(new U
     main_window_->btn_vgears_config->setText(settings_->value("ConfigDir").toString());
     main_window_->line_data_dst->setText(settings_->value("DataDir").toString());
     main_window_->line_vgears_exe->setText(settings_->value("VGearsEXE").toString());
-#ifdef _DEBUG
-    // Hard coded prebaked paths for debugging to save time
-    //main_window_->line_data_src->setText("C:\\Games\\FF7\\data");
-    //main_window_->line_data_dst->setText(
-    //  "C:\\Users\\paul\\Desktop\\v-gears\\output\\data"
-    //);
-#endif
+    // TODO" Hard coded paths for debugging to save time. Remove them.
+    main_window_->line_data_src->setText("/home/ivalentin/data/");
+    main_window_->line_exe_src->setText("/home/ivalentin/data/ff7.exe");
+    //main_window_->line_data_dst->setText("/home/ivalentin/.v-gears/data/");
     timer_ = new QTimer(this);
     connect(timer_, SIGNAL(timeout()), this, SLOT(DoProgress()));
 }
@@ -136,18 +132,26 @@ void MainWindow::on_btn_vgears_run_clicked(){
 
 void MainWindow::on_btn_data_src_clicked(){
     QString temp = QFileDialog::getExistingDirectory(
-      this, tr("Location of Game Data),"),QDir::homePath()
+      this, tr("Location of extracted original game data"), QDir::homePath()
     );
     main_window_->line_data_src->setText(temp);
 }
 
+void MainWindow::on_btn_exe_src_clicked(){
+    QString temp = QFileDialog::getOpenFileName(
+      this, tr("Location of original executable (ff7.exe)"),
+      QDir::homePath(), "PC executable (ff7.exe)", 0
+    );
+    main_window_->line_exe_src->setText(temp);
+}
+
 void MainWindow::on_line_data_dst_editingFinished(){
-    settings_->setValue("DataDir",main_window_->line_data_dst->text());
+    settings_->setValue("DataDir", main_window_->line_data_dst->text());
 }
 
 void MainWindow::on_btn_data_dst_clicked(){
     QString temp = QFileDialog::getExistingDirectory(
-      this, tr("Location of VGears Data),"), settings_->value("DataDir").toString()
+      this, tr("V-Gears data installation directory"), settings_->value("DataDir").toString()
     );
     if (!temp.isNull()){
         settings_->setValue("DataDir",temp);
@@ -157,42 +161,48 @@ void MainWindow::on_btn_data_dst_clicked(){
 
 void MainWindow::on_btn_data_run_clicked(){
     if (main_window_->line_data_src->text().isEmpty()){
-        // TODO IVV: Default path, remove
-        main_window_->line_data_src->setText("/home/ivalentin/data/");
+        QMessageBox::critical(
+          this, tr("Input error"),
+          tr(
+            "The installation needs the original game data.\n\n"
+            "Select a directory with the extracted data from Final Fantasy VII "
+            "(PC version, install disk)."
+          )
+        );
     }
-    //{
-    //    QMessageBox::critical(
-    //      this, tr("Input error"),
-    //      tr("No input to installed FF7 PC data provided")
-    //    );
-    //}
     else if (main_window_->line_data_dst->text().isEmpty())
         QMessageBox::critical(this, tr("Output error"), tr("No output path provided"));
     else{
         // Normalize the paths so its in / format separators.
         QString input = QDir::fromNativeSeparators(main_window_->line_data_src->text());
         if (!input.endsWith("/")) input += "/";
+        QString input_exe = QDir::fromNativeSeparators(main_window_->line_exe_src->text());
         QString output = QDir::fromNativeSeparators(main_window_->line_data_dst->text());
         if (!output.endsWith("/")) output += "/";
         // TODO: Enumerate files or find some better way to do this.
-        const std::vector<std::string> required_files = {"field/char.lgp", "field/flevel.lgp"};
+        const std::vector<std::string> required_files = {
+          "field/char.lgp", "field/flevel.lgp", "kernel/KERNEL.BIN"
+        };
         // Ensure required files are in the input dir
         for (auto& file : required_files){
             QString full_path = input + QString::fromStdString(file);
             if (!QFile::exists(full_path)){
                 QMessageBox::critical(
-                  this, tr("Missing input file"), tr("File not found: ") + full_path);
+                  this, tr("Missing input file"),
+                  tr(
+                    "Some of the required files were not found among the extracted data.\n\n"
+                    " Make sure that the file '"
+                  ) + file.c_str() + tr("' is in the extracted data.")
+                );
                 return;
             }
         }
         if (installer_created){
+            // Due to the use of singletons, the installer can't be re-run.
+            // TODO: Verify that this is true, and if so, try to fix it.
             QMessageBox::critical(
-              this,
-              tr("Error"),
-              tr(
-                "Due to use of singletons install function can only be used "
-                "once, please restart the application."
-              )
+              this, tr("Error"),
+              tr("Please, fix the errors, and then close the installer before trying again.")
             );
             return;
         }
@@ -201,9 +211,11 @@ void MainWindow::on_btn_data_run_clicked(){
             installer_created = true;
             installer_ = std::make_unique<DataInstaller>(
               QDir::toNativeSeparators(input).toStdString(),
+              QDir::toNativeSeparators(input_exe).toStdString(),
               QDir::toNativeSeparators(output).toStdString(),
-              [this](const std::string outputLine){
-                main_window_->data_log->append(outputLine.c_str());
+              [this](const std::string log_line){main_window_->data_log->append(log_line.c_str());},
+              [this](const std::string progress){
+                main_window_->label_progress->setText(progress.c_str());
               }
             );
             OnInstallStarted();

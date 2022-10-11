@@ -57,15 +57,17 @@
 float DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
 
 DataInstaller::DataInstaller(
-  const std::string input_dir, const std::string output_dir,
-  std::function<void(std::string)> write_output_line
+  const std::string input_dir, const std::string exe_path, const std::string output_dir,
+  std::function<void(std::string)> write_output_line,
+  std::function<void(std::string)> set_progress_label
 )
 #ifdef _DEBUG
     : application_("plugins_d.cfg", "resources_d.cfg", "install_d.log"),
 #else
   : application_("plugins.cfg", "resources.cfg", "install.log"),
 #endif
-  input_dir_(input_dir), output_dir_(output_dir), write_output_line(write_output_line),
+  input_dir_(input_dir), exe_path_(exe_path), output_dir_(output_dir),
+  write_output_line_(write_output_line), set_progress_label_(set_progress_label),
   iterator_counter_(0), conversion_step_(0), progress_step_num_elements_(0)
 {
     if (!application_.initOgre(true)) throw std::runtime_error("Ogre init failure");
@@ -77,7 +79,7 @@ DataInstaller::DataInstaller(
 
 DataInstaller::~DataInstaller(){}
 
-int DataInstaller::CalcProgress(){
+const int DataInstaller::CalcProgress(){
     // TODO: Make more accurate with iterator_counter_ and
     // progress_step_num_elements_.
     float curr_step = installation_state_ / static_cast<float>(STATE_COUNT);
@@ -88,15 +90,18 @@ int DataInstaller::CalcProgress(){
 int DataInstaller::Progress(){
     switch (installation_state_){
         case IDLE:
-            write_output_line("Loading flevel.lgp");
+            write_output_line_("Loading flevel.lgp");
+            set_progress_label_("Loading flevel.lgp");
             progress_step_num_elements_ = 1;
             iterator_counter_ = 0;
             fields_lgp_ = std::make_unique<ScopedLgp>(
               application_.getRoot(), input_dir_ + "field/flevel.lgp", "LGP", "FFVIIFields"
             );
+            set_progress_label_("Installing kernel data...");
             kernel_installer_ = std::make_unique<KernelDataInstaller>(
-              input_dir_ += "kernel/KERNEL.BIN"
+              input_dir_ + "kernel/KERNEL.BIN"
             );
+            kernel_installer_->ReadPrices(exe_path_);
             if (kernel_installer_->ReadCommands() > 0){
                 CreateDir("game");
                 kernel_installer_->WriteCommands(output_dir_ + "game/commands.xml");
@@ -139,14 +144,17 @@ int DataInstaller::Progress(){
                 CreateDir("game");
                 kernel_installer_->WriteSummonNames(output_dir_ + "game/summons.xml");
             }
-            exit(0);
+            kernel_installer_->ReadInitialSaveMap();
+            kernel_installer_->WriteInitialSaveMap(output_dir_ + "game/initial_savemap.xml");
+            //exit(0);
 
             installation_state_ = SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
             // TODO: DEBUG:
             //installation_state_ = CONVERT_FIELDS;
             return CalcProgress();
         case SPAWN_POINTS_AND_SCALE_FACTORS_INIT:
-            write_output_line("Collecting spawn points and scale factors...");
+            write_output_line_("Collecting spawn points and scale factors...");
+            set_progress_label_("Collecting spawn points and scale factors...");
             InitCollectSpawnAndScaleFactors();
             return CalcProgress();
         case SPAWN_POINTS_AND_SCALE_FACTORS:
@@ -156,7 +164,8 @@ int DataInstaller::Progress(){
             ConvertFieldsIteration();
             return CalcProgress();
         case WRITE_MAPS_INIT:
-            write_output_line("Writing fields...");
+            write_output_line_("Writing fields...");
+            set_progress_label_("Writing fields...");
             WriteMapsXmlBegin();
             return CalcProgress();
         case WRITE_MAPS:
@@ -166,7 +175,8 @@ int DataInstaller::Progress(){
             EndWriteMapsXml();
             return CalcProgress();
         case CONVERT_FIELD_MODELS_INIT:
-            write_output_line("Converting field models...");
+            write_output_line_("Converting field models...");
+            set_progress_label_("Converting field models...");
             ConvertFieldModelsBegin();
             return CalcProgress();
         case CONVERT_FIELD_MODELS:
@@ -642,7 +652,7 @@ static float FieldScaleFactor(
  * @param[in] model_animation_db Database of model animations.
  * @param[out] maps The list of maps. The converted one will be added at the
  * end.
- * @param[in] write_output_line Functon to print output to console.
+ * @param[in] write_output_line_ Functon to print output to console.
  */
 static void FF7PcFieldToVGearsField(
   FieldTextWriter& field_text_writter,
@@ -653,7 +663,7 @@ static void FF7PcFieldToVGearsField(
   const FieldScaleFactorMap& scale_factor_map,
   ModelsAndAnimationsDb& model_animation_db,
   MapCollection& maps,
-  std::function<void(std::string)> write_output_line
+  std::function<void(std::string)> write_output_line_
 ){
     // Generate triggers script to insert into main
     // decompiled FF7 field -> LUA script.
@@ -689,7 +699,7 @@ static void FF7PcFieldToVGearsField(
             script_file << decompiled.luaScript;
             try{field_text_writter.Write(raw_field_data, field->getName());}
             catch (const std::out_of_range& ex){
-                write_output_line(
+                write_output_line_(
                   "[ERROR] Failed to read texts from field " + field->getName() + ": " + ex.what()
                 );
                 std::cerr << "[ERROR] Failed to read texts from field "
@@ -697,7 +707,7 @@ static void FF7PcFieldToVGearsField(
             }
         }
         else{
-            write_output_line(
+            write_output_line_(
               "[ERROR] Failed to open script file from field " + field->getName() + " for writing."
             );
             std::cerr << "[ERROR] Failed to open script file from field "
@@ -705,7 +715,7 @@ static void FF7PcFieldToVGearsField(
         }
     }
     catch (const ::DecompilerException& ex){
-        write_output_line(
+        write_output_line_(
           "[ERROR] Internal decompiler error in field " + field->getName() + ": " + ex.what()
         );
         std::cerr << "[ERROR] Internal decompiler error in field "
@@ -786,7 +796,7 @@ static void FF7PcFieldToVGearsField(
                 if (
                   triangle_index >= field->GetWalkmesh()->GetTriangles().size()
                 ){
-                    write_output_line(
+                    write_output_line_(
                       "[WARNING] In field " + field->getName() + ": Map jump triangle ("
                       + std::to_string(triangle_index) + ") out of bounds ("
                       + std::to_string(field->GetWalkmesh()->GetTriangles().size()) + ")"
@@ -1309,16 +1319,16 @@ void DataInstaller::CollectionFieldSpawnAndScaleFactors(){
                 field_ = VGears::LZSFLevelFileManager::GetSingleton().load(
                   resource_name, "FFVIIFields"
                 ).staticCast<VGears::FLevelFile>();
-                //write_output_line("Load field " + resource_name);
+                //write_output_line_("Load field " + resource_name);
                 return;
             }
             if (conversion_step_ == 2){
-                //write_output_line("Read spawn points from scripts");
+                //write_output_line_("Read spawn points from scripts");
                 CollectSpawnPoints(field_, map_list_, spawn_points_);
                 return;
             }
             if (conversion_step_ == 3){
-                //write_output_line("Read scale factor");
+                //write_output_line_("Read scale factor");
                 CollectFieldScaleFactors(field_, scale_factors_, map_list_);
                 conversion_step_ = 0;
                 iterator_counter_ ++;
@@ -1345,7 +1355,7 @@ void DataInstaller::ConvertFieldsIteration(){
             //if (/*IsTestField(resource_name) &&*/ !WillCrash(resource_name)){
             // TODO: DEBUG: Only test fields
             if (IsTestField(resource_name) && !WillCrash(resource_name)){
-                //write_output_line("Converting field " + resource_name);
+                //write_output_line_("Converting field " + resource_name);
                 std::cout << " - Converting field: " << resource_name << std::endl;
                 CreateDir(FieldMapDir() + "/" + resource_name);
                 VGears::FLevelFilePtr field
@@ -1354,13 +1364,13 @@ void DataInstaller::ConvertFieldsIteration(){
                   ).staticCast<VGears::FLevelFile>();
                 FF7PcFieldToVGearsField(
                   field_text_writer_, field, output_dir_, map_list_, spawn_points_, scale_factors_,
-                  used_models_and_anims_, converted_map_list_, write_output_line
+                  used_models_and_anims_, converted_map_list_, write_output_line_
                 );
             }
             else{
-                write_output_line(
+                /*write_output_line_(
                   "[ERROR] Skip field " + resource_name + " due to crash or hang issue."
-                );
+                );*/
                 std::cerr << "[ERROR] Skip field: " << resource_name
                   << " due to crash or hang issue." << std::endl;
             }
@@ -1390,7 +1400,7 @@ void DataInstaller::WriteMapsXmlIteration(){
     progress_step_num_elements_ = converted_map_list_.size();
     if (converted_map_list_iterator_ != converted_map_list_.end()){
         auto map = *converted_map_list_iterator_;
-        write_output_line("Writing field " + FieldName(map));
+        write_output_line_("Writing field " + FieldName(map));
         std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("map"));
         xml_element->SetAttribute("name", FieldName(map));
         xml_element->SetAttribute("file_name", FieldMapDir() + "/" + map + "/map.xml");
@@ -1426,7 +1436,7 @@ void DataInstaller::ConvertFieldModelsIteration(){
     progress_step_num_elements_ = used_models_and_anims_.map.size();
     if (model_animation_map_iterator_ != used_models_and_anims_.map.end()){
         if (conversion_step_ == 0){
-            write_output_line("Converting model " + model_animation_map_iterator_->first);
+            write_output_line_("Converting model " + model_animation_map_iterator_->first);
             conversion_step_ ++;
         }
         else{
@@ -1449,7 +1459,7 @@ void DataInstaller::ConvertFieldModelsIteration(){
                 ExportMesh(output_dir_ + "/" + FieldModelDir() + "/", mesh);
             }
             catch (const Ogre::Exception& ex){
-                write_output_line(
+                write_output_line_(
                   "[ERROR] Ogre exception converting model "
                   + model_animation_map_iterator_->first + ": " + ex.what()
                 );
@@ -1457,7 +1467,7 @@ void DataInstaller::ConvertFieldModelsIteration(){
                   << model_animation_map_iterator_->first <<": " << ex.what() << std::endl;
             }
             catch (const std::exception& ex){
-                write_output_line(
+                write_output_line_(
                   "[ERROR] Exception converting model "
                   + model_animation_map_iterator_->first + ": " + ex.what()
                 );
@@ -1471,7 +1481,8 @@ void DataInstaller::ConvertFieldModelsIteration(){
     }
     else{
         std::cout << "Installation finished." << std::endl;
-        write_output_line("Installation finished.");
+        write_output_line_("Installation finished.");
+        set_progress_label_("Installation finished.");
         installation_state_ = DONE;
     }
 }

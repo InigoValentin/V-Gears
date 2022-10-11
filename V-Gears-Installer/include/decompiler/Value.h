@@ -610,7 +610,7 @@ class ArrayValue : public VarValue {
          * @param[in] indexes List of stack entries representing the indexes
          * used (left-to-right).
          */
-        ArrayValue(const std::string name, const ValueList indexes);
+        ArrayValue(const std::string& name, const ValueList& indexes);
 
         /**
          * Print the value to a stream.

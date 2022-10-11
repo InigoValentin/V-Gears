@@ -419,6 +419,11 @@ struct SaveMap{
          */
         bool back_row;
 
+        /**
+         * Indicates which limits the character have learned.
+         */
+        bool limits_learned[4][2];
+
     };
 
     /**

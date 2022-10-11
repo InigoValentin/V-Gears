@@ -87,6 +87,13 @@ class MainWindow : public QMainWindow{
         void on_btn_data_src_clicked();
 
         /**
+         * Triggered when the ff7.exe file button is clicked.
+         *
+         * Opens a file manager for file selection.
+         */
+        void on_btn_exe_src_clicked();
+
+        /**
          * Triggered when the output data directory has done being edited.
          *
          * Sets the selected directory.
