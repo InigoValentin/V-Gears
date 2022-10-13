@@ -1,16 +1,18 @@
 <maps>
-    <map name="ffvii_elevtr1" file_name="maps/ffvii/field/elevtr1/map.xml" />
-    <map name="ffvii_md1_1" file_name="maps/ffvii/field/md1_1/map.xml" />
-    <map name="ffvii_md1_2" file_name="maps/ffvii/field/md1_2/map.xml" />
-    <map name="ffvii_md1stin" file_name="maps/ffvii/field/md1stin/map.xml" />
-    <map name="ffvii_md8_1" file_name="maps/ffvii/field/md8_1/map.xml" />
-    <map name="ffvii_md8_4" file_name="maps/ffvii/field/md8_4/map.xml" />
-    <map name="ffvii_nmkin_1" file_name="maps/ffvii/field/nmkin_1/map.xml" />
-    <map name="ffvii_nmkin_2" file_name="maps/ffvii/field/nmkin_2/map.xml" />
-    <map name="ffvii_nmkin_3" file_name="maps/ffvii/field/nmkin_3/map.xml" />
-    <map name="ffvii_nrthmk" file_name="maps/ffvii/field/nrthmk/map.xml" />
-    <map name="ffvii_rootmap" file_name="maps/ffvii/field/rootmap/map.xml" />
-    <map name="ffvii_startmap" file_name="maps/ffvii/field/startmap/map.xml" />
-    <map name="ffvii_tin_1" file_name="maps/ffvii/field/tin_1/map.xml" />
-    <map name="ffvii_tin_2" file_name="maps/ffvii/field/tin_2/map.xml" />
+    <map name="elevtr1" file_name="fields/elevtr1/map.xml" />
+    <map name="md1_1" file_name="fields/md1_1/map.xml" />
+    <map name="md1_2" file_name="fields/md1_2/map.xml" />
+    <map name="md1stin" file_name="fields/md1stin/map.xml" />
+    <map name="md8_1" file_name="fields/md8_1/map.xml" />
+    <map name="md8_4" file_name="fields/md8_4/map.xml" />
+    <map name="nmkin_1" file_name="fields/nmkin_1/map.xml" />
+    <map name="nmkin_2" file_name="fields/nmkin_2/map.xml" />
+    <map name="nmkin_3" file_name="fields/nmkin_3/map.xml" />
+    <map name="nmkin_4" file_name="fields/nmkin_4/map.xml" />
+    <map name="nmkin_5" file_name="fields/nmkin_5/map.xml" />
+    <map name="nrthmk" file_name="fields/nrthmk/map.xml" />
+    <map name="rootmap" file_name="fields/rootmap/map.xml" />
+    <map name="startmap" file_name="fields/startmap/map.xml" />
+    <map name="tin_1" file_name="fields/tin_1/map.xml" />
+    <map name="tin_2" file_name="fields/tin_2/map.xml" />
 </maps>

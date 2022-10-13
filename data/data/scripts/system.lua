@@ -1,13 +1,13 @@
 FFVII.set_party = function( character1, character2, character3 )
-    FFVII.Party[ 1 ] = character1
-    FFVII.Party[ 2 ] = character2
-    FFVII.Party[ 3 ] = character3
+    FFVII.Party[1] = character1
+    FFVII.Party[2] = character2
+    FFVII.Party[3] = character3
 end
 
 
 
 FFVII.is_character = function( character )
-    if FFVII.Characters[ character ] == nil then
+    if FFVII.Characters[character] == nil then
         return false
     end
 

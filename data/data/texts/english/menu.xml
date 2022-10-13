@@ -1,14 +1,10 @@
 ﻿<texts>
     <text name="BeginMenuNewGame">NEW GAME</text>
-    <text name="BeginMenu1">Battle map</text>
-    <text name="BeginMenu2">Xenogears map</text>
-    <text name="BeginMenu3">Entity testarea</text>
-    <text name="BeginMenu4">Idol menu</text>
-    <text name="BeginMenu5">World map test</text>
-    <text name="BeginMenu6">Debug Room</text>
-    <text name="BeginMenu7">North Mako Reactor Inside 2</text>
-    <text name="BeginMenu8">Midgar Train</text>
-    <text name="BeginMenu9">Debug Room HD</text>
+    <text name="BeginMenu1">DEBUG: Battle map</text>
+    <text name="BeginMenu2">DEBUG: Quick map</text>
+    <text name="BeginMenu3">DEBUG: Entity testarea</text>
+    <text name="BeginMenu4">DEBUG: World map test</text>
+    <text name="BeginMenu5">DEBUG: Debug Room</text>
 
     <text name="PauseMenuHeader">Paused</text>
     <text name="PauseMenuText">Are you want to quit?</text>
@@ -50,10 +46,4 @@
     <text name="CharacterDataNextLevel">next level</text>
     <text name="CharacterDataLimitLevel">Limit level</text>
     <text name="CharacterDataLimitLevelNumber">3</text>
-
-    <text name="IdolsNakagawaShoko">Nakagawa Shoko</text>
-    <text name="IdolsUetoAya">Ueto Aya</text>
-    <text name="IdolsHiranoAya">Hirano Aya</text>
-    <text name="IdolsTodaErica">Toda Erica</text>
-    <text name="IdolsHorikitaMaki">Horikita Maki</text>
 </texts>

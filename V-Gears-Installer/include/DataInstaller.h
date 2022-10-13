@@ -100,6 +100,25 @@ class DataInstaller{
         void CreateDir(const std::string& dir);
 
         /**
+         * Converts a tex file to png.
+         *
+         * The image is saved in the model data directory.
+         *
+         * @param[in] name Path to the tex file to convert.
+         */
+        void TexToPng(const std::string name);
+
+        /**
+         * Exports a mesh to a file.
+         *
+         * The file will have the mesh name.
+         *
+         * @param[in] outdir Path to the directory where the file will be saved.
+         * @param[in] mesh The mesh to export.
+         */
+        void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh);
+
+        /**
          * Initializer for {@see CollectionFieldSpawnAndScaleFactors}.
          *
          * Installation step 1.

@@ -4,7 +4,7 @@ if UiContainer == nil then UiContainer = {} end
 
 UiContainer.BeginMenu = {
     position = 1,
-    position_total = 10,
+    position_total = 6,
 
 
 
@@ -22,7 +22,7 @@ UiContainer.BeginMenu = {
 
             if button == "Enter" and event == "Press" then
                 if self.position == 1 then
-                    load_field_map_request( "ffvii_md1stin", "" )
+                    load_field_map_request( "md1stin", "" )
                     console( "camera_free false" )
                     console( "debug_walkmesh true" )
                     script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
@@ -36,7 +36,7 @@ UiContainer.BeginMenu = {
                 elseif self.position == 3 then
                     -- NMKIN_3 START
                     FFVII.Data.progress_game = 23
-                    load_field_map_request("ffvii_nmkin_3", "")
+                    load_field_map_request("nmkin_3", "")
                     console( "camera_free false" )
                     console( "debug_walkmesh true" )
                     script:wait(1)
@@ -52,7 +52,7 @@ UiContainer.BeginMenu = {
                     -- NMKIN_3 END
                     -- NMKIN_4 START
                     --[[FFVII.Data.progress_game = 23
-                    load_field_map_request("ffvii_nmkin_4", "")
+                    load_field_map_request("nmkin_4", "")
                     console( "camera_free false" )
                     console( "debug_walkmesh true" )
                     script:wait(1.5)
@@ -75,32 +75,10 @@ UiContainer.BeginMenu = {
                     FFVII.MenuSettings.pause_available = true
                 elseif self.position == 5 then
                     script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
-                    script:request_end_sync( Script.UI, "Idol", "show", 0 )
-                -- world map test menu
+                    console( "camera_free true" )
+                    world_map_module:init()
                 elseif self.position == 6 then
-					script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
-					console( "camera_free true" )
-					world_map_module:init()                
-                elseif self.position == 7 then
-                    load_field_map_request( "ffvii_startmap", "" )
-                    console( "camera_free false" )
-                    console( "debug_walkmesh false" )
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
-                    FFVII.MenuSettings.pause_available = true
-                elseif self.position == 8 then
-                    load_field_map_request( "ffvii_nmkin_2", "Spawn_elevtr1" )
-                    console( "camera_free false" )
-                    console( "debug_walkmesh false" )
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
-                    FFVII.MenuSettings.pause_available = true
-                elseif self.position == 9 then
-                    load_field_map_request( "ffvii_tin_2", "" )
-                    console( "camera_free false" )
-                    console( "debug_walkmesh false" )
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
-                    FFVII.MenuSettings.pause_available = true
-                elseif self.position == 10 then
-                    load_field_map_request( "debug", "" )
+                    load_field_map_request( "startmap", "" )
                     console( "camera_free false" )
                     console( "debug_walkmesh false" )
                     script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )

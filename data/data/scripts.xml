@@ -1,9 +1,9 @@
 <scripts>
-    <script file="scripts/ffvii/data.lua" />
-    <script file="scripts/ffvii/system.lua" />
-    <script file="scripts/ffvii/field.lua" />
-    <script file="scripts/ffvii/battle.lua" />
-    <script file="scripts/ffvii/battle_ai.lua" />
+    <script file="scripts/data.lua" />
+    <script file="scripts/system.lua" />
+    <script file="scripts/field.lua" />
+    <script file="scripts/battle.lua" />
+    <script file="scripts/battle_ai.lua" />
     <script file="game/accessories.lua" />
     <script file="game/armors.lua" />
     <script file="game/attacks.lua" />
@@ -14,7 +14,7 @@
     <script file="game/key_items.lua" />
     <script file="game/summons.lua" />
     <script file="game/weapons.lua" />
-    <!-- TODO: DOnt always parse initial savemap when loading is implemented -->
+    <!-- TODO: Don't always parse initial savemap when loading is implemented. -->
     <script file="game/initial_savemap.lua" />
     <system_script name="MapChanger" />
 </scripts>

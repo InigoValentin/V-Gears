@@ -1,107 +1,2674 @@
-﻿<texts>
-    <dialog name="md1stin_00" width="133" height="41">“C'mon newcomer.
-    Follow me.”</dialog>
+<texts>
+<dialog name="elevtr1_0">Platform</dialog>
 
-    <dialog name="md1_1_00" width="269" height="73">Biggs
-“Wow! You used to be in SOLDIER all right!
-    …Not everyday ya find one
-    in a group like AVALANCHE.”</dialog>
+<dialog name="elevtr1_1">Sector 1 Station</dialog>
 
-    <dialog name="md1_1_01" width="233" height="41">Jessie
-“SOLDIER? Aren't they the enemy?”</dialog>
+<dialog name="elevtr1_2">Sector 1</dialog>
 
-    <dialog name="md1_1_02" width="268" height="41">Jessie
-“What's he doing with us in AVALANCHE?”</dialog>
+<dialog name="elevtr1_3">No.1 Reactor</dialog>
 
-    <dialog name="md1_1_03" width="242" height="41">Biggs
-“Hold it, Jessie. He WAS in SOLDIER.”<next_page />“He quit them and now is one of us.”</dialog>
+<dialog name="elevtr1_4">No.5 Reactor</dialog>
 
-    <dialog name="md1_1_04" width="174" height="41">Biggs
-“Didn't catch your name…”</dialog>
+<dialog name="elevtr1_5">Received &quot;Restore&quot; Materia!</dialog>
 
-    <dialog name="md1_1_05" width="165" height="41"><include name="char_cloud" />
-“…<include name="char_cloud" />.”</dialog>
+<dialog name="elevtr1_6">Received &quot;Potion&quot;!</dialog>
 
-    <dialog name="md1_1_06" width="213" height="41">Biggs
-“<include name="char_cloud" />, eh? I'm…”</dialog>
+<dialog name="elevtr1_7">Received &quot;Phoenix Down&quot;!</dialog>
 
-    <dialog name="md1_1_07" width="249" height="57"><include name="char_cloud" />
-“I don't care what your names are.
-    Once this job's over…I'm outta here.”</dialog>
+<dialog name="elevtr1_8">Received &quot;All&quot; Materia!</dialog>
 
-    <dialog name="md1_1_08" width="228" height="57">“The hell you all doin'!?
-    I thought I told you never to move
-    in a group!”</dialog>
+<dialog name="elevtr1_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
 
-    <dialog name="md1_1_09" width="260" height="41">“Our target's the North Mako Reactor.
-    We'll meet on the bridge in front of it.”</dialog>
+<dialog name="elevtr1_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
 
-    <dialog name="md1_1_10" width="135" height="41">“Ex-SOLDIER, huh?
-    Don't trust ya!”</dialog>
+<dialog name="elevtr1_11">    <character id="4" /></dialog>
 
-    <dialog name="md1_1_11" width="254" height="73"><include name="char_barret" />
-“If you push the Directional button while
-    pushing the  <colour value="1 0 1">[CANCEL]</colour> button to run.
-    (earlier marked <image sprite="ButtonCross" />)”</dialog>
+<dialog name="elevtr1_12">    <include name="char_barret" />    <character id="5" /></dialog>
 
-    <dialog name="nrthmk_00" width="202" height="73">Wedge
-“I'll secure the escape passage.
-    Concentrate on the mission,
-    <include name="char_cloud" />.”</dialog>
+<dialog name="elevtr1_13">    ()    ()</dialog>
 
-    <dialog name="nrthmk_01" width="203" height="73">Wedge
-“Geez, we're really gonna blow
-    this huge furnace up?
-    This'll be somethin' to see!”</dialog>
+<dialog name="elevtr1_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
 
-    <dialog name="nmkin_1_00" width="247" height="41"><include name="char_barret" />
-“Yo! This your first time in a reactor?”</dialog>
+<dialog name="elevtr1_15">    1    2    3    4    5</dialog>
 
-    <dialog name="nmkin_1_01" width="293" height="41"><include name="char_cloud" />
-“No. After all, I did work for Shinra, y'know.”</dialog>
+<dialog name="elevtr1_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
 
-    <dialog name="nmkin_1_02" width="218" height="57"><include name="char_barret" />
-“The planet's full of Mako energy.
-    People here use it every day.”</dialog>
+<dialog name="elevtr1_17">opening(<image sprite="ButtonSquare" />)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
 
-    <dialog name="nmkin_1_03" width="248" height="73"><include name="char_barret" />
-“It's the life blood of this planet.
-    But Shinra keeps suckin' the blood out
-    with these weird machines.”</dialog>
+<dialog name="elevtr1_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
 
-    <dialog name="nmkin_1_04" width="177" height="57"><include name="char_cloud" />
-“I'm not here for a lecture.
-    Let's just hurry.”</dialog>
+<dialog name="elevtr1_19">para66F67F(<image sprite="ButtonSquare" />)68F68F270Felevetr()</dialog>
 
-    <dialog name="nmkin_1_05" width="213" height="57"><include name="char_barret" />
-“That's it! You're comin' with me
-    from now on.”</dialog>
+<dialog name="elevtr1_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
 
-    <dialog name="nmkin_1_06" width="127" height="41">Jessie
-“Code deciphered”</dialog>
+<dialog name="elevtr1_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
 
-    <dialog name="nmkin_1_07" width="127" height="41">Biggs
-“Code deciphered”</dialog>
+<dialog name="elevtr1_22">1F59F60F61F62F63F64F65F66F69F</dialog>
 
-    <dialog name="nmkin_1_08" width="133" height="41">Can't decipher code
-without Biggs</dialog>
+<dialog name="elevtr1_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
 
-    <dialog name="nmkin_1_09" width="133" height="41">Can't decipher code
-without Jessie</dialog>
+<dialog name="elevtr1_24"></dialog>
 
-    <dialog name="nmkin_1_10" width="250" height="41">Jessie
-“Biggs and I got the code for this door.”</dialog>
+<dialog name="elevtr1_25">        </dialog>
 
-    <dialog name="nmkin_1_11" width="266" height="57">Biggs
-“Think how many of our people risked their
-    lives, just for this code…”</dialog>
+<dialog name="elevtr1_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
 
-    <dialog name="nmkin_1_12" width="85" height="41">Biggs
-“Let's go!”</dialog>
+<dialog name="elevtr1_27"></dialog>
 
-    <dialog name="nmkin_1_13" width="149" height="41">Jessie
-“Alright, be careful.”</dialog>
+<dialog name="elevtr1_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
 
-    <dialog name="nmkin_1_14" width="211" height="41">Biggs
-“Jessie still hasn't come up yet!”</dialog>
+<dialog name="elevtr1_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="elevtr1_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="elevtr1_31">Biggs&quot;Wow! You used to be in SOLDIER all right!    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="elevtr1_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="elevtr1_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="elevtr1_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="elevtr1_35">Biggs&quot;Didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="elevtr1_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="elevtr1_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="elevtr1_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="elevtr1_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="elevtr1_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="elevtr1_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="elevtr1_42"><include name="char_barret" />&quot;Press the Directional buttons while    pushing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="elevtr1_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the mission,    <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="elevtr1_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="elevtr1_45">Switch On.</dialog>
+
+<dialog name="elevtr1_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="elevtr1_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="elevtr1_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="elevtr1_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="elevtr1_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="elevtr1_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="elevtr1_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="elevtr1_53"><include name="char_barret" />&quot;The Planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="elevtr1_54"><include name="char_barret" />&quot;It&apos;s the life blood of this Planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="elevtr1_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="elevtr1_56"><include name="char_barret" />&quot;@#&amp;^%$! From now on    you come with me.&quot;</dialog>
+
+<dialog name="elevtr1_57"><include name="char_barret" />&quot;Little by little the reactors&apos;ll drain out    all the life.    Then that&apos;ll be that.&quot;</dialog>
+
+<dialog name="elevtr1_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="elevtr1_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="elevtr1_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="elevtr1_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="elevtr1_62">Jessie&quot;Code deciphered&quot;</dialog>
+
+<dialog name="elevtr1_63">Biggs&quot;Code deciphered&quot;</dialog>
+
+<dialog name="elevtr1_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="elevtr1_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="elevtr1_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="elevtr1_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="elevtr1_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="elevtr1_69">Biggs&quot;I only let my guard down for a minute...    And someone got behind me...&quot;</dialog>
+
+<dialog name="elevtr1_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="elevtr1_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="elevtr1_72">Jessie&quot;Push [OK] in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="elevtr1_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="elevtr1_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="elevtr1_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="elevtr1_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="elevtr1_77"><include name="char_barret" />&quot;When we blow this place, this ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="elevtr1_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="elevtr1_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="elevtr1_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="elevtr1_81"><include name="char_cloud" />&quot;Fine, be my guest.&quot;</dialog>
+
+<dialog name="elevtr1_82">                 Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="elevtr1_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="elevtr1_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="elevtr1_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="elevtr1_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="elevtr1_87"><include name="char_barret" />&quot;Heads up, here they come!&quot;</dialog>
+
+<dialog name="elevtr1_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="elevtr1_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="elevtr1_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="elevtr1_91">Ten minutes to detonation!</dialog>
+
+<dialog name="elevtr1_92">Two minutes remaining</dialog>
+
+<dialog name="elevtr1_93">One minute remaining</dialog>
+
+<dialog name="elevtr1_94">Thirty seconds remaining</dialog>
+
+<dialog name="elevtr1_95">Ten seconds remaining</dialog>
+
+<dialog name="elevtr1_96">Five seconds remaining</dialog>
+
+<dialog name="elevtr1_97">Four seconds remaining</dialog>
+
+<dialog name="elevtr1_98">Three seconds remaining</dialog>
+
+<dialog name="elevtr1_99">Two seconds remaining</dialog>
+
+<dialog name="elevtr1_100">One second remaining</dialog>
+
+<dialog name="elevtr1_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="elevtr1_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="elevtr1_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="elevtr1_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="elevtr1_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="elevtr1_106"><include name="char_cloud" />&quot;Let me guess...    You&apos;re my chaperone, right?&quot;</dialog>
+
+<dialog name="elevtr1_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="elevtr1_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="elevtr1_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="elevtr1_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="elevtr1_111">Am I...human?</dialog>
+
+<dialog name="elevtr1_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="elevtr1_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="md1_2_0">Platform</dialog>
+
+<dialog name="md1_2_1">Sector 1 Station</dialog>
+
+<dialog name="md1_2_2">Sector 1</dialog>
+
+<dialog name="md1_2_3">No.1 Reactor</dialog>
+
+<dialog name="md1_2_4">No.5 Reactor</dialog>
+
+<dialog name="md1_2_5">Received &quot;Restore&quot; Materia!</dialog>
+
+<dialog name="md1_2_6">Received &quot;Potion&quot;!</dialog>
+
+<dialog name="md1_2_7">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="md1_2_8">Received &quot;All&quot; Materia!</dialog>
+
+<dialog name="md1_2_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
+
+<dialog name="md1_2_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
+
+<dialog name="md1_2_11">    <character id="4" /></dialog>
+
+<dialog name="md1_2_12">    <include name="char_barret" />    <character id="5" /></dialog>
+
+<dialog name="md1_2_13">    ()    ()</dialog>
+
+<dialog name="md1_2_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
+
+<dialog name="md1_2_15">    1    2    3    4    5</dialog>
+
+<dialog name="md1_2_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
+
+<dialog name="md1_2_17">opening(<image sprite="ButtonSquare" />)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
+
+<dialog name="md1_2_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
+
+<dialog name="md1_2_19">para66F67F(<image sprite="ButtonSquare" />)68F68F270Felevetr()</dialog>
+
+<dialog name="md1_2_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
+
+<dialog name="md1_2_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
+
+<dialog name="md1_2_22">1F59F60F61F62F63F64F65F66F69F</dialog>
+
+<dialog name="md1_2_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
+
+<dialog name="md1_2_24"></dialog>
+
+<dialog name="md1_2_25">        </dialog>
+
+<dialog name="md1_2_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
+
+<dialog name="md1_2_27"></dialog>
+
+<dialog name="md1_2_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
+
+<dialog name="md1_2_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="md1_2_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="md1_2_31">Biggs&quot;Wow! You used to be in SOLDIER all right!    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="md1_2_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="md1_2_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="md1_2_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="md1_2_35">Biggs&quot;I didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="md1_2_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="md1_2_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="md1_2_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="md1_2_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="md1_2_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="md1_2_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="md1_2_42"><include name="char_barret" />&quot;Press the Directional buttons while    pressing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="md1_2_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the mission,    <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="md1_2_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="md1_2_45">Switch On.</dialog>
+
+<dialog name="md1_2_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="md1_2_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="md1_2_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="md1_2_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="md1_2_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="md1_2_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="md1_2_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="md1_2_53"><include name="char_barret" />&quot;The planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="md1_2_54"><include name="char_barret" />&quot;It&apos;s the life blood of this planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="md1_2_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="md1_2_56"><include name="char_barret" />&quot;Alright! You come with me    from now on.&quot;</dialog>
+
+<dialog name="md1_2_57"><include name="char_barret" />&quot;Little by little the reactors are    draining out all the life.    And that&apos;ll be that.&quot;</dialog>
+
+<dialog name="md1_2_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="md1_2_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="md1_2_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="md1_2_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="md1_2_62">Jessie&quot;Code deciphered&quot;</dialog>
+
+<dialog name="md1_2_63">Biggs&quot;Code deciphered&quot;</dialog>
+
+<dialog name="md1_2_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="md1_2_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="md1_2_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="md1_2_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="md1_2_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="md1_2_69">Biggs&quot;I just let my guard down for a minute...    And someone got behind me...&quot;</dialog>
+
+<dialog name="md1_2_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="md1_2_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="md1_2_72">Jessie&quot;Push the [OK] button in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="md1_2_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="md1_2_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="md1_2_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="md1_2_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="md1_2_77"><include name="char_barret" />&quot;When we blow this place, it ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="md1_2_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="md1_2_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="md1_2_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="md1_2_81"><include name="char_cloud" />&quot;Fine, be my guest.&quot;</dialog>
+
+<dialog name="md1_2_82">               Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="md1_2_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="md1_2_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="md1_2_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="md1_2_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="md1_2_87"><include name="char_barret" />&quot;Heads up, here they come!&quot;</dialog>
+
+<dialog name="md1_2_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="md1_2_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="md1_2_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="md1_2_91">Ten minutes to detonation!</dialog>
+
+<dialog name="md1_2_92">Two minutes remaining</dialog>
+
+<dialog name="md1_2_93">One minute remaining</dialog>
+
+<dialog name="md1_2_94">Thirty seconds remaining</dialog>
+
+<dialog name="md1_2_95">Ten seconds remaining</dialog>
+
+<dialog name="md1_2_96">Five seconds remaining</dialog>
+
+<dialog name="md1_2_97">Four seconds remaining</dialog>
+
+<dialog name="md1_2_98">Three seconds remaining</dialog>
+
+<dialog name="md1_2_99">Two seconds remaining</dialog>
+
+<dialog name="md1_2_100">One second remaining</dialog>
+
+<dialog name="md1_2_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="md1_2_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="md1_2_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="md1_2_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="md1_2_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="md1_2_106"><include name="char_cloud" />&quot;I know.    You&apos;re my chaperone, right?&quot;</dialog>
+
+<dialog name="md1_2_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="md1_2_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="md1_2_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="md1_2_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="md1_2_111">Am I...human?</dialog>
+
+<dialog name="md1_2_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="md1_2_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="md8_1_0"><include name="char_barret" />&quot;Alright, now let&apos;s get out of here.&quot;</dialog>
+
+<dialog name="md8_1_1"><include name="char_barret" />&quot;Rendezvous at Sector 8 station!    Split up and get on the train!&quot;</dialog>
+
+<dialog name="md8_1_2"><include name="char_cloud" />&quot;H, hey!&quot;</dialog>
+
+<dialog name="md8_1_3"><include name="char_barret" />&quot;If it&apos;s about your money,    wait &apos;til we get back.&quot;</dialog>
+
+<dialog name="md8_1_4">Sector 8</dialog>
+
+<dialog name="md8_4_0">Biggs&quot;That should keep the planet going...    at least a little longer.&quot;</dialog>
+
+<dialog name="md8_4_1">Wedge&quot;Yeah.&quot;</dialog>
+
+<dialog name="md8_4_2"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="md8_4_3">Jessie&quot;OK!     Now everyone get back.&quot;</dialog>
+
+<dialog name="md8_4_4">Sector 8</dialog>
+
+<dialog name="md1_1_0">Platform</dialog>
+
+<dialog name="md1_1_1">Sector 1 Station</dialog>
+
+<dialog name="md1_1_2">Sector 1</dialog>
+
+<dialog name="md1_1_3">No.1 Reactor</dialog>
+
+<dialog name="md1_1_4">No.5 Reactor</dialog>
+
+<dialog name="md1_1_5">Received &quot;Restore&quot; Materia!</dialog>
+
+<dialog name="md1_1_6">Received &quot;Potion&quot;!</dialog>
+
+<dialog name="md1_1_7">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="md1_1_8">Received &quot;All&quot; Materia!</dialog>
+
+<dialog name="md1_1_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
+
+<dialog name="md1_1_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
+
+<dialog name="md1_1_11">    <character id="4" /></dialog>
+
+<dialog name="md1_1_12">    <include name="char_barret" />    <character id="5" /></dialog>
+
+<dialog name="md1_1_13">    ()    ()</dialog>
+
+<dialog name="md1_1_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
+
+<dialog name="md1_1_15">    1    2    3    4    5</dialog>
+
+<dialog name="md1_1_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
+
+<dialog name="md1_1_17">opening(*)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
+
+<dialog name="md1_1_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
+
+<dialog name="md1_1_19">para66F67F(*)68F68F270Felevetr()</dialog>
+
+<dialog name="md1_1_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
+
+<dialog name="md1_1_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
+
+<dialog name="md1_1_22">1F59F60F61F62F63F64F65F66F69F</dialog>
+
+<dialog name="md1_1_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
+
+<dialog name="md1_1_24"></dialog>
+
+<dialog name="md1_1_25">        </dialog>
+
+<dialog name="md1_1_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
+
+<dialog name="md1_1_27"></dialog>
+
+<dialog name="md1_1_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
+
+<dialog name="md1_1_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="md1_1_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="md1_1_31">Biggs&quot;Wow! You used to be in SOLDIER, huh?    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="md1_1_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="md1_1_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="md1_1_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="md1_1_35">Biggs&quot;I didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="md1_1_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="md1_1_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="md1_1_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="md1_1_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="md1_1_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="md1_1_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="md1_1_42"><include name="char_barret" />&quot;Press the Directional buttons while    pressing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="md1_1_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the mission,    <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="md1_1_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="md1_1_45">Switch On.</dialog>
+
+<dialog name="md1_1_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="md1_1_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="md1_1_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="md1_1_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="md1_1_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="md1_1_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="md1_1_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="md1_1_53"><include name="char_barret" />&quot;The planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="md1_1_54"><include name="char_barret" />&quot;It&apos;s the life blood of this planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="md1_1_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="md1_1_56"><include name="char_barret" />&quot;Alright! You come with me    from now on.&quot;</dialog>
+
+<dialog name="md1_1_57"><include name="char_barret" />&quot;Little by little the reactors are    draining out all the life.    And that&apos;ll be that.&quot;</dialog>
+
+<dialog name="md1_1_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="md1_1_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="md1_1_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="md1_1_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="md1_1_62">Jessie&quot;Code deciphered&quot;</dialog>
+
+<dialog name="md1_1_63">Biggs&quot;Code deciphered&quot;</dialog>
+
+<dialog name="md1_1_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="md1_1_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="md1_1_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="md1_1_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="md1_1_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="md1_1_69">Biggs&quot;I just let my guard down for a minute...    and someone got behind me...&quot;</dialog>
+
+<dialog name="md1_1_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="md1_1_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="md1_1_72">Jessie&quot;Push [OK] in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="md1_1_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="md1_1_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="md1_1_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="md1_1_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="md1_1_77"><include name="char_barret" />&quot;When we blow this place, it ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="md1_1_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="md1_1_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="md1_1_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="md1_1_81"><include name="char_cloud" />&quot;Fine, I&apos;ll do it.&quot;</dialog>
+
+<dialog name="md1_1_82">               Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="md1_1_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="md1_1_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="md1_1_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="md1_1_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="md1_1_87"><include name="char_barret" />&quot;Heads up, here they come!&quot;</dialog>
+
+<dialog name="md1_1_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="md1_1_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="md1_1_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="md1_1_91">Ten minutes to detonation!</dialog>
+
+<dialog name="md1_1_92">Two minutes remaining</dialog>
+
+<dialog name="md1_1_93">One minute remaining</dialog>
+
+<dialog name="md1_1_94">Thirty seconds remaining</dialog>
+
+<dialog name="md1_1_95">Ten seconds remaining</dialog>
+
+<dialog name="md1_1_96">Five seconds remaining</dialog>
+
+<dialog name="md1_1_97">Four seconds remaining</dialog>
+
+<dialog name="md1_1_98">Three seconds remaining</dialog>
+
+<dialog name="md1_1_99">Two seconds remaining</dialog>
+
+<dialog name="md1_1_100">One second remaining</dialog>
+
+<dialog name="md1_1_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="md1_1_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="md1_1_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="md1_1_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="md1_1_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="md1_1_106"><include name="char_cloud" />&quot;I know.    You&apos;re my chaperone, right?&quot;</dialog>
+
+<dialog name="md1_1_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="md1_1_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="md1_1_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="md1_1_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="md1_1_111">Am I...human?</dialog>
+
+<dialog name="md1_1_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="md1_1_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="md1stin_0">Platform</dialog>
+
+<dialog name="md1stin_1">Sector 1 Station</dialog>
+
+<dialog name="md1stin_2">Sector 1</dialog>
+
+<dialog name="md1stin_3">No.1 Reactor</dialog>
+
+<dialog name="md1stin_4">No.5 Reactor</dialog>
+
+<dialog name="md1stin_5">Received &quot;Restore&quot; Materia!</dialog>
+
+<dialog name="md1stin_6">Received &quot;Potion&quot;!</dialog>
+
+<dialog name="md1stin_7">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="md1stin_8">Received &quot;All&quot; Materia!</dialog>
+
+<dialog name="md1stin_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
+
+<dialog name="md1stin_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
+
+<dialog name="md1stin_11">    <character id="4" /></dialog>
+
+<dialog name="md1stin_12">    <include name="char_barret" />    <character id="5" /></dialog>
+
+<dialog name="md1stin_13">    ()    ()</dialog>
+
+<dialog name="md1stin_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
+
+<dialog name="md1stin_15">    1    2    3    4    5</dialog>
+
+<dialog name="md1stin_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
+
+<dialog name="md1stin_17">opening(<image sprite="ButtonSquare" />)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
+
+<dialog name="md1stin_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
+
+<dialog name="md1stin_19">para66F67F(<image sprite="ButtonSquare" />)68F68F270Felevetr()</dialog>
+
+<dialog name="md1stin_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
+
+<dialog name="md1stin_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
+
+<dialog name="md1stin_22">1F59F60F61F62F63F64F65F66F69F</dialog>
+
+<dialog name="md1stin_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
+
+<dialog name="md1stin_24"></dialog>
+
+<dialog name="md1stin_25">        </dialog>
+
+<dialog name="md1stin_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
+
+<dialog name="md1stin_27"></dialog>
+
+<dialog name="md1stin_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
+
+<dialog name="md1stin_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="md1stin_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="md1stin_31">Biggs&quot;Wow! You used to be in SOLDIER all right!    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="md1stin_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="md1stin_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="md1stin_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="md1stin_35">Biggs&quot;I didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="md1stin_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="md1stin_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="md1stin_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="md1stin_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="md1stin_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="md1stin_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="md1stin_42"><include name="char_barret" />&quot;Press the Directional buttons while    pressing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="md1stin_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the mission,    <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="md1stin_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="md1stin_45">Switch On.</dialog>
+
+<dialog name="md1stin_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="md1stin_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="md1stin_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="md1stin_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="md1stin_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="md1stin_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="md1stin_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="md1stin_53"><include name="char_barret" />&quot;The planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="md1stin_54"><include name="char_barret" />&quot;It&apos;s the life blood of this planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="md1stin_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="md1stin_56"><include name="char_barret" />&quot;Alright! You come with me    from now on.&quot;</dialog>
+
+<dialog name="md1stin_57"><include name="char_barret" />&quot;Little by little the reactors are    draining out all the life.    And that&apos;ll be that.&quot;</dialog>
+
+<dialog name="md1stin_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="md1stin_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="md1stin_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="md1stin_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="md1stin_62">Jessie&quot;Code deciphered&quot;</dialog>
+
+<dialog name="md1stin_63">Biggs&quot;Code deciphered&quot;</dialog>
+
+<dialog name="md1stin_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="md1stin_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="md1stin_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="md1stin_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="md1stin_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="md1stin_69">Biggs&quot;I just let my guard down for a minute...    And someone got behind me...&quot;</dialog>
+
+<dialog name="md1stin_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="md1stin_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="md1stin_72">Jessie&quot;Push the [OK] button in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="md1stin_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="md1stin_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="md1stin_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="md1stin_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="md1stin_77"><include name="char_barret" />&quot;When we blow this place, it ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="md1stin_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="md1stin_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="md1stin_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="md1stin_81"><include name="char_cloud" />&quot;Fine, be my guest.&quot;</dialog>
+
+<dialog name="md1stin_82">               Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="md1stin_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="md1stin_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="md1stin_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="md1stin_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="md1stin_87"><include name="char_barret" />&quot;Heads up, here they come!&quot;</dialog>
+
+<dialog name="md1stin_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="md1stin_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="md1stin_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="md1stin_91">Ten minutes to detonation!</dialog>
+
+<dialog name="md1stin_92">Two minutes remaining</dialog>
+
+<dialog name="md1stin_93">One minute remaining</dialog>
+
+<dialog name="md1stin_94">Thirty seconds remaining</dialog>
+
+<dialog name="md1stin_95">Ten seconds remaining</dialog>
+
+<dialog name="md1stin_96">Five seconds remaining</dialog>
+
+<dialog name="md1stin_97">Four seconds remaining</dialog>
+
+<dialog name="md1stin_98">Three seconds remaining</dialog>
+
+<dialog name="md1stin_99">Two seconds remaining</dialog>
+
+<dialog name="md1stin_100">One second remaining</dialog>
+
+<dialog name="md1stin_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="md1stin_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="md1stin_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="md1stin_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="md1stin_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="md1stin_106"><include name="char_cloud" />&quot;I know.    You&apos;re my chaperone, right?&quot;</dialog>
+
+<dialog name="md1stin_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="md1stin_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="md1stin_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="md1stin_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="md1stin_111">Am I...human?</dialog>
+
+<dialog name="md1stin_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="md1stin_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="nmkin_1_0">Platform</dialog>
+
+<dialog name="nmkin_1_1">Sector 1 Station</dialog>
+
+<dialog name="nmkin_1_2">Sector 1</dialog>
+
+<dialog name="nmkin_1_3">No.1 Reactor</dialog>
+
+<dialog name="nmkin_1_4">No.5 Reactor</dialog>
+
+<dialog name="nmkin_1_5">Received &quot;Restore&quot; Materia!</dialog>
+
+<dialog name="nmkin_1_6">Received &quot;Potion&quot;!</dialog>
+
+<dialog name="nmkin_1_7">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="nmkin_1_8">Received &quot;All&quot; Materia!</dialog>
+
+<dialog name="nmkin_1_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
+
+<dialog name="nmkin_1_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
+
+<dialog name="nmkin_1_11">    <character id="4" /></dialog>
+
+<dialog name="nmkin_1_12">    <include name="char_barret" />    <character id="5" /></dialog>
+
+<dialog name="nmkin_1_13">    ()    ()</dialog>
+
+<dialog name="nmkin_1_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
+
+<dialog name="nmkin_1_15">    1    2    3    4    5</dialog>
+
+<dialog name="nmkin_1_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
+
+<dialog name="nmkin_1_17">opening(*)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
+
+<dialog name="nmkin_1_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
+
+<dialog name="nmkin_1_19">para66F67F(*)68F68F270Felevetr()</dialog>
+
+<dialog name="nmkin_1_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
+
+<dialog name="nmkin_1_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
+
+<dialog name="nmkin_1_22">1F59F60F61F62F63F64F65F66F69F</dialog>
+
+<dialog name="nmkin_1_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
+
+<dialog name="nmkin_1_24"></dialog>
+
+<dialog name="nmkin_1_25">        </dialog>
+
+<dialog name="nmkin_1_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
+
+<dialog name="nmkin_1_27"></dialog>
+
+<dialog name="nmkin_1_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
+
+<dialog name="nmkin_1_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="nmkin_1_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="nmkin_1_31">Biggs&quot;Wow! You used to be in SOLDIER all right!    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="nmkin_1_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="nmkin_1_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="nmkin_1_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="nmkin_1_35">Biggs&quot;I didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="nmkin_1_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_1_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="nmkin_1_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="nmkin_1_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="nmkin_1_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="nmkin_1_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="nmkin_1_42"><include name="char_barret" />&quot;Press the Directional buttons while    pressing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="nmkin_1_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the mission,    <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_1_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="nmkin_1_45">Switch On.</dialog>
+
+<dialog name="nmkin_1_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="nmkin_1_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="nmkin_1_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="nmkin_1_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="nmkin_1_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="nmkin_1_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="nmkin_1_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="nmkin_1_53"><include name="char_barret" />&quot;The planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="nmkin_1_54"><include name="char_barret" />&quot;It&apos;s the life blood of this planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="nmkin_1_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="nmkin_1_56"><include name="char_barret" />&quot;Alright! You come with me    from now on.&quot;</dialog>
+
+<dialog name="nmkin_1_57"><include name="char_barret" />&quot;Little by little the reactors are    draining out all the life.    And that&apos;ll be that.&quot;</dialog>
+
+<dialog name="nmkin_1_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="nmkin_1_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="nmkin_1_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="nmkin_1_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="nmkin_1_62">Jessie&quot;Code deciphered.&quot;</dialog>
+
+<dialog name="nmkin_1_63">Biggs&quot;Code deciphered.&quot;</dialog>
+
+<dialog name="nmkin_1_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="nmkin_1_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="nmkin_1_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_1_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="nmkin_1_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="nmkin_1_69">Biggs&quot;I just let my guard down for a minute...    And someone got behind me...&quot;</dialog>
+
+<dialog name="nmkin_1_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="nmkin_1_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="nmkin_1_72">Jessie&quot;Push [OK] in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="nmkin_1_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="nmkin_1_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="nmkin_1_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="nmkin_1_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="nmkin_1_77"><include name="char_barret" />&quot;When we blow this place, it ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="nmkin_1_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="nmkin_1_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="nmkin_1_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="nmkin_1_81"><include name="char_cloud" />&quot;Fine, be my guest.&quot;</dialog>
+
+<dialog name="nmkin_1_82">               Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="nmkin_1_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="nmkin_1_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="nmkin_1_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="nmkin_1_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="nmkin_1_87"><include name="char_barret" />&quot;Heads up, here it comes!&quot;</dialog>
+
+<dialog name="nmkin_1_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="nmkin_1_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="nmkin_1_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="nmkin_1_91">Ten minutes to detonation!</dialog>
+
+<dialog name="nmkin_1_92">Two minutes remaining</dialog>
+
+<dialog name="nmkin_1_93">One minute remaining</dialog>
+
+<dialog name="nmkin_1_94">Thirty seconds remaining</dialog>
+
+<dialog name="nmkin_1_95">Ten seconds remaining</dialog>
+
+<dialog name="nmkin_1_96">Five seconds remaining</dialog>
+
+<dialog name="nmkin_1_97">Four seconds remaining</dialog>
+
+<dialog name="nmkin_1_98">Three seconds remaining</dialog>
+
+<dialog name="nmkin_1_99">Two seconds remaining</dialog>
+
+<dialog name="nmkin_1_100">One second remaining</dialog>
+
+<dialog name="nmkin_1_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="nmkin_1_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_1_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="nmkin_1_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="nmkin_1_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="nmkin_1_106"><include name="char_cloud" />&quot;I know.    You&apos;re my chaperon, right?&quot;</dialog>
+
+<dialog name="nmkin_1_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="nmkin_1_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="nmkin_1_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_1_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="nmkin_1_111">Am I...human?</dialog>
+
+<dialog name="nmkin_1_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="nmkin_1_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="nmkin_2_0">Platform</dialog>
+
+<dialog name="nmkin_2_1">Sector 1 Station</dialog>
+
+<dialog name="nmkin_2_2">Sector 1</dialog>
+
+<dialog name="nmkin_2_3">No.1 Reactor</dialog>
+
+<dialog name="nmkin_2_4">No.5 Reactor</dialog>
+
+<dialog name="nmkin_2_5">Received &quot;Restore&quot; Materia!</dialog>
+
+<dialog name="nmkin_2_6">Received &quot;Potion&quot;!</dialog>
+
+<dialog name="nmkin_2_7">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="nmkin_2_8">Received &quot;All&quot; Materia!</dialog>
+
+<dialog name="nmkin_2_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
+
+<dialog name="nmkin_2_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
+
+<dialog name="nmkin_2_11">    <character id="4" /></dialog>
+
+<dialog name="nmkin_2_12">    <include name="char_barret" />    <character id="5" /></dialog>
+
+<dialog name="nmkin_2_13">    ()    ()</dialog>
+
+<dialog name="nmkin_2_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
+
+<dialog name="nmkin_2_15">    1    2    3    4    5</dialog>
+
+<dialog name="nmkin_2_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
+
+<dialog name="nmkin_2_17">opening(<image sprite="ButtonSquare" />)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
+
+<dialog name="nmkin_2_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
+
+<dialog name="nmkin_2_19">para66F67F(<image sprite="ButtonSquare" />)68F68F270Felevetr()</dialog>
+
+<dialog name="nmkin_2_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
+
+<dialog name="nmkin_2_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
+
+<dialog name="nmkin_2_22">1F59F60F61F62F63F64F65F66F69F</dialog>
+
+<dialog name="nmkin_2_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
+
+<dialog name="nmkin_2_24"></dialog>
+
+<dialog name="nmkin_2_25">        </dialog>
+
+<dialog name="nmkin_2_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
+
+<dialog name="nmkin_2_27"></dialog>
+
+<dialog name="nmkin_2_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
+
+<dialog name="nmkin_2_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="nmkin_2_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="nmkin_2_31">Biggs&quot;Wow! You used to be in SOLDIER all right!    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="nmkin_2_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="nmkin_2_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="nmkin_2_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="nmkin_2_35">Biggs&quot;I didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="nmkin_2_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_2_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="nmkin_2_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="nmkin_2_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="nmkin_2_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="nmkin_2_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="nmkin_2_42"><include name="char_barret" />&quot;Press the Directional buttons while    pressing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="nmkin_2_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the mission,    <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_2_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="nmkin_2_45">Switch On.</dialog>
+
+<dialog name="nmkin_2_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="nmkin_2_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="nmkin_2_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="nmkin_2_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="nmkin_2_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="nmkin_2_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="nmkin_2_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="nmkin_2_53"><include name="char_barret" />&quot;The planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="nmkin_2_54"><include name="char_barret" />&quot;It&apos;s the life blood of this planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="nmkin_2_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="nmkin_2_56"><include name="char_barret" />&quot;Alright! You come with me    from now on.&quot;</dialog>
+
+<dialog name="nmkin_2_57"><include name="char_barret" />&quot;Little by little the reactors are    draining out all the life.    And that&apos;ll be that.&quot;</dialog>
+
+<dialog name="nmkin_2_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="nmkin_2_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="nmkin_2_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="nmkin_2_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="nmkin_2_62">Jessie&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nmkin_2_63">Biggs&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nmkin_2_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="nmkin_2_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="nmkin_2_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_2_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="nmkin_2_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="nmkin_2_69">Biggs&quot;I just let my guard down for a minute...    And someone got behind me...&quot;</dialog>
+
+<dialog name="nmkin_2_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="nmkin_2_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="nmkin_2_72">Jessie&quot;Push [OK] in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="nmkin_2_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="nmkin_2_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="nmkin_2_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="nmkin_2_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="nmkin_2_77"><include name="char_barret" />&quot;When we blow this place, it ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="nmkin_2_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="nmkin_2_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="nmkin_2_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="nmkin_2_81"><include name="char_cloud" />&quot;Fine, be my guest.&quot;</dialog>
+
+<dialog name="nmkin_2_82">               Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="nmkin_2_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="nmkin_2_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="nmkin_2_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="nmkin_2_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="nmkin_2_87"><include name="char_barret" />&quot;Heads up, here it comes!&quot;</dialog>
+
+<dialog name="nmkin_2_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="nmkin_2_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="nmkin_2_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="nmkin_2_91">Ten minutes to detonation!</dialog>
+
+<dialog name="nmkin_2_92">Two minutes remaining</dialog>
+
+<dialog name="nmkin_2_93">One minute remaining</dialog>
+
+<dialog name="nmkin_2_94">Thirty seconds remaining</dialog>
+
+<dialog name="nmkin_2_95">Ten seconds remaining</dialog>
+
+<dialog name="nmkin_2_96">Five seconds remaining</dialog>
+
+<dialog name="nmkin_2_97">Four seconds remaining</dialog>
+
+<dialog name="nmkin_2_98">Three seconds remaining</dialog>
+
+<dialog name="nmkin_2_99">Two seconds remaining</dialog>
+
+<dialog name="nmkin_2_100">One second remaining</dialog>
+
+<dialog name="nmkin_2_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="nmkin_2_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_2_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="nmkin_2_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="nmkin_2_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="nmkin_2_106"><include name="char_cloud" />&quot;I know.    You&apos;re my chaperon, right?&quot;</dialog>
+
+<dialog name="nmkin_2_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="nmkin_2_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="nmkin_2_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_2_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="nmkin_2_111">Am I...human?</dialog>
+
+<dialog name="nmkin_2_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="nmkin_2_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="nmkin_3_0">Platform</dialog>
+
+<dialog name="nmkin_3_1">Sector 1 Station</dialog>
+
+<dialog name="nmkin_3_2">Sector 1</dialog>
+
+<dialog name="nmkin_3_3">No.1 Reactor</dialog>
+
+<dialog name="nmkin_3_4">No.5 Reactor</dialog>
+
+<dialog name="nmkin_3_5">Received &quot;Restore&quot; Materia!</dialog>
+
+<dialog name="nmkin_3_6">Received &quot;Potion&quot;!</dialog>
+
+<dialog name="nmkin_3_7">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="nmkin_3_8">Received &quot;All&quot; Materia!</dialog>
+
+<dialog name="nmkin_3_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
+
+<dialog name="nmkin_3_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
+
+<dialog name="nmkin_3_11">    <character id="4" /></dialog>
+
+<dialog name="nmkin_3_12">    <include name="char_barret" />    <character id="5" /></dialog>
+
+<dialog name="nmkin_3_13">    ()    ()</dialog>
+
+<dialog name="nmkin_3_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
+
+<dialog name="nmkin_3_15">    1    2    3    4    5</dialog>
+
+<dialog name="nmkin_3_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
+
+<dialog name="nmkin_3_17">opening(<image sprite="ButtonSquare" />)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
+
+<dialog name="nmkin_3_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
+
+<dialog name="nmkin_3_19">para66F67F(<image sprite="ButtonSquare" />)68F68F270Felevetr()</dialog>
+
+<dialog name="nmkin_3_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
+
+<dialog name="nmkin_3_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
+
+<dialog name="nmkin_3_22">1F59F60F61F62F63F64F65F66F69F</dialog>
+
+<dialog name="nmkin_3_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
+
+<dialog name="nmkin_3_24"></dialog>
+
+<dialog name="nmkin_3_25">        </dialog>
+
+<dialog name="nmkin_3_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
+
+<dialog name="nmkin_3_27"></dialog>
+
+<dialog name="nmkin_3_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
+
+<dialog name="nmkin_3_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="nmkin_3_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="nmkin_3_31">Biggs&quot;Wow! You used to be in SOLDIER all right!    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="nmkin_3_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="nmkin_3_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="nmkin_3_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="nmkin_3_35">Biggs&quot;I didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="nmkin_3_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_3_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="nmkin_3_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="nmkin_3_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="nmkin_3_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="nmkin_3_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="nmkin_3_42"><include name="char_barret" />&quot;Press the Directional buttons while    pressing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="nmkin_3_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the mission,    <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_3_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="nmkin_3_45">Switch On.</dialog>
+
+<dialog name="nmkin_3_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="nmkin_3_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="nmkin_3_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="nmkin_3_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="nmkin_3_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="nmkin_3_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="nmkin_3_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="nmkin_3_53"><include name="char_barret" />&quot;The planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="nmkin_3_54"><include name="char_barret" />&quot;It&apos;s the life blood of this planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="nmkin_3_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="nmkin_3_56"><include name="char_barret" />&quot;Alright! You come with me    from now on.&quot;</dialog>
+
+<dialog name="nmkin_3_57"><include name="char_barret" />&quot;Little by little the reactors are    draining out all the life.    And that&apos;ll be that.&quot;</dialog>
+
+<dialog name="nmkin_3_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="nmkin_3_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="nmkin_3_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="nmkin_3_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="nmkin_3_62">Jessie&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nmkin_3_63">Biggs&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nmkin_3_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="nmkin_3_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="nmkin_3_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_3_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="nmkin_3_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="nmkin_3_69">Biggs&quot;I just let my guard down for a minute...    And someone got behind me...&quot;</dialog>
+
+<dialog name="nmkin_3_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="nmkin_3_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="nmkin_3_72">Jessie&quot;Push [OK] in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="nmkin_3_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="nmkin_3_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="nmkin_3_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="nmkin_3_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="nmkin_3_77"><include name="char_barret" />&quot;When we blow this place, it ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="nmkin_3_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="nmkin_3_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="nmkin_3_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="nmkin_3_81"><include name="char_cloud" />&quot;Fine, be my guest.&quot;</dialog>
+
+<dialog name="nmkin_3_82">               Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="nmkin_3_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="nmkin_3_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="nmkin_3_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="nmkin_3_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="nmkin_3_87"><include name="char_barret" />&quot;Heads up, here it comes!&quot;</dialog>
+
+<dialog name="nmkin_3_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="nmkin_3_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="nmkin_3_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="nmkin_3_91">Ten minutes to detonation!</dialog>
+
+<dialog name="nmkin_3_92">Two minutes remaining</dialog>
+
+<dialog name="nmkin_3_93">One minute remaining</dialog>
+
+<dialog name="nmkin_3_94">Thirty seconds remaining</dialog>
+
+<dialog name="nmkin_3_95">Ten seconds remaining</dialog>
+
+<dialog name="nmkin_3_96">Five seconds remaining</dialog>
+
+<dialog name="nmkin_3_97">Four seconds remaining</dialog>
+
+<dialog name="nmkin_3_98">Three seconds remaining</dialog>
+
+<dialog name="nmkin_3_99">Two seconds remaining</dialog>
+
+<dialog name="nmkin_3_100">One second remaining</dialog>
+
+<dialog name="nmkin_3_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="nmkin_3_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_3_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="nmkin_3_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="nmkin_3_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="nmkin_3_106"><include name="char_cloud" />&quot;I know.    You&apos;re my chaperon, right?&quot;</dialog>
+
+<dialog name="nmkin_3_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="nmkin_3_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="nmkin_3_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_3_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="nmkin_3_111">Am I...human?</dialog>
+
+<dialog name="nmkin_3_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="nmkin_3_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="nmkin_4_0">Platform</dialog>
+
+<dialog name="nmkin_4_1">Sector 1 Station</dialog>
+
+<dialog name="nmkin_4_2">Sector 1</dialog>
+
+<dialog name="nmkin_4_3">No.1 Reactor</dialog>
+
+<dialog name="nmkin_4_4">No.5 Reactor</dialog>
+
+<dialog name="nmkin_4_5">Received &quot;Restore&quot; Materia!</dialog>
+
+<dialog name="nmkin_4_6">Received &quot;Potion&quot;!</dialog>
+
+<dialog name="nmkin_4_7">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="nmkin_4_8">Received &quot;All&quot; Materia!</dialog>
+
+<dialog name="nmkin_4_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
+
+<dialog name="nmkin_4_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
+
+<dialog name="nmkin_4_11">    <character id="4" /></dialog>
+
+<dialog name="nmkin_4_12">    <include name="char_barret" />    <character id="5" /></dialog>
+
+<dialog name="nmkin_4_13">    ()    ()</dialog>
+
+<dialog name="nmkin_4_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
+
+<dialog name="nmkin_4_15">    1    2    3    4    5</dialog>
+
+<dialog name="nmkin_4_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
+
+<dialog name="nmkin_4_17">opening(<image sprite="ButtonSquare" />)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
+
+<dialog name="nmkin_4_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
+
+<dialog name="nmkin_4_19">para66F67F(<image sprite="ButtonSquare" />)68F68F270Felevetr()</dialog>
+
+<dialog name="nmkin_4_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
+
+<dialog name="nmkin_4_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
+
+<dialog name="nmkin_4_22">1F59F60F61F62F63F64F65F66F69F</dialog>
+
+<dialog name="nmkin_4_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
+
+<dialog name="nmkin_4_24"></dialog>
+
+<dialog name="nmkin_4_25">        </dialog>
+
+<dialog name="nmkin_4_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
+
+<dialog name="nmkin_4_27"></dialog>
+
+<dialog name="nmkin_4_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
+
+<dialog name="nmkin_4_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="nmkin_4_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="nmkin_4_31">Biggs&quot;Wow! You used to be in SOLDIER all right!    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="nmkin_4_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="nmkin_4_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="nmkin_4_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="nmkin_4_35">Biggs&quot;I didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="nmkin_4_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_4_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="nmkin_4_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="nmkin_4_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="nmkin_4_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="nmkin_4_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="nmkin_4_42"><include name="char_barret" />&quot;Press the Directional buttons while    pressing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="nmkin_4_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the mission,    <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_4_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="nmkin_4_45">Switch On.</dialog>
+
+<dialog name="nmkin_4_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="nmkin_4_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="nmkin_4_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="nmkin_4_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="nmkin_4_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="nmkin_4_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="nmkin_4_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="nmkin_4_53"><include name="char_barret" />&quot;The planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="nmkin_4_54"><include name="char_barret" />&quot;It&apos;s the life blood of this planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="nmkin_4_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="nmkin_4_56"><include name="char_barret" />&quot;Alright! You come with me    from now on.&quot;</dialog>
+
+<dialog name="nmkin_4_57"><include name="char_barret" />&quot;Little by little the reactors are    draining out all the life.    And that&apos;ll be that.&quot;</dialog>
+
+<dialog name="nmkin_4_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="nmkin_4_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="nmkin_4_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="nmkin_4_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="nmkin_4_62">Jessie&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nmkin_4_63">Biggs&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nmkin_4_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="nmkin_4_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="nmkin_4_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_4_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="nmkin_4_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="nmkin_4_69">Biggs&quot;I just let my guard down for a minute...    And someone got behind me...&quot;</dialog>
+
+<dialog name="nmkin_4_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="nmkin_4_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="nmkin_4_72">Jessie&quot;Push [OK] in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="nmkin_4_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="nmkin_4_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="nmkin_4_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="nmkin_4_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="nmkin_4_77"><include name="char_barret" />&quot;When we blow this place, it ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="nmkin_4_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="nmkin_4_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="nmkin_4_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="nmkin_4_81"><include name="char_cloud" />&quot;Fine, be my guest.&quot;</dialog>
+
+<dialog name="nmkin_4_82">               Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="nmkin_4_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="nmkin_4_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="nmkin_4_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="nmkin_4_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="nmkin_4_87"><include name="char_barret" />&quot;Heads up, here it comes!&quot;</dialog>
+
+<dialog name="nmkin_4_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="nmkin_4_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="nmkin_4_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="nmkin_4_91">Ten minutes to detonation!</dialog>
+
+<dialog name="nmkin_4_92">Two minutes remaining</dialog>
+
+<dialog name="nmkin_4_93">One minute remaining</dialog>
+
+<dialog name="nmkin_4_94">Thirty seconds remaining</dialog>
+
+<dialog name="nmkin_4_95">Ten seconds remaining</dialog>
+
+<dialog name="nmkin_4_96">Five seconds remaining</dialog>
+
+<dialog name="nmkin_4_97">Four seconds remaining</dialog>
+
+<dialog name="nmkin_4_98">Three seconds remaining</dialog>
+
+<dialog name="nmkin_4_99">Two seconds remaining</dialog>
+
+<dialog name="nmkin_4_100">One second remaining</dialog>
+
+<dialog name="nmkin_4_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="nmkin_4_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_4_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="nmkin_4_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="nmkin_4_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="nmkin_4_106"><include name="char_cloud" />&quot;I know.    You&apos;re my chaperon, right?&quot;</dialog>
+
+<dialog name="nmkin_4_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="nmkin_4_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="nmkin_4_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_4_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="nmkin_4_111">Am I...human?</dialog>
+
+<dialog name="nmkin_4_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="nmkin_4_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="nmkin_5_0">Platform</dialog>
+
+<dialog name="nmkin_5_1">Sector 1 Station</dialog>
+
+<dialog name="nmkin_5_2">Sector 1</dialog>
+
+<dialog name="nmkin_5_3">No.1 Reactor</dialog>
+
+<dialog name="nmkin_5_4">No.5 Reactor</dialog>
+
+<dialog name="nmkin_5_5">Received &quot;Restore&quot; Materia!</dialog>
+
+<dialog name="nmkin_5_6">Received &quot;Potion&quot;!</dialog>
+
+<dialog name="nmkin_5_7">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="nmkin_5_8">Received &quot;All&quot; Materia!</dialog>
+
+<dialog name="nmkin_5_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
+
+<dialog name="nmkin_5_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
+
+<dialog name="nmkin_5_11">    <character id="4" /></dialog>
+
+<dialog name="nmkin_5_12">    <include name="char_barret" />    <character id="5" /></dialog>
+
+<dialog name="nmkin_5_13">    ()    ()</dialog>
+
+<dialog name="nmkin_5_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
+
+<dialog name="nmkin_5_15">    1    2    3    4    5</dialog>
+
+<dialog name="nmkin_5_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
+
+<dialog name="nmkin_5_17">opening(<image sprite="ButtonSquare" />)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
+
+<dialog name="nmkin_5_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
+
+<dialog name="nmkin_5_19">para66F67F(<image sprite="ButtonSquare" />)68F68F270Felevetr()</dialog>
+
+<dialog name="nmkin_5_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
+
+<dialog name="nmkin_5_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
+
+<dialog name="nmkin_5_22">1F59F60F61F62F63F64F65F66F69F</dialog>
+
+<dialog name="nmkin_5_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
+
+<dialog name="nmkin_5_24"></dialog>
+
+<dialog name="nmkin_5_25">        </dialog>
+
+<dialog name="nmkin_5_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
+
+<dialog name="nmkin_5_27"></dialog>
+
+<dialog name="nmkin_5_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
+
+<dialog name="nmkin_5_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="nmkin_5_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="nmkin_5_31">Biggs&quot;Wow! You used to be in SOLDIER all right!    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="nmkin_5_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="nmkin_5_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="nmkin_5_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="nmkin_5_35">Biggs&quot;I didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="nmkin_5_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_5_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="nmkin_5_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="nmkin_5_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="nmkin_5_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="nmkin_5_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="nmkin_5_42"><include name="char_barret" />&quot;Press the Directional buttons while    pressing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="nmkin_5_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the mission,    <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_5_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="nmkin_5_45">Switch On.</dialog>
+
+<dialog name="nmkin_5_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="nmkin_5_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="nmkin_5_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="nmkin_5_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="nmkin_5_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="nmkin_5_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="nmkin_5_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="nmkin_5_53"><include name="char_barret" />&quot;The planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="nmkin_5_54"><include name="char_barret" />&quot;It&apos;s the life blood of this planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="nmkin_5_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="nmkin_5_56"><include name="char_barret" />&quot;Alright! You come with me    from now on.&quot;</dialog>
+
+<dialog name="nmkin_5_57"><include name="char_barret" />&quot;Little by little the reactors are    draining out all the life.    And that&apos;ll be that.&quot;</dialog>
+
+<dialog name="nmkin_5_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="nmkin_5_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="nmkin_5_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="nmkin_5_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="nmkin_5_62">Jessie&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nmkin_5_63">Biggs&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nmkin_5_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="nmkin_5_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="nmkin_5_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_5_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="nmkin_5_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="nmkin_5_69">Biggs&quot;I just let my guard down for a minute...    And someone got behind me...&quot;</dialog>
+
+<dialog name="nmkin_5_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="nmkin_5_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="nmkin_5_72">Jessie&quot;Push [OK] in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="nmkin_5_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="nmkin_5_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="nmkin_5_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="nmkin_5_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="nmkin_5_77"><include name="char_barret" />&quot;When we blow this place, it ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="nmkin_5_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="nmkin_5_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="nmkin_5_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="nmkin_5_81"><include name="char_cloud" />&quot;Fine, I&apos;ll do it.&quot;</dialog>
+
+<dialog name="nmkin_5_82">               Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="nmkin_5_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="nmkin_5_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="nmkin_5_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="nmkin_5_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="nmkin_5_87"><include name="char_barret" />&quot;Heads up, here it comes!&quot;</dialog>
+
+<dialog name="nmkin_5_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="nmkin_5_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="nmkin_5_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="nmkin_5_91">Ten minutes to detonation!</dialog>
+
+<dialog name="nmkin_5_92">Two minutes remaining</dialog>
+
+<dialog name="nmkin_5_93">One minute remaining</dialog>
+
+<dialog name="nmkin_5_94">Thirty seconds remaining</dialog>
+
+<dialog name="nmkin_5_95">Ten seconds remaining</dialog>
+
+<dialog name="nmkin_5_96">Five seconds remaining</dialog>
+
+<dialog name="nmkin_5_97">Four seconds remaining</dialog>
+
+<dialog name="nmkin_5_98">Three seconds remaining</dialog>
+
+<dialog name="nmkin_5_99">Two seconds remaining</dialog>
+
+<dialog name="nmkin_5_100">One second remaining</dialog>
+
+<dialog name="nmkin_5_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="nmkin_5_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nmkin_5_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="nmkin_5_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="nmkin_5_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="nmkin_5_106"><include name="char_cloud" />&quot;I know.    You&apos;re my chaperon, right?&quot;</dialog>
+
+<dialog name="nmkin_5_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="nmkin_5_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="nmkin_5_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nmkin_5_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="nmkin_5_111">Am I...human?</dialog>
+
+<dialog name="nmkin_5_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="nmkin_5_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="nrthmk_0">Platform</dialog>
+
+<dialog name="nrthmk_1">Sector 1 Station</dialog>
+
+<dialog name="nrthmk_2">Sector 1</dialog>
+
+<dialog name="nrthmk_3">No.1 Reactor</dialog>
+
+<dialog name="nrthmk_4">No.5 Reactor</dialog>
+
+<dialog name="nrthmk_5">Received &quot;Restore&quot; Materia!</dialog>
+
+<dialog name="nrthmk_6">Received &quot;Potion&quot;!</dialog>
+
+<dialog name="nrthmk_7">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="nrthmk_8">Received &quot;All&quot; Materia!</dialog>
+
+<dialog name="nrthmk_9">    <include name="char_cloud" />    <include name="char_barret" />    <character id="3" />    <character id="2" />    <character id="4" />    cid    <character id="6" />    <character id="7" />    <character id="5" />    Take Cloud Out</dialog>
+
+<dialog name="nrthmk_10">    Cancel    <character id="3" />    <character id="2" />    <include name="char_barret" />    <character id="4" />    cid    <character id="6" />    <character id="5" />    <character id="7" />    Cloud Lock    Change Party Members</dialog>
+
+<dialog name="nrthmk_11">    <character id="4" /></dialog>
+
+<dialog name="nrthmk_12">    <include name="char_barret" />    <character id="5" /></dialog>
+
+<dialog name="nrthmk_13">    ()    ()</dialog>
+
+<dialog name="nrthmk_14">    ()    ()    ()    ()    ()    ()    ()    ()    ()</dialog>
+
+<dialog name="nrthmk_15">    1    2    3    4    5</dialog>
+
+<dialog name="nrthmk_16">    <include name="char_barret" />&apos;<character id="4" />    <include name="char_barret" />&apos;<character id="3" />    <include name="char_barret" />&apos;<character id="2" />    <character id="4" />&apos;<character id="3" />    <character id="4" />&apos;<character id="2" />    <character id="3" />&apos;<character id="2" /></dialog>
+
+<dialog name="nrthmk_17">opening(<image sprite="ButtonSquare" />)feel windgate1 openT road(<image sprite="ButtonSquare" />escape)1reactor(5reactor)junon(<image sprite="ButtonSquare" />yufi,R1gaiheki)()</dialog>
+
+<dialog name="nrthmk_18">past jenova(<image sprite="ButtonSquare" />egg)join vincentshinra house vincent(<image sprite="ButtonSquare" />present)shinra under(<image sprite="ButtonSquare" />awake)nivl reactornivl reactor out(<image sprite="ButtonSquare" />with tifa)nivl mt entrance(<image sprite="ButtonSquare" />past)Materia cavenew event sininb34new event sininb35new midgalnivgate()</dialog>
+
+<dialog name="nrthmk_19">para66F67F(<image sprite="ButtonSquare" />)68F68F270Felevetr()</dialog>
+
+<dialog name="nrthmk_20">plate down meetingcaughtdead presidentapp rufausafter heli</dialog>
+
+<dialog name="nrthmk_21">7 pillarkolneo underhigh way5 outairport(<image sprite="ButtonSquare" />gelnica)after fire cefirosjairo skyjairo seajunon cannonjunon medical()</dialog>
+
+<dialog name="nrthmk_22">1F59F60F61F62F63F64F65F66F69F</dialog>
+
+<dialog name="nrthmk_23">cancelbone after armasan dunsleep forestancent forestlost lakewater pray<character id="3" /> deadrocket(<image sprite="ButtonSquare" />first)bone firstbone lunalos in</dialog>
+
+<dialog name="nrthmk_24"></dialog>
+
+<dialog name="nrthmk_25">        </dialog>
+
+<dialog name="nrthmk_26">[Save Point]Access the Menu and select[SAVE] to save your game.</dialog>
+
+<dialog name="nrthmk_27"></dialog>
+
+<dialog name="nrthmk_28">whitewhite boogen(key)white boogen(no key)beforeafterwhite2junonn in2</dialog>
+
+<dialog name="nrthmk_29">&quot;Who goes there!?&quot;</dialog>
+
+<dialog name="nrthmk_30">&quot;C&apos;mon newcomer.    Follow me.&quot;</dialog>
+
+<dialog name="nrthmk_31">Biggs&quot;Wow! You used to be in SOLDIER all right!    ...Not everyday ya find one    in a group like AVALANCHE.&quot;</dialog>
+
+<dialog name="nrthmk_32">Jessie&quot;SOLDIER? Aren&apos;t they the enemy?&quot;</dialog>
+
+<dialog name="nrthmk_33">Jessie&quot;What&apos;s he doing with us in AVALANCHE?&quot;</dialog>
+
+<dialog name="nrthmk_34">Biggs&quot;He WAS in SOLDIER, Jessie.&quot;<next_page />&quot;But he quit and is with us now.&quot;</dialog>
+
+<dialog name="nrthmk_35">Biggs&quot;I didn&apos;t catch your name...&quot;</dialog>
+
+<dialog name="nrthmk_36"><include name="char_cloud" />&quot;...<include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nrthmk_37">Biggs&quot;<include name="char_cloud" />, eh? I&apos;m...&quot;</dialog>
+
+<dialog name="nrthmk_38"><include name="char_cloud" />&quot;I don&apos;t care what your names are.    Once this job&apos;s over...I&apos;m outta here.&quot;</dialog>
+
+<dialog name="nrthmk_39">&quot;The hell you all doin&apos;!?    I thought I told you never to move    in a group!&quot;</dialog>
+
+<dialog name="nrthmk_40">&quot;Our target&apos;s the North Mako Reactor.    We&apos;ll meet on the bridge in front of it.&quot;</dialog>
+
+<dialog name="nrthmk_41">&quot;Ex-SOLDIER, huh?    I don&apos;t trust ya!&quot;</dialog>
+
+<dialog name="nrthmk_42"><include name="char_barret" />&quot;Press the Directional buttons while    pressing [CANCEL]    to run.&quot;</dialog>
+
+<dialog name="nrthmk_43">Wedge&quot;I&apos;ll secure our escape passage.    You concentrate on the    mission, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nrthmk_44">Wedge&quot;Geez, we&apos;re really gonna blow    this huge furnace up?    This&apos;ll be somethin&apos; to see!&quot;</dialog>
+
+<dialog name="nrthmk_45">Switch On.</dialog>
+
+<dialog name="nrthmk_46">Jessie&quot;Push that button over there!&quot;</dialog>
+
+<dialog name="nrthmk_47"><include name="char_barret" />&quot;Now let&apos;s go into the reactor!    From here on out, you stick with me.&quot;</dialog>
+
+<dialog name="nrthmk_48">&quot;Leave this to me!&quot;</dialog>
+
+<dialog name="nrthmk_49">&quot;Don&apos;t mess up SOLDIER-boy!&quot;</dialog>
+
+<dialog name="nrthmk_50">&quot;Bring <include name="char_barret" /> back alive!&quot;</dialog>
+
+<dialog name="nrthmk_51"><include name="char_barret" />&quot;Yo! This your first time in a reactor?&quot;</dialog>
+
+<dialog name="nrthmk_52"><include name="char_cloud" />&quot;No. After all, I did work for Shinra, y&apos;know.&quot;</dialog>
+
+<dialog name="nrthmk_53"><include name="char_barret" />&quot;The planet&apos;s full of Mako energy.    People here use it everyday.&quot;</dialog>
+
+<dialog name="nrthmk_54"><include name="char_barret" />&quot;It&apos;s the life blood of this planet.    But Shinra keeps suckin&apos; the blood out    with these weird machines.&quot;</dialog>
+
+<dialog name="nrthmk_55"><include name="char_cloud" />&quot;I&apos;m not here for a lecture.    Let&apos;s just do it.&quot;</dialog>
+
+<dialog name="nrthmk_56"><include name="char_barret" />&quot;Alright! You come with me    from now on.&quot;</dialog>
+
+<dialog name="nrthmk_57"><include name="char_barret" />&quot;Little by little the reactors are    draining out all the life.    And that&apos;ll be that.&quot;</dialog>
+
+<dialog name="nrthmk_58"><include name="char_barret" />&quot;The planet&apos;s dyin&apos;, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="nrthmk_59"><include name="char_cloud" />&quot;It&apos;s not my problem.&quot;</dialog>
+
+<dialog name="nrthmk_60"><include name="char_cloud" />&quot;The only thing I care about is finishin&apos; this job    before security and the Roboguards come.&quot;</dialog>
+
+<dialog name="nrthmk_61"><include name="char_barret" />&quot;...&quot;</dialog>
+
+<dialog name="nrthmk_62">Jessie&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nrthmk_63">Biggs&quot;Code deciphered&quot;</dialog>
+
+<dialog name="nrthmk_64">Can&apos;t decipher codewithout Biggs</dialog>
+
+<dialog name="nrthmk_65">Can&apos;t decipher codewithout Jessie</dialog>
+
+<dialog name="nrthmk_66"><include name="char_cloud" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nrthmk_67">Jessie&quot;My leg got stuck.&quot;</dialog>
+
+<dialog name="nrthmk_68">Jessie&quot;Thanks!&quot;</dialog>
+
+<dialog name="nrthmk_69">Biggs&quot;I just let my guard down for a minute...    And someone got behind me...&quot;</dialog>
+
+<dialog name="nrthmk_70">Jessie&quot;Biggs and I got the code for this door.&quot;</dialog>
+
+<dialog name="nrthmk_71">Biggs&quot;Think how many of our people risked their    lives, just for this code...&quot;</dialog>
+
+<dialog name="nrthmk_72">Jessie&quot;Push [OK] in front of a ladder    to grab on to it.    Then use the [Directional button]    to climb up and down.&quot;</dialog>
+
+<dialog name="nrthmk_73">Jessie&quot;There you go!&quot;</dialog>
+
+<dialog name="nrthmk_74">Biggs&quot;Let&apos;s go!&quot;</dialog>
+
+<dialog name="nrthmk_75">Jessie&quot;Alright, be careful.&quot;</dialog>
+
+<dialog name="nrthmk_76">Biggs&quot;Jessie still isn&apos;t back yet!&quot;</dialog>
+
+<dialog name="nrthmk_77"><include name="char_barret" />&quot;When we blow this place, it ain&apos;t gonna    be nothin&apos; more than a hunka junk.&quot;</dialog>
+
+<dialog name="nrthmk_78"><include name="char_barret" />&quot;<include name="char_cloud" />, you set the bomb.&quot;</dialog>
+
+<dialog name="nrthmk_79"><include name="char_cloud" />&quot;Shouldn&apos;t you do it?&quot;</dialog>
+
+<dialog name="nrthmk_80"><include name="char_barret" />&quot;Jus&apos; do it!    I gotta watch to make sure    you don&apos;t pull nothin&apos;.&quot;</dialog>
+
+<dialog name="nrthmk_81"><include name="char_cloud" />&quot;Fine, be my guest.&quot;</dialog>
+
+<dialog name="nrthmk_82">               Watch out!        This isn&apos;t just a reactor!!</dialog>
+
+<dialog name="nrthmk_83"><include name="char_barret" />&quot;What&apos;s wrong?&quot;</dialog>
+
+<dialog name="nrthmk_84"><include name="char_cloud" />&quot;Huh?&quot;</dialog>
+
+<dialog name="nrthmk_85"><include name="char_barret" />&quot;What&apos;s wrong, <include name="char_cloud" />?   Hurry it up!&quot;</dialog>
+
+<dialog name="nrthmk_86"><include name="char_cloud" />&quot;...Yeah, sorry.&quot;</dialog>
+
+<dialog name="nrthmk_87"><include name="char_barret" />&quot;Heads up, here it comes!&quot;</dialog>
+
+<dialog name="nrthmk_88"><include name="char_cloud" />&quot;The alarm!&quot;</dialog>
+
+<dialog name="nrthmk_89"><include name="char_cloud" />&quot;Come on, let&apos;s get outta here!&quot;</dialog>
+
+<dialog name="nrthmk_90"><include name="char_cloud" />&quot;This is...    Materia...&quot;</dialog>
+
+<dialog name="nrthmk_91">Ten minutes to detonation!</dialog>
+
+<dialog name="nrthmk_92">Two minutes remaining</dialog>
+
+<dialog name="nrthmk_93">One minute remaining</dialog>
+
+<dialog name="nrthmk_94">Thirty seconds remaining</dialog>
+
+<dialog name="nrthmk_95">Ten seconds remaining</dialog>
+
+<dialog name="nrthmk_96">Five seconds remaining</dialog>
+
+<dialog name="nrthmk_97">Four seconds remaining</dialog>
+
+<dialog name="nrthmk_98">Three seconds remaining</dialog>
+
+<dialog name="nrthmk_99">Two seconds remaining</dialog>
+
+<dialog name="nrthmk_100">One second remaining</dialog>
+
+<dialog name="nrthmk_101"><include name="char_barret" />&quot;Damn man, get a hold of yourself!&quot;</dialog>
+
+<dialog name="nrthmk_102"><character id="2" />&quot;You all right?&quot;</dialog>
+
+<dialog name="nrthmk_103"><include name="char_cloud" />&quot;...<character id="2" />.&quot;</dialog>
+
+<dialog name="nrthmk_104"><character id="2" />&quot;Mmm?&quot;</dialog>
+
+<dialog name="nrthmk_105"><include name="char_cloud" />&quot;No...forget...    Come on, let&apos;s hurry!&quot;</dialog>
+
+<dialog name="nrthmk_106"><include name="char_cloud" />&quot;I know.    You&apos;re my chaperon, right?&quot;</dialog>
+
+<dialog name="nrthmk_107"><include name="char_barret" />&quot;Damn straight.&quot;</dialog>
+
+<dialog name="nrthmk_108"><include name="char_barret" />&quot;<character id="2" />&apos;s old friend...    That ain&apos;t good enough.&quot;</dialog>
+
+<dialog name="nrthmk_109"><character id="2" />&quot;Let&apos;s hurry, <include name="char_cloud" />.&quot;</dialog>
+
+<dialog name="nrthmk_110"><include name="char_barret" />&quot;Alright, let&apos;s go.&quot;</dialog>
+
+<dialog name="nrthmk_111">Am I...human?</dialog>
+
+<dialog name="nrthmk_112">I didn&apos;t really understandwhat Sephiroth meant then.</dialog>
+
+<dialog name="nrthmk_113">I was even more surprised thatShinra was producing monsters.</dialog>
+
+<dialog name="rootmap_0">Last Train from Midgar</dialog>
+
+<dialog name="rootmap_1">Jessie&quot;<include name="char_cloud" />!    Look over here.&quot;</dialog>
+
+<dialog name="rootmap_2">Jessie&quot;Okay, it&apos;s about to start.&quot;</dialog>
+
+<dialog name="rootmap_3">Jessie&quot;This is a complete model    of the city of Midgar.&quot;<next_page />&quot;It&apos;s about a 1/10000 scale.&quot;<next_page />&quot;The top plate is about 50 meters    above ground.&quot;</dialog>
+
+<dialog name="rootmap_4">&quot;A main pillar supports    the plate in the center,     and there are other support pillars    built in each section...&quot;</dialog>
+
+<dialog name="rootmap_5">&quot;Psst...whisper...whisper...    (The No. 1 Reactor we blew up    was in the northern section.)&quot;<next_page />&quot;Then there&apos;s No. 2, No. 3 all the way up to    the No. 8 Reactor.&quot;<next_page />&quot;The 8 Reactors provide Midgar    with electricity.&quot;</dialog>
+
+<dialog name="rootmap_6">&quot;Each town used to have a name,     but no one in Midgar remembers them.&quot;<next_page />&quot;Instead of names, we refer to them    by numbered sectors.    That&apos;s how things turned out.&quot;</dialog>
+
+<dialog name="rootmap_7"></dialog>
+
+<dialog name="rootmap_8"></dialog>
+
+<dialog name="rootmap_9"></dialog>
+
+<dialog name="rootmap_10"></dialog>
+
+<dialog name="rootmap_11"></dialog>
+
+<dialog name="rootmap_12"></dialog>
+
+<dialog name="rootmap_13"></dialog>
+
+<dialog name="rootmap_14"></dialog>
+
+<dialog name="rootmap_15"></dialog>
+
+<dialog name="rootmap_16"></dialog>
+
+<dialog name="rootmap_17"></dialog>
+
+<dialog name="rootmap_18"></dialog>
+
+<dialog name="rootmap_19"></dialog>
+
+<dialog name="rootmap_20"></dialog>
+
+<dialog name="rootmap_21"></dialog>
+
+<dialog name="rootmap_22">Jessie&quot;Phew, look what&apos;s    next! Look!&quot;</dialog>
+
+<dialog name="rootmap_23">Jessie&quot;This is the route this train is on.&quot;<next_page />&quot;The route spirals around    the main pillar.&quot;<next_page />&quot;We should be coming around    the center, right now.&quot;<next_page />&quot;Each checkpoint has    an ID sensor device.&quot;<next_page />&quot;It checks the identities and    backgrounds of each    passenger on the train    and is linked up to the central data    bank at Shinra headquarters.&quot;</dialog>
+
+<dialog name="rootmap_24">&quot;Whisper...whisper...    (We definitely look suspicious,    so we&apos;re using fake IDs.)&quot;</dialog>
+
+<dialog name="rootmap_25"></dialog>
+
+<dialog name="rootmap_26"></dialog>
+
+<dialog name="rootmap_27"></dialog>
+
+<dialog name="rootmap_28"></dialog>
+
+<dialog name="rootmap_29"></dialog>
+
+<dialog name="rootmap_30"></dialog>
+
+<dialog name="startmap_0">        NEXT        MENU ON        BATTLE LOCK        BATTLE UNLOCK        MOVIE LOCK        MOVIE UNLOCK        GLOBAL RESET        FULL NAME        NEW START        EXIT</dialog>
+
+<dialog name="startmap_1">        BACK        SOUND RESET        FULL MATERIA        BATTLE999        EXIT</dialog>
+
+<dialog name="startmap_2">MMMMMMMMMMMMMMM</dialog>
+
+<dialog name="startmap_3">WWWWWWWWWWWWWWW</dialog>
+
+<dialog name="startmap_4">MMMMMMMMMMMMMMM</dialog>
+
+<dialog name="startmap_5">WWWWWWWWWWWWWWW</dialog>
+
+<dialog name="startmap_6">MMMMMMMMMMMMMMM</dialog>
+
+<dialog name="startmap_7">WWWWWWWWWWWWWWW</dialog>
+
+<dialog name="startmap_8">MMMMMMMMMMMMMMM</dialog>
+
+<dialog name="startmap_9">WWWWWWWWWWWWWWW</dialog>
+
+<dialog name="startmap_10">MMMMMMMMMMMMMMM</dialog>
+
+<dialog name="tin_2_0">Inside Train</dialog>
+
+<dialog name="tin_2_1">Last train from Sector 8 Station-Final stop: sector 7, Train Cemetery-  Expected time of arrival is 12:23AM,  Midgar Standard Time</dialog>
+
+<dialog name="tin_2_2">          Level 1 Warning          Car #1: Lock Down</dialog>
+
+<dialog name="tin_2_3">          Car #1: Locked Down          Upgrading to Level 2 Warning</dialog>
+
+<dialog name="tin_2_4">Jessie&quot;Let&apos;s  hurry!!&quot;</dialog>
+
+<dialog name="tin_2_5"><include name="char_barret" />&quot;What&apos;s happenin&apos;?&quot;</dialog>
+
+<dialog name="tin_2_6">Jessie&quot;Sorry!!    I&apos;ve made a mistake...&quot;</dialog>
+
+<dialog name="tin_2_7"><include name="char_barret" />&quot;What!?&quot;</dialog>
+
+<dialog name="tin_2_8">Jessie&quot;Ugh!    I&apos;m not sure...&quot;</dialog>
+
+<dialog name="tin_2_9"><include name="char_barret" />&quot;C&apos;mon, this ain&apos;t no joke!&quot;</dialog>
+
+<dialog name="tin_2_10">Biggs&quot;Hurry!&quot;</dialog>
+
+<dialog name="tin_2_11">Wedge&quot;They&apos;re locking the door, sir!&quot;</dialog>
+
+<dialog name="tin_2_12">Biggs&quot;We&apos;ll execute it just as we planned it.&quot;</dialog>
+
+<dialog name="tin_2_13">Wedge&quot;I&apos;m goin&apos; first, sir!    Let&apos;s switch to Plan 2!&quot;</dialog>
+
+<dialog name="tin_2_14"><include name="char_barret" />&quot;What do you want me to do?&quot;</dialog>
+
+<dialog name="tin_2_15">Jessie&quot;Just run!&quot;<next_page />&quot;Changing to Plan 2!&quot;</dialog>
+
+<dialog name="tin_2_16"><include name="char_barret" />&quot;Damn!!    I guess there&apos;s no other way...&quot;<next_page />&quot;We gonna kick some ass!&quot;</dialog>
+
+<dialog name="tin_2_17"><include name="char_barret" />&quot;What!?    That&apos;s it!?&quot;</dialog>
+
+<dialog name="tin_2_18"><character id="2" />&quot;That didn&apos;t do anything!&quot;</dialog>
+
+<dialog name="tin_2_19"><include name="char_barret" />&quot;We&apos;ll jump from here!!    Follow me, you &apos;spensive leech!!&quot;</dialog>
+
+<dialog name="tin_2_20"><character id="2" />&quot;Phew---!    Be strong!&quot;</dialog>
+
+<dialog name="tin_2_21">                 </dialog>
+
+<dialog name="tin_2_22">Unidentified passengers located in Car #2Preparing for Lock Down</dialog>
+
+<dialog name="tin_2_23">Car #2: Locked DownCar being sent to the station</dialog>
+
+<dialog name="tin_2_24">&quot;Hey...    You guys are too rowdy.&quot;</dialog>
+
+<dialog name="tin_2_25">&quot;Well, just calm down.&quot;</dialog>
+
+<dialog name="tin_2_26"><character id="2" />&quot;Yes, it&apos;s really something.    It&apos;s always like this.&quot;</dialog>
+
+<dialog name="tin_2_27"><include name="char_barret" />&quot;Hey, yo!    Jus&apos; keep the hell outta my face!&quot;</dialog>
+
+<dialog name="tin_2_28">&quot;Hyu---n!!    Hyu---n!!&quot;</dialog>
+
+<dialog name="tin_2_29">&quot;Does this mean    that we&apos;re in a major bind?&quot;</dialog>
+
+<dialog name="tin_2_30">&quot;Gosh!!    You&apos;re adults,    but you&apos;re acting like kids.&quot;<next_page />&quot;Please behave while you&apos;re in the train.&quot;</dialog>
+
+<dialog name="tin_2_31">&quot;Huh?&quot;<next_page />&quot;The hell?&quot;<next_page />&quot;Do you want this?&quot;          Yeah...          My mistake</dialog>
+
+<dialog name="tin_2_32">&quot;Wow!    I won&apos;t even charge you...&quot;<next_page />&quot;What?    Don&apos;t get used to it though.&quot;</dialog>
+
+<dialog name="tin_2_33">&quot;Wha-t?    Let me know when you need me.&quot;</dialog>
+
+<dialog name="tin_2_34">Received &quot;Hi-Potion&quot;!</dialog>
+
+<dialog name="tin_2_35">&quot;Wha-t?    You sure are greedy.&quot;</dialog>
+
+<dialog name="tin_1_0">Last Train from Midgar</dialog>
+
+<dialog name="tin_1_1">Inside Train</dialog>
+
+<dialog name="tin_1_2"><include name="char_barret" />&quot;Look...you can see the surface now.    This city don&apos;t have no day or night.&quot;<next_page />&quot;If that plate weren&apos;t there...    we could see the sky.&quot;</dialog>
+
+<dialog name="tin_1_3"><include name="char_cloud" />&quot;A floating city...    Pretty unsettling scenery.&quot;</dialog>
+
+<dialog name="tin_1_4"><include name="char_barret" />&quot;Huh?&quot;<next_page />&quot;Never expect ta hear that outta    someone like you.&quot;<next_page />&quot;...You jus&apos; full of surprises.&quot;</dialog>
+
+<dialog name="tin_1_5"><include name="char_barret" />&quot;The upper world...a city on a plate...&quot;<next_page />&quot;It&apos;s &apos;cuz of that &amp;^#$# &apos;pizza&apos;    that people underneath are sufferin&apos;!&quot;</dialog>
+
+<dialog name="tin_1_6"><include name="char_barret" />&quot;All the pollution from Mako energy above     falls down on the world below.&quot;</dialog>
+
+<dialog name="tin_1_7"><include name="char_barret" />&quot;And the city below is full of polluted air.&quot;</dialog>
+
+<dialog name="tin_1_8"><include name="char_barret" />&quot;On top&apos;a that,    the Reactor keeps drainin&apos; up    all the energy.&quot;</dialog>
+
+<dialog name="tin_1_9"><include name="char_cloud" />&quot;Then why doesn&apos;t everyone    move onto the Plate?&quot;</dialog>
+
+<dialog name="tin_1_10"><include name="char_barret" />&quot;Dunno.    Probably &apos;cuz they ain&apos;t got no money.    Or, maybe...&quot;</dialog>
+
+<dialog name="tin_1_11">&quot;&apos;Cuz they love their land,     no matter how polluted it gets.&quot;</dialog>
+
+<dialog name="tin_1_12"><include name="char_cloud" />&quot;I know...    no one lives in the slums    because they want to.&quot;<next_page />&quot;It&apos;s like this train.    It can&apos;t run anywhere except    where its rails take it.&quot;</dialog>
+
+<dialog name="tin_1_13"><include name="char_barret" />&quot;Stop actin&apos; like a damn kid.    Siddown an&apos; shu&apos;up!&quot;</dialog>
+
+<dialog name="tin_1_14">Jessie&quot;Hey, <include name="char_cloud" />.    You want to look at this with me?&quot;<next_page />&quot;It&apos;s a map of the Midgar Rail System.    Let&apos;s look at it together.    I&apos;ll explain it to you.&quot;</dialog>
+
+<dialog name="tin_1_15">    &quot;To the Route Map Screen&quot;</dialog>
+
+<dialog name="tin_1_16">Jessie&quot;I like this kinda stuff.     Bombs and monitors...you know,    flashy stuff.&quot;</dialog>
+
+<dialog name="tin_1_17">Jessie&quot;I know!&quot;<next_page />&quot;Next time,    I&apos;ll make one just for you.&quot;          Thanks anyway          Looking forward to it</dialog>
+
+<dialog name="tin_1_18">Jessie&quot;Oh yeah, you might regret it.    I&apos;m the type who takes things personal.&quot;</dialog>
+
+<dialog name="tin_1_19">Jessie&quot;Okay, then I&apos;ll put a little extra effort in    and make it with a BANG.&quot;</dialog>
+
+<dialog name="tin_1_20">Jessie&quot;We&apos;re almost there.    After talking with you,    I&apos;m ready to try!&quot;<next_page />&quot;I think you&apos;ve lit my fuse!&quot;</dialog>
+
+<dialog name="tin_1_21">Jessie&quot;Speak of the devil...&quot;<next_page />&quot;That light means that    we&apos;re in the ID Security Check area.&quot;</dialog>
+
+<dialog name="tin_1_22">&quot;...whisper...whisper...    (When the lights go off,    you never know what kind of    creeps&apos;ll come out.)&quot;</dialog>
+
+<dialog name="tin_1_23">&quot;...We&apos;re almost back now.    What a relief.&quot;</dialog>
+
+<dialog name="tin_1_24">Biggs&quot;This train hasn&apos;t switched    to security mode yet.&quot;<next_page />&quot;I&apos;m sure that will change by tomorrow.&quot;</dialog>
+
+<dialog name="tin_1_25">Biggs&quot;...YAWN...that sure took its toll on me.    I&apos;m gonna sleep till we get to the station.&quot;</dialog>
+
+<dialog name="tin_1_26">Biggs&quot;...snore...heebeebeeheebee...snore...    (Don&apos;t act so damn big,    <include name="char_barret" />...snooze...)&quot;</dialog>
+
+<dialog name="tin_1_27">Wedge&quot;Someday AVALANCHE&apos;s gonna be famous    ...and me, too!&quot;</dialog>
+
+<dialog name="tin_1_28">Wedge&quot;<include name="char_cloud" />!!&quot;<next_page />&quot;Don&apos;t ya think I got a bright    future ahead of me?&quot;          What do you have in mind?          Don&apos;t hold your breath</dialog>
+
+<dialog name="tin_1_29">Wedge&quot;All my life, I felt like nothin&apos; but a sidekick.&quot;<next_page />&quot;But, after joinin&apos; AVALANCHE and    tryin&apos; to save the Planet,     I feel like I can do lots of things.&quot;</dialog>
+
+<dialog name="tin_1_30">Wedge&quot;Oh man,    that&apos;s pretty harsh. <include name="char_cloud" />.    You really think I won&apos;t?&quot;</dialog>
+
+<dialog name="tin_1_31">Wedge&quot;I&apos;m seein&apos; stars.    This sucks. I hate the dark.&quot;</dialog>
+
+<dialog name="tin_1_32">Last train out of Sector 8 Station.Last stop is Sector 7, Train Graveyard.Expected time of arrival is 12:23AM,Midgar Standard Time...</dialog>
+
+<dialog name="tin_1_33">&quot;Huh?    This is my house,    so make yourselves at home.&quot;</dialog>
+
+<dialog name="tin_1_34">&quot;Hey!!    What&apos;s going on here?&quot;</dialog>
+
+<dialog name="tin_1_35">&quot;Oops, uh,     n, nothing...&quot;</dialog>
+
+<dialog name="tin_1_36">&quot;Please don&apos;t make any trouble.&quot;</dialog>
+
+<dialog name="tin_1_37">&quot;...mumble...grumble...    (...Reactor&apos;s blown to bits...    ...Bad things one after another...    ...What a day!)&quot;</dialog>
+
+<dialog name="tin_1_38">&quot;Please!!    Don&apos;t bother the other passengers.&quot;</dialog>
+
+<dialog name="tin_1_39">&quot;This is why I hate the last train.    Hoo-boy...&quot;</dialog>
+
+<dialog name="tin_1_40"></dialog>
+
+<dialog name="tin_1_41"></dialog>
+
+<dialog name="tin_1_42"></dialog>
+
+<dialog name="tin_1_43"></dialog>
+
+<dialog name="tin_1_44"></dialog>
+
+<dialog name="tin_1_45">&quot;You see the headlines in the Shinra Times?&quot;<next_page />&quot;The terrorists that bombed    the No. 1 Reactor are based    somewhere in the slums.&quot;<next_page />&quot;...Blowing up a Reactor...    they sure put some thought into this one.&quot;<next_page />&quot;They must have a real calculating leader.    I wonder what they&apos;ll do next?&quot;</dialog>
+
+<dialog name="tin_1_46"><include name="char_barret" />&quot;YO!&quot;</dialog>
+
+<dialog name="tin_1_47">&quot;This ain&apos;t no private car!!    So split up!!&quot;</dialog>
+
+<dialog name="tin_1_48">&quot;...Hoodlums again.    God, don&apos;t I just have all the luck?&quot;</dialog>
+
+<dialog name="tin_1_49"><include name="char_barret" />&quot;You say sumthin&apos; ?&quot;</dialog>
+
+<dialog name="tin_1_50"><include name="char_barret" />&quot;I said, &apos;you say sumthin&apos;!?&quot;</dialog>
+
+<dialog name="tin_1_51"><include name="char_barret" />&quot;Now look at that!!    It got empty alluva sudden.&quot;<next_page />&quot;What&apos;s goin&apos; on?&quot;</dialog>
+
+<dialog name="tin_1_52">&quot;DAMN!!&quot;</dialog>
+
+<dialog name="tin_1_53">&quot;It..it&apos;s empty because of...    g, guys like you...&quot;</dialog>
+
+<dialog name="tin_1_54">&quot;YYY...YIPES!!&quot;</dialog>
+
+<dialog name="tin_1_55">&quot;You...you&apos;ve seen the news, right?    AVALANCHE says there&apos;ll be more bombings.&quot;<next_page />&quot;Only devoted employees like me     would go to Midgar on a day like today.&quot;</dialog>
+
+<dialog name="tin_1_56"><include name="char_barret" />&quot;You work for Shinra?&quot;</dialog>
+
+<dialog name="tin_1_57">Shinra Manager&quot;I won&apos;t give in to violence...    and I&apos;m not giving you my seat either!&quot;</dialog>
+
+<dialog name="tin_1_58"><character id="2" />&quot;<include name="char_barret" />!!&quot;</dialog>
+
+<dialog name="tin_1_59"><include name="char_barret" />&quot;&amp;$#%!!    You lucky ^$#^$.!&quot;</dialog>
+
+<dialog name="tin_1_60"><include name="char_cloud" />&quot;So, what are we gonna do now?&quot;</dialog>
+
+<dialog name="tin_1_61"><include name="char_barret" />&quot;@#$%! The hell you so calm?    You&apos;re bustin&apos; up my rhythm!&quot;</dialog>
+
+<dialog name="tin_1_62"><include name="char_barret" />&quot;Huh?  Wait a minute!&quot;<next_page />&quot;Did we make a terrorist threat?&quot;</dialog>
+
+<dialog name="tin_1_63"><character id="2" />&quot;What are you talking about?    Right about now, AVALANCHE is famous.&quot;</dialog>
+
+<dialog name="tin_1_64"><include name="char_barret" />&quot;Heh heh...    Famous...&quot;</dialog>
+
+<dialog name="tin_1_65"><character id="2" />&quot;Looks like they just finished    connecting the cars.     We&apos;re finally leaving.&quot;</dialog>
+
+<dialog name="tin_1_66"><include name="char_cloud" />&quot;So what&apos;s our next target?&quot;</dialog>
+
+<dialog name="tin_1_67"><include name="char_barret" />&quot;Hah! Listen to    Mr. Serious-about-his-work!&quot;</dialog>
+
+<dialog name="tin_1_68"><include name="char_barret" />&quot;Alright...I&apos;ll tell ya!&quot;<next_page />&quot;Jessie&apos;s probably already told you,    but there&apos;s a security check point    at the top plate.&quot;<next_page />&quot;It&apos;s an ID scan system    checkin&apos; all the trains.&quot;</dialog>
+
+<dialog name="tin_1_69"><character id="2" />&quot;Which Shinra is very proud of.&quot;</dialog>
+
+<dialog name="tin_1_70"><include name="char_barret" />&quot;We can&apos;t use our fake ID&apos;s    anymore...&quot;</dialog>
+
+<dialog name="tin_1_71">Good Morning, and welcome to Midgar lines.Arrival time at Sector 4 Station is 11:45.</dialog>
+
+<dialog name="tin_1_72"><character id="2" />&quot;That means we&apos;ve got only three     more minutes to the ID Check point.&quot;</dialog>
+
+<dialog name="tin_1_73"><include name="char_barret" />&quot;Alright, in three minutes,    we&apos;re jumpin&apos; off this train.&quot;<next_page />&quot;Got it!?&quot;</dialog>
+
+<dialog name="tin_1_74"><include name="char_cloud" />&quot;What do we do until then?&quot;</dialog>
+
+<dialog name="tin_1_75"><include name="char_barret" />&quot;The hell do I care whatcha do?    Just siddown an&apos; shu&apos;up.&quot;</dialog>
+
+<dialog name="tin_1_76"><include name="char_cloud" />&quot;Sorry, but I have a thing against     sitting down in trains.&quot;</dialog>
+
+<dialog name="tin_1_77"><include name="char_barret" />&quot;@#$%! Do whatever you want!&quot;</dialog>
+
+<dialog name="tin_1_78"><include name="char_cloud" />&quot;What do we do after we jump?&quot;</dialog>
+
+<dialog name="tin_1_79"><include name="char_barret" />&quot;Yo, <include name="char_cloud" />!&quot;</dialog>
+
+<dialog name="tin_1_80"><include name="char_barret" />&quot;Yo, Mr. Know-it-all, big time SOLDIER!    You oughta know the area &apos;round    the No. 5 Reactor, right!&quot;<next_page />&quot;So let&apos;s hear YOUR explanation!&quot;</dialog>
+
+<dialog name="tin_1_81"><character id="2" />&quot;I&apos;ll help, too.&quot;</dialog>
+
+<dialog name="tin_1_82"><include name="char_barret" />&quot;@#$%!    I don&apos;t know even why you came!&quot;</dialog>
+
+<dialog name="tin_1_83"><character id="2" />&quot;Oh, <include name="char_barret" />!    Are you mad because    I&apos;m not paying enough attention to you?&quot;</dialog>
+
+<dialog name="tin_1_84"><include name="char_barret" />&quot;@#$%!!&quot;</dialog>
+
+<dialog name="tin_1_85"><character id="2" />&quot;<include name="char_cloud" />, come over here!    Let&apos;s look at the Railway Map Monitor.&quot;</dialog>
+
+<dialog name="tin_1_86"><character id="2" />&quot;Hmm, it looks like    you&apos;ve seen this already...&quot;<next_page />&quot;It&apos;s all right. Come a little closer.&quot;</dialog>
+
+<dialog name="tin_1_87"><character id="2" />&quot;That&apos;s odd.    The ID Check Point was supposed    to be further down.&quot;</dialog>
+
+<dialog name="tin_1_88">Type A Security Alert!!<next_page />Unidentified passengers confirmed...A search of all cars will be conducted!</dialog>
+
+<dialog name="tin_1_89">Repeat!!Type A Security Alert!!<next_page />Unidentified passengers confirmed...A search of all cars will be conducted!</dialog>
+
+<dialog name="tin_1_90"><character id="2" />&quot;What&apos;s happening?&quot;</dialog>
+
+<dialog name="tin_1_91"><include name="char_barret" />&quot;What&apos;s goin&apos; on?!&quot;</dialog>
+
+<dialog name="tin_1_92">Jessie&quot;We&apos;re in trouble.&quot;<next_page />&quot;I&apos;ll explain later.    Hurry! Get to the next car!&quot;</dialog>
+
+<dialog name="tin_1_93"><include name="char_barret" />&quot;@#$%!    Someone blew it...&quot;</dialog>
+
+<dialog name="tin_1_94"><include name="char_barret" />&quot;Let&apos;s go!    Keep it up!&quot;</dialog>
+
+<dialog name="tin_1_95"><include name="char_barret" />&quot;C&apos;mon!! Hurry your slow ass up!     That&apos;s it, huh?&quot;</dialog>
+
+<dialog name="tin_1_96"><character id="2" />&quot;Oh well...&quot;</dialog>
+
+<dialog name="tin_1_97"><include name="char_barret" />&quot;We&apos;re gonna jump outta here!!    Follow me!!&quot;</dialog>
+
+<dialog name="tin_1_98"><character id="2" />&quot;We got a lot of battles ahead of us.    This&apos;s going to be tough.&quot;</dialog>
+
+<dialog name="tin_1_99">&quot;Hmmm?    You&apos;re the only ones that&apos;ll talk to me     or come to my house.&quot;<next_page />&quot;I&apos;m impressed.&quot;</dialog>
+
+<dialog name="tin_1_100">&quot;Hm?     You&apos;d talk to me even now?&quot;<next_page />&quot;I&apos;m really impressed.    Here&apos;s a little    something as a reward.&quot;</dialog>
+
+<dialog name="tin_1_101">Received &quot;Phoenix Down&quot;!</dialog>
+
+<dialog name="tin_1_102">&quot;If I die in the gutter,     use that to revive me, okay?&quot;</dialog>
+
+<dialog name="tin_1_103">Shinra Manager&quot;Waaaaah!!&quot;<next_page />&quot;Don&apos;t...don&apos;t worry about me.    (oh man, oh man, oh man...!!    I&apos;m gonna brag to everyone    at work about this...)&quot;</dialog>
+
+<dialog name="tin_1_104">              </dialog>
+
+<dialog name="tin_1_105">Unidentified passengers located in Car #1Preparing for Lock Down</dialog>
+
+<dialog name="tin_1_106">          Car #1: Locked Down          Car being sent to the station</dialog>
+
+<dialog name="tin_1_107">  &quot;This is the end of the Test Play.</dialog>
+
 </texts>

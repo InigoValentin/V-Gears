@@ -12,10 +12,6 @@
     <prototype file_name="screens/dialog/prototypes.xml" />
     <screen file_name="screens/dialog/dialog.xml" />
 
-    <!-- Idol test screen data -->
-    <prototype file_name="screens/idol/prototypes.xml" />
-    <screen file_name="screens/idol/idol.xml" />
-
     <!-- Fade effect for map changer -->
     <screen file_name="screens/fade/fade.xml" />
 

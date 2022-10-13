@@ -49,8 +49,7 @@
 #include "data/VGearsMapListFile.h"
 #include <memory>
 #include <QtCore/QDir>
-
-#include "../include/DataInstaller.h"
+#include "DataInstaller.h"
 #include "decompiler/field/FieldScriptFormatter.h"
 #include "decompiler/field/FieldDecompiler.h"
 
@@ -169,18 +168,11 @@ int DataInstaller::Progress(){
     }
 }
 
-static std::string FieldModelDir(){return "models/ffvii/field/units";}
+static std::string FieldModelDir(){return "models/fields/entities";}
 
 std::vector<std::string> materials_;
 
-/**
- * Converts a tex file to png.
- *
- * The image is saved in data/models/ffvii/field/units/
- *
- * @param[in] name Path to the tex file to convert.
- */
-void TexToPng(const std::string name){
+void DataInstaller::TexToPng(const std::string name){
     Ogre::DataStreamPtr stream(
       Ogre::ResourceGroupManager::getSingleton().openResource(name, "FFVIITextures", true, NULL)
     );
@@ -208,20 +200,11 @@ void TexToPng(const std::string name){
     }
     Ogre::String base_name;
     VGears::StringUtil::splitBase(name, base_name);
-    // TODO: Detect path
-    image->save("data/models/ffvii/field/units/" + base_name + ".png");
+    image->save(output_dir_ + "/" + FieldModelDir() + "/" + base_name + ".png");
 
 }
 
-/**
- * Exports a mesh to a file.
- *
- * The file will have the mesh name.
- *
- * @param[in] outdir Path to the directory where the file will be saved.
- * @param[in] mesh The mesh to export.
- */
-static void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
+void DataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
 
     // TODO: Share function with pc model exporter
     VGears::String base_mesh_name;
@@ -319,12 +302,12 @@ static void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
 /**
  * Normalizes a field name.
  *
- * It prefixes a name witg "ffvii_".
+ * It does nothing
  *
  * @param[in] name The field name.
  * @return The normalized field name.
  */
-static std::string FieldName(const std::string& name){return "ffvii_" + name;}
+static std::string FieldName(const std::string& name){return name;}
 
 void DataInstaller::CreateDir(const std::string& path){
     QString target = QString::fromStdString(output_dir_ + path);
@@ -337,7 +320,7 @@ void DataInstaller::CreateDir(const std::string& path){
  *
  * @return The relative path to the field map directory.
  */
-static std::string FieldMapDir(){return "maps/ffvii/field";}
+static std::string FieldMapDir(){return "fields";}
 
 /**
  * Utilities for formatting field scripts.
