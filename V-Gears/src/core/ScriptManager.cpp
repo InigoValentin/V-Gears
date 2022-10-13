@@ -54,6 +54,7 @@ ScriptManager::ScriptManager():
     luaopen_string(lua_state_);
     luaopen_table(lua_state_);
     luaopen_math(lua_state_);
+    luaopen_io(lua_state_);
     LOG_TRIVIAL("ScriptManager starting ... 1");
     InitBinds();
     LOG_TRIVIAL("ScriptManager starting ... 2");

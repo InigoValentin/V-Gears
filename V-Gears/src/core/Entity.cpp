@@ -69,8 +69,7 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   animation_current_name_(""),
   animation_auto_play_(true),
   is_character_(false),
-  character_id_(0),
-  character_name_(""),
+  character_id_(-1),
   is_line_(false)
 {
     model_root_node_ = scene_node_->createChildSceneNode();
@@ -756,23 +755,15 @@ int Entity::ScriptAnimationSync(){
     return -1;
 }
 
-void Entity::SetCharacter(const char* character_name){
-    is_character_ = true;
-    character_name_ = character_name;
-    if (character_name_ == "Cloud") character_id_ = 0;
-    else if (character_name_ == "Barret") character_id_ = 1;
-    else if (character_name_ == "Tifa") character_id_ = 2;
-    else if (character_name_ == "Aeris") character_id_ = 3;
-    else if (character_name_ == "Red XIII") character_id_ = 4;
-    // TODO: Continue this list.
-    // TODO: Or better event, look IDs up somewhere.
+void Entity::SetCharacter(int char_id){
+    if (char_id >= 0) is_character_ = true;
+    else is_character_ = false;
+    character_id_ = char_id;
 }
 
 bool Entity::IsCharacter(){return is_character_;}
 
-uint Entity::GetCharacterId(){return character_id_;}
-
-std::string Entity::GetCharacterName(){return character_name_;}
+int Entity::GetCharacterId(){return character_id_;}
 
 bool Entity::IsLine(){return is_line_;}
 

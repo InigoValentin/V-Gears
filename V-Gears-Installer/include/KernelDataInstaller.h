@@ -36,6 +36,11 @@ class KernelDataInstaller{
          */
         ~KernelDataInstaller();
 
+        /**
+         * Reads items and materia prices from the executable.
+         *
+         * @param[in] menu_path PAth to the "ff7.exe" file.
+         */
         void ReadPrices(std::string menu_path);
 
         /**
@@ -46,11 +51,11 @@ class KernelDataInstaller{
         int ReadCommands();
 
         /**
-         * Saves command data to an xml file
+         * Saves command data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteCommands(std::string file);
+        void WriteCommands(std::string file_name);
 
         /**
          * Reads the attack data from the kernel.
@@ -60,11 +65,11 @@ class KernelDataInstaller{
         int ReadAttacks();
 
         /**
-         * Saves command data to an xml file
+         * Saves command data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteAttacks(std::string file);
+        void WriteAttacks(std::string file_name);
 
         /**
          * Reads character data from the kernel.
@@ -74,11 +79,11 @@ class KernelDataInstaller{
         int ReadCharacters();
 
         /**
-         * Saves character data to an xml file
+         * Saves character data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteCharacters(std::string file);
+        void WriteCharacters(std::string file_name);
 
         /**
          * Reads growth data from the kernel.
@@ -86,11 +91,11 @@ class KernelDataInstaller{
         void ReadGrowth();
 
         /**
-         * Saves growth data to an xml file
+         * Saves growth data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteGrowth(std::string file);
+        void WriteGrowth(std::string file_name);
 
         /**
          * Reads the items from the kernel.
@@ -100,11 +105,11 @@ class KernelDataInstaller{
         int ReadItems();
 
         /**
-         * Saves item data to an xml file
+         * Saves item data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteItems(std::string file);
+        void WriteItems(std::string file_name);
 
         /**
          * Reads the weapon info from the kernel.
@@ -114,11 +119,11 @@ class KernelDataInstaller{
         int ReadWeapons();
 
         /**
-         * Saves weapon data to an xml file
+         * Saves weapon data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteWeapons(std::string file);
+        void WriteWeapons(std::string file_name);
 
         /**
          * Reads the armor info from the kernel.
@@ -128,11 +133,11 @@ class KernelDataInstaller{
         int ReadArmors();
 
         /**
-         * Saves armor data to an xml file
+         * Saves armor data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteArmors(std::string file);
+        void WriteArmors(std::string file_name);
 
         /**
          * Reads the accessory info from the kernel.
@@ -142,11 +147,11 @@ class KernelDataInstaller{
         int ReadAccessories();
 
         /**
-         * Saves accessory data to an xml file
+         * Saves accessory data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteAccessories(std::string file);
+        void WriteAccessories(std::string file_name);
 
         /**
          * Reads materia info from the kernel.
@@ -156,11 +161,11 @@ class KernelDataInstaller{
         int ReadMateria();
 
         /**
-         * Saves materia data to an xml file
+         * Saves materia data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteMateria(std::string file);
+        void WriteMateria(std::string file_name);
 
         /**
          * Reads key item info from the kernel.
@@ -170,11 +175,11 @@ class KernelDataInstaller{
         int ReadKeyItems();
 
         /**
-         * Saves key item data to an xml file
+         * Saves key item data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteKeyItems(std::string file);
+        void WriteKeyItems(std::string file_name);
 
         /**
          * Reads summon name info from the kernel.
@@ -184,11 +189,11 @@ class KernelDataInstaller{
         int ReadSummonNames();
 
         /**
-         * Saves summon names data to an xml file
+         * Saves summon names data to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteSummonNames(std::string file);
+        void WriteSummonNames(std::string file_name);
 
         /**
          * Reads the initial savemap from the kernel.
@@ -196,11 +201,11 @@ class KernelDataInstaller{
         void ReadInitialSaveMap();
 
         /**
-         * Saves the initial savemap to an xml file
+         * Saves the initial savemap to a Lua script.
          *
-         * @param file[in] Absolute path to the target XML file.
+         * @param[in] file Absolute path to the target Lua file.
          */
-        void WriteInitialSaveMap(std::string file);
+        void WriteInitialSaveMap(std::string file_name);
 
     private:
 

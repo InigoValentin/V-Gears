@@ -250,7 +250,7 @@ void ScriptManager::InitBinds(){
           .def("is_key_off", (bool(EntityManager::*)(unsigned int)) &EntityManager::IsKeyOff)
           .def(
             "set_entity_to_character",
-            (void(EntityManager::*)(const char*, const char*)) &EntityManager::SetEntityToCharacter
+            (void(EntityManager::*)(const char*, unsigned int)) &EntityManager::SetEntityToCharacter
           )
     ];
 
@@ -370,8 +370,11 @@ void ScriptManager::InitBinds(){
           .def("set_x", (void(UiWidget::*)(const float, const float)) &UiWidget::SetX)
           .def("set_y", (void(UiWidget::*)(const float, const float)) &UiWidget::SetY)
           .def("set_z", (void(UiWidget::*)(const float)) &UiWidget::SetZ)
-          .def("set_width", (void(UiWidget::*)(const float, const float)) &UiWidget::SetWidth)
-          .def("set_height", (void(UiWidget::*)(const float, const float)) &UiWidget::SetHeight)
+          .def("get_width", (float(UiWidget::*)()) &UiWidget::ScriptGetWidth)
+          .def("set_width", (void(UiWidget::*)(const float)) &UiWidget::ScriptSetWidth)
+          .def("get_height", (float(UiWidget::*)()) &UiWidget::ScriptGetHeight)
+          .def("set_height", (void(UiWidget::*)(const float)) &UiWidget::ScriptSetHeight)
+          .def("set_text", (void(UiWidget::*)(const char*)) &UiWidget::SetText)
     ];
 
     // UI manager commands. Use to get a specific widget.

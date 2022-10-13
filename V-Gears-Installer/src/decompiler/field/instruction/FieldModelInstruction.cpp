@@ -85,7 +85,7 @@ void FieldModelInstruction::ProcessInst(
         case OPCODES::PGTDR: code_gen->WriteTodo(md.GetEntityName(), "PGTDR"); break;
         case OPCODES::PXYZI: code_gen->WriteTodo(md.GetEntityName(), "PXYZI"); break;
         case OPCODES::TLKON: ProcessTLKON(code_gen, md.GetEntityName()); break;
-        case OPCODES::PC: ProcessPC(code_gen, md.GetEntityName()); break;
+        case OPCODES::PC: ProcessPC(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
         case OPCODES::opCodeCHAR: ProcessCHAR(code_gen, md.GetEntityName()); break;
         case OPCODES::DFANM: ProcessDFANM(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
         case OPCODES::ANIME1:
@@ -192,9 +192,11 @@ void FieldModelInstruction::ProcessTLKON(CodeGenerator* code_gen, const std::str
     ).str());
 }
 
-void FieldModelInstruction::ProcessPC(CodeGenerator* code_gen, const std::string& entity){
+void FieldModelInstruction::ProcessPC(
+  CodeGenerator* code_gen, const std::string& entity, int char_id
+){
     code_gen->AddOutputLine(
-      (boost::format("set_entity_to_character(\"%1%\", \"%1%\")") % entity).str()
+      (boost::format("set_entity_to_character(\"%1%\", %2%)") % entity % char_id).str()
     );
 }
 

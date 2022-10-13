@@ -1043,18 +1043,17 @@ class Entity{
         /**
          * Assigns the entity as a character.
          *
-         * Marks the entity as a character, and assigns a character name and
-         * ID.
+         * Marks the entity as a character, and assigns a character name and ID. If the ID is
+         * passed as a negative number, the entity will no longer be considered a character.
          *
-         * @param[in] character_name The character name.
+         * @param[in] char_id The character name.
          */
-        void SetCharacter(const char* character_name);
+        void SetCharacter(int char_id);
 
         /**
          * Checks if the entity is a character.
          *
-         * An entity is not a character until {@see SetCharacter} has been
-         * called.
+         * An entity is not a character until {@see SetCharacter} has been called.
          *
          * @return True if the entity is a character, false otherwise.
          */
@@ -1063,17 +1062,9 @@ class Entity{
         /**
          * Retrieves the entity's character ID.
          *
-         * @return The character ID, or 0 if the entity is not a character.
+         * @return The character ID, or a negative value if the entity is not a character.
          */
-        uint GetCharacterId();
-
-        /**
-         * Retrieves the entity's character name.
-         *
-         * @return The character name, or an empty string if the entity is not
-         * a character.
-         */
-        std::string GetCharacterName();
+        int GetCharacterId();
 
         /**
          * Checks if the entity is a line.
@@ -1399,11 +1390,15 @@ class Entity{
          */
         Ogre::Degree GetDirectionToEntity(Entity* entity) const;
 
+        /**
+         * Indicates if the entity is a playable character.
+         */
         bool is_character_;
 
-        uint character_id_;
-
-        std::string character_name_;
+        /**
+         * The ID of the playable character the entity is, if any.
+         */
+        int character_id_;
 
         /**
          * Index of the entity on the field.

@@ -20,6 +20,36 @@
                 <sprite name="LimitLinePart1" x="203" y="50" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
                 <sprite name="LimitLinePart2" x="203" y="53" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
             </widget>
+            <widget name="Character2" x="0" y="65" width="100%" height="60" visible="true">
+                <sprite name="Portrait" image="screens/images/cloud.png" x="22" y="12" width="48" height="48" visible="true" />
+                <widget name="Data" x="102" y="14" width="100%" height="100%" visible="true">
+                    <prototype name="MenuCharacterData" />
+                </widget>
+                <text_area name="NextLevelText" x="186" y="17" text_name="CharacterDataNextLevel" font="FFVIIFont" visible="true" />
+                <sprite name="NextLevelBar" image="screens/images/menu_bar.png" x="202" y="28" width="64" height="8" visible="true" />
+                <sprite name="NextLevelLinePart1" x="203" y="29" width="20" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.125, 0.5 0.125 0.125" alpha="0.8" visible="false" />
+                <sprite name="NextLevelLinePart2" x="203" y="32" width="20" height="3" colours="0.5 0.125 0.125, 0.5 0.125 0.125, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+                <text_area name="LimitLevelText" x="186" y="38" text_name="CharacterDataLimitLevel" font="FFVIIFont" visible="true" />
+                <sprite name="LimitLevelBar" image="screens/images/menu_bar.png" x="202" y="49" width="64" height="8" visible="true" />
+                <text_area name="LimitLevel" x="250" y="40" text_name="CharacterDataLimitLevelNumber" font="FFVIIMenuDigits" visible="true" />
+                <sprite name="LimitLinePart1" x="203" y="50" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
+                <sprite name="LimitLinePart2" x="203" y="53" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+            </widget>
+            <widget name="Character3" x="0" y="130" width="100%" height="60" visible="true">
+                <sprite name="Portrait" image="screens/images/cloud.png" x="22" y="12" width="48" height="48" visible="true" />
+                <widget name="Data" x="102" y="14" width="100%" height="100%" visible="true">
+                    <prototype name="MenuCharacterData" />
+                </widget>
+                <text_area name="NextLevelText" x="186" y="17" text_name="CharacterDataNextLevel" font="FFVIIFont" visible="true" />
+                <sprite name="NextLevelBar" image="screens/images/menu_bar.png" x="202" y="28" width="64" height="8" visible="true" />
+                <sprite name="NextLevelLinePart1" x="203" y="29" width="20" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.125, 0.5 0.125 0.125" alpha="0.8" visible="false" />
+                <sprite name="NextLevelLinePart2" x="203" y="32" width="20" height="3" colours="0.5 0.125 0.125, 0.5 0.125 0.125, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+                <text_area name="LimitLevelText" x="186" y="38" text_name="CharacterDataLimitLevel" font="FFVIIFont" visible="true" />
+                <sprite name="LimitLevelBar" image="screens/images/menu_bar.png" x="202" y="49" width="64" height="8" visible="true" />
+                <text_area name="LimitLevel" x="250" y="40" text_name="CharacterDataLimitLevelNumber" font="FFVIIMenuDigits" visible="true" />
+                <sprite name="LimitLinePart1" x="203" y="50" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
+                <sprite name="LimitLinePart2" x="203" y="53" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+            </widget>
         </widget>
 
         <widget name="Menu" x="278" y="5" width="86" height="132" visible="true">

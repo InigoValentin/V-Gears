@@ -328,10 +328,9 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * Assigns a character to an entity.
          *
          * @param[in] entity_name The entity name.
-         * @param[in] character_name The character name. Usually the same as
-         * the entity.
+         * @param[in] charid The character ID.
          */
-        void SetEntityToCharacter(const char* entity_name, const char* character_name);
+        void SetEntityToCharacter(const char* entity_name, unsigned int char_id);
 
     private:
 

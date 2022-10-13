@@ -587,10 +587,10 @@ bool EntityManager::IsKeyOn(unsigned int key_code){
 
 bool EntityManager::IsKeyOff(unsigned int key_code){return !IsKeyOn(key_code);}
 
-void EntityManager::SetEntityToCharacter(const char* entity_name, const char* character_name){
+void EntityManager::SetEntityToCharacter(const char* entity_name, unsigned int char_id){
     for (unsigned int i = 0; i < entity_.size(); ++ i){
         if (entity_[i]->GetName() == entity_name){
-            entity_[i]->SetCharacter(character_name);
+            entity_[i]->SetCharacter(char_id);
         }
     }
 }

@@ -102,50 +102,31 @@ int DataInstaller::Progress(){
               input_dir_ + "kernel/KERNEL.BIN"
             );
             kernel_installer_->ReadPrices(exe_path_);
-            if (kernel_installer_->ReadCommands() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteCommands(output_dir_ + "game/commands.xml");
-            }
-            if (kernel_installer_->ReadAttacks() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteAttacks(output_dir_ + "game/attacks.xml");
-            }
-            if (kernel_installer_->ReadCharacters() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteCharacters(output_dir_ + "game/characters.xml");
-            }
-            if (kernel_installer_->ReadItems() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteItems(output_dir_ + "game/items.xml");
-            }
+            CreateDir("game");
+            kernel_installer_->ReadCommands();
+            kernel_installer_->WriteCommands(output_dir_ + "game/commands.lua");
+            kernel_installer_->ReadAttacks();
+            kernel_installer_->WriteAttacks(output_dir_ + "game/attacks.lua");
+            kernel_installer_->ReadCharacters();
+            kernel_installer_->WriteCharacters(output_dir_ + "game/characters.lua");
+            kernel_installer_->ReadItems();
+            kernel_installer_->WriteItems(output_dir_ + "game/items.lua");
             kernel_installer_->ReadGrowth();
-            kernel_installer_->WriteGrowth(output_dir_ + "game/growth.xml");
-            if (kernel_installer_->ReadWeapons() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteWeapons(output_dir_ + "game/weapons.xml");
-            }
-            if (kernel_installer_->ReadArmors() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteArmors(output_dir_ + "game/armors.xml");
-            }
-            if (kernel_installer_->ReadAccessories() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteAccessories(output_dir_ + "game/accessories.xml");
-            }
-            if (kernel_installer_->ReadMateria() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteMateria(output_dir_ + "game/materia.xml");
-            }
-            if (kernel_installer_->ReadKeyItems() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteKeyItems(output_dir_ + "game/key_items.xml");
-            }
-            if (kernel_installer_->ReadSummonNames() > 0){
-                CreateDir("game");
-                kernel_installer_->WriteSummonNames(output_dir_ + "game/summons.xml");
-            }
+            kernel_installer_->WriteGrowth(output_dir_ + "game/growth.lua");
+            kernel_installer_->ReadWeapons();
+            kernel_installer_->WriteWeapons(output_dir_ + "game/weapons.lua");
+            kernel_installer_->ReadArmors() > 0;
+            kernel_installer_->WriteArmors(output_dir_ + "game/armors.lua");
+            kernel_installer_->ReadAccessories();
+            kernel_installer_->WriteAccessories(output_dir_ + "game/accessories.lua");
+            kernel_installer_->ReadMateria();
+            kernel_installer_->WriteMateria(output_dir_ + "game/materia.lua");
+            kernel_installer_->ReadKeyItems();
+            kernel_installer_->WriteKeyItems(output_dir_ + "game/key_items.lua");
+            kernel_installer_->ReadSummonNames();
+            kernel_installer_->WriteSummonNames(output_dir_ + "game/summons.lua");
             kernel_installer_->ReadInitialSaveMap();
-            kernel_installer_->WriteInitialSaveMap(output_dir_ + "game/initial_savemap.xml");
+            kernel_installer_->WriteInitialSaveMap(output_dir_ + "game/initial_savemap.lua");
             //exit(0);
 
             installation_state_ = SPAWN_POINTS_AND_SCALE_FACTORS_INIT;

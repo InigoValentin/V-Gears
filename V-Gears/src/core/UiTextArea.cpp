@@ -251,6 +251,10 @@ void UiTextArea::SetPadding(
     padding_left_ = left;
 }
 
+void UiTextArea::SetText(const char* text){
+    SetText(Ogre::UTFString(text));
+}
+
 void UiTextArea::SetText(const Ogre::UTFString& text){
     TiXmlDocument doc;
     Ogre::UTFString xml_text = "<container>" + text + "</container>";

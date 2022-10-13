@@ -15,8 +15,11 @@
 
 
 #include <tinyxml.h>
+#include <fstream>
+#include <iostream>
 #include "KernelDataInstaller.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
+#include <boost/algorithm/string/replace.hpp>
 
 KernelDataInstaller::KernelDataInstaller(std::string path): kernel_(path){
     for (int i = 0; i < 416; i ++) prices_[i] = 50;
@@ -61,6 +64,7 @@ int KernelDataInstaller::ReadCommands(){
             if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
             name_offset ++;
         }
+        boost::replace_all(data.name, "\"", "'");
 
         // For descriptions, do the same as for names.
         data.description = "";
@@ -91,6 +95,7 @@ int KernelDataInstaller::ReadCommands(){
             }
             desc_offset ++;
         }
+        boost::replace_all(data.description, "\"", "'");
 
         // Read data from the item data section.
         data.cursor_action = command_file.readU8();
@@ -127,20 +132,18 @@ int KernelDataInstaller::ReadCommands(){
     return command_count;
 }
 
-void KernelDataInstaller::WriteCommands(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("commands"));
+void KernelDataInstaller::WriteCommands(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     for (CommandData command : commands_){
-        std::unique_ptr<TiXmlElement> xml_command(new TiXmlElement("item"));
-        xml_command->SetAttribute("id", command.id);
-        xml_command->SetAttribute("name", command.name);
-        xml_command->SetAttribute("description", command.description);
-        xml_command->SetAttribute("camera_1", command.camera_single);
-        xml_command->SetAttribute("camera_x", command.camera_single);
-        container->LinkEndChild(xml_command.release());
+        file << "Game.Commands[" << command.id << "] = {\n"
+          << "    name = \"" << command.name << "\",\n"
+          << "    description = \"" << command.description << "\",\n"
+          << "    camera = {single = " << command.camera_single << ", "
+          << "multiple = " << command.camera_multiple << "}\n}\n";
     }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }
 
 int KernelDataInstaller::ReadAttacks(){
@@ -308,60 +311,34 @@ int KernelDataInstaller::ReadAttacks(){
     return attack_count;
 }
 
-void KernelDataInstaller::WriteAttacks(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("attacks"));
+void KernelDataInstaller::WriteAttacks(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     for (AttackData attack : attacks_){
-        std::unique_ptr<TiXmlElement> xml_attack(new TiXmlElement("attack"));
-        xml_attack->SetAttribute("id", attack.id);
-        xml_attack->SetAttribute("accuracy", attack.accuracy);
-        xml_attack->SetAttribute("impact_effect", attack.impact_effect);
-        xml_attack->SetAttribute("hurt_anim", attack.hurt_anim);
-        xml_attack->SetAttribute("mp", attack.mp);
-        xml_attack->SetAttribute("sounds", attack.sound);
-        xml_attack->SetAttribute("camera_1", attack.camera_single);
-        xml_attack->SetAttribute("camera_x", attack.camera_multiple);
-        xml_attack->SetAttribute("effect", attack.effect);
-        xml_attack->SetAttribute("dmg_formula", attack.damage_formula);
-        xml_attack->SetAttribute("dmg_modifier", attack.damage_modifier);
-        xml_attack->SetAttribute("power", attack.power);
-        xml_attack->SetAttribute("restore", attack.restore_type);
-        xml_attack->SetAttribute("target_select", attack.target.selection_enabled);
-        xml_attack->SetAttribute("target_default_enemy", attack.target.default_enemy);
-        xml_attack->SetAttribute("target_default_multiple", attack.target.default_multiple);
-        xml_attack->SetAttribute("target_toggle_multiple", attack.target.toggle_multiple);
-        xml_attack->SetAttribute("target_fixed", attack.target.fixed_row);
-        xml_attack->SetAttribute("target_short_range", attack.target.short_range);
-        xml_attack->SetAttribute("target_all", attack.target.all_rows);
-        xml_attack->SetAttribute("target_random", attack.target.random);
-        // Statuses.
-        if (attack.status.status.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("statuses"));
-            xml_status->SetAttribute("mode", attack.status.mode);
-            xml_status->SetAttribute("chance", attack.status.chance);
-            for (int s : attack.status.status){
-                std::unique_ptr<TiXmlElement> xml_status_status(new TiXmlElement("status"));
-                xml_status_status->SetAttribute("id", s);
-                xml_status->LinkEndChild(xml_status_status.release());
-            }
-            xml_attack->LinkEndChild(xml_status.release());
-        }
-        // Add elements.
-        if (attack.elements.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_elements(new TiXmlElement("elements"));
-            for (int s : attack.elements){
-                std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("element"));
-                xml_element->SetAttribute("id", s);
-                xml_elements->LinkEndChild(xml_element.release());
-            }
-            xml_attack->LinkEndChild(xml_elements.release());
-        }
-
-        container->LinkEndChild(xml_attack.release());
-
+        file << "Game.Attacks[" << attack.id << "] = {\n"
+          << "    accuracy = " << static_cast<int>(attack.accuracy) << ",\n"
+          << "    impact_effect = " << static_cast<int>(attack.impact_effect) << ",\n"
+          << "    hurt_anim = " << static_cast<int>(attack.hurt_anim) << ",\n"
+          << "    mp = " << attack.mp << ",\n"
+          << "    sound = " << attack.sound << ",\n"
+          << "    camera = {single = " << attack.camera_single << ", "
+          << "multiple = " << attack.camera_multiple << "},\n"
+          << "    effect = " << static_cast<int>(attack.effect) << ",\n"
+          << "    dmg_formula = " << static_cast<int>(attack.damage_formula) << ",\n"
+          << "    dmg_modifier = " << static_cast<int>(attack.damage_modifier) << ",\n"
+          << "    power = " << static_cast<int>(attack.power) << ",\n"
+          << "    restore = " << attack.restore_type << ",\n"
+          << "    target = {selectable = " << attack.target.selection_enabled
+          << ", default_enemy = " << attack.target.default_enemy
+          << ", default_multiple = " << attack.target.default_multiple
+          << ", toggle_multiple = " << attack.target.toggle_multiple
+          << ", fixed_row = " << attack.target.fixed_row
+          << ", short_range = " << attack.target.short_range
+          << ", all_rows = " << attack.target.all_rows
+          << ", random = " << attack.target.random << "}\n}\n";
     }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }
 
 int KernelDataInstaller::ReadCharacters(){
@@ -428,134 +405,106 @@ int KernelDataInstaller::ReadCharacters(){
     return character_count;
 }
 
-void KernelDataInstaller::WriteCharacters(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("attacks"));
+void KernelDataInstaller::WriteCharacters(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     for (CharacterData character : characters_){
-        std::unique_ptr<TiXmlElement> xml_character(new TiXmlElement("attack"));
-        xml_character->SetAttribute("id", character.id);
-        xml_character->SetAttribute("name", character.name);
-        xml_character->SetAttribute("initial_level", character.initial_level);
-        // Curves.
-        std::unique_ptr<TiXmlElement> xml_curves(new TiXmlElement("curves"));
-        std::unique_ptr<TiXmlElement> xml_curve_str(new TiXmlElement("curve"));
-        xml_curve_str->SetAttribute("stat", "strength");
-        xml_curve_str->SetAttribute("id", character.curve_str);
-        xml_curves->LinkEndChild(xml_curve_str.release());
-        std::unique_ptr<TiXmlElement> xml_curve_vit(new TiXmlElement("curve"));
-        xml_curve_vit->SetAttribute("stat", "vitality");
-        xml_curve_vit->SetAttribute("id", character.curve_vit);
-        xml_curves->LinkEndChild(xml_curve_vit.release());
-        std::unique_ptr<TiXmlElement> xml_curve_mag(new TiXmlElement("curve"));
-        xml_curve_mag->SetAttribute("stat", "magic");
-        xml_curve_mag->SetAttribute("id", character.curve_mag);
-        xml_curves->LinkEndChild(xml_curve_mag.release());
-        std::unique_ptr<TiXmlElement> xml_curve_spr(new TiXmlElement("curve"));
-        xml_curve_spr->SetAttribute("stat", "spirit");
-        xml_curve_spr->SetAttribute("id", character.curve_spr);
-        xml_curves->LinkEndChild(xml_curve_spr.release());
-        std::unique_ptr<TiXmlElement> xml_curve_dex(new TiXmlElement("curve"));
-        xml_curve_dex->SetAttribute("stat", "dexterity");
-        xml_curve_dex->SetAttribute("id", character.curve_dex);
-        xml_curves->LinkEndChild(xml_curve_dex.release());
-        std::unique_ptr<TiXmlElement> xml_curve_lck(new TiXmlElement("curve"));
-        xml_curve_lck->SetAttribute("stat", "luck");
-        xml_curve_lck->SetAttribute("id", character.curve_lck);
-        xml_curves->LinkEndChild(xml_curve_lck.release());
-        std::unique_ptr<TiXmlElement> xml_curve_hp(new TiXmlElement("curve"));
-        xml_curve_hp->SetAttribute("stat", "hp");
-        xml_curve_hp->SetAttribute("id", character.curve_hp);
-        xml_curves->LinkEndChild(xml_curve_hp.release());
-        std::unique_ptr<TiXmlElement> xml_curve_mp(new TiXmlElement("curve"));
-        xml_curve_mp->SetAttribute("stat", "mp");
-        xml_curve_mp->SetAttribute("id", character.curve_mp);
-        xml_curves->LinkEndChild(xml_curve_mp.release());
-        std::unique_ptr<TiXmlElement> xml_curve_exp(new TiXmlElement("curve"));
-        xml_curve_exp->SetAttribute("stat", "experience");
-        xml_curve_exp->SetAttribute("id", character.curve_exp);
-        xml_curves->LinkEndChild(xml_curve_exp.release());
-        xml_character->LinkEndChild(xml_curves.release());
-        // Limits.
-        std::unique_ptr<TiXmlElement> xml_limits(new TiXmlElement("limits"));
-        // Limit level 1.
-        std::unique_ptr<TiXmlElement> xml_limit_1(new TiXmlElement("level"));
-        xml_limit_1->SetAttribute("level", 1);
-        xml_limit_1->SetAttribute("kills", 0);
-        xml_limit_1->SetAttribute("divisor", character.limit_1_div);
-        std::unique_ptr<TiXmlElement> xml_limit_1_1(new TiXmlElement("limit"));
-        xml_limit_1_1->SetAttribute("level", 1);
-        xml_limit_1_1->SetAttribute("uses", 0);
-        xml_limit_1_1->SetAttribute("command", character.limit_1_1);
-        xml_limit_1->LinkEndChild(xml_limit_1_1.release());
+        file
+          << "Game.Characters[" << character.id << "] = {\n"
+          << "    id = " << character.id << ",\n"
+          << "    name = \"" << character.name << "\",\n"
+          << "    initial_level = \"" << static_cast<int>(character.initial_level) << "\",\n"
+          << "    curves = {\n"
+          << "        str = " << static_cast<int>(character.curve_str) << ",\n"
+          << "        vit = " << static_cast<int>(character.curve_vit) << ",\n"
+          << "        mag = " << static_cast<int>(character.curve_mag) << ",\n"
+          << "        spr = " << static_cast<int>(character.curve_spr) << ",\n"
+          << "        dex = " << static_cast<int>(character.curve_dex) << ",\n"
+          << "        lck = " << static_cast<int>(character.curve_lck) << ",\n"
+          << "        hp = " << static_cast<int>(character.curve_hp) << ",\n"
+          << "        mp = " << static_cast<int>(character.curve_mp) << ",\n"
+          << "        exp = " << static_cast<int>(character.curve_exp) << ",\n"
+          << "    },\n"
+          << "    limits = {\n"
+          << "        [1] = {\n"
+          << "            kills = 0,\n"
+          << "            techniques = {\n"
+          << "                [1] = {\n"
+          << "                    command = " << static_cast<int>(character.limit_1_1) << ",\n"
+          << "                    uses = 0\n"
+          << "                },\n";
         if (character.limit_1_2 < 255){ // Some characters only have 1 limit per level.
-            std::unique_ptr<TiXmlElement> xml_limit_1_2(new TiXmlElement("limit"));
-            xml_limit_1_2->SetAttribute("level", 2);
-            xml_limit_1_2->SetAttribute("uses", character.limit_1_2_uses);
-            xml_limit_1_2->SetAttribute("command", character.limit_1_2);
-            xml_limit_1->LinkEndChild(xml_limit_1_2.release());
+            file
+              << "                [2] = {\n"
+              << "                    command = " << static_cast<int>(character.limit_1_2) << ",\n"
+              << "                    uses = " << character.limit_1_2_uses << "\n"
+              << "                },\n";
         }
-        xml_limits->LinkEndChild(xml_limit_1.release());
+        file
+          << "            }\n"
+          << "        },\n";
         // Limit level 2.
         if (character.limit_2_kills < 65535){
-            std::unique_ptr<TiXmlElement> xml_limit_2(new TiXmlElement("level"));
-            xml_limit_2->SetAttribute("level", 2);
-            xml_limit_2->SetAttribute("kills", character.limit_2_kills);
-            xml_limit_2->SetAttribute("divisor", character.limit_2_div);
-            std::unique_ptr<TiXmlElement> xml_limit_2_1(new TiXmlElement("limit"));
-            xml_limit_2_1->SetAttribute("level", 1);
-            xml_limit_2_1->SetAttribute("uses", 0);
-            xml_limit_2_1->SetAttribute("command", character.limit_2_1);
-            xml_limit_2->LinkEndChild(xml_limit_2_1.release());
+            file
+              << "        [2] = {\n"
+              << "            kills = " << character.limit_2_kills << ",\n"
+              << "            techniques = {\n"
+              << "                [1] = {\n"
+              << "                    command = " << static_cast<int>(character.limit_2_1) << ",\n"
+              << "                    uses = 0\n"
+              << "                },\n";
             if (character.limit_2_2 < 255){ // Some characters only have 1 limit per level.
-                std::unique_ptr<TiXmlElement> xml_limit_2_2(new TiXmlElement("limit"));
-                xml_limit_2_2->SetAttribute("level", 2);
-                xml_limit_2_2->SetAttribute("uses", character.limit_2_2_uses);
-                xml_limit_2_2->SetAttribute("command", character.limit_2_2);
-                xml_limit_2->LinkEndChild(xml_limit_2_2.release());
+                file
+                  << "                [2] = {\n"
+                  << "                    command = "
+                  << static_cast<int>(character.limit_2_2) << ",\n"
+                  << "                    uses = " << character.limit_2_2_uses << "\n"
+                  << "                },\n";
             }
-            xml_limits->LinkEndChild(xml_limit_2.release());
+            file
+              << "            }\n"
+              << "        },\n";
         }
         // Limit level 3.
-        if (character.limit_3_kills < 65535 && character.limit_3_kills > 0){
-            std::unique_ptr<TiXmlElement> xml_limit_3(new TiXmlElement("level"));
-            xml_limit_3->SetAttribute("level", 3);
-            xml_limit_3->SetAttribute("kills", character.limit_3_kills);
-            xml_limit_3->SetAttribute("divisor", character.limit_3_div);
-            std::unique_ptr<TiXmlElement> xml_limit_3_1(new TiXmlElement("limit"));
-            xml_limit_3_1->SetAttribute("level", 1);
-            xml_limit_3_1->SetAttribute("uses", 0);
-            xml_limit_3_1->SetAttribute("command", character.limit_3_1);
-            xml_limit_3->LinkEndChild(xml_limit_3_1.release());
+        if (character.limit_3_kills < 65535){
+            file
+              << "        [3] = {\n"
+              << "            kills = " << character.limit_3_kills << ",\n"
+              << "            techniques = {\n"
+              << "                [1] = {\n"
+              << "                    command = " << static_cast<int>(character.limit_3_1) << ",\n"
+              << "                    uses = 0\n"
+              << "                },\n";
             if (character.limit_3_2 < 255){ // Some characters only have 1 limit per level.
-                std::unique_ptr<TiXmlElement> xml_limit_3_2(new TiXmlElement("limit"));
-                xml_limit_3_2->SetAttribute("level", 2);
-                xml_limit_3_2->SetAttribute("uses", character.limit_3_2_uses);
-                xml_limit_3_2->SetAttribute("command", character.limit_3_2);
-                xml_limit_3->LinkEndChild(xml_limit_3_2.release());
+                file
+                  << "                [2] = {\n"
+                  << "                    command = "
+                  << static_cast<int>(character.limit_3_2) << ",\n"
+                  << "                    uses = " << character.limit_3_2_uses << "\n"
+                  << "                },\n";
             }
-            xml_limits->LinkEndChild(xml_limit_3.release());
+            file
+              << "            }\n"
+              << "        },\n";
         }
         // Limit level 4.
         if (character.limit_4_1 < 255){
-            std::unique_ptr<TiXmlElement> xml_limit_4(new TiXmlElement("level"));
-            xml_limit_4->SetAttribute("level", 4);
-            xml_limit_4->SetAttribute("kills", 0);
-            xml_limit_4->SetAttribute("divisor", character.limit_4_div);
-            std::unique_ptr<TiXmlElement> xml_limit_4_1(new TiXmlElement("limit"));
-            xml_limit_4_1->SetAttribute("level", 1);
-            xml_limit_4_1->SetAttribute("uses", 0);
-            xml_limit_4_1->SetAttribute("command", character.limit_4_1);
-            xml_limit_4->LinkEndChild(xml_limit_4_1.release());
-            xml_limits->LinkEndChild(xml_limit_4.release());
+            file
+              << "        [4] = {\n"
+              << "            kills = 0,\n"
+              << "            techniques = {\n"
+              << "                [1] = {\n"
+              << "                    command = " << static_cast<int>(character.limit_4_1) << ",\n"
+              << "                    uses = 0\n"
+              << "                },\n"
+              << "            }\n"
+              << "        },\n";
         }
-
-        xml_character->LinkEndChild(xml_limits.release());
-
-        container->LinkEndChild(xml_character.release());
-
+        file
+          << "    }\n}\n";
     }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }
 
 void KernelDataInstaller::ReadGrowth(){
@@ -577,51 +526,33 @@ void KernelDataInstaller::ReadGrowth(){
             growth_.curves[i].base[j] = growth_file.readU8();
         }
     }
-
 }
 
-void KernelDataInstaller::WriteGrowth(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("growth"));
-    // Bonus.
-    std::unique_ptr<TiXmlElement> xml_bonuses(new TiXmlElement("stat_bonus"));
-    for (int i = 0; i < 12; i ++){
-        std::unique_ptr<TiXmlElement> xml_bonus(new TiXmlElement("bonus"));
-        xml_bonus->SetAttribute("stat", "primary");
-        xml_bonus->SetAttribute("value", growth_.bonus_stat[i]);
-        xml_bonuses->LinkEndChild(xml_bonus.release());
-    }
-    for (int i = 0; i < 12; i ++){
-        std::unique_ptr<TiXmlElement> xml_bonus(new TiXmlElement("bonus"));
-        xml_bonus->SetAttribute("stat", "hp");
-        xml_bonus->SetAttribute("value", growth_.bonus_hp[i]);
-        xml_bonuses->LinkEndChild(xml_bonus.release());
-    }
-    for (int i = 0; i < 12; i ++){
-        std::unique_ptr<TiXmlElement> xml_bonus(new TiXmlElement("bonus"));
-        xml_bonus->SetAttribute("stat", "mp");
-        xml_bonus->SetAttribute("value", growth_.bonus_mp[i]);
-        xml_bonuses->LinkEndChild(xml_bonus.release());
-    }
-    container->LinkEndChild(xml_bonuses.release());
-    // Curves
-    std::unique_ptr<TiXmlElement> xml_curves(new TiXmlElement("curves"));
+void KernelDataInstaller::WriteGrowth(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
+    file << "Game.Growth.bonus.primary = {";
+    for (int i = 0; i < 12; i ++)
+        file << "[" << i << "] = " << static_cast<int>(growth_.bonus_stat[i]) << ", ";
+    file << "}\nGame.Growth.bonus.hp = {";
+    for (int i = 0; i < 12; i ++)
+        file << "[" << i << "] = " << static_cast<int>(growth_.bonus_hp[i]) << ", ";
+    file << "}\nGame.Growth.bonus.mp = {";
+    for (int i = 0; i < 12; i ++)
+        file << "[" << i << "] = " << static_cast<int>(growth_.bonus_mp[i]) << ", ";
+    file << "}\n";
     for (int i = 0; i < 64; i ++){
-        std::unique_ptr<TiXmlElement> xml_curve(new TiXmlElement("curve"));
-        xml_curve->SetAttribute("id", growth_.curves[i].id);
-        xml_curve->SetAttribute("type", growth_.curves[i].type);
+        file << "Game.Growth.curves[" << i << "] = {\n";
         for (int j = 0; j < 8; j ++){
-            std::unique_ptr<TiXmlElement> xml_curve_pair(new TiXmlElement("pair"));
-            xml_curve_pair->SetAttribute("id", j);
-            xml_curve_pair->SetAttribute("gradient", growth_.curves[i].gradient[j]);
-            xml_curve_pair->SetAttribute("base", growth_.curves[i].base[j]);
-            xml_curve->LinkEndChild(xml_curve_pair.release());
+            file << "    [" << j << "] = {gradient = "
+              << static_cast<int>(growth_.curves[i].gradient[j])
+              << ", base = " << static_cast<int>(growth_.curves[i].gradient[j]) << "},\n";
         }
-        xml_curves->LinkEndChild(xml_curve.release());
+        file << "}\n";
     }
-    container->LinkEndChild(xml_curves.release());
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+
+    file.close();
 }
 
 int KernelDataInstaller::ReadItems(){
@@ -651,6 +582,7 @@ int KernelDataInstaller::ReadItems(){
             if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
             name_offset ++;
         }
+        boost::replace_all(data.name, "\"", "'");
 
         // For descriptions, do the same as for names.
         data.description = "";
@@ -681,6 +613,7 @@ int KernelDataInstaller::ReadItems(){
             }
             desc_offset ++;
         }
+        boost::replace_all(data.description, "\"", "'");
 
         // If the item doesn't have a name, it means all items have been read.
         // break the loop.
@@ -840,61 +773,35 @@ int KernelDataInstaller::ReadItems(){
     return item_count;
 }
 
-void KernelDataInstaller::WriteItems(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("items"));
+void KernelDataInstaller::WriteItems(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     for (ItemData item : items_){
-        std::unique_ptr<TiXmlElement> xml_item(new TiXmlElement("item"));
-        xml_item->SetAttribute("id", item.id);
-        xml_item->SetAttribute("inventory_id", item.id);
-        xml_item->SetAttribute("price", prices_[item.id]);
-        xml_item->SetAttribute("name", item.name);
-        xml_item->SetAttribute("description", item.description);
-        xml_item->SetAttribute("camera", item.camera);
-        xml_item->SetAttribute("sell", item.sellable);
-        xml_item->SetAttribute("battle", item.useable_battle);
-        xml_item->SetAttribute("menu", item.useable_menu);
-        xml_item->SetAttribute("effect", item.effect);
-        xml_item->SetAttribute("dmg_formula", item.damage_formula);
-        xml_item->SetAttribute("dmg_modifier", item.damage_modifier);
-        xml_item->SetAttribute("power", item.power);
-        xml_item->SetAttribute("restore", item.restore_type);
-        xml_item->SetAttribute("target_select", item.target.selection_enabled);
-        xml_item->SetAttribute("target_default_enemy", item.target.default_enemy);
-        xml_item->SetAttribute("target_default_multiple", item.target.default_multiple);
-        xml_item->SetAttribute("target_toggle_multiple", item.target.toggle_multiple);
-        xml_item->SetAttribute("target_fixed", item.target.fixed_row);
-        xml_item->SetAttribute("target_short_range", item.target.short_range);
-        xml_item->SetAttribute("target_all", item.target.all_rows);
-        xml_item->SetAttribute("target_random", item.target.random);
-        // Statuses.
-        if (item.status.status.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("statuses"));
-            xml_status->SetAttribute("mode", item.status.mode);
-            xml_status->SetAttribute("chance", item.status.chance);
-            for (int s : item.status.status){
-                std::unique_ptr<TiXmlElement> xml_status_status(new TiXmlElement("status"));
-                xml_status_status->SetAttribute("id", s);
-                xml_status->LinkEndChild(xml_status_status.release());
-            }
-            xml_item->LinkEndChild(xml_status.release());
-        }
-        // Add elements.
-        if (item.elements.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_elements(new TiXmlElement("elements"));
-            for (int s : item.elements){
-                std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("element"));
-                xml_element->SetAttribute("id", s);
-                xml_elements->LinkEndChild(xml_element.release());
-            }
-            xml_item->LinkEndChild(xml_elements.release());
-        }
-
-        container->LinkEndChild(xml_item.release());
-
+        file << "Game.Items[" << item.id << "] = {\n"
+          << "    inventory_id = " << item.id << ",\n"
+          << "    price = " << prices_[item.id] << ",\n"
+          << "    name = \"" << item.name << "\",\n"
+          << "    description = \"" << item.description << "\",\n"
+          << "    camera = " << item.camera << ",\n"
+          << "    sell = " << item.sellable << ",\n"
+          << "    battle = " << item.useable_battle << ",\n"
+          << "    menu = " << item.useable_menu << ",\n"
+          << "    effect = " << static_cast<int>(item.effect) << ",\n"
+          << "    dmg_formula = " << static_cast<int>(item.damage_formula) << ",\n"
+          << "    dmg_modifier = " << static_cast<int>(item.damage_modifier) << ",\n"
+          << "    power = " << static_cast<int>(item.power) << ",\n"
+          << "    restore = " << item.restore_type << ",\n"
+          << "    target = {selectable = " << item.target.selection_enabled
+          << ", default_enemy = " << item.target.default_enemy
+          << ", default_multiple = " << item.target.default_multiple
+          << ", toggle_multiple = " << item.target.toggle_multiple
+          << ", fixed_row = " << item.target.fixed_row
+          << ", short_range = " << item.target.short_range
+          << ", all_rows = " << item.target.all_rows
+          << ", random = " << item.target.random << "}\n}\n";
     }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }
 
 int KernelDataInstaller::ReadWeapons(){
@@ -924,6 +831,7 @@ int KernelDataInstaller::ReadWeapons(){
             if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
             name_offset ++;
         }
+        boost::replace_all(data.name, "\"", "'");
 
         // For descriptions, do the same as for names.
         data.description = "";
@@ -954,6 +862,7 @@ int KernelDataInstaller::ReadWeapons(){
             }
             desc_offset ++;
         }
+        boost::replace_all(data.description, "\"", "'");
 
         // If the item doesn't have a name, it means all items have been read.
         // break the loop.
@@ -1072,89 +981,55 @@ int KernelDataInstaller::ReadWeapons(){
     return weapon_count;
 }
 
-void KernelDataInstaller::WriteWeapons(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("weapons"));
+void KernelDataInstaller::WriteWeapons(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     for (WeaponData weapon : weapons_){
-        std::unique_ptr<TiXmlElement> xml_weapon(new TiXmlElement("weapon"));
-        xml_weapon->SetAttribute("id", weapon.id);
-        xml_weapon->SetAttribute("inventory_id", weapon.id + 128);
-        xml_weapon->SetAttribute("price", prices_[weapon.id + 128]);
-        xml_weapon->SetAttribute("name", weapon.name);
-        xml_weapon->SetAttribute("description", weapon.description);
-        xml_weapon->SetAttribute("camera", weapon.camera);
-        xml_weapon->SetAttribute("sell", weapon.sellable);
-        xml_weapon->SetAttribute("battle", weapon.useable_battle);
-        xml_weapon->SetAttribute("menu", weapon.useable_menu);
-        xml_weapon->SetAttribute("throw", weapon.throwable);
-        xml_weapon->SetAttribute("effect", weapon.effect);
-        xml_weapon->SetAttribute("dmg_formula", weapon.damage_formula);
-        xml_weapon->SetAttribute("dmg_modifier", weapon.damage_modifier);
-        xml_weapon->SetAttribute("power", weapon.power);
-        xml_weapon->SetAttribute("growth", weapon.growth);
-        xml_weapon->SetAttribute("accuracy", weapon.accuracy);
-        xml_weapon->SetAttribute("critical", weapon.critical);
-        xml_weapon->SetAttribute("model", weapon.model);
-        xml_weapon->SetAttribute("animation", weapon.animation_index);
-        xml_weapon->SetAttribute("target_select", weapon.target.selection_enabled);
-        xml_weapon->SetAttribute("target_default_enemy", weapon.target.default_enemy);
-        xml_weapon->SetAttribute("target_default_multiple", weapon.target.default_multiple);
-        xml_weapon->SetAttribute("target_toggle_multiple", weapon.target.toggle_multiple);
-        xml_weapon->SetAttribute("target_fixed", weapon.target.fixed_row);
-        xml_weapon->SetAttribute("target_short_range", weapon.target.short_range);
-        xml_weapon->SetAttribute("target_all", weapon.target.all_rows);
-        xml_weapon->SetAttribute("target_random", weapon.target.random);
-        // Statuses.
-        if (weapon.status != 0XFF){
-            std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("statuses"));
-            std::unique_ptr<TiXmlElement> xml_status_status(new TiXmlElement("status"));
-            xml_status_status->SetAttribute("id", weapon.status);
-            xml_status->LinkEndChild(xml_status_status.release());
-            xml_weapon->LinkEndChild(xml_status.release());
+        file << "Game.Weapons[" << weapon.id << "] = {\n"
+          << "    inventory_id = " << weapon.id + 128 << ",\n"
+          << "    price = " << prices_[weapon.id + 128] << ",\n"
+          << "    name = \"" << weapon.name << "\",\n"
+          << "    description = \"" << weapon.description << "\",\n"
+          << "    camera = " << weapon.camera << ",\n"
+          << "    sell = " << weapon.sellable << ",\n"
+          << "    battle = " << weapon.useable_battle << ",\n"
+          << "    menu = " << weapon.useable_menu << ",\n"
+          << "    throw = " << weapon.throwable << ",\n"
+          << "    effect = " << static_cast<int>(weapon.effect) << ",\n"
+          << "    dmg_formula = " << static_cast<int>(weapon.damage_formula) << ",\n"
+          << "    dmg_modifier = " << static_cast<int>(weapon.damage_modifier) << ",\n"
+          << "    power = " << static_cast<int>(weapon.power) << ",\n"
+          << "    growth = " << static_cast<int>(weapon.growth) << ",\n"
+          << "    accuracy = " << static_cast<int>(weapon.accuracy) << ",\n"
+          << "    critical = " << static_cast<int>(weapon.critical) << ",\n"
+          << "    model = " << static_cast<int>(weapon.model) << ",\n"
+          << "    animation = " << static_cast<int>(weapon.animation_index) << ",\n"
+          << "    target = {selectable = " << weapon.target.selection_enabled
+          << ", default_enemy = " << weapon.target.default_enemy
+          << ", default_multiple = " << weapon.target.default_multiple
+          << ", toggle_multiple = " << weapon.target.toggle_multiple
+          << ", fixed_row = " << weapon.target.fixed_row
+          << ", short_range = " << weapon.target.short_range
+          << ", all_rows = " << weapon.target.all_rows
+          << ", random = " << weapon.target.random << "},\n"
+          << "    elements = {";
+        for (int s : weapon.elements) file << s << ", ";
+        file << "},\n";
+        file << "    slots = {";
+        for (u8 slot : weapon.materia_slots) file << static_cast<int>(slot) << ", ";
+        file << "},\n    stats = {";
+        for (StatBonus s : weapon.stat_bonus){
+            file << "\n        {stat = " << static_cast<int>(s.stat) << ", bonus = "
+              << static_cast<int>(s.bonus) << "},";
         }
-        // Add elements.
-        if (weapon.elements.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_elements(new TiXmlElement("elements"));
-            for (int s : weapon.elements){
-                std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("element"));
-                xml_element->SetAttribute("id", s);
-                xml_elements->LinkEndChild(xml_element.release());
-            }
-            xml_weapon->LinkEndChild(xml_elements.release());
-        }
-        if (weapon.materia_slots.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_slots(new TiXmlElement("slots"));
-            for (u8 slot : weapon.materia_slots){
-                std::unique_ptr<TiXmlElement> xml_slot(new TiXmlElement("slot"));
-                xml_slot->SetAttribute("type", slot);
-                xml_slots->LinkEndChild(xml_slot.release());
-            }
-            xml_weapon->LinkEndChild(xml_slots.release());
-        }
-        if (weapon.stat_bonus.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_stats(new TiXmlElement("stat_bonuses"));
-            for (StatBonus s : weapon.stat_bonus){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", s.stat);
-                xml_stat->SetAttribute("bonus", s.bonus);
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            xml_weapon->LinkEndChild(xml_stats.release());
-        }
-        if (weapon.equip.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_characters(new TiXmlElement("characters"));
-            for (int s : weapon.equip){
-                std::unique_ptr<TiXmlElement> xml_character(new TiXmlElement("character"));
-                xml_character->SetAttribute("id", s);
-                xml_characters->LinkEndChild(xml_character.release());
-            }
-            xml_weapon->LinkEndChild(xml_characters.release());
-        }
-        container->LinkEndChild(xml_weapon.release());
-
+        if (weapon.stat_bonus.size() > 0) file << "\n    },\n";
+        else file << "},\n";
+        file << "    users = {";
+        for (int s : weapon.equip) file << s << ", ";
+        file << "}\n}\n";
     }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }
 
 int KernelDataInstaller::ReadArmors(){
@@ -1184,6 +1059,7 @@ int KernelDataInstaller::ReadArmors(){
             if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
             name_offset ++;
         }
+        boost::replace_all(data.name, "\"", "'");
 
         // For descriptions, do the same as for names.
         data.description = "";
@@ -1214,6 +1090,7 @@ int KernelDataInstaller::ReadArmors(){
             }
             desc_offset ++;
         }
+        boost::replace_all(data.description, "\"", "'");
 
         // If the item doesn't have a name, it means all items have been read.
         // break the loop.
@@ -1307,76 +1184,49 @@ int KernelDataInstaller::ReadArmors(){
     return armor_count;
 }
 
-void KernelDataInstaller::WriteArmors(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("armors"));
+void KernelDataInstaller::WriteArmors(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     for (ArmorData armor : armors_){
-        std::unique_ptr<TiXmlElement> xml_armor(new TiXmlElement("armor"));
-        xml_armor->SetAttribute("id", armor.id);
-        xml_armor->SetAttribute("inventory_id", armor.id + 256);
-        xml_armor->SetAttribute("price", prices_[armor.id + 256]);
-        xml_armor->SetAttribute("name", armor.name);
-        xml_armor->SetAttribute("description", armor.description);
-        xml_armor->SetAttribute("sell", armor.sellable);
-        xml_armor->SetAttribute("battle", armor.useable_battle);
-        xml_armor->SetAttribute("menu", armor.useable_menu);
-        xml_armor->SetAttribute("phi_defense", armor.defense);
-        xml_armor->SetAttribute("mag_defense", armor.m_defense);
-        xml_armor->SetAttribute("phi_evasion", armor.evasion);
-        xml_armor->SetAttribute("mag_evasion", armor.m_evasion);
-        xml_armor->SetAttribute("growth", armor.growth);
-        // Statuses.
-        if (armor.status != 0XFF){
-            std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("statuses"));
-            std::unique_ptr<TiXmlElement> xml_status_status(new TiXmlElement("status"));
-            xml_status_status->SetAttribute("id", armor.status);
-            xml_status->LinkEndChild(xml_status_status.release());
-            xml_armor->LinkEndChild(xml_status.release());
+        file << "Game.Armors[" << armor.id << "] = {\n"
+          << "    inventory_id = " << armor.id + 256 << ",\n"
+          << "    price = " << prices_[armor.id + 256] << ",\n"
+          << "    name = \"" << armor.name << "\",\n"
+          << "    description = \"" << armor.description << "\",\n"
+          << "    sell = " << armor.sellable << ",\n"
+          << "    battle = " << armor.useable_battle << ",\n"
+          << "    menu = " << armor.useable_menu << ",\n"
+          << "    defense = {physical = " << static_cast<int>(armor.defense) << ", magical = "
+          << static_cast<int>(armor.m_defense) << "},\n"
+          << "    evasion = {physical = " << static_cast<int>(armor.evasion) << ", magical = "
+          << static_cast<int>(armor.m_evasion) << "},\n"
+          << "    growth = " << static_cast<int>(armor.growth) << ",\n"
+          << "    status = {";
+        if (armor.status != 0XFF) file << armor.status;
+        file
+          << "},\n"
+          << "    elements = {";
+        for (int s : armor.elements){
+            file << "\n        {id = " << s << ", mode = "
+              << static_cast<int>(armor.element_defense_mode) << "},";
         }
-        // Add elements.
-        if (armor.elements.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_elements(new TiXmlElement("elements"));
-            for (int s : armor.elements){
-                std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("element"));
-                xml_element->SetAttribute("id", s);
-                xml_element->SetAttribute("mode", armor.element_defense_mode);
-                xml_elements->LinkEndChild(xml_element.release());
-            }
-            xml_armor->LinkEndChild(xml_elements.release());
+        if (armor.elements.size() > 0) file << "\n    },\n";
+        else file << "},\n";
+        file << "    slots = {";
+        for (u8 slot : armor.materia_slots) file << static_cast<int>(slot) << ", ";
+        file << "},\n    stats = {";
+        for (StatBonus s : armor.stat_bonus){
+            file << "\n        {stat = " << static_cast<int>(s.stat) << ", bonus = "
+              << static_cast<int>(s.bonus) << "},";
         }
-        if (armor.materia_slots.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_slots(new TiXmlElement("slots"));
-            for (u8 slot : armor.materia_slots){
-                std::unique_ptr<TiXmlElement> xml_slot(new TiXmlElement("slot"));
-                xml_slot->SetAttribute("type", slot);
-                xml_slots->LinkEndChild(xml_slot.release());
-            }
-            xml_armor->LinkEndChild(xml_slots.release());
-        }
-        if (armor.stat_bonus.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_stats(new TiXmlElement("stat_bonuses"));
-            for (StatBonus s : armor.stat_bonus){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", s.stat);
-                xml_stat->SetAttribute("bonus", s.bonus);
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            xml_armor->LinkEndChild(xml_stats.release());
-        }
-        if (armor.equip.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_characters(new TiXmlElement("characters"));
-            for (int s : armor.equip){
-                std::unique_ptr<TiXmlElement> xml_character(new TiXmlElement("character"));
-                xml_character->SetAttribute("id", s);
-                xml_characters->LinkEndChild(xml_character.release());
-            }
-            xml_armor->LinkEndChild(xml_characters.release());
-        }
-        container->LinkEndChild(xml_armor.release());
-
+        if (armor.stat_bonus.size() > 0) file << "\n    },\n";
+        else file << "},\n";
+        file << "    users = {";
+        for (int s : armor.equip) file << s << ", ";
+        file << "}\n}\n";
     }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }
 
 int KernelDataInstaller::ReadAccessories(){
@@ -1406,6 +1256,7 @@ int KernelDataInstaller::ReadAccessories(){
             if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
             name_offset ++;
         }
+        boost::replace_all(data.name, "\"", "'");
 
         // For descriptions, do the same as for names.
         data.description = "";
@@ -1436,6 +1287,7 @@ int KernelDataInstaller::ReadAccessories(){
             }
             desc_offset ++;
         }
+        boost::replace_all(data.description, "\"", "'");
 
         // If the item doesn't have a name, it means all items have been read.
         // break the loop.
@@ -1540,72 +1392,41 @@ int KernelDataInstaller::ReadAccessories(){
     return accessory_count;
 }
 
-void KernelDataInstaller::WriteAccessories(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("accessories"));
+void KernelDataInstaller::WriteAccessories(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     for (AccessoryData accessory : accessories_){
-        std::unique_ptr<TiXmlElement> xml_accessory(new TiXmlElement("accessory"));
-        xml_accessory->SetAttribute("id", accessory.id);
-        xml_accessory->SetAttribute("inventory_id", accessory.id + 287);
-        xml_accessory->SetAttribute("price", prices_[accessory.id + 287]);
-        xml_accessory->SetAttribute("name", accessory.name);
-        xml_accessory->SetAttribute("description", accessory.description);
-        xml_accessory->SetAttribute("sell", accessory.sellable);
-        xml_accessory->SetAttribute("battle", accessory.useable_battle);
-        xml_accessory->SetAttribute("menu", accessory.useable_menu);
-        // Special effect
-        if (accessory.effect != 0XFF){
-            std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("special_effects"));
-            std::unique_ptr<TiXmlElement> xml_status_status(new TiXmlElement("effect"));
-            xml_status_status->SetAttribute("id", accessory.effect);
-            xml_status->LinkEndChild(xml_status_status.release());
-            xml_accessory->LinkEndChild(xml_status.release());
+        file << "Game.Accessories[" << accessory.id << "] = {\n"
+          << "    inventory_id = " << accessory.id + 287 << ",\n"
+          << "    price = " << prices_[accessory.id + 287] << ",\n"
+          << "    name = \"" << accessory.name << "\",\n"
+          << "    description = \"" << accessory.description << "\",\n"
+          << "    sell = " << accessory.sellable << ",\n"
+          << "    battle = " << accessory.useable_battle << ",\n"
+          << "    menu = " << accessory.useable_menu << ",\n"
+          << "    special_effect = {";
+        if (accessory.effect != 0XFF) file << static_cast<int>(accessory.effect);
+        file
+          << "},\n"
+          << "    status = {";
+        for (int s : accessory.status) file << s << ", ";
+        file
+          << "},\n"
+          << "    elements = {";
+        for (int s : accessory.elements) file << s << ", ";
+        file << "},\n    stats = {";
+        for (StatBonus s : accessory.stat_bonus){
+            file << "\n        {stat = " << static_cast<int>(s.stat) << ", bonus = "
+              << static_cast<int>(s.bonus) << "},";
         }
-        // Statuses.
-        if (accessory.status.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("statuses"));
-            for (int s : accessory.status){
-                std::unique_ptr<TiXmlElement> xml_status_status(new TiXmlElement("status"));
-                xml_status_status->SetAttribute("id", s);
-                xml_status->LinkEndChild(xml_status_status.release());
-            }
-            xml_accessory->LinkEndChild(xml_status.release());
-        }
-        // Add elements.
-        if (accessory.elements.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_elements(new TiXmlElement("elements"));
-            for (int s : accessory.elements){
-                std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("element"));
-                xml_element->SetAttribute("id", s);
-                xml_element->SetAttribute("mode", accessory.element_defense_mode);
-                xml_elements->LinkEndChild(xml_element.release());
-            }
-            xml_accessory->LinkEndChild(xml_elements.release());
-        }
-        if (accessory.stat_bonus.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_stats(new TiXmlElement("stat_bonuses"));
-            for (StatBonus s : accessory.stat_bonus){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", s.stat);
-                xml_stat->SetAttribute("bonus", s.bonus);
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            xml_accessory->LinkEndChild(xml_stats.release());
-        }
-        if (accessory.equip.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_characters(new TiXmlElement("characters"));
-            for (int s : accessory.equip){
-                std::unique_ptr<TiXmlElement> xml_character(new TiXmlElement("character"));
-                xml_character->SetAttribute("id", s);
-                xml_characters->LinkEndChild(xml_character.release());
-            }
-            xml_accessory->LinkEndChild(xml_characters.release());
-        }
-        container->LinkEndChild(xml_accessory.release());
-
+        if (accessory.stat_bonus.size() > 0) file << "\n    },\n";
+        else file << "},\n";
+        file << "    users = {";
+        for (int s : accessory.equip) file << s << ", ";
+        file << "}\n}\n";
     }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }
 
 int KernelDataInstaller::ReadMateria(){
@@ -1635,6 +1456,7 @@ int KernelDataInstaller::ReadMateria(){
             if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
             name_offset ++;
         }
+        boost::replace_all(data.name, "\"", "'");
 
         // For descriptions, do the same as for names.
         data.description = "";
@@ -1665,6 +1487,7 @@ int KernelDataInstaller::ReadMateria(){
             }
             desc_offset ++;
         }
+        boost::replace_all(data.description, "\"", "'");
 
         // Read data from the materia data section.
         for (int i = 0; i < 4; i ++) data.level_up_ap[i] = materia_file.readU16LE();
@@ -1851,117 +1674,59 @@ int KernelDataInstaller::ReadMateria(){
     return materia_count;
 }
 
-void KernelDataInstaller::WriteMateria(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("materias"));
+void KernelDataInstaller::WriteMateria(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     for (MateriaData materia : materia_){
-        std::unique_ptr<TiXmlElement> xml_materia(new TiXmlElement("materia"));
-        xml_materia->SetAttribute("id", materia.id);
-        xml_materia->SetAttribute("price", prices_[materia.id + 320]);
-        xml_materia->SetAttribute("name", materia.name);
-        xml_materia->SetAttribute("description", materia.description);
-        xml_materia->SetAttribute("type", materia.type);
-        // Levels.
-        std::unique_ptr<TiXmlElement> xml_levels(new TiXmlElement("levels"));
-        std::unique_ptr<TiXmlElement> xml_level(new TiXmlElement("level"));
-        xml_level->SetAttribute("level", 1);
-        xml_level->SetAttribute("ap", 0);
-        xml_levels->LinkEndChild(xml_level.release());
+        file << "Game.Materia[" << materia.id << "] = {\n"
+          << "    price = " << prices_[materia.id + 320] << ",\n"
+          << "    name = \"" << materia.name << "\",\n"
+          << "    description = \"" << materia.description << "\",\n"
+          << "    type = " << materia.type << ",\n"
+          << "    levels_ap = {[1] = 0, ";
         for (int i = 0; i < 4; i ++){
-            if (materia.level_up_ap[i] < 65535){
-                std::unique_ptr<TiXmlElement> xml_level(new TiXmlElement("level"));
-                xml_level->SetAttribute("level", i + 2);
-                xml_level->SetAttribute("ap", materia.level_up_ap[i] * 100);
-                xml_levels->LinkEndChild(xml_level.release());
-            }
+            if (materia.level_up_ap[i] < 65535)
+                file << "[" << (i + 2) << "] = " << (materia.level_up_ap[i] * 100) << ", ";
         }
-
-        xml_materia->LinkEndChild(xml_levels.release());
-
-        // Statuses.
-        if (materia.status.size() > 0){
-            std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("statuses"));
-            for (int s : materia.status){
-                std::unique_ptr<TiXmlElement> xml_status_status(new TiXmlElement("status"));
-                xml_status_status->SetAttribute("id", s);
-                xml_status->LinkEndChild(xml_status_status.release());
-            }
-            xml_materia->LinkEndChild(xml_status.release());
-        }
-        // Add elements.
-        if (materia.element != 0xFF){
-            std::unique_ptr<TiXmlElement> xml_elements(new TiXmlElement("elements"));
-            std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("element"));
-            xml_element->SetAttribute("id", materia.element);
-            xml_elements->LinkEndChild(xml_element.release());
-            xml_materia->LinkEndChild(xml_elements.release());
-        }
-        if (materia.stats.change == true){
-            std::unique_ptr<TiXmlElement> xml_stats(new TiXmlElement("stat_bonuses"));
-            // TODO: Lookup stat IDs.
-            if (materia.stats.str != 0){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", 0);
-                xml_stat->SetAttribute("bonus", materia.stats.str);
-                xml_stat->SetAttribute("mode", "abs");
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            if (materia.stats.vit != 0){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", 1);
-                xml_stat->SetAttribute("bonus", materia.stats.vit);
-                xml_stat->SetAttribute("mode", "abs");
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            if (materia.stats.mag != 0){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", 2);
-                xml_stat->SetAttribute("bonus", materia.stats.mag);
-                xml_stat->SetAttribute("mode", "abs");
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            if (materia.stats.spr != 0){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", 3);
-                xml_stat->SetAttribute("bonus", materia.stats.spr);
-                xml_stat->SetAttribute("mode", "abs");
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            if (materia.stats.dex != 0){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", 4);
-                xml_stat->SetAttribute("bonus", materia.stats.dex);
-                xml_stat->SetAttribute("mode", "abs");
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            if (materia.stats.lck != 0){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", 5);
-                xml_stat->SetAttribute("bonus", materia.stats.lck);
-                xml_stat->SetAttribute("mode", "abs");
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            if (materia.stats.hp != 0){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", 6);
-                xml_stat->SetAttribute("bonus", materia.stats.hp);
-                xml_stat->SetAttribute("mode", "rel");
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            if (materia.stats.mp != 0){
-                std::unique_ptr<TiXmlElement> xml_stat(new TiXmlElement("stat_bonus"));
-                xml_stat->SetAttribute("stat", 7);
-                xml_stat->SetAttribute("bonus", materia.stats.mp);
-                xml_stat->SetAttribute("mode", "rel");
-                xml_stats->LinkEndChild(xml_stat.release());
-            }
-            xml_materia->LinkEndChild(xml_stats.release());
-        }
-        container->LinkEndChild(xml_materia.release());
-
+        file
+          << "},\n"
+          << "    status = {";
+        for (int s : materia.status) file << s << ", ";
+        file
+          << "}\n"
+          << "    elements = {";
+        if (materia.element != 0xFF) file << static_cast<int>(materia.element);
+        file << "}\n    stats = {";
+        if (materia.stats.str != 0)
+            file
+              << "\n        {stat = \"str\", bonus = " << materia.stats.str << ", mode = \"abs\"},";
+        if (materia.stats.vit != 0)
+            file
+              << "\n        {stat = \"vit\", bonus = " << materia.stats.vit << ", mode = \"abs\"},";
+        if (materia.stats.mag != 0)
+            file
+              << "\n        {stat = \"mag\", bonus = " << materia.stats.mag << ", mode = \"abs\"},";
+        if (materia.stats.spr != 0)
+            file
+              << "\n        {stat = \"spr\", bonus = " << materia.stats.spr << ", mode = \"abs\"},";
+        if (materia.stats.dex != 0)
+            file
+              << "\n        {stat = \"dex\", bonus = " << materia.stats.dex << ", mode = \"abs\"},";
+        if (materia.stats.lck != 0)
+            file
+              << "\n        {stat = \"lck\", bonus = " << materia.stats.lck << ", mode = \"abs\"},";
+        if (materia.stats.hp != 0)
+            file
+              << "\n        {stat = \"hp\", bonus = " << materia.stats.hp << ", mode = \"rel\"},";
+        if (materia.stats.mp != 0)
+            file
+              << "\n        {stat = \"mp\", bonus = " << materia.stats.mp << ", mode = \"rel\"},";
+        if (materia.stats.change) file << "\n    }\n";
+        else file << "}\n";
+        file << "}\n";
     }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }
 
 int KernelDataInstaller::ReadKeyItems(){
@@ -1990,6 +1755,7 @@ int KernelDataInstaller::ReadKeyItems(){
             if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
             name_offset ++;
         }
+        boost::replace_all(data.name, "\"", "'");
 
         // For descriptions, do the same as for names.
         data.description = "";
@@ -2020,6 +1786,7 @@ int KernelDataInstaller::ReadKeyItems(){
             }
             desc_offset ++;
         }
+        boost::replace_all(data.description, "\"", "'");
 
         // If the key item doesn't have a name, it means all key items have been read.
         // break the loop.
@@ -2034,19 +1801,16 @@ int KernelDataInstaller::ReadKeyItems(){
     return key_item_count;
 }
 
-void KernelDataInstaller::WriteKeyItems(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("key_items"));
+void KernelDataInstaller::WriteKeyItems(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     for (KeyItemData key_item : key_items_){
-        std::unique_ptr<TiXmlElement> xml_key_item(new TiXmlElement("key_item"));
-        xml_key_item->SetAttribute("id", key_item.id);
-        xml_key_item->SetAttribute("name", key_item.name);
-        xml_key_item->SetAttribute("description", key_item.description);
-        container->LinkEndChild(xml_key_item.release());
-
+        file << "Game.Key_Items[" << key_item.id << "] = {\n"
+          << "    name = \"" << key_item.name << "\",\n"
+          << "    description = \"" << key_item.description << "\"\n}\n";
     }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }
 
 int KernelDataInstaller::ReadSummonNames(){
@@ -2073,6 +1837,7 @@ int KernelDataInstaller::ReadSummonNames(){
             if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
             name_offset ++;
         }
+        boost::replace_all(data.name, "\"", "'");
 
         // If the key item doesn't have a name, it means all key items have been read.
         // break the loop.
@@ -2087,18 +1852,13 @@ int KernelDataInstaller::ReadSummonNames(){
     return summon_count;
 }
 
-void KernelDataInstaller::WriteSummonNames(std::string file){
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("summons"));
-    for (SummonNameData summon : summon_names_){
-        std::unique_ptr<TiXmlElement> xml_summon(new TiXmlElement("summon"));
-        xml_summon->SetAttribute("id", summon.id);
-        xml_summon->SetAttribute("name", summon.name);
-        container->LinkEndChild(xml_summon.release());
-
-    }
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+void KernelDataInstaller::WriteSummonNames(std::string file_name){
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
+    for (SummonNameData summon : summon_names_)
+        file << "Game.Summon_Names[" << summon.id << "] = {\"" << summon.name << "\"}\n";
+    file.close();
 }
 
 void KernelDataInstaller::ReadInitialSaveMap(){
@@ -2211,162 +1971,98 @@ void KernelDataInstaller::ReadInitialSaveMap(){
     // The initial savemap ends up after character data, end now.
 }
 
-void KernelDataInstaller::WriteInitialSaveMap(std::string file){
+void KernelDataInstaller::WriteInitialSaveMap(std::string file_name){
     // The initial save map only contains character data.
-    TiXmlDocument xml;
-    std::unique_ptr<TiXmlElement> container(new TiXmlElement("savemap"));
-    std::unique_ptr<TiXmlElement> xml_characters(new TiXmlElement("characters"));
+    std::fstream file;
+    file.open(file_name, std::ios::out);
+    if (!file) return;
     int total_count = 0; // Utility to count in loops.
-    // Characters.
     for (int c = 0; c < 9; c ++){
-        std::unique_ptr<TiXmlElement> xml_character(new TiXmlElement("character"));
-        xml_character->SetAttribute("id", c);
-        xml_character->SetAttribute("char_id", savemap_.characters[c].identifier);
-        xml_character->SetAttribute("name", savemap_.characters[c].name);
-        xml_character->SetAttribute("level", savemap_.characters[c].level);
-        xml_character->SetAttribute("kills", savemap_.characters[c].kills);
-        xml_character->SetAttribute("exp", savemap_.characters[c].exp);
-        xml_character->SetAttribute("exp_to_next_lv", savemap_.characters[c].exp_to_next);
-        // Character stats.
-        std::unique_ptr<TiXmlElement> xml_stats(new TiXmlElement("stats"));
-        // TODO: Lookup stat names or IDs (one or the other, don't hardcode both).
-        std::unique_ptr<TiXmlElement> xml_stat_str(new TiXmlElement("stat"));
-        xml_stat_str->SetAttribute("id", 0);
-        xml_stat_str->SetAttribute("name", "str");
-        xml_stat_str->SetAttribute("value", savemap_.characters[c].str);
-        xml_stat_str->SetAttribute("bonus", savemap_.characters[c].str_bonus);
-        xml_stats->LinkEndChild(xml_stat_str.release());
-        std::unique_ptr<TiXmlElement> xml_stat_vit(new TiXmlElement("stat"));
-        xml_stat_vit->SetAttribute("id", 1);
-        xml_stat_vit->SetAttribute("name", "vit");
-        xml_stat_vit->SetAttribute("value", savemap_.characters[c].vit);
-        xml_stat_vit->SetAttribute("bonus", savemap_.characters[c].vit_bonus);
-        xml_stats->LinkEndChild(xml_stat_vit.release());
-        std::unique_ptr<TiXmlElement> xml_stat_mag(new TiXmlElement("stat"));
-        xml_stat_mag->SetAttribute("id", 2);
-        xml_stat_mag->SetAttribute("name", "mag");
-        xml_stat_mag->SetAttribute("value", savemap_.characters[c].mag);
-        xml_stat_mag->SetAttribute("bonus", savemap_.characters[c].mag_bonus);
-        xml_stats->LinkEndChild(xml_stat_mag.release());
-        std::unique_ptr<TiXmlElement> xml_stat_spr(new TiXmlElement("stat"));
-        xml_stat_spr->SetAttribute("id", 3);
-        xml_stat_spr->SetAttribute("name", "spr");
-        xml_stat_spr->SetAttribute("value", savemap_.characters[c].spr);
-        xml_stat_spr->SetAttribute("bonus", savemap_.characters[c].spr_bonus);
-        xml_stats->LinkEndChild(xml_stat_spr.release());
-        std::unique_ptr<TiXmlElement> xml_stat_dex(new TiXmlElement("stat"));
-        xml_stat_dex->SetAttribute("id", 4);
-        xml_stat_dex->SetAttribute("name", "dex");
-        xml_stat_dex->SetAttribute("value", savemap_.characters[c].dex);
-        xml_stat_dex->SetAttribute("bonus", savemap_.characters[c].dex_bonus);
-        xml_stats->LinkEndChild(xml_stat_dex.release());
-        std::unique_ptr<TiXmlElement> xml_stat_lck(new TiXmlElement("stat"));
-        xml_stat_lck->SetAttribute("id", 5);
-        xml_stat_lck->SetAttribute("name", "lck");
-        xml_stat_lck->SetAttribute("value", savemap_.characters[c].lck);
-        xml_stat_lck->SetAttribute("bonus", savemap_.characters[c].lck_bonus);
-        xml_stats->LinkEndChild(xml_stat_lck.release());
-        std::unique_ptr<TiXmlElement> xml_stat_hp(new TiXmlElement("stat"));
-        xml_stat_hp->SetAttribute("id", 6);
-        xml_stat_hp->SetAttribute("name", "hp");
-        xml_stat_hp->SetAttribute("value", savemap_.characters[c].hp);
-        xml_stat_hp->SetAttribute("base", savemap_.characters[c].base_hp);
-        // TODO: MAX HP always as 0xFF, must be calculated manually.
-        xml_stat_hp->SetAttribute("max", savemap_.characters[c].max_hp);
-        xml_stats->LinkEndChild(xml_stat_hp.release());
-        std::unique_ptr<TiXmlElement> xml_stat_mp(new TiXmlElement("stat"));
-        xml_stat_mp->SetAttribute("id", 6);
-        xml_stat_mp->SetAttribute("name", "mp");
-        xml_stat_mp->SetAttribute("value", savemap_.characters[c].mp);
-        xml_stat_mp->SetAttribute("base", savemap_.characters[c].base_mp);
-        // TODO: MAX MP always as 0xFF, must be calculated manually.
-        xml_stat_mp->SetAttribute("max", savemap_.characters[c].max_mp);
-        xml_stats->LinkEndChild(xml_stat_mp.release());
-        xml_character->LinkEndChild(xml_stats.release());
-        // Character limits
-        std::unique_ptr<TiXmlElement> xml_limits(new TiXmlElement("limits"));
-        xml_limits->SetAttribute("selected", savemap_.characters[c].limit_level);
-        xml_limits->SetAttribute("bar", savemap_.characters[c].limit_bar);
-        for (int l = 0; l < 4; l ++){
-            if (savemap_.characters[c].limits_learned[l][0]){
-                std::unique_ptr<TiXmlElement> xml_limit_level(new TiXmlElement("level"));
-                xml_limit_level->SetAttribute("id", l + 1);
-                std::unique_ptr<TiXmlElement> xml_limit_technique(new TiXmlElement("technique"));
-                xml_limit_technique->SetAttribute("id", 1);
-                if (l < 3)
-                    xml_limit_technique->SetAttribute("uses", savemap_.characters[c].limit_uses[l]);
-                else xml_limit_technique->SetAttribute("uses", 0);
-                xml_limit_level->LinkEndChild(xml_limit_technique.release());
-                if (savemap_.characters[c].limits_learned[l][1]){
-                    std::unique_ptr<TiXmlElement> xml_limit_technique(
-                      new TiXmlElement("technique")
-                    );
-                    xml_limit_technique->SetAttribute("id", 2);
-                    xml_limit_technique->SetAttribute("uses", 0);
-                    xml_limit_level->LinkEndChild(xml_limit_technique.release());
-                }
-                xml_limits->LinkEndChild(xml_limit_level.release());
-            }
-        }
-        xml_character->LinkEndChild(xml_limits.release());
-        // Character equipments.
-        std::unique_ptr<TiXmlElement> xml_equipment(new TiXmlElement("equipment"));
-        std::unique_ptr<TiXmlElement> xml_weapon(new TiXmlElement("weapon"));
-        xml_weapon->SetAttribute("id", savemap_.characters[c].weapon);
-        std::unique_ptr<TiXmlElement> xml_weapon_materias(new TiXmlElement("materias"));
+        SaveMap::Character character = savemap_.characters[c];
+        file
+          << "Characters[" << c << "] = {\n"
+          << "    char_id = " << static_cast<int>(character.identifier) << ",\n"
+          << "    name = \"" << character.name << "\",\n"
+          << "    level = " << static_cast<int>(character.level) << ",\n"
+          << "    kills = " << character.kills << ",\n"
+          << "    exp = " << character.exp << ",\n"
+          << "    exp_to_next = " << character.exp_to_next << ",\n"
+          << "    stats = {\n"
+          << "        str = {base = " << static_cast<int>(character.str)
+          << ", bonus = " << static_cast<int>(character.str_bonus)
+          << ", total = " << static_cast<int>(character.str + character.str_bonus) << "},\n"
+          << "        vit = {base = " << static_cast<int>(character.vit)
+          << ", bonus = " << static_cast<int>(character.vit_bonus)
+          << ", total = " << static_cast<int>(character.vit + character.vit_bonus) << "},\n"
+          << "        mag = {base = " << static_cast<int>(character.mag)
+          << ", bonus = " << static_cast<int>(character.mag_bonus)
+          << ", total = " << static_cast<int>(character.mag + character.mag_bonus) << "},\n"
+          << "        spr = {base = " << static_cast<int>(character.spr)
+          << ", bonus = " << static_cast<int>(character.spr_bonus)
+          << ", total = " << static_cast<int>(character.spr + character.spr_bonus) << "},\n"
+          << "        dex = {base = " << static_cast<int>(character.dex)
+          << ", bonus = " << static_cast<int>(character.dex_bonus)
+          << ", total = " << static_cast<int>(character.dex + character.dex_bonus) << "},\n"
+          << "        lck = {base = " << static_cast<int>(character.lck)
+          << ", bonus = " << static_cast<int>(character.lck_bonus)
+          << ", total = " << static_cast<int>(character.lck + character.lck_bonus) << "},\n"
+          << "        hp = {current = " << character.hp  << ", base = " << character.base_hp
+          << ", max = " << character.max_hp << "},\n"
+          << "        mp = {current = " << character.mp  << ", base = " << character.base_mp
+          << ", max = " << character.max_mp << "}\n"
+          << "    },\n"
+          << "    limit = {\n"
+          << "        current = " << static_cast<int>(character.limit_level) << ",\n"
+          << "        bar = " << static_cast<int>(character.limit_bar) << ",\n"
+          << "        learned = {\n"
+          << "            [1] = {[1] = " << character.limits_learned[0][0] << ", [2] = "
+          << character.limits_learned[0][1] << "},\n"
+          << "            [2] = {[1] = " << character.limits_learned[1][0] << ", [2] = "
+          << character.limits_learned[1][1] << "},\n"
+          << "            [3] = {[1] = " << character.limits_learned[2][0] << ", [2] = "
+          << character.limits_learned[2][1] << "},\n"
+          << "            [4] = {[1] = " << character.limits_learned[3][0] << ", [2] = "
+          << character.limits_learned[3][1] << "}\n"
+          << "        },\n"
+          << "        uses = {[1] = " << character.limit_uses[0] << ", [2] = "
+          << character.limit_uses[1] << ", [3] = " << character.limit_uses[2] << ", [4] = 0}\n"
+          << "    },\n"
+          << "    weapon = {\n"
+          << "        id = " << static_cast<int>(character.weapon) << ",\n"
+          << "        materia = {";
         total_count = 0;
         for (int m = 0; m < 8; m ++){
-            if (savemap_.characters[c].weapon_materia[m].id < 255){
+            if (character.weapon_materia[m].id < 255){
                 total_count ++;
-                std::unique_ptr<TiXmlElement> xml_weapon_materia(new TiXmlElement("materia"));
-                xml_weapon_materia->SetAttribute("id", savemap_.characters[c].weapon_materia[m].id);
-                xml_weapon_materia->SetAttribute("ap", savemap_.characters[c].weapon_materia[m].ap);
-                xml_weapon_materias->LinkEndChild(xml_weapon_materia.release());
+                file << "\n            [" << m << "] = {id = "
+                  << static_cast<int>(character.weapon_materia[m].id) << ", ap = "
+                  << character.weapon_materia[m].ap << "},";
             }
         }
-        // Only add materia section to equipment if at least one is equipped, else ignore section.
-        if (total_count > 0) xml_weapon->LinkEndChild(xml_weapon_materias.release());
-        xml_equipment->LinkEndChild(xml_weapon.release());
-        std::unique_ptr<TiXmlElement> xml_armor(new TiXmlElement("armor"));
-        xml_armor->SetAttribute("id", savemap_.characters[c].armor);
-        std::unique_ptr<TiXmlElement> xml_armor_materias(new TiXmlElement("materias"));
+        if (total_count > 0) file << "\n        }\n    },\n";
+        else file << "}\n    },\n";
+        file
+          << "    armor = {\n"
+          << "        id = " << static_cast<int>(character.armor) << ",\n"
+          << "        materia = {";
         total_count = 0;
         for (int m = 0; m < 8; m ++){
-            if (savemap_.characters[c].armor_materia[m].id < 255){
+            if (character.armor_materia[m].id < 255){
                 total_count ++;
-                std::unique_ptr<TiXmlElement> xml_armor_materia(new TiXmlElement("materia"));
-                xml_armor_materia->SetAttribute("id", savemap_.characters[c].weapon_materia[m].id);
-                xml_armor_materia->SetAttribute("ap", savemap_.characters[c].weapon_materia[m].ap);
-                xml_armor_materias->LinkEndChild(xml_armor_materia.release());
+                file << "\n            [" << m << "] = {id = "
+                  << static_cast<int>(character.armor_materia[m].id) << ", ap = "
+                  << character.armor_materia[m].ap << "},";
             }
         }
-        // Only add materia section to equipment if at least one is equipped, else ignore section.
-        if (total_count > 0) xml_armor->LinkEndChild(xml_armor_materias.release());
-        xml_equipment->LinkEndChild(xml_armor.release());
-        if (savemap_.characters[c].accessory < 255){
-            std::unique_ptr<TiXmlElement> xml_accessory(new TiXmlElement("accessory"));
-            xml_accessory->SetAttribute("id", savemap_.characters[c].accessory);
-            xml_equipment->LinkEndChild(xml_accessory.release());
-        }
-        xml_character->LinkEndChild(xml_equipment.release());
-        // Statuses (Only saddness/fury)
-        if (savemap_.characters[c].fury || savemap_.characters[c].sadness){
-            std::unique_ptr<TiXmlElement> xml_statuses(new TiXmlElement("statuses"));
-            if (savemap_.characters[c].fury){
-                std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("status"));
-                xml_status->SetAttribute("id", FURY);
-                xml_statuses->LinkEndChild(xml_status.release());
-            }
-            if (savemap_.characters[c].sadness){
-                std::unique_ptr<TiXmlElement> xml_status(new TiXmlElement("status"));
-                xml_status->SetAttribute("id", SADNESS);
-                xml_statuses->LinkEndChild(xml_status.release());
-            }
-            xml_character->LinkEndChild(xml_statuses.release());
-        }
-        xml_characters->LinkEndChild(xml_character.release());
+        if (total_count > 0) file << "\n        }\n    },\n";
+        else file << "}\n    },\n";
+        file << "    accessory = ";
+        if (character.accessory < 0xFF) file << static_cast<int>(character.accessory);
+        else file << "nil";
+        file << ",\n    status = {";
+        if (character.fury) file << FURY;
+        if (character.sadness) file << SADNESS;
+        file << "}\n}\n";
     }
-    container->LinkEndChild(xml_characters.release());
-    xml.LinkEndChild(container.release());
-    xml.SaveFile(file);
+    file.close();
 }

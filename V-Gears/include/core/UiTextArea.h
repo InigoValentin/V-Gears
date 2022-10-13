@@ -212,10 +212,7 @@ class UiTextArea : public UiWidget{
          * @param[in] bottom Padding from the bottom, in pixels.
          * @param[in] left Padding from the left, in pixels.
          */
-        void SetPadding(
-          const float top, const float right,
-          const float bottom, const float left
-        );
+        void SetPadding(const float top, const float right, const float bottom, const float left);
 
         /**
          * Sets the text from a string.
@@ -223,6 +220,13 @@ class UiTextArea : public UiWidget{
          * @param[in] text Text to set.
          */
         void SetText(const Ogre::UTFString& text);
+
+        /**
+         * Sets the text from a string.
+         *
+         * @param[in] text Text to set.
+         */
+        void SetText(const char* text) override;
 
         /**
          * Sets the text from an XML node.

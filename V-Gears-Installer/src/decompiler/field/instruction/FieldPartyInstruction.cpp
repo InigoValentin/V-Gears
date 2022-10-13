@@ -74,14 +74,12 @@ void FieldPartyInstruction::ProcessSTITM(CodeGenerator* code_gen){
 }
 
 void FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
-    FieldCodeGenerator* gc = static_cast<FieldCodeGenerator*>(code_gen);
-    auto char_id_1 = gc->GetFormatter().GetFriendlyCharName(params_[0]->GetUnsigned());
-    char_id_1 = (char_id_1 == "") ? "nil" : ("\"" + char_id_1 + "\"");
-    auto char_id_2 = gc->GetFormatter().GetFriendlyCharName(params_[1]->GetUnsigned());
-    char_id_2 = (char_id_2 == "") ? "nil" : ("\"" + char_id_2 + "\"");
-    auto char_id_3 = gc->GetFormatter().GetFriendlyCharName(params_[2]->GetUnsigned());
-    char_id_3 = (char_id_3 == "") ? "nil" : ("\"" + char_id_3 + "\"");
+    std::string chars[3];
+    for (int i = 0; i < 3; i ++){
+        if (params_[i]->GetUnsigned() < 254) chars[i] = params_[i]->GetString();
+        else chars[i] = "nil";
+    }
     code_gen->AddOutputLine((
-      boost::format("FFVII.set_party(%1%, %2%, %3%)") % char_id_1 % char_id_2 % char_id_3
+      boost::format("FFVII.set_party(%1%, %2%, %3%)") % chars[0] % chars[1] % chars[2]
     ).str());
 }

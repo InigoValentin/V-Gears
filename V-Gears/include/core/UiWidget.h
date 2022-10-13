@@ -483,8 +483,6 @@ class UiWidget{
         /**
          * Sets the widget colour.
          *
-         * It set the same colour for all corners.
-         *
          * @param[in] r Colour red component (0-255).
          * @param[in] g Colour green component (0-255).
          * @param[in] b Colour blue component (0-255).
@@ -530,6 +528,51 @@ class UiWidget{
          * @param[in] a Alpha value (0 opaque, 255 fully transparent).
          */
         void SetAlpha(const float a);
+
+        /**
+         * Sets the text of the widget.
+         *
+         * If the widget dones't have text, it won't do anything.
+         *
+         * @param[in] Text the text to set.
+         */
+        virtual void SetText(const char* text);
+
+        /**
+         * Retrieves the absolute width of the widget.
+         *
+         * Doesn't consider percentages.
+         *
+         * @return Absolute width.
+         */
+        float ScriptGetWidth();
+
+        /**
+         * Sets the absolute width of the widget.
+         *
+         * Doesn't modify percentages.
+         *
+         * @param[in] Absolute width.
+         */
+        void ScriptSetWidth(float width);
+
+        /**
+         * Retrieves the absolute height of the widget.
+         *
+         * Doesn't consider percentages.
+         *
+         * @return Absolute height.
+         */
+        float ScriptGetHeight();
+
+        /**
+         * Sets the absolute height of the widget.
+         *
+         * Doesn't modify percentages.
+         *
+         * @param[in] Absolute height.
+         */
+        void ScriptSetHeight(float height);
 
     protected:
 

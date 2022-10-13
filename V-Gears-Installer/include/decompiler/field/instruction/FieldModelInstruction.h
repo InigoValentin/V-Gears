@@ -136,7 +136,7 @@ class FieldModelInstruction : public KernelCallInstruction{
 
         void ProcessTLKON(CodeGenerator* code_gen, const std::string& entity);
 
-        void ProcessPC(CodeGenerator* code_gen, const std::string& entity);
+        void ProcessPC(CodeGenerator* code_gen, const std::string& entity, int char_id);
 
         void ProcessCHAR(CodeGenerator* code_gen, const std::string& entity);
 

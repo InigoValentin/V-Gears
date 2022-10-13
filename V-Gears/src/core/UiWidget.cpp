@@ -629,3 +629,19 @@ void UiWidget::SetAlpha(const float a){
     colour_4_.a = a;
     SetUpdateTransformation();
 }
+
+void UiWidget::SetText(const char* text){}
+
+float UiWidget::ScriptGetWidth(){return width_;}
+
+void UiWidget::ScriptSetWidth(float width){
+    width_ = width;
+    SetUpdateTransformation();
+}
+
+float UiWidget::ScriptGetHeight(){return width_;}
+
+void UiWidget::ScriptSetHeight(float height){
+    height_ = height;
+    SetUpdateTransformation();
+}
