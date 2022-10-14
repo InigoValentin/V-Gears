@@ -80,6 +80,9 @@ void FieldTextWriter::Write(
           "<dialog name=\"" + field_name + "_" + std::to_string(i) + "\">"
         );
         tag_open_ = true;
+        // Some maps have unclosed color tags.
+        // Use this counter to close them at the end.
+        int colour_opened = 0;
         for (unsigned char temp = 0x00;; ++ offset){
             temp = GetU8(offset);
             if (temp == 0xFF) break;
@@ -111,11 +114,11 @@ void FieldTextWriter::Write(
             }
             else if (temp == 0xEA){
                 AddText(dialog);
-                logger_->Log("<include name=\"char_cloud\" />");
+                logger_->Log("<character id=\"0\" />");
             }
             else if (temp == 0xEB){
                 AddText(dialog);
-                logger_->Log("<include name=\"char_barret\" />");
+                logger_->Log("<character id=\"1\" />");
             }
             else if (temp == 0xEC){
                 AddText(dialog);
@@ -147,15 +150,15 @@ void FieldTextWriter::Write(
             }
             else if (temp == 0xF3){
                 AddText(dialog);
-                logger_->Log("<character party_id=\"0\" />");
+                logger_->Log("<party pos=\"0\" />");
             }
             else if (temp == 0xF4){
                 AddText(dialog);
-                logger_->Log("<character party_id=\"1\" />");
+                logger_->Log("<party pos=\"1\" />");
             }
             else if (temp == 0xF5){
                 AddText(dialog);
-                logger_->Log("<character party_id=\"2\" />");
+                logger_->Log("<party pos=\"2\" />");
             }
             else if (temp == 0xF6){
                 AddText(dialog);
@@ -226,33 +229,55 @@ void FieldTextWriter::Write(
                 // TODO: Maybe value must be RGB?
                 // TODO: anfrst map fails to terminate a colour breaking all of
                 // the XML, so colours turned off for now.
-                if (temp2 == 0xD4){
+                if (temp2 == 0xD2){ // Gray.
                     AddText(dialog);
-                   // logger_->Log("<colour value=\"red\">");
+                    logger_->Log("<colour value=\"0.6 0.6 0.6\">");
+                    colour_opened ++;
                 }
-                else if (temp2 == 0xD5){
+                else if (temp2 == 0xD3){ // Blue.
                     AddText(dialog);
-                   // logger_->Log("<colour value=\"purple\" >");
+                    logger_->Log("<colour value=\"0.0 0.0 1.0\">");
+                    colour_opened ++;
                 }
-                else if (temp2 == 0xD6){
+                else if (temp2 == 0xD4){ // Red.
                     AddText(dialog);
-                    //logger_->Log("<colour value=\"green\" >");
+                    logger_->Log("<colour value=\"1.0 0.0 0.0\">");
+                    colour_opened ++;
                 }
-                else if (temp2 == 0xD7){
+                else if (temp2 == 0xD5){ // Purple
                     AddText(dialog);
-                   // logger_->Log("<colour value=\"cyan\" >");
+                    logger_->Log("<colour value=\"1.0 0.2 0.8\" >");
+                    colour_opened ++;
                 }
-                else if (temp2 == 0xD8){
+                else if (temp2 == 0xD6){ // Green.
                     AddText(dialog);
-                   // logger_->Log("<colour value=\"yellow\">");
+                    logger_->Log("<colour value=\"0.0 1.0 0.0\" >");
+                    colour_opened ++;
                 }
-                else if (temp2 == 0xD9){
+                else if (temp2 == 0xD7){ // Cyan.
                     AddText(dialog);
-                   // logger_->Log("</colour>");
+                    logger_->Log("<colour value=\"0.0 1.0 0.8\" >");
+                    colour_opened ++;
+                }
+                else if (temp2 == 0xD8){ // Yellow
+                    AddText(dialog);
+                    logger_->Log("<colour value=\"1.0 1.0 0.4\">");
+                    colour_opened ++;
+                }
+                else if (temp2 == 0xD9){ // White, or back to normal.
+                    AddText(dialog);
+                    logger_->Log("</colour>");
+                    colour_opened --;
+                }
+                else if (temp2 == 0xDA){ // Flash (blink), global for a window.
+                    // TODO: Implement
+                }
+                else if (temp2 == 0xDB){ // Rainbow, global for a window.
+                    // TODO: Implement
                 }
                 else if (temp2 == 0xDC){
                     AddText(dialog);
-                   // logger_->Log("<pause_ok >");
+                    logger_->Log("<pause_ok >");
                 }
                 else if (temp2 == 0xDD){
                     u16 wait = GetU16LE(offset + 1);
@@ -286,6 +311,8 @@ void FieldTextWriter::Write(
                 }
             }
         }
+        // Close unclosed color tags;
+        for (; colour_opened > 0; colour_opened --) logger_->Log("</colour>");
         AddText(dialog);
         logger_->Log("</dialog>\n\n");
         tag_open_ = false;

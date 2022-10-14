@@ -67,8 +67,9 @@ enum TextState{
     TS_NEXT_PAGE,
 };
 
-
-
+/**
+ * A character in a text.
+ */
 struct TextChar{
     TextChar():
       char_code(0),
@@ -83,23 +84,72 @@ struct TextChar{
       sprite_y(0)
     {}
 
+    /**
+     * The character code.
+     *
+     * Normal character code, no FF7 code tables.
+     */
     int char_code;
+
+    /**
+     * Color for the character.
+     */
     Ogre::ColourValue colour;
+
+    /**
+     * Indicates if the character is to be actually printed.
+     */
     bool skip;
+
+    /**
+     * If the character is a variable, the variable name.
+     */
     Ogre::String variable;
+
+    /**
+     * If the character is a variable, the variable length.
+     */
     unsigned int variable_len;
+
+    /**
+     * Indicates if the OK button has been pressed during a text pause.
+     */
     bool pause_ok;
+
+    /**
+     * For pause characters, the time.
+     */
     float pause_time;
+
+    /**
+     * Indicates if the character is a new page character.
+     */
     bool next_page;
+
+    /**
+     * If the character is a symbol or an image, this is the sprite.
+     */
     UiSprite* sprite;
+
+    /**
+     * If the character is a symbol or an image, this is the Y position.
+     */
     float sprite_y;
 };
 
+/**
+ * A variable displayed in a text.
+ */
+struct TextVariable{
 
-
-struct TextVariable
-{
+    /**
+     * The variable name.
+     */
     Ogre::String name;
+
+    /**
+     * The variable value, resolved as a string.
+     */
     Ogre::UTFString value;
 };
 
@@ -129,10 +179,7 @@ class UiTextArea : public UiWidget{
          * @param[in] parent Pointer to the widget that will parent the
          * UiTextArea.
          */
-        UiTextArea(
-          const Ogre::String& name, const Ogre::String& path_name,
-          UiWidget* parent
-        );
+        UiTextArea(const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent);
 
         /**
          * Destroys the UiTextArea.
@@ -283,9 +330,7 @@ class UiTextArea : public UiWidget{
          * @param[in] name Variable name.
          * @param[in] value Variable value.
          */
-        void SetVariable(
-          const Ogre::String& name, const Ogre::UTFString& value
-        );
+        void SetVariable(const Ogre::String& name, const Ogre::UTFString& value);
 
         /**
          * Gets the value of a variable in the text.
@@ -340,22 +385,16 @@ class UiTextArea : public UiWidget{
          *
          * @param[in] node The XML node to get the text from.
          * @param[in] colour The text colour.
-         * @todo Does this call setText?
          */
-        void PrepareTextFromNode(
-          TiXmlNode* node, const Ogre::ColourValue& colour
-        );
+        void PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colour);
 
         /**
          * Prepares text from a string.
          *
          * @param[in] text The text to prepare.
          * @param[in] colour The text colour.
-         * @todo Does this call setText?
          */
-        void PrepareTextFromText(
-          const Ogre::UTFString& text, const Ogre::ColourValue& colour
-        );
+        void PrepareTextFromText(const Ogre::UTFString& text, const Ogre::ColourValue& colour);
 
         /**
          * Constructor.

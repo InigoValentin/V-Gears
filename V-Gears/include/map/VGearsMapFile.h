@@ -36,20 +36,16 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param[in] creator Pointer to the ResourceManager that is
-             * creating this resource.
+             * @param[in] creator Pointer to the ResourceManager that is creating this resource.
              * @param[in] name The unique name of the resource.
              * @param[in] handle @todo Understand and document.
-             * @param[in] group The name of the resource group to which this
-             * resource belong.
-             * @param[in] is_manual True if the resource is manually loaded,
-             * false otherwise.
-             * @param[in] loader Pointer to a ManualResourceLoader
-             * implementation which will be called when the Resource wishes to
-             * load (should be supplied if is_manual is set to true). It can be
-             * null, but the Resource will never be able to reload if anything
-             * ever causes it to unload. Therefore provision of a proper
-             * ManualResourceLoader instance is strongly recommended.
+             * @param[in] group The name of the resource group to which this resource belong.
+             * @param[in] is_manual True if the resource is manually loaded, false otherwise.
+             * @param[in] loader Pointer to a ManualResourceLoader implementation which will be
+             * called when the Resource wishes to load (should be supplied if is_manual is set to
+             * true). It can be null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper ManualResourceLoader
+             * instance is strongly recommended.
              */
             MapFile(
               Ogre::ResourceManager* creator, const String &name, Ogre::ResourceHandle handle,
@@ -77,28 +73,35 @@ namespace VGears{
             virtual const String& GetScriptName() const;
 
             /**
-             * Retrieves the map background name.
+             * Retrieves the map background file name.
              *
-             * @return The background name.
+             * @return The background file name.
              */
             virtual const String& GetBackground2dName() const;
 
             /**
-             * Retrieves the map walkmesh name.
+             * Retrieves the map texts file name.
              *
-             * @return The walkmesh name.
+             * @return The texts file name.
+             */
+            virtual const String& GetTextsName() const;
+
+            /**
+             * Retrieves the map walkmesh file name.
+             *
+             * @return The walkmesh file name.
              */
             virtual const String& GetWalkmeshName() const;
 
             /**
              * Retrieves the map forward direction.
              *
-             * The forward direction is the direction the playable character
-             * moves when 'up' is pressed.
+             * The forward direction is the direction the playable character moves when 'up' is
+             * pressed.
              *
              * @return The forward direction.
              */
-            virtual const Ogre::Real& GetForwardDirection () const;
+            virtual const Ogre::Real& GetForwardDirection() const;
 
             /**
              * Retrieves the list of entity points in the map.
@@ -119,31 +122,38 @@ namespace VGears{
              *
              * @param[in] script_name The script name.
              */
-            virtual void SetScriptName(const String &script_name);
+            virtual void SetScriptName(const String& script_name);
 
             /**
-             * Sets the map background name.
+             * Sets the map background file name.
              *
-             * @param[in] background2d_name The background name.
+             * @param[in] background2d_name The background file name.
              */
-            virtual void SetBackground2dName(const String &background2d_name);
+            virtual void SetBackground2dName(const String& background2d_name);
 
             /**
-             * Sets the map walkmesh name.
+             * Sets the map field texts file name.
              *
-             * @param[in] walkmesh_name The walkmesh name.
+             * @param[in] texts The texts file name.
              */
-            virtual void SetWalkmeshName(const String &walkmesh_name);
+            virtual void SetTextsName(const String& texts_name);
+
+            /**
+             * Sets the map walkmesh file name.
+             *
+             * @param[in] walkmesh_name The walkmesh file name.
+             */
+            virtual void SetWalkmeshName(const String& walkmesh_name);
 
             /**
              * Sets the map forward direction.
              *
-             * The forward direction is the direction the playable character
-             * moves when 'up' is pressed.
+             * The forward direction is the direction the playable character moves when 'up' is
+             * pressed.
              *
              * @param[in] forward_direction The forward direction.
              */
-            virtual void SetForwardDirection(const Ogre::Real &forward_direction);
+            virtual void SetForwardDirection(const Ogre::Real& forward_direction);
 
         protected:
 
@@ -158,27 +168,33 @@ namespace VGears{
             virtual void unloadImpl() override;
 
             /**
-             * Calculates the size of the palette.
+             * Calculates the size of the map.
              *
-             * @return The size of the palette.
-             * @todo Units?
+             * It's the size of the tiles, script, walkmesh and forward direction.
+             *
+             * @return The size of the map.
              */
             virtual size_t calculateSize() const;
 
         private:
 
             /**
-             * The script name.
+             * The script file name.
              */
             String script_name_;
 
             /**
-             * The background name.
+             * The background file name.
              */
-            String background_2d_name;
+            String background_2d_name_;
 
             /**
-             * The walkmesh name.
+             * The background file name.
+             */
+            String texts_name_;
+
+            /**
+             * The walkmesh file name.
              */
             String walkmesh_name_;
 

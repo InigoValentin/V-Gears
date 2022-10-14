@@ -119,6 +119,13 @@ class DataInstaller{
         void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh);
 
         /**
+         * Converts a FFVII PC field to a V-Gears field.
+         *
+         * @param[in] field The field map to convert.
+         */
+        void PcFieldToVGearsField(VGears::FLevelFilePtr& field);
+
+        /**
          * Initializer for {@see CollectionFieldSpawnAndScaleFactors}.
          *
          * Installation step 1.

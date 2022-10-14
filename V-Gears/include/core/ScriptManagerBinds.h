@@ -24,6 +24,7 @@
 #include "XmlMapFile.h"
 #include "XmlMapsFile.h"
 #include "DialogsManager.h"
+#include "TextManager.h"
 #include "modules/worldmap/WorldMapModule.h"
 
 /**
@@ -297,6 +298,16 @@ void ScriptManager::InitBinds(){
           .def("is_locked", (bool(Walkmesh ::*)(unsigned int)) &Walkmesh ::IsLocked)
     ];
 
+    // Text manager commands
+    luabind::module(lua_state_)[
+        luabind::class_<TextManager>("TextManager")
+          .def(
+            "set_character_name",
+            (void(TextManager ::*)(unsigned int, const char*)) &TextManager::SetCharacterName
+          )
+          .def("set_party", (void(TextManager ::*)(int, int, int)) &TextManager::SetParty)
+    ];
+
     // Dialog commands
     luabind::module(lua_state_)[
         luabind::class_<DialogsManager>("Dialog")
@@ -437,6 +448,7 @@ void ScriptManager::InitBinds(){
       = boost::ref(*(EntityManager::getSingletonPtr()->GetBackground2D()));
     luabind::globals(lua_state_)["walkmesh"]
       = boost::ref(*(EntityManager::getSingletonPtr()->GetWalkmesh()));
+    luabind::globals(lua_state_)["text_manager"] = boost::ref(*(TextManager::getSingletonPtr()));
     luabind::globals(lua_state_)["dialog"] = boost::ref(*(DialogsManager::getSingletonPtr()));
     luabind::globals(lua_state_)["ui_manager"] = boost::ref(*(UiManager::getSingletonPtr()));
     luabind::globals(lua_state_)["world_map_module"]

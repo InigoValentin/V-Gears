@@ -1,3 +1,6 @@
+-- When V-Gears is run, export character names.
+export_character_names()
+
 --- Helper function that changes field maps through fade in and fadeout
 --
 -- @param map_name The target map name.
@@ -136,6 +139,7 @@ bit_off = function(bank, variable, bit)
 end
 
 --- Retrieves a bit variable.
+--
 -- @param bank Memory bank (0-index, as in game).
 -- @param variable Bank address (0-index, as in game).
 -- @param bit Address bit (0-index, as in game).
@@ -143,14 +147,6 @@ end
 bit = function(bank, variable, bit)
     return FFVII.BitBanks[bank + 1][variable + 1][bit + 1]
 end
-
---- Checks if a key is being pressed.
--- @param key_code The code of the key to check.
--- @return True if the key is being pressed, false otherwise.
-KeyOn = function(key_code)
-    return true;
-end
-
 
 --- Stores the coordinates and walkmesh triangle in memory.
 --
@@ -170,7 +166,6 @@ axyzi = function(bx, by, bz, bt, id, ax, ay, az, at, scale)
     if entity == nil then
         do return end
     end
-    script:wait(0.666667)
     local x, y, z = entity:get_position()
     local t = entity:get_move_triangle_id()
     FFVII.Banks[bx + 1][ax + 1] = math.floor(x * scale)

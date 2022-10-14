@@ -64,7 +64,7 @@ namespace VGears{
             virtual void ReadHeader(TiXmlNode *node);
 
             /**
-             * Reads a XML node as a script.
+             * Reads the script file location from the field XML file.
              *
              * @param[in] node The XML node to read.
              * @param[out] dest The script data will be loaded here.
@@ -72,7 +72,7 @@ namespace VGears{
             virtual void ReadScript(TiXmlNode &node, MapFile *dest);
 
             /**
-             * Reads a XML node as a 2D background.
+             * Reads the backgrouns file location from the field XML file.
              *
              * @param[in] node The XML node to read.
              * @param[out] dest The background data will be loaded here.
@@ -80,7 +80,15 @@ namespace VGears{
             virtual void ReadBackground2D(TiXmlNode &node, MapFile *dest);
 
             /**
-             * Reads a XML node as a walkmesh.
+             * Reads the text file location from the field XML file.
+             *
+             * @param[in] node The XML node to read.
+             * @param[out] dest The background data will be loaded here.
+             */
+            virtual void ReadTexts(TiXmlNode &node, MapFile *dest);
+
+            /**
+             * Reads the walkmesh file location from the field XML file.
              *
              * @param[in] node The XML node to read.
              * @param[out] dest The walkmesh data will be loaded here.
@@ -88,7 +96,7 @@ namespace VGears{
             virtual void ReadWalkmesh(TiXmlNode &node, MapFile *dest);
 
             /**
-             * Reads a XML node as a forward direction.
+             * Reads the field forward direction location from the field XML file.
              *
              * @param[in] node The XML node to read.
              * @param[out] dest The direction data will be loaded here.
@@ -96,7 +104,7 @@ namespace VGears{
             virtual void ReadForwardDirection(TiXmlNode &node, MapFile *dest);
 
             /**
-             * Reads a XML node as a list of entities.
+             * Reads the entities location from the field XML file.
              *
              * @param[in] node The XML node to read.
              * @param[out] dest The entity data will be loaded here.
@@ -104,7 +112,7 @@ namespace VGears{
             virtual void ReadEntities(TiXmlNode &node, MapFile *dest);
 
             /**
-             * Reads an XML node as an entity point.
+             * Reads an object from the field XML file.
              *
              * @param[in] node The XML node to read.
              * @param[out] dest The formed point data.
@@ -112,7 +120,7 @@ namespace VGears{
             virtual void readObject(TiXmlNode &node, Point &dest);
 
             /**
-             * Reads an XML node as a trigger.
+             * Reads a trigger from the field XML file.
              *
              * @param[in] node The XML node to read.
              * @param[out] dest The formed trigger data.

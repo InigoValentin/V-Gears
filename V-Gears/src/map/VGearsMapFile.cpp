@@ -21,9 +21,8 @@ namespace VGears{
     const String MapFile::RESOURCE_TYPE("VGearsMapFile");
 
     MapFile::MapFile(
-      Ogre::ResourceManager *creator, const String &name,
-      Ogre::ResourceHandle handle, const String &group, bool is_manual,
-      Ogre::ManualResourceLoader *loader
+      Ogre::ResourceManager *creator, const String &name, Ogre::ResourceHandle handle,
+      const String &group, bool is_manual, Ogre::ManualResourceLoader *loader
     ) : Resource(creator, name, handle, group, is_manual, loader){}
 
     MapFile::~MapFile(){unload();}
@@ -36,42 +35,41 @@ namespace VGears{
 
     void MapFile::unloadImpl(){
         script_name_.clear();
-        background_2d_name.clear();
+        background_2d_name_.clear();
         walkmesh_name_.clear();
         forward_direction_ = 0;
     }
 
     size_t MapFile::calculateSize() const{
+        // TODO: Should text size be considered?
         return
-          script_name_.size() + background_2d_name.size()
+          script_name_.size() + background_2d_name_.size()
           + walkmesh_name_.size() + sizeof(forward_direction_);
     }
 
     const String& MapFile::GetScriptName() const{return script_name_;}
 
-    const String& MapFile::GetBackground2dName() const{
-        return background_2d_name;
-    }
+    const String& MapFile::GetBackground2dName() const{return background_2d_name_;}
+
+    const String& MapFile::GetTextsName() const{return texts_name_;}
 
     const String& MapFile::GetWalkmeshName() const{return walkmesh_name_;}
 
-    const Ogre::Real& MapFile::GetForwardDirection() const{
-        return forward_direction_;
-    }
+    const Ogre::Real& MapFile::GetForwardDirection() const{return forward_direction_;}
+
     MapFile::PointList& MapFile::GetPoints(){return points_;}
 
     MapFile::TriggerList& MapFile::GetTriggers(){return triggers_;}
 
-    void MapFile::SetScriptName(const String &script_name){
-        script_name_ = script_name;
-    }
+    void MapFile::SetScriptName(const String &script_name){script_name_ = script_name;}
+
     void MapFile::SetBackground2dName(const String &background2d_name){
-        background_2d_name = background2d_name;
+        background_2d_name_ = background2d_name;
     }
 
-    void MapFile::SetWalkmeshName(const String &walkmesh_name){
-        walkmesh_name_ = walkmesh_name;
-    }
+    void MapFile::SetTextsName(const String& texts_name){texts_name_ = texts_name;}
+
+    void MapFile::SetWalkmeshName(const String &walkmesh_name){walkmesh_name_ = walkmesh_name;}
 
     void MapFile::SetForwardDirection(const Ogre::Real &forward_direction){
         forward_direction_ = forward_direction;

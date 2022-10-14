@@ -206,6 +206,7 @@ namespace VGears{
         StringUtil::splitFull(getName(), base_name);
         base_name += SUFFIX_BACKGROUND_2D;
         return base_name;
+
     }
 
 }

@@ -603,32 +603,7 @@ static float FieldScaleFactor(
     return it->second;
 }
 
-/**
- * Converts a FFVII PC field to a V-Gears field.
- *
- * @param[in] field_text_writter The field text writer.
- * @param[in] field The field map.
- * @param[in] out_dir The path to the directory where to save the map file.
- * @param[in] field_id_to_name_lookup Lookup table used to relate map IDs and
- * names
- * @param[in] spawn_map List of spawn points.
- * @param[in] scale_factor_map List of scale factors.
- * @param[in] model_animation_db Database of model animations.
- * @param[out] maps The list of maps. The converted one will be added at the
- * end.
- * @param[in] write_output_line_ Functon to print output to console.
- */
-static void FF7PcFieldToVGearsField(
-  FieldTextWriter& field_text_writter,
-  VGears::FLevelFilePtr& field,
-  const std::string& out_dir,
-  const std::vector<std::string>& field_id_to_name_lookup,
-  FieldSpawnPointsMap& spawn_map,
-  const FieldScaleFactorMap& scale_factor_map,
-  ModelsAndAnimationsDb& model_animation_db,
-  MapCollection& maps,
-  std::function<void(std::string)> write_output_line_
-){
+void DataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
     // Generate triggers script to insert into main
     // decompiled FF7 field -> LUA script.
     std::string gateway_script_data;
@@ -640,14 +615,14 @@ static void FF7PcFieldToVGearsField(
             const std::string gateway_entity_name = "Gateway" + std::to_string(i);
             gateway_script_data += CreateGateWayScript(
               gateway_entity_name,
-              FieldName(field_id_to_name_lookup.at(gateway.destination_field_id)),
+              FieldName(map_list_.at(gateway.destination_field_id)),
               "Spawn_" + field->getName() + "_" + std::to_string(i)
             );
         }
     }
     const VGears::ModelListFilePtr& models = field->GetModelList();
     FieldDecompiler::DecompiledScript decompiled;
-    FF7FieldScriptFormatter formatter(field->getName(), models, field_id_to_name_lookup, spawn_map);
+    FF7FieldScriptFormatter formatter(field->getName(), models, map_list_, spawn_points_);
     try{
         // Get the raw script bytes.
         const std::vector<u8> raw_field_data = field->GetRawScript();
@@ -657,11 +632,12 @@ static void FF7PcFieldToVGearsField(
           "EntityContainer = {}\n\n"
         );
         std::ofstream script_file(
-          out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/script.lua"
+          output_dir_ + "/" + FieldMapDir() + "/" + field->getName() + "/script.lua"
         );
         if (script_file.is_open()){
             script_file << decompiled.luaScript;
-            try{field_text_writter.Write(raw_field_data, field->getName());}
+            field_text_writer_.Begin(output_dir_ + "/" + FieldMapDir() + "/" + field->getName() + "/text.xml");
+            try{field_text_writer_.Write(raw_field_data, field->getName());}
             catch (const std::out_of_range& ex){
                 write_output_line_(
                   "[ERROR] Failed to read texts from field " + field->getName() + ": " + ex.what()
@@ -669,6 +645,7 @@ static void FF7PcFieldToVGearsField(
                 std::cerr << "[ERROR] Failed to read texts from field "
                   << field->getName() << ": " << ex.what() << std::endl;
             }
+            field_text_writer_.End();
         }
         else{
             write_output_line_(
@@ -701,6 +678,12 @@ static void FF7PcFieldToVGearsField(
           "file_name", FieldMapDir() + "/" + field->getName() + "/bg.xml"
         );
         element->LinkEndChild(xml_background_2d.release());
+        // Texts.
+        std::unique_ptr<TiXmlElement> xml_texts(new TiXmlElement("texts"));
+        xml_texts->SetAttribute(
+          "file_name", FieldMapDir() + "/" + field->getName() + "/text.xml"
+        );
+        element->LinkEndChild(xml_texts.release());
         // Walkmesh.
         std::unique_ptr<TiXmlElement> xml_walkmesh(new TiXmlElement("walkmesh"));
         xml_walkmesh->SetAttribute(
@@ -714,14 +697,14 @@ static void FF7PcFieldToVGearsField(
         );
         element->LinkEndChild(xml_forward_direction.release());
         // Get this fields Id.
-        const size_t this_field_id = FieldId(field->getName(), field_id_to_name_lookup);
+        const size_t this_field_id = FieldId(field->getName(), map_list_);
         // Use the ID to find the pre-computed list of gateways in all other fields that link to
         // this field.
-        auto spawn_iterator = spawn_map.find(this_field_id);
+        auto spawn_iterator = spawn_points_.find(this_field_id);
         Ogre::Vector3 first_entity_point = Ogre::Vector3::ZERO;
 
         // If none found it probably just means no other fields have doors to this one.
-        if (spawn_iterator != std::end(spawn_map)){
+        if (spawn_iterator != std::end(spawn_points_)){
             const std::vector<SpawnPointDb::Record>& spawn_point_records
               = spawn_iterator->second.gateways_to_this_field;
             for (size_t i = 0; i < spawn_point_records.size(); i ++){
@@ -732,7 +715,7 @@ static void FF7PcFieldToVGearsField(
                     // Spawn points from map jumps have a another algorithm.
                     xml_entity_point->SetAttribute(
                       "name",
-                      field_id_to_name_lookup.at(
+                      map_list_.at(
                         spawn_point_records[i].field_id) + "_" + spawn_point_records[i].entity_name
                         + "_" + spawn_point_records[i].script_function_name + "_addr_"
                         + std::to_string(spawn_point_records[i].gateway_index_or_map_jump_address)
@@ -743,14 +726,12 @@ static void FF7PcFieldToVGearsField(
                     // fields have more than one door linking to each other.
                     xml_entity_point->SetAttribute(
                       "name",
-                      "Spawn_"
-                        + field_id_to_name_lookup.at(spawn_point_records[i].field_id)
-                        + "_"
+                      "Spawn_" + map_list_.at(spawn_point_records[i].field_id) + "_"
                         + std::to_string(spawn_point_records[i].gateway_index_or_map_jump_address)
                     );
                 }
                 const float downscaler_next = 128.0f * FieldScaleFactor(
-                  scale_factor_map, gateway.destination_field_id
+                  scale_factors_, gateway.destination_field_id
                 );
 
                 // Position Z is actually the target walkmesh triangle ID, so this is tiny bit more
@@ -814,17 +795,18 @@ static void FF7PcFieldToVGearsField(
         for (FieldDecompiler::FieldEntity entity : decompiled.entities){
             // If the entity has been added as a line, skip.
             if (line_entities.size() > 0){
-                if (*std::find(line_entities.begin(), line_entities.end(), entity.name) == entity.name) {
+                if (
+                  *std::find(line_entities.begin(), line_entities.end(), entity.name) == entity.name
+                ){
                     continue;
                 }
             }
             const int char_id = entity.char_id;
             if (char_id != -1){
-                const VGears::ModelListFile::ModelDescription& desc
-                  = models->GetModels().at(char_id);
-                auto& animations = model_animation_db.ModelAnimations(desc.hrc_name);
+                const VGears::ModelListFile::ModelDescription& desc = models->GetModels().at(char_id);
+                auto& animations = used_models_and_anims_.ModelAnimations(desc.hrc_name);
                 for (const auto& anim : desc.animations)
-                    animations.insert(model_animation_db.NormalizeAnimationName(anim.name));
+                    animations.insert(used_models_and_anims_.NormalizeAnimationName(anim.name));
                 std::unique_ptr<TiXmlElement> xml_entity_script(new TiXmlElement("entity_model"));
                 xml_entity_script->SetAttribute("name", entity.name);
                 // TODO: Add to list of HRC's to convert, obtain name of converted .mesh file.
@@ -832,7 +814,7 @@ static void FF7PcFieldToVGearsField(
                 VGears::StringUtil::toLowerCase(lower_case_hrc_name);
                 xml_entity_script->SetAttribute(
                   "file_name",
-                  FieldModelDir() + "/" + model_animation_db.ModelMetaDataName(lower_case_hrc_name)
+                  FieldModelDir() + "/" + used_models_and_anims_.ModelMetaDataName(lower_case_hrc_name)
                 );
                 xml_entity_script->SetAttribute("index", entity.index);
                 if (desc.type == VGears::ModelListFile::PLAYER){
@@ -863,7 +845,7 @@ static void FF7PcFieldToVGearsField(
                 element->LinkEndChild(xml_entity_script.release());
             }
         }
-        const float downscaler_this = 128.0f * FieldScaleFactor(scale_factor_map, this_field_id);
+        const float downscaler_this = 128.0f * FieldScaleFactor(scale_factors_, this_field_id);
         for (size_t i = 0; i < gateways.size(); i ++){
             const VGears::TriggersFile::Gateway& gateway = gateways[i];
             // If non-inactive gateway:
@@ -896,12 +878,12 @@ static void FF7PcFieldToVGearsField(
             }
         }
         doc.LinkEndChild(element.release());
-        doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/map.xml");
+        doc.SaveFile(output_dir_ + "/" + FieldMapDir() + "/" + field->getName() + "/map.xml");
         const VGears::PaletteFilePtr& pal = field->GetPalette();
         const VGears::BackgroundFilePtr& bg = field->GetBackground();
         std::unique_ptr<Ogre::Image> bg_image(bg->CreateImage(pal));
         bg_image->encode("png");
-        bg_image->save(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/tiles.png");
+        bg_image->save(output_dir_ + "/" + FieldMapDir() + "/" + field->getName() + "/tiles.png");
         {
             TiXmlDocument bg_doc;
             std::unique_ptr<TiXmlElement> bg_element(new TiXmlElement("background2d"));
@@ -914,7 +896,7 @@ static void FF7PcFieldToVGearsField(
             const int height = bg_image->getHeight();
             const VGears::CameraMatrixFilePtr& camera_matrix = field->GetCameraMatrix();
             const Ogre::Vector3 position
-              = camera_matrix->GetPosition() / FieldScaleFactor(scale_factor_map, this_field_id);
+              = camera_matrix->GetPosition() / FieldScaleFactor(scale_factors_, this_field_id);
             const Ogre::Quaternion orientation = camera_matrix->GetOrientation();
             const Ogre::Degree fov
               = camera_matrix->GetFov(static_cast<float>(BG_PSX_SCREEN_HEIGHT));
@@ -988,7 +970,7 @@ static void FF7PcFieldToVGearsField(
                 //}
             }
             bg_doc.LinkEndChild(bg_element.release());
-            bg_doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/bg.xml");
+            bg_doc.SaveFile(output_dir_ + "/" + FieldMapDir() + "/" + field->getName() + "/bg.xml");
         }
     }
     {
@@ -1007,9 +989,9 @@ static void FF7PcFieldToVGearsField(
             wmesh_element->LinkEndChild(xml_element.release());
         }
         doc.LinkEndChild(wmesh_element.release());
-        doc.SaveFile(out_dir + "/" + FieldMapDir() + "/" + field->getName() + "/wm.xml");
+        doc.SaveFile(output_dir_ + "/" + FieldMapDir() + "/" + field->getName() + "/wm.xml");
     }
-    maps.insert(field->getName());
+    converted_map_list_.insert(field->getName());
 }
 
 /**
@@ -1305,7 +1287,7 @@ void DataInstaller::CollectionFieldSpawnAndScaleFactors(){
         field_.reset();
         iterator_counter_ = 0;
         installation_state_ = CONVERT_FIELDS;
-        field_text_writer_.Begin(output_dir_ + "/texts/english/dialogs_mission1.xml");
+        //field_text_writer_.Begin(output_dir_ + "/texts/english/dialogs_mission1.xml");
     }
 }
 
@@ -1322,14 +1304,10 @@ void DataInstaller::ConvertFieldsIteration(){
                 //write_output_line_("Converting field " + resource_name);
                 std::cout << " - Converting field: " << resource_name << std::endl;
                 CreateDir(FieldMapDir() + "/" + resource_name);
-                VGears::FLevelFilePtr field
-                  = VGears::LZSFLevelFileManager::GetSingleton().load(
+                VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton().load(
                     resource_name, "FFVIIFields"
                   ).staticCast<VGears::FLevelFile>();
-                FF7PcFieldToVGearsField(
-                  field_text_writer_, field, output_dir_, map_list_, spawn_points_, scale_factors_,
-                  used_models_and_anims_, converted_map_list_, write_output_line_
-                );
+                PcFieldToVGearsField(field);
             }
             else{
                 /*write_output_line_(

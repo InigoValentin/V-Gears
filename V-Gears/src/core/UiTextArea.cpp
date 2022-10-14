@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <string>
 #include <iostream>
 #include <OgreBlendMode.h>
 #include <OgreCommon.h>
@@ -34,11 +35,9 @@ UiTextArea::UiTextArea(const Ogre::String& name): UiWidget(name){
     Initialise();
 }
 
-UiTextArea::UiTextArea(
-  const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent
-) : UiWidget(name, path_name, parent){
-    Initialise();
-}
+UiTextArea::UiTextArea(const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent):
+  UiWidget(name, path_name, parent)
+{Initialise();}
 
 UiTextArea::~UiTextArea(){DestroyVertexBuffer();}
 
@@ -80,22 +79,14 @@ void UiTextArea::Update(){
             if (time != timer_time_){
                 timer_time_ = time;
                 Ogre::String time_string = "";
-                //time_string
-                //  += Ogre::StringConverter::toString(
-                //    timer_time_ / 60, 2, '0'
-                //  );
-                time_string
-                  += Ogre::StringUtil::format("%2d", timer_time_ / 60);
+                //time_string += Ogre::StringConverter::toString(timer_time_ / 60, 2, '0');
+                time_string += Ogre::StringUtil::format("%2d", timer_time_ / 60);
                 time_string += (timer_time_ & 1) ? ":" : ";";
-                //time_string += Ogre::StringConverter::toString(
-                //  timer_time_ % 60, 2, '0'
-                //);
-                time_string
-                  += Ogre::StringUtil::format("%2d", timer_time_ % 60);
+                //time_string += Ogre::StringConverter::toString(timer_time_ % 60, 2, '0');
+                time_string += Ogre::StringUtil::format("%2d", timer_time_ % 60);
                 SetVariable("UITextAreaTimer", time_string);
             }
         }
-
         switch(text_state_){
             case TS_SHOW_TEXT:
                 if (text_print_speed_ == -1) text_limit_ = max_letters_;
@@ -104,13 +95,9 @@ void UiTextArea::Update(){
                     float addition;
                     float limit;
                     if (next_pressed_ == true || next_repeated_ == true){
-                        text_print_speed_mod_
-                          += (text_print_speed_mod_ >= 128) ? 0 : 1.0f * time;
+                        text_print_speed_mod_ += (text_print_speed_mod_ >= 128) ? 0 : 1.0f * time;
                     }
-                    else{
-                        text_print_speed_mod_
-                          -= (text_print_speed_mod_ <= 1) ? 0 : 1.0f * time;
-                    }
+                    else text_print_speed_mod_ -= (text_print_speed_mod_ <= 1) ? 0 : 1.0f * time;
                     if (text_print_speed_ < 128){
                         addition = ((128 - text_print_speed_) / 32) + 2;
                         limit = 1;
@@ -119,14 +106,11 @@ void UiTextArea::Update(){
                         addition = 2;
                         limit = ((text_print_speed_ - 128) / 32) + 1;
                     }
-                    float char_to_add
-                      = (limit * text_print_speed_mod_ / 16 + addition) / limit;
+                    float char_to_add = (limit * text_print_speed_mod_ / 16 + addition) / limit;
                     text_limit_ += time * char_to_add;
                 }
-
                 update_transformation_ = true;
                 break;
-
             case TS_SCROLL_TEXT:
                 text_y_offset_
                   -= font_->GetHeight()
@@ -139,14 +123,12 @@ void UiTextArea::Update(){
                 }
                 update_transformation_ = true;
                 break;
-
             case TS_PAUSE_OK:
                 if (next_pressed_ == true){
                     text_print_speed_mod_ = 1;
                     text_state_ = TS_SHOW_TEXT;
                 }
                 break;
-
             case TS_PAUSE_TIME:
                 pause_time_ -= Timer::getSingleton().GetGameTimeDelta();
                 if (pause_time_ <= 0){
@@ -154,20 +136,16 @@ void UiTextArea::Update(){
                     text_state_ = TS_SHOW_TEXT;
                 }
                 break;
-
             case TS_OVERFLOW:
                 if (next_pressed_ == true){
                     text_y_offset_target_ = text_y_offset_ - font_->GetHeight();
                     text_state_ = TS_SCROLL_TEXT;
                 }
-            break;
-
+                break;
             case TS_NEXT_PAGE:
                 if (next_pressed_ == true){
                     RemoveSpritesFromText(next_page_start_);
-                    text_.erase(
-                      text_.begin(), text_.begin() + next_page_start_
-                    );
+                    text_.erase(text_.begin(), text_.begin() + next_page_start_);
                     text_limit_ = 0;
                     text_print_speed_mod_ = 1;
                     text_y_offset_ = 0;
@@ -177,12 +155,10 @@ void UiTextArea::Update(){
                 break;
         }
     }
-
     next_pressed_ = false;
     next_repeated_ = false;
     UiWidget::Update();
 }
-
 
 void UiTextArea::Render(){
     if (update_transformation_ == false && visible_ == true){
@@ -191,32 +167,21 @@ void UiTextArea::Render(){
               Ogre::TVC_NONE, Ogre::FOG_NONE
             );
             render_parameters->setConstant(
-              Ogre::GpuProgramParameters::ACT_WORLD_MATRIX,
-              Ogre::Matrix4::IDENTITY
+              Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY
             );
             render_parameters->setConstant(
-              Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX,
-              Ogre::Matrix4::IDENTITY
+              Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX, Ogre::Matrix4::IDENTITY
             );
             render_parameters->setConstant(
-              Ogre::GpuProgramParameters::ACT_VIEW_MATRIX,
-              Ogre::Matrix4::IDENTITY
+              Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, Ogre::Matrix4::IDENTITY
             );
-            render_system_->applyFixedFunctionParams(
-              render_parameters, Ogre::GPV_GLOBAL
-            );
-
+            render_system_->applyFixedFunctionParams(render_parameters, Ogre::GPV_GLOBAL);
             //render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
             //render_system_->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
             //render_system_->_setViewMatrix(Ogre::Matrix4::IDENTITY);
-
-            scene_manager_->_setPass(
-              material_->getTechnique(0)->getPass(0), true, false
-            );
-
+            scene_manager_->_setPass(material_->getTechnique(0)->getPass(0), true, false);
             //render_system_->setScissorTest(
-            //  true,
-            //  scissor_left_, scissor_top_, scissor_right_, scissor_bottom_
+            //  true, scissor_left_, scissor_top_, scissor_right_, scissor_bottom_
             //);
             render_system_->setScissorTest(true, Ogre::Rect(
               scissor_left_, scissor_top_, scissor_right_, scissor_bottom_
@@ -251,19 +216,14 @@ void UiTextArea::SetPadding(
     padding_left_ = left;
 }
 
-void UiTextArea::SetText(const char* text){
-    SetText(Ogre::UTFString(text));
-}
+void UiTextArea::SetText(const char* text){SetText(Ogre::UTFString(text));}
 
 void UiTextArea::SetText(const Ogre::UTFString& text){
     TiXmlDocument doc;
     Ogre::UTFString xml_text = "<container>" + text + "</container>";
     doc.Parse(xml_text.asUTF8_c_str(), 0, TIXML_ENCODING_UTF8);
     if (doc.Error() == true){
-        LOG_ERROR(
-          "Can't parse text \"" + text + "\". TinyXml Error: "
-          + doc.ErrorDesc()
-        );
+        LOG_ERROR("Can't parse text \"" + text + "\". TinyXml Error: " + doc.ErrorDesc());
         return;
     }
     SetText(doc.RootElement());
@@ -279,21 +239,17 @@ void UiTextArea::SetText(TiXmlNode* text){
     if (font_ != NULL){
         Ogre::String language = font_->GetLanguage();
         if (language != "")
-            if (TextManager::getSingleton().GetLanguage() != language)
-                SetFont(font_->GetName());
+            if (TextManager::getSingleton().GetLanguage() != language) SetFont(font_->GetName());
     }
-
     TextClear();
     PrepareTextFromNode(text, colour_1_);
     text_state_ = TS_SHOW_TEXT;
     update_transformation_ = true;
-
     if (text_.size() > max_letters_){
         text_.clear();
         LOG_ERROR(
-          "Max number of text reached in \"" + path_name_
-          + "\". Can't render text from node. Max number of letters is "
-          + Ogre::StringConverter::toString(max_letters_) + "."
+          "Max number of text reached in \"" + path_name_ + "\". Can't render text from node. "
+          + "Max number of letters is " + Ogre::StringConverter::toString(max_letters_) + "."
         );
     }
 }
@@ -313,9 +269,7 @@ void UiTextArea::RemoveSpritesFromText(const unsigned int end){
             for (unsigned int j = 0; j < children_.size(); ++j){
                 if (text_[i].sprite == children_[j]){
                     delete children_[j];
-                    children_.erase(
-                      children_.begin() + j, children_.begin() + j + 1
-                    );
+                    children_.erase(children_.begin() + j, children_.begin() + j + 1);
                     break;
                 }
             }
@@ -326,9 +280,7 @@ void UiTextArea::RemoveSpritesFromText(const unsigned int end){
 void UiTextArea::SetFont(const Ogre::String& font){
     font_ = UiManager::getSingleton().GetFont(font);
     if (font_ == nullptr){
-        LOG_ERROR(
-          "Could not find font \"" + font + "\" for \"" + path_name_ + "\"."
-        );
+        LOG_ERROR("Could not find font \"" + font + "\" for \"" + path_name_ + "\".");
         return;
     }
     material_ = Ogre::MaterialManager::getSingleton().getByName(
@@ -357,26 +309,21 @@ void UiTextArea::SetFont(const Ogre::String& font){
 
 const UiFont* UiTextArea::GetFont() const{return font_;}
 
-void UiTextArea::SetTextPrintSpeed(const float speed){
-    text_print_speed_ = speed;
-}
+void UiTextArea::SetTextPrintSpeed(const float speed){text_print_speed_ = speed;}
 
 void UiTextArea::SetTextScrollTime(const float time){text_scroll_time_ = time;}
 
-void UiTextArea::SetVariable(
-  const Ogre::String& name, const Ogre::UTFString& value
-){
+void UiTextArea::SetVariable(const Ogre::String& name, const Ogre::UTFString& value){
     if (name == "") return;
     bool update = false;
     for (unsigned int i = 0; i < text_variable_.size(); ++ i){
         if (text_variable_[i].name == name){
             text_variable_[i].value = value;
             update = true;
-            for (unsigned int j = 0; j < text_.size(); ++j){
+            for (unsigned int j = 0; j < text_.size(); ++ j){
                 if (text_[j].variable == name){
                     text_.erase(
-                      text_.begin() + j + 1,
-                      text_.begin() + j + 1 + text_[j].variable_len
+                      text_.begin() + j + 1, text_.begin() + j + 1 + text_[j].variable_len
                     );
                 }
             }
@@ -424,36 +371,23 @@ void UiTextArea::UpdateGeometry(){
         LOG_ERROR("Font for \"" + path_name_ + "\" if not set.");
         return;
     }
-
     float width = 0;
     if (text_align_ != LEFT){
         width = GetTextWidth();
         if (text_align_ == CENTER) width /= 2;
     }
-
-    //LOG_ERROR(
-    //  "1) final_origin_.y = "
-    //  + Ogre::StringConverter::toString(final_origin_.y)
-    //  + ", text_y_offset_ = "
-    //  + Ogre::StringConverter::toString(text_y_offset_)
-    //);
-
-    float* write_iterator
-      = (float*) vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    float* write_iterator = (float*) vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL);
     render_operation_.vertexData->vertexCount = 0;
 
     float local_x_start
-      = -final_origin_.x - (width - padding_left_)
-        * final_scale_.x * screen_height_ / 720.0f;
+      = -final_origin_.x - (width - padding_left_) * final_scale_.x * screen_height_ / 720.0f;
     float local_x1 = local_x_start;
-    float local_y1
-      = -final_origin_.y + ((text_y_offset_ + padding_top_)
-        * final_scale_.y * screen_height_ / 720.0f);
+    float local_y1 = -final_origin_.y + ((text_y_offset_ + padding_top_)
+      * final_scale_.y * screen_height_ / 720.0f);
     float local_x2;
     float local_y2;
     float x = final_translate_.x;
     float y = final_translate_.y;
-
     unsigned int i = 0;
     for (; (i < text_limit_) && (i < text_.size()); ++ i){
         if (text_[i].skip == true) continue;
@@ -478,84 +412,49 @@ void UiTextArea::UpdateGeometry(){
             float width_percent = 0;
             float width = 0;
             text_[i].sprite->GetWidth(width_percent, width);
-            text_[i].sprite->SetX(
-              0, local_x1 / (final_scale_.x * screen_height_ / 720.0f)
-            );
+            text_[i].sprite->SetX(0, local_x1 / (final_scale_.x * screen_height_ / 720.0f));
             local_x1 += width * final_scale_.x * screen_height_ / 720.0f;
             float height_percent = 0;
             float height = 0;
             text_[i].sprite->GetHeight(height_percent, height);
             text_[i].sprite->SetY(
-              0,
-              text_[i].sprite_y + (
-                local_y1 / (final_scale_.y * screen_height_ / 720.0f)
-              )
+              0, text_[i].sprite_y + (local_y1 / (final_scale_.y * screen_height_ / 720.0f))
             );
             text_[i].sprite->SetVisible(true);
             text_[i].sprite->UpdateGeometry();
             continue;
         }
-
         UiCharData char_data = font_->GetCharData(text_[i].char_code);
         Ogre::ColourValue colour = text_[i].colour;
-
         if (char_data.char_code == 10){ // LF (line feed): \n
             local_x1 = local_x_start;
-            local_y1
-              += font_->GetHeight() * final_scale_.y * screen_height_ / 720.0f;
+            local_y1 += font_->GetHeight() * final_scale_.y * screen_height_ / 720.0f;
             continue;
         }
-
         local_x1 += char_data.pre * final_scale_.x * screen_height_ / 720.0f;
-        local_x2
-          = local_x1 + char_data.width
-            * final_scale_.x * screen_height_ / 720.0f;
-        local_y2
-          = local_y1 + char_data.height
-            * final_scale_.y * screen_height_ / 720.0f;
-
+        local_x2 = local_x1 + char_data.width * final_scale_.x * screen_height_ / 720.0f;
+        local_y2 = local_y1 + char_data.height * final_scale_.y * screen_height_ / 720.0f;
         if (
           local_x2 + char_data.post * final_scale_.x * screen_height_ / 720.0f
-          > final_size_.x - padding_right_ * final_scale_.x
-            * screen_height_ / 720.0f
+          > final_size_.x - padding_right_ * final_scale_.x * screen_height_ / 720.0f
         ){
             local_x1 = local_x_start;
-            local_x2
-              = local_x1 + char_data.width * final_scale_.x
-                * screen_height_ / 720.0f;
-            local_y1
-              += font_->GetHeight() * final_scale_.y * screen_height_ / 720.0f;
-            local_y2
-              = local_y1 + char_data.height * final_scale_.y
-                * screen_height_ / 720.0f;
+            local_x2 = local_x1 + char_data.width * final_scale_.x * screen_height_ / 720.0f;
+            local_y1 += font_->GetHeight() * final_scale_.y * screen_height_ / 720.0f;
+            local_y2 = local_y1 + char_data.height * final_scale_.y * screen_height_ / 720.0f;
         }
 
         // If the lower border of the textarea is crossed:
         // generate event and stop rendering
-        if (
-          local_y2
-          > final_size_.y - padding_bottom_ *
-            final_scale_.y * screen_height_ / 720.0f
-        ){
+        if (local_y2 > final_size_.y - padding_bottom_ * final_scale_.y * screen_height_ / 720.0f){
             if (text_state_ != TS_SCROLL_TEXT) text_state_ = TS_OVERFLOW;
             break;
         }
         int x1, y1, x2, y2, x3, y3, x4, y4;
-        //LOG_ERROR(name_);
-        //LOG_ERROR(
-        //  "local_x1 = " + Ogre::StringConverter::toString(local_x1)
-        //  + ", local_y1 = " + Ogre::StringConverter::toString(local_y1)
-        //);
-        //LOG_ERROR(
-        //  "local_x2 = " + Ogre::StringConverter::toString(local_x2)
-        //  + ", local_y2 = " + Ogre::StringConverter::toString(local_y2)
-        //);
 
         if (final_rotation_ != 0){
-            float cos
-              = Ogre::Math::Cos(Ogre::Radian(Ogre::Degree(final_rotation_)));
-            float sin
-              = Ogre::Math::Sin(Ogre::Radian(Ogre::Degree(final_rotation_)));
+            float cos = Ogre::Math::Cos(Ogre::Radian(Ogre::Degree(final_rotation_)));
+            float sin = Ogre::Math::Sin(Ogre::Radian(Ogre::Degree(final_rotation_)));
             x1 = local_x1 * cos - local_y1 * sin + x;
             y1 = local_x1 * sin + local_y1 * cos + y;
             x2 = local_x2 * cos - local_y1 * sin + x;
@@ -575,24 +474,6 @@ void UiTextArea::UpdateGeometry(){
             x4 = local_x1 + x;
             y4 = local_y2 + y;
         }
-
-        //LOG_ERROR(
-        //  "x1 = " + Ogre::StringConverter::toString(x1) + ", y1 = "
-        //  + Ogre::StringConverter::toString(y1)
-        //);
-        //LOG_ERROR(
-        //  "x2 = " + Ogre::StringConverter::toString(x2) + ", y2 = "
-        //  + Ogre::StringConverter::toString(y2)
-        //);
-        //LOG_ERROR(
-        //  "x3 = " + Ogre::StringConverter::toString(x3) + ", y3 = "
-        //  + Ogre::StringConverter::toString(y3)
-        //);
-        //LOG_ERROR(
-        //  "x4 = " + Ogre::StringConverter::toString(x4) + ", y4 = "
-        //  + Ogre::StringConverter::toString(y4)
-        //);
-
         float new_x1 = (x1 / screen_width_) * 2 - 1;
         float new_y1 = -((y1 / screen_height_) * 2 - 1);
         float new_x2 = (x2 / screen_width_) * 2 - 1;
@@ -601,44 +482,13 @@ void UiTextArea::UpdateGeometry(){
         float new_y3 = -((y3 / screen_height_) * 2 - 1);
         float new_x4 = (x4 / screen_width_) * 2 - 1;
         float new_y4 = -((y4 / screen_height_) * 2 - 1);
-
-        local_x1
-          += (char_data.width + char_data.post)
-            * final_scale_.x * screen_height_ / 720.0f;
-
+        local_x1 += (char_data.width + char_data.post) * final_scale_.x * screen_height_ / 720.0f;
         float width = font_->GetImageWidth();
         float height = font_->GetImageHeight();
         float left = (float)char_data.x / width;
         float right = (float)(char_data.x + char_data.width) / width;
         float top = (float)char_data.y / height;
         float bottom = (float)(char_data.y + char_data.height) / height;
-
-        //LOG_ERROR("width = " + Ogre::StringConverter::toString(width) + ".");
-        //LOG_ERROR(
-        //  "height = " + Ogre::StringConverter::toString(height) + "."
-        //);
-        //LOG_ERROR(
-        //  "char_data.x = " + Ogre::StringConverter::toString(char_data.x)
-        //  + "."
-        //);
-        //LOG_ERROR(
-        //  "char_data.y = " + Ogre::StringConverter::toString(char_data.y)
-        //  + "."
-        //);
-        //LOG_ERROR(
-        //  "char_data.width = "
-        //  + Ogre::StringConverter::toString(char_data.width) + "."
-        //);
-        //LOG_ERROR(
-        //  "char_data.height = "
-        //  + Ogre::StringConverter::toString(char_data.height) + "."
-        //);
-        //LOG_ERROR("left = " + Ogre::StringConverter::toString(left) + ".");
-        //LOG_ERROR("right = " + Ogre::StringConverter::toString(right) + ".");
-        //LOG_ERROR("top = " + Ogre::StringConverter::toString(top) + ".");
-        //LOG_ERROR(
-        //  "bottom = " + Ogre::StringConverter::toString(bottom) + "."
-        //);
 
         *write_iterator ++ = new_x1;
         *write_iterator ++ = new_y1;
@@ -711,33 +561,29 @@ float UiTextArea::GetTextWidth() const{
     float width_max = 0;
     for (unsigned int i = 0; i < text_.size(); ++ i){
         UiCharData char_data = font_->GetCharData(text_[i].char_code);
-
         // If newline, store previous row max width
         if (char_data.char_code == 10){
             width_max = (width > width_max) ? width : width_max;
             width = 0;
         }
-        else
-            width += char_data.pre + char_data.width + char_data.post;
+        else width += char_data.pre + char_data.width + char_data.post;
     }
     return (width > width_max) ? width : width_max;
 }
 
-void UiTextArea::PrepareTextFromNode(
-  TiXmlNode* node, const Ogre::ColourValue& colour
-){
+void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colour){
+    Ogre::ColourValue colour_child = colour;
     while (node != NULL){
         switch(node->Type()){
             case TiXmlNode::TINYXML_TEXT:
                 {
                     TiXmlText* childText = node->ToText();
-                    if (childText)
-                        PrepareTextFromText(childText->Value(), colour);
+                    if (childText) PrepareTextFromText(childText->Value(), colour);
                 }
                 break;
             case TiXmlNode::TINYXML_ELEMENT:
                 {
-                    Ogre::ColourValue colour_child = colour;
+
                     Ogre::String name = node->ValueStr();
                     if (name == "colour"){
                         colour_child = Ogre::StringConverter::parseColourValue(
@@ -754,8 +600,7 @@ void UiTextArea::PrepareTextFromNode(
                           = node->ToElement()->Attribute(Ogre::String("time"));
                         if (string != NULL){
                             TextChar new_char;
-                            new_char.pause_time
-                              = Ogre::StringConverter::parseReal(*string);
+                            new_char.pause_time = Ogre::StringConverter::parseReal(*string);
                             text_.push_back(new_char);
                         }
                     }
@@ -799,77 +644,80 @@ void UiTextArea::PrepareTextFromNode(
                             }
                         }
                     }
+                    else if (name == "character"){
+                        const std::string* id = node->ToElement()->Attribute(Ogre::String("id"));
+                        const std::string name = TextManager::getSingleton().GetCharacterName(
+                          std::stoi(*id)
+                        );
+                        for (unsigned int i = 0; i < name.length(); ++ i){
+                            TextChar text_char;
+                            text_char.char_code = name.at(i);
+                            text_char.colour = colour;
+                            text_.push_back(text_char);
+                        }
+                    }
+                    else if (name == "party"){
+                        const std::string* pos = node->ToElement()->Attribute(Ogre::String("pos"));
+                        const std::string name = TextManager::getSingleton().GetPartyCharacterName(
+                          std::stoi(*pos)
+                        );
+                        for (unsigned int i = 0; i < name.length(); ++ i){
+                            TextChar text_char;
+                            text_char.char_code = name.at(i);
+                            text_char.colour = colour;
+                            text_.push_back(text_char);
+                        }
+                    }
                     else if (name == "include"){
-                        const std::string* text_name
-                          = node->ToElement()->Attribute(Ogre::String("name"));
+                        const std::string* text_name = node->ToElement()->Attribute(
+                          Ogre::String("name")
+                        );
                         if (text_name != NULL){
-                            TiXmlNode* text
-                              = TextManager::getSingleton().GetText(*text_name);
-                            if (text != NULL)
-                                PrepareTextFromNode(text, colour_child);
+                            TiXmlNode* text = TextManager::getSingleton().GetText(*text_name);
+                            if (text != NULL) PrepareTextFromNode(text, colour_child);
                         }
                     }
                     else if (name == "image"){
                         Ogre::String name1 = GetString(node, "sprite");
                         if (name1 != ""){
-                            TiXmlNode* sprites
-                              = UiManager::getSingleton().GetPrototype(
-                                "TextAreaSprite"
-                              );
+                            TiXmlNode* sprites = UiManager::getSingleton().GetPrototype(
+                              "TextAreaSprite"
+                            );
                             if (sprites != NULL){
                                 sprites = sprites->FirstChild();
                                 while (sprites != NULL){
                                     if (
-                                      sprites->Type()
-                                        == TiXmlNode::TINYXML_ELEMENT
+                                      sprites->Type() == TiXmlNode::TINYXML_ELEMENT
                                       && sprites->ValueStr() == "sprite"
                                     ){
-                                        Ogre::String name2
-                                          = GetString(sprites, "name");
+                                        Ogre::String name2 = GetString(sprites, "name");
                                         if (name1 == name2){
                                             TextChar new_char;
-
-                                            UiSprite* sprite
-                                              = new UiSprite(
-                                                name1, name_ + "." + name1, this
-                                              );
-                                            Ogre::String image
-                                              = GetString(sprites, "image");
-                                            if (image != "")
-                                                sprite->SetImage(image);
-                                            Ogre::String y_str
-                                              = GetString(sprites, "y");
+                                            UiSprite* sprite = new UiSprite(
+                                              name1, name_ + "." + name1, this
+                                            );
+                                            Ogre::String image = GetString(sprites, "image");
+                                            if (image != "") sprite->SetImage(image);
+                                            Ogre::String y_str = GetString(sprites, "y");
                                             if (y_str != ""){
                                                 float y_percent = 0;
                                                 float y = 0;
-                                                ParsePercent(
-                                                  y_percent, y, y_str
-                                                );
+                                                ParsePercent(y_percent, y, y_str);
                                                 new_char.sprite_y = y;
                                             }
-                                            Ogre::String width_str
-                                              = GetString(sprites, "width");
+                                            Ogre::String width_str = GetString(sprites, "width");
                                             if (width_str != ""){
                                                 float width_percent = 0;
                                                 float width = 0;
-                                                ParsePercent(
-                                                  width_percent, width,
-                                                  width_str
-                                                );
+                                                ParsePercent(width_percent, width, width_str);
                                                 sprite->SetWidth(0, width);
                                             }
-                                            Ogre::String height_str
-                                              = GetString(sprites, "height");
+                                            Ogre::String height_str = GetString(sprites, "height");
                                             if (height_str != ""){
                                                 float height_percent = 0;
                                                 float height = 0;
-                                                ParsePercent(
-                                                  height_percent, height,
-                                                  height_str
-                                                );
-                                                sprite->SetHeight(
-                                                  height_percent, height
-                                                );
+                                                ParsePercent(height_percent, height, height_str);
+                                                sprite->SetHeight(height_percent, height);
                                             }
                                             sprite->SetVisible(false);
                                             AddChild(sprite);
@@ -908,29 +756,19 @@ void UiTextArea::CreateVertexBuffer(){
     max_letters_ = 1024;
     render_operation_.vertexData = new Ogre::VertexData;
     render_operation_.vertexData->vertexStart = 0;
-
-    Ogre::VertexDeclaration* vertex_declaration
-      = render_operation_.vertexData->vertexDeclaration;
-
+    Ogre::VertexDeclaration* vertex_declaration = render_operation_.vertexData->vertexDeclaration;
     size_t offset = 0;
     vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vertex_declaration->addElement(
-      0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE
-    );
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vertex_declaration->addElement(
-      0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES
-    );
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
 
-    vertex_buffer_
-      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
-        vertex_declaration->getVertexSize(0), max_letters_ * 6,
-        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
-      );
-    render_operation_.vertexData->vertexBufferBinding->setBinding(
-      0, vertex_buffer_
+    vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+      vertex_declaration->getVertexSize(0), max_letters_ * 6,
+      Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
     );
+    render_operation_.vertexData->vertexBufferBinding->setBinding(0, vertex_buffer_);
     render_operation_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
     render_operation_.useIndexes = false;
 }
