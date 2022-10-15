@@ -57,32 +57,38 @@ UiContainer.MainMenu = {
 
 
     on_button = function(self, button, event)
-        if ui_manager:get_widget("MainMenu"):is_visible() == true then
-            local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
-            local menu        = ui_manager:get_widget("MainMenu.Container.Menu")
-            local menu_cursor = ui_manager:get_widget("MainMenu.Container.Menu.Cursor")
-            local timegil     = ui_manager:get_widget("MainMenu.Container.TimeGil")
-            local location    = ui_manager:get_widget("MainMenu.Container.Location")
 
-            if button == "Escape" and event == "Press" then
-                script:request_end_sync(Script.UI, "MainMenu", "hide", 0)
-            elseif button == "Down" then
-                self.position = self.position + 1
-                if self.position > self.position_total then
-                    self.position = 1;
+        local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
+        local menu  = ui_manager:get_widget("MainMenu.Container.Menu")
+        local menu_cursor = ui_manager:get_widget("MainMenu.Container.Menu.Cursor")
+        local timegil = ui_manager:get_widget("MainMenu.Container.TimeGil")
+        local location = ui_manager:get_widget("MainMenu.Container.Location")
+        if UiContainer.current_menu == "main" then
+            if UiContainer.current_submenu == "" then
+                if button == "Escape" and event == "Press" then
+                    script:request_end_sync(Script.UI, "MainMenu", "hide", 0)
+                elseif button == "Enter" and event == "Press" and self.position == 1 then
+                    script:request_end_sync(Script.UI, "ItemMenu", "show", 0)
+                elseif button == "Down" then
+                    self.position = self.position + 1
+                    if self.position > self.position_total then
+                        self.position = 1;
+                    end
+                    menu_cursor:set_default_animation("Position" .. self.position)
+                elseif button == "Up" then
+                    self.position = self.position - 1
+                    if self.position <= 0 then
+                        self.position = self.position_total;
+                    end
+                    menu_cursor:set_default_animation("Position" .. self.position)
                 end
-                menu_cursor:set_default_animation("Position" .. self.position)
-            elseif button == "Up" then
-                self.position = self.position - 1
-                if self.position <= 0 then
-                    self.position = self.position_total;
-                end
-                menu_cursor:set_default_animation("Position" .. self.position)
             end
-        elseif FFVII.MenuSettings.available == true then
+        elseif ui_manager:get_widget("MainMenu"):is_visible() == false and FFVII.MenuSettings.available == true then
             if button == "Escape" and event == "Press" then
                 script:request_end_sync(Script.UI, "MainMenu", "show", 0)
             end
+        else
+            return 0
         end
 
         return 0
@@ -92,9 +98,10 @@ UiContainer.MainMenu = {
     --
     -- Populates and updates displayed data before opening.
     show = function(self)
+        UiContainer.current_menu = "main"
+        UiContainer.current_submenu = ""
         entity_manager:set_paused(true)
         FFVII.MenuSettings.pause_available = false
-
         ui_manager:get_widget("MainMenu"):set_visible(true)
         local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
         local menu = ui_manager:get_widget("MainMenu.Container.Menu")
@@ -125,6 +132,8 @@ UiContainer.MainMenu = {
 
 
     hide = function(self)
+        UiContainer.current_menu = ""
+        UiContainer.current_submenu = ""
         local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
         local menu = ui_manager:get_widget("MainMenu.Container.Menu")
         local timegil = ui_manager:get_widget("MainMenu.Container.TimeGil")

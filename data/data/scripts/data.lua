@@ -82,6 +82,20 @@ for i = 1, 11 do
     Characters[i] = {}
 end
 
+--- The party inventory.
+--
+-- Items can be accessed with indexes 0 - MAX_INVENTORY_SLOTS. Money can be accessed with the
+-- index "money." It has the following functions:
+--   add_item(item, quantity)
+--   remove_item(item, quantity)
+--   get_item_quantity(item)
+--   add_money(amount)
+--   remove_money(amount)
+--   money_to_2_banks(b1, b2, a1, a2)
+Inventory = {}
+Inventory.money = 0
+
+
 
 FFVII = {}
 
@@ -156,29 +170,28 @@ FFVII.Party = {
 
 --- Memory banks.
 --
--- @todo: Give propper indices starting at 0.
--- @todo: Change to Banks, don't include it in FFVII, which is to be deleted.
-FFVII.Banks = {}
-for i = 1, 15 do
-    FFVII.Banks[i] = {}
-    for j = 1, 256 do
-        FFVII.Banks[i][j] = 0
+-- Used to store gama data.
+-- 15 banks (indexes 0-14) with 255 addresses (indexes 0-254) each. Memory banks 4, 5, 7, 8 and 9
+-- are temporary and are not saved to the savemap.
+Banks = {}
+for i = 0, 14 do
+    Banks[i] = {}
+    for j = 0, 255 do
+        Banks[i][j] = 0
     end
 end
 
 
 --- Memory banks for individual bits.
 --
--- @todo: Give propper indices starting at 0.
--- @todo: Change to Banks, don't include it in FFVII, which is to be deleted.
 -- @todo Delete this, and implement bit operations over Banks.
-FFVII.BitBanks = {}
-for i = 1, 16 do
-    FFVII.BitBanks[i] = {}
-    for j = 1, 256 do
-        FFVII.BitBanks[i][j] = {}
-        for k = 1, 8 do
-            FFVII.BitBanks[i][j][k] = 0
+BitBanks = {}
+for i = 0, 15 do
+    BitBanks[i] = {}
+    for j = 0, 255 do
+        BitBanks[i][j] = {}
+        for k = 0, 7 do
+            BitBanks[i][j][k] = 0
         end
     end
 end

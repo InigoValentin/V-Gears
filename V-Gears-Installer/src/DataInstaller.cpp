@@ -1093,6 +1093,7 @@ static void CollectSpawnPoints(
   VGears::FLevelFilePtr& field, const std::vector<std::string>& field_id_to_name_lookup,
   FieldSpawnPointsMap& spawn_points
 ){
+    //std::cout << "Decompile FIELD " << field->getName() << "\n";
     const size_t this_field_id = FieldId(field->getName(), field_id_to_name_lookup);
     // Decompile the script just so the MAPJUMPs can be collected. This is needed to construct the
     // full list of entries to each field.
@@ -1182,6 +1183,10 @@ static bool WillCrash(const Ogre::String& resource_name){
       || resource_name == "lastmap" // Background image crash
       || resource_name == "md_e1" // Background image crash
       || resource_name == "trnad_3" // Background image crash
+      || resource_name == "bonevil2" // stof
+      || resource_name == "coloin1" // boost::bad_format_string: format-string is ill-formed
+      || resource_name == "del3" // Segmentation fault.
+      || resource_name == "elmin4_2" // boost::bad_format_string: format-string is ill-formed
     ){return true;}
     return false;
 }
@@ -1257,9 +1262,9 @@ void DataInstaller::CollectionFieldSpawnAndScaleFactors(){
     if (iterator_counter_ < flevel_file_list_->size()){
         auto resource_name = (*flevel_file_list_)[iterator_counter_];
         // Exclude things that are not fields.
-        //if (IsAFieldFile(resource_name) /*&& IsTestField(resource_name)*/){
+        //if (IsAFieldFile(resource_name) && !WillCrash(resource_name)){
         // TODO: DEBUG: Only testing fields.
-        if (IsAFieldFile(resource_name) && IsTestField(resource_name)){
+        if (IsAFieldFile(resource_name) && IsTestField(resource_name) && !WillCrash(resource_name)){
             conversion_step_ ++;
             if (conversion_step_ == 1){
                 field_ = VGears::LZSFLevelFileManager::GetSingleton().load(

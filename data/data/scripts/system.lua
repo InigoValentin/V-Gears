@@ -1,3 +1,5 @@
+MAX_INVENTORY_SLOTS = 320
+
 --- Export character names to the text manager.
 --
 -- Used to compose dialog with character names. Must be called on start and when a character is
@@ -166,26 +168,46 @@ end
 --
 -- @param item Item ID.
 -- @param quantity Quantity to add.
-FFVII.add_item = function(item, quantity)
-    if FFVII.Items[item] == nil then
+Inventory.add_item = function(item, quantity)
+    -- TODO: Also check weapons, armors and accessories.
+    if Game.Items[item] == nil then
         print("Tried add invalid item \"" .. item .. "\".");
         return
     end
     local old_quantity = 0
-    if FFVII.ItemStorage[item] ~= nil then
-        old_quantity = FFVII.ItemStorage[item]
+    local index = -1
+    for i = 0, MAX_INVENTORY_SLOTS do
+        if Inventory[i] ~= nil and Inventory[i].item == item then
+            -- Item already in inventory, add quantity
+            print("Add item " .. item .. " (" .. quantity .. "..) at a existing position " .. i)
+            Inventory[i].quantity = Inventory[i].quantity + quantity
+            if Inventory[i].quantity > 99 then
+                Inventory[i].quantity = 99
+            end
+            return
+        end
     end
-    FFVII.ItemStorage[item] = old_quantity + quantity
-    if FFVII.ItemStorage[item] > 99 then
-        FFVII.ItemStorage[item] = 99
+    -- Item not in inventory, search for the first available position.
+    for i = 0, MAX_INVENTORY_SLOTS do
+        if Inventory[i] == nil then
+            print("Add item " .. item .. " (" .. quantity .. "..) at a new position " .. i)
+            Inventory[i] = {item = item, quantity = quantity}
+            if Inventory[i].quantity > 99 then
+                Inventory[i].quantity = 99
+            end
+            return
+        end
     end
+    -- If reached this point, it means that the item is not in inventory, and all slots are full.
+    -- TODO: The orignal game does nothing, but in here?
+    return
 end
 
 --- Checks how many items of a type are in the inventory.
 --
 -- @param item The item ID.
 -- @return Number of the items in the inventory.
-FFVII.get_item_quantity = function(item)
+Inventory.get_item_quantity = function(item)
     if FFVII.Items[item] == nil then
         print("Tried get quontity for invalid item \"" .. item .. "\".");
         return
@@ -204,7 +226,7 @@ end
 --
 -- @param item Item ID.
 -- @param quantity Quantity to remove.
-FFVII.remove_item = function(item, quantity)
+Inventory.remove_item = function(item, quantity)
     if FFVII.Items[item] == nil then
         print("Tried remove invalid item \"" .. item .. "\".");
         return
@@ -222,20 +244,11 @@ end
 --- Adds money.
 --
 -- @param amount The money to add.
--- @todo Fix cap.
-FFVII.add_money = function(amount)
-    FFVII.Savemap.money = FFVII.Savemap.money + amount
-
-    if FFVII.Savemap.money > 999999 then
-        FFVII.ItemStorage[item] = 999999
+Inventory.add_money = function(amount)
+    Inventory.money = Inventory.money + amount
+    if Inventory.money > 99999999 then
+        Inventory.money = 99999999
     end
-end
-
---- Checks the curent money.
---
--- @return Current money.
-FFVII.get_money = function()
-    return FFVII.Savemap.money
 end
 
 --- Removes money.
@@ -244,9 +257,24 @@ end
 -- it will be removed.
 --
 -- @param amount Money to remove.
-FFVII.remove_money = function(amount)
-    FFVII.Savemap.money = FFVII.Savemap.money - amount
-    if FFVII.Savemap.money < 0 then
-        FFVII.Savemap.money = 0
+Inventory.remove_money = function(amount)
+    Inventory.money = Inventory.money - amount
+    if Inventory.money < 0 then
+        Inventory.money = 0
     end
+end
+
+--- Copies the amount of gil the party has into data banks
+--
+-- As the gil amount is a four-byte value, in the original game the arguments require two
+-- destination addresses to place two two-byte values into. Address 1 takes the lower two bytes of
+-- the gil amount, while address 2 takes the higher two bytes.
+--
+-- @param b1 First destination bank.
+-- @param b2 Second destination address.
+-- @param a1 First destination bank.
+-- @param a2 Second destination address.
+Inventory.money_to_2_banks = function(b1, b2, a1, a2)
+    Banks[b1][a1] = math.floor(Inventory.money / 65535)
+    Banks[b2][a2] = math.floor(Inventory.money % 65535) - math.floor(Inventory.money / 65535)
 end

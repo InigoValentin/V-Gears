@@ -126,7 +126,7 @@ end
 -- @param variable Bank address (0-index, as in game).
 -- @param bit Address bit (0-index, as in game).
 bit_on = function(bank, variable, bit)
-    FFVII.BitBanks[bank + 1][variable + 1][bit + 1] = 1
+    BitBanks[bank][variable][bit] = 1
 end
 
 --- Sets a bit variable off (0).
@@ -135,7 +135,7 @@ end
 -- @param variable Bank address (0-index, as in game).
 -- @param bit Address bit (0-index, as in game).
 bit_off = function(bank, variable, bit)
-    FFVII.BitBanks[bank + 1][variable + 1][bit + 1] = 0
+    BitBanks[bank][variable][bit] = 0
 end
 
 --- Retrieves a bit variable.
@@ -145,7 +145,7 @@ end
 -- @param bit Address bit (0-index, as in game).
 -- @return 1 or 0
 bit = function(bank, variable, bit)
-    return FFVII.BitBanks[bank + 1][variable + 1][bit + 1]
+    return BitBanks[bank][variable][bit]
 end
 
 --- Stores the coordinates and walkmesh triangle in memory.
@@ -168,10 +168,10 @@ axyzi = function(bx, by, bz, bt, id, ax, ay, az, at, scale)
     end
     local x, y, z = entity:get_position()
     local t = entity:get_move_triangle_id()
-    FFVII.Banks[bx + 1][ax + 1] = math.floor(x * scale)
-    FFVII.Banks[by + 1][ay + 1] = math.floor(y * scale)
-    FFVII.Banks[bz + 1][az + 1] = math.floor(z * scale)
-    FFVII.Banks[bt + 1][at + 1] = t
+    Banks[bx][ax] = math.floor(x * scale)
+    Banks[by][ay] = math.floor(y * scale)
+    Banks[bz][az] = math.floor(z * scale)
+    Banks[bt][at] = t
     return 0
 end
 
