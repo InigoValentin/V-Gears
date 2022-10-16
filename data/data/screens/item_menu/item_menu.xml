@@ -5,6 +5,11 @@
             <text_area name="ItemText" x="36" y="6" text_name="ItemMenuUse" font="FFVIIFont" visible="true" />
             <text_area name="ItemText" x="96" y="6" text_name="ItemMenuOrder" font="FFVIIFont" visible="true" />
             <text_area name="ItemText" x="156" y="6" text_name="ItemMenuKey" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="screens/images/cursor.png" x="-11" y="6" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" x="0:6" />
+                <animation name="Position2" length="0" x="0:66" />
+                <animation name="Position3" length="0" x="0:126" />
+            </sprite>
         </widget>
         <widget name="ItemMenuTitle" x="254" y="5" width="86" height="24" visible="true">
             <prototype name="Window" />
@@ -34,6 +39,16 @@
                     <prototype name="MenuCharacterData" />
                 </widget>
             </widget>
+            <sprite name="Cursor" image="screens/images/cursor.png" x="-11" y="6" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:25" />
+                <animation name="Position2" length="0" y="0:80" />
+                <animation name="Position3" length="0" y="0:135" />
+            </sprite>
+            <widget name="CursorMultiple" x="-11" y="0" width="24" height="150" visible="false">
+                <sprite name="Cursor1" image="screens/images/cursor.png" x="0" y="25" width="24" height="17" visible="true"/>
+                <sprite name="Cursor2" image="screens/images/cursor.png" x="0" y="80" width="24" height="17" visible="true"/>
+                <sprite name="Cursor3" image="screens/images/cursor.png" x="0" y="135" width="24" height="17" visible="true"/>
+            </widget>
         </widget>
         <widget name="ItemList" x="185" y="53" width="155" height="182" visible="true">
             <prototype name="Window" />
@@ -59,9 +74,9 @@
             <text_area name="Qty3" x="135" y="57" text_name="Placeholder" font="FFVIIFont" visible="true" />
 
             <sprite name="Icon4" image="screens/images/item_item.png" x="8" y="73" width="13" height="15" visible="true" />
-            <text_area name="Name4" x="30" y="78" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon4" x="130" y="78" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty4" x="135" y="78" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="Name4" x="30" y="74" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="Colon4" x="130" y="74" text_name="Colon" font="FFVIIFont" visible="true" />
+            <text_area name="Qty4" x="135" y="74" text_name="Placeholder" font="FFVIIFont" visible="true" />
 
             <sprite name="Icon5" image="screens/images/item_item.png" x="8" y="90" width="13" height="15" visible="true" />
             <text_area name="Name5" x="30" y="91" text_name="Placeholder" font="FFVIIFont" visible="true" />

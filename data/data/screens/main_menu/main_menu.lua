@@ -111,9 +111,9 @@ UiContainer.MainMenu = {
 
         for c = 1, 3 do
             if FFVII.Party[c] ~= nil then
-                self.populate_character(c, Characters[FFVII.Party[c]])
+                UiContainer.populate_character_data("MainMenu.Container.Characters.Character" .. tostring(c), Characters[FFVII.Party[c]])
             else
-                self.populate_character(c, nil)
+                UiContainer.populate_character_data("MainMenu.Container.Characters.Character" .. tostring(c), nil)
             end
         end
 

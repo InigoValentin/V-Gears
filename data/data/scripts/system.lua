@@ -174,12 +174,9 @@ Inventory.add_item = function(item, quantity)
         print("Tried add invalid item \"" .. item .. "\".");
         return
     end
-    local old_quantity = 0
-    local index = -1
     for i = 0, MAX_INVENTORY_SLOTS do
         if Inventory[i] ~= nil and Inventory[i].item == item then
             -- Item already in inventory, add quantity
-            print("Add item " .. item .. " (" .. quantity .. "..) at a existing position " .. i)
             Inventory[i].quantity = Inventory[i].quantity + quantity
             if Inventory[i].quantity > 99 then
                 Inventory[i].quantity = 99
@@ -190,7 +187,6 @@ Inventory.add_item = function(item, quantity)
     -- Item not in inventory, search for the first available position.
     for i = 0, MAX_INVENTORY_SLOTS do
         if Inventory[i] == nil then
-            print("Add item " .. item .. " (" .. quantity .. "..) at a new position " .. i)
             Inventory[i] = {item = item, quantity = quantity}
             if Inventory[i].quantity > 99 then
                 Inventory[i].quantity = 99
@@ -208,15 +204,13 @@ end
 -- @param item The item ID.
 -- @return Number of the items in the inventory.
 Inventory.get_item_quantity = function(item)
-    if FFVII.Items[item] == nil then
-        print("Tried get quontity for invalid item \"" .. item .. "\".");
-        return
+    local qty = 0
+    for i = 0, MAX_INVENTORY_SLOTS do
+        if Inventory[i] ~= nil and Inventory[i].item == item then
+            qty = qty + Inventory[i].quantity
+        end
     end
-    local quantity = 0
-    if FFVII.ItemStorage[item] ~= nil then
-        quantity = FFVII.ItemStorage[item]
-    end
-    return quantity
+    return qty
 end
 
 --- Removes items from the inventory.
@@ -227,17 +221,15 @@ end
 -- @param item Item ID.
 -- @param quantity Quantity to remove.
 Inventory.remove_item = function(item, quantity)
-    if FFVII.Items[item] == nil then
-        print("Tried remove invalid item \"" .. item .. "\".");
-        return
-    end
-    local old_quantity = 0
-    if FFVII.ItemStorage[item] ~= nil then
-        old_quantity = FFVII.ItemStorage[item]
-    end
-    FFVII.ItemStorage[item] = old_quantity - quantity
-    if FFVII.ItemStorage[item] < 0 then
-        FFVII.ItemStorage[item] = 0
+    for i = 0, MAX_INVENTORY_SLOTS do
+        if Inventory[i] ~= nil and Inventory[i].item == item then
+            -- Item already in inventory, add quantity
+            Inventory[i].quantity = Inventory[i].quantity - quantity
+            if Inventory[i].quantity <= 0 then
+                Inventory[i] = nil
+            end
+            return
+        end
     end
 end
 

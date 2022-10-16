@@ -799,7 +799,19 @@ void KernelDataInstaller::WriteItems(std::string file_name){
           << ", fixed_row = " << item.target.fixed_row
           << ", short_range = " << item.target.short_range
           << ", all_rows = " << item.target.all_rows
-          << ", random = " << item.target.random << "}\n}\n";
+          << ", random = " << item.target.random << "},\n"
+          << "    status = {";
+        for (int s : item.status.status){
+            file << "\n        {status = " << s << ", mode = " << item.status.mode
+              << ", chance = " << item.status.chance << "},";
+        }
+        if (item.status.status.size() > 0) file << "\n    },\n";
+        else file << "},\n";
+        file << "    elements = {";
+        for (int e : item.elements) file << e << ", ";
+        file << "},\n}\n";
+
+
     }
     file.close();
 }

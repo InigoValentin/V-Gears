@@ -16,6 +16,7 @@
     <script file="scripts/field.lua" />
     <script file="scripts/battle.lua" />
     <script file="scripts/battle_ai.lua" />
+    <script file="screens/menu_helpers.lua" />
 
     <system_script name="MapChanger" />
 </scripts>
