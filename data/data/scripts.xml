@@ -18,5 +18,8 @@
     <script file="scripts/battle_ai.lua" />
     <script file="screens/menu_helpers.lua" />
 
+    <!-- TODO: Debugging pourposes only -->
+    <script file="scripts/debug_data.lua" />
+
     <system_script name="MapChanger" />
 </scripts>

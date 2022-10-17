@@ -118,6 +118,73 @@
 
 
         </widget>
+        <widget name="ItemOrder" x="140" y="25" width="62" height="108" visible="false">
+            <prototype name="Window" />
+            <text_area name="Order1" x="12" y="6" text_name="ItemMenuOrder1" font="FFVIIFont" visible="true" />
+            <text_area name="Order2" x="12" y="18" text_name="ItemMenuOrder2" font="FFVIIFont" visible="true" />
+            <text_area name="Order3" x="12" y="30" text_name="ItemMenuOrder3" font="FFVIIFont" visible="true" />
+            <text_area name="Order4" x="12" y="42" text_name="ItemMenuOrder4" font="FFVIIFont" visible="true" />
+            <text_area name="Order5" x="12" y="54" text_name="ItemMenuOrder5" font="FFVIIFont" visible="true" />
+            <text_area name="Order6" x="12" y="66" text_name="ItemMenuOrder6" font="FFVIIFont" visible="true" />
+            <text_area name="Order7" x="12" y="78" text_name="ItemMenuOrder7" font="FFVIIFont" visible="true" />
+            <text_area name="Order8" x="12" y="90" text_name="ItemMenuOrder8" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="screens/images/cursor.png" x="-12" y="6" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:6" />
+                <animation name="Position2" length="0" y="0:18" />
+                <animation name="Position3" length="0" y="0:30" />
+                <animation name="Position4" length="0" y="0:42" />
+                <animation name="Position5" length="0" y="0:54" />
+                <animation name="Position6" length="0" y="0:66" />
+                <animation name="Position7" length="0" y="0:78" />
+                <animation name="Position8" length="0" y="0:90" />
+            </sprite>
+
+        </widget>
+        <widget name="KeyItems" x="30" y="53" width="310" height="182" visible="false">
+            <prototype name="Window" />
+            <text_area name="KeyItem0-0" x="30" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem0-1" x="185" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem1-0" x="30" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem1-1" x="185" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem2-0" x="30" y="40" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem2-1" x="185" y="40" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem3-0" x="30" y="57" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem3-1" x="185" y="57" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem4-0" x="30" y="74" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem4-1" x="185" y="74" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem5-0" x="30" y="91" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem5-1" x="185" y="91" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem6-0" x="30" y="108" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem6-1" x="185" y="108" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem7-0" x="30" y="125" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem7-1" x="185" y="125" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem8-0" x="30" y="142" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem8-1" x="185" y="142" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem9-0" x="30" y="159" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem9-1" x="185" y="159" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="screens/images/cursor.png" x="-11" y="6" width="24" height="17" visible="true">
+                <animation name="Position0-0" length="0" x="0:0" y="0:6" />
+                <animation name="Position0-1" length="0" x="0:150" y="0:6" />
+                <animation name="Position1-0" length="0" x="0:0" y="0:23" />
+                <animation name="Position1-1" length="0" x="0:150" y="0:23" />
+                <animation name="Position2-0" length="0" x="0:0" y="0:40" />
+                <animation name="Position2-1" length="0" x="0:150" y="0:40" />
+                <animation name="Position3-0" length="0" x="0:0" y="0:57" />
+                <animation name="Position3-1" length="0" x="0:150" y="0:57" />
+                <animation name="Position4-0" length="0" x="0:0" y="0:78" />
+                <animation name="Position4-1" length="0" x="0:150" y="0:78" />
+                <animation name="Position5-0" length="0" x="0:0" y="0:91" />
+                <animation name="Position5-1" length="0" x="0:150" y="0:91" />
+                <animation name="Position6-0" length="0" x="0:0" y="0:108" />
+                <animation name="Position6-1" length="0" x="0:150" y="0:108" />
+                <animation name="Position7-0" length="0" x="0:0" y="0:125" />
+                <animation name="Position7-1" length="0" x="0:150" y="0:125" />
+                <animation name="Position8-0" length="0" x="0:0" y="0:142" />
+                <animation name="Position8-1" length="0" x="0:150" y="0:142" />
+                <animation name="Position9-0" length="0" x="0:0" y="0:159" />
+                <animation name="Position9-1" length="0" x="0:150" y="0:159" />
+            </sprite>
+        </widget>
         <!--<widget name="Characters" x="0" y="17" width="300" height="190" visible="true">
             <prototype name="Window" />
             <animation name="Appear" length="0.3" x="0:736,0.3:0" />

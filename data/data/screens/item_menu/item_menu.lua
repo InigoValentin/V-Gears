@@ -1,26 +1,76 @@
 if UiContainer == nil then UiContainer = {} end
 
---- The main menu.
+--- The item menu.
 UiContainer.ItemMenu = {
+
+    --- Current cursor position in the top bar (1-3).
     bar_position = 1,
+
+    --- Max cursor position in the top bar.
     bar_position_total = 3,
+
+    --- Current cursor position in the item list (1-10).
+    --
+    -- It doesn't represent the item id or the inventory position, but the highlighted row among
+    -- the ten displayed.
     item_cursor_position = 1,
+
+    --- Max cursor position in the item list (1-10).
     item_cursor_position_total = 10,
-    item_cursor_item_selected = 0,
+
+    --- Highlighted inventory position (1-320).
+    item_cursor_item_selected = 1,
+
+    --- Current cursor position in the character section (1-3).
     char_position = 1,
+
+    --- Max cursor position in the character section.
     char_position_total = 3,
+
+    --- First inventory entry currently visible in the item list.
     first_item_in_window = 0,
 
-    -- Item ID of the currently selected (not highlighted) item.
+    --- Key items cursor vertical position (0-9)
+    --
+    -- It doesn't represent the item id or the inventory position, but the highlighted row among
+    -- the ten displayed.
+    key_items_cursor_x_position = 0,
+
+    --- Key items cursor horizontal position (0-1)
+    --
+    -- It doesn't represent the item id or the inventory position, but the highlighted row among
+    -- the ten displayed. 0 if the cursor is in the left column, 1 if it's on the right.
+    key_items_cursor_y_position = 0,
+
+    --- First visible row of key items (0-16)
+    --
+    -- Changes as the key item list scrols vertically.
+    first_key_item_row_in_window = 0,
+
+    --- Current cursor position in the order section (1-8).
+    order_cursor_position = 1,
+
+    --- Max cursor position in the order section.
+    order_cursor_position_total = 8,
+
+    --- Item ID of the currently selected (not highlighted) item.
     item_in_use = nil,
 
-    -- Indicates it the selected item affect the entire party.
+    --- Indicates it the selected item affect the entire party.
     item_in_use_party = false,
 
+    --- Run when the menu is creaded.
+    --
+    -- It does nothing.
     on_start = function(self)
         return 0
     end,
 
+    --- Handles button events.
+    --
+    -- For the current submenu, handles directional keys, enter and escape events.
+    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "item" then
             if UiContainer.current_submenu == "bar_selection" then
@@ -33,24 +83,72 @@ UiContainer.ItemMenu = {
                         self.bar_position = 1
                     end
                     ui_manager:get_widget("ItemMenu.Container.ItemMenuTopBar.Cursor"):set_default_animation("Position" .. self.bar_position)
+                    -- If highlighted, show key items.
+                    if self.bar_position == 3 then
+                        ui_manager:get_widget("ItemMenu.Container.KeyItems"):set_visible(true)
+                    else
+                        ui_manager:get_widget("ItemMenu.Container.KeyItems"):set_visible(false)
+                    end
                 elseif button == "Left" then
                     self.bar_position = self.bar_position - 1
                     if self.bar_position < 1 then
                         self.bar_position = self.bar_position_total
                     end
                     ui_manager:get_widget("ItemMenu.Container.ItemMenuTopBar.Cursor"):set_default_animation("Position" .. self.bar_position)
+                    -- If highlighted, show key items.
+                    if self.bar_position == 3 then
+                        ui_manager:get_widget("ItemMenu.Container.KeyItems"):set_visible(true)
+                    else
+                        ui_manager:get_widget("ItemMenu.Container.KeyItems"):set_visible(false)
+                    end
                 elseif button == "Enter" then
                     if self.bar_position == 1 then
                         self.submenu_items(self)
                     elseif self.bar_position == 2 then
-                        print("Unimplemented: Order")
+                        self.submenu_order(self)
                     elseif self.bar_position == 3 then
-                        print("Unimplemented: Key Items")
+                        self.submenu_key_items(self)
                     else
                         return 0
                     end
                 else
                     return 0
+                end
+            elseif UiContainer.current_submenu == "order_selection" then
+                if button == "Escape" and event == "Press" then
+                    self.submenu_bar(self)
+                elseif button == "Down" then
+                    self.order_cursor_position = self.order_cursor_position + 1
+                    if self.order_cursor_position > self.order_cursor_position_total then
+                        self.order_cursor_position = 1
+                    end
+                    ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_default_animation("Position" .. self.order_cursor_position)
+                elseif button == "Up" then
+                    self.order_cursor_position = self.order_cursor_position - 1
+                    if self.order_cursor_position <= 0 then
+                        self.order_cursor_position = self.order_cursor_position_total
+                    end
+                    ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_default_animation("Position" .. self.order_cursor_position)
+                elseif button == "Enter" then
+                    if self.order_cursor_position == 1 then
+                        Inventory.sort(Inventory.ORDER.CUSTOM)
+                    elseif self.order_cursor_position == 2 then
+                        Inventory.sort(Inventory.ORDER.FIELD)
+                    elseif self.order_cursor_position == 3 then
+                        Inventory.sort(Inventory.ORDER.BATTLE)
+                    elseif self.order_cursor_position == 4 then
+                        Inventory.sort(Inventory.ORDER.THROW)
+                    elseif self.order_cursor_position == 5 then
+                        Inventory.sort(Inventory.ORDER.TYPE)
+                    elseif self.order_cursor_position == 6 then
+                        Inventory.sort(Inventory.ORDER.NAME)
+                    elseif self.order_cursor_position == 7 then
+                        Inventory.sort(Inventory.ORDER.MOST)
+                    elseif self.order_cursor_position == 8 then
+                        Inventory.sort(Inventory.ORDER.LEAST)
+                    end
+                    self.populate_items(self)
+                    self.submenu_bar(self)
                 end
             elseif UiContainer.current_submenu == "item_selection" then
                 local cursor = ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor")
@@ -114,9 +212,6 @@ UiContainer.ItemMenu = {
                     else
                         print("BEEP")
                     end
-                    --self.submenu_bar(self)
-                    --UiContainer.current_submenu = "bar_selection"
-                    --ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
                 end
             elseif UiContainer.current_submenu == "char_selection" then
                 if button == "Down" then
@@ -152,7 +247,109 @@ UiContainer.ItemMenu = {
                         print("USE BEEP")
                     end
                 end
-            elseif UiContainer.current_submenu == "key_items" then
+            elseif UiContainer.current_submenu == "key_item_selection" then
+                if button == "Down" then
+                    if self.key_items_cursor_y_position == 9 and self.first_key_item_row_in_window == 16 then
+                        -- Last key item selected, do nothing
+                        return 0
+                    end
+                    if self.key_items_cursor_y_position == 9 then
+                        -- Scroll down by 1, don't move cursor
+                        self.first_key_item_row_in_window = self.first_key_item_row_in_window + 1
+                        self.populate_key_items(self)
+                    else
+                        -- Move cursor down by 1.
+                        self.key_items_cursor_y_position = self.key_items_cursor_y_position + 1
+                    end
+                    ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
+                    -- Show description of the selected item, if any.
+                    local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
+                    if (Inventory.key[k_selected_id] == true) then
+                        ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
+                    else
+                        ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+                    end
+                elseif button == "Up" then
+                    if self.key_items_cursor_y_position == 0 and self.first_key_item_row_in_window == 0 then -- TODO: Don't hardcode.
+                        -- First item, do nothing.
+                        return 0
+                    end
+                    if self.key_items_cursor_y_position == 0 then
+                        -- Scroll down by 1, don't move cursor
+                        self.first_key_item_row_in_window = self.first_key_item_row_in_window - 1
+                        self.populate_key_items(self)
+                    else
+                        -- Move cursor up by 1.
+                        self.key_items_cursor_y_position = self.key_items_cursor_y_position - 1
+                    end
+                    ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
+                    -- Show description of the selected item, if any.
+                    local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
+                    if (Inventory.key[k_selected_id] == true) then
+                        ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
+                    else
+                        ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+                    end
+                elseif button == "Right" then
+                    local next_selected_index = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position + 1
+                    if next_selected_index >= 50 then
+                        -- Already in last item, do nothing
+                        return 0
+                    end
+                    if self.key_items_cursor_x_position == 0 then
+                        -- If on the left, move to the right. No scrolling.
+                        self.key_items_cursor_x_position = 1
+                    else
+                        -- If on the right, move to left and one row down...
+                        self.key_items_cursor_x_position = 0
+                        if self.key_items_cursor_y_position == 9 then
+                            -- ... by scrolling down by 1, not moving cursor.
+                            self.first_key_item_row_in_window = self.first_key_item_row_in_window + 1
+                            self.populate_key_items(self)
+                        else
+                            --  ... by moving the cursor down.
+                            self.key_items_cursor_y_position = self.key_items_cursor_y_position + 1
+                        end
+                    end
+                    ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
+                    -- Show description of the selected item, if any.
+                    local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
+                    if (Inventory.key[k_selected_id] == true) then
+                        ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
+                    else
+                        ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+                    end
+                elseif button == "Left" then
+                    local next_selected_index = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position - 1
+                    if next_selected_index < 0 then
+                        -- Already in first item, do nothing
+                        return 0
+                    end
+                    if self.key_items_cursor_x_position == 1 then
+                        -- If on the right, move to the left. No scrolling.
+                        self.key_items_cursor_x_position = 0
+                    else
+                        -- If on the left, move to right and one row up...
+                        self.key_items_cursor_x_position = 1
+                        if self.key_items_cursor_y_position == 0 then
+                            -- ... by scrolling up by 1, not moving cursor.
+                            self.first_key_item_row_in_window = self.first_key_item_row_in_window - 1
+                            self.populate_key_items(self)
+                        else
+                            --  ... by moving the cursor up.
+                            self.key_items_cursor_y_position = self.key_items_cursor_y_position - 1
+                        end
+                    end
+                    ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
+                    -- Show description of the selected item, if any.
+                    local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
+                    if (Inventory.key[k_selected_id] == true) then
+                        ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
+                    else
+                        ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+                    end
+                end
+
             end
         end
         return 0
@@ -164,14 +361,6 @@ UiContainer.ItemMenu = {
     show = function(self)
         ui_manager:get_widget("ItemMenu"):set_visible(true)
         UiContainer.current_menu = "item"
-        Inventory.add_item(0, 2)
-        Inventory.add_item(1, 4)
-        Inventory.add_item(42, 3)
-        Inventory.add_item(1, 4)
-        Inventory.add_item(6, 5)
-        Inventory.add_item(13, 2)
-        Inventory.add_item(14, 4)
-        Characters[0].stats.hp.current = 10
         self.char_position_total = 0
         for c = 1, 3 do
             if FFVII.Party[c] ~= nil then
@@ -182,10 +371,12 @@ UiContainer.ItemMenu = {
             end
         end
         self.populate_items(self)
+        self.populate_key_items(self)
         self.submenu_items(self)
         return 0;
     end,
 
+    --- Initializes the selection of the menu section in the top bar.
     submenu_bar = function(self)
         UiContainer.current_submenu = "bar_selection"
         ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
@@ -194,16 +385,47 @@ UiContainer.ItemMenu = {
         ui_manager:get_widget("ItemMenu.Container.ItemMenuTopBar.Cursor"):set_visible(true)
         ui_manager:get_widget("ItemMenu.Container.ItemMenuTopBar.Cursor"):set_default_animation("Position" .. self.bar_position)
         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+        ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder"):set_visible(false)
     end,
 
+    --- Initializes the sorting mode window.
+    submenu_order = function(self)
+        UiContainer.current_submenu = "order_selection"
+        self.order_cursor_position = 1
+        ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.CursorMultiple"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemMenuTopBar.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+        ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder"):set_visible(true)
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_visible(true)
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_default_animation("Position" .. self.order_cursor_position)
+    end,
+
+    --- Initializes the item selection selection mode.
     submenu_items = function(self)
         UiContainer.current_submenu = "item_selection"
         ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(true)
         ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_default_animation("Position" .. self.item_cursor_position)
         ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Cursor"):set_visible(false)
         ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.CursorMultiple"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_visible(false)
         --ui_manager:get_widget("ItemMenu.Container.ItemMenuTopBar.Cursor"):set_visible(false)
         -- Show description of the very first item, if any.
+        -- TODO: Selected, not first
+        -- Show description of the selected item, if any.
+        local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
+        if (Inventory.key[k_selected_id] == true) then
+            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
+        else
+            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+        end
+
+
         if (Inventory[0] ~= nil) then
             ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Items[Inventory[0].item].description)
         else
@@ -211,6 +433,7 @@ UiContainer.ItemMenu = {
         end
     end,
 
+    --- Initializes the character selection mode.
     submenu_chars = function(self, multiple)
         UiContainer.current_submenu = "char_selection"
         --ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
@@ -223,28 +446,43 @@ UiContainer.ItemMenu = {
             ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Cursor"):set_visible(true)
             ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Cursor"):set_default_animation("Position" .. self.char_position)
         end
+        ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_visible(false)
+    end,
+
+    --- Initializes the key item selection mode.
+    submenu_key_items = function(self)
+        UiContainer.current_submenu = "key_item_selection"
+        ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(true)
+        ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.CursorMultiple"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_visible(true)
+        ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
+        -- Show description of the selected item, if any.
+        local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
+        if (Inventory.key[k_selected_id] == true) then
+            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
+        else
+            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+        end
     end,
 
     --- Uses an item from the menu.
     --
     -- Checks the item conditions. If they are valid, uses the item and discounts 1 from the
     -- inventory.
-    -- TODO: If after using a item, the quantity becames 0, go back to the item selection menu.
     --
     -- @param item The ID of the item being used.
-    -- @param character_pos Position in the party of the character on which to use the item (1-3). If
-    -- nil, the item affects the whole party.
+    -- @param character_pos Position in the party of the character on which to use the item (1-3).
+    -- If nil, the item affects the whole party.
     use_item = function(self, item, character_pos)
         char_id = -1
         if character_pos then
-            char_id = FFVII.Party[character_pos]
             -- Normal item, use in one character.
-        else
-            -- Party item, use in all characters.
+            char_id = FFVII.Party[character_pos]
         end
 
-        -- TODO: Refactor this. Use damage formulas, power and restore types to make it less
-        -- hardcoded
         -- TODO: When HP MAX is fixed, use it instead of base.
         if Game.Items[item].dmg_formula == 2 then
             -- HP or MP heal: Potion, Hi-Potion, X-Potion, Ether, Turbo Ether, Phoenix Down
@@ -627,7 +865,7 @@ UiContainer.ItemMenu = {
             local w_name = ui_manager:get_widget("ItemMenu.Container.ItemList.Name" .. tostring(i))
             local w_colon = ui_manager:get_widget("ItemMenu.Container.ItemList.Colon" .. tostring(i))
             local w_qty = ui_manager:get_widget("ItemMenu.Container.ItemList.Qty" .. tostring(i))
-            local inventory_index = i + first_item_in_window
+            local inventory_index = i + first_item_in_window + 1
             if Inventory[inventory_index] == nil then
                 w_icon:set_visible(false)
                 w_name:set_visible(false)
@@ -658,26 +896,35 @@ UiContainer.ItemMenu = {
         return
     end,
 
+    --- Populates the visible key items entries.
+    --
+    -- 20 entries visible at a time (10 rows).
+    populate_key_items = function(self)
+        local first_key_item_row_in_window = self.first_key_item_row_in_window
+        for i = 0, 9 do
+            local label_left = ui_manager:get_widget("ItemMenu.Container.KeyItems.KeyItem" .. tostring(i) .. "-0")
+            local label_right = ui_manager:get_widget("ItemMenu.Container.KeyItems.KeyItem" .. tostring(i) .. "-1")
+            local left_item_index = (first_key_item_row_in_window + i) * 2
+            local right_item_index = left_item_index + 1
+            if Inventory.has_key_item(left_item_index) == true then -- Left column
+                label_left:set_text(Game.Key_Items[left_item_index].name)
+            else
+                label_left:set_text("")
+            end
+            if Inventory.has_key_item(right_item_index) == true then -- Right column
+                label_right:set_text(Game.Key_Items[right_item_index].name)
+            else
+                label_right:set_text("")
+            end
+        end
+        return
+    end,
 
+    --- Hides the item menu and goes back to the main menu.
     hide = function(self)
-        --[[local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
-        local menu = ui_manager:get_widget("MainMenu.Container.Menu")
-        local timegil = ui_manager:get_widget("MainMenu.Container.TimeGil")
-        local location = ui_manager:get_widget("MainMenu.Container.Location")
-
-        characters:play_animation_stop("Disappear")
-        menu:play_animation_stop("Disappear")
-        timegil:play_animation_stop("Disappear")
-        location:play_animation_stop("Disappear")
-        location:animation_sync()]]
-
         ui_manager:get_widget("ItemMenu"):set_visible(false)
         UiContainer.current_menu = "main"
         UiContainer.current_submenu = ""
-
-        --FFVII.MenuSettings.pause_available = true
-        --entity_manager:set_paused(false)
-
         return 0;
     end,
 }

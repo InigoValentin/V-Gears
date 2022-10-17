@@ -779,7 +779,8 @@ void KernelDataInstaller::WriteItems(std::string file_name){
     if (!file) return;
     for (ItemData item : items_){
         file << "Game.Items[" << item.id << "] = {\n"
-          << "    inventory_id = " << item.id << ",\n"
+          << "    type = Inventory.ITEM_TYPE.ITEM,\n"
+          << "    id = " << item.id << ",\n"
           << "    price = " << prices_[item.id] << ",\n"
           << "    name = \"" << item.name << "\",\n"
           << "    description = \"" << item.description << "\",\n"
@@ -787,6 +788,7 @@ void KernelDataInstaller::WriteItems(std::string file_name){
           << "    sell = " << item.sellable << ",\n"
           << "    battle = " << item.useable_battle << ",\n"
           << "    menu = " << item.useable_menu << ",\n"
+          << "    throw = 0,\n"
           << "    effect = " << static_cast<int>(item.effect) << ",\n"
           << "    dmg_formula = " << static_cast<int>(item.damage_formula) << ",\n"
           << "    dmg_modifier = " << static_cast<int>(item.damage_modifier) << ",\n"
@@ -998,8 +1000,9 @@ void KernelDataInstaller::WriteWeapons(std::string file_name){
     file.open(file_name, std::ios::out);
     if (!file) return;
     for (WeaponData weapon : weapons_){
-        file << "Game.Weapons[" << weapon.id << "] = {\n"
-          << "    inventory_id = " << weapon.id + 128 << ",\n"
+        file << "Game.Items[" << weapon.id + 128 << "] = {\n"
+          << "    type = Inventory.ITEM_TYPE.WEAPON,\n"
+          << "    id = " << weapon.id + 128 << ",\n"
           << "    price = " << prices_[weapon.id + 128] << ",\n"
           << "    name = \"" << weapon.name << "\",\n"
           << "    description = \"" << weapon.description << "\",\n"
@@ -1201,14 +1204,16 @@ void KernelDataInstaller::WriteArmors(std::string file_name){
     file.open(file_name, std::ios::out);
     if (!file) return;
     for (ArmorData armor : armors_){
-        file << "Game.Armors[" << armor.id << "] = {\n"
-          << "    inventory_id = " << armor.id + 256 << ",\n"
+        file << "Game.Items[" << armor.id + 256 << "] = {\n"
+          << "    type = Inventory.ITEM_TYPE.ARMOR,\n"
+          << "    id = " << armor.id + 256 << ",\n"
           << "    price = " << prices_[armor.id + 256] << ",\n"
           << "    name = \"" << armor.name << "\",\n"
           << "    description = \"" << armor.description << "\",\n"
           << "    sell = " << armor.sellable << ",\n"
           << "    battle = " << armor.useable_battle << ",\n"
           << "    menu = " << armor.useable_menu << ",\n"
+          << "    throw = 0,\n"
           << "    defense = {physical = " << static_cast<int>(armor.defense) << ", magical = "
           << static_cast<int>(armor.m_defense) << "},\n"
           << "    evasion = {physical = " << static_cast<int>(armor.evasion) << ", magical = "
@@ -1409,14 +1414,16 @@ void KernelDataInstaller::WriteAccessories(std::string file_name){
     file.open(file_name, std::ios::out);
     if (!file) return;
     for (AccessoryData accessory : accessories_){
-        file << "Game.Accessories[" << accessory.id << "] = {\n"
-          << "    inventory_id = " << accessory.id + 287 << ",\n"
+        file << "Game.Items[" << accessory.id + 287 << "] = {\n"
+          << "    type = Inventory.ITEM_TYPE.ACCESSORY,\n"
+          << "    id = " << accessory.id + 287 << ",\n"
           << "    price = " << prices_[accessory.id + 287] << ",\n"
           << "    name = \"" << accessory.name << "\",\n"
           << "    description = \"" << accessory.description << "\",\n"
           << "    sell = " << accessory.sellable << ",\n"
           << "    battle = " << accessory.useable_battle << ",\n"
           << "    menu = " << accessory.useable_menu << ",\n"
+          << "    throw = 0,\n"
           << "    special_effect = {";
         if (accessory.effect != 0XFF) file << static_cast<int>(accessory.effect);
         file

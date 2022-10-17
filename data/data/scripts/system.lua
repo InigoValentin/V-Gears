@@ -174,7 +174,7 @@ Inventory.add_item = function(item, quantity)
         print("Tried add invalid item \"" .. item .. "\".");
         return
     end
-    for i = 0, MAX_INVENTORY_SLOTS do
+    for i = 1, MAX_INVENTORY_SLOTS do
         if Inventory[i] ~= nil and Inventory[i].item == item then
             -- Item already in inventory, add quantity
             Inventory[i].quantity = Inventory[i].quantity + quantity
@@ -185,7 +185,7 @@ Inventory.add_item = function(item, quantity)
         end
     end
     -- Item not in inventory, search for the first available position.
-    for i = 0, MAX_INVENTORY_SLOTS do
+    for i = 1, MAX_INVENTORY_SLOTS do
         if Inventory[i] == nil then
             Inventory[i] = {item = item, quantity = quantity}
             if Inventory[i].quantity > 99 then
@@ -205,7 +205,7 @@ end
 -- @return Number of the items in the inventory.
 Inventory.get_item_quantity = function(item)
     local qty = 0
-    for i = 0, MAX_INVENTORY_SLOTS do
+    for i = 1, MAX_INVENTORY_SLOTS do
         if Inventory[i] ~= nil and Inventory[i].item == item then
             qty = qty + Inventory[i].quantity
         end
@@ -221,7 +221,7 @@ end
 -- @param item Item ID.
 -- @param quantity Quantity to remove.
 Inventory.remove_item = function(item, quantity)
-    for i = 0, MAX_INVENTORY_SLOTS do
+    for i = 1, MAX_INVENTORY_SLOTS do
         if Inventory[i] ~= nil and Inventory[i].item == item then
             -- Item already in inventory, add quantity
             Inventory[i].quantity = Inventory[i].quantity - quantity
@@ -231,6 +231,30 @@ Inventory.remove_item = function(item, quantity)
             return
         end
     end
+end
+
+--- Adds a key item.
+--
+-- @param item ID of the key item (0-50).
+Inventory.add_key_item = function(item)
+    Inventory.key[item] = true
+    return
+end
+
+--- Removes a key item.
+--
+-- @param item ID of the key item (0-50).
+Inventory.remove_key_item = function(item)
+    Inventory.key[item] = false
+    return
+end
+
+--- Checks if the party has a key item.
+--
+-- @param item ID of the key item (0-50).
+-- @return True if the party has the key item, false otherwise.
+Inventory.has_key_item = function(item)
+    return Inventory.key[item]
 end
 
 --- Adds money.
@@ -269,4 +293,66 @@ end
 Inventory.money_to_2_banks = function(b1, b2, a1, a2)
     Banks[b1][a1] = math.floor(Inventory.money / 65535)
     Banks[b2][a2] = math.floor(Inventory.money % 65535) - math.floor(Inventory.money / 65535)
+end
+
+--- Sorts the items in the inventory.
+--
+-- @param criteria {@see Inventory.ORDER.CUSTOM} (unimplemented), {@see Inventory.ORDER.FIELD.},
+-- {@see Inventory.ORDER.BATTLE}, {@see Inventory.ORDER.THROW}, {@see Inventory.ORDER.TYPE},
+-- {@see Inventory.ORDER.NAME}, {@see Inventory.ORDER.MOST} or {@see Inventory.ORDER.LEAST}. Any
+-- othe rvalue and the items will not be sorted.
+Inventory.sort = function(criteria)
+    if criteria == Inventory.ORDER.CUSTOM then
+        print("Custom order unimplemented")
+    elseif criteria == Inventory.ORDER.FIELD then
+        table.sort(Inventory, function (left, right)
+                                  if Game.Items[left.item].menu ~= Game.Items[right.item].menu then
+                                      return Game.Items[left.item].menu > Game.Items[right.item].menu
+                                  end
+                                  return left.item < right.item
+                              end
+        )
+    elseif criteria == Inventory.ORDER.BATTLE then
+        table.sort(Inventory, function (left, right)
+                                  if Game.Items[left.item].battle ~= Game.Items[right.item].battle then
+                                      return Game.Items[left.item].battle > Game.Items[right.item].battle
+                                  end
+                                  return left.item < right.item
+                              end
+        )
+    elseif criteria == Inventory.ORDER.THROW then
+        table.sort(Inventory, function (left, right)
+                                  if Game.Items[left.item].throw ~= Game.Items[right.item].throw then
+                                      return Game.Items[left.item].throw > Game.Items[right.item].throw
+                                  end
+                                  return left.item < right.item
+                              end
+        )
+    elseif criteria == Inventory.ORDER.TYPE then
+        table.sort(Inventory, function (left, right)
+                                  return left.item < right.item
+                              end
+        )
+    elseif criteria == Inventory.ORDER.NAME then
+        table.sort(Inventory, function (left, right)
+                                  return Game.Items[left.item].name < Game.Items[right.item].name
+                              end
+        )
+    elseif criteria == Inventory.ORDER.MOST then
+        table.sort(Inventory, function (left, right)
+                                  if left.quantity ~= right.quantity then
+                                      return left.quantity > right.quantity
+                                  end
+                                  return left.item < right.item
+                              end
+        )
+    elseif criteria == Inventory.ORDER.LEAST then
+        table.sort(Inventory, function (left, right)
+                                  if left.quantity ~= right.quantity then
+                                      return left.quantity < right.quantity
+                                  end
+                                  return left.item < right.item
+                              end
+        )
+    end
 end

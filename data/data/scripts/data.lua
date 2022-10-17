@@ -53,18 +53,8 @@ Game = {
 
     --- Item definitions.
     --
-    -- Only items: weapons, armors, accessories, key items and materia are not
-    -- stored here.
+    -- Include items, weapons, armors, and accessories. Key items and materia are not stored here.
     Items = {},
-
-    --- Weapon definitions.
-    Weapons = {},
-
-    --- Weapon definitions.
-    Armors = {},
-
-    --- Accessory definitions.
-    Accessories = {},
 
     --- Materia definitions.
     Materia = {},
@@ -85,15 +75,46 @@ end
 --- The party inventory.
 --
 -- Items can be accessed with indexes 0 - MAX_INVENTORY_SLOTS. Money can be accessed with the
--- index "money." It has the following functions:
+-- index "money". Key items are under the index "key", with indexes 0-50, true or false if the key
+-- item is in the inventory. Inventory has the following functions:
 --   add_item(item, quantity)
 --   remove_item(item, quantity)
+--   add_key_item(item)
+--   remove_key_item(item)
+--   has_key_item(item)
 --   get_item_quantity(item)
 --   add_money(amount)
 --   remove_money(amount)
 --   money_to_2_banks(b1, b2, a1, a2)
+--   sort(criteria)
 Inventory = {}
 Inventory.money = 0
+Inventory.key = {}
+for i = 0, 50  do
+    Inventory.key[i] = false
+end
+Inventory.ITEM_TYPE = {
+    ITEM = 0,
+    WEAPON = 1,
+    ARMOR = 2,
+    ACCESSORY = 3
+}
+Inventory.RESTORE_TYPE = {
+    HP = 0,
+    MP = 1,
+    STATUS = 2,
+    NONE = 3
+}
+Inventory.ORDER = {
+    CUSTOM = 0,
+    FIELD = 1,
+    BATTLE = 2,
+    THROW = 3,
+    TYPE = 4,
+    NAME = 5,
+    MOST = 6,
+    LEAST = 7
+}
 
 
 

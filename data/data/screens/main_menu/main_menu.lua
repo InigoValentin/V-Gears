@@ -2,62 +2,26 @@ if UiContainer == nil then UiContainer = {} end
 
 --- The main menu.
 UiContainer.MainMenu = {
+
+    --- Current cursor position in the main menu (1-10).
     position = 1,
+
+    -- Max cursor position in the main menu.
     position_total = 10,
 
+    --- Run when the menu is creaded.
+    --
+    -- It does nothing.
     on_start = function(self)
         return 0
     end,
 
-    --- Populates a character data.
+    --- Handles button events.
     --
-    -- @param row The row the character is in (1-3).
-    -- @param character The character to get the data from. If nill, the character details will be
-    -- hidden.
-    populate_character = function(row, character)
-        local widget = "MainMenu.Container.Characters.Character" .. tostring(row)
-        if character == nil then
-            ui_manager:get_widget(widget):set_visible(false)
-            return 0
-        end
-
-        -- TODO: When MAX HP and MP values are fixed, use them instead of base.
-
-        local char_id = character.char_id
-        ui_manager:get_widget(widget):set_visible(true)
-
-        -- Critical?
-        if character.stats.hp.current == 0 then
-            ui_manager:get_widget(widget .. ".Data.HpCurrent"):set_colour(1.0, 0, 0)
-        elseif character.stats.hp.current <= character.stats.hp.base / 4 then
-            ui_manager:get_widget(widget .. ".Data.HpCurrent"):set_colour(1.0, 1.0, 0)
-        else
-            ui_manager:get_widget(widget .. ".Data.HpCurrent"):set_colour(0.9, 0.9, 0.9)
-        end
-
-        -- Text data
-        ui_manager:get_widget(widget .. ".Data.Name"):set_text(character.name)
-        ui_manager:get_widget(widget .. ".Data.LvNumber"):set_text(tostring(character.level))
-        ui_manager:get_widget(widget .. ".Data.HpCurrent"):set_text(tostring(character.stats.hp.current))
-        ui_manager:get_widget(widget .. ".Data.HpMax"):set_text(tostring(character.stats.hp.base))
-        ui_manager:get_widget(widget .. ".Data.MpCurrent"):set_text(tostring(character.stats.mp.current))
-        ui_manager:get_widget(widget .. ".Data.MpMax"):set_text(tostring(character.stats.mp.base))
-
-        -- Calculate the HP and MP bar.
-        local max_hp_width= ui_manager:get_widget(widget .. ".Data.HpLine"):get_width()
-        local hp_width = character.stats.hp.current * max_hp_width / character.stats.hp.base
-        ui_manager:get_widget(widget .. ".Data.HpLineCurrent"):set_width(hp_width)
-        local max_mp_width= ui_manager:get_widget(widget .. ".Data.MpLine"):get_width()
-        local mp_width = character.stats.mp.current * max_mp_width / character.stats.mp.base
-        ui_manager:get_widget(widget .. ".Data.MpLineCurrent"):set_width(mp_width)
-
-        return 0
-    end,
-
-
-
+    -- For the current submenu, handles directional keys, enter and escape events.
+    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
-
         local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
         local menu  = ui_manager:get_widget("MainMenu.Container.Menu")
         local menu_cursor = ui_manager:get_widget("MainMenu.Container.Menu.Cursor")
@@ -96,7 +60,7 @@ UiContainer.MainMenu = {
 
     --- Opens the main menu.
     --
-    -- Populates and updates displayed data before opening.
+    -- Populates and updates displayed data before opening. It also pauses the game.
     show = function(self)
         UiContainer.current_menu = "main"
         UiContainer.current_submenu = ""
@@ -129,8 +93,9 @@ UiContainer.MainMenu = {
         return 0;
     end,
 
-
-
+    --- Hides the item menu and goes back to the game.
+    --
+    -- It also unpauses the game.
     hide = function(self)
         UiContainer.current_menu = ""
         UiContainer.current_submenu = ""
