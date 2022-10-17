@@ -2004,6 +2004,7 @@ void KernelDataInstaller::WriteInitialSaveMap(std::string file_name){
           << "    name = \"" << character.name << "\",\n"
           << "    level = " << static_cast<int>(character.level) << ",\n"
           << "    kills = " << character.kills << ",\n"
+          << "    back_row = " << character.back_row << ",\n"
           << "    exp = " << character.exp << ",\n"
           << "    exp_to_next = " << character.exp_to_next << ",\n"
           << "    stats = {\n"

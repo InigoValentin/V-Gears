@@ -22,5 +22,7 @@ Inventory.add_key_item(21)
 Inventory.add_key_item(22)
 Inventory.add_key_item(33)
 Inventory.add_key_item(38)
+Inventory.money = 1234567
 Inventory.sort(Inventory.ORDER.NAME)
-Characters[0].stats.hp.current = 10
+Characters[0].stats.hp.current = 12345
+Characters[0].stats.hp.base = 54321

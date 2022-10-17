@@ -8,6 +8,15 @@ print("ADD helpers")
 -- @param character The character to get the data from. If nill, the character details will be
 -- hidden.
 UiContainer.populate_character_data = function(widget, character)
+
+    space_pad = function(val, length)
+        str = tostring(val)
+        while #(str) < length do
+            str = " " .. str
+        end
+        return str
+    end
+
     if character == nil then
         ui_manager:get_widget(widget):set_visible(false)
         return 0
@@ -29,11 +38,11 @@ UiContainer.populate_character_data = function(widget, character)
 
     -- Text data
     ui_manager:get_widget(widget .. ".Data.Name"):set_text(character.name)
-    ui_manager:get_widget(widget .. ".Data.LvNumber"):set_text(tostring(character.level))
-    ui_manager:get_widget(widget .. ".Data.HpCurrent"):set_text(tostring(character.stats.hp.current))
-    ui_manager:get_widget(widget .. ".Data.HpMax"):set_text(tostring(character.stats.hp.base))
-    ui_manager:get_widget(widget .. ".Data.MpCurrent"):set_text(tostring(character.stats.mp.current))
-    ui_manager:get_widget(widget .. ".Data.MpMax"):set_text(tostring(character.stats.mp.base))
+    ui_manager:get_widget(widget .. ".Data.LvNumber"):set_text(space_pad(character.level, 3))
+    ui_manager:get_widget(widget .. ".Data.HpCurrent"):set_text(space_pad(character.stats.hp.current, 5))
+    ui_manager:get_widget(widget .. ".Data.HpMax"):set_text(space_pad(character.stats.hp.base, 5))
+    ui_manager:get_widget(widget .. ".Data.MpCurrent"):set_text(space_pad(character.stats.mp.current, 5))
+    ui_manager:get_widget(widget .. ".Data.MpMax"):set_text(space_pad(character.stats.mp.base, 5))
 
     -- Calculate the HP and MP bar.
     local max_hp_width= ui_manager:get_widget(widget .. ".Data.HpLine"):get_width()
