@@ -87,6 +87,8 @@ void UiSprite::SetImage(const Ogre::String& image){
     tex->setTextureName(image);
 }
 
+void UiSprite::SetImage(const char* image){SetImage(Ogre::String(image));}
+
 void UiSprite::SetVertexShader(const Ogre::String& shader){
     Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);
     pass->setVertexProgram(shader, true);

@@ -92,8 +92,10 @@ set(HEADER_FILES
     include/common/Lzs.h
     include/ModelsAndAnimationsDb.h
     include/ScopedLgp.h
+    include/TexFile.h
     include/SpawnPointDb.h
     include/KernelDataInstaller.h
+    include/MediaDataInstaller.h
 )
 
 
@@ -166,7 +168,9 @@ set(SOURCE_FILES
     src/decompiler/world/WorldEngine.cpp
     src/ModelsAndAnimationsDb.cpp
     src/ScopedLgp.cpp
+    src/TexFile.cpp
     src/KernelDataInstaller.cpp
+    src/MediaDataInstaller.cpp
 )
 
 # For SUDM. TODO: Add elses.

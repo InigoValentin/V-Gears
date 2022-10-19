@@ -75,9 +75,16 @@ class UiSprite : public UiWidget{
         /**
          * Sets the sprite image.
          *
-         * @param[in] image @todo file path or just a name?
+         * @param[in] Path to the image.
          */
         void SetImage(const Ogre::String& image);
+
+        /**
+         * Sets the sprite image.
+         *
+         * @param[in] Path to the image.
+         */
+        void SetImage(const char* image) override;
 
         /**
          * Sets the vertex shader for the sprite.

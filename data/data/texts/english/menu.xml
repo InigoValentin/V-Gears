@@ -1,4 +1,8 @@
 ﻿<texts>
+    <text name="Placeholder">#</text>
+
+    <text name="Colon">:</text>
+
     <text name="BeginMenuNewGame">NEW GAME</text>
     <text name="BeginMenu1">DEBUG: Battle map</text>
     <text name="BeginMenu2">DEBUG: Quick map</text>
@@ -12,7 +16,7 @@
     <text name="PauseMenuNo">No</text>
 
     <text name="MainMenuGil">Gil</text>
-    <text name="MainMenuGilAmount">     12005</text>
+    <text name="MainMenuGilAmount">123456789</text>
     <text name="MainMenuTime">Time</text>
     <text name="MainMenuHours"> 3</text>
     <text name="MainMenuMinutes">34</text>
@@ -32,18 +36,52 @@
     <text name="MainMenuPHS">PHS</text>
     <text name="MainMenuSave">Save</text>
 
-    <text name="CharacterDataName">Akari</text>
+    <text name="ItemMenuItem">Item</text>
+    <text name="ItemMenuUse">Use</text>
+    <text name="ItemMenuOrder">Order</text>
+    <text name="ItemMenuKey">Key Items</text>
+    <text name="ItemMenuStatus">Status</text>
+    <text name="ItemMenuOrder">Order</text>
+    <text name="ItemMenuLimit">Limit</text>
+    <text name="ItemMenuConfig">Config</text>
+    <text name="ItemMenuPHS">PHS</text>
+    <text name="MainMenuSave">Save</text>
+    <text name="ItemMenuOrder1">Custom</text>
+    <text name="ItemMenuOrder2">Field</text>
+    <text name="ItemMenuOrder3">Battle</text>
+    <text name="ItemMenuOrder4">Throw</text>
+    <text name="ItemMenuOrder5">Type</text>
+    <text name="ItemMenuOrder6">Name</text>
+    <text name="ItemMenuOrder7">Most</text>
+    <text name="ItemMenuOrder8">Least</text>
+
+    <text name="EquipMenuTitle">Equip</text>
+    <text name="EquipMenuSlots"> Slots:</text>
+    <text name="EquipMenuGrowth">Growth:</text>
+    <text name="EquipMenuGrowth1">Normal</text>
+    <text name="EquipMenuGrowth2">Double</text>
+    <text name="EquipMenuGrowth3">Triple</text>
+    <text name="EquipMenuAtk">        Attack:</text>
+    <text name="EquipMenuAcc">      Accuracy:</text>
+    <text name="EquipMenuDef">       Defense:</text>
+    <text name="EquipMenuEva">       Evasion:</text>
+    <text name="EquipMenuMAtk"> Magic attack:</text>
+    <text name="EquipMenuMDef">Magic defense:</text>
+    <text name="EquipMenuMEva">Magic evasion:</text>
+
+
+    <text name="CharacterDataName">#Name#</text>
     <text name="CharacterDataLv">LV</text>
-    <text name="CharacterDataLvNumber">29</text>
+    <text name="CharacterDataLvNumber"> 0</text>
     <text name="CharacterDataHp">HP</text>
-    <text name="CharacterDataHpCurrent"> 184</text>
-    <text name="CharacterDataHpMax">1260</text>
+    <text name="CharacterDataHpCurrent">1234</text>
+    <text name="CharacterDataHpMax">4567</text>
     <text name="CharacterDataMp">MP</text>
-    <text name="CharacterDataMpCurrent"> 220</text>
-    <text name="CharacterDataMpMax"> 220</text>
+    <text name="CharacterDataMpCurrent"> 123</text>
+    <text name="CharacterDataMpMax"> 456</text>
     <text name="CharacterDataFury">Fury</text>
     <text name="CharacterDataSadness">Sadness</text>
-    <text name="CharacterDataNextLevel">next level</text>
-    <text name="CharacterDataLimitLevel">Limit level</text>
+    <text name="CharacterDataNextLevel">Next Lv.</text>
+    <text name="CharacterDataLimitLevel">Limit Lv.</text>
     <text name="CharacterDataLimitLevelNumber">3</text>
 </texts>

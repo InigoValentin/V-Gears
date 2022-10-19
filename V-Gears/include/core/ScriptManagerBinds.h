@@ -386,6 +386,7 @@ void ScriptManager::InitBinds(){
           .def("get_height", (float(UiWidget::*)()) &UiWidget::ScriptGetHeight)
           .def("set_height", (void(UiWidget::*)(const float)) &UiWidget::ScriptSetHeight)
           .def("set_text", (void(UiWidget::*)(const char*)) &UiWidget::SetText)
+          .def("set_image", (void(UiWidget::*)(const char*)) &UiWidget::SetImage)
     ];
 
     // UI manager commands. Use to get a specific widget.

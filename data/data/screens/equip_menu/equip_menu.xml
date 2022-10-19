@@ -1,0 +1,53 @@
+<screen name="EquipMenu" script="scripts/menu/equip_menu.lua" visible="false">
+    <widget name="Container" width="425" height="240" origin_x="50%" origin_y="49%" align="center" valign="middle" scale="3 3" visible="true">
+        <widget name="Character" width="100%" height="70" visible="true">
+            <prototype name="Window"/>
+            <sprite name="Portrait" image="images/other/choco.png" x="10" y="12" width="48" height="48" visible="true" />
+            <widget name="Data" x="66" y="14" width="100%-66" height="100%-14" visible="true">
+                <prototype name="MenuCharacterData" />
+            </widget>
+            <sprite name="WpnIcon" image="images/icons/item_weapon_0.png" x="170" y="3" width="18" height="18" visible="true" />
+            <sprite name="ArmIcon" image="images/icons/item_armor.png" x="170" y="23" width="18" height="18" visible="true" />
+            <sprite name="AccIcon" image="images/icons/item_accessory.png" x="170" y="43" width="18" height="18" visible="true" />
+            <text_area name="WpnLbl" x="192" y="8" font="FFVIIFont" visible="true" />
+            <text_area name="ArmLbl" x="192" y="28" font="FFVIIFont" visible="true" />
+            <text_area name="AccLbl" x="192" y="48" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="images/icons/cursor.png" x="150" y="10" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:10" />
+                <animation name="Position2" length="0" y="0:30" />
+                <animation name="Position3" length="0" y="0:50" />
+            </sprite>
+        </widget>
+        <widget name="Title" x="100%-86" y="0" width="86" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Title" x="16" y="6" text_name="EquipMenuTitle" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Help" x="0" y="70" width="100%" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Help" x="16" y="6" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Slots" x="0" y="94" width="260" height="60" visible="true">
+            <prototype name="Window" />
+            <text_area name="SlotsLbl" colours="0 0.8 1, 0 0.8 1, 0 0.8 1, 0 0.8 1" text_name="EquipMenuSlots" x="16" y="12" font="FFVIIFont" visible="true" />
+            <text_area name="GrowthLbl" text_name="EquipMenuGrowth" x="16" y="32" font="FFVIIFont" visible="true" colour="0 0.8 1" />
+            <text_area name="Growth1" text_name="EquipMenuGrowth1" x="80" y="32" font="FFVIIFont" visible="true" colour="0 0.8 1" />
+            <text_area name="Growth2" text_name="EquipMenuGrowth2" x="80" y="32" font="FFVIIFont" visible="false" colour="0 0.8 1" />
+            <text_area name="Growth3" text_name="EquipMenuGrowth3" x="80" y="32" font="FFVIIFont" visible="false" colour="0 0.8 1" />
+            <sprite name="Slot1" image="images/icons/materia_slot.png" x="80" y="10" width="18" height="18" visible="true"/>
+            <sprite name="Slot2" image="images/icons/materia_slot.png" x="100" y="10" width="18" height="18" visible="true"/>
+            <sprite name="Link1" image="images/icons/materia_slot_link.png" x="94" y="10" width="10" height="18" visible="true"/>
+            <sprite name="Slot3" image="images/icons/materia_slot.png" x="120" y="10" width="18" height="18" visible="true"/>
+            <sprite name="Slot4" image="images/icons/materia_slot.png" x="140" y="10" width="18" height="18" visible="true"/>
+            <sprite name="Link2" image="images/icons/materia_slot_link.png" x="134" y="10" width="10" height="18" visible="true"/>
+            <sprite name="Slot5" image="images/icons/materia_slot.png" x="160" y="10" width="18" height="18" visible="true"/>
+            <sprite name="Slot6" image="images/icons/materia_slot.png" x="180" y="10" width="18" height="18" visible="true"/>
+            <sprite name="Link3" image="images/icons/materia_slot_link.png" x="174" y="10" width="10" height="18" visible="true"/>
+            <sprite name="Slot7" image="images/icons/materia_slot.png" x="200" y="10" width="18" height="18" visible="true"/>
+            <sprite name="Slot8" image="images/icons/materia_slot.png" x="220" y="10" width="18" height="18" visible="true"/>
+            <sprite name="Link4" image="images/icons/materia_slot_link.png" x="214" y="10" width="10" height="18" visible="true"/>
+        </widget>
+        <widget name="SlotsEmpty" x="0" y="94" width="260" height="60" visible="false">
+            <prototype name="Window" />
+        </widget>
+    </widget>
+</screen>

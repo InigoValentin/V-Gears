@@ -516,5 +516,10 @@ namespace VGears{
              * @todo Understand and document.
              */
             static const Ogre::uint8 USE_REFERENCE_ALPHA;
+
+            /**
+             * Colour palettes in the TEXT file.
+             */
+            Palette palettes_[8];
     };
 }

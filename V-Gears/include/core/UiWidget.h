@@ -532,11 +532,20 @@ class UiWidget{
         /**
          * Sets the text of the widget.
          *
-         * If the widget dones't have text, it won't do anything.
+         * If the widget doesn't have text, it won't do anything.
          *
          * @param[in] Text the text to set.
          */
         virtual void SetText(const char* text);
+
+        /**
+         * Sets the text of the widget.
+         *
+         * If the widget doesn't have an image, it won't do anything.
+         *
+         * @param[in] image Path to the image.
+         */
+        virtual void SetImage(const char* image);
 
         /**
          * Retrieves the absolute width of the widget.

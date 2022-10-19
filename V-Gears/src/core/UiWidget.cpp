@@ -632,6 +632,8 @@ void UiWidget::SetAlpha(const float a){
 
 void UiWidget::SetText(const char* text){}
 
+void UiWidget::SetImage(const char* image){}
+
 float UiWidget::ScriptGetWidth(){return width_;}
 
 void UiWidget::ScriptSetWidth(float width){

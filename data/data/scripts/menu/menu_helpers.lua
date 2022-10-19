@@ -46,7 +46,8 @@ UiContainer.populate_character_data = function(widget, character)
 
     -- Calculate the HP and MP bar.
     local max_hp_width= ui_manager:get_widget(widget .. ".Data.HpLine"):get_width()
-    local hp_width = character.stats.hp.current * max_hp_width / character.stats.hp.base
+    local hp_width = math.floor(character.stats.hp.current * max_hp_width / character.stats.hp.base)
+    print ("HP width: " .. tostring(hp_width) .. " MAX: " .. tostring(max_hp_width))
     ui_manager:get_widget(widget .. ".Data.HpLineCurrent"):set_width(hp_width)
     local max_mp_width= ui_manager:get_widget(widget .. ".Data.MpLine"):get_width()
     local mp_width = character.stats.mp.current * max_mp_width / character.stats.mp.base

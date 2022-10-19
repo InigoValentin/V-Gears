@@ -37,9 +37,7 @@ namespace VGears{
         size_t image_pixel_count(
           header_.image_data.width * header_.image_data.height);
         image_data_.resize(image_pixel_count);
-        memset(
-          &image_data_[0], 0, image_pixel_count * sizeof(TexImageData::value_type)
-        );
+        memset(&image_data_[0], 0, image_pixel_count * sizeof(TexImageData::value_type));
 
         if (header_.palette_data.flag) ReadPalleted(input);
         else{
@@ -101,6 +99,8 @@ namespace VGears{
         }
     }
 
+    //OgreColourValue TexFile::GetPalettedPixel(unsigned int pixel_index, unsigned int palette){}
+
     MemoryDataStream* TexFile::GetPixelData() const{
         size_t data_size(
           image_data_.size() * sizeof(TexImageData::value_type)
@@ -125,6 +125,7 @@ namespace VGears{
 
     void TexFile::FlipEndian(void * pData, size_t size, size_t count) const{
 #if OGRE_ENDIAN == OGRE_ENDIAN_BIG
+        std::cout << "FLIP ENDIAN 1\n";
         for (unsigned int index = 0; index < count; index ++)
             FlipEndian((void *)((long)pData + (index * size)), size);
 #endif
@@ -132,6 +133,7 @@ namespace VGears{
 
     void TexFile::FlipEndian(void * pData, size_t size) const{
 #if OGRE_ENDIAN == OGRE_ENDIAN_BIG
+        std::cout << "FLIP ENDIAN 2\n";
         char swap_byte;
         for(unsigned int byteIndex = 0; byteIndex < size/2; byteIndex ++){
             swap_byte = *(char *)((long)pData + byteIndex);

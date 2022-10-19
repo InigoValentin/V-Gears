@@ -126,6 +126,18 @@ int DataInstaller::Progress(){
             kernel_installer_->WriteSummonNames(output_dir_ + "game/summons.lua");
             kernel_installer_->ReadInitialSaveMap();
             kernel_installer_->WriteInitialSaveMap(output_dir_ + "game/initial_savemap.lua");
+
+
+
+            media_installer_ = std::make_unique<MediaDataInstaller>(input_dir_, output_dir_);
+            CreateDir("images/icons");
+            CreateDir("images/other");
+            CreateDir("images/characters");
+            CreateDir("images/fonts");
+            CreateDir("images/reels");
+            CreateDir("images/window");
+            media_installer_->InstallSprites();
+
             //exit(0);
 
             installation_state_ = SPAWN_POINTS_AND_SCALE_FACTORS_INIT;

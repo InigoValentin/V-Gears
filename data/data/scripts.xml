@@ -16,7 +16,7 @@
     <script file="scripts/field.lua" />
     <script file="scripts/battle.lua" />
     <script file="scripts/battle_ai.lua" />
-    <script file="screens/menu_helpers.lua" />
+    <script file="scripts/menu/menu_helpers.lua" />
 
     <!-- TODO: Debugging pourposes only -->
     <script file="scripts/debug_data.lua" />

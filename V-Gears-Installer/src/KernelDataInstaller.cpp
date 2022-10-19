@@ -351,7 +351,7 @@ int KernelDataInstaller::ReadCharacters(){
     File characters_file = kernel_.ExtractGZip(KERNEL_BATTLE_AND_GROWTH_DATA);
     int character_count = 0;
 
-    for (int i = 0; i < 10; i ++){ // 9 characters
+    for (int i = 0; i < 11; i ++){ // 11 characters
 
         CharacterData data;
 
@@ -937,17 +937,17 @@ int KernelDataInstaller::ReadWeapons(){
         data.damage_modifier = data.damage_raw & 15; // Lower nybble.
         data.animation_index = data.model_raw >> 4; // Upper nybble.
         data.model = data.model_raw & 15; // Lower nybble.
-        if (data.equip_raw == (data.equip_raw | 0x0001)) data.equip.push_back(1);
-        if (data.equip_raw == (data.equip_raw | 0x0002)) data.equip.push_back(2);
-        if (data.equip_raw == (data.equip_raw | 0x0004)) data.equip.push_back(3);
-        if (data.equip_raw == (data.equip_raw | 0x0008)) data.equip.push_back(4);
-        if (data.equip_raw == (data.equip_raw | 0x0010)) data.equip.push_back(5);
-        if (data.equip_raw == (data.equip_raw | 0x0020)) data.equip.push_back(6);
-        if (data.equip_raw == (data.equip_raw | 0x0040)) data.equip.push_back(7);
-        if (data.equip_raw == (data.equip_raw | 0x0080)) data.equip.push_back(8);
-        if (data.equip_raw == (data.equip_raw | 0x0100)) data.equip.push_back(9);
-        if (data.equip_raw == (data.equip_raw | 0x0200)) data.equip.push_back(10);
-        if (data.equip_raw == (data.equip_raw | 0x0400)) data.equip.push_back(11);
+        if (data.equip_raw == (data.equip_raw | 0x0001)) data.equip.push_back(0);
+        if (data.equip_raw == (data.equip_raw | 0x0002)) data.equip.push_back(1);
+        if (data.equip_raw == (data.equip_raw | 0x0004)) data.equip.push_back(2);
+        if (data.equip_raw == (data.equip_raw | 0x0008)) data.equip.push_back(3);
+        if (data.equip_raw == (data.equip_raw | 0x0010)) data.equip.push_back(4);
+        if (data.equip_raw == (data.equip_raw | 0x0020)) data.equip.push_back(5);
+        if (data.equip_raw == (data.equip_raw | 0x0040)) data.equip.push_back(6);
+        if (data.equip_raw == (data.equip_raw | 0x0080)) data.equip.push_back(7);
+        if (data.equip_raw == (data.equip_raw | 0x0100)) data.equip.push_back(8);
+        if (data.equip_raw == (data.equip_raw | 0x0200)) data.equip.push_back(9);
+        if (data.equip_raw == (data.equip_raw | 0x0400)) data.equip.push_back(10);
         for (int i = 0; i < 4; i ++){
             if (data.stat_raw[i] < 0XFF && data.stat_bonus_raw[i] > 0){
                 StatBonus stat_bonus;
@@ -1136,17 +1136,17 @@ int KernelDataInstaller::ReadArmors(){
         data.sellable = !(data.restrict_raw & (1 << 0));
         data.useable_battle = !(data.restrict_raw & (2 << 0));
         data.useable_menu = !(data.restrict_raw & (4 << 0));
-        if (data.equip_raw == (data.equip_raw | 0x0001)) data.equip.push_back(1);
-        if (data.equip_raw == (data.equip_raw | 0x0002)) data.equip.push_back(2);
-        if (data.equip_raw == (data.equip_raw | 0x0004)) data.equip.push_back(3);
-        if (data.equip_raw == (data.equip_raw | 0x0008)) data.equip.push_back(4);
-        if (data.equip_raw == (data.equip_raw | 0x0010)) data.equip.push_back(5);
-        if (data.equip_raw == (data.equip_raw | 0x0020)) data.equip.push_back(6);
-        if (data.equip_raw == (data.equip_raw | 0x0040)) data.equip.push_back(7);
-        if (data.equip_raw == (data.equip_raw | 0x0080)) data.equip.push_back(8);
-        if (data.equip_raw == (data.equip_raw | 0x0100)) data.equip.push_back(9);
-        if (data.equip_raw == (data.equip_raw | 0x0200)) data.equip.push_back(10);
-        if (data.equip_raw == (data.equip_raw | 0x0400)) data.equip.push_back(11);
+        if (data.equip_raw == (data.equip_raw | 0x0001)) data.equip.push_back(0);
+        if (data.equip_raw == (data.equip_raw | 0x0002)) data.equip.push_back(1);
+        if (data.equip_raw == (data.equip_raw | 0x0004)) data.equip.push_back(2);
+        if (data.equip_raw == (data.equip_raw | 0x0008)) data.equip.push_back(3);
+        if (data.equip_raw == (data.equip_raw | 0x0010)) data.equip.push_back(4);
+        if (data.equip_raw == (data.equip_raw | 0x0020)) data.equip.push_back(5);
+        if (data.equip_raw == (data.equip_raw | 0x0040)) data.equip.push_back(6);
+        if (data.equip_raw == (data.equip_raw | 0x0080)) data.equip.push_back(7);
+        if (data.equip_raw == (data.equip_raw | 0x0100)) data.equip.push_back(8);
+        if (data.equip_raw == (data.equip_raw | 0x0200)) data.equip.push_back(9);
+        if (data.equip_raw == (data.equip_raw | 0x0400)) data.equip.push_back(10);
         for (int i = 0; i < 4; i ++){
             if (data.stat_raw[i] < 0XFF && data.stat_bonus_raw[i] > 0){
                 StatBonus stat_bonus;
@@ -1218,7 +1218,7 @@ void KernelDataInstaller::WriteArmors(std::string file_name){
           << static_cast<int>(armor.m_defense) << "},\n"
           << "    evasion = {physical = " << static_cast<int>(armor.evasion) << ", magical = "
           << static_cast<int>(armor.m_evasion) << "},\n"
-          << "    growth = " << static_cast<int>(armor.growth) << ",\n"
+          << "    growth = " << static_cast<int>(armor.growth) + 1 << ",\n"
           << "    status = {";
         if (armor.status != 0XFF) file << armor.status;
         file
@@ -1357,17 +1357,17 @@ int KernelDataInstaller::ReadAccessories(){
         if (data.status_raw == (data.status_raw | 0x20000000)) data.status.push_back(RESIST);
         if (data.status_raw == (data.status_raw | 0x40000000)) data.status.push_back(LUCKY_GIRL);
         if (data.status_raw == (data.status_raw | 0x80000000)) data.status.push_back(IMPRISONED);
-        if (data.equip_raw == (data.equip_raw | 0x0001)) data.equip.push_back(1);
-        if (data.equip_raw == (data.equip_raw | 0x0002)) data.equip.push_back(2);
-        if (data.equip_raw == (data.equip_raw | 0x0004)) data.equip.push_back(3);
-        if (data.equip_raw == (data.equip_raw | 0x0008)) data.equip.push_back(4);
-        if (data.equip_raw == (data.equip_raw | 0x0010)) data.equip.push_back(5);
-        if (data.equip_raw == (data.equip_raw | 0x0020)) data.equip.push_back(6);
-        if (data.equip_raw == (data.equip_raw | 0x0040)) data.equip.push_back(7);
-        if (data.equip_raw == (data.equip_raw | 0x0080)) data.equip.push_back(8);
-        if (data.equip_raw == (data.equip_raw | 0x0100)) data.equip.push_back(9);
-        if (data.equip_raw == (data.equip_raw | 0x0200)) data.equip.push_back(10);
-        if (data.equip_raw == (data.equip_raw | 0x0400)) data.equip.push_back(11);
+        if (data.equip_raw == (data.equip_raw | 0x0001)) data.equip.push_back(0);
+        if (data.equip_raw == (data.equip_raw | 0x0002)) data.equip.push_back(1);
+        if (data.equip_raw == (data.equip_raw | 0x0004)) data.equip.push_back(2);
+        if (data.equip_raw == (data.equip_raw | 0x0008)) data.equip.push_back(3);
+        if (data.equip_raw == (data.equip_raw | 0x0010)) data.equip.push_back(4);
+        if (data.equip_raw == (data.equip_raw | 0x0020)) data.equip.push_back(5);
+        if (data.equip_raw == (data.equip_raw | 0x0040)) data.equip.push_back(6);
+        if (data.equip_raw == (data.equip_raw | 0x0080)) data.equip.push_back(7);
+        if (data.equip_raw == (data.equip_raw | 0x0100)) data.equip.push_back(8);
+        if (data.equip_raw == (data.equip_raw | 0x0200)) data.equip.push_back(9);
+        if (data.equip_raw == (data.equip_raw | 0x0400)) data.equip.push_back(10);
         for (int i = 0; i < 2; i ++){
             if (data.stat_raw[i] < 0XFF && data.stat_bonus_raw[i] > 0){
                 StatBonus stat_bonus;
@@ -2048,7 +2048,7 @@ void KernelDataInstaller::WriteInitialSaveMap(std::string file_name){
           << character.limit_uses[1] << ", [3] = " << character.limit_uses[2] << ", [4] = 0}\n"
           << "    },\n"
           << "    weapon = {\n"
-          << "        id = " << static_cast<int>(character.weapon) << ",\n"
+          << "        id = " << static_cast<int>(character.weapon) + 128 << ",\n"
           << "        materia = {";
         total_count = 0;
         for (int m = 0; m < 8; m ++){
@@ -2063,7 +2063,7 @@ void KernelDataInstaller::WriteInitialSaveMap(std::string file_name){
         else file << "}\n    },\n";
         file
           << "    armor = {\n"
-          << "        id = " << static_cast<int>(character.armor) << ",\n"
+          << "        id = " << static_cast<int>(character.armor) + 256 << ",\n"
           << "        materia = {";
         total_count = 0;
         for (int m = 0; m < 8; m ++){
@@ -2077,7 +2077,7 @@ void KernelDataInstaller::WriteInitialSaveMap(std::string file_name){
         if (total_count > 0) file << "\n        }\n    },\n";
         else file << "}\n    },\n";
         file << "    accessory = ";
-        if (character.accessory < 0xFF) file << static_cast<int>(character.accessory);
+        if (character.accessory < 0xFF) file << static_cast<int>(character.accessory) + 287;
         else file << "nil";
         file << ",\n    status = {";
         if (character.fury) file << FURY;

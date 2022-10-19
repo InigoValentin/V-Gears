@@ -24,6 +24,7 @@
 #include "data/VGearsFLevelFile.h"
 #include "FieldTextWriter.h"
 #include "KernelDataInstaller.h"
+#include "MediaDataInstaller.h"
 #include "ModelsAndAnimationsDb.h"
 #include "ScopedLgp.h"
 #include "SpawnPointDb.h"
@@ -292,6 +293,11 @@ class DataInstaller{
          * The installer for kernel data.
          */
         std::unique_ptr<KernelDataInstaller> kernel_installer_;
+
+        /**
+         * The installer for media files.
+         */
+        std::unique_ptr<MediaDataInstaller> media_installer_;
 
         /**
          * LGP archive with texture data.

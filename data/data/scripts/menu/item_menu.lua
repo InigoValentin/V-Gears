@@ -366,6 +366,7 @@ UiContainer.ItemMenu = {
             if FFVII.Party[c] ~= nil then
                 self.char_position_total = self.char_position_total + 1
                 UiContainer.populate_character_data("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c), Characters[FFVII.Party[c]])
+                ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c) .. ".Portrait"):set_image("images/characters/" .. tostring(FFVII.Party[c]) .. ".png")
             else
                 UiContainer.populate_character_data("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c), nil)
             end
@@ -873,6 +874,7 @@ UiContainer.ItemMenu = {
                 w_qty:set_visible(false)
             else
                 local useable = Game.Items[Inventory[inventory_index].item].menu
+                local type = Game.Items[Inventory[inventory_index].item].type
                 -- TODO: Get icon.
                 w_icon:set_visible(true)
                 w_name:set_visible(true)
@@ -888,6 +890,25 @@ UiContainer.ItemMenu = {
                     w_colon:set_colour(0.6, 0.6, 0.6)
                     w_qty:set_colour(0.6, 0.6, 0.6)
                 end
+                -- Item icon
+                if type == Inventory.ITEM_TYPE.ITEM then
+                    w_icon:set_image("images/icons/item_item.png")
+                elseif type == Inventory.ITEM_TYPE.ARMOR then
+                    w_icon:set_image("images/icons/item_armor.png")
+                elseif type == Inventory.ITEM_TYPE.ACCESSORY then
+                    w_icon:set_image("images/icons/item_accessory.png")
+                elseif type == Inventory.ITEM_TYPE.WEAPON then
+                    local users = Game.Items[Inventory[inventory_index].item].users
+                    for _, v in ipairs(users) do
+                        print(Game.Items[Inventory[inventory_index].item].name .. " Users " .. tostring(v))
+                        if v >= 0 and v <= 8 then
+                            w_icon:set_image("images/icons/item_weapon_" .. v .. ".png")
+                            break;
+                        end
+                    end
+
+                end
+
                 w_name:set_text(Game.Items[Inventory[inventory_index].item].name)
                 w_qty:set_text(tostring(Inventory[inventory_index].quantity))
                 w_colon:set_text(":") -- Refresh text to apply colour.
