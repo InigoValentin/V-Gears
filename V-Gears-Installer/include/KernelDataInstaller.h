@@ -2382,6 +2382,14 @@ class KernelDataInstaller{
         };
 
         /**
+         * Retrieves the 3-letter name of a basic stat from it's id.
+         *
+         * @param[in] id The stat ID.
+         * @return Stat name abbreviation. If the stat ID is unknown, "stat" will be returned.
+         */
+        std::string GetBasicStatName(int id);
+
+        /**
          * Items read from the kernel.
          */
         std::vector<CommandData> commands_;

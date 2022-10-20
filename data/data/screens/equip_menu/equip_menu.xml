@@ -26,28 +26,81 @@
             <prototype name="Window" />
             <text_area name="Help" x="16" y="6" font="FFVIIFont" visible="true" />
         </widget>
-        <widget name="Slots" x="0" y="94" width="260" height="60" visible="true">
+        <widget name="Slots" x="0" y="94" width="260" height="50" visible="true">
             <prototype name="Window" />
-            <text_area name="SlotsLbl" colours="0 0.8 1, 0 0.8 1, 0 0.8 1, 0 0.8 1" text_name="EquipMenuSlots" x="16" y="12" font="FFVIIFont" visible="true" />
-            <text_area name="GrowthLbl" text_name="EquipMenuGrowth" x="16" y="32" font="FFVIIFont" visible="true" colour="0 0.8 1" />
-            <text_area name="Growth1" text_name="EquipMenuGrowth1" x="80" y="32" font="FFVIIFont" visible="true" colour="0 0.8 1" />
-            <text_area name="Growth2" text_name="EquipMenuGrowth2" x="80" y="32" font="FFVIIFont" visible="false" colour="0 0.8 1" />
-            <text_area name="Growth3" text_name="EquipMenuGrowth3" x="80" y="32" font="FFVIIFont" visible="false" colour="0 0.8 1" />
-            <sprite name="Slot1" image="images/icons/materia_slot.png" x="80" y="10" width="18" height="18" visible="true"/>
-            <sprite name="Slot2" image="images/icons/materia_slot.png" x="100" y="10" width="18" height="18" visible="true"/>
-            <sprite name="Link1" image="images/icons/materia_slot_link.png" x="94" y="10" width="10" height="18" visible="true"/>
-            <sprite name="Slot3" image="images/icons/materia_slot.png" x="120" y="10" width="18" height="18" visible="true"/>
-            <sprite name="Slot4" image="images/icons/materia_slot.png" x="140" y="10" width="18" height="18" visible="true"/>
-            <sprite name="Link2" image="images/icons/materia_slot_link.png" x="134" y="10" width="10" height="18" visible="true"/>
-            <sprite name="Slot5" image="images/icons/materia_slot.png" x="160" y="10" width="18" height="18" visible="true"/>
-            <sprite name="Slot6" image="images/icons/materia_slot.png" x="180" y="10" width="18" height="18" visible="true"/>
-            <sprite name="Link3" image="images/icons/materia_slot_link.png" x="174" y="10" width="10" height="18" visible="true"/>
-            <sprite name="Slot7" image="images/icons/materia_slot.png" x="200" y="10" width="18" height="18" visible="true"/>
-            <sprite name="Slot8" image="images/icons/materia_slot.png" x="220" y="10" width="18" height="18" visible="true"/>
-            <sprite name="Link4" image="images/icons/materia_slot_link.png" x="214" y="10" width="10" height="18" visible="true"/>
+            <text_area name="SlotsLbl" text_name="EquipMenuSlots" x="16" y="10" font="FFVIIFont" visible="true" />
+            <text_area name="GrowthLbl" text_name="EquipMenuGrowth" x="16" y="28" font="FFVIIFont" visible="true" />
+            <text_area name="Growth0" text_name="EquipMenuGrowth1" x="80" y="28" font="FFVIIFont" visible="true" />
+            <text_area name="Growth1" text_name="EquipMenuGrowth1" x="80" y="28" font="FFVIIFont" visible="true" />
+            <text_area name="Growth2" text_name="EquipMenuGrowth2" x="80" y="28" font="FFVIIFont" visible="false" />
+            <text_area name="Growth3" text_name="EquipMenuGrowth3" x="80" y="28" font="FFVIIFont" visible="false" />
+            <sprite name="Slot1" image="images/icons/materia_slot.png" x="80" y="8" width="18" height="18" visible="true"/>
+            <sprite name="Slot2" image="images/icons/materia_slot.png" x="100" y="8" width="18" height="18" visible="true"/>
+            <sprite name="Link1" image="images/icons/materia_slot_link.png" x="94" y="8" width="10" height="18" visible="true"/>
+            <sprite name="Slot3" image="images/icons/materia_slot.png" x="120" y="8" width="18" height="18" visible="true"/>
+            <sprite name="Slot4" image="images/icons/materia_slot.png" x="140" y="8" width="18" height="18" visible="true"/>
+            <sprite name="Link2" image="images/icons/materia_slot_link.png" x="134" y="8" width="10" height="18" visible="true"/>
+            <sprite name="Slot5" image="images/icons/materia_slot.png" x="160" y="8" width="18" height="18" visible="true"/>
+            <sprite name="Slot6" image="images/icons/materia_slot.png" x="180" y="8" width="18" height="18" visible="true"/>
+            <sprite name="Link3" image="images/icons/materia_slot_link.png" x="174" y="8" width="10" height="18" visible="true"/>
+            <sprite name="Slot7" image="images/icons/materia_slot.png" x="200" y="8" width="18" height="18" visible="true"/>
+            <sprite name="Slot8" image="images/icons/materia_slot.png" x="220" y="8" width="18" height="18" visible="true"/>
+            <sprite name="Link4" image="images/icons/materia_slot_link.png" x="214" y="8" width="10" height="18" visible="true"/>
         </widget>
-        <widget name="SlotsEmpty" x="0" y="94" width="260" height="60" visible="false">
+        <widget name="SlotsEmpty" x="0" y="94" width="260" height="50" visible="false">
             <prototype name="Window" />
+        </widget>
+        <widget name="Stats" x="0" y="144" width="260" height="100%-145" visible="true">
+            <prototype name="Window" />
+            <text_area name="AtkLbl" text_name="EquipMenuAtk" x="20" y="4" font="FFVIIFont" visible="true" />
+            <text_area name="AccLbl" text_name="EquipMenuAcc" x="20" y="16" font="FFVIIFont" visible="true" />
+            <text_area name="DefLbl" text_name="EquipMenuDef" x="20" y="28" font="FFVIIFont" visible="true" />
+            <text_area name="EvaLbl" text_name="EquipMenuEva" x="20" y="40" font="FFVIIFont" visible="true" />
+            <text_area name="MAtkLbl" text_name="EquipMenuMAtk" x="20" y="52" font="FFVIIFont" visible="true" />
+            <text_area name="MDefLbl" text_name="EquipMenuMDef" x="20" y="64" font="FFVIIFont" visible="true" />
+            <text_area name="MEvaLbl" text_name="EquipMenuMEva" x="20" y="76" font="FFVIIFont" visible="true" />
+            <text_area name="Atk" x="120" y="5" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Acc" x="120" y="17" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Def" x="120" y="29" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Eva" x="120" y="41" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="MAtk" x="120" y="53" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="MDef" x="120" y="65" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="MEva" x="120" y="77" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="AtkArw" text_name="EquipMenuArrow" x="155" y="4" font="FFVIIFont" visible="true" />
+            <text_area name="AccArw" text_name="EquipMenuArrow" x="155" y="16" font="FFVIIFont" visible="true" />
+            <text_area name="DefArw" text_name="EquipMenuArrow" x="155" y="28" font="FFVIIFont" visible="true" />
+            <text_area name="EvaArw" text_name="EquipMenuArrow" x="155" y="40" font="FFVIIFont" visible="true" />
+            <text_area name="MAtkArw" text_name="EquipMenuArrow" x="155" y="52" font="FFVIIFont" visible="true" />
+            <text_area name="MDefArw" text_name="EquipMenuArrow" x="155" y="64" font="FFVIIFont" visible="true" />
+            <text_area name="MEvaArw" text_name="EquipMenuArrow" x="155" y="76" font="FFVIIFont" visible="true" />
+            <text_area name="AtkDif" x="170" y="5" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="AccDif" x="170" y="17" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="DefDif" x="170" y="29" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="EvaDif" x="170" y="41" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="MAtkDif" x="170" y="53" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="MDefDif" x="170" y="65" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="MEvaDif" x="170" y="77" font="FFVIIMenuDigits" visible="true" />
+        </widget>
+        <widget name="List" x="260" y="94" width="100%-260" height="100%-95" visible="true">
+            <prototype name="Window" />
+            <text_area name="Item1" x="15" y="5" font="FFVIIFont" visible="true" />
+            <text_area name="Item2" x="15" y="22" font="FFVIIFont" visible="true" />
+            <text_area name="Item3" x="15" y="39" font="FFVIIFont" visible="true" />
+            <text_area name="Item4" x="15" y="56" font="FFVIIFont" visible="true" />
+            <text_area name="Item5" x="15" y="73" font="FFVIIFont" visible="true" />
+            <text_area name="Item6" x="15" y="90" font="FFVIIFont" visible="true" />
+            <text_area name="Item7" x="15" y="107" font="FFVIIFont" visible="true" />
+            <text_area name="Item8" x="15" y="124" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="images/icons/cursor.png" x="-10" y="8" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:8" />
+                <animation name="Position2" length="0" y="0:25" />
+                <animation name="Position3" length="0" y="0:42" />
+                <animation name="Position4" length="0" y="0:59" />
+                <animation name="Position5" length="0" y="0:76" />
+                <animation name="Position6" length="0" y="0:93" />
+                <animation name="Position7" length="0" y="0:110" />
+                <animation name="Position8" length="0" y="0:127" />
+            </sprite>
         </widget>
     </widget>
 </screen>

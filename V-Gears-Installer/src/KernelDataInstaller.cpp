@@ -1035,8 +1035,8 @@ void KernelDataInstaller::WriteWeapons(std::string file_name){
         for (u8 slot : weapon.materia_slots) file << static_cast<int>(slot) << ", ";
         file << "},\n    stats = {";
         for (StatBonus s : weapon.stat_bonus){
-            file << "\n        {stat = " << static_cast<int>(s.stat) << ", bonus = "
-              << static_cast<int>(s.bonus) << "},";
+            file << "\n        " << GetBasicStatName(s.stat) << " = "
+              << static_cast<int>(s.stat) << ",";
         }
         if (weapon.stat_bonus.size() > 0) file << "\n    },\n";
         else file << "},\n";
@@ -1107,11 +1107,11 @@ int KernelDataInstaller::ReadArmors(){
         }
         boost::replace_all(data.description, "\"", "'");
 
-        // If the item doesn't have a name, it means all items have been read.
+        // If the armor doesn't have a name, it means all items have been read.
         // break the loop.
         if ("" == data.name) break;
 
-        // Read data from the weapon data section.
+        // Read data from the armor data section.
         data.unknown_0 = armor_file.readU8();
         data.element_defense_mode = armor_file.readU8();
         data.defense = armor_file.readU8();
@@ -1218,7 +1218,7 @@ void KernelDataInstaller::WriteArmors(std::string file_name){
           << static_cast<int>(armor.m_defense) << "},\n"
           << "    evasion = {physical = " << static_cast<int>(armor.evasion) << ", magical = "
           << static_cast<int>(armor.m_evasion) << "},\n"
-          << "    growth = " << static_cast<int>(armor.growth) + 1 << ",\n"
+          << "    growth = " << static_cast<int>(armor.growth) << ",\n"
           << "    status = {";
         if (armor.status != 0XFF) file << armor.status;
         file
@@ -1234,8 +1234,8 @@ void KernelDataInstaller::WriteArmors(std::string file_name){
         for (u8 slot : armor.materia_slots) file << static_cast<int>(slot) << ", ";
         file << "},\n    stats = {";
         for (StatBonus s : armor.stat_bonus){
-            file << "\n        {stat = " << static_cast<int>(s.stat) << ", bonus = "
-              << static_cast<int>(s.bonus) << "},";
+            file << "\n        " << GetBasicStatName(s.stat) << " = "
+              << static_cast<int>(s.stat) << ",";
         }
         if (armor.stat_bonus.size() > 0) file << "\n    },\n";
         else file << "},\n";
@@ -1436,8 +1436,8 @@ void KernelDataInstaller::WriteAccessories(std::string file_name){
         for (int s : accessory.elements) file << s << ", ";
         file << "},\n    stats = {";
         for (StatBonus s : accessory.stat_bonus){
-            file << "\n        {stat = " << static_cast<int>(s.stat) << ", bonus = "
-              << static_cast<int>(s.bonus) << "},";
+            file << "\n        " << GetBasicStatName(s.stat) << " = "
+              << static_cast<int>(s.stat) << ",";
         }
         if (accessory.stat_bonus.size() > 0) file << "\n    },\n";
         else file << "},\n";
@@ -1713,34 +1713,18 @@ void KernelDataInstaller::WriteMateria(std::string file_name){
           << "    status = {";
         for (int s : materia.status) file << s << ", ";
         file
-          << "}\n"
+          << "},\n"
           << "    elements = {";
         if (materia.element != 0xFF) file << static_cast<int>(materia.element);
-        file << "}\n    stats = {";
-        if (materia.stats.str != 0)
-            file
-              << "\n        {stat = \"str\", bonus = " << materia.stats.str << ", mode = \"abs\"},";
-        if (materia.stats.vit != 0)
-            file
-              << "\n        {stat = \"vit\", bonus = " << materia.stats.vit << ", mode = \"abs\"},";
-        if (materia.stats.mag != 0)
-            file
-              << "\n        {stat = \"mag\", bonus = " << materia.stats.mag << ", mode = \"abs\"},";
-        if (materia.stats.spr != 0)
-            file
-              << "\n        {stat = \"spr\", bonus = " << materia.stats.spr << ", mode = \"abs\"},";
-        if (materia.stats.dex != 0)
-            file
-              << "\n        {stat = \"dex\", bonus = " << materia.stats.dex << ", mode = \"abs\"},";
-        if (materia.stats.lck != 0)
-            file
-              << "\n        {stat = \"lck\", bonus = " << materia.stats.lck << ", mode = \"abs\"},";
-        if (materia.stats.hp != 0)
-            file
-              << "\n        {stat = \"hp\", bonus = " << materia.stats.hp << ", mode = \"rel\"},";
-        if (materia.stats.mp != 0)
-            file
-              << "\n        {stat = \"mp\", bonus = " << materia.stats.mp << ", mode = \"rel\"},";
+        file << "},\n    stats = {";
+        if (materia.stats.str != 0) file << "\n        str = " << materia.stats.str << ",";
+        if (materia.stats.vit != 0) file << "\n        vit = " << materia.stats.vit << ",";
+        if (materia.stats.mag != 0) file << "\n        mag = " << materia.stats.mag << ",";
+        if (materia.stats.spr != 0) file << "\n        spr = " << materia.stats.spr << ",";
+        if (materia.stats.dex != 0) file << "\n        dex = " << materia.stats.dex << ",";
+        if (materia.stats.lck != 0) file << "\n        lck = " << materia.stats.lck << ",";
+        if (materia.stats.hp != 0) file << "\n        hp = " << materia.stats.hp << ",";
+        if (materia.stats.mp != 0) file << "\n        mp = " << materia.stats.mp << ",";
         if (materia.stats.change) file << "\n    }\n";
         else file << "}\n";
         file << "}\n";
@@ -2029,7 +2013,14 @@ void KernelDataInstaller::WriteInitialSaveMap(std::string file_name){
           << "        hp = {current = " << character.hp  << ", base = " << character.base_hp
           << ", max = " << character.max_hp << "},\n"
           << "        mp = {current = " << character.mp  << ", base = " << character.base_mp
-          << ", max = " << character.max_mp << "}\n"
+          << ", max = " << character.max_mp << "},\n"
+          << "        atk = 0,"
+          << "        acc = 0,"
+          << "        def = 0,"
+          << "        eva = 0,"
+          << "        matk = 0,"
+          << "        mdef = 0,"
+          << "        meva = 0"
           << "    },\n"
           << "    limit = {\n"
           << "        current = " << static_cast<int>(character.limit_level) << ",\n"
@@ -2082,7 +2073,20 @@ void KernelDataInstaller::WriteInitialSaveMap(std::string file_name){
         file << ",\n    status = {";
         if (character.fury) file << FURY;
         if (character.sadness) file << SADNESS;
-        file << "}\n}\n";
+        file << "}\n}\nCharacters.recalculate_stats(" << c << ")\n\n";
     }
     file.close();
+}
+
+std::string KernelDataInstaller::GetBasicStatName(int id){
+    std::string name = "stat";
+    switch (id){
+        case 0: name = "str"; break;
+        case 1: name = "vit"; break;
+        case 2: name = "mag"; break;
+        case 3: name = "spr"; break;
+        case 4: name = "dex"; break;
+        case 5: name = "lck"; break;
+    }
+    return name;
 }

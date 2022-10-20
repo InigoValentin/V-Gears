@@ -24,7 +24,7 @@ UiContainer.BeginMenu = {
                 if self.position == 1 then
                     load_field_map_request( "md1stin", "" )
                     console( "camera_free false" )
-                    console( "debug_walkmesh true" )
+                    --console( "debug_walkmesh true" )
                     script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
                     FFVII.MenuSettings.pause_available = true
                 elseif self.position == 2 then

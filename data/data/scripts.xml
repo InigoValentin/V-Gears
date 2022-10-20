@@ -8,11 +8,15 @@
     <script file="game/growth.lua" />
     <script file="game/items.lua" />
     <script file="game/key_items.lua" />
+    <script file="game/materia.lua" />
     <script file="game/summons.lua" />
     <script file="game/weapons.lua" />
+
+    <script file="scripts/system.lua" />
+
     <!-- TODO: Don't always parse initial savemap when loading is implemented. -->
     <script file="game/initial_savemap.lua" />
-    <script file="scripts/system.lua" />
+
     <script file="scripts/field.lua" />
     <script file="scripts/battle.lua" />
     <script file="scripts/battle_ai.lua" />

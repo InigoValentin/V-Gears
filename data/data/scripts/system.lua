@@ -356,3 +356,277 @@ Inventory.sort = function(criteria)
         )
     end
 end
+
+Characters.recalculate_stats = function(id)
+    -- Initialize
+    local stats = Characters[id].stats
+    stats.str.total = stats.str.base
+    stats.vit.total = stats.vit.base
+    stats.mag.total = stats.mag.base
+    stats.spr.total = stats.spr.base
+    stats.dex.total = stats.dex.base
+    stats.lck.total = stats.lck.base
+    stats.hp.max = stats.hp.base
+    stats.mp.max = stats.mp.base
+    -- Weapon bonus. HP and MP are percents of base, the rest absolutes.
+    local weapon = Game.Items[Characters[id].weapon.id]
+    for stat, value in ipairs(weapon.stats) do
+        if stat == "str" then
+            stats.str.total = stats.str.total + value
+        elseif stat == "vit" then
+            stats.vit.total = stats.vit.total + value
+        elseif stat == "mag" then
+            stats.mag.total = stats.mag.total + value
+        elseif stat == "spr" then
+            stats.spr.total = stats.spr.total + value
+        elseif stat == "dex" then
+            stats.dex.total = stats.dex.total + value
+        elseif stat == "lck" then
+            stats.lck.total = stats.lck.total + value
+        elseif stat == "hp" then
+            stats.hp.max = stats.hp.max + (value * stats.hp.max / 100)
+        elseif stat == "mp" then
+            stats.mp.max = stats.mp.max + (value * stats.mp.max / 100)
+        end
+    end
+    -- Armor bonus. HP and MP are percents of bsae, the rest absolutes.
+    local armor = Game.Items[Characters[id].armor.id]
+    for stat, value in ipairs(armor.stats) do
+        if stat == "str" then
+            stats.str.total = stats.str.total + value
+        elseif stat == "vit" then
+            stats.vit.total = stats.vit.total + value
+        elseif stat == "mag" then
+            stats.mag.total = stats.mag.total + value
+        elseif stat == "spr" then
+            stats.spr.total = stats.spr.total + value
+        elseif stat == "dex" then
+            stats.dex.total = stats.dex.total + value
+        elseif stat == "lck" then
+            stats.lck.total = stats.lck.total + value
+        elseif stat == "hp" then
+            stats.hp.max = stats.hp.max + (value * stats.hp.max / 100)
+        elseif stat == "mp" then
+            stats.mp.max = stats.mp.max + (value * stats.mp.max / 100)
+        end
+    end
+    -- Accesory bonus
+    local accessory = Game.Items[Characters[id].accessory]
+    if (accessory ~= nil) then
+        for stat, value in ipairs(armor.stats) do
+            if stat == "str" then
+                stats.str.total = stats.str.total + value
+            elseif stat == "vit" then
+                stats.vit.total = stats.vit.total + value
+            elseif stat == "mag" then
+                stats.mag.total = stats.mag.total + value
+            elseif stat == "spr" then
+                stats.spr.total = stats.spr.total + value
+            elseif stat == "dex" then
+                stats.dex.total = stats.dex.total + value
+            elseif stat == "lck" then
+                stats.lck.total = stats.lck.total + value
+            elseif stat == "hp" then
+                stats.hp.max = stats.hp.max + (value * stats.hp.max / 100)
+            elseif stat == "mp" then
+                stats.mp.max = stats.mp.max + (value * stats.mp.max / 100)
+            end
+        end
+    end
+    -- Get a list of materias
+    local materias = {}
+    for m = 0, 7 do
+        if Characters[id].weapon.materia[m] ~= nil then
+            table.insert(materias, Game.Materia[Characters[id].weapon.materia[m].id])
+        end
+        if Characters[id].armor.materia[m] ~= nil then
+            table.insert(materias, Game.Materia[Characters[id].weapon.materia[m].id])
+        end
+    end
+    -- Get materia bonuses. All are percents of base.
+    for _, materia in ipairs(materias) do
+        for stat, value in ipairs(materia.stats) do
+            if stat == "str" then
+                stats.str.total = stats.str.total + (value * stats.str.base / 100)
+            elseif stat == "vit" then
+                stats.vit.total = stats.vit.total + (value * stats.vit.base / 100)
+            elseif stat == "mag" then
+                stats.mag.total = stats.mag.total + (value * stats.mag.base / 100)
+            elseif stat == "spr" then
+                stats.spr.total = stats.spr.total + (value * stats.spr.base / 100)
+            elseif stat == "dex" then
+                stats.dex.total = stats.dex.total + (value * stats.dex.base / 100)
+            elseif stat == "lck" then
+                stats.lck.total = stats.lck.total + (value * stats.lck.base / 100)
+            elseif stat == "hp" then
+                stats.hp.max = stats.hp.max + (value * stats.hp.max / 100)
+            elseif stat == "mp" then
+                stats.mp.max = stats.mp.max + (value * stats.mp.max / 100)
+            end
+        end
+    end
+    -- Round down all basic stats
+    stats.str.total = math.floor(stats.str.total)
+    stats.vit.total = math.floor(stats.vit.total)
+    stats.mag.total = math.floor(stats.mag.total)
+    stats.spr.total = math.floor(stats.spr.total)
+    stats.dex.total = math.floor(stats.dex.total)
+    stats.lck.total = math.floor(stats.lck.total)
+    stats.hp.max = math.floor(stats.hp.max)
+    stats.mp.max = math.floor(stats.mp.max)
+
+    if stats.str.total < 1 then
+        stats.str.total = 1
+    end
+    if stats.vit.total < 1 then
+        stats.vit.total = 1
+    end
+    if stats.mag.total < 1 then
+        stats.mag.total = 1
+    end
+    if stats.spr.total < 1 then
+        stats.spr.total = 1
+    end
+    if stats.dex.total < 1 then
+        stats.dex.total = 1
+    end
+    if stats.lck.total < 1 then
+        stats.lck.total = 1
+    end
+    if stats.hp.max < 1 then
+        stats.hp.max = 1
+    end
+    if stats.mp.max < 1 then
+        stats.mp.max = 1
+    end
+
+    -- Calculate composed stats.
+    stats.atk = stats.str.total + weapon.power
+    stats.acc = weapon.accuracy
+    stats.def = stats.vit.total + armor.defense.physical
+    stats.eva = armor.evasion.physical
+    stats.matk = stats.mag.total
+    stats.mdef = stats.spr.total + armor.defense.magical
+    stats.meva = armor.evasion.magical
+
+    -- Cap composed stats. TODO: Max caps?
+    if stats.atk < 1 then
+        stats.atk = 1
+    end
+    if stats.acc < 1 then
+        stats.acc = 1
+    end
+    if stats.def < 1 then
+        stats.def = 1
+    end
+    if stats.eva < 1 then
+        stats.eva = 1
+    end
+    if stats.matk < 1 then
+        stats.matk = 1
+    end
+    if stats.mdef < 1 then
+        stats.mdef = 1
+    end
+    if stats.meva < 1 then
+        stats.meva = 1
+    end
+
+    -- TODO: If HP<->MP materia, invert values.
+
+    -- Cap current HP/MP
+    if stats.hp.current > stats.hp.max then
+        stats.hp.current = stats.hp.max
+    end
+    if stats.mp.current > stats.mp.max then
+        stats.mp.current = stats.mp.max
+    end
+
+    -- Assign
+    Characters[id].stats = stats
+end
+
+--- Equips an item on a character.
+--
+-- Works for weapons, armors and accessories. If there is a previously equiped item, it
+-- will be unequiped and added to the inventory. The equiped item will be removed form the
+-- inventory. For armors and weapons, if the newly equiped item has less materia slots than
+-- the previuos one, remainig materia will be unequiped and added to the materia inventory.
+--
+-- @param char_id ID of the character to equip the item to.
+-- @param item_id ID of the item to equip.
+-- @return True if the item was equipped. False if the character or item don't exist, if
+-- the item is not in the inventory, or if the item is not equippable or not equippable by
+-- the selected character. In any of those cases, an error message will be printed.
+Characters.equip = function(char_id, item_id)
+
+    -- Error checks
+    if Characters[char_id] == nil then
+        print("Tried to equip item on wrong character: " .. tostring(char_id))
+        return false
+    elseif Game.Items[item_id] == nil then
+        print("Tried to equip invalid item: " .. tostring(character))
+        return false
+    elseif Inventory.get_item_quantity(item_id) < 1 then
+        print("Tried to equip item not in inventory: " .. item_id .. " (" .. Game.Items[item.id].name .. ")")
+        return false
+    end
+    local type = Game.Items[item_id].type
+    if type ~= Inventory.ITEM_TYPE.WEAPON and type ~= Inventory.ITEM_TYPE.ARMOR and type ~= Inventory.ITEM_TYPE.ACCESSORY then
+        print("Tried to equip non-equipable item: " .. item_id .. " (" .. Game.Items[item.id].name .. ")")
+        return false
+    end
+    local equipable = false
+    for _, u in ipairs(Game.Items[item_id].users) do
+        if u == char_id then
+            equipable = true
+            break
+        end
+    end
+    if equipable == false then
+        print("Tried to equip item " .. tostring(item_id) .. " (" .. Game.Items[item.id].name .. ") on a non valid character: " .. tostring(char_id) .. " (" .. Characters[char_id].name .. ")")
+        return false
+    end
+
+    -- All is good, equip.
+    if type == Inventory.ITEM_TYPE.ACCESSORY then
+        -- Equip accessory. If any was equipped, send it to the inventory.
+        if Characters[char_id].accessory ~= nil then
+            Inventory.add_item(Characters[char_id].accessory, 1)
+        end
+        Characters[char_id].accessory = item_id
+        Inventory.remove_item(item_id, 1)
+    elseif type == Inventory.ITEM_TYPE.WEAPON then
+        -- Weapon. Remove excess materia, send previuos one to the inventory.
+        for m = 0, 7 do
+            if Characters[char_id].weapon.materia[i] ~= nil and #(Game.Items[item_id].slots) < m then
+                -- Materia to inventory
+                Materia.add(Characters[char_id].weapon.materia[i].id, Characters[char_id].weapon.materia[i].ap)
+                Characters[char_id].weapon.materia[i] = nil
+            end
+        end
+        Inventory.add_item(Characters[char_id].weapon.id, 1)
+        Characters[char_id].weapon.id = item_id
+        Inventory.remove_item(item_id, 1)
+    elseif type == Inventory.ITEM_TYPE.ARMOR then
+        -- Armor. Remove excess materia, send previuos one to the inventory.
+        for m = 0, 7 do
+            if Characters[char_id].armor.materia[i] ~= nil and #(Game.Items[item_id].slots) < m then
+                -- Materia to inventory
+                Materia.add(Characters[char_id].armor.materia[i].id, Characters[char_id].armor.materia[i].ap)
+                Characters[char_id].armor.materia[i] = nil
+            end
+        end
+        Inventory.add_item(Characters[char_id].armor.id, 1)
+        Characters[char_id].armor.id = item_id
+        Inventory.remove_item(item_id, 1)
+    else
+        return false
+    end
+    return true
+end
+
+Materia.add = function(id, ap)
+    ap = ap or 0
+    -- TODO
+end

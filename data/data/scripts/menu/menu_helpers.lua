@@ -2,6 +2,14 @@ if UiContainer == nil then UiContainer = {} end
 
 print("ADD helpers")
 
+UiContainer.pad_value = function(value, length)
+    local str = tostring(value)
+    while #(str) < length do
+        str = " " .. str
+    end
+    return str
+end
+
 --- Populates a character data.
 --
 -- @param widget Name of the widget with the character data.

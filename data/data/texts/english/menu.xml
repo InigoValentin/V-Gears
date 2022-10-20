@@ -56,19 +56,19 @@
     <text name="ItemMenuOrder8">Least</text>
 
     <text name="EquipMenuTitle">Equip</text>
-    <text name="EquipMenuSlots"> Slots:</text>
-    <text name="EquipMenuGrowth">Growth:</text>
+    <text name="EquipMenuSlots"><colour value="0 0.8 1">Slots:</colour></text>
+    <text name="EquipMenuGrowth"><colour value="0 0.8 1">Growth:</colour></text>
     <text name="EquipMenuGrowth1">Normal</text>
     <text name="EquipMenuGrowth2">Double</text>
     <text name="EquipMenuGrowth3">Triple</text>
-    <text name="EquipMenuAtk">        Attack:</text>
-    <text name="EquipMenuAcc">      Accuracy:</text>
-    <text name="EquipMenuDef">       Defense:</text>
-    <text name="EquipMenuEva">       Evasion:</text>
-    <text name="EquipMenuMAtk"> Magic attack:</text>
-    <text name="EquipMenuMDef">Magic defense:</text>
-    <text name="EquipMenuMEva">Magic evasion:</text>
-
+    <text name="EquipMenuAtk"><colour value="0 0.8 1">Attack:</colour></text>
+    <text name="EquipMenuAcc"><colour value="0 0.8 1">Accuracy:</colour></text>
+    <text name="EquipMenuDef"><colour value="0 0.8 1">Defense:</colour></text>
+    <text name="EquipMenuEva"><colour value="0 0.8 1">Evasion:</colour></text>
+    <text name="EquipMenuMAtk"><colour value="0 0.8 1">Magic attack:</colour></text>
+    <text name="EquipMenuMDef"><colour value="0 0.8 1">Magic defense:</colour></text>
+    <text name="EquipMenuMEva"><colour value="0 0.8 1">Magic evasion:</colour></text>
+    <text name="EquipMenuArrow"><colour value="0 0.6 0.8">-></colour></text>
 
     <text name="CharacterDataName">#Name#</text>
     <text name="CharacterDataLv">LV</text>

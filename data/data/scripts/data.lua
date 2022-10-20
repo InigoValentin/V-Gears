@@ -116,6 +116,8 @@ Inventory.ORDER = {
     LEAST = 7
 }
 
+Materia = {}
+
 
 
 FFVII = {}
