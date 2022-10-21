@@ -203,7 +203,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * @return The entity assigned to the character, or nullptr if there
          * is no one.
          */
-        Entity* GetEntityFromCharacterId(const char* id) const;
+        Entity* GetEntityFromCharacterId(const int id) const;
 
         /**
          * Retrieves an entity by name.

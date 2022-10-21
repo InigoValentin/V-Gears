@@ -453,7 +453,7 @@ void Entity::SetLinear(
 }
 
 void Entity::UnsetLinear(){
-    state_ = Entity::NEEDS_TO_REATTACH;
+    state_ = Entity::NONE;
     move_triangle_id_ = linear_dest_triangle_; // Set for NPCs. Playable can end up in two places.
     animation_auto_play_ = true;
     PlayAnimation(animation_default_, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1);

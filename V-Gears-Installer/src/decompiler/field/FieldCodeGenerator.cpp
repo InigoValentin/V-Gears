@@ -78,8 +78,7 @@ void FunctionMetaData::ParseCharId(const std::string& item, std::deque<std::stri
 
 void FunctionMetaData::ParseEntity(const std::string& item, std::deque<std::string>& strs){
     entity_name_ = item;
-    for (auto& part : strs)
-        if (!part.empty()) entity_name_ += "_" + part;
+    for (auto& part : strs) if (!part.empty()) entity_name_ += "_" + part;
 }
 
 void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
@@ -88,9 +87,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
     
     std::vector<std::pair<Function&, InstVec>> functions_with_bodies;
     for (
-      auto function = engine_->functions.begin();
-      function != engine_->functions.end();
-      ++ function
+      auto function = engine_->functions.begin(); function != engine_->functions.end(); ++ function
     ){
         InstVec body;
         for (size_t i = 0; i < function->second.num_instructions; ++ i, ++ instruction)
@@ -109,7 +106,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
         AddOutputLine(signature, false, true);
         OnStartFunction(function->first);
         
-        // Comment with original instructions.
+        // Generate labels for jump instruction targets.
         std::unordered_map<uint32, InstVec> labels;
         for (
           auto instruction = function->second.begin();
@@ -125,11 +122,15 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
         }
 
         // Implemented instructions.
-        bool end_needed = false;
+
+        // Some conditional jumps point to an address outside the function (i.e the starting
+        // address of the next function) and the 'end' are not written to the Lua script. Keep
+        // track of how many are needed and add them at the end of the function.
+        int ends_needed = 0;
         for (
           auto instruction = function->second.begin();
           instruction != function->second.end();
-          ++instruction
+          ++ instruction
         ){
             auto label = labels.find((*instruction)->GetAddress());
             if (label != labels.end()){
@@ -137,6 +138,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                 bool needs_new_line = false;
                 for (auto origin = label->second.begin(); origin != label->second.end(); ++ origin){
                     if ((*origin)->IsCondJump()){
+                        ends_needed --;
                         AddOutputLine("end", true, false);
                         needs_new_line = true;
                     }
@@ -148,18 +150,19 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
             }
             ValueStack stack;
             (*instruction)->ProcessInst(function->first, stack, engine_, this);
-            if (end_needed){
-                AddOutputLine("end -- end if", true, false);
-                end_needed = false;
-            }
+            //if (end_needed){
+            //    AddOutputLine("end -- end if", true, false);
+            //    end_needed = false;
+            //}
             if ((*instruction)->IsCondJump()){
+                ends_needed ++;
                 AddOutputLine(
                   (boost::format("if (%s) then") % stack.Pop()->GetString()).str(), false, true
                 );
                 // If the next instruction is the last in the function, mark the next pass to
                 // add an 'end' after the instruction to close the if.
-                if ((*(instruction + 1))->GetAddress() == (*(function->second.back())).GetAddress())
-                    end_needed = true;
+                //if ((*(instruction + 1))->GetAddress() == (*(function->second.back())).GetAddress())
+                //    end_needed = true;
             }
             else if ((*instruction)->IsUncondJump()){
                 // If destination address is outside the functions, turn goto into a return.
@@ -190,6 +193,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
             }
             // Else, already output'd.
         }
+        for(; ends_needed > 0; ends_needed --) AddOutputLine("end -- clean-up", true, false);
         // Add missing return:
         if (
           "return 0" != lines_.at(lines_.size() - 1).line
@@ -228,6 +232,14 @@ void FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
 }
 
 void FieldCodeGenerator::OnStartFunction(const Function& func){
+    // Add some hacks for Director entity before the comments
+    FunctionMetaData meta_data(func.metadata);
+    if (meta_data.GetEntityName() == "Director" && func.name == "on_start"){
+        // TODO: Don't hardcode Cloud, Use the one from the previous level,
+        AddOutputLine("-- HACK: Set default playable entity an ensure the camera follows it.");
+        AddOutputLine("entity_manager:set_player_entity(\"Cloud\")");
+        AddOutputLine("background2d:autoscroll_to_entity(entity_manager:get_entity(\"Cloud\"))\n");
+    }
     AddOutputLine("--[[");
     for (const auto& inst : insts_){
         if (inst->GetAddress() >= func.start_addr && inst->GetAddress() <= func.end_addr){
@@ -237,11 +249,6 @@ void FieldCodeGenerator::OnStartFunction(const Function& func){
         }
     }
     AddOutputLine("]]\n");
-    // TODO: If this hack is needed, maybe it can just be added to the "Director" entity.
-    if (func.name == "on_start" || func.name == "init"){
-        AddOutputLine("-- HACK ensure camera follows cloud, fix in engine.");
-        AddOutputLine("background2d:autoscroll_to_entity(entity_manager:get_entity(\"Cloud\"))");
-    }
 }
 
 void FieldCodeGenerator::OnEndFunction(const Function& function){

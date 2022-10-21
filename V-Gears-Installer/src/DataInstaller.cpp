@@ -94,11 +94,11 @@ int DataInstaller::Progress(){
             progress_step_num_elements_ = 1;
             iterator_counter_ = 0;
             fields_lgp_ = std::make_unique<ScopedLgp>(
-              application_.getRoot(), input_dir_ + "field/flevel.lgp", "LGP", "FFVIIFields"
+              application_.getRoot(), input_dir_ + "data/field/flevel.lgp", "LGP", "FFVIIFields"
             );
             set_progress_label_("Installing kernel data...");
             kernel_installer_ = std::make_unique<KernelDataInstaller>(
-              input_dir_ + "kernel/KERNEL.BIN"
+              input_dir_ + "data/kernel/KERNEL.BIN"
             );
             kernel_installer_->ReadPrices(exe_path_);
             CreateDir("game");
@@ -254,7 +254,10 @@ void DataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &me
                                   = pass->getTextureUnitState(texture_unit_num);
                                 if (unit && unit->getTextureName().empty() == false){
                                     // Convert the texture from .tex to .png.
-                                    TexToPng(unit->getTextureName());
+                                    std::cout << "[TEX2PNG] Calling with " << unit->getTextureName() << "\n";
+                                    //TexToPng(unit->getTextureName());
+                                    TexFile tex(output_dir_ + "temp/char/" + unit->getTextureName());
+
                                     // Ensure the output material script references png files
                                     // rather than tex
                                     // files.
@@ -266,6 +269,9 @@ void DataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &me
                                       FieldModelDir() + "/" + base_mesh_name
                                       + "_" + base_name + ".png"
                                     );
+
+                                    std::cout << "SAVING PNG: " << output_dir_ << FieldModelDir() << "/" << base_name << ".png\n";
+                                    tex.SavePng(output_dir_ + FieldModelDir() + "/" + base_name + ".png", 0);
                                     // Copy subtexture (xxxx.png) to
                                     // model_xxxx.png
                                     // TODO: obtain the "data" folder
@@ -1379,11 +1385,54 @@ void DataInstaller::EndWriteMapsXml(){
 
 void DataInstaller::ConvertFieldModelsBegin(){
     // TODO: Convert models and animations in model_animation_db.
-    progress_step_num_elements_ = 1;
+    /*progress_step_num_elements_ = 1;
     field_models_lgp_ = std::make_unique<ScopedLgp>(
-      application_.getRoot(), input_dir_ + "field/char.lgp", "LGP", "FFVII"
+      application_.getRoot(), input_dir_ + "data/field/char.lgp", "LGP", "FFVII"
     );
     field_model_file_list_ = application_.ResMgr()->listResourceNames("FFVII", "*");
+    // Save file
+    //Ogre::StringVectorPtr file_list = field_models_lgp_->list(true, true);
+    VGears::LGPArchive::FileList files = field_models_lgp_.GetFiles();
+    CreateDir("temp/char");
+    for (int i = 0; i < file_list->size(); i ++){
+        VGears::LGPArchive::FileEntry f = files.at(i);
+        // Save the TEX File
+        std::fstream out;
+        out.open(output_dir_ + "temp/char/" + f.file_name, std::ios::out);
+        menu.SetOffset(f.data_offset);
+        for (int j = 0; j < f.data_size; j ++) out << menu.readU8();
+        out.close();
+    }*/
+
+    field_model_file_list_;// = application_.ResMgr()->listResourceNames("FFVII", "*");
+
+    // Open char_lgp as a lgp archive
+    VGears::LGPArchive char_lgp(input_dir_ + "data/field/char.lgp", "LGP");
+    char_lgp.open(input_dir_ + "data/field/char.lgp", true);
+    char_lgp.load();
+    // Also, open it as a file for reading
+    File char_file(input_dir_ + "data/field/char.lgp");
+
+    //Ogre::StringVectorPtr file_list = char_lgp.list(true, true);
+    field_model_file_list_ = char_lgp.list(true, true);
+    VGears::LGPArchive::FileList files = char_lgp.GetFiles();
+    CreateDir("temp/char");
+    std::cout << "[CHAR_LGP] START \n" ;
+    for (int i = 0; i < field_model_file_list_->size(); i ++){
+        VGears::LGPArchive::FileEntry f = files.at(i);
+        //std::cout << "[CHAR_LGP] File : " << f.file_name << "\n";
+        // Save the TEX File
+        std::fstream out;
+        out.open(output_dir_ + "temp/char/" + f.file_name, std::ios::out);
+        char_file.SetOffset(f.data_offset);
+        for (int j = 0; j < f.data_size; j ++) out << char_file.readU8();
+        out.close();
+
+        //field_model_file_list_->push_back(f.file_name);
+    }
+
+    application_.ResMgr()->addResourceLocation("data/temp/char/", "FileSystem", "FFVII", true, true);
+
     iterator_counter_ = 0;
     installation_state_ = CONVERT_FIELD_MODELS;
     iterator_counter_ = 0;
@@ -1400,9 +1449,11 @@ void DataInstaller::ConvertFieldModelsIteration(){
         }
         else{
             try{
+                std::cout << "OPEN HRC: " << model_animation_map_iterator_->first << std::endl;
                 Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(
                     model_animation_map_iterator_->first, "FFVII"
-                  );
+                );
+                //Ogre::ResourcePtr hrc = VGears::HRCFile();
                 Ogre::String base_name;
                 VGears::StringUtil::splitBase(model_animation_map_iterator_->first, base_name);
                 auto mesh_name = VGears::NameLookup::model(base_name) + ".mesh";

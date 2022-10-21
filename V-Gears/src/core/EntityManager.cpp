@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include <cmath>
 #include <OgreEntity.h>
 #include <OgreRoot.h>
@@ -511,9 +512,9 @@ Entity* EntityManager::GetEntityFromIndex(const int index) const{
     return nullptr;
 }
 
-Entity* EntityManager::GetEntityFromCharacterId(const char* id) const{
+Entity* EntityManager::GetEntityFromCharacterId(const int id) const{
     for (unsigned int i = 0; i < entity_.size(); ++ i){
-        if (entity_[i]->IsCharacter() && entity_[i]->GetCharacterId() == atoi(id))
+        if (entity_[i]->IsCharacter() && entity_[i]->GetCharacterId() == id)
             return entity_[i];
     }
     return nullptr;
@@ -572,6 +573,10 @@ void EntityManager::StartBattle(unsigned int formation){
 }
 
 bool EntityManager::IsKeyOn(unsigned int key_code){
+    // If the player is locked, always false.
+    // TODO: Maybe this will interfere with something down the road?
+    // Some scene where the player can't move but muts press a button?
+    if (player_lock_) return false;
     unsigned int code = key_code;
     // Translate keycodes to game key codes.
     // For example 32 is standard for "Enter", but in game is "Circle/Action".
@@ -1067,7 +1072,8 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
                     //std::cout << "    [TRIGGER] " << entity->GetName()
                     //  << " on_cross_line " << entity_triggers_[i]->GetName() << std::endl;
                     ScriptManager::getSingleton().ScriptRequest(
-                      trigger, "on_cross_line", 1, entity->GetName(), "", false, false
+                      //trigger, "on_cross_line", 1, entity->GetName(), "", false, false
+                      trigger, "on_cross_line", 1, entity->GetName(), "", true, true
                     );
                     // Test on_cross_line_once.
                     // Same conditions that on_cross_line, but triggered only once (i.e. if the entity

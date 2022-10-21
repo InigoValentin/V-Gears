@@ -900,7 +900,6 @@ UiContainer.ItemMenu = {
                 elseif type == Inventory.ITEM_TYPE.WEAPON then
                     local users = Game.Items[Inventory[inventory_index].item].users
                     for _, v in ipairs(users) do
-                        print(Game.Items[Inventory[inventory_index].item].name .. " Users " .. tostring(v))
                         if v >= 0 and v <= 8 then
                             w_icon:set_image("images/icons/item_weapon_" .. v .. ".png")
                             break;

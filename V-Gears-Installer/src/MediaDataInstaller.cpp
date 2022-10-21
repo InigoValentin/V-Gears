@@ -28,17 +28,17 @@
 
 MediaDataInstaller::MediaDataInstaller(const std::string input_dir, const std::string output_dir):
   input_dir_(input_dir), output_dir_(output_dir),
-  menu_(input_dir + "menu/menu_us.lgp", "LGP"), window_(input_dir + "kernel/WINDOW.BIN")
+  menu_(input_dir + "data/menu/menu_us.lgp", "LGP"), window_(input_dir + "data/kernel/WINDOW.BIN")
 {}
 
 MediaDataInstaller::~MediaDataInstaller(){}
 
 void MediaDataInstaller::InstallSprites(){
     // Actually open the lgp as a file for reading
-    File menu(input_dir_ + "menu/menu_us.lgp");
+    File menu(input_dir_ + "data/menu/menu_us.lgp");
 
     // Also, open it as a LGP archive.
-    menu_.open(input_dir_ + "menu/menu_us.lgp", true);
+    menu_.open(input_dir_ + "data/menu/menu_us.lgp", true);
     menu_.load();
 
 

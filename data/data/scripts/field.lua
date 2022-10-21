@@ -49,6 +49,7 @@ join_party = function(speed)
     for c = 2, 3 do
         if FFVII.Party[c] ~= nil then
             local character = entity_manager:get_entity_from_character_id(FFVII.Party[c])
+            --print("    Name: " .. character:get_name())
             if character ~= nil then
                 local cur_speed = character:get_move_auto_speed()
                 character:set_solid(false)
@@ -91,8 +92,13 @@ split_party = function(ax, ay, ar, bx, by, br, speed)
                 -- Approximated speed, good enough for now.
                 -- TODO: Calculate speed based on time, as the orignal opcode.
                 character:set_move_auto_speed(speed / 16)
-                character:set_position(x, y, z)
-                character:set_visible(true)
+                if charater:is_visible() == false then
+                    -- In theory, a member is never visible before a split, but some maps
+                    -- are wrong. In these cases, don't change position and move the entity
+                    -- from it's current position.
+                    character:set_position(x, y, z)
+                    character:set_visible(true)
+                end
                 character:set_solid(false)
                 if c == 2 then
                     character:move_to_position(ax, ay)

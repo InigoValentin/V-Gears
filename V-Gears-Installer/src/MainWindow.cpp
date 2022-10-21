@@ -40,8 +40,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), main_window_(new U
     main_window_->line_data_dst->setText(settings_->value("DataDir").toString());
     main_window_->line_vgears_exe->setText(settings_->value("VGearsEXE").toString());
     // TODO" Hard coded paths for debugging to save time. Remove them.
-    main_window_->line_data_src->setText("/home/ivalentin/data/");
-    main_window_->line_exe_src->setText("/home/ivalentin/data/ff7.exe");
+    main_window_->line_data_src->setText("/home/ivalentin/FF7InstallDisk/");
+    main_window_->line_exe_src->setText("/home/ivalentin/FF7InstallDisk/ff7.exe");
     //main_window_->line_data_dst->setText("/home/ivalentin/.v-gears/data/");
     timer_ = new QTimer(this);
     connect(timer_, SIGNAL(timeout()), this, SLOT(DoProgress()));
@@ -181,7 +181,11 @@ void MainWindow::on_btn_data_run_clicked(){
         if (!output.endsWith("/")) output += "/";
         // TODO: Enumerate files or find some better way to do this.
         const std::vector<std::string> required_files = {
-          "field/char.lgp", "field/flevel.lgp", "kernel/KERNEL.BIN"
+          "data/field/char.lgp",
+          "data/field/flevel.lgp",
+          "data/kernel/KERNEL.BIN",
+          "data/menu/menu_us.lgp",
+          "ff7.exe"
         };
         // Ensure required files are in the input dir
         for (auto& file : required_files){

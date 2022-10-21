@@ -322,6 +322,8 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         /**
          * Request an script execution.
          *
+         * The script will execute only if it's not already being executed.
+         *
          * @param[in] type Script type.
          * @param[in] entity Entity the scripts belong to.
          * @param[in] function Name of the function of the selected entity to
@@ -329,8 +331,7 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
          * @param[in] priority Execution priority.
          */
         void ScriptRequest(
-          const Type type, const char* entity,
-          const char* function, const int priority
+          const Type type, const char* entity, const char* function, const int priority
         );
 
         /**

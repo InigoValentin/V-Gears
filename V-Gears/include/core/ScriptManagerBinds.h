@@ -219,7 +219,7 @@ void ScriptManager::InitBinds(){
            )
           .def(
              "get_entity_from_character_id",
-             (Entity*(EntityManager::*)(const char*)) &EntityManager::GetEntityFromCharacterId
+             (Entity*(EntityManager::*)(const int)) &EntityManager::GetEntityFromCharacterId
           )
           .def(
              "get_entity_point",
