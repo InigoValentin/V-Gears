@@ -96,6 +96,7 @@ set(HEADER_FILES
     include/SpawnPointDb.h
     include/KernelDataInstaller.h
     include/MediaDataInstaller.h
+    include/FieldDataInstaller.h
 )
 
 
@@ -171,6 +172,7 @@ set(SOURCE_FILES
     src/TexFile.cpp
     src/KernelDataInstaller.cpp
     src/MediaDataInstaller.cpp
+    src/FieldDataInstaller.cpp
 )
 
 # For SUDM. TODO: Add elses.

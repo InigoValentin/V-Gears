@@ -21,14 +21,15 @@
 #include "common/FinalFantasy7/FF7NameLookup.h"
 #include <boost/algorithm/string/replace.hpp>
 
-KernelDataInstaller::KernelDataInstaller(std::string path): kernel_(path){
+KernelDataInstaller::KernelDataInstaller(std::string path):
+  kernel_(path + "data/kernel/KERNEL.BIN"), exe_path_(path + "ff7.exe"){
     for (int i = 0; i < 416; i ++) prices_[i] = 50;
 }
 
 KernelDataInstaller::~KernelDataInstaller(){}
 
-void KernelDataInstaller::ReadPrices(std::string exe_path){
-    File exe_file(exe_path);
+void KernelDataInstaller::ReadPrices(){
+    File exe_file(exe_path_);
     exe_file.SetOffset(0x00514518); // Items, weapons, armors, accessories start here
     for (int i = 0; i < 320; i ++) prices_[i] = exe_file.readU32LE();
     exe_file.SetOffset(0x00514B18); // Materias start here

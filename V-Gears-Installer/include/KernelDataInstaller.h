@@ -27,7 +27,7 @@ class KernelDataInstaller{
         /**
          * Constructor.
          *
-         * @param[in] path Absolute path to the KERNEL.BIN file
+         * @param[in] path Path selected in the installation as source directory.
          */
         KernelDataInstaller(std::string path);
 
@@ -38,10 +38,8 @@ class KernelDataInstaller{
 
         /**
          * Reads items and materia prices from the executable.
-         *
-         * @param[in] menu_path PAth to the "ff7.exe" file.
          */
-        void ReadPrices(std::string menu_path);
+        void ReadPrices();
 
         /**
          * Reads the command data from the kernel.
@@ -2441,12 +2439,20 @@ class KernelDataInstaller{
          */
         std::vector<SummonNameData> summon_names_;
 
+        /**
+         * The initial savemap structure.
+         */
         SaveMap savemap_;
 
         /**
          * The kernel file.
          */
         BinGZipFile kernel_;
+
+        /**
+         * Path to ff7.exe file.
+         */
+        std::string exe_path_;
 
         /**
          * Item and materia shop prices.

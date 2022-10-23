@@ -41,7 +41,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), main_window_(new U
     main_window_->line_vgears_exe->setText(settings_->value("VGearsEXE").toString());
     // TODO" Hard coded paths for debugging to save time. Remove them.
     main_window_->line_data_src->setText("/home/ivalentin/FF7InstallDisk/");
-    main_window_->line_exe_src->setText("/home/ivalentin/FF7InstallDisk/ff7.exe");
     //main_window_->line_data_dst->setText("/home/ivalentin/.v-gears/data/");
     timer_ = new QTimer(this);
     connect(timer_, SIGNAL(timeout()), this, SLOT(DoProgress()));
@@ -137,14 +136,6 @@ void MainWindow::on_btn_data_src_clicked(){
     main_window_->line_data_src->setText(temp);
 }
 
-void MainWindow::on_btn_exe_src_clicked(){
-    QString temp = QFileDialog::getOpenFileName(
-      this, tr("Location of original executable (ff7.exe)"),
-      QDir::homePath(), "PC executable (ff7.exe)", 0
-    );
-    main_window_->line_exe_src->setText(temp);
-}
-
 void MainWindow::on_line_data_dst_editingFinished(){
     settings_->setValue("DataDir", main_window_->line_data_dst->text());
 }
@@ -176,7 +167,6 @@ void MainWindow::on_btn_data_run_clicked(){
         // Normalize the paths so its in / format separators.
         QString input = QDir::fromNativeSeparators(main_window_->line_data_src->text());
         if (!input.endsWith("/")) input += "/";
-        QString input_exe = QDir::fromNativeSeparators(main_window_->line_exe_src->text());
         QString output = QDir::fromNativeSeparators(main_window_->line_data_dst->text());
         if (!output.endsWith("/")) output += "/";
         // TODO: Enumerate files or find some better way to do this.
@@ -215,11 +205,12 @@ void MainWindow::on_btn_data_run_clicked(){
             installer_created = true;
             installer_ = std::make_unique<DataInstaller>(
               QDir::toNativeSeparators(input).toStdString(),
-              QDir::toNativeSeparators(input_exe).toStdString(),
               QDir::toNativeSeparators(output).toStdString(),
-              [this](const std::string log_line){main_window_->data_log->append(log_line.c_str());},
-              [this](const std::string progress){
-                main_window_->label_progress->setText(progress.c_str());
+              [this](const std::string log_line, int level, bool as_progress = false){
+                 main_window_->data_log->append(log_line.c_str());
+                 std::cout << log_line << std::endl;
+                 if (as_progress)
+                     main_window_->label_progress->setText(log_line.c_str());
               }
             );
             OnInstallStarted();

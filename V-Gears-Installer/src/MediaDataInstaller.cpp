@@ -273,5 +273,4 @@ void MediaDataInstaller::InstallSprites(){
         // Delete Tex file.
         std::remove((output_dir_ + "images/" + f.file_name).c_str());
     }
-
 }

@@ -19,25 +19,10 @@
 #include <vector>
 #include <iostream>
 #include "common/VGearsApplication.h"
-#include "common/FinalFantasy7/FF7NameLookup.h"
-#include "data/VGearsTriggersFile.h"
-#include "data/VGearsFLevelFile.h"
-#include "FieldTextWriter.h"
+#include "FieldDataInstaller.h"
 #include "KernelDataInstaller.h"
 #include "MediaDataInstaller.h"
 #include "ModelsAndAnimationsDb.h"
-#include "ScopedLgp.h"
-#include "SpawnPointDb.h"
-
-// TODO: Separate classes in files.
-// TODO: Move implementations to cpp file.
-
-typedef std::set<std::string> MapCollection;
-
-typedef std::map<u16, SpawnPointDb> FieldSpawnPointsMap;
-
-typedef std::map<u16, float> FieldScaleFactorMap;
-
 
 /**
  * The data installer.
@@ -59,15 +44,13 @@ class DataInstaller{
          *
          * @param[in] input_dir Path to the directory containing the original
          * data to parse.
-         * @param[in] exe_path Path to the ff7.exe file. It's optional and it may be empty.
          * @param[in] output_dir Path to the directory to write generated data
          * to.
          * @param[in] write_output_line Pointer to function to write output.
          */
         DataInstaller(
-          const std::string input_dir, const std::string exe_path, const std::string output_dir,
-          std::function<void(std::string)> write_output_line,
-          std::function<void(std::string)> set_progress_label
+          const std::string input_dir, const std::string output_dir,
+          std::function<void(std::string, int, bool)> write_output_line
         );
 
         /**
@@ -101,84 +84,16 @@ class DataInstaller{
         void CreateDir(const std::string& dir);
 
         /**
-         * Converts a tex file to png.
+         * Creates all directories required for the installation.
          *
-         * The image is saved in the model data directory.
-         *
-         * @param[in] name Path to the tex file to convert.
+         * It also adds certain location to the resource group manager.
          */
-        void TexToPng(const std::string name);
+        void CreateDirectories();
 
         /**
-         * Exports a mesh to a file.
-         *
-         * The file will have the mesh name.
-         *
-         * @param[in] outdir Path to the directory where the file will be saved.
-         * @param[in] mesh The mesh to export.
+         * Cleans up after the installation is complete.
          */
-        void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh);
-
-        /**
-         * Converts a FFVII PC field to a V-Gears field.
-         *
-         * @param[in] field The field map to convert.
-         */
-        void PcFieldToVGearsField(VGears::FLevelFilePtr& field);
-
-        /**
-         * Initializer for {@see CollectionFieldSpawnAndScaleFactors}.
-         *
-         * Installation step 1.
-         */
-        void InitCollectSpawnAndScaleFactors();
-
-        /**
-         * Reads spawn points and scale factors from flevel files.
-         *
-         * Installation step 2.
-         */
-        void CollectionFieldSpawnAndScaleFactors();
-
-        /**
-         * Converts FFVII PC fields to V-Gears format.
-         */
-        void ConvertFieldsIteration();
-
-        /**
-         * Initializer for {@see WriteMapsXmlIteration}.
-         *
-         * Installation step 3.
-         */
-        void WriteMapsXmlBegin();
-
-        /**
-         * Saves the game maps to XML files.
-         *
-         * Installation step 4.
-         */
-        void WriteMapsXmlIteration();
-
-        /**
-         * Cleans up after {@see WriteMapsXmlIteration}.
-         *
-         * Installation step 5.
-         */
-        void EndWriteMapsXml();
-
-        /**
-         * Initializer for {@see ConvertFieldModelsIteration}.
-         *
-         * Installation step 6.
-         */
-        void ConvertFieldModelsBegin();
-
-        /**
-         * Converts the field models to V-Gears format.
-         *
-         * Installation step 7 and final.
-         */
-        void ConvertFieldModelsIteration();
+        void CleanInstall();
 
         /**
          * Installation steps.
@@ -191,44 +106,129 @@ class DataInstaller{
             IDLE = 0,
 
             /**
+             * Create all directories required for the installation.
+             */
+            CREATE_DIRECTORIES,
+
+            /**
+             * Initialize data for installation.
+             */
+            INITIALIZE,
+
+            /**
+             * Parses item and materia prices from ff7.exe.
+             */
+            KERNEL_PRICES,
+
+            /**
+             * Parses command data from KERNEL.BIN.
+             */
+            KERNEL_COMMANDS,
+
+            /**
+             * Parses attack data from KERNEL.BIN.
+             */
+            KERNEL_ATTACKS,
+
+            /**
+             * Parses characters data from KERNEL.BIN.
+             */
+            KERNEL_CHARACTERS,
+
+            /**
+             * Parses item data from KERNEL.BIN.
+             */
+            KERNEL_ITEMS,
+
+            /**
+             * Parses growth data from KERNEL.BIN.
+             */
+            KERNEL_GROWTH,
+
+            /**
+             * Parses weapon data from KERNEL.BIN.
+             */
+            KERNEL_WEAPONS,
+
+            /**
+             * Parses armor data from KERNEL.BIN.
+             */
+            KERNEL_ARMORS,
+
+            /**
+             * Parses accessory data from KERNEL.BIN.
+             */
+            KERNEL_ACCESSORIES,
+
+            /**
+             * Parses materia data from KERNEL.BIN.
+             */
+            KERNEL_MATERIA,
+
+            /**
+             * Parses key item data data from KERNEL.BIN.
+             */
+            KERNEL_KEY_ITEMS,
+
+            /**
+             * Parses summon names data from KERNEL.BIN.
+             */
+            KERNEL_SUMMON_NAMES,
+
+            /**
+             * Parses the initial savemap from KERNEL.BIN.
+             */
+            KERNEL_SAVEMAP,
+
+            /**
+             * Extract game images and icons from menu.lgp.
+             */
+            MEDIA_IMAGES,
+
+            /**
              * Initializer for {@see SPAWN_POINTS_AND_SCALE_FACTORS}.
              */
-            SPAWN_POINTS_AND_SCALE_FACTORS_INIT = 1,
+            FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT,
 
             /**
              * Step that collects spawn points and sclae factors.
              */
-            SPAWN_POINTS_AND_SCALE_FACTORS = 2,
+            FIELD_SPAWN_POINTS_AND_SCALE_FACTORS,
 
             /**
              * Step that convets fields to V-Gears format.
              */
-            CONVERT_FIELDS = 3,
+            FIELD_CONVERT,
 
             /**
              * Initializer for {@see WRITE_MAPS}.
              */
-            WRITE_MAPS_INIT = 4,
+            FIELD_WRITE_INIT,
 
             /**
              * Step that writes XML maps.
              */
-            WRITE_MAPS = 5,
+            FIELD_WRITE,
 
             /**
              * Clean up after {@see WRITE_MAPS}.
              */
-            WRITE_MAPS_CLEAN = 6,
+            FIELD_WRITE_END,
 
             /**
              * Initializer for {@see CONVERT_FIELD_MODELS}.
              */
-            CONVERT_FIELD_MODELS_INIT = 7,
+            FIELD_CONVERT_MODELS_INIT,
 
             /**
              * Step that converts field models.
              */
-            CONVERT_FIELD_MODELS = 8,
+            FIELD_CONVERT_MODELS,
+
+            /**
+             * Cleans up after the installation.
+             */
+            CLEAN,
 
             /**
              * Number of installation steps.
@@ -246,6 +246,12 @@ class DataInstaller{
          */
         InstallationSteps installation_state_ = IDLE;
 
+        int substeps_;
+
+        int cur_substep_;
+
+        std::vector<std::string> field_model_names_;
+
         /**
          * The path to the directory from which to read the PC game data.
          */
@@ -262,21 +268,6 @@ class DataInstaller{
         std::string output_dir_;
 
         /**
-         * Iterator counter.
-         */
-        size_t iterator_counter_;
-
-        /**
-         * Helper variable to indicate internal progress of installation steps.
-         */
-        size_t conversion_step_;
-
-        /**
-         * Helper variable to indicate internal progress of installation steps.
-         */
-        size_t progress_step_num_elements_;
-
-        /**
          * The installer application.
          *
          * It's a singleton so it can't be recreated. It will crash the second
@@ -290,6 +281,11 @@ class DataInstaller{
         std::unique_ptr<ScopedLgp> fields_lgp_;
 
         /**
+         * The installer for fiel maps data.
+         */
+        std::unique_ptr<FieldDataInstaller> field_installer_;
+
+        /**
          * The installer for kernel data.
          */
         std::unique_ptr<KernelDataInstaller> kernel_installer_;
@@ -300,97 +296,13 @@ class DataInstaller{
         std::unique_ptr<MediaDataInstaller> media_installer_;
 
         /**
-         * LGP archive with texture data.
-         */
-        std::unique_ptr<ScopedLgp> textures_lgp_;
-
-        /**
-         * LGP archive with field model data.
-         */
-        std::unique_ptr<ScopedLgp> field_models_lgp_;
-
-
-        /**
-         * List of flevel files.
-         */
-        Ogre::StringVectorPtr flevel_file_list_;
-
-        /**
-         * The list of maps.
-         */
-        std::vector<std::string> map_list_;
-
-        /**
-         * Map of the collected spawn points.
-         */
-        FieldSpawnPointsMap spawn_points_;
-
-        /**
-         * Map of th collected scale factors.
-         */
-        FieldScaleFactorMap scale_factors_;
-
-        /**
-         * ModelsAndAnimationsUsedByConvertedFields
-         */
-        ModelsAndAnimationsDb used_models_and_anims_;
-
-        /**
-         * List of converted maps.
-         */
-        MapCollection converted_map_list_;
-
-        /**
-         * Iterator for {@see converted_map_list}.
-         */
-        MapCollection::iterator converted_map_list_iterator_;
-
-        /**
-         * Field currently being processed.
-         */
-        VGears::FLevelFilePtr field_;
-
-        /**
-         * List of model files.
-         */
-        Ogre::StringVectorPtr field_model_file_list_;
-
-        /**
-         * An XML document.
-         *
-         * Internally used during some installation steps.
-         */
-        std::unique_ptr<TiXmlDocument> doc_;
-
-        /**
-         * An XML element.
-         *
-         * Internally used during some installation steps.
-         */
-        std::unique_ptr<TiXmlElement> element_;
-
-        /**
-         * Iterator for {@see used_models_and_anims_}.
-         */
-        ModelAnimationMap::iterator model_animation_map_iterator_;
-
-        /**
          * Function used to print text to the log output, line by line.
+         *
+         * @param[in] msg the message to write.
+         * @param[in] level Log level for the message.
+         * @param[in] as_progress If true, the text will also be set as the current text behind the
+         * progress bar.
          */
-        std::function<void(std::string)> write_output_line_;
+        std::function<void(std::string msg, int level, bool progress)> write_output_line_;
 
-        /**
-         * Function used to print set the current installation progress text.
-         */
-        std::function<void(std::string)> set_progress_label_;
-
-        /**
-         * Field text writer.
-         */
-        FieldTextWriter field_text_writer_;
-
-        /**
-         * Written materials.
-         */
-        std::vector<std::string> materials_;
 };
