@@ -4,10 +4,8 @@
 Install required dependencies by runing the script `CIBuild/linux/dependencies.sh`. Alternativelly, install them manually by running as root
 
 ```bash
-apt install libogre-1.12-dev libtinyxml-dev boost1.55 libvorbis-dev libalut-devlibfreetype6-dev libfreeimage-dev zlib1g-dev libzzip-dev libois-dev libglu-dev libqt5core5a libqt5widgets5 libpng
+apt install g++ cmake libqt5widgets5 qtbase5-dev zlib1g-dev libogre-1.12-dev libois-dev libvorbis-dev libboost-dev libboost-test-dev libboost-filesystem-dev lua5.2 liblua5.2-dev libluabind-dev luajit libopenal-dev libtinyxml-dev
 ```
-## TODO:
-I will either explain tis, or, preferably, fix it so it isn't nedded.
 
 ## Build using CMake
 ```bash

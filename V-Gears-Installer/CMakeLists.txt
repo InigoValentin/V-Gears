@@ -2,7 +2,6 @@
 include_directories(
     ${VGears_INCLUDE_DIRS}
     ${VGears_SOURCE_DIR}/V-Gears/include
-    ${VGears_SOURCE_DIR}/SupportedGames/FinalFantasy7/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${ZLIB_INCLUDE_DIRS}

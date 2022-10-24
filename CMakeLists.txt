@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 # on / off for verbose build.
 set(CMAKE_VERBOSE_MAKEFILE off)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/lib/cotire/CMake")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake")
 include(cotire)
 
 # Project Information.
@@ -105,7 +105,7 @@ endif()
 find_package(Qt5Widgets REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OGRE REQUIRED)
-find_package(OIS REQUIRED)
+#find_package(OIS REQUIRED)
 
 
 #if(NOT OIS_FOUND)

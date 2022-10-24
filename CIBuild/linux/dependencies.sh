@@ -1,1 +1,0 @@
-sudo apt-get install libogre-1.12-dev libtinyxml-dev boost1.55 libvorbis-dev libalut-dev libfreetype6-dev libfreeimage-dev zlib1g-dev libzzip-dev libois-dev libglu-dev libqt5core5a libqt5widgets5 libpng
