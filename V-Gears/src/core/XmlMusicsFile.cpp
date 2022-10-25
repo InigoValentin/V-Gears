@@ -24,17 +24,12 @@ XmlMusicsFile::~XmlMusicsFile(){}
 void XmlMusicsFile::LoadMusics(){
     TiXmlNode* node = file_.RootElement();
     if (node == nullptr || node->ValueStr() != "musics"){
-        LOG_ERROR(
-          file_.ValueStr() + " is not a valid musics file! No <musics> in root."
-        );
+        LOG_ERROR(file_.ValueStr() + " is not a valid musics file! No <musics> in root.");
         return;
     }
     node = node->FirstChild();
     while (node != nullptr){
-        if (
-          node->Type() == TiXmlNode::TINYXML_ELEMENT
-          && node->ValueStr() == "music"
-        ){
+        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "music"){
             AudioManager::Music music;
             music.name = GetString(node, "name");
             music.file = "./data/" + GetString(node, "file_name");

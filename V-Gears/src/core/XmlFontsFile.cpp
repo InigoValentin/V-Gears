@@ -25,17 +25,13 @@ void XmlFontsFile::LoadFonts(){
     TiXmlNode* node = file_.RootElement();
     if (node == nullptr || node->ValueStr() != "fonts"){
         LOG_ERROR(
-          "UI XML Manager: " + file_.ValueStr()
-          + " is not a valid fonts file! No <fonts> in root."
+          "UI XML Manager: " + file_.ValueStr() + " is not a valid fonts file! No <fonts> in root."
         );
         return;
     }
     node = node->FirstChild();
     while (node != nullptr){
-        if (
-          node->Type() == TiXmlNode::TINYXML_ELEMENT
-          && node->ValueStr() == "font"
-         ){
+        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "font"){
             XmlFontFile font("./data/" + GetString(node, "file_name"));
             font.LoadFont();
         }

@@ -68,8 +68,7 @@ class UiWidget{
         /**
          * Handles resizing events.
          *
-         * Recalculates the widget geometry and calls OnResize for all the
-         * widget children.
+         * Recalculates the widget geometry and calls OnResize for all the widget children.
          */
         void OnResize();
 
@@ -81,8 +80,7 @@ class UiWidget{
         /**
          * Toggles the widget visibility.
          *
-         * @param[in] visible True to make the widget visible, false to make it
-         * invisible.
+         * @param[in] visible True to make the widget visible, false to make it invisible.
          */
         void SetVisible(const bool visible);
 
@@ -111,8 +109,8 @@ class UiWidget{
          * Retrieves a children by name.
          *
          * @param[in] name Name of the children widget to retrieve.
-         * @return The children widget by the specified name. NULL if the
-         * widgets has no direct children by that name.
+         * @return The children widget by the specified name. NULL if the widgets has no direct
+         * children by that name.
          */
         UiWidget* GetChild(const Ogre::String& name);
 
@@ -120,8 +118,8 @@ class UiWidget{
          * Retrieves a children by ID.
          *
          * @param[in] id ID of the children widget to retrieve.
-         * @return The children widget by the specified name. NULL if the
-         * widgets has no direct children by that ID.
+         * @return The children widget by the specified name. NULL if the widgets has no direct
+         * children by that ID.
          */
         UiWidget* GetChild(const unsigned int id);
 
@@ -147,8 +145,7 @@ class UiWidget{
         /**
          * Retrieves the current animation name.
          *
-         * @return The current animation name. A blankstring if there is no set
-         * default animation.
+         * @return The current animation name. A blankstring if there is no animation.
          */
         const Ogre::String& GetCurrentAnimationName() const;
 
@@ -165,8 +162,7 @@ class UiWidget{
          * @param[in] animation Animation to play.
          * @param[in] state Initial animation state.
          * @param[in] start Seconds at which to start the animation.
-         * @param[in] end Seconds at which to end the animation. -1 to play
-         * it in full.
+         * @param[in] end Seconds at which to end the animation. -1 to play it in full.
          */
         void PlayAnimation(
           const Ogre::String& animation, UiAnimation::State state,
@@ -179,17 +175,15 @@ class UiWidget{
          * The animation will be played from the start for it's full length.
          *
          * @param[in] name The name of the animation to play.
-         * @todo It uses the parameter UiAnimation::DEFAULT. What does it do?
-         * Does it play the animation in a loop, or uses a default value of the
-         * specific animation.
+         * @todo It uses the parameter UiAnimation::DEFAULT. What does it do? Does it play the
+         * animation in a loop, or uses a default value of the specific animation.
          */
         void ScriptPlayAnimation(const char* name);
 
         /**
          * Plays an animation.
          *
-         * The animation will be played from the start for it's full length,
-         * only once.
+         * The animation will be played from the start for it's full length, only once.
          *
          * @param[in] name The name of the animation to play.
          */
@@ -198,11 +192,9 @@ class UiWidget{
         /**
          * @param[in] name Name of the animation to play.
          * @param[in] start Seconds at which to start the animation.
-         * @param[in] end Seconds at which to end the animation. -1 to play
-         * it in full.
-         * @todo It uses the parameter UiAnimation::DEFAULT. Whats does it do?
-         * Does it play the animation in a loop, or uses a default value of the
-         * specific animation.
+         * @param[in] end Seconds at which to end the animation. -1 to play it in full.
+         * @todo It uses the parameter UiAnimation::DEFAULT. Whats does it do? Does it play the
+         * animation in a loop, or uses a default value of the specific animation.
          */
         void ScriptPlayAnimation(const char* name, const float start, const float end);
 
@@ -458,19 +450,18 @@ class UiWidget{
         /**
          * Sets the widget scissor area.
          *
-         * @param[in] percent_x1 @todo Undersnd and document.
-         * @param[in] x1 @todo Undersnd and document.
-         * @param[in] percent_y1 @todo Undersnd and document.
-         * @param[in] y1 @todo Undersnd and document.
-         * @param[in] percent_x2 @todo Undersnd and document.
-         * @param[in] x2 @todo Undersnd and document.
-         * @param[in] percent_y2 @todo Undersnd and document.
-         * @param[in] y2 @todo Undersnd and document.
+         * @param[in] percent_x1 @todo Understand and document.
+         * @param[in] x1 @todo Understand and document.
+         * @param[in] percent_y1 @todo Understand and document.
+         * @param[in] y1 @todo Understand and document.
+         * @param[in] percent_x2 @todo Understand and document.
+         * @param[in] x2 @todo Understand and document.
+         * @param[in] percent_y2 @todo Understand and document.
+         * @param[in] y2 @todo Understand and document.
          */
         void SetScissorArea(
-          const float percent_x1, const float x1, const float percent_y1,
-          const float y1, const float percent_x2, const float x2,
-          const float percent_y2, const float y2
+          const float percent_x1, const float x1, const float percent_y1, const float y1,
+          const float percent_x2, const float x2, const float percent_y2, const float y2
         );
 
         /**
@@ -492,28 +483,20 @@ class UiWidget{
         /**
          * Sets the widget colour.
          *
-         * It set the same colours for each corner, and blends it in the
-         * interior.
+         * It set the same colours for each corner, and blends it in the interior.
          *
          * @param[in] r1 Colour red component for the top-left corner (0-255).
-         * @param[in] g1 Colour green component for the top-left corner
-         * (0-255).
+         * @param[in] g1 Colour green component for the top-left corner (0-255).
          * @param[in] b1 Colour blue component for the top-left corner (0-255).
          * @param[in] r2 Colour red component for the top-right corner (0-255).
-         * @param[in] g2 Colour green component for the top-right corner
-         * (0-255).
+         * @param[in] g2 Colour green component for the top-right corner (0-255).
          * @param[in] b2 Colour blue component for the top-right corner (0-255).
          * @param[in] r3 Colour red component for the bottom-right corner (0-255).
-         * @param[in] g3 Colour green component for the bottom-right corner
-         * (0-255).
-         * @param[in] b3 Colour blue component for the bottom-right corner
-         * (0-255).
-         * @param[in] r4 Colour red component for the bottom-left corner
-         * (0-255).
-         * @param[in] g4 Colour green component for the bottom-left corner
-         * (0-255).
-         * @param[in] b4 Colour blue component for the bottom-left corner
-         * (0-255).
+         * @param[in] g3 Colour green component for the bottom-right corner (0-255).
+         * @param[in] b3 Colour blue component for the bottom-right corner (0-255).
+         * @param[in] r4 Colour red component for the bottom-left corner (0-255).
+         * @param[in] g4 Colour green component for the bottom-left corner (0-255).
+         * @param[in] b4 Colour blue component for the bottom-left corner (0-255).
          */
         void SetColours(
           const float r1, const float g1, const float b1,

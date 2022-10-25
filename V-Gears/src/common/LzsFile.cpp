@@ -45,45 +45,44 @@ void LzsFile::ExtractLzs(){
         return;
     }
     u32 extract_size = (buffer_size_ + 255) & ~255;
-    u8* extractbuffer_ = (u8*) malloc(extract_size);
+    u8* extractbuffer_ = static_cast<u8*>(malloc(extract_size));
     unsigned int inputoffset_ = 4;
     int outputoffset_ = 0;
     u8 control_byte = 0;
     u8 control_bit = 0;
     while (inputoffset_ < buffer_size_){
         if (control_bit == 0){
-            control_byte = ((u8*) buffer_)[inputoffset_ ++];
+            control_byte = (static_cast<u8*>(buffer_))[inputoffset_ ++];
             control_bit = 8;
         }
 
         if (control_byte & 1){
-            ((u8*) extractbuffer_) [outputoffset_ ++] =
-              ((u8*) buffer_) [inputoffset_ ++];
+            (static_cast<u8*>(extractbuffer_))[outputoffset_ ++] =
+              (static_cast<u8*>(buffer_))[inputoffset_ ++];
             if (outputoffset_ == extract_size){
                 extract_size += 256;
-                extractbuffer_ = (u8*) realloc(extractbuffer_, extract_size);
+                extractbuffer_ = static_cast<u8*>(realloc(extractbuffer_, extract_size));
             }
         }
         else{
-            u8 reference1 = ((u8*) buffer_)[inputoffset_++];
-            u8 reference2 = ((u8*) buffer_)[inputoffset_++];
+            u8 reference1 = (static_cast<u8*>(buffer_))[inputoffset_++];
+            u8 reference2 = (static_cast<u8*>(buffer_))[inputoffset_++];
             u16 referenceoffset_ = reference1 | ((reference2 & 0xF0) << 4);
             u8 reference_length = (reference2 & 0xF) + 3;
-            int realoffset_ =
-              outputoffset_
-              - ((outputoffset_ - 18 - referenceoffset_) & 0xFFF);
+            int realoffset_
+              = outputoffset_ - ((outputoffset_ - 18 - referenceoffset_) & 0xFFF);
             for (int j = 0; j < reference_length; ++ j){
                 if (realoffset_ < 0){
-                    ((u8*)extractbuffer_)[outputoffset_++] = 0;
+                    (static_cast<u8*>(extractbuffer_))[outputoffset_++] = 0;
                 }
                 else{
-                    ((u8*)extractbuffer_)[outputoffset_++] =
-                      ((u8*)extractbuffer_)[realoffset_];
+                    (static_cast<u8*>(extractbuffer_))[outputoffset_++] =
+                      (static_cast<u8*>(extractbuffer_))[realoffset_];
                 }
                 if (outputoffset_ == extract_size){
                     extract_size += 256;
                     extractbuffer_ =
-                      (u8*) realloc(extractbuffer_, extract_size);
+                      static_cast<u8*>(realloc(extractbuffer_, extract_size));
                 }
                 ++ realoffset_;
             }

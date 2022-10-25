@@ -16,8 +16,9 @@
 #include <OgreLogManager.h>
 #include <OgreRoot.h>
 #include "core/particles/ParticleSystemManager.h"
+
+#include "../../../include/core/particles/emitters/PointEmitterFactory.h"
 #include "core/particles/ParticleSystemFactory.h"
-#include "core/particles/emitters/ParticlePointEmitterFactory.h"
 #include "core/particles/renderer/ParticleEntityRendererFactory.h"
 
 template<> ParticleSystemManager*

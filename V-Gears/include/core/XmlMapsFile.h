@@ -41,16 +41,15 @@ class XmlMapsFile : public XmlFile{
          * Retrieves a map file by map name.
          *
          * @param[in] name Name of the map to look for.
-         * @return Path to the specified map file, or an empty string if there
-         * is no file for such map.
+         * @return Path to the specified map file, or an empty string if there is no file for such
+         * map.
          */
         const Ogre::String GetMapFileNameByName(const Ogre::String& name);
 
         /**
          * Retrieves a list of map names.
          *
-         * @param[out] complete_params The list of map names will be loaded
-         * here.
+         * @param[out] complete_params The list of map names will be loaded here.
          */
         void GetMapNames(Ogre::StringVector& complete_params);
 };

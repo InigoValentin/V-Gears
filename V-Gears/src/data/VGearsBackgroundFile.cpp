@@ -94,12 +94,10 @@ namespace VGears{
         assert(palette != nullptr);
         SpritePtrList sprites;
         AddAllSprites(sprites);
-        size_t sprite_count(sprites.size());
         size_t width(1024);
         size_t row_pitch(width);
         size_t height(width);
         size_t pixel_count(width * height);
-        row_pitch = width;
         Ogre::PixelFormat format(Ogre::PF_A8R8G8B8);
         size_t memory_size(
           Ogre::PixelUtil::getMemorySize(width, height, 1, format)
@@ -107,10 +105,6 @@ namespace VGears{
         Ogre::MemoryDataStream *buffer(new Ogre::MemoryDataStream(memory_size));
         uint32 *color(reinterpret_cast<uint32*>(buffer->getPtr()));
 
-        /*
-        Ogre::LogManager::getSingleton().stream() << "Image Size: " << width
-          << " x " << height << " sprite_count " << sprite_count;
-        */
         int dst_x(0), dst_y(0);
         int dst_x_16(0), dst_y_16(0);
         int dst_x_32(0), dst_y_32(0);

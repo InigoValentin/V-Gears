@@ -125,7 +125,6 @@ namespace VGears{
 
     void TexFile::FlipEndian(void * pData, size_t size, size_t count) const{
 #if OGRE_ENDIAN == OGRE_ENDIAN_BIG
-        std::cout << "FLIP ENDIAN 1\n";
         for (unsigned int index = 0; index < count; index ++)
             FlipEndian((void *)((long)pData + (index * size)), size);
 #endif
@@ -133,10 +132,8 @@ namespace VGears{
 
     void TexFile::FlipEndian(void * pData, size_t size) const{
 #if OGRE_ENDIAN == OGRE_ENDIAN_BIG
-        std::cout << "FLIP ENDIAN 2\n";
-        char swap_byte;
         for(unsigned int byteIndex = 0; byteIndex < size/2; byteIndex ++){
-            swap_byte = *(char *)((long)pData + byteIndex);
+            char swap_byte = *(char *)((long)pData + byteIndex);
             *(char *)((long)pData + byteIndex)
               = *(char *)((long)pData + size - byteIndex - 1);
             *(char *)((long)pData + size - byteIndex - 1) = swap_byte;

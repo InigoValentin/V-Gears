@@ -25,20 +25,14 @@ void ParticleRendererTranslator::translate(
 
     // name can't be empty because we get renderer type from it
     if(obj->name.empty()){
-        compiler->addError(
-          Ogre::ScriptCompiler::CE_OBJECTNAMEEXPECTED, obj->file, obj->line
-        );
+        compiler->addError(Ogre::ScriptCompiler::CE_OBJECTNAMEEXPECTED, obj->file, obj->line);
         return;
     }
-    ParticleTechnique* tech = Ogre::any_cast<ParticleTechnique*>(
-      obj->parent->context
-    );
+    ParticleTechnique* tech = Ogre::any_cast<ParticleTechnique*>(obj->parent->context);
 
     ParticleRenderer* rend = tech->CreateRenderer(obj->name);
     if (rend == nullptr) {
-        compiler->addError(
-          Ogre::ScriptCompiler::CE_OBJECTALLOCATIONERROR, obj->file, obj->line
-        );
+        compiler->addError(Ogre::ScriptCompiler::CE_OBJECTALLOCATIONERROR, obj->file, obj->line);
         return;
     }
     Ogre::LogManager::getSingletonPtr()->logMessage(
@@ -46,9 +40,7 @@ void ParticleRendererTranslator::translate(
     );
 
     for (
-      Ogre::AbstractNodeList::iterator i = obj->children.begin();
-      i != obj->children.end();
-      ++ i
+      Ogre::AbstractNodeList::iterator i = obj->children.begin(); i != obj->children.end(); ++ i
     ){
         if ((*i)->type == Ogre::ANT_PROPERTY){
             Ogre::PropertyAbstractNode *prop =
@@ -57,37 +49,28 @@ void ParticleRendererTranslator::translate(
 
             // Glob the values together
             for (
-              Ogre::AbstractNodeList::iterator i = prop->values.begin();
-              i != prop->values.end();
-              ++ i
+              Ogre::AbstractNodeList::iterator j = prop->values.begin();
+              j != prop->values.end();
+              ++ j
             ){
-                if((*i)->type == Ogre::ANT_ATOM){
-                    if (value.empty()){
-                        value = ((Ogre::AtomAbstractNode*)(*i).get())->value;
-                    }
-                    else{
-                        value =
-                          value + " "
-                          + ((Ogre::AtomAbstractNode*)(*i).get())->value;
-                    }
+                if((*j)->type == Ogre::ANT_ATOM){
+                    if (value.empty()) value = ((Ogre::AtomAbstractNode*)(*j).get())->value;
+                    else value = value + " " + ((Ogre::AtomAbstractNode*)(*j).get())->value;
                 }
                 else{
                     compiler->addError(
-                      Ogre::ScriptCompiler::CE_INVALIDPARAMETERS,
-                      prop->file, prop->line
+                      Ogre::ScriptCompiler::CE_INVALIDPARAMETERS, prop->file, prop->line
                     );
                     break;
                 }
             }
 
             Ogre::LogManager::getSingletonPtr()->logMessage(
-              "ParticleRendererTranslator: Set param '"
-              + prop->name + "' to '" + value + "'."
+              "ParticleRendererTranslator: Set param '" + prop->name + "' to '" + value + "'."
             );
             if (!rend->setParameter(prop->name, value)){
                 compiler->addError(
-                  Ogre::ScriptCompiler::CE_INVALIDPARAMETERS,
-                  prop->file, prop->line
+                  Ogre::ScriptCompiler::CE_INVALIDPARAMETERS, prop->file, prop->line
                 );
             }
         }

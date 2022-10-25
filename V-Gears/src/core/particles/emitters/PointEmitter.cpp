@@ -13,11 +13,9 @@
  * GNU General Public License for more details.
  */
 
-#include "core/particles/emitters/ParticlePointEmitter.h"
+#include "core/particles/emitters/PointEmitter.h"
 
-PointEmitter::PointEmitter():ParticleEmitter(){
-    emitter_type_ = "Point";
-}
+PointEmitter::PointEmitter():ParticleEmitter(){emitter_type_ = "Point";}
 
 void PointEmitter::CopyAttributesTo(ParticleEmitter* emitter){
     ParticleEmitter::CopyAttributesTo(emitter);

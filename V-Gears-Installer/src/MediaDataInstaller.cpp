@@ -50,7 +50,6 @@ void MediaDataInstaller::InstallSprites(){
         VGears::LGPArchive::FileEntry f = files.at(i);
         if (
           f.file_name != "barre.tex"
-          && f.file_name != "barre.tex"
           && f.file_name != "bins.tex"
           && f.file_name != "cido.tex"
           && f.file_name != "cloud.tex"

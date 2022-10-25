@@ -44,8 +44,6 @@ int KernelDataInstaller::ReadCommands(){
     File command_file = kernel_.ExtractGZip(KERNEL_COMMAND_DATA);
     File command_name_file = kernel_.ExtractGZip(KERNEL_COMMAND_NAMES);
     File command_desc_file = kernel_.ExtractGZip(KERNEL_COMMAND_DESCRIPTIONS);
-    int name_offset = 0;
-    int desc_offset = 0;
     int command_count = 0;
 
     // There are exactly 32 commands. Some of them are blank, so there is not really a
@@ -53,6 +51,8 @@ int KernelDataInstaller::ReadCommands(){
     for (int i = 0; i < 32; i ++){
 
         CommandData data;
+        int name_offset;
+        int desc_offset;
 
         // From the current name file offset, read 16 bytes.
         // This is the pointer to the offset for the item name.
@@ -85,9 +85,9 @@ int KernelDataInstaller::ReadCommands(){
                     // The offset goes backwards from the position of the 0xF9 byte.
                     u8 comp_offset = command_desc_file.GetU8(desc_offset + 1) & 63;
 
-                    for (int i = 0; i < comp_size; i ++){
+                    for (int c = 0; c < comp_size; c ++){
                         data.description += ENGLISH_CHARS[
-                          command_desc_file.GetU8(desc_offset - 1 - comp_offset + i)
+                          command_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
                         ];
                     }
                     desc_offset ++;
@@ -518,7 +518,7 @@ void KernelDataInstaller::ReadGrowth(){
     for (int i = 0; i < 12; i ++) growth_.bonus_mp[i] = growth_file.readU8();
     for (int i = 0; i < 64; i ++){
         growth_.curves[i].id = i;
-        if (i >=0 && i < 37) growth_.curves[i].type = CURVE_PRIMARY;
+        if (i < 37) growth_.curves[i].type = CURVE_PRIMARY;
         else if (i >=37 && i < 46) growth_.curves[i].type = CURVE_HP;
         else if (i >=46 && i < 55) growth_.curves[i].type = CURVE_MP;
         else growth_.curves[i].type = CURVE_EXP;
@@ -564,13 +564,13 @@ int KernelDataInstaller::ReadItems(){
     File items_file = kernel_.ExtractGZip(KERNEL_ITEM_DATA);
     File items_name_file = kernel_.ExtractGZip(KERNEL_ITEM_NAMES);
     File items_desc_file = kernel_.ExtractGZip(KERNEL_ITEM_DESCRIPTIONS);
-    int name_offset = 0;
-    int desc_offset = 0;
     int item_count = 0;
 
     for (int i = 0; i < 128; i ++){
 
         ItemData data;
+        int name_offset;
+        int desc_offset;
 
         // From the current name file offset, read 16 bytes.
         // This is the pointer to the offset for the item name.
@@ -603,9 +603,9 @@ int KernelDataInstaller::ReadItems(){
                     // The offset goes backwards from the position of the 0xF9 byte.
                     u8 comp_offset = items_desc_file.GetU8(desc_offset + 1) & 63;
 
-                    for (int i = 0; i < comp_size; i ++){
+                    for (int c = 0; c < comp_size; c ++){
                         data.description += ENGLISH_CHARS[
-                          items_desc_file.GetU8(desc_offset - 1 - comp_offset + i)
+                          items_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
                         ];
                     }
                     desc_offset ++;
@@ -827,13 +827,13 @@ int KernelDataInstaller::ReadWeapons(){
     File weapons_file = kernel_.ExtractGZip(KERNEL_WEAPON_DATA);
     File weapons_name_file = kernel_.ExtractGZip(KERNEL_WEAPON_NAMES);
     File weapons_desc_file = kernel_.ExtractGZip(KERNEL_WEAPON_DESCRIPTIONS);
-    int name_offset = 0;
-    int desc_offset = 0;
     int weapon_count = 0;
 
     for (int i = 0; i < 128; i ++){
 
         WeaponData data;
+        int name_offset;
+        int desc_offset;
 
         // From the current name file offset, read 16 bytes.
         // This is the pointer to the offset for the item name.
@@ -866,9 +866,9 @@ int KernelDataInstaller::ReadWeapons(){
                     // The offset goes backwards from the position of the 0xF9 byte.
                     u8 comp_offset = weapons_desc_file.GetU8(desc_offset + 1) & 63;
 
-                    for (int i = 0; i < comp_size; i ++){
+                    for (int c = 0; c < comp_size; c ++){
                         data.description += ENGLISH_CHARS[
-                          weapons_desc_file.GetU8(desc_offset - 1 - comp_offset + i)
+                          weapons_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
                         ];
                     }
                     desc_offset ++;
@@ -900,9 +900,9 @@ int KernelDataInstaller::ReadWeapons(){
         data.equip_raw = weapons_file.readU16LE();
         data.element_raw = weapons_file.readU16LE();
         data.unused_3 = weapons_file.readU16LE();
-        for (int i = 0; i < 4; i ++) data.stat_raw[i] = weapons_file.readU8();
-        for (int i = 0; i < 4; i ++) data.stat_bonus_raw[i] = weapons_file.readU8();
-        for (int i = 0; i < 8; i ++) data.slots_raw[i] = weapons_file.readU8();
+        for (int s = 0; s < 4; s ++) data.stat_raw[s] = weapons_file.readU8();
+        for (int s = 0; s < 4; s ++) data.stat_bonus_raw[s] = weapons_file.readU8();
+        for (int s = 0; s < 8; s ++) data.slots_raw[s] = weapons_file.readU8();
         data.sound = weapons_file.readU8();
         data.sound_critical = weapons_file.readU8();
         data.sound_miss = weapons_file.readU8();
@@ -949,21 +949,21 @@ int KernelDataInstaller::ReadWeapons(){
         if (data.equip_raw == (data.equip_raw | 0x0100)) data.equip.push_back(8);
         if (data.equip_raw == (data.equip_raw | 0x0200)) data.equip.push_back(9);
         if (data.equip_raw == (data.equip_raw | 0x0400)) data.equip.push_back(10);
-        for (int i = 0; i < 4; i ++){
-            if (data.stat_raw[i] < 0XFF && data.stat_bonus_raw[i] > 0){
+        for (int s = 0; s < 4; s ++){
+            if (data.stat_raw[s] < 0XFF && data.stat_bonus_raw[s] > 0){
                 StatBonus stat_bonus;
-                stat_bonus.stat = data.stat_raw[i];
-                stat_bonus.bonus = data.stat_bonus_raw[i];
+                stat_bonus.stat = data.stat_raw[s];
+                stat_bonus.bonus = data.stat_bonus_raw[s];
                 data.stat_bonus.push_back(stat_bonus);
             }
         }
-        for (int i = 0; i < 8; i ++){
-            if (data.slots_raw[i] == 1 || data.slots_raw[i] == 5){
+        for (int s = 0; s < 8; s ++){
+            if (data.slots_raw[s] == 1 || data.slots_raw[s] == 5){
                 data.materia_slots.push_back(SLOT_UNLINKED);
             }
             else if (
-              data.slots_raw[i] == 2 || data.slots_raw[i] == 3
-              || data.slots_raw[i] == 6 || data.slots_raw[i] == 7
+              data.slots_raw[s] == 2 || data.slots_raw[s] == 3
+              || data.slots_raw[s] == 6 || data.slots_raw[s] == 7
             ){
                 data.materia_slots.push_back(SLOT_LINKED);
             }
@@ -1056,13 +1056,13 @@ int KernelDataInstaller::ReadArmors(){
     File armor_file = kernel_.ExtractGZip(KERNEL_ARMOR_DATA);
     File armor_name_file = kernel_.ExtractGZip(KERNEL_ARMOR_NAMES);
     File armor_desc_file = kernel_.ExtractGZip(KERNEL_ARMOR_DESCRIPTIONS);
-    int name_offset = 0;
-    int desc_offset = 0;
     int armor_count = 0;
 
     for (int i = 0; i < 32; i ++){ // There are exactly 32.
 
         ArmorData data;
+        int name_offset;
+        int desc_offset;
 
         // From the current name file offset, read 16 bytes.
         // This is the pointer to the offset for the item name.
@@ -1095,9 +1095,9 @@ int KernelDataInstaller::ReadArmors(){
                     // The offset goes backwards from the position of the 0xF9 byte.
                     u8 comp_offset = armor_desc_file.GetU8(desc_offset + 1) & 63;
 
-                    for (int i = 0; i < comp_size; i ++){
+                    for (int c = 0; c < comp_size; c ++){
                         data.description += ENGLISH_CHARS[
-                          armor_desc_file.GetU8(desc_offset - 1 - comp_offset + i)
+                          armor_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
                         ];
                     }
                     desc_offset ++;
@@ -1121,13 +1121,13 @@ int KernelDataInstaller::ReadArmors(){
         data.m_evasion = armor_file.readU8();
         data.status = armor_file.readU8();
         data.unknown_1 = armor_file.readU16LE();
-        for (int i = 0; i < 8; i ++) data.slots_raw[i] = armor_file.readU8();
+        for (int s = 0; s < 8; s ++) data.slots_raw[s] = armor_file.readU8();
         data.growth = armor_file.readU8();
         data.equip_raw = armor_file.readU16LE();
         data.element_raw = armor_file.readU16LE();
         data.unknown_2 = armor_file.readU16LE();
-        for (int i = 0; i < 4; i ++) data.stat_raw[i] = armor_file.readU8();
-        for (int i = 0; i < 4; i ++) data.stat_bonus_raw[i] = armor_file.readU8();
+        for (int s = 0; s < 4; s ++) data.stat_raw[s] = armor_file.readU8();
+        for (int s = 0; s < 4; s ++) data.stat_bonus_raw[s] = armor_file.readU8();
         data.restrict_raw = armor_file.readU16LE();
         data.unknown_3 = armor_file.readU16LE();
 
@@ -1148,11 +1148,11 @@ int KernelDataInstaller::ReadArmors(){
         if (data.equip_raw == (data.equip_raw | 0x0100)) data.equip.push_back(8);
         if (data.equip_raw == (data.equip_raw | 0x0200)) data.equip.push_back(9);
         if (data.equip_raw == (data.equip_raw | 0x0400)) data.equip.push_back(10);
-        for (int i = 0; i < 4; i ++){
-            if (data.stat_raw[i] < 0XFF && data.stat_bonus_raw[i] > 0){
+        for (int s = 0; s < 4; s ++){
+            if (data.stat_raw[s] < 0XFF && data.stat_bonus_raw[s] > 0){
                 StatBonus stat_bonus;
-                stat_bonus.stat = data.stat_raw[i];
-                stat_bonus.bonus = data.stat_bonus_raw[i];
+                stat_bonus.stat = data.stat_raw[s];
+                stat_bonus.bonus = data.stat_bonus_raw[s];
                 data.stat_bonus.push_back(stat_bonus);
             }
         }
@@ -1255,13 +1255,13 @@ int KernelDataInstaller::ReadAccessories(){
     File accessory_file = kernel_.ExtractGZip(KERNEL_ACCESSORY_DATA);
     File accessory_name_file = kernel_.ExtractGZip(KERNEL_ACCESSORY_NAMES);
     File accessory_desc_file = kernel_.ExtractGZip(KERNEL_ACCESSORY_DESCRIPTIONS);
-    int name_offset = 0;
-    int desc_offset = 0;
     int accessory_count = 0;
 
     for (int i = 0; i < 32; i ++){ // There are exactly 32.
 
         AccessoryData data;
+        int name_offset;
+        int desc_offset;
 
         // From the current name file offset, read 16 bytes.
         // This is the pointer to the offset for the item name.
@@ -1294,9 +1294,9 @@ int KernelDataInstaller::ReadAccessories(){
                     // The offset goes backwards from the position of the 0xF9 byte.
                     u8 comp_offset = accessory_desc_file.GetU8(desc_offset + 1) & 63;
 
-                    for (int i = 0; i < comp_size; i ++){
+                    for (int c = 0; c < comp_size; c ++){
                         data.description += ENGLISH_CHARS[
-                          accessory_desc_file.GetU8(desc_offset - 1 - comp_offset + i)
+                          accessory_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
                         ];
                     }
                     desc_offset ++;
@@ -1312,8 +1312,8 @@ int KernelDataInstaller::ReadAccessories(){
         if ("" == data.name) break;
 
         // Read data from the accessory data section.
-        for (int i = 0; i < 2; i ++) data.stat_raw[i] = accessory_file.readU8();
-        for (int i = 0; i < 2; i ++) data.stat_bonus_raw[i] = accessory_file.readU8();
+        for (int s = 0; s < 2; s ++) data.stat_raw[s] = accessory_file.readU8();
+        for (int s = 0; s < 2; s ++) data.stat_bonus_raw[s] = accessory_file.readU8();
         data.element_defense_mode = accessory_file.readU8();
         data.effect = accessory_file.readU8();
         data.element_raw = accessory_file.readU16LE();
@@ -1369,11 +1369,11 @@ int KernelDataInstaller::ReadAccessories(){
         if (data.equip_raw == (data.equip_raw | 0x0100)) data.equip.push_back(8);
         if (data.equip_raw == (data.equip_raw | 0x0200)) data.equip.push_back(9);
         if (data.equip_raw == (data.equip_raw | 0x0400)) data.equip.push_back(10);
-        for (int i = 0; i < 2; i ++){
-            if (data.stat_raw[i] < 0XFF && data.stat_bonus_raw[i] > 0){
+        for (int s = 0; s < 2; s ++){
+            if (data.stat_raw[s] < 0XFF && data.stat_bonus_raw[s] > 0){
                 StatBonus stat_bonus;
-                stat_bonus.stat = data.stat_raw[i];
-                stat_bonus.bonus = data.stat_bonus_raw[i];
+                stat_bonus.stat = data.stat_raw[s];
+                stat_bonus.bonus = data.stat_bonus_raw[s];
                 data.stat_bonus.push_back(stat_bonus);
             }
         }
@@ -1457,13 +1457,13 @@ int KernelDataInstaller::ReadMateria(){
     File materia_file = kernel_.ExtractGZip(KERNEL_MATERIA_DATA);
     File materia_name_file = kernel_.ExtractGZip(KERNEL_MATERIA_NAMES);
     File materia_desc_file = kernel_.ExtractGZip(KERNEL_MATERIA_DESCRIPTIONS);
-    int name_offset = 0;
-    int desc_offset = 0;
     int materia_count = 0;
 
     for (int i = 0; i < 96; i ++){ // There are exactly 96.
 
         MateriaData data;
+        int name_offset;
+        int desc_offset;
 
         // From the current name file offset, read 16 bytes.
         // This is the pointer to the offset for the item name.
@@ -1496,9 +1496,9 @@ int KernelDataInstaller::ReadMateria(){
                     // The offset goes backwards from the position of the 0xF9 byte.
                     u8 comp_offset = materia_desc_file.GetU8(desc_offset + 1) & 63;
 
-                    for (int i = 0; i < comp_size; i ++){
+                    for (int c = 0; c < comp_size; c ++){
                         data.description += ENGLISH_CHARS[
-                          materia_desc_file.GetU8(desc_offset - 1 - comp_offset + i)
+                          materia_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
                         ];
                     }
                     desc_offset ++;
@@ -1740,13 +1740,13 @@ int KernelDataInstaller::ReadKeyItems(){
 
     File key_items_name_file = kernel_.ExtractGZip(KERNEL_KEY_ITEM_NAMES);
     File key_items_desc_file = kernel_.ExtractGZip(KERNEL_KEY_ITEM_DESCRIPTIONS);
-    int name_offset = 0;
-    int desc_offset = 0;
     int key_item_count = 0;
 
     for (int i = 0; i < 128; i ++){
 
         KeyItemData data;
+        int name_offset;
+        int desc_offset;
 
         // From the current name file offset, read 16 bytes.
         // This is the pointer to the offset for the item name.
@@ -1823,12 +1823,12 @@ int KernelDataInstaller::ReadSummonNames(){
     key_items_.clear();
 
     File summon_name_file = kernel_.ExtractGZip(KERNEL_SUMMON_ATTACK_NAMES);
-    int name_offset = 0;
     int summon_count = 0;
 
     for (int i = 0; i < 16; i ++){ // There are exactly 16.
 
         SummonNameData data;
+        int name_offset;
 
         // From the current name file offset, read 16 bytes.
         // This is the pointer to the offset for the item name.
@@ -1980,8 +1980,8 @@ void KernelDataInstaller::WriteInitialSaveMap(std::string file_name){
     std::fstream file;
     file.open(file_name, std::ios::out);
     if (!file) return;
-    int total_count = 0; // Utility to count in loops.
     for (int c = 0; c < 9; c ++){
+        int total_count; // Utility to count in loops.
         SaveMap::Character character = savemap_.characters[c];
         file
           << "Characters[" << c << "] = {\n"

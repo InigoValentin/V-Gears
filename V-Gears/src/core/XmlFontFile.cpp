@@ -27,29 +27,24 @@ XmlFontFile::~XmlFontFile(){}
 void XmlFontFile::LoadFont(){
     TiXmlNode* node = file_.RootElement();
     if (node == nullptr || node->ValueStr() != "font"){
-        LOG_ERROR(
-          file_.ValueStr() + " is not a valid font file! No <font> in root."
-        );
+        LOG_ERROR(file_.ValueStr() + " is not a valid font file! No <font> in root.");
         return;
     }
     Ogre::String name = GetString(node, "name", "");
-    Ogre::String language = GetString( node, "language", "" );
+    Ogre::String language = GetString( node, "language", "");
     Ogre::String image = GetString(node, "image", "");
     Ogre::Vector2 size = GetVector2(node, "image_size", Ogre::Vector2::ZERO);
     int height = GetInt(node, "height", 0);
     if (name != "" && image != "" && size.x != 0 && size.y != 0){
-        UiFont* font = new UiFont( name, language );
-        font->SetImage(image, (int)size.x, (int)size.y);
+        UiFont* font = new UiFont(name, language);
+        font->SetImage(image, static_cast<int>(size.x), static_cast<int>(size.y));
         font->SetHeight(height);
         node = node->FirstChild();
         while (node != nullptr){
-            if (
-              node->Type() == TiXmlNode::TINYXML_ELEMENT
-              && node->ValueStr() == "char"
-            ){
+            if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "char"){
                 UiCharData data;
-                Ogre::UTFString name = GetUTFString(node, "name", "");
-                if (name != "") data.char_code = *(name.c_str());
+                Ogre::UTFString node_name = GetUTFString(node, "name", "");
+                if (node_name != "") data.char_code = *(node_name.c_str());
                 data.x = GetInt(node, "x", 0);
                 data.y = GetInt(node, "y", 0);
                 data.width = GetInt(node, "width", 0);

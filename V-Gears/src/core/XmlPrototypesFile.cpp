@@ -32,10 +32,7 @@ void XmlPrototypesFile::LoadPrototypes(){
     }
     node = node->FirstChild();
     while (node != nullptr){
-        if (
-          node->Type() == TiXmlNode::TINYXML_ELEMENT
-          && node->ValueStr() == "prototype"
-        ){
+        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "prototype"){
             Ogre::String name = GetString(node, "name");
             UiManager::getSingleton().AddPrototype(name, node->Clone());
         }

@@ -49,7 +49,5 @@ class XmlScreenFile : public XmlFile{
          * @param[in] base_name Name for the top widget in the XML node.
          * @param[in] widget Top parent widget.
          */
-        void LoadScreenRecursive(
-          TiXmlNode* node, const Ogre::String& base_name, UiWidget* widget
-        );
+        void LoadScreenRecursive(TiXmlNode* node, const Ogre::String& base_name, UiWidget* widget);
 };

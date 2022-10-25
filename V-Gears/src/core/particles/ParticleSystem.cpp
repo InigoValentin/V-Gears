@@ -43,7 +43,7 @@ void ParticleSystem::CopyAttributesTo(ParticleSystem* ps){
 }
 
 const Ogre::String& ParticleSystem::getMovableType() const{
-    static Ogre::String type = "ParticleSystem";
+    Ogre::String type = "ParticleSystem";
     return type;
 }
 

@@ -26,16 +26,15 @@
 
 // TODO: All the methods defined here that refer to XML files are implemented
 // as methods of XmlFile. Can they be deleted from here?
+// TODO: Also, a lot of functions are never actually called.
 
 /**
  * Retrieves a boolean from an XMl tag.
  *
  * @param[in] node The XML node.
  * @param[in] tag The name of the tag.
- * @param[in] def Default value, in case the tag is not found or it's not a
- * boolean value.
- * @return Boolean value of the tag. If it's not found or it's not a boolean,
- * def is returned.
+ * @param[in] def Default value, in case the tag is not found or it's not a boolean value.
+ * @return Boolean value of the tag. If it's not found or it's not a boolean, def is returned.
  */
 bool GetBool(TiXmlNode* node, const Ogre::String& tag, bool def = false);
 
@@ -44,10 +43,8 @@ bool GetBool(TiXmlNode* node, const Ogre::String& tag, bool def = false);
  *
  * @param[in] node The XML node.
  * @param[in] tag The name of the tag.
- * @param[in] def Default value, in case the tag is not found or it's not a
- * numeric value.
- * @return Integer value of the tag. If it's not found or it's not a number,
- * def is returned.
+ * @param[in] def Default value, in case the tag is not found or it's not a numeric value.
+ * @return Integer value of the tag. If it's not found or it's not a number, def is returned.
  */
 int GetInt(TiXmlNode* node, const Ogre::String& tag, int def = 0);
 
@@ -56,10 +53,8 @@ int GetInt(TiXmlNode* node, const Ogre::String& tag, int def = 0);
  *
  * @param[in] node The XML node.
  * @param[in] tag The name of the tag.
- * @param[in] def Default value, in case the tag is not found or it's not a
- * numeric value.
- * @return Floating value of the tag. If it's not found or it's not a number,
- * def is returned.
+ * @param[in] def Default value, in case the tag is not found or it's not a numeric value.
+ * @return Floating value of the tag. If it's not found or it's not a number, def is returned.
  */
 float GetFloat(TiXmlNode* node, const Ogre::String& tag, float def = 0.0f);
 
@@ -96,8 +91,7 @@ const Ogre::UTFString GetUTFString(
  * @return Vector in the tag. If it's not found, def is returned.
  */
 const Ogre::Vector2 GetVector2(
-  TiXmlNode* node, const Ogre::String& tag,
-  const Ogre::Vector2& def = Ogre::Vector2::ZERO
+  TiXmlNode* node, const Ogre::String& tag, const Ogre::Vector2& def = Ogre::Vector2::ZERO
 );
 
 /**
@@ -109,8 +103,7 @@ const Ogre::Vector2 GetVector2(
  * @return Vector in the tag. If it's not found, def is returned.
  */
 const Ogre::Vector3 GetVector3(
-  TiXmlNode* node, const Ogre::String& tag,
-  const Ogre::Vector3& def = Ogre::Vector3::ZERO
+  TiXmlNode* node, const Ogre::String& tag, const Ogre::Vector3& def = Ogre::Vector3::ZERO
 );
 
 /**
@@ -122,8 +115,7 @@ const Ogre::Vector3 GetVector3(
  * @return Vector in the tag. If it's not found, def is returned.
  */
 const Ogre::Vector4 GetVector4(
-  TiXmlNode* node, const Ogre::String& tag,
-  const Ogre::Vector4& def = Ogre::Vector4::ZERO
+  TiXmlNode* node, const Ogre::String& tag, const Ogre::Vector4& def = Ogre::Vector4::ZERO
 );
 
 /**
@@ -135,8 +127,7 @@ const Ogre::Vector4 GetVector4(
  * @return Martix in the tag. If it's not found, def is returned.
  */
 const Ogre::Matrix4 GetMatrix4(
-  TiXmlNode* node, const Ogre::String& tag,
-  const Ogre::Matrix4& def = Ogre::Matrix4::IDENTITY
+  TiXmlNode* node, const Ogre::String& tag, const Ogre::Matrix4& def = Ogre::Matrix4::IDENTITY
 );
 
 /**
@@ -148,8 +139,7 @@ const Ogre::Matrix4 GetMatrix4(
  * @return quaternion in the tag. If it's not found, def is returned.
  */
 const Ogre::Quaternion GetQuaternion(
-  TiXmlNode* node, const Ogre::String& tag,
-  const Ogre::Quaternion& def = Ogre::Quaternion::IDENTITY
+  TiXmlNode* node, const Ogre::String& tag, const Ogre::Quaternion& def = Ogre::Quaternion::IDENTITY
 );
 
 /**
@@ -161,15 +151,13 @@ const Ogre::Quaternion GetQuaternion(
  * @return Colour in the tag. If it's not found, def is returned.
  */
 const Ogre::ColourValue GetColourValue(
-  TiXmlNode* node, const Ogre::String& tag,
-  const Ogre::ColourValue& def = Ogre::ColourValue::ZERO
+  TiXmlNode* node, const Ogre::String& tag, const Ogre::ColourValue& def = Ogre::ColourValue::ZERO
 );
 
 /**
  * Parses percentage strings
  *
- * Accepts strings in the formats "A" "A%" "A%B", where A and B are real
- * values.
+ * Accepts strings in the formats "A" "A%" "A%B", where A and B are real values.
  *
  * Examples:
  *   "80.4%" -> value = 0, percent_value = 80.4
@@ -180,15 +168,12 @@ const Ogre::ColourValue GetColourValue(
  * @param[out] value String numeric value.
  * @param[in] string Input string.
  */
-void ParsePercent(
-  float& value_percent, float& value, const Ogre::String& string
-);
+void ParsePercent(float& value_percent, float& value, const Ogre::String& string);
 
 /**
  * Parses a keyframe time string.
  *
- * It acceps input string of numeric values and numeric values followed by a
- * percentage sign.
+ * It accepts input string of numeric values and numeric values followed by a percentage sign.
  *
  * Examples:
  *   "7.2" -> 7.2
@@ -213,8 +198,8 @@ const Ogre::String CreateAutoName(const Ogre::String prefix);
  * Obtains a name from a key code.
  *
  * @param[in] key Key code.
- * @return Human readable name assigned to the key code. "UNASSIGNED" if there
- * is no name for the key code.
+ * @return Human readable name assigned to the key code. "UNASSIGNED" if there is no name for the
+ * key code.
  */
 Ogre::String KeyToString(OIS::KeyCode key);
 
@@ -222,8 +207,8 @@ Ogre::String KeyToString(OIS::KeyCode key);
  * Obtains a key code from a name.
  *
  * @param[in] str Key name.
- * @return Key code assigned to the name. OIS::KC_UNASSIGNED  if there is no
- * keycode with the specified name.
+ * @return Key code assigned to the name. OIS::KC_UNASSIGNED  if there is no keycode with the
+ * specified name.
  */
 OIS::KeyCode StringToKey(const Ogre::String& str);
 
@@ -231,13 +216,11 @@ OIS::KeyCode StringToKey(const Ogre::String& str);
  * Tokenizes a string.
  *
  * @param[in] str Input string.
- * @param[in] delimiters Token delimiters. They will be stripped from the
- * string.
- * @param[in] delimiters_preserve More token delimiters. They will be returned
- * as individual tokens.
+ * @param[in] delimiters Token delimiters. They will be stripped from the string.
+ * @param[in] delimiters_preserve More token delimiters. They will be returned as individual tokens.
  * @param[in] quote @todo Understand and document.
- * @param[in] esc Accepted escape characters. Escaped characters won't be
- * considered delimiters of any kind.
+ * @param[in] esc Accepted escape characters. Escaped characters won't be considered delimiters of
+ * any kind.
  * @return Tokens of the original string.
  */
 Ogre::StringVector StringTokenise(

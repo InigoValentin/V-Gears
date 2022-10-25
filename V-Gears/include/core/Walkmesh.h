@@ -62,6 +62,9 @@ namespace VGears{
     typedef Ogre::SharedPtr<class WalkmeshFile> WalkmeshFilePtr;
 }
 
+/**
+ * A walkmesh.
+ */
 class Walkmesh{
 
     public:
@@ -98,8 +101,8 @@ class Walkmesh{
          *
          * @param[in] triangle_id Triangle.
          * @param[in] side The side index in the triangle.
-         * @return The id of the triangle accessed from the indicated triangle
-         * and side, or -1 if no triangle can be accessed.
+         * @return The id of the triangle accessed from the indicated triangle and side, or -1 if
+         * no triangle can be accessed.
          */
         int GetAccessSide(unsigned int triangle_id, unsigned char side) const;
 
@@ -107,8 +110,7 @@ class Walkmesh{
          * Retrieves the first side of a triangle.
          *
          * @param[in] triangle_id ID of the triangle.
-         * @return The side of the triangle. Ogre::Vector3::ZERO if the
-         * triangle doesn't exist.
+         * @return The side of the triangle. Ogre::Vector3::ZERO if the triangle doesn't exist.
          */
         const Ogre::Vector3& GetA(unsigned int triangle_id) const;
 
@@ -116,8 +118,7 @@ class Walkmesh{
          * Retrieves the second side of a triangle.
          *
          * @param[in] triangle_id ID of the triangle.
-         * @return The side of the triangle. Ogre::Vector3::ZERO if the
-         * triangle doesn't exist.
+         * @return The side of the triangle. Ogre::Vector3::ZERO if the triangle doesn't exist.
          */
         const Ogre::Vector3& GetB(unsigned int triangle_id) const;
 
@@ -125,8 +126,7 @@ class Walkmesh{
          * Retrieves the third side of a triangle.
          *
          * @param[in] triangle_id ID of the triangle.
-         * @return The side of the triangle. Ogre::Vector3::ZERO if the
-         * triangle doesn't exist.
+         * @return The side of the triangle. Ogre::Vector3::ZERO if the triangle doesn't exist.
          */
         const Ogre::Vector3& GetC(unsigned int triangle_id) const;
 

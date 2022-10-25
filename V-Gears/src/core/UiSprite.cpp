@@ -20,14 +20,9 @@
 #include "core/UiSprite.h"
 
 
-UiSprite::UiSprite(const Ogre::String& name):
-  UiWidget(name)
-{Initialise();}
+UiSprite::UiSprite(const Ogre::String& name): UiWidget(name){Initialise();}
 
-
-UiSprite::UiSprite(
-  const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent
-):
+UiSprite::UiSprite(const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent):
   UiWidget(name, path_name, parent)
 {Initialise();}
 
@@ -63,9 +58,7 @@ void UiSprite::Render(){
             render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
             render_system_->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
             render_system_->_setViewMatrix(Ogre::Matrix4::IDENTITY);
-            scene_manager_->_setPass(
-              material_->getTechnique(0)->getPass(0), true, false
-            );
+            scene_manager_->_setPass(material_->getTechnique(0)->getPass(0), true, false);
             render_system_->setScissorTest(
               true, scissor_left_, scissor_top_, scissor_right_, scissor_bottom_
             );
@@ -109,24 +102,9 @@ void UiSprite::UpdateGeometry(){
     float x = final_translate_.x;
     float y = final_translate_.y;
     int x1, y1, x2, y2, x3, y3, x4, y4;
-    //LOG_ERROR(
-    //  name_ + ", rotation = " + Ogre::StringConverter::toString(rotation)
-    //);
-    //LOG_ERROR(
-    //  "local_x1 = " + Ogre::StringConverter::toString(local_x1)
-    //  + ", local_y1 = " + Ogre::StringConverter::toString(local_y1)
-    //);
-    //LOG_ERROR(
-    //  "local_x2 = " + Ogre::StringConverter::toString(local_x2)
-    //  + ", local_y2 = " + Ogre::StringConverter::toString(local_y2)
-    //);
-
     if(final_rotation_ != 0){
-        float cos
-          = Ogre::Math::Cos(Ogre::Radian(Ogre::Degree(final_rotation_)));
-        float sin
-          = Ogre::Math::Sin(Ogre::Radian(Ogre::Degree(final_rotation_)));
-
+        float cos = Ogre::Math::Cos(Ogre::Radian(Ogre::Degree(final_rotation_)));
+        float sin = Ogre::Math::Sin(Ogre::Radian(Ogre::Degree(final_rotation_)));
         x1 = static_cast<int>(local_x1 * cos - local_y1 * sin + x);
         y1 = static_cast<int>(local_x1 * sin + local_y1 * cos + y);
         x2 = static_cast<int>(local_x2 * cos - local_y1 * sin + x);
@@ -146,24 +124,6 @@ void UiSprite::UpdateGeometry(){
         x4 = static_cast<int>(local_x1 + x);
         y4 = static_cast<int>(local_y2 + y);
     }
-
-    //LOG_ERROR(
-    //  "x1 = " + Ogre::StringConverter::toString(x1) + ", y1 = "
-    // + Ogre::StringConverter::toString(y1)
-    //);
-    //LOG_ERROR(
-    //  "x2 = " + Ogre::StringConverter::toString(x2) + ", y2 = "
-    //  + Ogre::StringConverter::toString(y2)
-    //);
-    //LOG_ERROR(
-    //  "x3 = " + Ogre::StringConverter::toString(x3) + ", y3 = "
-    //  + Ogre::StringConverter::toString(y3)
-    //);
-    //LOG_ERROR(
-    //  "x4 = " + Ogre::StringConverter::toString(x4) + ", y4 = "
-    //  + Ogre::StringConverter::toString(y4)
-    //);
-
     float new_x1 = (x1 / screen_width_) * 2 - 1;
     float new_y1 = -((y1 / screen_height_) * 2 - 1);
     float new_x2 = (x2 / screen_width_) * 2 - 1;
@@ -174,8 +134,7 @@ void UiSprite::UpdateGeometry(){
     float new_y4 = -((y4 / screen_height_) * 2 - 1);
 
     float* write_iterator
-      = (float*) vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-    // TODO: use WriteGlyph (should probably rename and move to utils)
+      = static_cast<float*>(vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL));
     *write_iterator ++ = new_x1;
     *write_iterator ++ = new_y1;
     *write_iterator ++ = final_z_;
@@ -237,36 +196,23 @@ void UiSprite::UpdateGeometry(){
     *write_iterator ++ = 1;
 
     render_operation_.vertexData->vertexCount = 6;
-
     vertex_buffer_->unlock();
 }
 
 void UiSprite::CreateVertexBuffer(){
     render_operation_.vertexData = new Ogre::VertexData;
     render_operation_.vertexData->vertexStart = 0;
-    Ogre::VertexDeclaration* vertex_declaration
-      = render_operation_.vertexData->vertexDeclaration;
-
+    Ogre::VertexDeclaration* vertex_declaration = render_operation_.vertexData->vertexDeclaration;
     size_t offset = 0;
     vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vertex_declaration->addElement(
-      0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE
-    );
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vertex_declaration->addElement(
-      0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+    vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
+      vertex_declaration->getVertexSize(0), 6, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
     );
-
-    vertex_buffer_
-      = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
-        vertex_declaration->getVertexSize(0), 6,
-        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
-        );
-
-    render_operation_.vertexData->vertexBufferBinding->setBinding(
-      0, vertex_buffer_
-    );
+    render_operation_.vertexData->vertexBufferBinding->setBinding(0, vertex_buffer_);
     render_operation_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
     render_operation_.useIndexes = false;
 }

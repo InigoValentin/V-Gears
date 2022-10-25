@@ -161,8 +161,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * @param[in] rotation The point orientation.
          */
         void AddEntityPoint(
-          const Ogre::String& name, const Ogre::Vector3& position,
-          const float rotation
+          const Ogre::String& name, const Ogre::Vector3& position, const float rotation
         );
 
         /**
@@ -183,8 +182,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * Retrieves an entity by name.
          *
          * @param[in] name Name of the entity to retrieve.
-         * @return The entity by the specified name, or nullptr if there is no
-         * one.
+         * @return The entity by the specified name, or nullptr if there is no one.
          */
         Entity* GetEntity(const Ogre::String& name) const;
 
@@ -200,8 +198,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * Retrieves an entity by it's assigned character ID.
          *
          * @param[in] id Character ID of the entity to retrieve.
-         * @return The entity assigned to the character, or nullptr if there
-         * is no one.
+         * @return The entity assigned to the character, or nullptr if there is no one.
          */
         Entity* GetEntityFromCharacterId(const int id) const;
 
@@ -209,8 +206,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * Retrieves an entity by name.
          *
          * @param[in] name Name of the entity to retrieve.
-         * @return The entity by the specified name, or nullptr if there is no
-         * one.
+         * @return The entity by the specified name, or nullptr if there is no one.
          */
         Entity* ScriptGetEntity(const char* name) const;
 
@@ -218,17 +214,15 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * Retrieves an entity point by name.
          *
          * @param[in] name Name of the entity point to retrieve.
-         * @return The entity point by the specified name, or nullptr if there
-         * is no one.
+         * @return The entity point by the specified name, or nullptr if there is no one.
          */
         EntityPoint* ScriptGetEntityPoint(const char* name) const;
 
         /**
          * Sets the playable entity.
          *
-         * If no entities are found by name, no one will be assigned, the
-         * previous playable entity will remain so, and no warning will be
-         * issued.
+         * If no entities are found by name, no one will be assigned, the previous playable entity
+         * will remain so, and no warning will be issued.
          *
          * @param[in] name Name of the entity to make playable.
          */
@@ -271,8 +265,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Enables or disables random encounters in the field.
          *
-         * @param[in] active True to enable encounters, false to deactivate
-         * them.
+         * @param[in] active True to enable encounters, false to deactivate them.
          */
         void SetRandomEncounters(bool active);
 
@@ -294,8 +287,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * Starts a battle.
          *
          * @param[in] formation The enemy formation to fight.
-         * @return True if the battle victory conditions are met, false
-         * otherwise.
+         * @return True if the battle victory conditions are met, false otherwise.
          * @todo Implement
          */
         bool StartBattleForResult(unsigned int formation);
@@ -335,16 +327,71 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
     private:
 
         /**
+         * Calculates the point elevation over a plane.
+         *
+         * @param[in] point Point to calculate the elevation of.
+         * @param[in] a First point of the plane.
+         * @param[in] b Second point of the plane.
+         * @param[in] c Third  point of the plane.
+         * @return The elevation of the point.
+         */
+        static float PointElevation(
+          const Ogre::Vector2& point,
+          const Ogre::Vector3& a, const Ogre::Vector3& b, const Ogre::Vector3& c
+        );
+
+        /**
+         * Determines at which side of a line a point is.
+         *
+         * @param[in] point The point to evaluate.
+         * @param[in] p1 The first point of the line.
+         * @param[in] p2 The second point of the line.
+         * @return A negative value if the point is on the "left" of the line vector, a positive
+         * value if the point is on the "right" of the vector line, or 0 if the point is part of
+         * the line. "Left" and "right" are determined by going from p1 to p2.
+         */
+        static float SideOfVector(
+          const Ogre::Vector2& point, const Ogre::Vector2& p1, const Ogre::Vector2& p2
+        );
+
+        /**
+         * Calculates the square distance between a point and a line.
+         *
+         * The calculated distance is the vector orthogonal to the line that passes by the point,
+         * i.e. the shortest distance.
+         *
+         * @param[in] point The point.
+         * @param[in] point_a First point of the line.
+         * @param[in] point_b Second point of the line.
+         * @param[out] proj Vector representing the shortest distance.
+         * @return The distance from the point to the line.
+         */
+        static float SquareDistanceToLine(
+          const Ogre::Vector3& point, const Ogre::Vector3& point_a, const Ogre::Vector3& point_b,
+          Ogre::Vector3& proj
+        );
+
+        /**
+         * Calculates the direction degree between to points.
+         *
+         * @param[in] current_point Origin point.
+         * @param[in] direction_point Next point in the direction.
+         * @return Degrees between the two points
+         */
+        static Ogre::Degree GetDirectionToPoint(
+          const Ogre::Vector3& current_point, const Ogre::Vector3& direction_point
+        );
+
+        /**
          * Attaches an entity to the walkmesh.
          *
-         * It sets the triangle from the entity position coordinates. To
-         * account for multiple triangles on different levels, it uses only
-         * the X and Y coordinates, and automatically sets the Z one to the
-         * closest triangle.
+         * It sets the triangle from the entity position coordinates. To account for multiple
+         * triangles on different levels, it uses only the X and Y coordinates, and automatically
+         * sets the Z one to the closest triangle.
          *
          * @param[in] entity Entity to attach.
-         * @return True if the entity was assigned to a walkmesh triangle,
-         * false if the entity is not in a triangle.
+         * @return True if the entity was assigned to a walkmesh triangle, false if the entity is
+         * not in a triangle.
          */
         bool SetEntityOnWalkmesh(Entity* entity);
 
@@ -353,8 +400,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          *
          * @param[in] entity Entity to move.
          * @param[in] speed Movement speed.
-         * @return True if the movement was possible and the entity was moved,
-         * false otherwise.
+         * @return True if the movement was possible and the entity was moved, false otherwise.
          */
         bool PerformWalkmeshMove(Entity* entity, const float speed);
 
@@ -364,8 +410,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * @param[in] entity Entity to check.
          * @param[in] position The position. @todo document more.
          * @param[in] move_vector The move vector. @todo document more.
-         * @return True if the entity is crossing a triangle border, false
-         * otherwise.
+         * @return True if the entity is crossing a triangle border, false otherwise.
          */
         bool WalkmeshBorderCross(
           Entity* entity, Ogre::Vector3& position, const Ogre::Vector2& move_vector
@@ -376,8 +421,8 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          *
          * @param[in] entity Entity to check for collisions.
          * @param[in] position Position of the entity.
-         * @return True if the entity is colliding with another, false
-         * otherwise. If the entity is not solid, always false.
+         * @return True if the entity is colliding with another, false otherwise. If the entity is
+         * not solid, always false.
          */
         bool CheckSolidCollisions(Entity* entity, Ogre::Vector3& position);
 
@@ -392,10 +437,9 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Checks for entity triggers near a entity.
          *
-         * If there are triggers, and the conditions are met, the appropriate
-         * trigger function will be added to the queue. This must be tested
-         * every time an entity moves. If the entity is not solid, it will do
-         * nothing.
+         * If there are triggers, and the conditions are met, the appropriate trigger function will
+         * be added to the queue. This must be tested every time an entity moves. If the entity is
+         * not solid, it will do nothing.
          *
          * @param[in] entity Entity to check for nearby triggers.
          * @param[in] position The position of the entity.
@@ -405,15 +449,14 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         /**
          * Checks if an entity can be interacted.
          *
-         * It checks if there are entities that can be interacted with from the
-         * players current position and orientation. If there are, the most
-         * appropriate one is selected and, if it has an on_interact script, it
-         * is run.
+         * It checks if there are entities that can be interacted with from the players current
+         * position and orientation. If there are, the most appropriate one is selected and, if it
+         * has an on_interact script, it is run.
          */
         void CheckEntityInteract();
 
         /**
-         * Calculates the next offset step for an entity
+         * Calculates the next offset step for an entity.
          *
          * @param[in] entity The entity.
          */

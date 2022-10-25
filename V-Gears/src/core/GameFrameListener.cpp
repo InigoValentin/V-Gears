@@ -14,8 +14,8 @@
  */
 
 #include <OgreStringConverter.h>
-#include "../../include/core/GameFrameListener.h"
 #include "VGearsGameState.h"
+#include "core/GameFrameListener.h"
 #include "core/CameraManager.h"
 #include "core/ConfigVar.h"
 #include "core/Console.h"
@@ -31,11 +31,8 @@
 ConfigVar cv_debug_fps("debug_fps", "Debug FPS", "false");
 
 GameFrameListener::GameFrameListener(Ogre::RenderWindow* win):
-  window_(win),
-  input_manager_(0),
-  keyboard_(0)
+  window_(win), input_manager_(0), keyboard_(0)
 {
-    // TODO: Focus stealing problem must be here
     OIS::ParamList pl;
     size_t windowHnd = 0;
     std::ostringstream windowHndStr;
@@ -43,34 +40,21 @@ GameFrameListener::GameFrameListener(Ogre::RenderWindow* win):
     windowHndStr << windowHnd;
     pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
 #if defined __WIN32__
-    pl.insert(
-      std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND"))
-    );
-    pl.insert(std::make_pair(
-      std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")
-    ));
+    pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND")));
+    pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
 #else
-    pl.insert(
-      std::make_pair(std::string("x11_mouse_grab"), std::string("false"))
-    );
-    pl.insert(
-      std::make_pair(std::string("x11_mouse_hide"), std::string("false"))
-    );
-    // pl.insert(
-    //  std::make_pair(std::string("x11_keyboard_grab"), std::string("false"))
-    //);
+    pl.insert(std::make_pair(std::string("x11_mouse_grab"), std::string("false")));
+    pl.insert(std::make_pair(std::string("x11_mouse_hide"), std::string("false")));
+    pl.insert(std::make_pair(std::string("x11_keyboard_grab"), std::string("false")));
 #endif
     input_manager_ = OIS::InputManager::createInputSystem(pl);
     keyboard_ = static_cast<OIS::Keyboard*>(
       input_manager_->createInputObject(OIS::OISKeyboard, true)
     );
     keyboard_->setEventCallback(this);
-    mouse_ = static_cast<OIS::Mouse*>(
-      input_manager_->createInputObject(OIS::OISMouse, true)
-    );
+    mouse_ = static_cast<OIS::Mouse*>(input_manager_->createInputObject(OIS::OISMouse, true));
     mouse_->setEventCallback(this);
-    windowResized(window_);
-
+    this->windowResized(window_);
     //Register as a Window listener
     Ogre::WindowEventUtilities::addWindowEventListener(window_, this);
 }
@@ -81,7 +65,7 @@ GameFrameListener::~GameFrameListener(){
     OIS::InputManager::destroyInputSystem(input_manager_);
     //Remove ourself as a Window listener
     Ogre::WindowEventUtilities::removeWindowEventListener(window_, this);
-    windowClosed(window_);
+    this->windowClosed(window_);
 }
 
 bool GameFrameListener::frameStarted(const Ogre::FrameEvent& evt){
@@ -90,7 +74,7 @@ bool GameFrameListener::frameStarted(const Ogre::FrameEvent& evt){
     if(keyboard_) keyboard_->capture();
     if(mouse_) mouse_->capture();
     InputManager::getSingleton().Update();
-    static InputEventArray input_event_array;
+    InputEventArray input_event_array;
     input_event_array.clear();
     InputManager::getSingleton().GetInputEvents(input_event_array);
     bool console_active = Console::getSingleton().IsVisible();
@@ -100,9 +84,7 @@ bool GameFrameListener::frameStarted(const Ogre::FrameEvent& evt){
             EntityManager::getSingleton().Input(input_event_array[ i ]);
             DialogsManager::getSingleton().Input( input_event_array[ i ] );
             ScriptManager::getSingleton().Input(input_event_array[ i ]);
-            CameraManager::getSingleton().Input(
-              input_event_array[ i ], evt.timeSinceLastFrame
-            );
+            CameraManager::getSingleton().Input(input_event_array[ i ], evt.timeSinceLastFrame);
         }
     }
     Console::getSingleton().Update();
@@ -120,10 +102,7 @@ bool GameFrameListener::frameEnded(const Ogre::FrameEvent& evt){
         DEBUG_DRAW.SetTextAlignment(DEBUG_DRAW.LEFT);
         DEBUG_DRAW.SetScreenSpace(true);
         DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 1, 1, 1));
-        DEBUG_DRAW.Text(
-          10, 10,
-          "Current FPS:" + Ogre::StringConverter::toString(stats.lastFPS)
-        );
+        DEBUG_DRAW.Text(10, 10, "Current FPS:" + Ogre::StringConverter::toString(stats.lastFPS));
     }
     return true;
 }
@@ -161,25 +140,17 @@ bool GameFrameListener::keyReleased(const OIS::KeyEvent& event){
 
 
 bool GameFrameListener::mouseMoved(const OIS::MouseEvent& e){
-    if(e.state.Z.rel != 0)
-        InputManager::getSingleton().MouseScrolled(e.state.Z.rel);
-    else
-        InputManager::getSingleton().MouseMoved(e.state.X.rel, e.state.Y.rel);
-
+    if(e.state.Z.rel != 0) InputManager::getSingleton().MouseScrolled(e.state.Z.rel);
+    else InputManager::getSingleton().MouseMoved(e.state.X.rel, e.state.Y.rel);
     return true;
 }
 
-bool GameFrameListener::mousePressed(
-  const OIS::MouseEvent& e, OIS::MouseButtonID id
-){
+bool GameFrameListener::mousePressed(const OIS::MouseEvent& e, OIS::MouseButtonID id){
     InputManager::getSingleton().MousePressed(id, true);
     return true;
 }
 
-
-bool GameFrameListener::mouseReleased(
-  const OIS::MouseEvent& e, OIS::MouseButtonID id
-){
+bool GameFrameListener::mouseReleased(const OIS::MouseEvent& e, OIS::MouseButtonID id){
     InputManager::getSingleton().MousePressed(id, false);
     return true;
 }

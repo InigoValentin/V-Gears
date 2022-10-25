@@ -44,9 +44,8 @@ class XmlMapFile : public XmlFile{
         /**
          * Retrieves the path to the map walkmesh file.
          *
-         * @return The path to the map walkmesh file. If there is no walkmesh
-         * associated to the map, an error  message will be written to console
-         * and an empty string will be returned.
+         * @return The path to the map walkmesh file. If there is no walkmesh associated to the
+         * map, an error  message will be written to console and an empty string will be returned.
          */
         const Ogre::String GetWalkmeshFileName();
 };

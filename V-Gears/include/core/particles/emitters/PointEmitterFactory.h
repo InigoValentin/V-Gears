@@ -15,11 +15,11 @@
 
 #pragma once
 
-#include "ParticlePointEmitter.h"
-#include "../ParticleEmitterFactory.h"
+#include "core/particles/ParticleEmitterFactory.h"
+#include "PointEmitter.h"
 
 /**
- * A particle emitter factory.
+ * A point emitter factory.
  */
 class PointEmitterFactory : public ParticleEmitterFactory{
 
@@ -28,28 +28,24 @@ class PointEmitterFactory : public ParticleEmitterFactory{
         /**
          * Constructor.
          */
-        PointEmitterFactory(){};
+        PointEmitterFactory();
 
         /**
          * Destructor.
          */
-        virtual ~PointEmitterFactory(){};
+        virtual ~PointEmitterFactory();
 
         /**
          * Retrieves the emitter type.
          *
          * @return The emitter type (always "Point").
          */
-        Ogre::String GetEmitterType() const{
-            return "Point";
-        }
+        Ogre::String GetEmitterType() const;
 
         /**
          * Creates an emitter.
          *
          * @return A new {@see PointEmitter}.
          */
-        ParticleEmitter* CreateEmitter(){
-            return CreateEmitter_<PointEmitter>();
-        }
+        ParticleEmitter* CreateEmitter();
 };

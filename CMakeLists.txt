@@ -105,12 +105,6 @@ endif()
 find_package(Qt5Widgets REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OGRE REQUIRED)
-#find_package(OIS REQUIRED)
-
-
-#if(NOT OIS_FOUND)
-    #message(SEND_ERROR "Failed to find OIS.")
-#endif()
 
 # Find Boost
 if(NOT OGRE_BUILD_PLATFORM_IPHONE)
@@ -180,7 +174,6 @@ if(NOT OGRE_BUILD_PLATFORM_IPHONE)
             ${OGRE_LIBRARIES}
             ${Boost_LIBRARIES}
         )
-        #message(STATUS "Test libs = ${VGears_TEST_LIBRARIES}")
         # Enable CTest.
         enable_testing()
         endif()
@@ -199,7 +192,7 @@ set(VGears_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/
     ${OIS_INCLUDE_DIRS}
     ${OGRE_Overlay_INCLUDE_DIRS}
-    ${OGRE_SAMPLES_INCLUDEPATH}
+    #${OGRE_SAMPLES_INCLUDEPATH}
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
     ${CMAKE_CURRENT_BINARY_DIR}/lib/luajit
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/luajit/src
@@ -208,7 +201,7 @@ set(VGears_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/tinyxml
 )
 
-# C++20
+# C++14
 # TODO: Try to remove PIC
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fPIC")
 if (MSVC)
@@ -216,9 +209,6 @@ if (MSVC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Zm193")
     # Shut up about insecure functions, as this is cross platform code we can't use the Win32 specifc functions
     add_definitions( -D_CRT_SECURE_NO_WARNINGS )
-else()
-    # Enable C++11, you may need to use -std=c++0x if using an older gcc compiler
-    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 endif()
 
 if (UNIX AND $ENV{COVERAGE}==1)
@@ -227,13 +217,12 @@ if (UNIX AND $ENV{COVERAGE}==1)
       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage") # enabling coverage
 endif()
 
-#DEBUG, no optimizations
+#TODO: Force DEBUG, no optimizations for now.
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O0")
 
 add_definitions(-DTIXML_USE_STL)
 add_subdirectory(lib)
 add_subdirectory(V-Gears)
-#add_subdirectory(SupportedGames)
 
 if(VGears_BUILD_PLUGINS)
     add_subdirectory(PlugIns)
@@ -334,10 +323,10 @@ elseif(UNIX)
     install(FILES ${PROJECT_SOURCE_DIR}/output/resources.cfg_linux DESTINATION share/v-gears/ RENAME resources.cfg PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ GROUP_WRITE WORLD_WRITE WORLD_READ)
     install(FILES ${PROJECT_SOURCE_DIR}/output/v-gears.cfg_linux DESTINATION share/v-gears/ RENAME v-gears.cfg PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ GROUP_WRITE WORLD_WRITE WORLD_READ)
         
-    if(EXISTS "/usr/lib/x86_64-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0")
-        install(FILES /usr/lib/x86_64-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0 DESTINATION lib/v-gears/plugins/ )
-    elseif(EXISTS "/usr/lib/i386-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0")
-        install(FILES /usr/lib/i386-linux-gnu/OGRE-1.9.0/RenderSystem_GL.so.1.9.0 DESTINATION lib/v-gears/plugins/ )
+    if(EXISTS "/usr/lib/x86_64-linux-gnu/OGRE/RenderSystem_GL.so.1.12.10")
+        install(FILES /usr/lib/x86_64-linux-gnu/OGRE/RenderSystem_GL.so.1.12.10 DESTINATION lib/v-gears/plugins/ )
+    elseif(EXISTS "/usr/lib/i386-linux-gnu/OGRE/RenderSystem_GL.so.1.12.10")
+        install(FILES /usr/lib/i386-linux-gnu/OGRE/RenderSystem_GL.so.1.12.10 DESTINATION lib/v-gears/plugins/ )
     endif()
         
     SET(CPACK_SOURCE_GENERATOR "TGZ;TZ")

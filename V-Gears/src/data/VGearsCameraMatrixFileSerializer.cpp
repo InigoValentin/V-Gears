@@ -61,9 +61,9 @@ namespace VGears{
         orientation.FromRotationMatrix(camera_matrix);
         position = orientation * (position / 128.0f);
         // Matrix fix up.
-        camera_matrix[0][0] = camera_matrix[0][0];
-        camera_matrix[1][0] = camera_matrix[1][0];
-        camera_matrix[2][0] = camera_matrix[2][0];
+        //camera_matrix[0][0] = camera_matrix[0][0];
+        //camera_matrix[1][0] = camera_matrix[1][0];
+        //camera_matrix[2][0] = camera_matrix[2][0];
         camera_matrix[0][1] = -camera_matrix[0][1];
         camera_matrix[1][1] = -camera_matrix[1][1];
         camera_matrix[2][1] = -camera_matrix[2][1];

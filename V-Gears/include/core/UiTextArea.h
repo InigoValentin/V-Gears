@@ -176,8 +176,7 @@ class UiTextArea : public UiWidget{
          *
          * @param[in] name Name for the textarea.
          * @param[in] path_name Path for the widget.
-         * @param[in] parent Pointer to the widget that will parent the
-         * UiTextArea.
+         * @param[in] parent Pointer to the widget that will parent the UiTextArea.
          */
         UiTextArea(const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent);
 
@@ -288,7 +287,7 @@ class UiTextArea : public UiWidget{
         void TextClear();
 
         /**
-         * @todo Understand and document.
+         * Removes the prites from the text.
          *
          * @param[in] end @todo Understand and document.
          */

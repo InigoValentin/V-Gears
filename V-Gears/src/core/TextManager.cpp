@@ -23,7 +23,7 @@ template<>TextManager* Ogre::Singleton< TextManager >::msSingleton = NULL;
 
 TextManager::TextManager(): language_(""){
     for (int i = 0; i < 3; i ++) current_party_[i] = -1;
-    for (int i = 0; i < 11; i ++) character_names_[i] = "CHAR_" + i;
+    for (int i = 0; i < 11; i ++) character_names_[i] = std::string("CHAR_") + std::to_string(i);
     InitCmd();
 }
 
@@ -64,7 +64,7 @@ void TextManager::AddDialog(
 TiXmlNode* TextManager::GetText(const Ogre::String& name) const{
     for (unsigned int i = 0; i < texts_.size(); ++ i)
         if (texts_[i].name == name) return texts_[i].node;
-    LOG_WARNING("Can't find text \"" + name + "\".");
+    LOG_WARNING("Can't find text '" + name + "'.");
     return NULL;
 }
 

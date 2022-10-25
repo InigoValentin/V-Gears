@@ -24,23 +24,16 @@ XmlScreensFile::~XmlScreensFile(){}
 
 void XmlScreensFile::LoadScreens(){
     TiXmlNode* node = file_.RootElement();
-
     if (node == nullptr || node->ValueStr() != "ui"){
         LOG_ERROR(
-          "UI XML Manager: " + file_.ValueStr()
-          + " is not a valid ui file! No <ui> in root."
+          "UI XML Manager: " + file_.ValueStr() + " is not a valid ui file! No <ui> in root."
         );
         return;
     }
     node = node->FirstChild();
     while (node != nullptr){
-        if (
-          node->Type() == TiXmlNode::TINYXML_ELEMENT
-          && node->ValueStr() == "prototype"
-        ){
-            XmlPrototypesFile prototypes(
-              "./data/" + GetString(node, "file_name")
-            );
+        if (node->Type() == TiXmlNode::TINYXML_ELEMENT&& node->ValueStr() == "prototype"){
+            XmlPrototypesFile prototypes("./data/" + GetString(node, "file_name"));
             prototypes.LoadPrototypes();
         }
         node = node->NextSibling();
@@ -48,10 +41,7 @@ void XmlScreensFile::LoadScreens(){
     node = file_.RootElement();
     node = node->FirstChild();
     while (node != NULL){
-        if (
-          node->Type() == TiXmlNode::TINYXML_ELEMENT
-          && node->ValueStr() == "screen"
-        ){
+        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "screen"){
             XmlScreenFile screen("./data/" + GetString(node, "file_name"));
             screen.LoadScreen();
         }

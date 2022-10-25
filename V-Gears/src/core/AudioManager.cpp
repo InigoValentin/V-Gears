@@ -25,10 +25,7 @@ ALsizei AudioManager::channel_buffer_number_ = 2;
 int AudioManager::channel_buffer_size_ = 96 * 1024;
 
 AudioManager::AudioManager():
-    initialized_(false),
-    thread_continue_(true),
-    update_mutex_(),
-    music_(&update_mutex_)
+  initialized_(false), thread_continue_(true), update_mutex_(), music_(&update_mutex_)
 {
     al_device_ = alcOpenDevice(nullptr);
     if (al_device_ != nullptr){
@@ -49,16 +46,11 @@ AudioManager::AudioManager():
         }
         else{
             LOG_ERROR(
-              "AudioManager failed to initialised. "
-              + "Could not create context for sound device."
+              "AudioManager failed to initialised. Could not create context for sound device."
             );
         }
     }
-    else{
-        LOG_ERROR(
-          "AudioManager failed to initialised. There's no default sound device."
-        );
-    }
+    else LOG_ERROR("AudioManager failed to initialised. There's no default sound device.");
 
     // Load musics
     XmlMusicsFile musics("./data/musics.xml");
@@ -137,9 +129,7 @@ void AudioManager::AddMusic(const AudioManager::Music& music){
 AudioManager::Music* AudioManager::GetMusic(const Ogre::String& name){
     boost::recursive_mutex::scoped_lock lock(update_mutex_);
     for (auto it = music_list_.begin(); it != music_list_.end(); ++ it){
-        if (it->name == name){
-            return &(*it);
-        }
+        if (it->name == name) return &(*it);
     }
     return nullptr;
 }
@@ -162,11 +152,8 @@ const char* AudioManager::ALCError(const ALCdevice* device){
 }
 
 AudioManager::Player::Player(boost::recursive_mutex* mutex):
-    loop_(-1.0),
-    vorbis_info_(nullptr),
-    vorbis_section_(0),
-    stream_finished_(false),
-    update_mutex_(mutex)
+  loop_(-1.0), vorbis_info_(nullptr), vorbis_section_(0),
+  stream_finished_(false), update_mutex_(mutex)
 {}
 
 AudioManager::Player::~Player(){Stop();}
@@ -197,10 +184,9 @@ void AudioManager::Player::Play(const Ogre::String &file){
         ALsizei buffer_size = FillBuffer();
         if (buffer_size){
             alBufferData(
-              buffers[i], vorbis_info_->channels == 1 ?
-                AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-              (const ALvoid*)AudioManager::getSingleton().buffer_,
-              (ALsizei)buffer_size, (ALsizei)vorbis_info_->rate
+              buffers[i], vorbis_info_->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+              static_cast<const ALvoid*>(AudioManager::getSingleton().buffer_),
+              static_cast<ALsizei>(buffer_size), static_cast<ALsizei>(vorbis_info_->rate)
             );
             alSourceQueueBuffers(source_, 1, &buffers[i]);
         }
@@ -250,8 +236,8 @@ void AudioManager::Player::Update(){
             alBufferData(
               buffer_id, vorbis_info_->channels == 1 ?
                 AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-              (const ALvoid*)AudioManager::getSingleton().buffer_,
-              (ALsizei)buffer_size, (ALsizei)vorbis_info_->rate
+              static_cast<const ALvoid*>(AudioManager::getSingleton().buffer_),
+              static_cast<ALsizei>(buffer_size), static_cast<ALsizei>(vorbis_info_->rate)
             );
             alSourceQueueBuffers(source_, 1, &buffer_id);
         }
@@ -266,7 +252,6 @@ void AudioManager::Player::Update(){
     alGetSourcei(source_, AL_BUFFERS_PROCESSED, &processed);
     int queued;
     alGetSourcei(source_, AL_BUFFERS_QUEUED, &queued);
-
     if (stream_finished_ && processed == queued) Stop();
     else{
         ALenum source_state;
@@ -282,8 +267,7 @@ ALsizei AudioManager::Player::FillBuffer(){
     bool finished = false;
     do{
         long result = ov_read(
-          &vorbis_file_, buffer + read, channel_buffer_size_ - read,
-          0, 2, 1, &vorbis_section_
+          &vorbis_file_, buffer + read, channel_buffer_size_ - read, 0, 2, 1, &vorbis_section_
         );
 
         switch(result){
@@ -297,8 +281,7 @@ ALsizei AudioManager::Player::FillBuffer(){
             // End of stream
             case 0:
                 // If there isn't loop point or can't seek
-                if (loop_ < 0.0f || ov_time_seek(&vorbis_file_, loop_))
-                    finished = true;
+                if (loop_ < 0.0f || ov_time_seek(&vorbis_file_, loop_)) finished = true;
             break;
             // Readed "result" bytes
             default:
@@ -317,9 +300,7 @@ float AudioManager::Player::GetPosition(){
     return (
       ov_pcm_tell(&vorbis_file_)
       - (
-        channel_buffer_number_ * channel_buffer_size_
-        / vorbis_info_->channels
-        / sizeof(int16_t)
+        channel_buffer_number_ * channel_buffer_size_ / vorbis_info_->channels / sizeof(int16_t)
         - play_offset
       )
     ) * 1000 / vorbis_info_->rate;

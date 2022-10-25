@@ -18,15 +18,12 @@
 template<>ConfigVarManager *Ogre::Singleton<ConfigVarManager>::msSingleton = nullptr;
 
 ConfigVarManager::ConfigVarManager(){
-    if(ConfigVar::static_config_var_list_ != (ConfigVar*) 0xffffffff){
-        for (
-          ConfigVar* cvar = ConfigVar::static_config_var_list_;
-          cvar;
-          cvar = cvar->previous_
-        ){
+    // TODO: Properly cast this.
+    if (reinterpret_cast<std::uintptr_t>(&ConfigVar::static_config_var_list_) != 0xffffffff){
+        for (ConfigVar* cvar = ConfigVar::static_config_var_list_; cvar; cvar = cvar->previous_)
             config_vars_.push_back(cvar);
-        }
-        ConfigVar::static_config_var_list_ = (ConfigVar*) 0xffffffff;
+        // TODO: Properly cast this.
+        ConfigVar::static_config_var_list_ = reinterpret_cast<ConfigVar*>(0xffffffff);
     }
 }
 
@@ -36,11 +33,8 @@ ConfigVar* ConfigVarManager::Find(const Ogre::String& name) const{
     return nullptr;
 }
 
-unsigned int ConfigVarManager::GetConfigVarNumber() const{
-    return config_vars_.size();
-}
+unsigned int ConfigVarManager::GetConfigVarNumber() const{return config_vars_.size();}
 
 ConfigVar* ConfigVarManager::GetConfigVar(const unsigned int i) const{
-    if (i < config_vars_.size()) return config_vars_[i];
-    return nullptr;
+    if (i < config_vars_.size()) return config_vars_[i]; return nullptr;
 }

@@ -93,7 +93,7 @@ namespace VGears{
 
     void TexCodec::uninstall(){
         if (tex_codec_ != nullptr){
-            OGRE_DELETE tex_codec_;
+            delete tex_codec_;
             tex_codec_ = nullptr;
         }
     }

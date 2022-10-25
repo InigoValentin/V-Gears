@@ -51,7 +51,6 @@ namespace VGears{
         std::vector<uint32> section_sizesVec(header_.section_count);
         readInts(stream, section_offsetsVec.data(), header_.section_count);
         // Now calculate section sizes
-        size_t fileSize = stream->size();
         for (size_t i = 0; i < section_offsetsVec.size(); i ++){
             if (i+1 == section_offsetsVec.size()){
                 // The file size is needed to calculate this, since it's not

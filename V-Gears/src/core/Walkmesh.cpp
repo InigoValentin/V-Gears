@@ -34,51 +34,29 @@ void Walkmesh::UpdateDebug(){
         DEBUG_DRAW.SetTextAlignment(DEBUG_DRAW.CENTER);
 
         for (const auto &triangle : triangles_){
-            if (triangle.access_side[0] == -1)
-                DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 0, 0, 1));
-            else
-                DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 1, 1, 1));
+            if (triangle.access_side[0] == -1) DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 0, 0, 1));
+            else DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 1, 1, 1));
             DEBUG_DRAW.Line3d(triangle.a, triangle.b);
-            if (triangle.access_side[1] == -1)
-                DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 0, 0, 1));
-            else
-                DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 1, 1, 1));
+            if (triangle.access_side[1] == -1) DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 0, 0, 1));
+            else DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 1, 1, 1));
             DEBUG_DRAW.Line3d(triangle.b, triangle.c);
-            if (triangle.access_side[2] == -1)
-                DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 0, 0, 1));
-            else
-                DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 1, 1, 1));
+            if (triangle.access_side[2] == -1) DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 0, 0, 1));
+            else DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 1, 1, 1));
             DEBUG_DRAW.Line3d(triangle.c, triangle.a);
-
-            /*
-            if (triangles_[i].locked == false)
-                DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 1, 1, 0.5));
-            else
-                DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 0, 0, 0.5));
-            */
-            //DEBUG_DRAW.Triangle3d(
-            //  triangles_[i].a, triangles_[i].b, triangles_[i].c
-            //);
             DEBUG_DRAW.SetColour(Ogre::ColourValue(1, 1, 1, 1));
             DEBUG_DRAW.SetFadeDistance(40, 50);
-            Ogre::Vector3 triangle_pos
-              = (triangle.a + triangle.b + triangle.c) / 3;
+            Ogre::Vector3 triangle_pos = (triangle.a + triangle.b + triangle.c) / 3;
         }
     }
 }
 
 void Walkmesh::Clear(){triangles_.clear();}
 
-void Walkmesh::AddTriangle(const WalkmeshTriangle& triangle){
-    triangles_.push_back(triangle);
-}
+void Walkmesh::AddTriangle(const WalkmeshTriangle& triangle){triangles_.push_back(triangle);}
 
 int Walkmesh::GetAccessSide(unsigned int triangle_id, unsigned char side) const{
     if (triangle_id >= triangles_.size()){
-        LOG_ERROR(
-          "Triangle_id greater than number of triangles in walkmesh "
-          + "or less than zero."
-        );
+        LOG_ERROR("Triangle_id greater than number of triangles in walkmesh or less than zero.");
         return -1;
     }
     if (side >= 3){
@@ -90,10 +68,7 @@ int Walkmesh::GetAccessSide(unsigned int triangle_id, unsigned char side) const{
 
 const Ogre::Vector3& Walkmesh::GetA(unsigned int triangle_id) const{
     if (triangle_id >= triangles_.size()){
-        LOG_ERROR(
-          "Triangle_id greater than number of triangles in walkmesh "
-          + "or less than zero."
-        );
+        LOG_ERROR("Triangle_id greater than number of triangles in walkmesh or less than zero.");
         return Ogre::Vector3::ZERO;
     }
     return triangles_[triangle_id].a;
@@ -101,10 +76,7 @@ const Ogre::Vector3& Walkmesh::GetA(unsigned int triangle_id) const{
 
 const Ogre::Vector3& Walkmesh::GetB(unsigned int triangle_id) const{
     if (triangle_id >= triangles_.size()){
-        LOG_ERROR(
-          "Triangle_id greater than number of triangles in walkmesh "
-          + "or less than zero."
-        );
+        LOG_ERROR("Triangle_id greater than number of triangles in walkmesh or less than zero.");
         return Ogre::Vector3::ZERO;
     }
     return triangles_[triangle_id].b;
@@ -112,10 +84,7 @@ const Ogre::Vector3& Walkmesh::GetB(unsigned int triangle_id) const{
 
 const Ogre::Vector3& Walkmesh::GetC(unsigned int triangle_id) const{
     if (triangle_id >= triangles_.size()){
-        LOG_ERROR(
-          "Triangle_id greater than number of triangles in walkmesh "
-          + "or less than zero."
-        );
+        LOG_ERROR("Triangle_id greater than number of triangles in walkmesh or less than zero.");
         return Ogre::Vector3::ZERO;
     }
     return triangles_[triangle_id].c;
@@ -125,10 +94,7 @@ int Walkmesh::GetNumberOfTriangles() const{return triangles_.size();}
 
 void Walkmesh::LockWalkmesh(unsigned int triangle_id, bool lock){
     if (triangle_id >= triangles_.size()){
-        LOG_ERROR(
-          "Triangle_id greater than number of triangles in walkmesh "
-          + "or less than zero."
-        );
+        LOG_ERROR("Triangle_id greater than number of triangles in walkmesh or less than zero.");
         return;
     }
     triangles_[triangle_id].locked = lock;
@@ -136,10 +102,7 @@ void Walkmesh::LockWalkmesh(unsigned int triangle_id, bool lock){
 
 bool Walkmesh::IsLocked(unsigned int triangle_id) const{
     if (triangle_id >= triangles_.size()){
-        LOG_ERROR(
-          "Triangle_id greater than number of triangles in walkmesh "
-          + "or less than zero."
-        );
+        LOG_ERROR("Triangle_id greater than number of triangles in walkmesh or less than zero.");
         return false;
     }
     return triangles_[triangle_id].locked;

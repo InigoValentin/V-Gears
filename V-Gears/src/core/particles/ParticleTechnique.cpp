@@ -21,11 +21,11 @@
 
 
 ParticleTechnique::ParticleTechnique():
-    renderer_(nullptr),
-    visual_particle_quota_(10),
-    visual_particle_pool_increased_(false),
-    emitted_emitter_quota_(10),
-    particle_emitter_pool_increased_(false)
+  renderer_(nullptr),
+  visual_particle_quota_(10),
+  visual_particle_pool_increased_(false),
+  emitted_emitter_quota_(10),
+  particle_emitter_pool_increased_(false)
 {}
 
 ParticleTechnique::~ParticleTechnique(){
@@ -47,9 +47,8 @@ void ParticleTechnique::CopyAttributesTo(ParticleTechnique* technique){
     technique->emitted_emitter_quota_ = emitted_emitter_quota_;
     technique->particle_emitter_pool_increased_ = false;
     // Copy all emitters
-    ParticleEmitter* cloned_emitter;
     for (unsigned int i = 0; i < emitters_.size(); ++ i){
-        cloned_emitter = ParticleSystemManager::getSingletonPtr()->CloneEmitter(
+        ParticleEmitter* cloned_emitter = ParticleSystemManager::getSingletonPtr()->CloneEmitter(
           emitters_[i]
         );
         technique->AddEmitter( cloned_emitter );
@@ -63,8 +62,7 @@ void ParticleTechnique::UpdateRenderQueue(Ogre::RenderQueue* queue){
 }
 
 void ParticleTechnique::Initialize(){
-    if (renderer_ && renderer_->IsRendererInitialised() == false)
-        renderer_->Initialize();
+    if (renderer_ && renderer_->IsRendererInitialised() == false) renderer_->Initialize();
     // Create new visual particles if the quota has been increased
     if (visual_particle_pool_increased_ == false){
         int old_size = visual_particles_pool_.GetSize();
@@ -87,8 +85,7 @@ void ParticleTechnique::Initialize(){
             // in the technique and which are marked for emission.
             int number_of_emitted_emitters = GetNumEmittableEmitters();
             if (number_of_emitted_emitters == 0) return;
-            ParticleEmitter* existing_emitter = 0;
-            ParticleEmitter* cloned_emitter = 0;
+            ParticleEmitter* cloned_emitter;
             // Distribute size equally
             int increment = emitted_emitter_quota_ / number_of_emitted_emitters;
             // Run through emitters of the technique
@@ -96,8 +93,9 @@ void ParticleTechnique::Initialize(){
                 if( emitters_[ i ]->IsEmittable() ){
                     // Clone the emitter 'increment' times and add to the pool
                     for (int j = 0; j < increment; ++ j){
-                        cloned_emitter =ParticleSystemManager::getSingletonPtr()
-                          ->CloneEmitter(emitters_[i]);
+                        cloned_emitter = ParticleSystemManager::getSingletonPtr()->CloneEmitter(
+                          emitters_[i]
+                        );
                         cloned_emitter->SetEmittable(true);
                         particle_emitter_pool_.AddElement(
                           cloned_emitter->GetName(), cloned_emitter
@@ -111,18 +109,16 @@ void ParticleTechnique::Initialize(){
 }
 
 void ParticleTechnique::Update(Ogre::Real time_elapsed){
-    // Perform some initialisation type of activities (if needed). This must be
-    // done within the update-loop, because settings could be changed (i.e.
-    // changing quota), which must trigger a re-initialisation.
+    // Perform some initialisation type of activities (if needed). This must be done within the
+    // update-loop, because settings could be changed (i.e. changing quota), which must trigger a
+    // re-initialisation.
     Initialize();
-    // Process the emitters
+    // Process the emitters.
     for (unsigned int i = 0; i < emitters_.size(); ++ i){
-        // emitted particles handled in pool update
+        // Wmitted particles handled in pool update.
         if (emitters_[ i ]->IsEmittable() == false){
             ExecuteEmitParticles(
-              emitters_[i],
-              emitters_[i]->CalculateRequestedParticles(time_elapsed),
-              time_elapsed
+              emitters_[i], emitters_[i]->CalculateRequestedParticles(time_elapsed), time_elapsed
             );
         }
     }
@@ -131,9 +127,7 @@ void ParticleTechnique::Update(Ogre::Real time_elapsed){
         VisualParticle* particle = visual_particles_pool_.GetFirst();
         while (!visual_particles_pool_.End()){
             if (particle != nullptr){
-                if (particle->time_to_live > time_elapsed){
-                    particle->Update(time_elapsed);
-                }
+                if (particle->time_to_live > time_elapsed) particle->Update(time_elapsed);
                 else{
                     particle->InitForExpiration();
                     visual_particles_pool_.LockLatestElement();
@@ -152,9 +146,7 @@ void ParticleTechnique::Update(Ogre::Real time_elapsed){
                 if (particle->time_to_live > time_elapsed){
                     particle->Update(time_elapsed);
                     ExecuteEmitParticles(
-                      particle,
-                      particle->CalculateRequestedParticles(time_elapsed),
-                      time_elapsed
+                      particle, particle->CalculateRequestedParticles(time_elapsed), time_elapsed
                     );
                 }
                 else{
@@ -169,14 +161,10 @@ void ParticleTechnique::Update(Ogre::Real time_elapsed){
     }
 }
 
-ParticleRenderer* ParticleTechnique::CreateRenderer(
-  const Ogre::String& renderer_type
-){
+ParticleRenderer* ParticleTechnique::CreateRenderer(const Ogre::String& renderer_type){
     if (renderer_) DestroyRenderer();
     if (renderer_type != Ogre::BLANKSTRING){
-        renderer_ = ParticleSystemManager::getSingletonPtr()->CreateRenderer(
-          renderer_type
-        );
+        renderer_ = ParticleSystemManager::getSingletonPtr()->CreateRenderer(renderer_type);
         renderer_->SetParentTechnique(this);
         renderer_->SetRendererInitialised(false);
     }
@@ -197,13 +185,10 @@ void ParticleTechnique::DestroyRenderer(){
     }
 }
 
-ParticleEmitter* ParticleTechnique::CreateEmitter(
-  const Ogre::String& emitter_type
-){
+ParticleEmitter* ParticleTechnique::CreateEmitter(const Ogre::String& emitter_type){
     ParticleEmitter* emitter = nullptr;
     if (emitter_type != Ogre::BLANKSTRING){
-        emitter =
-          ParticleSystemManager::getSingletonPtr()->CreateEmitter(emitter_type);
+        emitter = ParticleSystemManager::getSingletonPtr()->CreateEmitter(emitter_type);
         emitters_.push_back(emitter);
         emitter->SetParentTechnique(this);
         EmissionChange();
@@ -227,25 +212,20 @@ void ParticleTechnique::DestroyAllEmitters(){
 
 int ParticleTechnique::GetNumEmittableEmitters() const{
     int count = 0;
-    for (unsigned int i = 0; i < emitters_.size(); ++ i){
-        if (emitters_[i]->IsEmittable()) count++;
-    }
+    for (unsigned int i = 0; i < emitters_.size(); ++ i) if (emitters_[i]->IsEmittable()) count++;
     return count;
 }
 
 void ParticleTechnique::EmissionChange() {
     // Run through all emitters and set MarkedForEmission to false.
-    for (unsigned int i = 0; i < emitters_.size(); ++ i)
-        emitters_[i]->SetEmittable(false);
+    for (unsigned int i = 0; i < emitters_.size(); ++ i) emitters_[i]->SetEmittable(false);
     // Run through all emitters and determine which objects each one emits.
     for (unsigned int i = 0; i < emitters_.size(); ++ i){
         Ogre::String name = emitters_[i]->GetEmitsName();
         if (name != emitters_[i]->GetName()){
             // Search the emitter to be emitted
-            for (unsigned int j = 0; j < emitters_.size(); ++ j){
-                if (emitters_[j]->GetName() == name)
-                    emitters_[j]->SetEmittable(true);
-            }
+            for (unsigned int j = 0; j < emitters_.size(); ++ j)
+                if (emitters_[j]->GetName() == name) emitters_[j]->SetEmittable(true);
         }
     }
 }
@@ -267,17 +247,13 @@ void ParticleTechnique::ExecuteEmitParticles(
                 particle = visual_particles_pool_.ReleaseElement();
                 break;
             case Particle::PT_EMITTER:
-                particle = particle_emitter_pool_.ReleaseElement(
-                  emitter->GetEmitsName()
-                );
+                particle = particle_emitter_pool_.ReleaseElement(emitter->GetEmitsName());
                 break;
         }
-        // Return if there is no particle left anymore, or the name cannot be
-        // found
+        // Return if there is no particle left anymore, or the name cannot be found.
         if (particle == nullptr){
             Ogre::LogManager::getSingletonPtr()->logMessage(
-              "ParticleTechnique::ExecuteEmitParticles request there are no "
-              "particles left."
+              "ParticleTechnique::ExecuteEmitParticles request there are no particles left."
             );
             return;
         }

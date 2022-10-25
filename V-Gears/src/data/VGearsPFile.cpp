@@ -81,7 +81,7 @@ namespace VGears{
         size_t normal_count(normals_.size());
         size_t edge_count  (edges_.size());
         for (size_t p(polygon_definitions_.size()); p --;){
-            PolygonDefinition& def(polygon_definitions_[p]);
+            const PolygonDefinition& def(polygon_definitions_[p]);
             for (int i(3); i --;){
                 if (def.vertex[i] >= vertex_count){
                     log << "Error: index to vertex is out of Bounds "

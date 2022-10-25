@@ -27,7 +27,7 @@ File::File(const Ogre::String& file):
 {
     LOG_TRIVIAL("Loading file: " + file_name_ + "\n");
     buffer_size_ = FileSystem::GetFileSize(file_name_);
-    buffer_ = (u8*) malloc(sizeof(u8) * buffer_size_);
+    buffer_ = static_cast<u8*>(malloc(sizeof(u8) * buffer_size_));
     if (!FileSystem::ReadFile(file_name_, buffer_, 0, buffer_size_))
         LOG_TRIVIAL("Warning: " + file_name_ + " not found!\n");
 }
@@ -37,7 +37,7 @@ File::File(const File* file, u32 offset, u32 length):
 {
     assert(file != nullptr);
     file_name_ = file->GetFileName();
-    buffer_ = (u8 *) malloc(sizeof(u8) * buffer_size_);
+    buffer_ = static_cast<u8*>(malloc(sizeof(u8) * buffer_size_));
     file->GetFileBuffer(buffer_, offset_, buffer_size_);
 }
 
@@ -45,7 +45,7 @@ File::File(const u8* buffer, u32 offset, u32 length):
   file_name_("BUFFER"), buffer_(nullptr), buffer_size_(length), offset_(offset)
 {
     assert(buffer != nullptr);
-    buffer_ = (u8*) malloc(sizeof(u8) * buffer_size_);
+    buffer_ = static_cast<u8*>(malloc(sizeof(u8) * buffer_size_));
     memcpy(buffer_, buffer + offset, buffer_size_);
 }
 
@@ -53,7 +53,7 @@ File::File(const File* file){
     assert(file != nullptr);
     buffer_size_ = file->GetFileSize();
     file_name_   = file->GetFileName();
-    buffer_ = (u8*) malloc(sizeof(u8) * buffer_size_);
+    buffer_ = static_cast<u8*>(malloc(sizeof(u8) * buffer_size_));
     file->GetFileBuffer(buffer_, 0, buffer_size_);
 }
 

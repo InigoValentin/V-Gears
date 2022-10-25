@@ -48,8 +48,8 @@ namespace VGears{
         triangle_list.clear();
         triangle_list.reserve(triangle_count);
         for (uint32 i(0); i < triangle_count; ++ i){
-            Triangle &in_triangle(triangles[i]);
-            Access &in_access(access[i]);
+            const Triangle &in_triangle(triangles[i]);
+            const Access &in_access(access[i]);
             WalkmeshTriangle tmp_triangle;
             tmp_triangle.a = in_triangle.a;
             tmp_triangle.b = in_triangle.b;

@@ -79,10 +79,8 @@ void UiTextArea::Update(){
             if (time != timer_time_){
                 timer_time_ = time;
                 Ogre::String time_string = "";
-                //time_string += Ogre::StringConverter::toString(timer_time_ / 60, 2, '0');
                 time_string += Ogre::StringUtil::format("%2d", timer_time_ / 60);
                 time_string += (timer_time_ & 1) ? ":" : ";";
-                //time_string += Ogre::StringConverter::toString(timer_time_ % 60, 2, '0');
                 time_string += Ogre::StringUtil::format("%2d", timer_time_ % 60);
                 SetVariable("UITextAreaTimer", time_string);
             }
@@ -94,9 +92,8 @@ void UiTextArea::Update(){
                     float time = Timer::getSingleton().GetGameTimeDelta() * 30;
                     float addition;
                     float limit;
-                    if (next_pressed_ == true || next_repeated_ == true){
+                    if (next_pressed_ == true || next_repeated_ == true)
                         text_print_speed_mod_ += (text_print_speed_mod_ >= 128) ? 0 : 1.0f * time;
-                    }
                     else text_print_speed_mod_ -= (text_print_speed_mod_ <= 1) ? 0 : 1.0f * time;
                     if (text_print_speed_ < 128){
                         addition = ((128 - text_print_speed_) / 32) + 2;
@@ -176,13 +173,7 @@ void UiTextArea::Render(){
               Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, Ogre::Matrix4::IDENTITY
             );
             render_system_->applyFixedFunctionParams(render_parameters, Ogre::GPV_GLOBAL);
-            //render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
-            //render_system_->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
-            //render_system_->_setViewMatrix(Ogre::Matrix4::IDENTITY);
             scene_manager_->_setPass(material_->getTechnique(0)->getPass(0), true, false);
-            //render_system_->setScissorTest(
-            //  true, scissor_left_, scissor_top_, scissor_right_, scissor_bottom_
-            //);
             render_system_->setScissorTest(true, Ogre::Rect(
               scissor_left_, scissor_top_, scissor_right_, scissor_bottom_
             ));
@@ -223,7 +214,7 @@ void UiTextArea::SetText(const Ogre::UTFString& text){
     Ogre::UTFString xml_text = "<container>" + text + "</container>";
     doc.Parse(xml_text.asUTF8_c_str(), 0, TIXML_ENCODING_UTF8);
     if (doc.Error() == true){
-        LOG_ERROR("Can't parse text \"" + text + "\". TinyXml Error: " + doc.ErrorDesc());
+        LOG_ERROR("Can't parse text '" + text + "'. TinyXml Error: " + doc.ErrorDesc());
         return;
     }
     SetText(doc.RootElement());
@@ -234,7 +225,6 @@ void UiTextArea::SetText(TiXmlNode* text){
         LOG_ERROR("Text pointer is NULL.");
         return;
     }
-
     // Reload font if language was changed.
     if (font_ != NULL){
         Ogre::String language = font_->GetLanguage();
@@ -248,7 +238,7 @@ void UiTextArea::SetText(TiXmlNode* text){
     if (text_.size() > max_letters_){
         text_.clear();
         LOG_ERROR(
-          "Max number of text reached in \"" + path_name_ + "\". Can't render text from node. "
+          "Max number of text reached in '" + path_name_ + "'. Can't render text from node. "
           + "Max number of letters is " + Ogre::StringConverter::toString(max_letters_) + "."
         );
     }
@@ -280,7 +270,7 @@ void UiTextArea::RemoveSpritesFromText(const unsigned int end){
 void UiTextArea::SetFont(const Ogre::String& font){
     font_ = UiManager::getSingleton().GetFont(font);
     if (font_ == nullptr){
-        LOG_ERROR("Could not find font \"" + font + "\" for \"" + path_name_ + "\".");
+        LOG_ERROR("Could not find font '" + font + "' for '" + path_name_ + "'.");
         return;
     }
     material_ = Ogre::MaterialManager::getSingleton().getByName(
@@ -368,7 +358,7 @@ float UiTextArea::GetPauseTime() const{return pause_time_;}
 
 void UiTextArea::UpdateGeometry(){
     if (font_ == NULL){
-        LOG_ERROR("Font for \"" + path_name_ + "\" if not set.");
+        LOG_ERROR("Font for '" + path_name_ + "' if not set.");
         return;
     }
     float width = 0;
@@ -376,9 +366,9 @@ void UiTextArea::UpdateGeometry(){
         width = GetTextWidth();
         if (text_align_ == CENTER) width /= 2;
     }
-    float* write_iterator = (float*) vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    float* write_iterator
+      = static_cast<float*>(vertex_buffer_->lock(Ogre::HardwareBuffer::HBL_NORMAL));
     render_operation_.vertexData->vertexCount = 0;
-
     float local_x_start
       = -final_origin_.x - (width - padding_left_) * final_scale_.x * screen_height_ / 720.0f;
     float local_x1 = local_x_start;
@@ -410,13 +400,13 @@ void UiTextArea::UpdateGeometry(){
         }
         else if (text_[i].sprite != NULL){
             float width_percent = 0;
-            float width = 0;
-            text_[i].sprite->GetWidth(width_percent, width);
+            float img_width = 0;
+            text_[i].sprite->GetWidth(width_percent, img_width);
             text_[i].sprite->SetX(0, local_x1 / (final_scale_.x * screen_height_ / 720.0f));
-            local_x1 += width * final_scale_.x * screen_height_ / 720.0f;
+            local_x1 += img_width * final_scale_.x * screen_height_ / 720.0f;
             float height_percent = 0;
-            float height = 0;
-            text_[i].sprite->GetHeight(height_percent, height);
+            float img_height = 0;
+            text_[i].sprite->GetHeight(height_percent, img_height);
             text_[i].sprite->SetY(
               0, text_[i].sprite_y + (local_y1 / (final_scale_.y * screen_height_ / 720.0f))
             );
@@ -451,7 +441,6 @@ void UiTextArea::UpdateGeometry(){
             break;
         }
         int x1, y1, x2, y2, x3, y3, x4, y4;
-
         if (final_rotation_ != 0){
             float cos = Ogre::Math::Cos(Ogre::Radian(Ogre::Degree(final_rotation_)));
             float sin = Ogre::Math::Sin(Ogre::Radian(Ogre::Degree(final_rotation_)));
@@ -483,12 +472,12 @@ void UiTextArea::UpdateGeometry(){
         float new_x4 = (x4 / screen_width_) * 2 - 1;
         float new_y4 = -((y4 / screen_height_) * 2 - 1);
         local_x1 += (char_data.width + char_data.post) * final_scale_.x * screen_height_ / 720.0f;
-        float width = font_->GetImageWidth();
-        float height = font_->GetImageHeight();
-        float left = (float)char_data.x / width;
-        float right = (float)(char_data.x + char_data.width) / width;
-        float top = (float)char_data.y / height;
-        float bottom = (float)(char_data.y + char_data.height) / height;
+        float img_width = font_->GetImageWidth();
+        float img_height = font_->GetImageHeight();
+        float left = (float)char_data.x / img_width;
+        float right = (float)(char_data.x + char_data.width) / img_width;
+        float top = (float)char_data.y / img_height;
+        float bottom = (float)(char_data.y + char_data.height) / img_height;
 
         *write_iterator ++ = new_x1;
         *write_iterator ++ = new_y1;
@@ -646,24 +635,23 @@ void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& c
                     }
                     else if (name == "character"){
                         const std::string* id = node->ToElement()->Attribute(Ogre::String("id"));
-                        const std::string name = TextManager::getSingleton().GetCharacterName(
+                        const std::string char_name = TextManager::getSingleton().GetCharacterName(
                           std::stoi(*id)
                         );
-                        for (unsigned int i = 0; i < name.length(); ++ i){
+                        for (unsigned int i = 0; i < char_name.length(); ++ i){
                             TextChar text_char;
-                            text_char.char_code = name.at(i);
+                            text_char.char_code = char_name.at(i);
                             text_char.colour = colour;
                             text_.push_back(text_char);
                         }
                     }
                     else if (name == "party"){
                         const std::string* pos = node->ToElement()->Attribute(Ogre::String("pos"));
-                        const std::string name = TextManager::getSingleton().GetPartyCharacterName(
-                          std::stoi(*pos)
-                        );
-                        for (unsigned int i = 0; i < name.length(); ++ i){
+                        const std::string char_name
+                          = TextManager::getSingleton().GetPartyCharacterName(std::stoi(*pos));
+                        for (unsigned int i = 0; i < char_name.length(); ++ i){
                             TextChar text_char;
-                            text_char.char_code = name.at(i);
+                            text_char.char_code = char_name.at(i);
                             text_char.colour = colour;
                             text_.push_back(text_char);
                         }
@@ -726,7 +714,6 @@ void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& c
                                             break;
                                         }
                                     }
-
                                     sprites = sprites->NextSibling();
                                 }
                             }
@@ -763,7 +750,6 @@ void UiTextArea::CreateVertexBuffer(){
     vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
     vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
-
     vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
       vertex_declaration->getVertexSize(0), max_letters_ * 6,
       Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false

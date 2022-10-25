@@ -21,8 +21,8 @@ set(HEADER_FILES
     include/LuaIncludes.h
     include/VGearsGameState.h
     include/VGearsPrerequisites.h
-    include/core/particles/emitters/ParticlePointEmitter.h
-    include/core/particles/emitters/ParticlePointEmitterFactory.h
+    include/core/particles/emitters/PointEmitter.h
+    include/core/particles/emitters/PointEmitterFactory.h
     include/core/particles/renderer/ParticleEntityAdditionalData.h
     include/core/particles/renderer/ParticleEntityRenderer.h
     include/core/particles/renderer/ParticleEntityRendererDictionary.h
@@ -221,7 +221,8 @@ set(SOURCE_FILES
     src/common/LzsFile.cpp
     src/common/File.cpp
     src/common/FileSystem.cpp
-    src/core/particles/emitters/ParticlePointEmitter.cpp
+    src/core/particles/emitters/PointEmitter.cpp
+    src/core/particles/emitters/PointEmitterFactory.cpp
     src/core/particles/Particle.cpp
     src/core/particles/ParticleEmitter.cpp
     src/core/particles/ParticleEmitterDictionary.cpp
@@ -290,7 +291,6 @@ set(SOURCE_FILES
     src/map/VGearsWalkmeshFile.cpp
     src/map/VGearsWalkmeshFileManager.cpp
     src/map/VGearsWalkmeshFileXMLSerializer.cpp
-    #src/viewer/ViewerModule.cpp
     src/VGearsGameState.cpp
     src/data/VGearsXMLSerializer.cpp
     src/common/FinalFantasy7/FF7NameLookup.cpp

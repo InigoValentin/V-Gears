@@ -41,7 +41,7 @@ BinGZipFile::~BinGZipFile(){}
 File* BinGZipFile::ExtractGZip(u32 file_index){
     if (file_index >= file_count_) return NULL;
     u32 extract_size = 256 * 1024;
-    u8* extract_buffer = (u8*)malloc(extract_size);
+    u8* extract_buffer = static_cast<u8*>(malloc(extract_size));
     int ret;
     z_stream strm;
     u32 offset = InnerGetFileOffset(file_index);
@@ -106,7 +106,7 @@ File* BinGZipFile::ExtractGZip(u32 file_index){
         }
 
         if (ret != Z_STREAM_END){
-            extract_buffer = (u8*) realloc(extract_buffer, extract_size * 2);
+            extract_buffer = static_cast<u8*>(realloc(extract_buffer, extract_size * 2));
             if (extract_buffer == NULL){
                 inflateEnd(&strm);
                 LOGGER->Log(
@@ -114,7 +114,7 @@ File* BinGZipFile::ExtractGZip(u32 file_index){
                 );
                 return NULL;
             }
-            strm.next_out = (u8*)extract_buffer + extract_size;
+            strm.next_out = static_cast<u8*>(extract_buffer + extract_size);
             strm.avail_out = extract_size;
             extract_size *= 2;
         }

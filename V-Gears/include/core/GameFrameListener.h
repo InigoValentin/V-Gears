@@ -48,19 +48,17 @@ class GameFrameListener :
          *
          * This event happens before any render targets have begun updating.
          *
-         * @return True to go ahead, false to abort rendering and drop out of
-         * the rendering loop.
+         * @return True to go ahead, false to abort rendering and drop out of the rendering loop.
          */
         bool frameStarted(const Ogre::FrameEvent& evt);
 
         /**
          * Called just after a frame has been rendered.
          *
-         * This event happens after all render targets have been fully updated
-         * and the buffers switched.
+         * This event happens after all render targets have been fully updated and the buffers
+         * switched.
          *
-         * @return True to continue with the next frame, false to drop out of
-         * the rendering loop.
+         * @return True to continue with the next frame, false to drop out of the rendering loop.
          */
         bool frameEnded(const Ogre::FrameEvent& evt);
 
@@ -139,16 +137,16 @@ class GameFrameListener :
         /**
          * The input manager.
          */
-        OIS::InputManager*  input_manager_;
+        OIS::InputManager* input_manager_;
 
         /**
          * The keyboard.
          */
-        OIS::Keyboard*      keyboard_;
+        OIS::Keyboard* keyboard_;
 
         /**
          * The mouse.
          */
-        OIS::Mouse*         mouse_;
+        OIS::Mouse* mouse_;
 };
 

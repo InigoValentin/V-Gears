@@ -35,9 +35,7 @@ DialogsManager::DialogsManager():
   up_pressed_(false),
   down_pressed_(false),
   limit_area_(NULL)
-{
-    LOG_TRIVIAL("DialogsManager created.");
-}
+{LOG_TRIVIAL("DialogsManager created.");}
 
 DialogsManager::~DialogsManager(){
     for (unsigned int i = 0; i < messages_.size(); ++i) delete messages_[i];
@@ -47,27 +45,24 @@ DialogsManager::~DialogsManager(){
 void DialogsManager::Initialise(){
     UiWidget* g_widget = UiManager::getSingletonPtr()->GetWidget("Dialog");
     if (g_widget == NULL){
-        LOG_ERROR(
-          "Can't create DialogsManager because Widget \"Dialog\" not founded."
-        );
+        LOG_ERROR("Can't create DialogsManager because Widget 'Dialog' not founded.");
         return;
     }
     limit_area_ = g_widget->GetChild("LimitArea");
     if (limit_area_ == NULL){
         LOG_ERROR(
-          "Can't create DialogsManager because Widget \"LimitArea\" "
-          + "not founded in Widget \"Dialog\"."
+          "Can't create DialogsManager because Widget 'LimitArea' not founded in Widget 'Dialog'."
         );
         return;
     }
     unsigned int num = limit_area_->GetNumberOfChildren();
     for (unsigned int i = 0; i < num; ++i){
         UiWidget* widget = limit_area_->GetChild(i);
-        UiTextArea* text_area = (UiTextArea*) widget->GetChild("TextArea");
+        UiTextArea* text_area = static_cast<UiTextArea*>(widget->GetChild("TextArea"));
         if (text_area == NULL){
             LOG_ERROR(
-              "Can't create dialog \"" +widget->GetName()
-              + "\" because because text_area with name \"TextArea\" missing."
+              "Can't create dialog '" +widget->GetName()
+              + "' because because text_area with name 'TextArea' is missing."
             );
             continue;
         }
@@ -80,31 +75,19 @@ void DialogsManager::Initialise(){
         //data->text_area->SetTextScrollTime(0.267f);
         data->text_area->SetTextScrollTime(0.1f);
         data->cursor = widget->GetChild("Cursor");
-        if (data->cursor != NULL)
-            data->cursor->GetY(data->cursor_percent_y, data->cursor_y);
+        if (data->cursor != NULL) data->cursor->GetY(data->cursor_percent_y, data->cursor_y);
         messages_.push_back(data);
     }
     LOG_TRIVIAL("DialogsManager initialized.");
 }
 
 void DialogsManager::Input(const VGears::Event& input){
-    if ((input.type == VGears::ET_KEY_PRESS) && (input.event == "message_ok"))
-        next_pressed_ = true;
-    else if (
-      (input.type == VGears::ET_KEY_REPEAT) && (input.event == "message_ok")
-    ){
+    if (input.type == VGears::ET_KEY_PRESS && input.event == "message_ok") next_pressed_ = true;
+    else if (input.type == VGears::ET_KEY_REPEAT && input.event == "message_ok")
         next_repeated_ = true;
-    }
-    else if (
-      (input.type == VGears::ET_KEY_PRESS) && (input.event == "message_up")
-    ){
-        up_pressed_ = true;
-    }
-    else if (
-      (input.type == VGears::ET_KEY_PRESS) && (input.event == "message_down")
-    ){
+    else if (input.type == VGears::ET_KEY_PRESS && input.event == "message_up") up_pressed_ = true;
+    else if (input.type == VGears::ET_KEY_PRESS && input.event == "message_down")
         down_pressed_ = true;
-    }
 }
 
 void DialogsManager::Update(){
@@ -114,14 +97,9 @@ void DialogsManager::Update(){
                 {
                     if (
                       (messages_[i]->window == NULL)
-                      || (
-                        messages_[i]->window->GetCurrentAnimationName()
-                          == Ogre::BLANKSTRING
-                      )
+                      || (messages_[i]->window->GetCurrentAnimationName() == Ogre::BLANKSTRING)
                     ){
-                        messages_[i]->text_area->PlayAnimation(
-                          "Show", UiAnimation::ONCE, 0, -1
-                        );
+                        messages_[i]->text_area->PlayAnimation("Show", UiAnimation::ONCE, 0, -1);
                         messages_[i]->text_area->SetVisible(true);
                         messages_[i]->state = MS_SHOW_TEXT;
                     }
@@ -130,23 +108,16 @@ void DialogsManager::Update(){
             case MS_SHOW_TEXT:{
                 if (AutoCloseCheck(i) == true) break;
                 if (messages_[i]->clickable == true){
-                    if (next_pressed_ == true)
-                        messages_[i]->text_area->InputPressed();
-                    if (next_repeated_ == true)
-                        messages_[i]->text_area->InputRepeated();
+                    if (next_pressed_ == true) messages_[i]->text_area->InputPressed();
+                    if (next_repeated_ == true) messages_[i]->text_area->InputRepeated();
                 }
 
                 if (messages_[i]->text_area->GetTextState() == TS_DONE){
                     messages_[i]->state = MS_OPENED;
-
-                    if (
-                      (messages_[i]->cursor != NULL)
-                      && (messages_[i]->show_cursor == true)
-                    ){
+                    if (messages_[i]->cursor != NULL && messages_[i]->show_cursor == true){
                         messages_[i]->cursor->SetY(
                           messages_[i]->cursor_percent_y,
-                          messages_[i]->cursor_y
-                            + messages_[i]->cursor_row_current
+                          messages_[i]->cursor_y + messages_[i]->cursor_row_current
                             * messages_[i]->text_area->GetFont()->GetHeight()
                         );
                         messages_[i]->cursor->SetVisible(true);
@@ -156,18 +127,11 @@ void DialogsManager::Update(){
                 break;
             case MS_OPENED:
                 {
-                    if (
-                      messages_[i]->clickable == true
-                      && next_pressed_ == true
-                    ){
+                    if (messages_[i]->clickable == true && next_pressed_ == true){
                         messages_[i]->auto_close = true;
-                        if (
-                          (messages_[i]->cursor != NULL)
-                          && (messages_[i]->show_cursor == true)
-                        ){
+                        if ((messages_[i]->cursor != NULL) && (messages_[i]->show_cursor == true)){
                             messages_[i]->show_cursor = false;
-                            messages_[i]->cursor_row_selected
-                              = messages_[i]->cursor_row_current;
+                            messages_[i]->cursor_row_selected = messages_[i]->cursor_row_current;
                             messages_[i]->cursor->SetVisible(false);
                         }
                     }
@@ -177,30 +141,18 @@ void DialogsManager::Update(){
                       && (messages_[i]->show_cursor == true)
                       && (messages_[i]->clickable == true)
                     ){
-                        if (up_pressed_ == true)
-                            messages_[i]->cursor_row_current -= 1;
-                        else if (down_pressed_ == true)
-                            messages_[i]->cursor_row_current += 1;
-                        messages_[i]->cursor_row_current
-                          = (
-                            messages_[i]->cursor_row_current
-                            < messages_[i]->cursor_row_first
-                          )
-                          ? messages_[i]->cursor_row_last
-                          : messages_[i]->cursor_row_current;
-                        messages_[i]->cursor_row_current
-                          = (
-                            messages_[i]->cursor_row_current
-                            > messages_[i]->cursor_row_last
-                          )
-                          ? messages_[i]->cursor_row_first
-                          : messages_[i]->cursor_row_current;
-
+                        if (up_pressed_ == true) messages_[i]->cursor_row_current -= 1;
+                        else if (down_pressed_ == true) messages_[i]->cursor_row_current += 1;
+                        messages_[i]->cursor_row_current =
+                          (messages_[i]->cursor_row_current < messages_[i]->cursor_row_first)
+                            ? messages_[i]->cursor_row_last : messages_[i]->cursor_row_current;
+                        messages_[i]->cursor_row_current =
+                          (messages_[i]->cursor_row_current > messages_[i]->cursor_row_last)
+                            ? messages_[i]->cursor_row_first : messages_[i]->cursor_row_current;
                         messages_[i]->cursor->SetY(
                           messages_[i]->cursor_percent_y,
-                          messages_[i]->cursor_y
-                          + messages_[i]->cursor_row_current
-                          * messages_[i]->text_area->GetFont()->GetHeight()
+                          messages_[i]->cursor_y + messages_[i]->cursor_row_current
+                            * messages_[i]->text_area->GetFont()->GetHeight()
                         );
                     }
                 }
@@ -208,10 +160,7 @@ void DialogsManager::Update(){
             case MS_HIDE_WINDOW:{
                     if (
                       (messages_[i]->window == NULL)
-                      || (
-                        messages_[i]->window->GetCurrentAnimationName()
-                          == Ogre::BLANKSTRING
-                      )
+                      || (messages_[i]->window->GetCurrentAnimationName() == Ogre::BLANKSTRING)
                     ){
                         HideMessage(i);
                     }
@@ -227,26 +176,20 @@ void DialogsManager::Update(){
         int y = 34;
         for (unsigned int i = 0; i < messages_.size(); ++ i){
             Ogre::String caption;
-            caption
-              += "Message " + Ogre::StringConverter::toString(i) + ": "
+            caption += "Message " + Ogre::StringConverter::toString(i) + ": "
               + message_state_string[messages_[i]->state];
 
             if (messages_[i]->state == MS_SHOW_TEXT){
                 caption += " ("
-                  + Ogre::StringConverter::toString(
-                    int(messages_[i]->text_area->GetTextLimit())
-                  ) + "/"
-                  + Ogre::StringConverter::toString(
-                    messages_[i]->text_area->GetTextSize()
-                  );
+                  + Ogre::StringConverter::toString(int(messages_[i]->text_area->GetTextLimit()))
+                  + "/" + Ogre::StringConverter::toString(messages_[i]->text_area->GetTextSize());
 
                 switch(messages_[i]->text_area->GetTextState()){
                     case TS_PAUSE_OK: caption += " pause ok"; break;
                     case TS_PAUSE_TIME:
-                        caption += " pause time "
-                          + Ogre::StringConverter::toString(
-                            int(messages_[i]->text_area->GetPauseTime())
-                          );
+                        caption += " pause time " + Ogre::StringConverter::toString(
+                          int(messages_[i]->text_area->GetPauseTime())
+                        );
                         break;
                     case TS_OVERFLOW: caption += " overflow"; break;
                     case TS_NEXT_PAGE: caption += " next page"; break;
@@ -264,28 +207,18 @@ void DialogsManager::Update(){
     down_pressed_ = false;
 }
 
-
-
-void DialogsManager::Clear(){
-    for (unsigned int i = 0; i < messages_.size(); ++ i) HideMessage(i);
-}
-
-
+void DialogsManager::Clear(){for (unsigned int i = 0; i < messages_.size(); ++ i) HideMessage(i);}
 
 void DialogsManager::OpenDialog(const char* d_name, int x, int y, int w, int h){
     int id = GetMessageId(d_name);
     if (id == -1){
-        LOG_TRIVIAL(
-          "[SCRIPT] dialog_open: dialog \"" + Ogre::String(d_name)
-          + "\" doesn't exist."
-        );
+        LOG_TRIVIAL("dialog_open: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
         return;
     }
     MessageData* data = messages_[id];
     if (data->state != MS_CLOSED){
         LOG_TRIVIAL(
-          "[SCRIPT] dialog_open: dialog \"" + Ogre::String(d_name)
-          + " already created. Close it first."
+          "dialog_open: dialog '" + Ogre::String(d_name) + "' already created. Close it first."
         );
         return;
     }
@@ -293,10 +226,8 @@ void DialogsManager::OpenDialog(const char* d_name, int x, int y, int w, int h){
     data->y = y;
     data->w = w;
     data->h = h;
-
     LOG_TRIVIAL(
-      "[SCRIPT] dialog_open: dialog("
-      + std::to_string(x) + "," + std::to_string(y) + ","
+      "dialog_open: dialog(" + std::to_string(x) + "," + std::to_string(y) + ","
       + std::to_string(w) + "," + std::to_string(h) + ")"
     );
 }
@@ -304,19 +235,14 @@ void DialogsManager::OpenDialog(const char* d_name, int x, int y, int w, int h){
 void DialogsManager::SetText(const char* d_name, const char* text){
     int id = GetMessageId(d_name);
     if (id == -1){
-        LOG_TRIVIAL(
-          "[SCRIPT] show_text: dialog \"" + Ogre::String(d_name)
-          + "\" doesn't exist."
-        );
+        LOG_TRIVIAL("[SCRIPT] show_text: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
         return;
     }
     MessageData* data = messages_[id];
-
     // XML data can change dialog w/h VS what is in the lua script
     float width = 0.0f;
     float height = 0.0f;
-    TiXmlNode* xmlText
-      = TextManager::getSingleton().GetDialog(text, width, height);
+    TiXmlNode* xmlText = TextManager::getSingleton().GetDialog(text, width, height);
     if (xmlText != NULL){
         messages_[id]->text_area->SetText(xmlText);
         ShowMessage(
@@ -326,21 +252,15 @@ void DialogsManager::SetText(const char* d_name, const char* text){
         );
     }
     else{
-        messages_[id]->text_area->SetText(
-          std::string("[ERROR string not found:] ") + text
-        );
+        messages_[id]->text_area->SetText(std::string("[ERROR string not found:] ") + text);
         ShowMessage(id, data->x, data->y, data->w, data->h);
     }
-
 }
 
 int DialogsManager::Sync(const char* d_name){
     int id = GetMessageId(d_name);
     if (id == -1){
-        LOG_TRIVIAL(
-          "[SCRIPT] sync: dialog \"" + Ogre::String(d_name)
-          + "\" doesn't exist."
-        );
+        LOG_TRIVIAL("sync: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
         return 1;
     }
 
@@ -349,36 +269,23 @@ int DialogsManager::Sync(const char* d_name){
     return -1;
 }
 
-
 void DialogsManager::Hide(const char* d_name){
     int id = GetMessageId(d_name);
     if (id == -1){
-        LOG_TRIVIAL(
-          "[SCRIPT] hide: dialog \"" + Ogre::String(d_name)
-          + "\" doesn't exist."
-        );
+        LOG_TRIVIAL("hide: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
         return;
     }
     if (messages_[id]->state == MS_CLOSED){
-        LOG_TRIVIAL(
-          "[SCRIPT ERROR] hide: dialog \"" + Ogre::String(d_name)
-          + "\" already closed. Open it first."
-        );
+        LOG_TRIVIAL("hide: dialog '" + Ogre::String(d_name) + "' already closed. Open it first.");
         return;
     }
     messages_[id]->auto_close = true;
 }
 
-
-void DialogsManager::SetVariable(
-  const char* d_name, const char* name, const char* value
-){
+void DialogsManager::SetVariable(const char* d_name, const char* name, const char* value){
     int id = GetMessageId(d_name);
     if (id == -1){
-        LOG_TRIVIAL(
-          "[SCRIPT] set_variable: dialog \"" + Ogre::String(d_name)
-          + "\" doesn't exist."
-        );
+        LOG_TRIVIAL("set_variable: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
         return;
     }
     messages_[id]->text_area->SetVariable(name, value);
@@ -387,32 +294,21 @@ void DialogsManager::SetVariable(
 void DialogsManager::SetClickable(const char* d_name, const bool clickable){
     int id = GetMessageId(d_name);
     if (id == -1){
-        LOG_TRIVIAL(
-          "[SCRIPT] set_clickable: dialog \"" + Ogre::String(d_name)
-          + "\" doesn't exist."
-        );
+        LOG_TRIVIAL("set_clickable: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
         return;
     }
     messages_[id]->clickable = clickable;
 }
 
-
-
-void DialogsManager::SetCursor(
-  const char* d_name, const int first_row, const int last_row
-){
+void DialogsManager::SetCursor(const char* d_name, const int first_row, const int last_row){
     int id = GetMessageId(d_name);
     if (id == -1){
-        LOG_TRIVIAL(
-          "[SCRIPT] set_cursor: dialog \"" + Ogre::String(d_name)
-          + "\" doesn't exist."
-        );
+        LOG_TRIVIAL("set_cursor: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
         return;
     }
     if (messages_[id]->state != MS_CLOSED){
         LOG_TRIVIAL(
-          "[SCRIPT] set_cursor: dialog \"" + Ogre::String(d_name)
-          + "\" already shown. Close it first."
+          "set_cursor: dialog '" + Ogre::String(d_name) + "' already shown. Close it first."
         );
         return;
     }
@@ -425,16 +321,11 @@ void DialogsManager::SetCursor(
 int DialogsManager::GetCursor(const char* d_name) const{
     int id = GetMessageId(d_name);
     if (id == -1){
-        LOG_TRIVIAL(
-          "[SCRIPT] get_cursor: dialog \"" + Ogre::String(d_name)
-          + "\" doesn't exist."
-        );
+        LOG_TRIVIAL("get_cursor: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
         return 0;
     }
     return messages_[id]->cursor_row_selected;
 }
-
-
 
 void DialogsManager::ShowMessage(
   const int id, const int x, const int y, const int width, const int height
@@ -454,7 +345,6 @@ void DialogsManager::ShowMessage(
     messages_[id]->widget->SetHeight(0, height);
     messages_[id]->widget->SetVisible(true);
     messages_[id]->auto_close = false;
-
     if (messages_[id]->window != NULL && messages_[id]->show_window == true){
         messages_[id]->window->SetVisible(true);
         messages_[id]->window->PlayAnimation("Show", UiAnimation::ONCE, 0, -1);
@@ -469,11 +359,8 @@ void DialogsManager::HideMessage(const int id){
     if (messages_[id]->cursor != NULL) messages_[id]->cursor->SetVisible(false);
     messages_[id]->text_area->SetVisible(false);
     messages_[id]->widget->SetVisible(false);
-    for (unsigned int i = 0; i < messages_[id]->sync.size(); ++ i){
-        ScriptManager::getSingleton().ContinueScriptExecution(
-          messages_[id]->sync[i]
-        );
-    }
+    for (unsigned int i = 0; i < messages_[id]->sync.size(); ++ i)
+        ScriptManager::getSingleton().ContinueScriptExecution(messages_[id]->sync[i]);
     messages_[id]->sync.clear();
 }
 
@@ -485,17 +372,11 @@ int DialogsManager::GetMessageId(const char* d_name) const{
 
 bool DialogsManager::AutoCloseCheck(const unsigned int id){
     if (messages_[id]->auto_close == true){
-        messages_[id]->text_area->PlayAnimation(
-          "Hide", UiAnimation::ONCE, 0, -1
-        );
-        if (messages_[id]->window != NULL){
-            messages_[id]->window->PlayAnimation(
-              "Hide", UiAnimation::ONCE, 0, -1
-            );
-        }
+        messages_[id]->text_area->PlayAnimation("Hide", UiAnimation::ONCE, 0, -1);
+        if (messages_[id]->window != NULL)
+            messages_[id]->window->PlayAnimation("Hide", UiAnimation::ONCE, 0, -1);
         messages_[id]->state = MS_HIDE_WINDOW;
         return true;
     }
-
     return false;
 }

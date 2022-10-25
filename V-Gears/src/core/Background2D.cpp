@@ -216,7 +216,8 @@ void Background2D::OnResize(){
             vertex_buffer = add_vertex_buffer_;
         else if(tiles_[i].blending == VGears::B_SUBTRACT)
             vertex_buffer = subtract_vertex_buffer_;
-        float* write_iterator = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+        float* write_iterator
+          = static_cast<float*>(vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
         write_iterator += tiles_[i].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
         *write_iterator ++ = new_x1;
         *write_iterator ++ = new_y1;
@@ -448,7 +449,7 @@ void Background2D::AddTile(
     tile.height = height;
     tile.start_vertex_index = render_op.vertexData->vertexCount;
     tile.blending = blending;
-    size_t index(tiles_.size());
+    //size_t index(tiles_.size());
     tiles_.push_back(tile);
     Ogre::Vector2 top_left(static_cast<Ogre::Real>(x), static_cast<Ogre::Real>(-y));
     Ogre::Vector2 top_right(
@@ -471,7 +472,8 @@ void Background2D::AddTile(
     float new_y3 = bottom_right.y;
     float new_x4 = bottom_left.x;
     float new_y4 = bottom_left.y;
-    float* write_iterator = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    float* write_iterator
+      = static_cast<float*>(vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
     write_iterator += render_op.vertexData->vertexCount * TILE_VERTEX_INDEX_SIZE;
 
     // TODO: Can use WriteGlyph
@@ -547,7 +549,8 @@ void Background2D::UpdateTileUV(
         vertex_buffer = add_vertex_buffer_;
     else if(tiles_[tile_id].blending == VGears::B_SUBTRACT)
         vertex_buffer = subtract_vertex_buffer_;
-    float* write_iterator = (float*) vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+    float* write_iterator
+      = static_cast<float*>(vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
     write_iterator += tiles_[tile_id].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
     write_iterator += 7;
     *write_iterator ++ = u1;

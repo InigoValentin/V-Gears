@@ -39,7 +39,6 @@ FontFile::~FontFile(void){}
 Surface* FontFile::GetSurface(void){
     int width = 512;
     int height = 4096;
-    int chars = 0;
     int char_num = 6165;
     Surface* ret = CreateSurface(width, height);
     int x_16 = 0;
@@ -74,24 +73,18 @@ Surface* FontFile::GetSurface(void){
     };
 
     ClutColor color;
-    color.r = 0;
-    color.g = 0;
-    color.b = 0;
-    color.a = 255;
-    u8 data = 0;
-
 
     for (int chars = 0; chars < char_num; ++chars){
         Surface* glyth = CreateSurface(16, 16);
         for (int y = 0; y < 16; ++ y){
-            data = (y < 11) ? GetU8(0xE + chars * 22 + y * 2 + 0) : 0;
+            u8 data = (y < 11) ? GetU8(0xE + chars * 22 + y * 2 + 0) : 0;
             //LOGGER->Log(LOGGER_INFO, "%x, %02x", y, data);
             int j = 0;
             for (int i = 7; i >= 0; -- i){
                 color.r = (((data >> i) & 0x01) == 1) ? 0 : 255;
                 color.g = (((data >> i) & 0x01) == 1) ? 0 : 255;
                 color.b = (((data >> i) & 0x01) == 1) ? 0 : 255;
-                color.a = (((data >> i) & 0x01) == 1) ? 255 : 255;
+                color.a = 255;
                 memcpy(
                   glyth->pixels.data() + 64 * y + j, &color, sizeof(ClutColor)
                 );
@@ -103,7 +96,7 @@ Surface* FontFile::GetSurface(void){
                 color.r = (((data >> i) & 0x01) == 1) ? 0 : 255;
                 color.g = (((data >> i) & 0x01) == 1) ? 0 : 255;
                 color.b = (((data >> i) & 0x01) == 1) ? 0 : 255;
-                color.a = (((data >> i) & 0x01) == 1) ? 255 : 255;
+                color.a = 255;
                 memcpy(
                   glyth->pixels.data() + 64 * y + j, &color, sizeof(ClutColor)
                 );
@@ -131,7 +124,7 @@ Surface* FontFile::GetSurface(void){
     for (auto y = 0; y < ret->height; ++ y){
         // IVV type cast
         auto* data = static_cast<unsigned int*> (
-          (unsigned int *)(pb.data) + y * pb.rowPitch
+          reinterpret_cast<unsigned int *>(pb.data) + y * pb.rowPitch
         );
         for (auto x = 0; x < ret->width; ++ x){
             auto clut

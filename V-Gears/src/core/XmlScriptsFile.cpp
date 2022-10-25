@@ -24,30 +24,18 @@ XmlScriptsFile::~XmlScriptsFile(){}
 void XmlScriptsFile::LoadScripts(){
     TiXmlNode* node = file_.RootElement();
     if(node == nullptr || node->ValueStr() != "scripts"){
-        LOG_ERROR(
-          file_.ValueStr()
-          + " is not a valid scripts file! No <scripts> in root."
-        );
+        LOG_ERROR(file_.ValueStr() + " is not a valid scripts file! No <scripts> in root.");
         return;
     }
     node = node->FirstChild();
     ScriptManager &script_manager(ScriptManager::getSingleton());
     while (node != nullptr){
-        if (
-          node->Type() == TiXmlNode::TINYXML_ELEMENT
-          && node->ValueStr() == "script"
-        ){
+        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "script")
             script_manager.RunFile(GetString(node, "file"));
-        }
-        else if(
-          node->Type() == TiXmlNode::TINYXML_ELEMENT
-          && node->ValueStr() == "system_script"
-        ){
+        else if(node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "system_script"){
             Ogre::String name = GetString(node, "name");
             if (name == ""){
-                LOG_ERROR(
-                  "There is no name specified for <system_script> tag."
-                );
+                LOG_ERROR("There is no name specified for <system_script> tag.");
                 continue;
             }
             script_manager.AddEntity(ScriptManager::SYSTEM, name, nullptr);

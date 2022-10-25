@@ -48,17 +48,12 @@ Console::Console():
   auto_completition_line_(0)
 {
 
-    Ogre::FontPtr font
-      = Ogre::FontManager::getSingleton().getByName("CourierNew");
-    if (font != nullptr)
-        letter_width_ = static_cast<int>(font->getGlyphAspectRatio('_') * 16);
-    else
-        LOG_ERROR("Console::frameStarted: Font for console not found.");
+    Ogre::FontPtr font = Ogre::FontManager::getSingleton().getByName("CourierNew");
+    if (font != nullptr) letter_width_ = static_cast<int>(font->getGlyphAspectRatio('_') * 16);
+    else LOG_ERROR("Console::frameStarted: Font for console not found.");
 
     // Calculate width and height of console depending on size of application
-    Ogre::RenderTarget *render_target(
-      VGears::Application::getSingleton().getRenderWindow()
-    );
+    Ogre::RenderTarget *render_target( VGears::Application::getSingleton().getRenderWindow());
     console_width_ = render_target->getWidth();
     console_height_ = static_cast<int>(render_target->getHeight() / 2.5f);
     line_width_ = (console_width_ - 20) / 8;
@@ -66,14 +61,13 @@ Console::Console():
       "Created console width " + Ogre::StringConverter::toString(console_width_)
       + ", height " + Ogre::StringConverter::toString(console_height_)
     );
-
-    // Add as frame and log listener
+    // Add as frame and log listener.
     Ogre::LogManager::getSingleton().getDefaultLog()->addListener(this);
     LoadHistory();
 }
 
 Console::~Console(){
-    // Remove as listener
+    // Remove as listener.
     Ogre::LogManager::getSingleton().getDefaultLog()->removeListener(this);
     SaveHistory();
 }
@@ -92,7 +86,7 @@ void Console::SaveHistory(){
         LOG_ERROR("Failed to open console_history.txt for writing");
         return;
     }
-    for (auto& historyLine : history_) file << historyLine << "\r\n";
+    for (const auto& historyLine : history_) file << historyLine << "\r\n";
 }
 
 void Console::AddToHistory(const Ogre::String& history){
@@ -103,13 +97,12 @@ void Console::AddToHistory(const Ogre::String& history){
 
 void Console::Input(const VGears::Event& event){
     if (visible_ != true){
-        // Add console
-        if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE)
-            SetToVisible();
+        // Add console.
+        if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE) SetToVisible();
         return;
     }
 
-    // input command
+    // Input command.
     else if (
       event.type == VGears::ET_KEY_PRESS && (
         event.param1 == OIS::KC_RETURN || event.param1 == OIS::KC_NUMPADENTER
@@ -119,10 +112,10 @@ void Console::Input(const VGears::Event& event){
             input_line_ += auto_completition_[auto_completition_line_];
         AddTextToOutput(input_line_);
         AddInputToHistory();
-        // Backslashed text are console commands, otherwise - script commands
+        // Backslashed text are console commands, otherwise - script commands.
         if ('\\' == input_line_[0] || '/' == input_line_[0]){
             if (input_line_.size() > 1){
-                // Remove backslash
+                // Remove backslash.
                 input_line_.erase(0, 1);
                 ExecuteCommand(input_line_);
             }
@@ -132,20 +125,13 @@ void Console::Input(const VGears::Event& event){
         cursor_position_ = 0;
         ResetAutoCompletion();
     }
-    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_TAB)
-        CompleteInput();
-    // Remove console
-    else if (
-      event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE
-    ){
-        SetToHide();
-    }
+    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_TAB) CompleteInput();
+    // Remove console.
+    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE) SetToHide();
     // History up
     else if (
-      (
-        event.type == VGears::ET_KEY_PRESS
-        || event.type == VGears::ET_KEY_REPEAT_WAIT
-      ) && event.param1 == OIS::KC_UP
+      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+      && event.param1 == OIS::KC_UP
     ){
         if (history_line_cycle_index_ < (int)history_.size() - 1){
             ++ history_line_cycle_index_;
@@ -154,50 +140,40 @@ void Console::Input(const VGears::Event& event){
     }
     // History down
     else if (
-      (
-        event.type == VGears::ET_KEY_PRESS
-        || event.type == VGears::ET_KEY_REPEAT_WAIT
-      ) && event.param1 == OIS::KC_DOWN
+      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+      && event.param1 == OIS::KC_DOWN
     ){
         if (history_line_cycle_index_ > 0){
             -- history_line_cycle_index_;
             SetInputLineFromHistory();
         }
     }
-    // Scroll display to previous row
+    // Scroll display to previous row.
     else if (event.type == VGears::ET_MOUSE_SCROLL && event.param1 > 0){
         if (display_line_ > 0) display_line_ -= 1;
     }
-    // Scroll display to next row
+    // Scroll display to next row.
     else if (event.type == VGears::ET_MOUSE_SCROLL && event.param1 < 0){
         if (display_line_ < output_line_.size()) display_line_ += 1;
-
     }
-    // Scroll display to previous row
+    // Scroll display to previous row.
     else if (
-      (
-        event.type == VGears::ET_KEY_PRESS
-        || event.type == VGears::ET_KEY_REPEAT_WAIT
-      ) && event.param1 == OIS::KC_PGUP
+      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+      && event.param1 == OIS::KC_PGUP
     ){
         if (display_line_ > 0) display_line_ -= 1;
-
     }
-    // Scroll display to next row
+    // Scroll display to next row.
     else if (
-      (
-        event.type == VGears::ET_KEY_PRESS
-        || event.type == VGears::ET_KEY_REPEAT_WAIT
-      ) && event.param1 == OIS::KC_PGDOWN
+      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+      && event.param1 == OIS::KC_PGDOWN
     ){
         if (display_line_ < output_line_.size()) display_line_ += 1;
     }
-    // Delete character after cursor
+    // Delete character after cursor.
     else if (
-      (
-        event.type == VGears::ET_KEY_PRESS
-        || event.type == VGears::ET_KEY_REPEAT_WAIT
-      ) && event.param1 == OIS::KC_DELETE
+      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+      && event.param1 == OIS::KC_DELETE
     ){
         if (auto_completition_.size() > 0) ResetAutoCompletion();
         else{
@@ -205,12 +181,10 @@ void Console::Input(const VGears::Event& event){
                 input_line_.erase(cursor_position_, 1);
         }
     }
-    // Delete character before cursor
+    // Delete character before cursor.
     else if (
-      (
-        event.type == VGears::ET_KEY_PRESS
-        || event.type == VGears::ET_KEY_REPEAT_WAIT
-      ) && event.param1 == OIS::KC_BACK
+      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+      && event.param1 == OIS::KC_BACK
     ){
         if (auto_completition_.size() > 0) ResetAutoCompletion();
         else{
@@ -220,12 +194,10 @@ void Console::Input(const VGears::Event& event){
             }
         }
     }
-    // Move cursor to left
+    // Move cursor to left.
     else if (
-      (
-        event.type == VGears::ET_KEY_PRESS
-        || event.type == VGears::ET_KEY_REPEAT_WAIT
-      ) && event.param1 == OIS::KC_LEFT
+      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+      && event.param1 == OIS::KC_LEFT
     ){
         if (auto_completition_.size() > 0){
             input_line_ += auto_completition_[auto_completition_line_];
@@ -233,12 +205,10 @@ void Console::Input(const VGears::Event& event){
         }
         if (cursor_position_ > 0) -- cursor_position_;
     }
-    // Move cursor to right
+    // Move cursor to right.
     else if (
-      (
-        event.type == VGears::ET_KEY_PRESS
-        || event.type == VGears::ET_KEY_REPEAT_WAIT
-      ) && event.param1 == OIS::KC_RIGHT
+      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+      && event.param1 == OIS::KC_RIGHT
     ){
         if (auto_completition_.size() > 0){
             input_line_ += auto_completition_[auto_completition_line_];
@@ -246,24 +216,20 @@ void Console::Input(const VGears::Event& event){
         }
         if (cursor_position_ <  input_line_.size()) ++ cursor_position_;
     }
-    else if (
-      event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_ESCAPE
-    ){
+    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_ESCAPE){
         input_line_.clear();
         cursor_position_ = 0;
         ResetAutoCompletion();
     }
-    // Move cursor to start of string
-    else if (
-      event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_HOME
-    ){
+    // Move cursor to start of string.
+    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_HOME){
         cursor_position_ = 0;
         if (auto_completition_.size() > 0){
             input_line_ += auto_completition_[auto_completition_line_];
             ResetAutoCompletion();
         }
     }
-    // Move cursor to end of string
+    // Move cursor to end of string.
     else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_END){
         if (auto_completition_.size() > 0){
             input_line_ += auto_completition_[auto_completition_line_];
@@ -271,12 +237,10 @@ void Console::Input(const VGears::Event& event){
         }
         cursor_position_ = input_line_.size();
     }
-    // Input Ascii character
+    // Input Ascii character.
     else if (
-      (
-        event.type == VGears::ET_KEY_PRESS
-        || event.type == VGears::ET_KEY_REPEAT_WAIT
-      ) && input_line_.size() < line_width_
+      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+      && input_line_.size() < line_width_
     ){
         char legalchars[]
           = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
@@ -284,8 +248,7 @@ void Console::Input(const VGears::Event& event){
         char txt = TranslateNumpad(event);
         for (unsigned int c = 0; c < sizeof(legalchars) - 1; ++ c){
             if (legalchars[c] == txt){
-                std::string::iterator i
-                  = input_line_.begin() + cursor_position_;
+                std::string::iterator i = input_line_.begin() + cursor_position_;
                 input_line_.insert(i, txt);
                 ++ cursor_position_;
                 ResetAutoCompletion();
@@ -321,8 +284,7 @@ void Console::Update(){
     if (to_visible_ == true && height_ < console_height_){
         // TODO: Convert this to a constant.
         height_ += delta_time * 1500;
-        if (height_ >= console_height_)
-            height_ = static_cast<float>(console_height_);
+        if (height_ >= console_height_) height_ = static_cast<float>(console_height_);
     }
     else if (to_visible_ == false && height_ > 0){
         height_ -= delta_time * 1500;
@@ -363,7 +325,7 @@ void Console::UpdateDraw(){
     }
     if (display_line_ != output_line_.size()){
         Ogre::String temp = "";
-        for (unsigned int i = 0; i < line_width_; ++ i) temp += "^";
+        for (unsigned int w = 0; w < line_width_; ++ w) temp += "^";
         DEBUG_DRAW.SetColour(Ogre::ColourValue(1.0f, 0.0f, 0.0f, 1.0f));
         DEBUG_DRAW.Text(5.0f, static_cast<float>(y), temp);
     }
@@ -400,9 +362,7 @@ void Console::UpdateNotification(){
     int y = (output_line_.size() > 10) ? 160 : output_line_.size() * 16;
     int line = 0;
     float max_time = 3.0f;
-    for (
-      i = output_line_.rbegin(); i != output_line_.rend() && line < 10; ++ i
-    ){
+    for (i = output_line_.rbegin(); i != output_line_.rend() && line < 10; ++ i){
         float time = Timer::getSingleton().GetSystemTimeTotal() - (*i).time;
         if (time < max_time){
             Ogre::ColourValue colour = (*i).colour;
@@ -417,18 +377,15 @@ void Console::UpdateNotification(){
 
 void Console::OnResize(){
     // Calculate width and height of console depending on size of application
-    Ogre::RenderTarget *render_target(
-      VGears::Application::getSingleton().getRenderWindow()
-    );
+    Ogre::RenderTarget *render_target(VGears::Application::getSingleton().getRenderWindow());
     console_width_ = render_target->getWidth();
     console_height_ = static_cast<int>(render_target->getHeight() / 2.5f);
     line_width_ = (console_width_ - 20) / 8;
     LOG_TRIVIAL(
-      "Resized console width to "
-      + Ogre::StringConverter::toString(console_width_) + ", height to "
-      + Ogre::StringConverter::toString(console_height_)
+      "Resized console width to " + Ogre::StringConverter::toString(console_width_)
+      + ", height to " + Ogre::StringConverter::toString(console_height_)
     );
-    // Update height of already opened console
+    // Update height of already opened console.
     height_ = (height_ > console_height_) ? console_height_ : height_;
 }
 
@@ -441,17 +398,15 @@ void Console::SetToHide(){to_visible_ = false;}
 
 bool Console::IsVisible() const{return visible_;}
 
-void Console::AddTextToOutput(
-  const Ogre::String& text, const Ogre::ColourValue& colour
-){
-    // Go through line and add it to output correctly
+void Console::AddTextToOutput(const Ogre::String& text, const Ogre::ColourValue& colour){
+    // Go through line and add it to output correctly.
     const char* str = text.c_str();
     Ogre::String output_line;
     unsigned int string_size = 0;
     bool indent = false;
     unsigned int c = 0;
     for (; c < text.size(); ++ c){
-        // Add space at start of string if we want indent
+        // Add space at start of string if it's to be indented.
         if (string_size == 0 && indent == true){
             output_line.push_back(' ');
             ++ string_size;
@@ -460,13 +415,10 @@ void Console::AddTextToOutput(
             output_line.push_back(str[c]);
             ++ string_size;
         }
-        if (
-          str[c] == '\n' || string_size >= line_width_ || c >= text.size() - 1
-        ){
-            // If string is larger than output size than add indent
+        if (str[c] == '\n' || string_size >= line_width_ || c >= text.size() - 1){
+            // If string is larger than output size than add indent.
             indent = (string_size >= line_width_) ? true : false;
-            if (output_line_.size() >= max_output_line_)
-                output_line_.pop_front();
+            if (output_line_.size() >= max_output_line_) output_line_.pop_front();
             if (output_line_.size() == display_line_) ++ display_line_;
             OutputLine line;
             line.text = output_line;
@@ -492,7 +444,6 @@ void Console::AddTextToOutput(
 void Console::ExecuteCommand(const Ogre::String& command){
     bool handled = false;
     Ogre::StringVector params = StringTokenise(command);
-
     // Is it cvar?
     ConfigVar* cvar = ConfigVarManager::getSingleton().Find(params[0]);
     if (cvar != nullptr){
@@ -503,9 +454,8 @@ void Console::ExecuteCommand(const Ogre::String& command){
         }
         else{
             AddTextToOutput(
-              params[0] + " = \"" + cvar->GetS() + "\".\n" + " default:\""
-              + cvar->GetDefaultValue() + "\".\n" + " description: "
-              + cvar->GetDescription() + ".\n"
+              params[0] + " = \"" + cvar->GetS() + "\".\n" + " default:\"" + cvar->GetDefaultValue()
+              + "\".\n" + " description: " + cvar->GetDescription() + ".\n"
             );
         }
     }
@@ -520,35 +470,26 @@ void Console::ExecuteCommand(const Ogre::String& command){
     }
 }
 
-void Console::ExecuteScript(){
-    ScriptManager::getSingleton().RunString(input_line_);
-}
+void Console::ExecuteScript(){ScriptManager::getSingleton().RunString(input_line_);}
 
 void Console::CompleteInput(){
-    bool add_slash = false;
     if (auto_completition_.size() == 0){
+        bool add_slash = false;
         // remove backslash
-        if (
-          input_line_.size() > 0
-          && ('\\' == input_line_[0]
-          || '/' == input_line_[0])
-        ){
+        if (input_line_.size() > 0 && ('\\' == input_line_[0] || '/' == input_line_[0]))
             input_line_.erase(0, 1);
-        }
         size_t input_size = input_line_.size();
         Ogre::StringVector params = StringTokenise(input_line_);
         if (params.size() == 0){
-            // Add cvars
-            int num_vars
-              = ConfigVarManager::getSingleton().GetConfigVarNumber();
+            // Add cvars.
+            int num_vars = ConfigVarManager::getSingleton().GetConfigVarNumber();
             for (int i = 0; i < num_vars; ++ i){
                 auto_completition_.push_back(
                   ConfigVarManager::getSingleton().GetConfigVar(i)->GetName()
                 );
             }
-            // Add commands
-            int num_cmds
-              = ConfigCmdManager::getSingleton().GetConfigCmdNumber();
+            // Add commands.
+            int num_cmds = ConfigCmdManager::getSingleton().GetConfigCmdNumber();
             for (int i = 0; i < num_cmds; ++i){
                 auto_completition_.push_back(
                   ConfigCmdManager::getSingleton().GetConfigCmd(i)->GetName()
@@ -558,52 +499,44 @@ void Console::CompleteInput(){
         }
         else if (params.size() == 1){
             input_line_ = params[0];
-            // add Cvars
-            int num_vars
-              = ConfigVarManager::getSingleton().GetConfigVarNumber();
+            // Add Cvars.
+            int num_vars = ConfigVarManager::getSingleton().GetConfigVarNumber();
             for (int i = 0; i < num_vars; ++ i){
-                Ogre::String name =
-                  ConfigVarManager::getSingleton().GetConfigVar(i)->GetName();
+                Ogre::String name = ConfigVarManager::getSingleton().GetConfigVar(i)->GetName();
                 unsigned int pos = name.find(input_line_);
                 if (pos == 0){
                     add_slash = true;
                     if (input_size != name.size()){
-                        Ogre::String part
-                          = name.substr(input_size, name.size() - input_size);
+                        Ogre::String part = name.substr(input_size, name.size() - input_size);
                         auto_completition_.push_back(part);
                     }
                 }
             }
-            // Add commands
-            int num_cmds
-              = ConfigCmdManager::getSingleton().GetConfigCmdNumber();
+            // Add commands.
+            int num_cmds = ConfigCmdManager::getSingleton().GetConfigCmdNumber();
             for (int i = 0; i < num_cmds; ++ i){
-                Ogre::String name
-                  = ConfigCmdManager::getSingleton().GetConfigCmd(i)->GetName();
+                Ogre::String name = ConfigCmdManager::getSingleton().GetConfigCmd(i)->GetName();
                 int pos = name.find(input_line_);
                 if (pos == 0){
                     add_slash = true;
                     if (name != params[0]){
-                        Ogre::String part
-                          = name.substr(input_size, name.size() - input_size);
+                        Ogre::String part = name.substr(input_size, name.size() - input_size);
                         auto_completition_.push_back(part);
                     }
                     else if (
-                      ConfigCmdManager::getSingleton().GetConfigCmd(i)
-                      ->GetCompletion()
-                      != nullptr
+                      ConfigCmdManager::getSingleton().GetConfigCmd(i)->GetCompletion() != nullptr
                     ){
                         input_line_ += " ";
-                        ConfigCmdManager::getSingleton().GetConfigCmd(i)->
-                          GetCompletion()(auto_completition_);
+                        ConfigCmdManager::getSingleton().GetConfigCmd(i)->GetCompletion()(
+                          auto_completition_
+                        );
                     }
                 }
             }
         }
         else if (params.size() > 1){
             Ogre::String all_params = params[1];
-            for (size_t i = 2; i < params.size(); ++ i)
-                all_params += " " + params[i];
+            for (size_t i = 2; i < params.size(); ++ i) all_params += " " + params[i];
             // Add commands arguments
             ConfigCmd* cmd = ConfigCmdManager::getSingleton().Find(params[0]);
             if (cmd != nullptr){
@@ -617,8 +550,7 @@ void Console::CompleteInput(){
                             int pos = full_complete[i].find(all_params);
                             if (pos == 0 && all_params != full_complete[i]){
                                 Ogre::String part = full_complete[i].substr(
-                                  all_params.size(),
-                                  full_complete[i].size() - all_params.size()
+                                  all_params.size(), full_complete[i].size() - all_params.size()
                                 );
                                 auto_completition_.push_back(part);
                             }
@@ -642,8 +574,7 @@ void Console::CompleteInput(){
         if (auto_completition_.size() > 0) AddTextToOutput("\n");
     }
     else{
-        if (auto_completition_line_ < auto_completition_.size() - 1)
-            ++auto_completition_line_;
+        if (auto_completition_line_ < auto_completition_.size() - 1) ++auto_completition_line_;
         else auto_completition_line_ = 0;
     }
 }
@@ -653,9 +584,7 @@ void Console::ResetAutoCompletion(){
     auto_completition_line_ = 0;
 }
 
-void Console::AddInputToHistory(){
-    AddToHistory(input_line_);
-}
+void Console::AddInputToHistory(){AddToHistory(input_line_);}
 
 void Console::SetInputLineFromHistory(){
     ResetAutoCompletion();

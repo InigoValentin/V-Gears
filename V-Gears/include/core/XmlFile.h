@@ -47,24 +47,20 @@ class XmlFile{
          *
          * @param[in] node The XML node.
          * @param[in] tag The name of the tag.
-         * @param[in] def Default value, in case the tag is not found or it's
-         * not a boolean value.
-         * @return Boolean value of the tag. If it's not found or it's not a
-         * boolean, def is returned.
+         * @param[in] def Default value, in case the tag is not found or it's not a boolean value.
+         * @return Boolean value of the tag. If it's not found or it's not a boolean, def is
+         * returned.
          */
-        bool GetBool(
-          TiXmlNode* node, const Ogre::String& tag, bool def = false
-        ) const;
+        bool GetBool(TiXmlNode* node, const Ogre::String& tag, bool def = false) const;
 
         /**
          * Retrieves an integer from an XMl tag.
          *
          * @param[in] node The XML node.
          * @param[in] tag The name of the tag.
-         * @param[in] def Default value, in case the tag is not found or it's
-         * not a numeric value.
-         * @return Integer value of the tag. If it's not found or it's not a
-         * number, def is returned.
+         * @param[in] def Default value, in case the tag is not found or it's not a numeric value.
+         * @return Integer value of the tag. If it's not found or it's not a number, def is
+         * returned.
          */
         int GetInt(TiXmlNode* node, const Ogre::String& tag, int def = 0) const;
 
@@ -73,14 +69,11 @@ class XmlFile{
          *
          * @param[in] node The XML node.
          * @param[in] tag The name of the tag.
-         * @param[in] def Default value, in case the tag is not found or it's
-         * not a numeric value.
-         * @return Decimal value of the tag. If it's not found or it's not a
-         * number, def is returned.
+         * @param[in] def Default value, in case the tag is not found or it's not a numeric value.
+         * @return Decimal value of the tag. If it's not found or it's not a number, def is
+         * returned.
          */
-        float GetFloat(
-          TiXmlNode* node, const Ogre::String& tag, float def = 0.0f
-        ) const;
+        float GetFloat(TiXmlNode* node, const Ogre::String& tag, float def = 0.0f) const;
 
         /**
          * Retrieves a string from an XMl tag.
@@ -100,12 +93,10 @@ class XmlFile{
          * @param[in] node The XML node.
          * @param[in] tag The name of the tag.
          * @param[in] def Default value, in case the tag is not found.
-         * @return String value of the tag, in UFT8. If not found, def is
-         * returned.
+         * @return String value of the tag, in UFT8. If not found, def is returned.
          */
         const Ogre::UTFString GetUTFString(
-          TiXmlNode* node, const Ogre::String& tag,
-          const Ogre::UTFString& def = ""
+          TiXmlNode* node, const Ogre::String& tag, const Ogre::UTFString& def = ""
         ) const;
 
         /**
@@ -117,8 +108,7 @@ class XmlFile{
          * @return Vector in the tag. If it's not found, def is returned.
          */
         const Ogre::Vector2 GetVector2(
-          TiXmlNode* node, const Ogre::String& tag,
-          const Ogre::Vector2& def = Ogre::Vector2::ZERO
+          TiXmlNode* node, const Ogre::String& tag, const Ogre::Vector2& def = Ogre::Vector2::ZERO
         ) const;
 
         /**
@@ -130,8 +120,7 @@ class XmlFile{
          * @return Vector in the tag. If it's not found, def is returned.
          */
         const Ogre::Vector3 GetVector3(
-          TiXmlNode* node, const Ogre::String& tag,
-          const Ogre::Vector3& def = Ogre::Vector3::ZERO
+          TiXmlNode* node, const Ogre::String& tag, const Ogre::Vector3& def = Ogre::Vector3::ZERO
         ) const;
 
         /**
@@ -143,8 +132,7 @@ class XmlFile{
          * @return Vector in the tag. If it's not found, def is returned.
          */
         const Ogre::Vector4 GetVector4(
-          TiXmlNode* node, const Ogre::String& tag,
-          const Ogre::Vector4& def = Ogre::Vector4::ZERO
+          TiXmlNode* node, const Ogre::String& tag, const Ogre::Vector4& def = Ogre::Vector4::ZERO
         ) const;
 
         /**

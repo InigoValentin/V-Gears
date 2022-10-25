@@ -22,30 +22,19 @@ ConfigVar* ConfigVar::static_config_var_list_ = nullptr;
 ConfigVar::ConfigVar(
   const Ogre::String& name, const Ogre::String& description, const Ogre::String& default_value
 ):
-  name_(name),
-  description_(description),
-  default_value_(default_value),
-  value_s_(default_value)
+  name_(name), description_(description), default_value_(default_value), value_s_(default_value)
 {
     VGEARS_ASSERT(name != "", "name_ of ConfigVar can't be empty!");
-    VGEARS_ASSERT(
-      default_value != "", "default_value_ of ConfigVar can't be empty!"
-    );
-    VGEARS_ASSERT(
-      description != "", "description_ of ConfigVar can't be empty!"
-    );
+    VGEARS_ASSERT(default_value != "", "default_value_ of ConfigVar can't be empty!");
+    VGEARS_ASSERT(description != "", "description_ of ConfigVar can't be empty!");
     UpdateVariables();
 
-    // TODO: I don't understand this code
-    if (static_config_var_list_ != (ConfigVar*) 0xffffffff){
+    // TODO: Properly cast this
+    if (reinterpret_cast<std::uintptr_t>(&static_config_var_list_) != 0xffffffff){
         previous_ = static_config_var_list_;
         static_config_var_list_ = this;
     }
-    else{
-        VGEARS_ASSERT(
-          false, "ConfigVar declared after RegisterCvars were called!"
-        );
-    }
+    else VGEARS_ASSERT(false, "ConfigVar declared after RegisterCvars were called!");
 }
 
 int ConfigVar::GetI() const{return value_i_;}
@@ -79,7 +68,6 @@ void ConfigVar::SetS(const Ogre::String& value){
 const Ogre::String& ConfigVar::GetName() const{return name_;}
 
 const Ogre::String& ConfigVar::GetDescription() const{return description_;}
-
 
 const Ogre::String& ConfigVar::GetDefaultValue() const{return default_value_;}
 

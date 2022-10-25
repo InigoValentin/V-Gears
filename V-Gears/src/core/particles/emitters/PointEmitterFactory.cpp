@@ -13,31 +13,27 @@
  * GNU General Public License for more details.
  */
 
-#pragma once
 
-#include "XmlFile.h"
+#include "core/particles/emitters/PointEmitterFactory.h"
+
+
+PointEmitterFactory::PointEmitterFactory(){};
 
 /**
- * Handles the main XML prototypes file.
+ * Destructor.
  */
-class XmlPrototypesFile : public XmlFile{
+PointEmitterFactory::~PointEmitterFactory(){};
 
-    public:
+/**
+ * Retrieves the emitter type.
+ *
+ * @return The emitter type (always "Point").
+ */
+Ogre::String PointEmitterFactory::GetEmitterType() const{return "Point";}
 
-        /**
-         * Constructor.
-         *
-         * @param[in] file Path to the main prototypes file.
-         */
-        XmlPrototypesFile(const Ogre::String& file);
-
-        /**
-         * Destructor.
-         */
-        virtual ~XmlPrototypesFile();
-
-        /**
-         * Parses the file and loads the prototypes.
-         */
-        void LoadPrototypes();
-};
+/**
+ * Creates an emitter.
+ *
+ * @return A new {@see PointEmitter}.
+ */
+ParticleEmitter* PointEmitterFactory::CreateEmitter(){return CreateEmitter_<PointEmitter>();}

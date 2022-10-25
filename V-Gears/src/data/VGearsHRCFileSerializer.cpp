@@ -99,12 +99,12 @@ namespace VGears{
         );
         String rsd_names("");
         for (
-          Ogre::StringVector::const_iterator it(++rsd_list.begin());
-          it != rsd_list.end();
-          ++ it
+          Ogre::StringVector::const_iterator rsd_it(++ rsd_list.begin());
+          rsd_it != rsd_list.end();
+          ++ rsd_it
         ){
-            dest.rsd_names.push_back(*it);
-            rsd_names += *it + " ";
+            dest.rsd_names.push_back(*rsd_it);
+            rsd_names += *rsd_it + " ";
         }
 
         if(rsd_count != dest.rsd_names.size()){

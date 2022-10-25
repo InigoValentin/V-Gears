@@ -65,9 +65,6 @@ namespace VGears {
         for (auto& section_offset : section_offsets)
             ReadUInt32(stream, section_offset);
 
-        std::cout
-          << "Got " << section_offsets.size() << " blocks " << std::endl;
-
         // Section 2 is the world map textures.
         if (section_offsets.size() >= 2){
             // Skip 4 to get the real start position.
@@ -107,7 +104,7 @@ namespace VGears {
             std::ofstream s(ss.str().c_str(), std::ios::binary);
             if (s.is_open()){
                 s.write(
-                  (const char*) tmp_block.pixels.data(),
+                  reinterpret_cast<const char*>(tmp_block.pixels.data()),
                   tmp_block.pixels.size()
                 );
             }
@@ -633,7 +630,7 @@ namespace VGears {
         //int entry_count = 20;
         for (int i = 0; i < entry_count; i ++){
             // Get the hard coded pre-baked known record.
-            harcoded_texture_info2& info = hardcoded_textures[i];
+            const harcoded_texture_info2& info = hardcoded_textures[i];
             // Grab the WM texture for it
             const WorldMapTexture& wm_texture = pallete_table[info.id];
             // From the wm texture grab the pallete data
