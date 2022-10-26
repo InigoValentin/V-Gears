@@ -346,8 +346,7 @@ void CmdResolution(const Ogre::StringVector& params){
         );
         return;
     }
-    Ogre::RenderWindow* window
-      = VGears::Application::getSingleton().getRenderWindow();
+    Ogre::RenderWindow* window = VGears::Application::getSingleton().getRenderWindow();
     if (params.size() >= 4){
         window->setFullscreen(
           Ogre::StringConverter::parseBool(params[3]),
@@ -360,6 +359,7 @@ void CmdResolution(const Ogre::StringVector& params){
           Ogre::StringConverter::parseInt(params[1]),
           Ogre::StringConverter::parseInt(params[2])
         );
+        window->getViewport(0)->setDimensions(0.0f, 0.0f, 1.0f, 1.0f);
     }
 }
 

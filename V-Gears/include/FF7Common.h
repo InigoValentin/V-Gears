@@ -27,12 +27,12 @@ namespace VGears{
         /**
          * Game horizontal resolution, in pixels.
          */
-        SCREEN_WIDTH = 320,
+        SCREEN_WIDTH = 1024,
 
         /**
          * Game vertical resolution, in pixels.
          */
-        SCREEN_HEIGHT = 240,
+        SCREEN_HEIGHT = 768,
 
         /**
          * @todo Understand and document.

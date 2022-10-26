@@ -418,8 +418,15 @@ EntityPoint* EntityManager::ScriptGetEntityPoint(const char* name) const{
 }
 
 void EntityManager::ScriptSetPlayerEntity(const char* name){
-    for (unsigned int i = 0; i < entity_.size(); ++ i)
-        if (entity_[i]->GetName() == name) player_entity_ = entity_[i];
+    for (unsigned int i = 0; i < entity_.size(); ++ i){
+        if (entity_[i]->GetName() == name){
+            player_entity_ = entity_[i];
+            // Also, make is solid, visible, and non-talkable.
+            entity_[i]->SetSolid(true);
+            entity_[i]->SetVisible(true);
+            entity_[i]->SetTalkable(false);
+        }
+    }
 }
 
 Entity* EntityManager::ScriptGetPlayerEntity() const{return player_entity_;}

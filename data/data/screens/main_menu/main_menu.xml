@@ -1,9 +1,9 @@
 <screen name="MainMenu" script="scripts/menu/main_menu.lua" visible="false">
-    <widget name="Container" width="368" height="240" origin_x="50%" origin_y="50%" align="center" valign="middle" scale="3 3" visible="true">
-        <widget name="Characters" x="30" y="17" width="300" height="190" visible="true">
+    <widget name="Container" width="100%" height="100%" x="0%"  y="0%" align="left" valign="top" scale="3 3" visible="true">
+        <widget name="Characters" x="1%" y="1%" width="32%" height="30%" visible="true">
             <prototype name="Window" />
-            <animation name="Appear" length="0.3" x="0:736,0.3:30" />
-            <animation name="Disappear" length="0.3" x="0:30,0.3:736" />
+            <animation name="Appear" length="0.3" x="0:110%,0.3:1%" />
+            <animation name="Disappear" length="0.3" x="0:1%,0.3:110%" />
 
             <widget name="Character1" x="0" y="0" width="100%" height="60" visible="true">
                 <sprite name="Portrait" image="images/other/choco.png" x="22" y="12" width="48" height="48" visible="true">

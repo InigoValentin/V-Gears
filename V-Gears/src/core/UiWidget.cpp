@@ -13,9 +13,11 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include <OgreMath.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
+#include "common/VGearsApplication.h"
 #include "core/ConfigVar.h"
 #include "core/CameraManager.h"
 #include "core/DebugDraw.h"
@@ -302,6 +304,16 @@ void UiWidget::SetUpdateTransformation(){
 }
 
 void UiWidget::UpdateTransformation(){
+
+    Ogre::RenderWindow* window = VGears::Application::getSingleton().getRenderWindow();
+    float res_width = static_cast<float>(window->getWidth());
+    float res_height = static_cast<float>(window->getHeight());
+    screen_width_ = res_width;
+    screen_height_ = res_height;
+
+    Ogre::Viewport *viewport(CameraManager::getSingleton().getViewport());
+    viewport->setDimensions(0.0f, 0.0f, 1.0f, 1.0f);
+
     Ogre::Vector2 area_scale
       = (parent_ != nullptr) ? parent_->GetFinalScale() : Ogre::Vector2(1, 1);
     Ogre::Vector2 area_origin

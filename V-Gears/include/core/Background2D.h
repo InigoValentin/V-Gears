@@ -107,8 +107,8 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Retrieves the entity currently being tracked for autoscroll.
          *
-         * @return The entity currently being tracked, or nullptr if the
-         * background is not currently scrolling to any entity.
+         * @return The entity currently being tracked, or nullptr if the background is not
+         * currently scrolling to any entity.
          */
         Entity* GetAutoScrollEntity() const;
 
@@ -121,8 +121,7 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] seconds Duration of the scroll.
          */
         void ScriptScrollToPosition(
-          const float x, const float y,
-          const SCROLL_TYPE type, const float seconds
+          const float x, const float y, const SCROLL_TYPE type, const float seconds
         );
 
         /**
@@ -131,6 +130,14 @@ class Background2D : public Ogre::RenderQueueListener{
          * @return -1.
          */
         int ScriptScrollSync();
+
+        /**
+         * Offsets the background to a position.
+         *
+         * @param[in] x X coordinate to scroll to.
+         * @param[in] y Y coordinate to scroll to.
+         */
+        void ScriptOffset(const float x, const float y);
 
         /**
          * Stops the current scrolling.
@@ -168,8 +175,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Sets the time taken by the current scroll action.
          *
-         * It represents the time the current scroll action has been going on
-         * for.
+         * It represents the time the current scroll action has been going on for.
          *
          * @param[in] seconds Time taken by the current scroll action.
          */
@@ -178,8 +184,7 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Retrieves the time taken by the current scroll action.
          *
-         * It represents the time the current scroll action has been going on
-         * for.
+         * It represents the time the current scroll action has been going on for.
          *
          * @return Time taken by the current scroll action.
          */
@@ -230,9 +235,7 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] max_x Max scrollabe x coordinate.
          * @param[in] max_y Max scrollabe y coordinate.
          */
-        void SetRange(
-          const int min_x, const int min_y, const int max_x, const int max_y
-        );
+        void SetRange(const int min_x, const int min_y, const int max_x, const int max_y);
 
         /**
          * Set the background scrolling range.
@@ -260,9 +263,8 @@ class Background2D : public Ogre::RenderQueueListener{
          * @todo What are v1, v2, u1 and u2?
          */
         void AddTile(
-          const int x, const int y, const int width, const int height,
-          const float depth, const float u1, const float v1,
-          const float u2, const float v2, const Blending blending
+          const int x, const int y, const int width, const int height, const float depth,
+          const float u1, const float v1, const float u2, const float v2, const Blending blending
         );
 
         /**
@@ -300,8 +302,7 @@ class Background2D : public Ogre::RenderQueueListener{
          * @todo What are v1, v2, u1 and u2?
          */
         void UpdateTileUV(
-          const unsigned int tile_id,
-          const float u1, const float v1, const float u2, const float v2
+          const unsigned int tile_id, const float u1, const float v1, const float u2, const float v2
         );
 
         /**
@@ -317,9 +318,7 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] animation The animation to play.
          * @param[in] state Animation state.
          */
-        void PlayAnimation(
-          const Ogre::String& animation, const Background2DAnimation::State state
-        );
+        void PlayAnimation(const Ogre::String& animation, const Background2DAnimation::State state);
 
         /**
          * Plays an animation in a loop.
@@ -354,13 +353,11 @@ class Background2D : public Ogre::RenderQueueListener{
          *
          * @param[in] queueGroupId The group id of the queue to end.
          * @param[in] invocation
-         * @param[in] repeatThisInvocation Indicates if the invocation must be
-         * repeated.
+         * @param[in] repeatThisInvocation Indicates if the invocation must be repeated.
          * @todo Understand and document.
          */
         void renderQueueEnded(
-          Ogre::uint8 queueGroupId, const Ogre::String& invocation,
-          bool& repeatThisInvocation
+          Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation
         ) override;
 
         /**
@@ -423,9 +420,7 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] tile_index The index of the tile.
          * @param[in] animations List of animations to load.
          */
-        virtual void load(
-          const size_t tile_index, const VGears::AnimationMap &animations
-        );
+        virtual void load( const size_t tile_index, const VGears::AnimationMap &animations);
 
         /**
          * Apply the camera position to match the current scroll.
@@ -595,7 +590,14 @@ class Background2D : public Ogre::RenderQueueListener{
         Ogre::Vector2 position_;
 
         /**
+         * The current background offset, virtual screen size.
+         */
+        Ogre::Vector2 offset_;
+
+        /**
          * The current scroll position, viewport size.
+         *
+         * Includes the offset.
          */
         Ogre::Vector2 position_real_;
 
@@ -650,5 +652,3 @@ class Background2D : public Ogre::RenderQueueListener{
          */
         std::vector<Background2DAnimation*> animations_;
 };
-
-

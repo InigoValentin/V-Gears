@@ -102,10 +102,13 @@ namespace VGears{
             Ogre::NameValuePairList list;
             list.emplace("hidden", "true");
             _root->initialise(false, getWindowTitle());
+            //
             _render_window = _root->createRenderWindow(getWindowTitle(), 1, 1, false, &list);
         }
         else{
-            _render_window = _root->initialise(true, getWindowTitle());
+            _render_window = _root->initialise(false, getWindowTitle());
+            // TODO: Get actual resolution from config
+            _render_window = _root->createRenderWindow(getWindowTitle(), 1024, 768, false);
         }
         registerArchiveFactories();
         loadResourcesConfig();

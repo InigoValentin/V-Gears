@@ -272,6 +272,9 @@ void ScriptManager::InitBinds(){
             "scroll_sync", (int(Background2D::*)()) &Background2D::ScriptScrollSync, luabind::yield
           )
           .def(
+            "offset", (void(Background2D::*)(const float, const float)) &Background2D::ScriptOffset
+          )
+          .def(
             "play_animation_looped",
             (void(Background2D::*)(const char*)) &Background2D::ScriptPlayAnimationLooped
           )

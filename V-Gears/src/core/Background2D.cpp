@@ -42,6 +42,7 @@ Background2D::Background2D():
   scroll_current_seconds_(0),
   position_(Ogre::Vector2::ZERO),
   position_real_(Ogre::Vector2::ZERO),
+  offset_(Ogre::Vector2::ZERO),
   range_(Ogre::AxisAlignedBox::BOX_INFINITE),
   virtual_screen_size_(320, 240) // FFVII original resolution
 {
@@ -104,14 +105,10 @@ Background2D::~Background2D(){
 
 void Background2D::InputDebug(const VGears::Event& event){
     if (cv_background2d_manual.GetB() == true && event.type == VGears::ET_KEY_IMPULSE){
-        if (event.param1 == OIS::KC_W)
-            position_real_.y += 2;
-        else if (event.param1 == OIS::KC_A)
-            position_real_.x += 2;
-        else if (event.param1 == OIS::KC_S)
-            position_real_.y -= 2;
-        else if (event.param1 == OIS::KC_D)
-            position_real_.x -= 2;
+        if (event.param1 == OIS::KC_W) position_real_.y += 2;
+        else if (event.param1 == OIS::KC_A) position_real_.x += 2;
+        else if (event.param1 == OIS::KC_S) position_real_.y -= 2;
+        else if (event.param1 == OIS::KC_D) position_real_.x -= 2;
         CameraManager::getSingleton().Set2DScroll(position_real_);
     }
 }
@@ -210,12 +207,9 @@ void Background2D::OnResize(){
         float new_x4 = bottom_left.x;
         float new_y4 = bottom_left.y;
         Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
-        if (tiles_[i].blending == VGears::B_ALPHA)
-            vertex_buffer = alpha_vertex_buffer_;
-        else if(tiles_[i].blending == VGears::B_ADD)
-            vertex_buffer = add_vertex_buffer_;
-        else if(tiles_[i].blending == VGears::B_SUBTRACT)
-            vertex_buffer = subtract_vertex_buffer_;
+        if (tiles_[i].blending == VGears::B_ALPHA) vertex_buffer = alpha_vertex_buffer_;
+        else if(tiles_[i].blending == VGears::B_ADD) vertex_buffer = add_vertex_buffer_;
+        else if(tiles_[i].blending == VGears::B_SUBTRACT) vertex_buffer = subtract_vertex_buffer_;
         float* write_iterator
           = static_cast<float*>(vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
         write_iterator += tiles_[i].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
@@ -249,6 +243,7 @@ void Background2D::Clear(){
     scroll_current_seconds_ = 0;
     position_ = Ogre::Vector2::ZERO;
     position_real_ = Ogre::Vector2::ZERO;
+    offset_ = Ogre::Vector2::ZERO;
     range_ = Ogre::AxisAlignedBox::BOX_INFINITE;
     UnsetScroll();
     for(unsigned int i = 0; i < animations_.size(); ++i) delete animations_[i];
@@ -270,12 +265,12 @@ void Background2D::ScriptScrollToPosition(
   const float x, const float y, const SCROLL_TYPE type, const float seconds
 ){
     LOG_TRIVIAL(
-      "[SCRIPT] Background2d set scroll to position \""
-      + Ogre::StringConverter::toString(Ogre::Vector2(x, y)) + "\"."
+      "Background2d set scroll to position '"
+      + Ogre::StringConverter::toString(Ogre::Vector2(x, y)) + "'."
     );
     Ogre::Vector2 position = Ogre::Vector2(x, y);
     scroll_entity_ = nullptr;
-    if(type == Background2D::NONE){
+    if (type == Background2D::NONE){
         SetScroll(position);
         return;
     }
@@ -289,11 +284,22 @@ void Background2D::ScriptScrollToPosition(
 int Background2D::ScriptScrollSync(){
     ScriptId script = ScriptManager::getSingleton().GetCurrentScriptId();
     LOG_TRIVIAL(
-      "[SCRIPT] Wait Background2d scroll for function \""
-      + script.function + "\" in script entity \"" + script.entity + "\"."
+      "Wait Background2d scroll for function '"
+      + script.function + "' in script entity '" + script.entity + "'."
     );
     scroll_sync_.push_back(script);
     return -1;
+}
+
+void Background2D::ScriptOffset(const float x, const float y){
+    LOG_TRIVIAL(
+      "Background2d offset '" + Ogre::StringConverter::toString(Ogre::Vector2(x, y)) + "'."
+    );
+    offset_.x = x;
+    offset_.y = y;
+    position_real_.x += offset_.x;
+    position_real_.y += offset_.y;
+    CameraManager::getSingleton().Set2DScroll(position_real_);
 }
 
 void Background2D::UnsetScroll(){
@@ -336,6 +342,8 @@ void Background2D::SetScroll(const Ogre::Vector2& position){
 void Background2D::applyScroll(){
     if(cv_background2d_manual.GetB() != true){
         position_real_ = GetScreenScroll();
+        position_real_.x += offset_.x;
+        position_real_.y += offset_.y;
         CameraManager::getSingleton().Set2DScroll(position_real_);
     }
 }
@@ -456,8 +464,7 @@ void Background2D::AddTile(
       static_cast<Ogre::Real>(x + width), static_cast<Ogre::Real>(top_left.y)
     );
     Ogre::Vector2 bottom_right(
-      static_cast<Ogre::Real>(top_right.x),
-      static_cast<Ogre::Real>(-(y + height))
+      static_cast<Ogre::Real>(top_right.x), static_cast<Ogre::Real>(-(y + height))
     );
     Ogre::Vector2 bottom_left(top_left.x, bottom_right.y);
     virtualScreenToWorldSpace(top_left);
@@ -543,12 +550,9 @@ void Background2D::UpdateTileUV(
         return;
     }
     Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
-    if (tiles_[tile_id].blending == VGears::B_ALPHA)
-        vertex_buffer = alpha_vertex_buffer_;
-    else if (tiles_[tile_id].blending == VGears::B_ADD)
-        vertex_buffer = add_vertex_buffer_;
-    else if(tiles_[tile_id].blending == VGears::B_SUBTRACT)
-        vertex_buffer = subtract_vertex_buffer_;
+    if (tiles_[tile_id].blending == VGears::B_ALPHA) vertex_buffer = alpha_vertex_buffer_;
+    else if (tiles_[tile_id].blending == VGears::B_ADD) vertex_buffer = add_vertex_buffer_;
+    else if(tiles_[tile_id].blending == VGears::B_SUBTRACT) vertex_buffer = subtract_vertex_buffer_;
     float* write_iterator
       = static_cast<float*>(vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
     write_iterator += tiles_[tile_id].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
@@ -596,8 +600,7 @@ void Background2D::PlayAnimation(
         anim.state = state;
         animation_played_.push_back(anim);
     }
-    else
-        LOG_ERROR("Background2D doesn't has animation \"" + animation + "\".");
+    else LOG_ERROR("Background2D doesn't has animation '" + animation + "'.");
 }
 
 void Background2D::ScriptPlayAnimationLooped(const char* name){
@@ -663,8 +666,7 @@ void Background2D::CreateVertexBuffers(){
     alpha_max_vertex_count_ = 2048 * TILE_VERTEX_COUNT;
     alpha_render_op_.vertexData = new Ogre::VertexData;
     alpha_render_op_.vertexData->vertexStart = 0;
-    Ogre::VertexDeclaration* vertex_declaration
-      = alpha_render_op_.vertexData->vertexDeclaration;
+    Ogre::VertexDeclaration* vertex_declaration = alpha_render_op_.vertexData->vertexDeclaration;
     size_t offset = 0;
     vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
@@ -704,8 +706,7 @@ void Background2D::CreateVertexBuffers(){
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
     vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES
-    );
+    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
     subtract_vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
       vertex_declaration->getVertexSize(0), subtract_max_vertex_count_,
       Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
@@ -749,7 +750,7 @@ void Background2D::load(const VGears::Background2DFile::TileList& tiles){
     size_t tile_index(0);
     while (it != it_end) {
         AddTile(*it);
-        load(tile_index++, it->animations);
+        load(tile_index ++, it->animations);
         ++ it;
     }
 }

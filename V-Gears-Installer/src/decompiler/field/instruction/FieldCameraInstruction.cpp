@@ -38,7 +38,7 @@ void FieldCameraInstruction::ProcessInst(
     case OPCODES::SCR2DC: ProcessSCR2DC(code_gen); break;
     case OPCODES::SCRLW: code_gen->WriteTodo(md.GetEntityName(), "SCRLW"); break;
     case OPCODES::SCR2DL: code_gen->WriteTodo(md.GetEntityName(), "SCR2DL"); break;
-    case OPCODES::VWOFT: code_gen->WriteTodo(md.GetEntityName(), "VWOFT"); break;
+    case OPCODES::VWOFT: ProcessVWOFT(code_gen); break;
     case OPCODES::FADE: ProcessFADE(code_gen); break;
     case OPCODES::FADEW: code_gen->WriteTodo(md.GetEntityName(), "FADEW"); break;
     case OPCODES::SCRLP: code_gen->WriteTodo(md.GetEntityName(), "SCRLP"); break;
@@ -106,6 +106,21 @@ void FieldCameraInstruction::ProcessSCR2DC(CodeGenerator* code_gen){
     );
     code_gen->AddOutputLine((
       boost::format("background2d:scroll_to_position(%1% * 3, %2% * 3, Background2D.SMOOTH, %3%)")
+      % x % y % speed
+    ).str());
+}
+
+void FieldCameraInstruction::ProcessVWOFT(CodeGenerator* code_gen){
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetSigned()
+    );
+    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetSigned()
+    );
+    const auto& speed = params_[4]->GetUnsigned();
+    code_gen->AddOutputLine((
+      boost::format("background2d:offset(%1%, %2%) -- Speed %3%")
       % x % y % speed
     ).str());
 }

@@ -35,7 +35,7 @@ UiContainer.BeginMenu = {
                     FFVII.MenuSettings.pause_available = true
                 elseif self.position == 3 then
                     -- NMKIN_3 START
-                    FFVII.Data.progress_game = 23
+                    --[[FFVII.Data.progress_game = 23
                     load_field_map_request("nmkin_3", "")
                     console( "camera_free false" )
                     console( "debug_walkmesh true" )
@@ -48,24 +48,26 @@ UiContainer.BeginMenu = {
                     entity_manager:get_entity("Cloud"):jump_to_position(0.46875, 14.9922, -1, 1, 42) -- Triangle 42, 2 steps.
                     entity_manager:get_entity("Cloud"):jump_sync()
                     entity_manager:player_lock(false)
-                    FFVII.MenuSettings.pause_available = true
+                    FFVII.MenuSettings.pause_available = true]]
                     -- NMKIN_3 END
                     -- NMKIN_4 START
-                    --[[FFVII.Data.progress_game = 23
-                    load_field_map_request("nmkin_4", "")
-                    console( "camera_free false" )
-                    console( "debug_walkmesh true" )
+                    FFVII.Data.progress_game = 14
+                    --load_field_map_request("nmkin_4", "")
+                    map("nmkin_4")
+                    console("camera_free false")
+                    console("debug_walkmesh true")
                     script:wait(1.5)
                     script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
                     entity_manager:get_entity("Cloud"):set_position(-0.820312, 0.500000, 17.281244)
                     entity_manager:set_player_entity("Cloud")
+                    FFVII.set_party(0, 1, nil)
                     script:wait(0.5)
                     entity_manager:get_player_entity():set_position(-0.820312, 0.500000, 17.281244)
                     entity_manager:get_entity("Cloud"):jump_to_position(-0.800312, 0.500000, -1, 1) -- Triangle 42, 2 steps.
                     entity_manager:get_entity("Cloud"):jump_sync()
                     entity_manager:player_lock(false)
                     print("TRIANGLE " .. entity_manager:get_entity("Cloud"):get_move_triangle_id())
-                    FFVII.MenuSettings.pause_available = true]]
+                    FFVII.MenuSettings.pause_available = true
                     -- NMKIN_4 END
                 elseif self.position == 4 then
                     script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )

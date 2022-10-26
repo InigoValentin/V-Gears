@@ -212,9 +212,9 @@ void FieldDisassembler::AddFunc(
     if (!func_name.empty()) func->name = func_name;
     if (engine_->EntityIsLine(entity_index)){
         switch (script_index){
-            // main   - on_update
+            // main - on_update
             case 0: break;
-            // [OK]   - on_interact
+            // [OK] - on_interact
             case 1: break;
             // Move - on_enter_line
             case 2: func->name = "on_enter_line"; break;
@@ -316,8 +316,8 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
   size_t end_pos, std::vector<float>& point_a, std::vector<float>& point_b
 ){
     bool is_line = false;
-    std::vector<unsigned int> exitAddrs;
     while (stream_->GetPosition() < end_pos){
+
         uint8 opcode = stream_->ReadU8();
         uint32 full_opcode = 0;
         full_opcode = (full_opcode << 8) + opcode;
@@ -1233,13 +1233,8 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
         }
         this->address_++;
 
-        // Is it within an "if" statement tracking?
-        InstPtr i = this->insts_.back();
-        if (i->IsCondJump()) exitAddrs.push_back(i->GetDestAddress());
-        if (!exitAddrs.empty())
-            if (i->GetAddress() == exitAddrs.back()) exitAddrs.pop_back();
-        // Only bail if its the first RET that isn't within an "if" block.
-        if (full_opcode == OPCODES::RET && exitAddrs.empty()) return is_line;
+        // Exit on return found.
+        if (full_opcode == OPCODES::RET) return is_line;
     }
     return is_line;
 }

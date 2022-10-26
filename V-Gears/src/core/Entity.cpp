@@ -28,9 +28,9 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   height_(1.0f),
   //solid_radius_(0.24f),
   solid_radius_(0.21f),
-  solid_(true),
+  solid_(false),
   talk_radius_(0.45f),
-  talkable_(true),
+  talkable_(false),
   state_(Entity::NONE),
   move_auto_speed_(0.7f),
   move_walk_speed_(0.7f),
@@ -201,6 +201,12 @@ void Entity::SetPosition(const Ogre::Vector3& position){scene_node_->setPosition
 
 void Entity::ScriptSetPosition(const float x, const float y, const float z){
     SetPosition(Ogre::Vector3(x, y, z));
+
+    // Make the entity solid, visible and talkable. TODO: Check if neccessary.
+    SetVisible(true);
+    SetSolid(true);
+    SetTalkable(true);
+
     // If set from a script:
     // Reset walkmesh triangle to reattach entity to walkmesh again if needed.
     move_triangle_id_ = -1;
