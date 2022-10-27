@@ -253,6 +253,8 @@ KeyName key_names[] = {
     {"F10", OIS::KC_F10},
     {"F11", OIS::KC_F11},
     {"F12", OIS::KC_F12},
+    {"PGUP", OIS::KC_PGUP},
+    {"PGDN", OIS::KC_PGDOWN},
     {"UNASSIGNED", OIS::KC_UNASSIGNED},
 };
 

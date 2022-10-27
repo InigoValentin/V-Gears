@@ -7,7 +7,7 @@ UiContainer.MainMenu = {
     position = 1,
 
     -- Max cursor position in the main menu.
-    position_total = 10,
+    position_total = 11,
 
     --- When selecting a character, the menu in this position will be opened.
     --
@@ -134,6 +134,7 @@ UiContainer.MainMenu = {
         for c = 1, 3 do
             if FFVII.Party[c] ~= nil then
                 UiContainer.populate_character_data("MainMenu.Container.Characters.Character" .. tostring(c), Characters[FFVII.Party[c]])
+                ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_image("images/characters/" .. tostring(FFVII.Party[c]) .. ".png")
                 if Characters[FFVII.Party[c]].back_row == 1 then
                     ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_default_animation("RowBack")
                 else

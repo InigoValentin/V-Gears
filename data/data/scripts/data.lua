@@ -191,6 +191,15 @@ FFVII.Party = {
     [3] = nil
 }
 
+--- Current party.
+--
+-- @todo: Change from FFVII.Party, which is to be deleted.
+Party = {
+    [1] = nil,
+    [2] = nil,
+    [3] = nil
+}
+
 --- Memory banks.
 --
 -- Used to store gama data.

@@ -41,7 +41,7 @@ void FieldWindowInstruction::ProcessInst(
         case OPCODES::MPRA2: code_gen->WriteTodo(md.GetEntityName(), "MPRA2"); break;
         case OPCODES::MPNAM: ProcessMPNAM(code_gen); break;
         case OPCODES::ASK: code_gen->WriteTodo(md.GetEntityName(), "ASK"); break;
-        case OPCODES::MENU: code_gen->WriteTodo(md.GetEntityName(), "MENU"); break;
+        case OPCODES::MENU: ProcessMENU(code_gen); break;
         case OPCODES::MENU2: ProcessMENU2(code_gen); break;
         case OPCODES::WINDOW: ProcessWINDOW(code_gen); break;
         case OPCODES::WMOVE: code_gen->WriteTodo(md.GetEntityName(), "WMOVE"); break;
@@ -69,6 +69,67 @@ void FieldWindowInstruction::ProcessWINDOW(CodeGenerator* code_gen){
       boost::format("dialog:dialog_open(\"%1%\", %2%, %3%, %4%, %5%)")
       % windowId % x % y % width % height
     ).str());
+}
+
+void FieldWindowInstruction::ProcessMENU(CodeGenerator* code_gen){
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    int menu_id = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+        cg->GetFormatter(), params_[1]->GetUnsigned(), params_[2]->GetSigned(),
+        FieldCodeGenerator::ValueType::Integer
+      ));
+    int param = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetSigned(),
+      FieldCodeGenerator::ValueType::Integer
+    ));
+    switch(menu_id){
+        case 0x05: // Ending credits.
+            code_gen->AddOutputLine("ending_credits()");
+            break;
+        case 0x06: // Name menu
+            if (param == 64) // ID 64 is for chocobos.
+                code_gen->AddOutputLine("name_chocobo()");
+            else
+                code_gen->AddOutputLine((boost::format("name_character(%1%)") % param).str());
+            break;
+        case 0x07: // Form party.
+            switch (param){
+                case 0x01: // Split in 3 teams (last battle).
+                    code_gen->AddOutputLine("Party.split_teams(3)");
+                    break;
+                case 0x02: // Split in 2 teams (last battle).
+                    code_gen->AddOutputLine("Party.split_teams(2)");
+                    break;
+                default: // 0x00: Normal, form party of three.
+                    code_gen->AddOutputLine("Party.choose_party()");
+            }
+            break;
+        case 0x08: //Shop
+            code_gen->AddOutputLine((boost::format("open_shop(%1%)") % param).str());
+            break;
+        case 0x09: // Party menu
+            code_gen->AddOutputLine("open_menu(\"party\")");
+            break;
+        case 0x0E: // Party menu
+            code_gen->AddOutputLine("open_menu(\"save\")");
+            break;
+        case 0x0F: // Steal materia event.
+            code_gen->AddOutputLine("Party.steal_materia()");
+            break;
+        case 0x12: // Remove materia from character.
+            code_gen->AddOutputLine(
+              (boost::format("Characters.remove_materia(%1%)") % param).str()
+            );
+            break;
+        case 0x13: // Restore character materia.
+            code_gen->AddOutputLine(
+              (boost::format("Characters.restore_materia(%1%)") % param).str()
+            );
+            break;
+        default:
+            code_gen->AddOutputLine(
+              (boost::format("-- Unknown menu %1% (%2%)") % menu_id % param).str()
+            );
+    }
 }
 
 void FieldWindowInstruction::ProcessMESSAGE(

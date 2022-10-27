@@ -1,0 +1,50 @@
+<screen name="NameMenu" script="scripts/menu/name_menu.lua" visible="false">
+    <sprite name="Background" x="0" y="0" width="100%" height="100%" colour="0 0 0" visible="true"/>
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Help" x="0" y="0" width="100%" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Help" text_name="NameMenuHelp" x="16" y="6" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Character" width="100%" x="0" y="24" height="70" visible="true">
+            <prototype name="Window"/>
+            <sprite name="Portrait" image="images/other/choco.png" x="10" y="12" width="48" height="48" visible="true" />
+            <widget name="Name" width="72" height="16" x="80" y="50%-8" visible="true">
+                <text_area name="Char1" x="1" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char2" x="11" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char3" x="21" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char4" x="31" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char5" x="41" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char6" x="51" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char7" x="61" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char8" x="71" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char9" x="81" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char10" x="91" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char11" x="101" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <text_area name="Char12" x="111" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
+                <sprite name="Score1" x="0" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score2" x="10" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score3" x="20" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score4" x="30" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score5" x="40" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score6" x="50" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score7" x="60" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score8" x="70" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score9" x="80" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score10" x="90" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score11" x="100" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+                <sprite name="Score12" x="110" y="11" width="8" height="0.3" colour="0.6 0.6 0.6" visible="true"/>
+            </widget>
+        </widget>
+        <widget name="Options" x="100%-80" y="94" width="80" height="100%-94" visible="true">
+            <prototype name="Window" />
+            <text_area name="Clear" x="15" y="10" font="FFVIIFont" visible="true" />
+            <text_area name="Default" x="15" y="20" font="FFVIIFont" visible="true" />
+            <text_area name="Confirm" x="15" y="30" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="images/icons/cursor.png" x="-5" y="10" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:10" />
+                <animation name="Position2" length="0" y="0:20" />
+                <animation name="Position3" length="0" y="0:30" />
+            </sprite>
+        </widget>
+    </widget>
+</screen>

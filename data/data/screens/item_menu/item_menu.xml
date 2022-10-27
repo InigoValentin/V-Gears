@@ -1,6 +1,6 @@
 <screen name="ItemMenu" script="scripts/menu/item_menu.lua" visible="false">
-    <widget name="Container" width="368" height="240" origin_x="50%" origin_y="50%" align="center" valign="middle" scale="3 3" visible="true">
-        <widget name="ItemMenuTopBar" x="30" y="5" width="310" height="24" visible="true">
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="ItemMenuTopBar" x="0" y="0" width="100%" height="24" visible="true">
             <prototype name="Window" />
             <text_area name="ItemText" x="36" y="6" text_name="ItemMenuUse" font="FFVIIFont" visible="true" />
             <text_area name="ItemText" x="96" y="6" text_name="ItemMenuOrder" font="FFVIIFont" visible="true" />
@@ -11,15 +11,15 @@
                 <animation name="Position3" length="0" x="0:126" />
             </sprite>
         </widget>
-        <widget name="ItemMenuTitle" x="254" y="5" width="86" height="24" visible="true">
+        <widget name="ItemMenuTitle" x="100%-86" y="" width="86" height="24" visible="true">
             <prototype name="Window" />
             <text_area name="ItemText" x="16" y="6" text_name="ItemMenuItem" font="FFVIIFont" visible="true" />
         </widget>
-        <widget name="ItemMenuSecondBar" x="30" y="29" width="310" height="24" visible="true">
+        <widget name="ItemMenuSecondBar" x="0" y="24" width="100%" height="24" visible="true">
             <prototype name="Window" />
-            <text_area name="ItemText" x="16" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <text_area name="ItemText" x="16" y="6" font="FFVIIFont" visible="true" />
         </widget>
-        <widget name="ItemMenuCharacters" x="30" y="53" width="155" height="182" visible="true">
+        <widget name="ItemMenuCharacters" x="0" y="48" width="50%" height="100%-48" visible="true">
             <prototype name="Window" />
             <widget name="Character1" x="0" y="0" width="100%" height="55" visible="true">
                 <sprite name="Portrait" image="images/other/choco.png" x="10" y="12" width="48" height="48" visible="true" />
@@ -50,70 +50,91 @@
                 <sprite name="Cursor3" image="images/icons/cursor.png" x="0" y="135" width="24" height="17" visible="true"/>
             </widget>
         </widget>
-        <widget name="ItemList" x="185" y="53" width="155" height="182" visible="true">
+        <widget name="ItemList" x="50%" y="48" width="50%" height="100%-48" visible="true">
             <prototype name="Window" />
 
-            <sprite name="Icon0" image="images/icons/item_item.png" x="8" y="5" width="13" height="15" visible="true" />
-            <text_area name="Name0" x="30" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon0" x="130" y="6" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty0" x="135" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="ScrollBg" x="100%-12" y="2" width="10" height="100%-6" colour="0.2 0.2 0.2" alpha="0.8" visible="true"/>
+            <sprite name="Scroll" x="100%-11" y="3" width="8" height="18" colour="0.7 0.7 0.7" visible="true"/>
 
-            <sprite name="Icon1" image="images/icons/item_item.png" x="8" y="22" width="13" height="15" visible="true" />
-            <text_area name="Name1" x="30" y="23" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon1" x="130" y="23" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty1" x="135" y="23" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Icon1" image="images/icons/item_item.png" x="8" y="5%-2" width="13" height="15" visible="true" />
+            <text_area name="Name1" x="30" y="5%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon1" x="130" y="5%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty1" x="135" y="5%" font="FFVIIFont" visible="true" />
 
-            <sprite name="Icon2" image="images/icons/item_item.png" x="8" y="39" width="13" height="15" visible="true" />
-            <text_area name="Name2" x="30" y="40" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon2" x="130" y="40" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty2" x="135" y="40" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Icon2" image="images/icons/item_item.png" x="8" y="12%-2" width="13" height="15" visible="true" />
+            <text_area name="Name2" x="30" y="12%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon2" x="130" y="12%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty2" x="135" y="12%" font="FFVIIFont" visible="true" />
 
-            <sprite name="Icon3" image="images/icons/item_item.png" x="8" y="56" width="13" height="15" visible="true" />
-            <text_area name="Name3" x="30" y="57" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon3" x="130" y="57" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty3" x="135" y="57" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Icon3" image="images/icons/item_item.png" x="8" y="19%-2" width="13" height="15" visible="true" />
+            <text_area name="Name3" x="30" y="19%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon3" x="130" y="19%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty3" x="135" y="19%" font="FFVIIFont" visible="true" />
 
-            <sprite name="Icon4" image="images/icons/item_item.png" x="8" y="73" width="13" height="15" visible="true" />
-            <text_area name="Name4" x="30" y="74" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon4" x="130" y="74" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty4" x="135" y="74" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Icon4" image="images/icons/item_item.png" x="8" y="26%-2" width="13" height="15" visible="true" />
+            <text_area name="Name4" x="30" y="26%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon4" x="130" y="26%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty4" x="135" y="26%" font="FFVIIFont" visible="true" />
 
-            <sprite name="Icon5" image="images/icons/item_item.png" x="8" y="90" width="13" height="15" visible="true" />
-            <text_area name="Name5" x="30" y="91" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon5" x="130" y="91" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty5" x="135" y="91" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Icon5" image="images/icons/item_item.png" x="8" y="33%-2" width="13" height="15" visible="true" />
+            <text_area name="Name5" x="30" y="33%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon5" x="130" y="33%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty5" x="135" y="33%" font="FFVIIFont" visible="true" />
 
-            <sprite name="Icon6" image="images/icons/item_item.png" x="8" y="107" width="13" height="15" visible="true" />
-            <text_area name="Name6" x="30" y="108" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon6" x="130" y="108" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty6" x="135" y="108" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Icon6" image="images/icons/item_item.png" x="8" y="40%-2" width="13" height="15" visible="true" />
+            <text_area name="Name6" x="30" y="40%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon6" x="130" y="40%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty6" x="135" y="40%" font="FFVIIFont" visible="true" />
 
-            <sprite name="Icon7" image="images/icons/item_item.png" x="8" y="124" width="13" height="15" visible="true" />
-            <text_area name="Name7" x="30" y="125" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon7" x="130" y="125" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty7" x="135" y="125" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Icon7" image="images/icons/item_item.png" x="8" y="47%-2" width="13" height="15" visible="true" />
+            <text_area name="Name7" x="30" y="47%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon7" x="130" y="47%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty7" x="135" y="47%" font="FFVIIFont" visible="true" />
 
-            <sprite name="Icon8" image="images/icons/item_item.png" x="8" y="141" width="13" height="15" visible="true" />
-            <text_area name="Name8" x="30" y="142" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon8" x="130" y="142" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty8" x="135" y="142" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Icon8" image="images/icons/item_item.png" x="8" y="54%-2" width="13" height="15" visible="true" />
+            <text_area name="Name8" x="30" y="54%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon8" x="130" y="54%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty8" x="135" y="54%" font="FFVIIFont" visible="true" />
 
-            <sprite name="Icon9" image="images/icons/item_item.png" x="8" y="158" width="13" height="15" visible="true" />
-            <text_area name="Name9" x="30" y="159" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="Colon9" x="130" y="159" text_name="Colon" font="FFVIIFont" visible="true" />
-            <text_area name="Qty9" x="135" y="159" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="Icon9" image="images/icons/item_item.png" x="8" y="61%-2" width="13" height="15" visible="true" />
+            <text_area name="Name9" x="30" y="61%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon9" x="130" y="61%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty9" x="135" y="61%" font="FFVIIFont" visible="true" />
 
-            <sprite name="Cursor" image="images/icons/cursor.png" x="-11" y="6" width="24" height="17" visible="true">
-                <animation name="Position1" length="0" y="0:6" />
-                <animation name="Position2" length="0" y="0:23" />
-                <animation name="Position3" length="0" y="0:40" />
-                <animation name="Position4" length="0" y="0:57" />
-                <animation name="Position5" length="0" y="0:78" />
-                <animation name="Position6" length="0" y="0:91" />
-                <animation name="Position7" length="0" y="0:108" />
-                <animation name="Position8" length="0" y="0:125" />
-                <animation name="Position9" length="0" y="0:142" />
-                <animation name="Position10" length="0" y="0:159" />
+            <sprite name="Icon10" image="images/icons/item_item.png" x="8" y="68%-2" width="13" height="15" visible="true" />
+            <text_area name="Name10" x="30" y="68%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon10" x="130" y="68%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty10" x="135" y="68%" font="FFVIIFont" visible="true" />
+
+            <sprite name="Icon11" image="images/icons/item_item.png" x="8" y="75%-2" width="13" height="15" visible="true" />
+            <text_area name="Name11" x="30" y="75%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon11" x="130" y="75%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty11" x="135" y="75%" font="FFVIIFont" visible="true" />
+
+            <sprite name="Icon12" image="images/icons/item_item.png" x="8" y="82%-2" width="13" height="15" visible="true" />
+            <text_area name="Name12" x="30" y="82%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon12" x="130" y="82%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty12" x="135" y="82%" font="FFVIIFont" visible="true" />
+
+            <sprite name="Icon13" image="images/icons/item_item.png" x="8" y="89%-2" width="13" height="15" visible="true" />
+            <text_area name="Name13" x="30" y="89%" font="FFVIIFont" visible="true" />
+            <text_area name="Colon13" x="130" y="89%" font="FFVIIFont" visible="true" />
+            <text_area name="Qty13" x="135" y="89%" font="FFVIIFont" visible="true" />
+
+            <sprite name="Cursor" image="images/icons/cursor.png" x="-11" y="5%+2" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:5%+2" />
+                <animation name="Position2" length="0" y="0:12%+2" />
+                <animation name="Position3" length="0" y="0:19%+2" />
+                <animation name="Position4" length="0" y="0:26%+2" />
+                <animation name="Position5" length="0" y="0:33%+2" />
+                <animation name="Position6" length="0" y="0:40%+2" />
+                <animation name="Position7" length="0" y="0:47%+2" />
+                <animation name="Position8" length="0" y="0:54%+2" />
+                <animation name="Position9" length="0" y="0:61%+2" />
+                <animation name="Position10" length="0" y="0:68%+2" />
+                <animation name="Position11" length="0" y="0:75%+2" />
+                <animation name="Position12" length="0" y="0:82%+2" />
+                <animation name="Position13" length="0" y="0:89%+2" />
             </sprite>
 
 
@@ -140,49 +161,63 @@
             </sprite>
 
         </widget>
-        <widget name="KeyItems" x="30" y="53" width="310" height="182" visible="false">
+        <widget name="KeyItems" x="0" y="48" width="100%" height="100%-48" visible="false">
             <prototype name="Window" />
-            <text_area name="KeyItem0-0" x="30" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem0-1" x="185" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem1-0" x="30" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem1-1" x="185" y="6" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem2-0" x="30" y="40" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem2-1" x="185" y="40" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem3-0" x="30" y="57" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem3-1" x="185" y="57" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem4-0" x="30" y="74" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem4-1" x="185" y="74" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem5-0" x="30" y="91" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem5-1" x="185" y="91" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem6-0" x="30" y="108" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem6-1" x="185" y="108" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem7-0" x="30" y="125" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem7-1" x="185" y="125" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem8-0" x="30" y="142" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem8-1" x="185" y="142" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem9-0" x="30" y="159" text_name="Placeholder" font="FFVIIFont" visible="true" />
-            <text_area name="KeyItem9-1" x="185" y="159" text_name="Placeholder" font="FFVIIFont" visible="true" />
+            <sprite name="ScrollBg" x="100%-12" y="2" width="10" height="100%-6" colour="0.2 0.2 0.2" alpha="0.8" visible="true"/>
+            <sprite name="Scroll" x="100%-11" y="3" width="8" height="18" colour="0.7 0.7 0.7" visible="true"/>
+            <text_area name="KeyItem1-1" x="10%" y="5%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem1-2" x="60%" y="5%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem2-1" x="10%" y="12%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem2-2" x="60%" y="12%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem3-1" x="10%" y="19%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem3-2" x="60%" y="19%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem4-1" x="10%" y="26%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem4-2" x="60%" y="26%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem5-1" x="10%" y="33%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem5-2" x="60%" y="33%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem6-1" x="10%" y="40%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem6-2" x="60%" y="40%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem7-1" x="10%" y="47%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem7-2" x="60%" y="47%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem8-1" x="10%" y="54%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem8-2" x="60%" y="54%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem9-1" x="10%" y="61%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem9-2" x="60%" y="61%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem10-1" x="10%" y="68%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem10-2" x="60%" y="68%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem11-1" x="10%" y="75%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem11-2" x="60%" y="75%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem12-1" x="10%" y="82%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem12-2" x="60%" y="82%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem13-1" x="10%" y="89%" font="FFVIIFont" visible="true" />
+            <text_area name="KeyItem13-2" x="60%" y="89%" font="FFVIIFont" visible="true" />
             <sprite name="Cursor" image="images/icons/cursor.png" x="-11" y="6" width="24" height="17" visible="true">
-                <animation name="Position0-0" length="0" x="0:0" y="0:6" />
-                <animation name="Position0-1" length="0" x="0:150" y="0:6" />
-                <animation name="Position1-0" length="0" x="0:0" y="0:23" />
-                <animation name="Position1-1" length="0" x="0:150" y="0:23" />
-                <animation name="Position2-0" length="0" x="0:0" y="0:40" />
-                <animation name="Position2-1" length="0" x="0:150" y="0:40" />
-                <animation name="Position3-0" length="0" x="0:0" y="0:57" />
-                <animation name="Position3-1" length="0" x="0:150" y="0:57" />
-                <animation name="Position4-0" length="0" x="0:0" y="0:78" />
-                <animation name="Position4-1" length="0" x="0:150" y="0:78" />
-                <animation name="Position5-0" length="0" x="0:0" y="0:91" />
-                <animation name="Position5-1" length="0" x="0:150" y="0:91" />
-                <animation name="Position6-0" length="0" x="0:0" y="0:108" />
-                <animation name="Position6-1" length="0" x="0:150" y="0:108" />
-                <animation name="Position7-0" length="0" x="0:0" y="0:125" />
-                <animation name="Position7-1" length="0" x="0:150" y="0:125" />
-                <animation name="Position8-0" length="0" x="0:0" y="0:142" />
-                <animation name="Position8-1" length="0" x="0:150" y="0:142" />
-                <animation name="Position9-0" length="0" x="0:0" y="0:159" />
-                <animation name="Position9-1" length="0" x="0:150" y="0:159" />
+                <animation name="Position1-1" length="0" x="0:10%-24" y="0:5%+1" />
+                <animation name="Position1-2" length="0" x="0:60%-24" y="0:5%+1" />
+                <animation name="Position2-1" length="0" x="0:10%-24" y="0:12%+1" />
+                <animation name="Position2-2" length="0" x="0:60%-24" y="0:12%+1" />
+                <animation name="Position3-1" length="0" x="0:10%-24" y="0:19%+1" />
+                <animation name="Position3-2" length="0" x="0:60%-24" y="0:19%+1" />
+                <animation name="Position4-1" length="0" x="0:10%-24" y="0:26%+1" />
+                <animation name="Position4-2" length="0" x="0:60%-24" y="0:26%+1" />
+                <animation name="Position5-1" length="0" x="0:10%-24" y="0:33%+1" />
+                <animation name="Position5-2" length="0" x="0:60%-24" y="0:33%+1" />
+                <animation name="Position6-1" length="0" x="0:10%-24" y="0:40%+1" />
+                <animation name="Position6-2" length="0" x="0:60%-24" y="0:40%+1" />
+                <animation name="Position7-1" length="0" x="0:10%-24" y="0:47%+1" />
+                <animation name="Position7-2" length="0" x="0:60%-24" y="0:47%+1" />
+                <animation name="Position8-1" length="0" x="0:10%-24" y="0:54%+1" />
+                <animation name="Position8-2" length="0" x="0:60%-24" y="0:54%+1" />
+                <animation name="Position9-1" length="0" x="0:10%-24" y="0:61%+1" />
+                <animation name="Position9-2" length="0" x="0:60%-24" y="0:61%+1" />
+                <animation name="Position10-1" length="0" x="0:10%-24" y="0:68%+1" />
+                <animation name="Position10-2" length="0" x="0:60%-24" y="0:68%+1" />
+                <animation name="Position11-1" length="0" x="0:10%-24" y="0:75%+1" />
+                <animation name="Position11-2" length="0" x="0:60%-24" y="0:75%+1" />
+                <animation name="Position12-1" length="0" x="0:10%-24" y="0:82%+1" />
+                <animation name="Position12-2" length="0" x="0:60%-24" y="0:82%+1" />
+                <animation name="Position13-1" length="0" x="0:10%-24" y="0:89%+1" />
+                <animation name="Position13-2" length="0" x="0:60%-24" y="0:89%+1" />
             </sprite>
         </widget>
     </widget>

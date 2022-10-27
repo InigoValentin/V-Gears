@@ -181,6 +181,48 @@ axyzi = function(bx, by, bz, bt, id, ax, ay, az, at, scale)
     return 0
 end
 
+--- Shows the ending credits.
+ending_credits = function()
+    -- TODO: Implement. Probably in a looooong loooong time.
+end
+
+--- Displays a window where a name can be assigned to a character.
+--
+-- @param id ID of the character to name.
+name_character = function(id)
+    -- TODO: Implement.
+    if Characters[id] == nil then
+        print("Tried to rename invalid character with ID " .. tostring(id))
+        return 0
+    end
+    UiContainer.NameMenu.id = id
+    UiContainer.NameMenu.chocobo = false
+    script:request(Script.UI, "NameMenu", "show", 0)
+end
+
+--- Displays a window where a name can be assigned to a chocobo.
+name_chocobo = function()
+    -- TODO: Implement.
+end
+
+--- Automatically opens a menu.
+--
+-- @param menu The name of the menu.
+open_menu = function(menu)
+    if menu == "party" then
+        -- TODO
+    elseif menu == "save" then
+        -- TODO
+    end
+end
+
+--- Opens a shop.
+--
+-- @param id Shop ID.
+open_shop = function(id)
+    -- TODO: Implement
+end
+
 --- Utility to change fields and enter battles.
 System["MapChanger"] = {
     map_name = "",

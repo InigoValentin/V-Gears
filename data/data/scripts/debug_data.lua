@@ -29,7 +29,7 @@ Inventory.add_item(240, 4)
 Inventory.add_item(289, 4)
 Inventory.add_item(290, 1)
 Inventory.add_item(294, 2)
-Inventory.add_key_item(0)
+--[[Inventory.add_key_item(0)
 Inventory.add_key_item(1)
 Inventory.add_key_item(5)
 Inventory.add_key_item(18)
@@ -38,7 +38,10 @@ Inventory.add_key_item(20)
 Inventory.add_key_item(21)
 Inventory.add_key_item(22)
 Inventory.add_key_item(33)
-Inventory.add_key_item(38)
+Inventory.add_key_item(38)]]
+for i = 0, 50 do
+    Inventory.add_key_item(i)
+end
 Inventory.money = 1234567
 Inventory.sort(Inventory.ORDER.NAME)
 Characters[0].stats.hp.current = 12345

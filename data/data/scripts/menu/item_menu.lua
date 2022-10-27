@@ -9,14 +9,14 @@ UiContainer.ItemMenu = {
     --- Max cursor position in the top bar.
     bar_position_total = 3,
 
-    --- Current cursor position in the item list (1-10).
+    --- Current cursor position in the item list (1-13).
     --
     -- It doesn't represent the item id or the inventory position, but the highlighted row among
     -- the ten displayed.
     item_cursor_position = 1,
 
-    --- Max cursor position in the item list (1-10).
-    item_cursor_position_total = 10,
+    --- Max cursor position in the item list.
+    item_cursor_position_total = 13,
 
     --- Highlighted inventory position (1-320).
     item_cursor_item_selected = 1,
@@ -34,18 +34,27 @@ UiContainer.ItemMenu = {
     --
     -- It doesn't represent the item id or the inventory position, but the highlighted row among
     -- the ten displayed.
-    key_items_cursor_x_position = 0,
+    key_items_cursor_y_position = 1,
 
     --- Key items cursor horizontal position (0-1)
     --
     -- It doesn't represent the item id or the inventory position, but the highlighted row among
-    -- the ten displayed. 0 if the cursor is in the left column, 1 if it's on the right.
-    key_items_cursor_y_position = 0,
+    -- the ten displayed. 1 if the cursor is in the left column, 2 if it's on the right.
+    key_items_cursor_x_position = 1,
+
+    --- Max vertical cursor position in the key item list.
+    key_items_cursor_y_position_total = 13,
+
+    --- Total number of rows in the key items window.
+    --
+    -- Includes visible and scrolled/scrollable rows. Since there are 51 key items, there are
+    -- 26 rows.
+    key_items_total_rows = 26,
 
     --- First visible row of key items (0-16)
     --
     -- Changes as the key item list scrols vertically.
-    first_key_item_row_in_window = 0,
+    first_key_item_row_in_window = 1,
 
     --- Current cursor position in the order section (1-8).
     order_cursor_position = 1,
@@ -58,6 +67,9 @@ UiContainer.ItemMenu = {
 
     --- Indicates it the selected item affect the entire party.
     item_in_use_party = false,
+
+    -- Slots in the party inventory
+    inventory_size = 320,
 
     --- Run when the menu is creaded.
     --
@@ -154,7 +166,7 @@ UiContainer.ItemMenu = {
                 local cursor = ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor")
                 local desc_label = ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText")
                 if button == "Down" then
-                    if self.item_cursor_item_selected >= 320 then
+                    if self.item_cursor_item_selected >= self.inventory_size then
                         -- At the very end, do nothing
                         return 0
                     end
@@ -170,7 +182,7 @@ UiContainer.ItemMenu = {
                     cursor:set_default_animation("Position" .. self.item_cursor_position)
                     -- If an item is selected, show description
                     if (Inventory[self.item_cursor_item_selected] ~= nil) then
-                        desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected].item].description)
+                        desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected + 1].item].description)
                     else
                         desc_label:set_text("")
                     end
@@ -191,9 +203,31 @@ UiContainer.ItemMenu = {
                     cursor:set_default_animation("Position" .. self.item_cursor_position)
                     -- If an item is selected, show description
                     if (Inventory[self.item_cursor_item_selected] ~= nil) then
-                        desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected].item].description)
+                        desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected + 1].item].description)
                     else
                         desc_label:set_text("")
+                    end
+                elseif button == "PGDN" then -- TODO: Also, the bind to R1
+                    if self.first_item_in_window + self.item_cursor_position_total < self.inventory_size - self.item_cursor_position_total then
+                        self.item_cursor_item_selected = self.item_cursor_item_selected + self.item_cursor_position_total
+                        self.first_item_in_window = self.first_item_in_window + self.item_cursor_position_total
+                        self.populate_items(self)
+                        if (Inventory[self.item_cursor_item_selected] ~= nil) then
+                            desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected + 1].item].description)
+                        else
+                            desc_label:set_text("")
+                        end
+                    end
+                elseif button == "PGUP" then -- TODO: Also, the bind to L1
+                    if self.first_item_in_window - self.item_cursor_position_total > 1 then
+                        self.item_cursor_item_selected = self.item_cursor_item_selected - self.item_cursor_position_total
+                        self.first_item_in_window = self.first_item_in_window - self.item_cursor_position_total
+                        self.populate_items(self)
+                        if (Inventory[self.item_cursor_item_selected] ~= nil) then
+                            desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected + 1].item].description)
+                        else
+                            desc_label:set_text("")
+                        end
                     end
                 elseif button == "Escape" and event == "Press" then
                     self.submenu_bar(self)
@@ -202,7 +236,7 @@ UiContainer.ItemMenu = {
                 elseif button == "Enter" then
                     if Game.Items[Inventory[self.item_cursor_item_selected].item].menu == 1 then
                         self.item_in_use = Inventory[self.item_cursor_item_selected].item
-                        if (Game.Items[Inventory[self.item_cursor_item_selected].item].target.default_multiple) == 1 then
+                        if (Game.Items[Inventory[self.item_cursor_item_selected - 1].item].target.default_multiple) == 1 then
                             self.item_in_use_party = true
                             self.submenu_chars(self, true)
                         else
@@ -249,11 +283,11 @@ UiContainer.ItemMenu = {
                 end
             elseif UiContainer.current_submenu == "key_item_selection" then
                 if button == "Down" then
-                    if self.key_items_cursor_y_position == 9 and self.first_key_item_row_in_window == 16 then
+                    if self.key_items_cursor_y_position == self.key_items_cursor_y_position_total and self.first_key_item_row_in_window == self.key_items_total_rows - self.key_items_cursor_y_position then
                         -- Last key item selected, do nothing
                         return 0
                     end
-                    if self.key_items_cursor_y_position == 9 then
+                    if self.key_items_cursor_y_position == self.key_items_cursor_y_position_total then
                         -- Scroll down by 1, don't move cursor
                         self.first_key_item_row_in_window = self.first_key_item_row_in_window + 1
                         self.populate_key_items(self)
@@ -263,18 +297,18 @@ UiContainer.ItemMenu = {
                     end
                     ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
                     -- Show description of the selected item, if any.
-                    local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
+                    local k_selected_id = 2 * (self.first_key_item_row_in_window + self.key_items_cursor_y_position - 2) + self.key_items_cursor_x_position - 1
                     if (Inventory.key[k_selected_id] == true) then
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
                     else
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
                     end
                 elseif button == "Up" then
-                    if self.key_items_cursor_y_position == 0 and self.first_key_item_row_in_window == 0 then -- TODO: Don't hardcode.
+                    if self.key_items_cursor_y_position == 1 and self.first_key_item_row_in_window == 1 then
                         -- First item, do nothing.
                         return 0
                     end
-                    if self.key_items_cursor_y_position == 0 then
+                    if self.key_items_cursor_y_position == 1 then
                         -- Scroll down by 1, don't move cursor
                         self.first_key_item_row_in_window = self.first_key_item_row_in_window - 1
                         self.populate_key_items(self)
@@ -284,25 +318,26 @@ UiContainer.ItemMenu = {
                     end
                     ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
                     -- Show description of the selected item, if any.
-                    local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
+                    local k_selected_id = 2 * (self.first_key_item_row_in_window + self.key_items_cursor_y_position - 2) + self.key_items_cursor_x_position - 1
                     if (Inventory.key[k_selected_id] == true) then
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
                     else
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
                     end
                 elseif button == "Right" then
-                    local next_selected_index = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position + 1
-                    if next_selected_index >= 50 then
+                    local k_selected_id = 2 * (self.first_key_item_row_in_window + self.key_items_cursor_y_position - 2) + self.key_items_cursor_x_position - 1
+                    if k_selected_id >= 50 then
                         -- Already in last item, do nothing
                         return 0
                     end
-                    if self.key_items_cursor_x_position == 0 then
+                    k_selected_id = k_selected_id + 1
+                    if self.key_items_cursor_x_position == 1 then
                         -- If on the left, move to the right. No scrolling.
-                        self.key_items_cursor_x_position = 1
+                        self.key_items_cursor_x_position = 2
                     else
                         -- If on the right, move to left and one row down...
-                        self.key_items_cursor_x_position = 0
-                        if self.key_items_cursor_y_position == 9 then
+                        self.key_items_cursor_x_position = 1
+                        if self.key_items_cursor_y_position == self.key_items_cursor_y_position_total then
                             -- ... by scrolling down by 1, not moving cursor.
                             self.first_key_item_row_in_window = self.first_key_item_row_in_window + 1
                             self.populate_key_items(self)
@@ -313,25 +348,25 @@ UiContainer.ItemMenu = {
                     end
                     ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
                     -- Show description of the selected item, if any.
-                    local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
                     if (Inventory.key[k_selected_id] == true) then
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
                     else
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
                     end
                 elseif button == "Left" then
-                    local next_selected_index = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position - 1
-                    if next_selected_index < 0 then
+                    local k_selected_id = 2 * (self.first_key_item_row_in_window + self.key_items_cursor_y_position - 2) + self.key_items_cursor_x_position - 1
+                    if k_selected_id <= 0 then
                         -- Already in first item, do nothing
                         return 0
                     end
-                    if self.key_items_cursor_x_position == 1 then
+                    k_selected_id = k_selected_id - 1
+                    if self.key_items_cursor_x_position == 2 then
                         -- If on the right, move to the left. No scrolling.
-                        self.key_items_cursor_x_position = 0
+                        self.key_items_cursor_x_position = 1
                     else
                         -- If on the left, move to right and one row up...
-                        self.key_items_cursor_x_position = 1
-                        if self.key_items_cursor_y_position == 0 then
+                        self.key_items_cursor_x_position = 2
+                        if self.key_items_cursor_y_position == 1 then
                             -- ... by scrolling up by 1, not moving cursor.
                             self.first_key_item_row_in_window = self.first_key_item_row_in_window - 1
                             self.populate_key_items(self)
@@ -342,12 +377,37 @@ UiContainer.ItemMenu = {
                     end
                     ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
                     -- Show description of the selected item, if any.
-                    local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
                     if (Inventory.key[k_selected_id] == true) then
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
                     else
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
                     end
+                elseif button == "PGDN" then -- TODO: Also, the bind to R1
+                    if self.first_key_item_row_in_window + self.key_items_cursor_y_position_total < self.key_items_total_rows - self.key_items_cursor_y_position_total then
+                        self.first_key_item_row_in_window = self.first_key_item_row_in_window + self.key_items_cursor_y_position_total
+                        self.populate_items(self)
+                        -- Show description of the selected item, if any.
+                        local k_selected_id = 2 * (self.first_key_item_row_in_window + self.key_items_cursor_y_position - 2) + self.key_items_cursor_x_position - 1
+                        if (Inventory.key[k_selected_id] == true) then
+                            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
+                        else
+                            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+                        end
+                    end
+                elseif button == "PGUP" then -- TODO: Also, the bind to L1
+                    if self.first_key_item_row_in_window + self.key_items_cursor_y_position_total > 1 then
+                        self.first_key_item_row_in_window = self.first_key_item_row_in_window - self.key_items_cursor_y_position_total
+                        self.populate_items(self)
+                        -- Show description of the selected item, if any.
+                        local k_selected_id = 2 * (self.first_key_item_row_in_window + self.key_items_cursor_y_position - 2) + self.key_items_cursor_x_position - 1
+                        if (Inventory.key[k_selected_id] == true) then
+                            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
+                        else
+                            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
+                        end
+                    end
+                elseif button == "Escape" then
+                    self.submenu_bar(self)
                 end
 
             end
@@ -461,7 +521,7 @@ UiContainer.ItemMenu = {
         ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_visible(true)
         ui_manager:get_widget("ItemMenu.Container.KeyItems.Cursor"):set_default_animation("Position" .. self.key_items_cursor_y_position .. "-" .. self.key_items_cursor_x_position)
         -- Show description of the selected item, if any.
-        local k_selected_id = (self.first_key_item_row_in_window + self.key_items_cursor_y_position) * 2 + self.key_items_cursor_x_position
+        local k_selected_id = 2 * (self.first_key_item_row_in_window + self.key_items_cursor_y_position - 2) + self.key_items_cursor_x_position - 1
         if (Inventory.key[k_selected_id] == true) then
             ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Key_Items[k_selected_id].description)
         else
@@ -858,10 +918,10 @@ UiContainer.ItemMenu = {
 
     --- Populates the visible inventory entries.
     --
-    -- 10 entries visible at a time.
+    -- 13 entries visible at a time.
     populate_items = function(self)
         local first_item_in_window = self.first_item_in_window
-        for i = 0, 9 do
+        for i = 1, self.item_cursor_position_total do
             local w_icon = ui_manager:get_widget("ItemMenu.Container.ItemList.Icon" .. tostring(i))
             local w_name = ui_manager:get_widget("ItemMenu.Container.ItemList.Name" .. tostring(i))
             local w_colon = ui_manager:get_widget("ItemMenu.Container.ItemList.Colon" .. tostring(i))
@@ -913,18 +973,25 @@ UiContainer.ItemMenu = {
                 w_colon:set_text(":") -- Refresh text to apply colour.
             end
         end
+        -- Set scroll bar position
+        local scroll = ui_manager:get_widget("ItemMenu.Container.ItemList.Scroll")
+        -- first_item_in_window == 1 then Top -> 0%3
+        -- first_item_in_window == inventory_size - first_item_in_window then top = 100%-21
+        local percent = math.floor(self.first_item_in_window * 100 / (self.inventory_size - self.item_cursor_position_total))
+        local fixed = -1 * math.floor(self.first_item_in_window * 17 / (self.inventory_size - self.item_cursor_position_total)) + 3
+        scroll:set_y(percent, fixed)
         return
     end,
 
     --- Populates the visible key items entries.
     --
-    -- 20 entries visible at a time (10 rows).
+    -- 26 entries visible at a time (13 rows).
     populate_key_items = function(self)
         local first_key_item_row_in_window = self.first_key_item_row_in_window
-        for i = 0, 9 do
-            local label_left = ui_manager:get_widget("ItemMenu.Container.KeyItems.KeyItem" .. tostring(i) .. "-0")
-            local label_right = ui_manager:get_widget("ItemMenu.Container.KeyItems.KeyItem" .. tostring(i) .. "-1")
-            local left_item_index = (first_key_item_row_in_window + i) * 2
+        for i = 1, self.key_items_cursor_y_position_total do
+            local label_left = ui_manager:get_widget("ItemMenu.Container.KeyItems.KeyItem" .. tostring(i) .. "-1")
+            local label_right = ui_manager:get_widget("ItemMenu.Container.KeyItems.KeyItem" .. tostring(i) .. "-2")
+            local left_item_index = (first_key_item_row_in_window + i - 2) * 2
             local right_item_index = left_item_index + 1
             if Inventory.has_key_item(left_item_index) == true then -- Left column
                 label_left:set_text(Game.Key_Items[left_item_index].name)
@@ -937,6 +1004,13 @@ UiContainer.ItemMenu = {
                 label_right:set_text("")
             end
         end
+        -- Set scroll bar position
+        local scroll = ui_manager:get_widget("ItemMenu.Container.KeyItems.Scroll")
+        -- first_key_item_row_in_window == 1 then Top -> 0%3
+        -- first_key_item_row_in_window == key_items_total_rows - first_key_item_row_in_window = 100%-21
+        local percent = math.ceil((self.first_key_item_row_in_window - 1) * 100 / (self.key_items_total_rows - self.key_items_cursor_y_position_total))
+        local fixed = -1 * math.floor((self.first_key_item_row_in_window - 1) * 13 / (self.key_items_total_rows - self.key_items_cursor_y_position_total)) + 3
+        scroll:set_y(percent, fixed)
         return
     end,
 

@@ -65,6 +65,7 @@ void ScriptManager::Input(const VGears::Event& event){
     if (
       (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
       && (
+        // TODO: Do this the other way: block keys NOT TO pass to scripts.
         event.param1 == OIS::KC_RETURN
         || event.param1 == OIS::KC_ESCAPE
         || event.param1 == OIS::KC_SPACE
@@ -73,6 +74,17 @@ void ScriptManager::Input(const VGears::Event& event){
         || event.param1 == OIS::KC_RIGHT
         || event.param1 == OIS::KC_DOWN
         || event.param1 == OIS::KC_UP
+        || event.param1 == OIS::KC_PGUP
+        || event.param1 == OIS::KC_PGDOWN
+        || event.param1 == OIS::KC_A || event.param1 == OIS::KC_B || event.param1 == OIS::KC_C
+        || event.param1 == OIS::KC_D || event.param1 == OIS::KC_E || event.param1 == OIS::KC_F
+        || event.param1 == OIS::KC_G || event.param1 == OIS::KC_H || event.param1 == OIS::KC_I
+        || event.param1 == OIS::KC_J || event.param1 == OIS::KC_K || event.param1 == OIS::KC_L
+        || event.param1 == OIS::KC_M || event.param1 == OIS::KC_N || event.param1 == OIS::KC_O
+        || event.param1 == OIS::KC_P || event.param1 == OIS::KC_Q || event.param1 == OIS::KC_R
+        || event.param1 == OIS::KC_S || event.param1 == OIS::KC_T || event.param1 == OIS::KC_U
+        || event.param1 == OIS::KC_V || event.param1 == OIS::KC_W || event.param1 == OIS::KC_X
+        || event.param1 == OIS::KC_Y || event.param1 == OIS::KC_Z || event.param1 == OIS::KC_X
       )
     ){
         for (unsigned int i = 0; i < script_entity_.size(); ++ i){

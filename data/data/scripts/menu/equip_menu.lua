@@ -41,7 +41,7 @@ UiContainer.EquipMenu = {
     list_position = 1,
 
     --- Maximum slots in the item list.
-    list_position_total = 8,
+    list_position_total = 10,
 
     --- highlighted position in the current item list.
     list_item_selected = 1,
@@ -206,7 +206,7 @@ UiContainer.EquipMenu = {
         ui_manager:get_widget("EquipMenu.Container.Stats.MDefArw"):set_visible(false)
         ui_manager:get_widget("EquipMenu.Container.Stats.MEvaArw"):set_visible(false)
         ui_manager:get_widget("EquipMenu.Container.List.Cursor"):set_visible(false)
-        for i = 1, 8 do
+        for i = 1, self.list_position_total do
             ui_manager:get_widget("EquipMenu.Container.List.Item" .. tostring(i)):set_text("")
         end
     end,
@@ -238,7 +238,7 @@ UiContainer.EquipMenu = {
         elseif self.selecting_slot == Inventory.ITEM_TYPE.ACCESSORY then
             list = self.avail_accessories
         else
-            for i = 1, 8 do
+            for i = 1, self.list_position_total do
                 ui_manager:get_widget("EquipMenu.Container.List.Item" .. tostring(i)):set_text("")
             end
             return false
@@ -247,7 +247,7 @@ UiContainer.EquipMenu = {
             -- No items for the list
             return false
         end
-        for i = 1, 8 do
+        for i = 1, self.list_position_total do
             if #(list) >= i + self.list_first_visible then
                 local name = Game.Items[list[i + self.list_first_visible]].name
                 ui_manager:get_widget("EquipMenu.Container.List.Item" .. tostring(i)):set_text(name)

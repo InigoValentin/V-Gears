@@ -626,7 +626,45 @@ Characters.equip = function(char_id, item_id)
     return true
 end
 
+--- Removes all materia from a character.
+--
+-- @param id ID of the character to remove materia from.
+Characters.remove_materia = function(id)
+    -- TODO: Implement
+end
+
+--- Restores all materia to a character.
+--
+-- @param id ID of the character to restore materia to.
+Characters.restore_materia = function(id)
+    -- TODO: Implement
+end
+
+
 Materia.add = function(id, ap)
     ap = ap or 0
-    -- TODO
+    -- TODO Implement.
+end
+
+--- Splits the party in teams.
+--
+-- @param number Number of teams (only 2 or 3).
+Party.split_teams = function(number)
+    if number < 2 then
+        number = 2
+    elseif number > 3 then
+        number = 3
+    end
+    -- TODO: Implement.
+end
+
+--- Displays a menu to choose a party of three.
+Party.choose_party = function()
+    -- TODO: Implement
+end
+
+--- Special event. Removes all materia from the party, equipped and unequipped.
+Party.steal_materia = function()
+    -- TODO: Implement.
+    -- TODO: How is this reversed?
 end

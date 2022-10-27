@@ -1,66 +1,70 @@
 <screen name="MainMenu" script="scripts/menu/main_menu.lua" visible="false">
-    <widget name="Container" width="100%" height="100%" x="0%"  y="0%" align="left" valign="top" scale="3 3" visible="true">
-        <widget name="Characters" x="1%" y="1%" width="32%" height="30%" visible="true">
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Characters" x="5%" y="5%" width="85%" height="80%" visible="true">
             <prototype name="Window" />
-            <animation name="Appear" length="0.3" x="0:110%,0.3:1%" />
-            <animation name="Disappear" length="0.3" x="0:1%,0.3:110%" />
-
-            <widget name="Character1" x="0" y="0" width="100%" height="60" visible="true">
-                <sprite name="Portrait" image="images/other/choco.png" x="22" y="12" width="48" height="48" visible="true">
-                    <animation name="RowFront" length="0" x="0:10" />
-                    <animation name="RowBack" length="0" x="0:22" />
+            <animation name="Appear" length="0.3" x="0:105%,0.3:5%" />
+            <animation name="Disappear" length="0.3" x="0:5%,0.3:105%" />
+            <widget name="Character1" x="2%" y="2%" width="100%" height="30%" visible="true">
+                <sprite name="Portrait" image="images/other/choco.png" x="5" y="12" width="56" height="56" visible="true">
+                    <animation name="RowFront" length="0" x="0:5" />
+                    <animation name="RowBack" length="0" x="0:25" />
                 </sprite>
-                <widget name="Data" x="80" y="14" width="100%" height="100%" visible="true">
+                <widget name="Data" x="80" y="18" width="100%" height="100%" visible="true">
                     <prototype name="MenuCharacterData" />
                 </widget>
-                <text_area name="NextLevelText" x="172" y="17" text_name="CharacterDataNextLevel" font="FFVIIFont" visible="true" />
-                <sprite name="NextLevelBar" image="images/icons/menu_bar.png" x="172" y="28" width="64" height="8" visible="true" />
-                <sprite name="NextLevelLinePart1" x="173" y="29" width="20" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.125, 0.5 0.125 0.125" alpha="0.8" visible="false" />
-                <sprite name="NextLevelLinePart2" x="173" y="32" width="20" height="3" colours="0.5 0.125 0.125, 0.5 0.125 0.125, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
-                <text_area name="LimitLevelText" x="172" y="38" text_name="CharacterDataLimitLevel" font="FFVIIFont" visible="true" />
-                <sprite name="LimitLevelBar" image="images/icons/menu_bar.png" x="172" y="49" width="64" height="8" visible="true" />
-                <text_area name="LimitLevel" x="225" y="40" text_name="CharacterDataLimitLevelNumber" font="FFVIIMenuDigits" visible="true" />
-                <sprite name="LimitLinePart1" x="173" y="50" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
-                <sprite name="LimitLinePart2" x="173" y="53" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+                <text_area name="NextLevelText" x="177" y="17" text_name="CharacterDataNextLevel" font="FFVIIFont" visible="true" />
+                <sprite name="NextLevelBar" image="images/icons/menu_bar.png" x="182" y="28" width="64" height="8" visible="true" />
+                <sprite name="NextLevelLinePart1" x="183" y="29" width="20" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.125, 0.5 0.125 0.125" alpha="0.8" visible="false" />
+                <sprite name="NextLevelLinePart2" x="183" y="32" width="20" height="3" colours="0.5 0.125 0.125, 0.5 0.125 0.125, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+                <text_area name="LimitLevelText" x="177" y="38" text_name="CharacterDataLimitLevel" font="FFVIIFont" visible="true" />
+                <sprite name="LimitLevelBar" image="images/icons/menu_bar.png" x="183" y="49" width="64" height="8" visible="true" />
+                <text_area name="LimitLevel" x="230" y="40" text_name="CharacterDataLimitLevelNumber" font="FFVIIMenuDigits" visible="true" />
+                <sprite name="LimitLinePart1" x="183" y="50" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
+                <sprite name="LimitLinePart2" x="183" y="53" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
             </widget>
-            <widget name="Character2" x="0" y="65" width="100%" height="60" visible="true">
-                <sprite name="Portrait" image="images/other/choco.png" x="22" y="12" width="48" height="48" visible="true" />
-                <widget name="Data" x="80" y="14" width="100%" height="100%" visible="true">
+            <widget name="Character2" x="2%" y="32%" width="100%" height="32%" visible="true">
+                <sprite name="Portrait" image="images/other/choco.png" x="5" y="12" width="56" height="56" visible="true">
+                    <animation name="RowFront" length="0" x="0:5" />
+                    <animation name="RowBack" length="0" x="0:25" />
+                </sprite>
+                <widget name="Data" x="80" y="18" width="100%" height="100%" visible="true">
                     <prototype name="MenuCharacterData" />
                 </widget>
-                <text_area name="NextLevelText" x="172" y="17" text_name="CharacterDataNextLevel" font="FFVIIFont" visible="true" />
-                <sprite name="NextLevelBar" image="images/icons/menu_bar.png" x="172" y="28" width="64" height="8" visible="true" />
-                <sprite name="NextLevelLinePart1" x="173" y="29" width="20" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.125, 0.5 0.125 0.125" alpha="0.8" visible="false" />
-                <sprite name="NextLevelLinePart2" x="173" y="32" width="20" height="3" colours="0.5 0.125 0.125, 0.5 0.125 0.125, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
-                <text_area name="LimitLevelText" x="172" y="38" text_name="CharacterDataLimitLevel" font="FFVIIFont" visible="true" />
-                <sprite name="LimitLevelBar" image="images/icons/menu_bar.png" x="172" y="49" width="64" height="8" visible="true" />
-                <text_area name="LimitLevel" x="225" y="40" text_name="CharacterDataLimitLevelNumber" font="FFVIIMenuDigits" visible="true" />
-                <sprite name="LimitLinePart1" x="173" y="50" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
-                <sprite name="LimitLinePart2" x="173" y="53" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+                <text_area name="NextLevelText" x="177" y="17" text_name="CharacterDataNextLevel" font="FFVIIFont" visible="true" />
+                <sprite name="NextLevelBar" image="images/icons/menu_bar.png" x="182" y="28" width="64" height="8" visible="true" />
+                <sprite name="NextLevelLinePart1" x="183" y="29" width="20" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.125, 0.5 0.125 0.125" alpha="0.8" visible="false" />
+                <sprite name="NextLevelLinePart2" x="183" y="32" width="20" height="3" colours="0.5 0.125 0.125, 0.5 0.125 0.125, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+                <text_area name="LimitLevelText" x="177" y="38" text_name="CharacterDataLimitLevel" font="FFVIIFont" visible="true" />
+                <sprite name="LimitLevelBar" image="images/icons/menu_bar.png" x="183" y="49" width="64" height="8" visible="true" />
+                <text_area name="LimitLevel" x="230" y="40" text_name="CharacterDataLimitLevelNumber" font="FFVIIMenuDigits" visible="true" />
+                <sprite name="LimitLinePart1" x="183" y="50" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
+                <sprite name="LimitLinePart2" x="183" y="53" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
             </widget>
-            <widget name="Character3" x="0" y="130" width="100%" height="60" visible="true">
-                <sprite name="Portrait" image="images/other/choco.png" x="22" y="12" width="48" height="48" visible="true" />
-                <widget name="Data" x="80" y="14" width="100%" height="100%" visible="true">
+            <widget name="Character3" x="2%" y="62%" width="100%" height="32%" visible="true">
+               <sprite name="Portrait" image="images/other/choco.png" x="5" y="12" width="56" height="56" visible="true">
+                    <animation name="RowFront" length="0" x="0:5" />
+                    <animation name="RowBack" length="0" x="0:25" />
+                </sprite>
+                <widget name="Data" x="80" y="18" width="100%" height="100%" visible="true">
                     <prototype name="MenuCharacterData" />
                 </widget>
-                <text_area name="NextLevelText" x="172" y="17" text_name="CharacterDataNextLevel" font="FFVIIFont" visible="true" />
-                <sprite name="NextLevelBar" image="images/icons/menu_bar.png" x="172" y="28" width="64" height="8" visible="true" />
-                <sprite name="NextLevelLinePart1" x="173" y="29" width="20" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.125, 0.5 0.125 0.125" alpha="0.8" visible="false" />
-                <sprite name="NextLevelLinePart2" x="173" y="32" width="20" height="3" colours="0.5 0.125 0.125, 0.5 0.125 0.125, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
-                <text_area name="LimitLevelText" x="172" y="38" text_name="CharacterDataLimitLevel" font="FFVIIFont" visible="true" />
-                <sprite name="LimitLevelBar" image="images/icons/menu_bar.png" x="172" y="49" width="64" height="8" visible="true" />
-                <text_area name="LimitLevel" x="225" y="40" text_name="CharacterDataLimitLevelNumber" font="FFVIIMenuDigits" visible="true" />
-                <sprite name="LimitLinePart1" x="173" y="50" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
-                <sprite name="LimitLinePart2" x="173" y="53" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+                <text_area name="NextLevelText" x="177" y="17" text_name="CharacterDataNextLevel" font="FFVIIFont" visible="true" />
+                <sprite name="NextLevelBar" image="images/icons/menu_bar.png" x="182" y="28" width="64" height="8" visible="true" />
+                <sprite name="NextLevelLinePart1" x="183" y="29" width="20" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.125, 0.5 0.125 0.125" alpha="0.8" visible="false" />
+                <sprite name="NextLevelLinePart2" x="183" y="32" width="20" height="3" colours="0.5 0.125 0.125, 0.5 0.125 0.125, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+                <text_area name="LimitLevelText" x="177" y="38" text_name="CharacterDataLimitLevel" font="FFVIIFont" visible="true" />
+                <sprite name="LimitLevelBar" image="images/icons/menu_bar.png" x="183" y="49" width="64" height="8" visible="true" />
+                <text_area name="LimitLevel" x="230" y="40" text_name="CharacterDataLimitLevelNumber" font="FFVIIMenuDigits" visible="true" />
+                <sprite name="LimitLinePart1" x="183" y="50" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
+                <sprite name="LimitLinePart2" x="183" y="53" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
             </widget>
-            <sprite name="Cursor" image="images/icons/cursor.png" x="0" y="35" width="24" height="16" visible="false">
-                <animation name="Position1" length="0" y="0:35" />
-                <animation name="Position2" length="0" y="0:95" />
-                <animation name="Position3" length="0" y="0:155" />
+            <sprite name="Cursor" image="images/icons/cursor.png" x="0" y="2%+40" width="24" height="16" visible="false">
+                <animation name="Position1" length="0" y="0:2%+40" />
+                <animation name="Position2" length="0" y="0:32%+40" />
+                <animation name="Position3" length="0" y="0:62%+40" />
             </sprite>
         </widget>
-
-        <widget name="Menu" x="270" y="5" width="75" height="132" visible="true">
+        <widget name="Menu" x="100%-105" y="2%" width="90" height="144" visible="true">
             <prototype name="Window" />
             <text_area name="ItemText" x="16" y="6" text_name="MainMenuItem" font="FFVIIFont" visible="true" />
             <text_area name="MagicText" x="16" y="18" text_name="MainMenuMagic" font="FFVIIFont" visible="true" />
@@ -72,6 +76,7 @@
             <text_area name="ConfigText" x="16" y="90" text_name="MainMenuConfig" font="FFVIIFont" visible="true" />
             <text_area name="PHSText" x="16" y="102" text_name="MainMenuPHS" font="FFVIIFont" visible="true" />
             <text_area name="SaveText" x="16" y="114" text_name="MainMenuSave" font="FFVIIFont" visible="true" />
+            <text_area name="Quit" x="16" y="126" text_name="MainMenuQuit" font="FFVIIFont" visible="true" />
             <sprite name="Cursor" image="images/icons/cursor.png" x="-11" y="6" width="24" height="16" visible="true">
                 <animation name="Position1" length="0" y="0:6" />
                 <animation name="Position2" length="0" y="0:18" />
@@ -83,14 +88,15 @@
                 <animation name="Position8" length="0" y="0:90" />
                 <animation name="Position9" length="0" y="0:102" />
                 <animation name="Position10" length="0" y="0:114" />
+                <animation name="Position11" length="0" y="0:126" />
             </sprite>
-            <animation name="Appear" length="0.3" y="0:405,0.3:5" />
-            <animation name="Disappear" length="0.3" y="0:5,0.3:405" />
+            <animation name="Appear" length="0.3" y="0:105%,0.3:2%" />
+            <animation name="Disappear" length="0.3" y="0:2%,0.3:105%" />
         </widget>
 
-        <widget name="TimeGil" x="270" y="164" width="75" height="36" visible="true">
+        <widget name="TimeGil" x="100%-105" y="100%-90" width="85" height="36" visible="true">
             <prototype name="Window" />
-            <text_area name="TimeText" x="4" y="6" text_name="MainMenuTime" font="FFVIIFont" visible="true" />
+            <text_area name="TimeText" x="3" y="6" text_name="MainMenuTime" font="FFVIIFont" visible="true" />
             <text_area name="TimeHours" x="31" y="8" text_name="MainMenuHours" font="FFVIIMenuDigits" visible="true" />
             <text_area name="TimeSemicolon1" x="44" y="1" text_name="MainMenuSemicolon" font="FFVIIMenuFont" visible="true" />
             <text_area name="TimeMinutes" x="50" y="8" text_name="MainMenuMinutes" font="FFVIIMenuDigits" visible="true" />
@@ -98,17 +104,17 @@
             <text_area name="TimeSemicolon2" x="62" y="1" text_name="MainMenuSemicolon" font="FFVIIMenuFont" visible="true" />
             <text_area name="TimeSeconds" x="67" y="8" text_name="MainMenuSeconds" font="FFVIIMenuDigits" visible="true" />
             -->
-            <text_area name="GilText" x="5" y="20" text_name="MainMenuGil" font="FFVIIFont" visible="true" />
+            <text_area name="GilText" x="3" y="20" text_name="MainMenuGil" font="FFVIIFont" visible="true" />
             <text_area name="Gil" x="14" y="22" text_name="MainMenuGilAmount" font="FFVIIMenuDigits" visible="true" />
-            <animation name="Appear" length="0.3" x="0:-458,0.3:270" />
-            <animation name="Disappear" length="0.3" x="0:270,0.3:-458" />
+            <animation name="Appear" length="0.3" x="0:-200%,0.3:100%-105" />
+            <animation name="Disappear" length="0.3" x="0:100%-105,0.3:-200%" />
         </widget>
 
-        <widget name="Location" x="165" y="200" width="180" height="24" visible="true">
+        <widget name="Location" x="100%-200" y="100%-54" width="180" height="24" visible="true">
             <prototype name="Window" />
             <text_area name="Text" x="8" y="6" text_name="MainMenuLocation" font="FFVIIFont" visible="true" />
-            <animation name="Appear" length="0.3" y="0:-136,0.3:200" />
-            <animation name="Disappear" length="0.3" y="0:200,0.3:-136" />
+            <animation name="Appear" length="0.3" y="0:-200%,0.3:100%-54" />
+            <animation name="Disappear" length="0.3" y="0:100%-54,0.3:-200%" />
         </widget>
     </widget>
 </screen>

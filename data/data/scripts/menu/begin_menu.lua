@@ -60,7 +60,7 @@ UiContainer.BeginMenu = {
                     script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
                     entity_manager:get_entity("Cloud"):set_position(-0.820312, 0.500000, 17.281244)
                     entity_manager:set_player_entity("Cloud")
-                    FFVII.set_party(0, 1, nil)
+                    FFVII.set_party(0, 1, 4)
                     script:wait(0.5)
                     entity_manager:get_player_entity():set_position(-0.820312, 0.500000, 17.281244)
                     entity_manager:get_entity("Cloud"):jump_to_position(-0.800312, 0.500000, -1, 1) -- Triangle 42, 2 steps.
