@@ -12,7 +12,7 @@ UiContainer.NameMenu = {
     --- Default name.
     default_name = "",
 
-    --- Currently input-ed name
+    --- Currently input-ed name.
     name = "",
 
     --- Max number of characters allowed in a name.
@@ -21,7 +21,20 @@ UiContainer.NameMenu = {
     --- Current text cursor
     text_cursor = 1,
 
-    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    --- Accepted characters in a name.
+    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ",
+
+    --- Current options cursor position.
+    options_position = 1,
+
+    --- Total options cursor position.
+    options_position_total = 3,
+
+    --- Current confirm dialog cursor position.
+    confirm_position = 1,
+
+    --- Total confirm dialog cursor position.
+    confirm_position_total = 2,
 
     --- Run when the menu is creaded.
     --
@@ -37,13 +50,51 @@ UiContainer.NameMenu = {
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "name" then
-            print("BUTTON " .. button .. " on " .. UiContainer.current_menu .. "." .. UiContainer.current_submenu)
 
             if UiContainer.current_submenu == "confirm" then
+                if button == "Right" then
+                    self.confirm_position = self.confirm_position + 1
+                    if self.confirm_position > self.confirm_position_total then
+                        self.confirm_position = 1
+                    end
+                    ui_manager:get_widget("NameMenu.Container.Confirm.Cursor"):set_default_animation("Position" .. self.confirm_position)
+                elseif button == "Left" then
+                    self.confirm_position = self.confirm_position - 1
+                    if self.confirm_position < 1 then
+                        self.confirm_position = self.confirm_position_total
+                    end
+                    ui_manager:get_widget("NameMenu.Container.Confirm.Cursor"):set_default_animation("Position" .. self.confirm_position)
+                elseif button == "Enter" then
+                    if self.confirm_position == 2 then -- Back
+                        UiContainer.current_submenu = ""
+                        ui_manager:get_widget("NameMenu.Container.Confirm"):set_visible(false)
+                    elseif self.confirm_position == 1 then
+                        ui_manager:get_widget("NameMenu.Container.Confirm"):set_visible(false)
+                        self.apply_name(self);
+                    end
+                end
             elseif UiContainer.current_submenu == "" then
-                local character_index = string.find(self.letters, button)
-                if button == "Up" and event == "Press" then
-                elseif button == "Down" then
+                -- Before handling buttons, get keycode, for letters and space.
+                local character_index
+                if button == "Space" then
+                    character_index = string.find(self.letters, " ")
+                else
+                    character_index = string.find(self.letters, button)
+                end
+
+                -- Handle buttons.
+                if button == "Down" then
+                    self.options_position = self.options_position + 1
+                    if self.options_position > self.options_position_total then
+                        self.options_position = 1
+                    end
+                    ui_manager:get_widget("NameMenu.Container.Options.Cursor"):set_default_animation("Position" .. self.options_position)
+                elseif button == "Up" then
+                    self.options_position = self.options_position - 1
+                    if self.options_position < 1 then
+                        self.options_position = self.options_position_total
+                    end
+                    ui_manager:get_widget("NameMenu.Container.Options.Cursor"):set_default_animation("Position" .. self.options_position)
                 elseif button == "Left" then
                     if self.text_cursor > 1 then
                         self.text_cursor = self.text_cursor - 1
@@ -55,9 +106,37 @@ UiContainer.NameMenu = {
                         self.draw_cursor(self)
                     end
                 elseif button == "Enter" then
-                -- TODO: Else Letters
+                    if self.options_position == 1 then -- Clear name.
+                        self.name = ""
+                        self.text_cursor = 1
+                        self.populate_name(self)
+                        self.draw_cursor(self)
+                    elseif self.options_position == 2 then -- Default name.
+                        self.name = self.default_name
+                        self.text_cursor = math.min(#(self.name) + 1, self.max_characters)
+                        self.populate_name(self)
+                        self.draw_cursor(self)
+                    elseif self.options_position == 3 then -- Show confirm dialog.
+                        self.format_name(self)
+                        self.populate_name(self)
+                        self.draw_cursor(self)
+                        if #(self.name) > 0 then
+                            UiContainer.current_submenu = "confirm"
+                            local name_display = self.name -- Pad with spaces, to display only.
+                            while #(name_display) < self.max_characters do
+                                name_display = " " .. name_display
+                            end
+                            ui_manager:get_widget("NameMenu.Container.Confirm.Name"):set_text(name_display)
+                            ui_manager:get_widget("NameMenu.Container.Confirm"):set_visible(true)
+                            self.confirm_position = 1
+                            ui_manager:get_widget("NameMenu.Container.Options.Cursor"):set_default_animation("Position" .. self.options_position)
+                        else
+                            print("BEEP no name")
+                        end
+                    end
+                -- TODO: Implement backspace, but how?
+                -- Letters and spaces
                 elseif character_index ~= nil then
-                    print(" LETTER " .. character_index)
                     self.set_char(self, character_index)
                     self.text_cursor = math.min(self.text_cursor + 1, self.max_characters)
                     self.populate_name(self)
@@ -68,38 +147,45 @@ UiContainer.NameMenu = {
         return 0
     end,
 
-    --- Opens the main menu.
+    --- Opens the name menu.
     --
-    -- Populates and updates displayed data before opening.
+    -- Populates and updates displayed data before opening. It also pauses the game. Shows a fade
+    -- effect.
     show = function(self)
         entity_manager:set_paused(true)
         FFVII.MenuSettings.pause_available = false
+        script:request_end_sync(Script.UI, "Fade", "fade_out", 0)
         ui_manager:get_widget("NameMenu"):set_visible(true)
         UiContainer.current_menu = "name"
         UiContainer.current_submenu = ""
         ui_manager:get_widget("NameMenu.Container.Character.Portrait"):set_image("images/characters/" .. tostring(self.id) .. ".png")
-        self.default_name = Characters[self.id].name
-        self.name = Characters[self.id].name
+        if (string.lower(Characters[self.id].name) == "ex-soldier") then
+            -- HACK: Hack for Ex-Soldier default. Can this be extracted from menu.lgp?
+            self.default_name = "Cloud"
+            self.name = "Cloud"
+        else
+            self.default_name = Characters[self.id].name
+            self.name = Characters[self.id].name
+        end
         self.text_cursor = math.min(#(self.name) + 1, self.max_characters)
         self.populate_name(self)
         self.draw_cursor(self)
+        script:request_end_sync(Script.UI, "Fade", "fade_in", 0)
         return 0;
     end,
 
+    --- Redraws the text cursor, indicating the current character.
     draw_cursor = function(self)
-        -- TODO: Do this with animations.
         for i = 1, self.max_characters do
             if self.text_cursor == i then
-                print("")
                 ui_manager:get_widget("NameMenu.Container.Character.Name.Score" .. tostring(i)):set_height(1.8)
-                --ui_manager:get_widget("NameMenu.Container.Character.Name.Score" .. tostring(i)):set_default_animation("Active")
             else
                 ui_manager:get_widget("NameMenu.Container.Character.Name.Score" .. tostring(i)):set_height(0.3)
-                --ui_manager:get_widget("NameMenu.Container.Character.Name.Score" .. tostring(i)):set_default_animation("Inactive")
             end
         end
     end,
 
+    --- Writes the name characters in the name input line.
     populate_name = function(self)
         for i = 1, self.max_characters do
             if #(self.name) < i then
@@ -111,34 +197,76 @@ UiContainer.NameMenu = {
         end
     end,
 
-    --- Sets a character in the current cursor position
+    --- Sets a character in the current cursor position.
     set_char = function(self, character_index)
         local temp_name = ""
         for i = 1, self.max_characters do
             if i == self.text_cursor then
-                -- TODO: First position or after space: Use upper case table
-                if self.text_cursor == 1 or self.name:sub(i - 1, i - 1) == " " then
+                -- First position or after space: Use upper case.
+                if i == 1 or temp_name:sub(i - 1, i - 1) == " " then
                     temp_name = temp_name .. self.letters:sub(character_index, character_index)
                 else
                     temp_name = temp_name .. string.lower(self.letters:sub(character_index, character_index))
                 end
-                print("NEW: " .. self.letters:sub(character_index, character_index))
             elseif #(self.name) >= i then
-                -- TODO: First position or after space: to upper, else to lower
-                temp_name = temp_name .. self.name:sub(i, i)
-                print("OLD: " .. self.name:sub(i, i))
+                if i == 1 or temp_name:sub(i - 1, i - 1) == " " then
+                    temp_name = temp_name .. string.upper(self.name:sub(i, i))
+                else
+                    temp_name = temp_name .. string.lower(self.name:sub(i, i))
+                end
+            else
+                temp_name = temp_name .. " "
             end
         end
         self.name = temp_name
     end,
 
+    --- Formats the current name.
+    --
+    -- Removes leading, trailing and double spaces, trims the length, and ensures capitalization.
+    format_name = function(self)
+        local temp_name = self.name
+        -- Trailing and leading spaces: Remove.
+        temp_name = string.gsub(temp_name, '^%s*(.-)%s*$', '%1')
+        -- Double (or more) spaces: One space.
+        temp_name = temp_name:gsub("%s+", " ")
+        -- Length. Trim to self.max_characters
+        if #(temp_name) > self.max_characters then
+            temp_name = temp_name:sub(1, self.max_characters)
+        end
+        -- Capitalization
+        self.name = ""
+        for i = 1, #(temp_name) do
+            if i == 1 or temp_name:sub(i - 1, i - 1) == " " then
+                self.name = self.name .. string.upper(temp_name:sub(i, i))
+            else
+                self.name = self.name .. string.lower(temp_name:sub(i, i))
+            end
+        end
+    end,
+
+    apply_name = function(self)
+
+        if self.chocobo == false then
+            Characters[self.id].name = self.name
+            export_character_names()
+        else
+            -- TODO: Do chocobo.
+        end
+        self.hide(self)
+    end,
+
     --- Hides the item menu and goes back to the main menu.
+    --
+    -- It also unpauses the game. Shows a fade effect.
     hide = function(self)
+        script:request_end_sync(Script.UI, "Fade", "fade_out", 0)
         ui_manager:get_widget("NameMenu"):set_visible(false)
         UiContainer.current_menu = ""
         UiContainer.current_submenu = ""
         FFVII.MenuSettings.pause_available = true
         entity_manager:set_paused(false)
+        script:request_end_sync(Script.UI, "Fade", "fade_in", 0)
         return 0;
     end,
 }

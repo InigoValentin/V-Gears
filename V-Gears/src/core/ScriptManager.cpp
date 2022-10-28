@@ -76,6 +76,7 @@ void ScriptManager::Input(const VGears::Event& event){
         || event.param1 == OIS::KC_UP
         || event.param1 == OIS::KC_PGUP
         || event.param1 == OIS::KC_PGDOWN
+        || event.param1 == OIS::KC_BACK
         || event.param1 == OIS::KC_A || event.param1 == OIS::KC_B || event.param1 == OIS::KC_C
         || event.param1 == OIS::KC_D || event.param1 == OIS::KC_E || event.param1 == OIS::KC_F
         || event.param1 == OIS::KC_G || event.param1 == OIS::KC_H || event.param1 == OIS::KC_I

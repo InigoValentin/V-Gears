@@ -91,7 +91,8 @@ UiContainer.MainMenu = {
                     if self.select_character_for_menu == 2 then -- Magic menu
                         print("Open magic menu for char in slot " .. self.character_position)
                     elseif self.select_character_for_menu == 3 then -- Materia menu
-                        print("Open materia menu for char in slot " .. self.character_position)
+                        UiContainer.current_character_id = FFVII.Party[self.character_position]
+                        script:request_end_sync(Script.UI, "MateriaMenu", "show", 0)
                     elseif self.select_character_for_menu == 4 then -- Equip menu
                         UiContainer.current_character_id = FFVII.Party[self.character_position]
                         script:request_end_sync(Script.UI, "EquipMenu", "show", 0)

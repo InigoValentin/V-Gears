@@ -10,6 +10,7 @@
     <prototype file_name="screens/item_menu/prototypes.xml" />
     <screen file_name="screens/item_menu/item_menu.xml" />
     <screen file_name="screens/equip_menu/equip_menu.xml" />
+    <screen file_name="screens/materia_menu/materia_menu.xml" />
     <screen file_name="screens/name_menu/name_menu.xml" />
 
     <!-- Dialogs -->
