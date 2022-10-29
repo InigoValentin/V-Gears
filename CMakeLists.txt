@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 2.8)
 # on / off for verbose build.
 set(CMAKE_VERBOSE_MAKEFILE off)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake")
 include(cotire)
 
@@ -12,6 +15,10 @@ set(CMAKE_PACKAGE_ICON v-gears.png)
 set(VGears_VERSION__MAJOR 0)
 set(VGears_VERSION__MINOR 1)
 set(VGears_VERSION__PATCH 0)
+set(VGears_VERSION ${VGears_VERSION__MAJOR}.${VGears_VERSION__MINOR}.${VGears_VERSION__PATCH})
+
+# Generate version header.
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/Version.h) 
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
     # CMake defaults to leaving CMAKE_BUILD_TYPE empty. This screws up
@@ -29,20 +36,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug)
-
-# Generate header containing window title/version information.
-set(VGEARS_VERSION "V-Gears v${VGears_VERSION__MAJOR}.${VGears_VERSION__MINOR}.${VGears_VERSION__PATCH}")
-configure_file(configure_version_file.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake @ONLY)
-
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/vgears_version.h
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake
-    DEPENDS
-        ${CMAKE_CURRENT_BINARY_DIR}/configure_version_file.cmake
-        ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/vgears_version.h.in
-    COMMENT "Configuring vgears_version.h"
-    VERBATIM
-)
-add_custom_target(configure_vgears_version ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/vgears_version.h)
 
 # Enable Visual Studio solution "folders".
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -86,7 +79,6 @@ endif()
 set(VGears_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 
 message("VGears_SOURCE_DIR ${VGears_SOURCE_DIR}")
-message("VGears_SOURCE_DIR ${VGears_SOURCE_DIR}")
 
 set(CMAKE_MODULE_PATH "${OGRE_CMAKE_MODULE_PATH};${CMAKE_MODULE_PATH}")
 set(CMAKE_MODULE_PATH 
@@ -98,7 +90,7 @@ set(CMAKE_DEBUG_POSTFIX "_d")
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX
-        "${VGears_SOURCE_DIR}/output" CACHE PATH "V-Gears install prefix" FORCE
+        "${VGears_SOURCE_DIR}/data" CACHE PATH "V-Gears install prefix" FORCE
     )
 endif()
 
@@ -192,7 +184,6 @@ set(VGears_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/
     ${OIS_INCLUDE_DIRS}
     ${OGRE_Overlay_INCLUDE_DIRS}
-    #${OGRE_SAMPLES_INCLUDEPATH}
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
     ${CMAKE_CURRENT_BINARY_DIR}/lib/luajit
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/luajit/src
@@ -201,9 +192,6 @@ set(VGears_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/tinyxml
 )
 
-# C++14
-# TODO: Try to remove PIC
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fPIC")
 if (MSVC)
     # Build cpp files on all cores, up virtual mem for PCH's as cotire really makes the compiler scream
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Zm193")
@@ -216,6 +204,9 @@ if (UNIX AND $ENV{COVERAGE}==1)
       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # debug, no optimisation
       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage") # enabling coverage
 endif()
+
+#Compiler flags
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC") # Position Independent Code, required if QT is compiled with -reduce-relocations
 
 #TODO: Force DEBUG, no optimizations for now.
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O0")
@@ -243,17 +234,16 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/output)
 #INCLUDE(InstallRequiredSystemLibraries)
 
 set(CPACK_PACKAGE_NAME "v-gears")
-SET(CPACK_PACKAGE_VERSION ${VGears_VERSION__MAJOR}.${VGears_VERSION__MINOR}.${VGears_VERSION__PATCH})
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A Free Final Fantasy VII Engine")
+SET(CPACK_PACKAGE_VERSION ${VGears_VERSION})
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A free implementation of the Final Fantasy VII Engine")
 SET(CPACK_PACKAGE_VENDOR "V-Gears team")
 # TODO: Need to set these up properly, installing build instructions is a bit strange :)
 SET(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/COPYING.txt")
 #SET(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/readme.md")
 
 MESSAGE( STATUS "CMAKE_BUILD_TYPE:         " ${CMAKE_BUILD_TYPE} )
-MESSAGE( STATUS "BOOST_ROOT:         " ${BOOST_ROOT} )
 
-INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/output/field_models_and_animation_metadata.xml" DESTINATION ".")
+INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/field_models_and_animation_metadata.xml" DESTINATION ".")
 
 #OS SPECIFIC
 if(WIN32)

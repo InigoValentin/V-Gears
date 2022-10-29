@@ -22,4 +22,8 @@
 /**
  * Application version.
  */
-#define QG_VERSION_NAME "V-Gears v0.1.0"
+#define VGEARS_VERSION "@VGears_VERSION@"
+#define VGEARS_VERSION_MAJOR "@VGears_VERSION__MAJOR@"
+#define VGEARS_VERSION_MINOR "@VGears_VERSION__MINOR@"
+#define VGEARS_VERSION_PATCH "@VGears_VERSION__PATCH@"
+#define VGEARS_VERSION_SIGNATURE "V-Gears v@VGears_VERSION@"

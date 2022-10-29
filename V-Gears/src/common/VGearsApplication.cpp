@@ -37,7 +37,7 @@
 #include "data/VGearsLGPArchiveFactory.h"
 #include "data/VGearsTriggersFile.h"
 #include "data/VGearsMapListFile.h"
-#include "vgears_version.h"
+#include "Version.h"
 
 template<> VGears::Application* Ogre::Singleton<VGears::Application>::msSingleton = nullptr;
 
@@ -151,7 +151,7 @@ namespace VGears{
         return resources_filename_;
     }
 
-    String Application::getWindowTitle() const {return QG_VERSION_NAME;}
+    String Application::getWindowTitle() const {return VGEARS_VERSION_SIGNATURE;}
 
     bool Application::processCommandLine( int argc, char *argv[]){
         bfs::path self(argv[0]);
