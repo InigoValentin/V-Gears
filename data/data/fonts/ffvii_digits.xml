@@ -10,4 +10,7 @@
     <char name="8" x="64" y="0" width="7" height="8" pre="0" post="0" />
     <char name="9" x="72" y="0" width="7" height="8" pre="0" post="0" />
     <char name=" " x="80" y="0" width="7" height="8" pre="0" post="0" />
+    <char name="-" x="88" y="0" width="7" height="8" pre="0" post="0" />
+    <char name="+" x="96" y="0" width="7" height="8" pre="0" post="0" />
+    <char name="%" x="104" y="0" width="7" height="8" pre="0" post="0" />
 </font>

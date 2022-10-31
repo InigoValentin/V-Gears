@@ -2,6 +2,23 @@
     <text name="Placeholder">#</text>
 
     <text name="Colon">:</text>
+    <text name="Yes">Yes</text>
+    <text name="No">No</text>
+
+    <text name="StatStr">Strength</text>
+    <text name="StatVit">Vitality</text>
+    <text name="StatMag">Magic</text>
+    <text name="StatSpr">Spirit</text>
+    <text name="StatDex">Speed</text>
+    <text name="StatLck">Luck</text>
+    <text name="StatHP">HP</text>
+    <text name="StatMP">MP</text>
+    <text name="StatEXP">EXP</text>
+
+    <text name="Currency">Gil</text>
+
+    <text name="MateriaEncounters">Encounters</text>
+    <text name="MateriaEncountersChocobo">Chocobo</text>
 
     <text name="BeginMenuNewGame">NEW GAME</text>
     <text name="BeginMenu1">DEBUG: Battle map</text>
@@ -35,6 +52,7 @@
     <text name="MainMenuConfig">Config</text>
     <text name="MainMenuPHS">PHS</text>
     <text name="MainMenuSave">Save</text>
+    <text name="MainMenuQuit">Quit</text>
 
     <text name="ItemMenuItem">Item</text>
     <text name="ItemMenuUse">Use</text>
@@ -69,6 +87,20 @@
     <text name="EquipMenuMDef"><colour value="0 0.8 1">Magic defense:</colour></text>
     <text name="EquipMenuMEva"><colour value="0 0.8 1">Magic evasion:</colour></text>
     <text name="EquipMenuArrow"><colour value="0 0.6 0.8">-></colour></text>
+
+    <text name="MateriaMenuTitle">Materia</text>
+    <text name="MateriaMenuCheck"><colour value="0.7 0.7 0.7">Check</colour></text>
+    <text name="MateriaMenuOrder"><colour value="0.7 0.7 0.7">Order</colour></text>
+    <text name="MateriaMenuAP"><colour value="0 0.8 1">A.P.:</colour></text>
+    <text name="MateriaMenuAPNext"><colour value="0 0.8 1">Next:</colour></text>
+    <text name="MateriaMenuAbilities"><colour value="0 0.8 1">Abilities</colour></text>
+    <text name="MateriaMenuEffects"><colour value="0 0.8 1">Effects</colour></text>
+
+    <text name="NameMenuHelp">Enter a name</text>
+    <text name="NameMenuClear">Clear</text>
+    <text name="NameMenuDefault">Default</text>
+    <text name="NameMenuConfirm">Confirm</text>
+    <text name="NameMenuConfirmMsg">Confirm name</text>
 
     <text name="CharacterDataName">#Name#</text>
     <text name="CharacterDataLv">LV</text>

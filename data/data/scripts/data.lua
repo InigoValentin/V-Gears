@@ -118,6 +118,57 @@ Inventory.ORDER = {
 
 Materia = {}
 
+--- Types of materia
+Materia.TYPE = {
+    MAGIC = 1,
+    SUPPORT = 2,
+    COMMAND = 3,
+    INDEPENDENT = 4,
+    SUMMON = 5
+}
+
+--- Abilities confered by independent materia.
+Materia.ABILITY = {
+    STR_PLUS = 0,
+    VIT_PLUS = 1,
+    MAG_PLUS = 2,
+    SPR_PLUS = 3,
+    DEX_PLUS = 4,
+    LCK_PLUS = 5,
+    HP_PLUS = 8,
+    MP_PLUS = 9,
+    EXP_PLUS = 10,
+    COVER = 11,
+    UNDERWATER = 12,
+    LONG_RANGE = 80,
+    COUNTER_ATTACK = 83,
+    HP_MP = 98,
+    MEGA_ALL = 99,
+    MONEY_PLUS = 100,
+    PREEMPTIVE = 103,
+    ENC_DOWN = 107,
+    ENC_UP = 108,
+    ENC_CHOCOBO = 109
+}
+
+--- Abilities confered by support materia.
+--
+-- They are dependant on the linked materia.
+Materia.LINK = {
+    ALL = 81,
+    COMMAND_COUNTER = 84,
+    MAGIC_COUNTER = 85,
+    SNEAK_ATTACK = 86,
+    FINAL_ATTACK = 87,
+    MP_TURBO = 88,
+    MP_TURBO = 89,
+    MP_TURBO = 90,
+    ADDED_CUT = 92,
+    STEAL_AS_WELL = 93,
+    ELEMENTAL = 94,
+    ADDED_EFFECT = 95,
+    QUADRA_MAGIC = 99
+}
 
 
 FFVII = {}

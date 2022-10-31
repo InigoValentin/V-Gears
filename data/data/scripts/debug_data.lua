@@ -46,3 +46,13 @@ Inventory.money = 1234567
 Inventory.sort(Inventory.ORDER.NAME)
 Characters[0].stats.hp.current = 12345
 Characters[0].stats.hp.base = 54321
+Characters[0].armor.id = 268
+Characters[0].armor.materia = {
+    [0] = {id = 62, ap = 5340},
+    [2] = {id = 72, ap = 5},
+    [3] = {id = 78, ap = 520},
+    [4] = {id = 36, ap = 0},
+    [5] = {id = 36, ap = 50000},
+    [6] = {id = 0, ap = 0},
+    [7] = {id = 26, ap = 0},
+}

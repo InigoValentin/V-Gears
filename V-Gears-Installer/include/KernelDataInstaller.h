@@ -260,9 +260,9 @@ class KernelDataInstaller{
             KERNEL_COMMAND_DESCRIPTIONS,
 
             /**
-             * Magic descriptions section in KERNEL.BIN.
+             * Attack descriptions section in KERNEL.BIN.
              */
-            KERNEL_MAGIC_DESCRIPTIONS,
+            KERNEL_ATTACK_DESCRIPTIONS,
 
             /**
              * Item descriptions section in KERNEL.BIN.
@@ -300,9 +300,9 @@ class KernelDataInstaller{
             KERNEL_COMMAND_NAMES,
 
             /**
-             * Magic Names section in KERNEL.BIN.
+             * Atack Names section in KERNEL.BIN.
              */
-            KERNEL_MAGIC_NAMES,
+            KERNEL_ATTACK_NAMES,
 
             /**
              * Item Names section in KERNEL.BIN.
@@ -970,6 +970,20 @@ class KernelDataInstaller{
              * Not actually in the item file data, it's the order at which it appears.
              */
             int id;
+
+            /**
+             * Attack name.
+             *
+             * Not found in the same file as the rest of the data, but on file 18.
+             */
+            std::string name;
+
+            /**
+             * Attack description.
+             *
+             * Not found in the same file as the rest of the data, but on file 10.
+             */
+            std::string description;
 
             /**
              * Target selection mode.
@@ -2020,11 +2034,18 @@ class KernelDataInstaller{
             std::string description;
 
             /**
-             * Mateira type.
+             * Materia type.
              *
              * Derived from {@see type_raw}.
              */
             int type;
+
+            /**
+             * Materia type.
+             *
+             * Derived from {@see type_raw}.
+             */
+            int sub_type;
 
             /**
              * Stat bonuses for equipping the materia.
@@ -2039,6 +2060,42 @@ class KernelDataInstaller{
              * Derived from {@see status_raw}.
              */
             std::vector<int> status;
+
+            /**
+             * Commands the materia enables in battle.
+             *
+             * Derived from {@see type_raw}.
+             */
+            std::vector<int> command;
+
+            /**
+             * Attacks the materia enables in battle, at each level.
+             *
+             * Derived from {@see type_raw} and {@see attribute}.
+             */
+            int attack[6];
+
+            /**
+             * Number of times per battle an attack can be used, per level.
+             *
+             * -1 means infinite times. Derived from {@see type_raw} and {@see attribute}.
+             */
+            int attack_times[6];
+
+            /**
+             * Ability confered by the materia.
+             *
+             * Can be provided by independent and independent materia.
+             */
+            std::string ability;
+
+            /**
+             * Parameter for the ability, varies per level.
+             *
+             * It can be the number of times the ability can be executed, or the chance to
+             * activate...
+             */
+            int ability_parameters[5];
         };
 
         /**
@@ -2464,5 +2521,15 @@ class KernelDataInstaller{
          * Indxes 320 - 415: Materia.
          */
         u32 prices_[416];
+
+        /**
+         * Attack names, required for other sections.
+         */
+        std::string attack_names_[128];
+
+        /**
+         * Command names, required for other sections.
+         */
+        std::string command_names_[128];
 
 };

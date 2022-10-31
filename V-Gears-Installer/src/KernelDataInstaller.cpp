@@ -125,6 +125,7 @@ int KernelDataInstaller::ReadCommands(){
 
         // Add to the list of items.
         if (data.name != ""){
+            command_names_[i] = data.name;
             commands_.push_back(data);
             command_count ++;
         }
@@ -153,11 +154,59 @@ int KernelDataInstaller::ReadAttacks(){
     attacks_.clear();
 
     File attacks_file = kernel_.ExtractGZip(KERNEL_ATTACK_DATA);
+    File attacks_name_file = kernel_.ExtractGZip(KERNEL_ATTACK_NAMES);
+    File attacks_desc_file = kernel_.ExtractGZip(KERNEL_ATTACK_DESCRIPTIONS);
     int attack_count = 0;
 
     for (int i = 0; i < 128; i ++){
 
         AttackData data;
+        int name_offset;
+        int desc_offset;
+
+        // From the current name file offset, read 16 bytes.
+        // This is the pointer to the offset for the item name.
+        // Start reading there until 0xFF is found.
+        data.name = "";
+        u8 ch = 1;
+        name_offset = attacks_name_file.readU16LE();
+        while (ch != 0xFF){
+            ch = attacks_name_file.GetU8(name_offset);
+            if (ch != 0xFF) data.name += ENGLISH_CHARS[ch];
+            name_offset ++;
+        }
+        boost::replace_all(data.name, "\"", "'");
+
+        // For descriptions, do the same as for names.
+        data.description = "";
+        ch = 1;
+        desc_offset = attacks_desc_file.readU16LE();
+        while (ch != 0xFF){
+            ch = attacks_desc_file.GetU8(desc_offset);
+            if (ch != 0xFF){
+                // Warning: If the char is 0xF9, special function!
+                // the next byte (in bits, aaoooooo) means to read aa data at offset oooooo.
+                // This is to compress information in the kernel.
+                if (ch == 0xF9){
+                    // Get how much to read, two upper bits of the next byte.
+                    // Multiply by 2 and add 4. That's just how it is.
+                    u8 comp_size = (attacks_desc_file.GetU8(desc_offset + 1) >> 6) * 2 + 4;
+                    // Get new offset, lower six bits of the next byte.
+                    // The offset goes backwards from the position of the 0xF9 byte.
+                    u8 comp_offset = attacks_desc_file.GetU8(desc_offset + 1) & 63;
+
+                    for (int c = 0; c < comp_size; c ++){
+                        data.description += ENGLISH_CHARS[
+                          attacks_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
+                        ];
+                    }
+                    desc_offset ++;
+                }
+                else data.description += ENGLISH_CHARS[ch];
+            }
+            desc_offset ++;
+        }
+        boost::replace_all(data.description, "\"", "'");
 
         // Read data from the item data section.
         data.accuracy = attacks_file.readU8();
@@ -306,6 +355,7 @@ int KernelDataInstaller::ReadAttacks(){
 
         // Add to the list of items.
         attacks_.push_back(data);
+        attack_names_[i] = data.name;
         attack_count ++;
     }
 
@@ -318,6 +368,8 @@ void KernelDataInstaller::WriteAttacks(std::string file_name){
     if (!file) return;
     for (AttackData attack : attacks_){
         file << "Game.Attacks[" << attack.id << "] = {\n"
+          << "    name = \"" << attack.name << "\",\n"
+          << "    description = \"" << attack.description << "\",\n"
           << "    accuracy = " << static_cast<int>(attack.accuracy) << ",\n"
           << "    impact_effect = " << static_cast<int>(attack.impact_effect) << ",\n"
           << "    hurt_anim = " << static_cast<int>(attack.hurt_anim) << ",\n"
@@ -1551,6 +1603,7 @@ int KernelDataInstaller::ReadMateria(){
         if (data.status_raw == (data.status_raw | 0x800000)) data.status.push_back(BERSERK);
         // Limit type to materia color.
         data.type = data.type_raw & 15; // Lower nybble.
+        data.sub_type = data.type_raw & 15; // Upper nyble.
         switch (data.type){
             case 0x09:
             case 0x0A:
@@ -1686,6 +1739,73 @@ int KernelDataInstaller::ReadMateria(){
                 break;
         }
 
+        // Attributtes. Very hardcoded!
+        /*u8 sub_type = data.type_raw >> 4;
+        u8 type = data.type_raw & 15;
+        switch (type){
+            case 0x09: // Magic, normal.
+            case 0x0A: // Magic, high tier.
+                // Always enable magic command.
+                // Each attribute is an attack unlocked each level.
+                data.command.push_back(2);
+                for (int a = 0; a < 6; a ++){
+                    if (data.attribute[i] == 0xFF) data.attack[i] = -1;
+                    else data.attack[i] = data.attribute[i];
+                    data.attack_times[i] = -1;
+                }
+                break;
+            case 0x05: //Support materia.
+                    switch (data.attribute[i]){
+                        case 0x54: data.ability = "Materia.ABILITY.COMMAND_COUNTER"; break;
+                        case 0x55: data.ability = "Materia.ABILITY.MAGIC_COUNTER"; break;
+                        case 0x56: data.ability = "Materia.ABILITY.SNEAK_ATTACK"; break;
+                        case 0x58: data.ability = "Materia.ABILITY.MP_TURBO"; break;
+                        case 0x59: data.ability = "Materia.ABILITY.HP_ABSORB"; break;
+                        case 0x5A: data.ability = "Materia.ABILITY.MP_ABSORB"; break;
+                        case 0x5C: data.ability = "Materia.ABILITY.ADDED_CUT"; break;
+                        case 0x5D: data.ability = "Materia.ABILITY.STEAL_AS_WELL"; break;
+                        case 0x5E: data.ability = "Materia.ABILITY.ELEMENTAL"; break;
+                        case 0x5F: data.ability = "Materia.ABILITY.ADDED_EFFECT"; break;
+                    }
+                    for (int a = 1; a < 6; a ++){
+                        if (data.attribute[i] != 0xFF)
+                            data.ability_parameters[a - 1] = data.attribute[i];
+                    }
+                break;
+            case 0x02: // Command, non-existent.
+                for (int a = 0; a < 6; a ++)
+                    if (data.attribute[i] != 0xFF) data.command.push_back(data.attribute[i]);
+                break;
+            case 0x03: // Command, W commands.
+                for (int a = 0; a < 6; a ++)
+                    if (data.attribute[i] != 0xFF) data.command.push_back(data.attribute[i]);
+                break;
+            case 0x06: // Command, replace attack, different by level.
+                for (int a = 0; a < 6; a ++)
+                    if (data.attribute[i] != 0xFF) data.command.push_back(data.attribute[i]);
+                break;
+            case 0x07: // E. Skill
+                data.command.push_back(13); break; // E.Skill.
+                break;
+            case 0x08: // Adds commands. Can be different by level.
+                for (int a = 0; a < 6; a ++)
+                    if (data.attribute[i] != 0xFF) data.command.push_back(data.attribute[i]);
+                break;
+            case 0x0B: // Summon, normal.
+            case 0x0C: // Summon, high tier.
+                // Always enable Summon command (3), always enable attack in attribute 0.
+                // Attributes 1-5 are the times the summon can be used per battle. They are always
+                // 1-5.
+                data.command.push_back(3);
+                //data.attack.push_back(data.attribute[i]);
+                for (int a = 1; a <= 6; a ++){
+                    data.attack_times[a - 1] = a;
+                }
+                break;
+            //default:
+                //data.type = static_cast<int>(MATERIA_TYPE::INDEPENDENT);
+        }*/
+
         // Add to the list of materia.
         materia_.push_back(data);
         materia_count ++;
@@ -1704,6 +1824,20 @@ void KernelDataInstaller::WriteMateria(std::string file_name){
           << "    name = \"" << materia.name << "\",\n"
           << "    description = \"" << materia.description << "\",\n"
           << "    type = " << materia.type << ",\n"
+
+
+        // TODO Remove from here...
+          << "    sub_type = " << (int)materia.sub_type << ",\n"
+          << "    type_raw = " << (int)materia.type_raw << ",\n"
+          << "    type_raw_upp = " << (int)(materia.type_raw >> 4) << ",\n"
+          << "    type_raw_low = " << (int)(materia.type_raw & 15) << ",\n"
+          << "    attributtes = {";
+        for (int i = 0; i < 6; i ++)
+            file << (int) materia.attribute[i] << ", ";
+        file << "},\n"
+        // TODO ... until here
+
+
           << "    levels_ap = {[1] = 0, ";
         for (int i = 0; i < 4; i ++){
             if (materia.level_up_ap[i] < 65535)
@@ -1726,8 +1860,147 @@ void KernelDataInstaller::WriteMateria(std::string file_name){
         if (materia.stats.lck != 0) file << "\n        lck = " << materia.stats.lck << ",";
         if (materia.stats.hp != 0) file << "\n        hp = " << materia.stats.hp << ",";
         if (materia.stats.mp != 0) file << "\n        mp = " << materia.stats.mp << ",";
-        if (materia.stats.change) file << "\n    }\n";
-        else file << "}\n";
+        if (materia.stats.change) file << "\n    },\n";
+        else file << "},\n";
+
+        // Type-dependant
+        if (materia.type == static_cast<int>(MATERIA_TYPE::MAGIC)){
+            file << "    magic = {\n";
+            for (int a = 0; a < 6; a ++){
+                if (materia.attribute[a] != 0xFF){
+                    file << "        [" << a + 1 << "] = " << static_cast<int>(materia.attribute[a])
+                      << ", -- " << attack_names_[static_cast<int>(materia.attribute[a])] << "\n";
+                }
+            }
+            file << "    }\n";
+        }
+        else if (materia.type == static_cast<int>(MATERIA_TYPE::SUMMON)){
+            file << "    summon = " << static_cast<int>(materia.attribute[0]) << ", -- "
+              << attack_names_[static_cast<int>(materia.attribute[0])] << "\n";
+            file << "    times = {";
+            for (int a = 1; a < 6; a ++)
+                file << "[" << a << "] = " << static_cast<int>(materia.attribute[a]) << ", ";
+            file << "}\n";
+        }
+        else if (materia.type == static_cast<int>(MATERIA_TYPE::COMMAND)){
+            switch (materia.sub_type){
+                case 0x02: // Command, replace attack.
+                    file << "    command = {\n";
+                    for (int a = 0; a < 6; a ++){
+                        if (materia.attribute[a] != 0xFF){
+                            file << "        [" << a + 1 << "] = "
+                              << static_cast<int>(materia.attribute[a]) << ", -- "
+                              << command_names_[static_cast<int>(materia.attribute[a])] << "\n";
+                        }
+                    }
+                    file << "    },\n    command_replace = 1 -- Attack\n";
+                    break;
+                case 0x03: // Command, W commands.
+                    file << "    command = {\n";
+                    for (int a = 0; a < 6; a ++){
+                        if (materia.attribute[a] != 0xFF){
+                            file << "        [" << a + 1 << "] = "
+                              << static_cast<int>(materia.attribute[a]) << ", -- "
+                              << command_names_[static_cast<int>(materia.attribute[a])] << "\n";
+                        }
+                    }
+                    file << "    },\n    command_replace = "
+                      << static_cast<int>(materia.attribute[0] - 19) << " -- "
+                      << command_names_[static_cast<int>(materia.attribute[0] - 19)] << "\n";
+                    break;
+                case 0x06: // Normal command.
+                case 0x07: // E.Skill.
+                    file << "    command = {\n";
+                        for (int a = 0; a < 6; a ++){
+                            if (materia.attribute[a] != 0xFF){
+                                file << "        [" << a + 1 << "] = "
+                                  << static_cast<int>(materia.attribute[a]) << ", -- "
+                                  << command_names_[static_cast<int>(materia.attribute[a])] << "\n";
+                            }
+                        }
+                        file << "    }\n";
+                    break;
+                case 0x08: // Master command.
+                    // TODO
+                    break;
+            }
+        }
+        else if (materia.type == static_cast<int>(MATERIA_TYPE::SUPPORT)){
+            file << "    link = {\n        id = ";
+            switch (materia.attribute[0]){
+                case 0x51: file << "Materia.LINK.ALL,\n"; break;
+                case 0x54: file << "Materia.LINK.COMMAND_COUNTER,\n"; break;
+                case 0x55: file << "Materia.LINK.MAGIC_COUNTER,\n"; break;
+                case 0x56: file << "Materia.LINK.SNEAK_ATTACK,\n"; break;
+                case 0x57: file << "Materia.LINK.FINAL_ATTACK,\n"; break;
+                case 0x58: file << "Materia.LINK.MP_TURBO,\n"; break;
+                case 0x59: file << "Materia.LINK.MP_ABSORB,\n"; break;
+                case 0x5A: file << "Materia.LINK.HP_ABSORB,\n"; break;
+                case 0x5C: file << "Materia.LINK.ADDED_CUT,\n"; break;
+                case 0x5D: file << "Materia.LINK.STEAL_AS_WELL,\n"; break;
+                case 0x5E: file << "Materia.LINK.ELEMENTAL,\n"; break;
+                case 0x5F: file << "Materia.LINK.ADDED_EFFECT,\n"; break;
+                case 0x63: file << "Materia.LINK.QUADRA_MAGIC,\n"; break;
+                default: file << "nil,\n"; break;
+            }
+            file << "        param = {";
+            for (int a = 1; a < 6; a ++){
+                if (materia.attribute[a] != 0xFF){
+                    file << "[" << a << "] = " << static_cast<int>(materia.attribute[a]) << ", ";
+                }
+            }
+            file << "}\n    }\n";
+        }
+        else if (materia.type == static_cast<int>(MATERIA_TYPE::INDEPENDENT)){
+            bool invert_attrs = false;
+            file << "    ability = {\n        id = ";
+            switch (materia.sub_type){
+                case 0x00: // Character effects
+                    switch (materia.attribute[0]){
+                        case 0x02: file << "Materia.ABILITY.MAG_PLUS,\n"; break;
+                        case 0x04: file << "Materia.ABILITY.DEX_PLUS,\n"; break;
+                        case 0x05: file << "Materia.ABILITY.LCK_PLUS,\n"; break;
+                        case 0x08: file << "Materia.ABILITY.HP_PLUS,\n"; break;
+                        case 0x09: file << "Materia.ABILITY.MP_PLUS,\n"; break;
+                        case 0x0A: file << "Materia.ABILITY.EXP_PLUS,\n"; break;
+                        case 0x0B: file << "Materia.ABILITY.COVER,\n"; break;
+                        case 0x0C: file << "Materia.ABILITY.UNDERWATER,\n"; break;
+                        case 0x50: file << "Materia.ABILITY.LONG_RANGE,\n"; break;
+                        case 0x53: file << "Materia.ABILITY.COUNTER_ATTACK,\n"; break;
+                        case 0x62: file << "Materia.ABILITY.HP_MP,\n"; break;
+                        default: file << "nil,\n"; break;
+                    }
+                    break;
+                case 0x01: // Party effects
+                    switch (materia.attribute[0]){
+                        case 0x00: file << "Materia.ABILITY.MONEY_PLUS,\n"; break;
+                        case 0x01: // Enemy Away / Enemy lure / Chocobo lure
+                            if (materia.id == 7)
+                                file << "Materia.ABILITY.ENCOUNTER_DOWN,\n";
+                            else if (materia.id == 8)
+                                file << "Materia.ABILITY.ENCOUNTER_UP,\n";
+                            else if (materia.id == 9)
+                                file << "Materia.ABILITY.ENCOUNTER_CHOCOBO,\n";
+                            else file << "nil,\n";
+                            break;
+                        case 0x03: file << "Materia.ABILITY.PREEMPTIVE,\n"; break;
+                        default: file << "nil,\n"; break;
+                    }
+                    break;
+                case 0x04:
+                    file << "Materia.ABILITY.MEGA_ALL,\n";
+                    break;
+                default: file << "nil,\n"; break;
+            }
+            file << "        param = {";
+                for (int a = 1; a < 6; a ++){
+                    if (materia.attribute[a] != 0xFF){
+                        file << "[" << a << "] = "
+                          << static_cast<int>(materia.attribute[a]) << ", ";
+                    }
+                }
+                file << "}\n    }\n";
+        }
         file << "}\n";
     }
     file.close();
