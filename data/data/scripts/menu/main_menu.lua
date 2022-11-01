@@ -33,12 +33,12 @@ UiContainer.MainMenu = {
     -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
-        local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
-        local menu  = ui_manager:get_widget("MainMenu.Container.Menu")
-        local menu_cursor = ui_manager:get_widget("MainMenu.Container.Menu.Cursor")
-        local timegil = ui_manager:get_widget("MainMenu.Container.TimeGil")
-        local location = ui_manager:get_widget("MainMenu.Container.Location")
         if UiContainer.current_menu == "main" then
+            local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
+            local menu  = ui_manager:get_widget("MainMenu.Container.Menu")
+            local menu_cursor = ui_manager:get_widget("MainMenu.Container.Menu.Cursor")
+            local timegil = ui_manager:get_widget("MainMenu.Container.TimeGil")
+            local location = ui_manager:get_widget("MainMenu.Container.Location")
             if UiContainer.current_submenu == "" then
                 if button == "Escape" and event == "Press" then
                     script:request_end_sync(Script.UI, "MainMenu", "hide", 0)

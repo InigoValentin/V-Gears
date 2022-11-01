@@ -50,7 +50,6 @@ UiContainer.NameMenu = {
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "name" then
-
             if UiContainer.current_submenu == "confirm" then
                 if button == "Right" then
                     self.confirm_position = self.confirm_position + 1

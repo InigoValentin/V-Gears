@@ -382,10 +382,24 @@ class UiTextArea : public UiWidget{
         /**
          * Prepares text from a XML node.
          *
+         * Not to be used to set text dinamically from scripts repatedly (i.e. for menus). It can
+         * produce memory leaks, and it's slower. Use {@see SetTextFromNode} for that.
+         *
          * @param[in] node The XML node to get the text from.
          * @param[in] colour The text colour.
          */
         void PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colour);
+
+        /**
+         * Prepares text from a XML node.
+         *
+         * Use this when setting text dinamically from scripts, instead of
+         * {@see PrepareTextFromNode}.
+         *
+         * @param[in] node The XML node to get the text from.
+         * @param[in] colour The text colour.
+         */
+        void SetTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colour);
 
         /**
          * Prepares text from a string.

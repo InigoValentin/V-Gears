@@ -1,7 +1,5 @@
 if UiContainer == nil then UiContainer = {} end
 
-print("ADD helpers")
-
 UiContainer.pad_value = function(value, length)
     local str = tostring(value)
     while #(str) < length do

@@ -187,6 +187,7 @@ void UiTextArea::Render(){
 void UiTextArea::UpdateTransformation(){
     UiWidget::UpdateTransformation();
     UpdateGeometry();
+    update_transformation_ = false;
 }
 
 void UiTextArea::InputPressed(){next_pressed_ = true;}
@@ -207,7 +208,27 @@ void UiTextArea::SetPadding(
     padding_left_ = left;
 }
 
-void UiTextArea::SetText(const char* text){SetText(Ogre::UTFString(text));}
+void UiTextArea::SetText(const char* text){
+    // Don't call PrepareTextFromNode from here!
+    // Use the non-recursive SetTextFromNode.
+    Ogre::UTFString str_text = Ogre::UTFString(text);
+    text_.clear();
+    TiXmlDocument doc;
+    Ogre::UTFString xml_text = "<container>" + str_text + "</container>";
+    doc.Parse(xml_text.asUTF8_c_str(), 0, TIXML_ENCODING_UTF8);
+    SetTextFromNode(doc.RootElement(), colour_1_);
+    text_state_ = TS_SHOW_TEXT;
+    update_transformation_ = true;
+    if (text_.size() > max_letters_){
+        text_.clear();
+        LOG_ERROR(
+          "Max number of text reached in '" + path_name_ + "'. Can't render text from node. "
+          + "Max number of letters is " + Ogre::StringConverter::toString(max_letters_) + "."
+        );
+    }
+    text_state_ = TS_SHOW_TEXT;
+    update_transformation_ = true;
+}
 
 void UiTextArea::SetText(const Ogre::UTFString& text){
     TiXmlDocument doc;
@@ -561,7 +582,6 @@ float UiTextArea::GetTextWidth() const{
 }
 
 void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colour){
-    Ogre::ColourValue colour_child = colour;
     while (node != NULL){
         switch(node->Type()){
             case TiXmlNode::TINYXML_TEXT:
@@ -572,7 +592,7 @@ void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& c
                 break;
             case TiXmlNode::TINYXML_ELEMENT:
                 {
-
+                    Ogre::ColourValue colour_child = colour;
                     Ogre::String name = node->ValueStr();
                     if (name == "colour"){
                         colour_child = Ogre::StringConverter::parseColourValue(
@@ -720,11 +740,175 @@ void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& c
                         }
                     }
                     TiXmlNode* node_child = node->FirstChild();
-                    PrepareTextFromNode(node_child, colour_child);
+                    if (node_child != NULL) PrepareTextFromNode(node_child, colour_child);
                 }
             break;
         }
         node = node->NextSibling();
+    }
+}
+
+void UiTextArea::SetTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colour){
+    switch(node->Type()){
+        case TiXmlNode::TINYXML_TEXT:
+            {
+                TiXmlText* childText = node->ToText();
+                if (childText) PrepareTextFromText(childText->Value(), colour);
+            }
+            break;
+        case TiXmlNode::TINYXML_ELEMENT:
+            {
+                Ogre::ColourValue colour_child = colour;
+                Ogre::String name = node->ValueStr();
+                if (name == "colour"){
+                    colour_child = Ogre::StringConverter::parseColourValue(
+                      node->ToElement()->Attribute("value")
+                    );
+                }
+                else if (name == "pause_ok"){
+                    TextChar new_char;
+                    new_char.pause_ok = true;
+                    text_.push_back(new_char);
+                }
+                else if (name == "pause"){
+                    const std::string* string
+                      = node->ToElement()->Attribute(Ogre::String("time"));
+                    if (string != NULL){
+                        TextChar new_char;
+                        new_char.pause_time = Ogre::StringConverter::parseReal(*string);
+                        text_.push_back(new_char);
+                    }
+                }
+                else if (name == "next_page"){
+                    TextChar new_char;
+                    new_char.next_page = true;
+                    text_.push_back(new_char);
+                }
+                else if (name == "timer"){
+                    timer_ = true;
+                    TextChar new_char;
+                    new_char.skip = true;
+                    new_char.variable = "UITextAreaTimer";
+                    new_char.colour = colour;
+                    Ogre::UTFString var = GetVariable("UITextAreaTimer");
+                    new_char.variable_len = var.size();
+                    text_.push_back(new_char);
+                    for (unsigned int i = 0; i < var.size(); ++ i){
+                        TextChar text_char;
+                        text_char.char_code = var[i];
+                        text_char.colour = colour;
+                        text_.push_back(text_char);
+                    }
+                }
+                else if (name == "variable"){
+                    const std::string* string
+                      = node->ToElement()->Attribute(Ogre::String("name"));
+                    if (string != NULL){
+                        TextChar new_char;
+                        new_char.skip = true;
+                        new_char.variable = *string;
+                        new_char.colour = colour;
+                        Ogre::UTFString var = GetVariable(*string);
+                        new_char.variable_len = var.size();
+                        text_.push_back(new_char);
+                        for (unsigned int i = 0; i < var.size(); ++ i){
+                            TextChar text_char;
+                            text_char.char_code = var[i];
+                            text_char.colour = colour;
+                            text_.push_back(text_char);
+                        }
+                    }
+                }
+                else if (name == "character"){
+                    const std::string* id = node->ToElement()->Attribute(Ogre::String("id"));
+                    const std::string char_name = TextManager::getSingleton().GetCharacterName(
+                      std::stoi(*id)
+                    );
+                    for (unsigned int i = 0; i < char_name.length(); ++ i){
+                        TextChar text_char;
+                        text_char.char_code = char_name.at(i);
+                        text_char.colour = colour;
+                        text_.push_back(text_char);
+                    }
+                }
+                else if (name == "party"){
+                    const std::string* pos = node->ToElement()->Attribute(Ogre::String("pos"));
+                    const std::string char_name
+                      = TextManager::getSingleton().GetPartyCharacterName(std::stoi(*pos));
+                    for (unsigned int i = 0; i < char_name.length(); ++ i){
+                        TextChar text_char;
+                        text_char.char_code = char_name.at(i);
+                        text_char.colour = colour;
+                        text_.push_back(text_char);
+                    }
+                }
+                else if (name == "include"){
+                    const std::string* text_name = node->ToElement()->Attribute(
+                      Ogre::String("name")
+                    );
+                    if (text_name != NULL){
+                        TiXmlNode* text = TextManager::getSingleton().GetText(*text_name);
+                        if (text != NULL) SetTextFromNode(text, colour_child);
+                    }
+                }
+                else if (name == "image"){
+                    Ogre::String name1 = GetString(node, "sprite");
+                    if (name1 != ""){
+                        TiXmlNode* sprites = UiManager::getSingleton().GetPrototype(
+                          "TextAreaSprite"
+                        );
+                        if (sprites != NULL){
+                            sprites = sprites->FirstChild();
+                            while (sprites != NULL){
+                                if (
+                                  sprites->Type() == TiXmlNode::TINYXML_ELEMENT
+                                  && sprites->ValueStr() == "sprite"
+                                ){
+                                    Ogre::String name2 = GetString(sprites, "name");
+                                    if (name1 == name2){
+                                        TextChar new_char;
+                                        UiSprite* sprite = new UiSprite(
+                                          name1, name_ + "." + name1, this
+                                        );
+                                        Ogre::String image = GetString(sprites, "image");
+                                        if (image != "") sprite->SetImage(image);
+                                        Ogre::String y_str = GetString(sprites, "y");
+                                        if (y_str != ""){
+                                            float y_percent = 0;
+                                            float y = 0;
+                                            ParsePercent(y_percent, y, y_str);
+                                            new_char.sprite_y = y;
+                                        }
+                                        Ogre::String width_str = GetString(sprites, "width");
+                                        if (width_str != ""){
+                                            float width_percent = 0;
+                                            float width = 0;
+                                            ParsePercent(width_percent, width, width_str);
+                                            sprite->SetWidth(0, width);
+                                        }
+                                        Ogre::String height_str = GetString(sprites, "height");
+                                        if (height_str != ""){
+                                            float height_percent = 0;
+                                            float height = 0;
+                                            ParsePercent(height_percent, height, height_str);
+                                            sprite->SetHeight(height_percent, height);
+                                        }
+                                        sprite->SetVisible(false);
+                                        AddChild(sprite);
+                                        new_char.sprite = sprite;
+                                        text_.push_back(new_char);
+                                        break;
+                                    }
+                                }
+                                sprites = sprites->NextSibling();
+                            }
+                        }
+                    }
+                }
+                TiXmlNode* node_child = node->FirstChild();
+                if (node_child != NULL) SetTextFromNode(node_child, colour_child);
+            }
+        break;
     }
 }
 

@@ -81,6 +81,7 @@ UiContainer.MateriaMenu = {
                         self.selecting_slot = Inventory.ITEM_TYPE.ACCESSORY
                     end
                     self.submenu_select(self)]]
+                -- TODO: Triangle->Remove
                 else
                     return 0
                 end
@@ -185,98 +186,6 @@ UiContainer.MateriaMenu = {
             end
         end
     end,
-
-    --- Initializzes the item selection submenu
-    --[[submenu_select = function(self)
-        -- Populate the list
-        self.list_first_visible = 1
-        self.list_position = 1
-        self.list_item_selected = 1
-        if self.populate_item_list(self) == false then
-            print("BEEP")
-            return
-        end
-        UiContainer.current_submenu = "item_select"
-        ui_manager:get_widget("EquipMenu.Container.List.Cursor"):set_visible(true)
-        ui_manager:get_widget("EquipMenu.Container.List.Cursor"):set_default_animation("Position" .. self.list_position)
-        -- TODO: Description and details of first item
-        self.populate_details(self, true)
-        self.calculate_stat_diffs(self)
-    end,]]
-
-    --[[populate_item_list = function(self)
-        local list
-        if self.selecting_slot == Inventory.ITEM_TYPE.WEAPON then
-            list = self.avail_weapons
-        elseif self.selecting_slot == Inventory.ITEM_TYPE.ARMOR then
-            list = self.avail_armors
-        elseif self.selecting_slot == Inventory.ITEM_TYPE.ACCESSORY then
-            list = self.avail_accessories
-        else
-            for i = 1, self.list_position_total do
-                ui_manager:get_widget("EquipMenu.Container.List.Item" .. tostring(i)):set_text("")
-            end
-            return false
-        end
-        if list == nil or #(list) == 0 then
-            -- No items for the list
-            return false
-        end
-        for i = 1, self.list_position_total do
-            if #(list) >= i + self.list_first_visible then
-                local name = Game.Items[list[i + self.list_first_visible] ].name
-                ui_manager:get_widget("EquipMenu.Container.List.Item" .. tostring(i)):set_text(name)
-            else
-                ui_manager:get_widget("EquipMenu.Container.List.Item" .. tostring(i)):set_text("")
-            end
-        end
-    end,]]
-
-    --- Loads the list of equipment available for the current character.
-    --
-    -- Currently equiped items are not added, even if more of them are in the inventory.
-    --[[load_availables = function(self)
-        self.avail_weapons = {}
-        self.avail_armors = {}
-        self.avail_accessories = {}
-        for _, item in ipairs(Inventory) do
-            if item.item ~= nil then
-                local item_type = Game.Items[item.item].type
-                if item_type == Inventory.ITEM_TYPE.WEAPON or item_type == Inventory.ITEM_TYPE.ARMOR or item_type == Inventory.ITEM_TYPE.ACCESSORY then
-                    local equip = Game.Items[item.item].users
-                    for _, ch in ipairs(equip) do
-                        if ch == self.char_id then
-                            if item_type == Inventory.ITEM_TYPE.WEAPON then
-                                if item.item ~= Characters[self.char_id].weapon.id then
-                                    table.insert(self.avail_weapons, item.item)
-                                end
-                            elseif item_type == Inventory.ITEM_TYPE.ARMOR then
-                                if item.item ~= Characters[self.char_id].armor.id then
-                                    table.insert(self.avail_armors, item.item)
-                                end
-                            elseif item_type == Inventory.ITEM_TYPE.ACCESSORY then
-                                if item.item ~= Characters[self.char_id].accessory then
-                                    table.insert(self.avail_accessories, item.item)
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end,]]
-
-    --[[populate_current_stats = function(self)
-        -- TODO: Cap at 255?
-        local stats = Characters[self.char_id].stats
-        ui_manager:get_widget("EquipMenu.Container.Stats.Atk"):set_text(UiContainer.pad_value(stats.atk, 4))
-        ui_manager:get_widget("EquipMenu.Container.Stats.Acc"):set_text(UiContainer.pad_value(stats.acc, 4))
-        ui_manager:get_widget("EquipMenu.Container.Stats.Def"):set_text(UiContainer.pad_value(stats.def, 4))
-        ui_manager:get_widget("EquipMenu.Container.Stats.Eva"):set_text(UiContainer.pad_value(stats.eva, 4))
-        ui_manager:get_widget("EquipMenu.Container.Stats.MAtk"):set_text(UiContainer.pad_value(stats.matk, 4))
-        ui_manager:get_widget("EquipMenu.Container.Stats.MDef"):set_text(UiContainer.pad_value(stats.mdef, 4))
-        ui_manager:get_widget("EquipMenu.Container.Stats.MEva"):set_text(UiContainer.pad_value(stats.meva, 4))
-    end,]]
 
     --- Hiddes the materia details.
     --
@@ -383,7 +292,6 @@ UiContainer.MateriaMenu = {
         if materia.type == Materia.TYPE.MAGIC then
             local attack_index = 1
             for attack_level, attack_id in pairs(materia.magic) do
-                print("LV " .. attack_level .. " ID " .. attack_id)
                 if level >= attack_level then
                     ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Abilities.Ability" .. tostring(attack_index)):set_colour(1, 1, 1)
                 else
@@ -472,97 +380,95 @@ UiContainer.MateriaMenu = {
         end
 
         -- Show effects, if any.
-        --if #(materia.stats) > 0 then
-            local effect_index = 1
-            if materia.stats.str ~= nil and materia.stats.str ~= 0 then
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatStr\" />")
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
-                if materia.stats.str < 0 then
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.str, 2) .. "</colour>")
-                else
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.str, 2) .. "</colour>")
-                end
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
-                effect_index = effect_index + 1
+        local effect_index = 1
+        if materia.stats.str ~= nil and materia.stats.str ~= 0 then
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatStr\" />")
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
+            if materia.stats.str < 0 then
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.str, 2) .. "</colour>")
+            else
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.str, 2) .. "</colour>")
             end
-            if materia.stats.vit ~= nil and materia.stats.vit ~= 0 then
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatVit\" />")
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
-                if materia.stats.vit < 0 then
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.vit, 2) .. "</colour>")
-                else
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.vit, 2) .. "</colour>")
-                end
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
-                effect_index = effect_index + 1
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
+            effect_index = effect_index + 1
+        end
+        if materia.stats.vit ~= nil and materia.stats.vit ~= 0 then
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatVit\" />")
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
+            if materia.stats.vit < 0 then
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.vit, 2) .. "</colour>")
+            else
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.vit, 2) .. "</colour>")
             end
-            if materia.stats.mag ~= nil and materia.stats.mag ~= 0 then
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatMag\" />")
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
-                if materia.stats.mag < 0 then
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.mag, 2) .. "</colour>")
-                else
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.mag, 2) .. "</colour>")
-                end
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
-                effect_index = effect_index + 1
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
+            effect_index = effect_index + 1
+        end
+        if materia.stats.mag ~= nil and materia.stats.mag ~= 0 then
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatMag\" />")
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
+            if materia.stats.mag < 0 then
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.mag, 2) .. "</colour>")
+            else
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.mag, 2) .. "</colour>")
             end
-            if materia.stats.spr ~= nil and materia.stats.spr ~= 0 then
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatSpr\" />")
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
-                if materia.stats.spr < 0 then
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.spr, 2) .. "</colour>")
-                else
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.spr, 2) .. "</colour>")
-                end
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
-                effect_index = effect_index + 1
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
+            effect_index = effect_index + 1
+        end
+        if materia.stats.spr ~= nil and materia.stats.spr ~= 0 then
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatSpr\" />")
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
+            if materia.stats.spr < 0 then
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.spr, 2) .. "</colour>")
+            else
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.spr, 2) .. "</colour>")
             end
-            if materia.stats.dex ~= nil and materia.stats.dex ~= 0 then
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatDex\" />")
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
-                if materia.stats.dex < 0 then
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.dex, 2) .. "</colour>")
-                else
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.dex, 2) .. "</colour>")
-                end
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
-                effect_index = effect_index + 1
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
+            effect_index = effect_index + 1
+        end
+        if materia.stats.dex ~= nil and materia.stats.dex ~= 0 then
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatDex\" />")
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
+            if materia.stats.dex < 0 then
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.dex, 2) .. "</colour>")
+            else
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.dex, 2) .. "</colour>")
             end
-            if materia.stats.lck ~= nil and materia.stats.lck ~= 0 then
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatLck\" />")
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
-                if materia.stats.lck < 0 then
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.lck, 2) .. "</colour>")
-                else
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.lck, 2) .. "</colour>")
-                end
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
-                effect_index = effect_index + 1
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
+            effect_index = effect_index + 1
+        end
+        if materia.stats.lck ~= nil and materia.stats.lck ~= 0 then
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatLck\" />")
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
+            if materia.stats.lck < 0 then
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.lck, 2) .. "</colour>")
+            else
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.lck, 2) .. "</colour>")
             end
-            if materia.stats.hp ~= nil and materia.stats.hp ~= 0 then
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatHP\" />")
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
-                if materia.stats.hp < 0 then
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.hp, 2) .. "%</colour>")
-                else
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.hp, 2) .. "%</colour>")
-                end
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
-                effect_index = effect_index + 1
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
+            effect_index = effect_index + 1
+        end
+        if materia.stats.hp ~= nil and materia.stats.hp ~= 0 then
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatHP\" />")
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
+            if materia.stats.hp < 0 then
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.hp, 2) .. "%</colour>")
+            else
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.hp, 2) .. "%</colour>")
             end
-            if materia.stats.mp ~= nil and materia.stats.mp ~= 0 then
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatMP\" />")
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
-                if materia.stats.mp < 0 then
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.mp, 2) .. "%</colour>")
-                else
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.mp, 2) .. "%</colour>")
-                end
-                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
-                effect_index = effect_index + 1
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
+            effect_index = effect_index + 1
+        end
+        if materia.stats.mp ~= nil and materia.stats.mp ~= 0 then
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_text("<include name=\"StatMP\" />")
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Stat" .. tostring(effect_index)):set_visible(true)
+            if materia.stats.mp < 0 then
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 0 0\">-" .. UiContainer.pad_value(-1 * materia.stats.mp, 2) .. "%</colour>")
+            else
+                ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_text("<colour value=\"1 1 0\">+" .. UiContainer.pad_value(materia.stats.mp, 2) .. "%</colour>")
             end
-        --end
+            ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Effects.Val" .. tostring(effect_index)):set_visible(true)
+            effect_index = effect_index + 1
+        end
     end,
 
     --- Hides the item menu and goes back to the main menu.
