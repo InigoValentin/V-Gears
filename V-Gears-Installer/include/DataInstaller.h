@@ -186,6 +186,11 @@ class DataInstaller{
             MEDIA_IMAGES,
 
             /**
+             * Prepares the installer for sound extraction.
+             */
+            MEDIA_SOUNDS_INIT,
+
+            /**
              * Extract game sounds.
              */
             MEDIA_SOUNDS,

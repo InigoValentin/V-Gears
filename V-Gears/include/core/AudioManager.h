@@ -109,7 +109,7 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
          * @param[in] name3 Name of the third sound to play.
          * @param[in] name4 Name of the fourth sound to play.
          */
-        void AudioManager::ScriptPlaySounds(
+        void ScriptPlaySounds(
           const char* name1, const char* name2, const char* name3, const char* name4
         );
 

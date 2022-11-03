@@ -136,12 +136,19 @@ int DataInstaller::Progress(){
         case MEDIA_IMAGES:
             write_output_line_("Extracting game images...", 2, true);
             media_installer_->InstallSprites();
+            installation_state_ = MEDIA_SOUNDS_INIT;
+            return CalcProgress();
+        case MEDIA_SOUNDS_INIT:
+            write_output_line_("Extracting sounds...", 2, true);
+            substeps_ = media_installer_->InstallSoundsInit();
             installation_state_ = MEDIA_SOUNDS;
+            cur_substep_ = 0;
             return CalcProgress();
         case MEDIA_SOUNDS:
-            write_output_line_("Extracting sounds...", 2, true);
-            media_installer_->InstallSounds();
-            installation_state_ = MEDIA_SOUNDS_INDEX;
+            write_output_line_("Extracting sound " + std::to_string(cur_substep_), 2, true);
+            if (media_installer_->InstallSounds() == true)
+                installation_state_ = MEDIA_SOUNDS_INDEX;
+            else cur_substep_ ++;
             return CalcProgress();
         case MEDIA_SOUNDS_INDEX:
             write_output_line_("Building sound index...", 2, true);
@@ -216,9 +223,14 @@ int DataInstaller::Progress(){
 }
 
 const int DataInstaller::CalcProgress(){
-    // TODO: Make more accurate with iterator_counter_ and
-    // progress_step_num_elements_.
     float curr_step = installation_state_ / static_cast<float>(STATE_COUNT);
+    if (substeps_ > 0 && cur_substep_ < substeps_){
+        curr_step
+          += (
+            (static_cast<float>(cur_substep_) / static_cast<float>(substeps_))
+            / static_cast<float>(STATE_COUNT)
+          );
+    }
     curr_step = curr_step * 100.0f;
     int progress = static_cast<int>(curr_step);
     if (progress >= 100) progress = 99;
@@ -235,7 +247,7 @@ void DataInstaller::CreateDirectories(){
     CreateDir("images/reels");
     CreateDir("images/window");
     CreateDir("models/fields/entities");
-    CreateDir("audio/fx");
+    CreateDir("audio/sound");
     CreateDir("audio/music");
     application_.ResMgr()->addResourceLocation("data/temp/char/", "FileSystem", "FFVII", true, true);
     application_.ResMgr()->addResourceLocation("data/models/", "FileSystem", "FFVII", true, true);

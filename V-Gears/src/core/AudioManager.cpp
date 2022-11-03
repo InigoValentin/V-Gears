@@ -141,7 +141,7 @@ void AudioManager::ScriptPlaySound(const char* name){
     SoundPlay(name_str);
 }
 
-void ScriptPlaySound(const char* name, const int channel){ScriptPlaySound(name1);}
+void AudioManager::ScriptPlaySound(const char* name, const int channel){ScriptPlaySound(name);}
 
 void AudioManager::ScriptPlaySounds(
   const char* name1, const char* name2, const char* name3, const char* name4

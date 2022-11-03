@@ -39,7 +39,8 @@ u8 MediaDataInstaller::WAV_HEADER[] = {
 
 MediaDataInstaller::MediaDataInstaller(const std::string input_dir, const std::string output_dir):
   input_dir_(input_dir), output_dir_(output_dir),
-  menu_(input_dir + "data/menu/menu_us.lgp", "LGP"), window_(input_dir + "data/kernel/WINDOW.BIN")
+  menu_(input_dir + "data/menu/menu_us.lgp", "LGP"), window_(input_dir + "data/kernel/WINDOW.BIN"),
+  fmt_(input_dir_ + "data/sound/audio.fmt"), dat_(input_dir_ + "data/sound/audio.dat")
 {PopulateMaps();}
 
 void MediaDataInstaller::PopulateMaps(){
@@ -297,61 +298,75 @@ void MediaDataInstaller::InstallSprites(){
     }
 }
 
-void MediaDataInstaller::InstallSounds(){
-    File fmt(input_dir_ + "data/sound/audio.fmt");
-    File dat(input_dir_ + "data/sound/audio.dat");
+int MediaDataInstaller::InstallSoundsInit(){
+    fmt_.SetOffset(0);
+    dat_.SetOffset(0);
+    processed_sounds_ = 0;
+    return TOTAL_SOUNDS;
+}
 
-    for (int i = 0; i < TOTAL_SOUNDS; i ++){
-        FmtFile header;
+bool MediaDataInstaller::InstallSounds(){
 
-        header.size = fmt.readU32LE();
-        // If size is 0, this is a bad header. There are 112 bytes of bad data, and after that,
-        // the next header.
-        if (header.size == 0){
-            for (int b = 0; b < 112; b += 4) fmt.readU32LE();
-            continue;
-        }
-
-        header.offset = fmt.readU32LE();
-        // If the offset is less than the previous one, also bad header. 34 bytes of bad data, and
-        // after that, the next header.
-        if (header.offset < dat.GetCurrentOffset()){
-            for (int b = 0; b < 34; b += 2) fmt.readU16LE();
-            continue;
-        }
-
-        // This should never happen, but just in case, never read outside the file
-        if (header.offset + header.size > dat.GetFileSize()) continue;
-
-        for (int l = 0; l < 16; l ++) header.loop_metadata[l] = fmt.readU8();
-        for (int l = 0; l < 18; l ++) header.wav_header[l] = fmt.readU8();
-        header.samples_per_block = fmt.readU16LE();
-        header.adpcm = fmt.readU16LE();
-        for (int l = 0; l < 28; l ++) header.adpcm_sets[l] = fmt.readU8();
-
-        dat.SetOffset(header.offset);
-        std::ofstream out(
-          output_dir_ + "audio/sound/" + std::to_string(i) + ".wav", std::ios::out | std::ios::binary
-        );
-
-
-        // Write the standard wav header.
-        for (int b = 0; b < 78; b ++) out.put(WAV_HEADER[b]);
-        // Write the data from the dat file.
-        for (int b = 0; b < header.size; b ++) out.put(dat.readU8());
-        out.close();
-
-        // Convert to OGG.
-        // TODO: Don't use system calls! Integrate libav or something that can do the conversion
-        // natively
-        std::string command = (boost::format(
-          "ffmpeg -hide_banner -loglevel panic -y -i %1%audio/sound/%2%.wav %1%audio/sound/%2%.ogg;"
-          "rm %1%audio/sound/%2%.wav"
-        ) % output_dir_ % i).str();
-        std::system(command.c_str());
-
-        sounds_.push_back("audio/sound/" + std::to_string(i) + ".ogg");
+    FmtFile header;
+    header.size = fmt_.readU32LE();
+    // If size is 0, this is a bad header. There are 112 bytes of bad data, and after that,
+    // the next header.
+    if (header.size == 0){
+        for (int b = 0; b < 112; b += 4) fmt_.readU32LE();
+        processed_sounds_ ++;
+        if (processed_sounds_ >= TOTAL_SOUNDS) return true;
+        else return false;
     }
+
+    header.offset = fmt_.readU32LE();
+    // If the offset is less than the previous one, also bad header. 34 bytes of bad data, and
+    // after that, the next header.
+    if (header.offset < dat_.GetCurrentOffset()){
+        for (int b = 0; b < 34; b += 2) fmt_.readU16LE();
+        processed_sounds_ ++;
+        if (processed_sounds_ >= TOTAL_SOUNDS) return true;
+        else return false;
+    }
+
+    // This should never happen, but just in case, never read outside the file
+    if (header.offset + header.size > dat_.GetFileSize()){
+        processed_sounds_ ++;
+        if (processed_sounds_ >= TOTAL_SOUNDS) return true;
+        else return false;
+    }
+
+    for (int l = 0; l < 16; l ++) header.loop_metadata[l] = fmt_.readU8();
+    for (int l = 0; l < 18; l ++) header.wav_header[l] = fmt_.readU8();
+    header.samples_per_block = fmt_.readU16LE();
+    header.adpcm = fmt_.readU16LE();
+    for (int l = 0; l < 28; l ++) header.adpcm_sets[l] = fmt_.readU8();
+
+    dat_.SetOffset(header.offset);
+    std::ofstream out(
+      output_dir_ + "audio/sound/" + std::to_string(processed_sounds_) + ".wav",
+      std::ios::out | std::ios::binary
+    );
+
+
+    // Write the standard wav header.
+    for (int b = 0; b < 78; b ++) out.put(WAV_HEADER[b]);
+    // Write the data from the dat file.
+    for (int b = 0; b < header.size; b ++) out.put(dat_.readU8());
+    out.close();
+
+    // Convert to OGG.
+    // TODO: Don't use system calls! Integrate libav or something that can do the conversion
+    // natively
+    std::string command = (boost::format(
+      "ffmpeg -hide_banner -loglevel panic -y -i %1%audio/sound/%2%.wav %1%audio/sound/%2%.ogg;"
+      "rm %1%audio/sound/%2%.wav"
+    ) % output_dir_ % processed_sounds_).str();
+    std::system(command.c_str());
+
+    sounds_.push_back("audio/sound/" + std::to_string(processed_sounds_) + ".ogg");
+    processed_sounds_ ++;
+    if (processed_sounds_ >= TOTAL_SOUNDS) return true;
+    else return false;
 }
 
 void MediaDataInstaller::WriteSoundIndex(){

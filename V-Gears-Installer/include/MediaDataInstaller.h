@@ -55,10 +55,18 @@ class MediaDataInstaller{
         void InstallSprites();
 
         /**
-         * Extracts all sound files contained in the audio.dat file and installs them.
+         * Prepares the installer for the sounds extraction.
          *
+         * @return The total number of sounds to process.
          */
-        void InstallSounds();
+        int InstallSoundsInit();
+
+        /**
+         * Extracts the next sound file contained in the audio.dat file and installs it.
+         *
+         * @return True if there are no more sounds to extract, false otherwise.
+         */
+        bool InstallSounds();
 
         /**
          * Writes the XML file with all audio entries.
@@ -139,6 +147,21 @@ class MediaDataInstaller{
          * The WINDOW.BIN file.
          */
         BinGZipFile window_;
+
+        /**
+         * The sounds .fmt file.
+         */
+        File fmt_;
+
+        /**
+         * The sounds .dat file.
+         */
+        File dat_;
+
+        /**
+         * Number of sounds already processed.
+         */
+        int processed_sounds_;
 
         /**
          * Map for sound files with descriptive names.
