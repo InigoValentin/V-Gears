@@ -1,4 +1,5 @@
 MAX_INVENTORY_SLOTS = 320
+MAX_MATERIA_SLOTS = 200
 
 --- Export character names to the text manager.
 --
@@ -642,8 +643,28 @@ end
 
 
 Materia.add = function(id, ap)
-    ap = ap or 0
-    -- TODO Implement.
+    local ap = ap or 0
+    if Game.Materia[id] == nil then
+        print("Tried to add invalid materia \"" .. item .. "\".");
+        return
+    end
+    -- TODO Cap AP?
+    for i = 1, MAX_MATERIA_SLOTS do
+        if Materia[i] == nil then
+            Materia[i] = {id = id, ap = ap}
+            if Materia[i].id == Materia.ENEMY_SKILL_ID then
+                Materia[i].ap = 0
+                Materia[i].skills = {}
+                for s = 1, 24 do
+                    Materia[i].skills[s] = false
+                end
+            end
+            return
+        end
+    end
+    -- If reached this point, it means that the materia wasn't added because all slots are full.
+    -- TODO: Do something.
+    return
 end
 
 --- Splits the party in teams.

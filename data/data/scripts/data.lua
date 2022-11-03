@@ -127,6 +127,9 @@ Materia.TYPE = {
     SUMMON = 5
 }
 
+--- ID of the enemy skill materia. This is handled differently.
+Materia.ENEMY_SKILL_ID = 44
+
 --- Abilities confered by independent materia.
 Materia.ABILITY = {
     STR_PLUS = 0,

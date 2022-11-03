@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <unordered_map>
 #include "data/VGearsLGPArchive.h"
 #include "common/BinGZipFile.h"
 #include "TexFile.h"
@@ -41,6 +42,11 @@ class MediaDataInstaller{
         ~MediaDataInstaller();
 
         /**
+         * Populates the audio name maps.
+         */
+        void PopulateMaps();
+
+        /**
          * Extracts all images contained in the menu LGP file and installs them.
          *
          * For composed  textures, it extracts individual images. All images are saved under the
@@ -48,7 +54,71 @@ class MediaDataInstaller{
          */
         void InstallSprites();
 
+        /**
+         * Extracts all sound files contained in the audio.dat file and installs them.
+         *
+         */
+        void InstallSounds();
+
+        /**
+         * Writes the XML file with all audio entries.
+         */
+        void WriteSoundIndex();
+
     private:
+
+        /**
+         * Number of sound files to extract.
+         */
+        static int TOTAL_SOUNDS;
+
+        /**
+         * The standard WAV header.
+         *
+         * 78 bytes to be written to every wav file before anything else.
+         */
+        static u8 WAV_HEADER[78];
+
+        /**
+         * The structure of each audio file pointer in a sound FMT file. 74 bytes.
+         */
+        struct FmtFile{
+
+            /**
+             * Size of the wav file in the dat. 4 bytes.
+             */
+            u32 size;
+
+            /**
+             * Offset of the wav file in the dat. 4 bytes.
+             */
+            u32 offset;
+
+            /**
+             * Information for sound looping. 12 bytes.
+             */
+            u8 loop_metadata[16];
+
+            /**
+             * Microsoft WAVFORMATEX header for the wav file. 44 bytes.
+             */
+            u8 wav_header[18];
+
+            /**
+             * Samples per block. 2 bytes.
+             */
+            u16 samples_per_block;
+
+            /**
+             * Number of ADPCM coefficients (used for compression, should always be 7). 2 bytes.
+             */
+            u16 adpcm;
+
+            /**
+             * Standard Microsoft ADPCMCoefSets. 28 bytes.
+             */
+            u8 adpcm_sets[28];
+        };
 
         /**
          * The path to the directory from which to read the PC game data.
@@ -69,5 +139,17 @@ class MediaDataInstaller{
          * The WINDOW.BIN file.
          */
         BinGZipFile window_;
+
+        /**
+         * Map for sound files with descriptive names.
+         */
+        std::unordered_map<int, std::string> sound_map_;
+
+        /**
+         * Sound data for each entry to write to the XML file
+         */
+        std::vector<std::string> sounds_;
+
+
 
 };

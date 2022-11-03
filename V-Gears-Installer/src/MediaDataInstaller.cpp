@@ -20,16 +20,39 @@
 #include <OgreResourceGroupManager.h>
 #include <OgreImage.h>
 #include <OgreColourValue.h>
+#include <boost/format.hpp>
+#include <tinyxml.h>
 #include "MediaDataInstaller.h"
 #include "data/VGearsLGPArchive.h"
 #include "data/VGearsTexFile.h"
 #include "TexFile.h"
 
+int MediaDataInstaller::TOTAL_SOUNDS = 723;
+
+u8 MediaDataInstaller::WAV_HEADER[] = {
+  0x52, 0x49, 0x46, 0x46, 0x70, 0x0B, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45, 0x66, 0x6D, 0x74, 0x20,
+  0x32, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x44, 0xAC, 0x00, 0x00, 0x00, 0x54, 0x00, 0x00,
+  0x00, 0x04, 0x04, 0x00, 0x20, 0x00, 0xF4, 0x07, 0x07, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
+  0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x00, 0x40, 0x00, 0xF0, 0x00, 0x00, 0x00, 0xCC, 0x01,
+  0x30, 0xFF, 0x88, 0x01, 0x18, 0xFF, 0x64, 0x61, 0x74, 0x61, 0x2A, 0x0B, 0x00, 0x00
+};
 
 MediaDataInstaller::MediaDataInstaller(const std::string input_dir, const std::string output_dir):
   input_dir_(input_dir), output_dir_(output_dir),
   menu_(input_dir + "data/menu/menu_us.lgp", "LGP"), window_(input_dir + "data/kernel/WINDOW.BIN")
-{}
+{PopulateMaps();}
+
+void MediaDataInstaller::PopulateMaps(){
+    // TODO: Names ending in "_?" are sounds that I think they match their name, but I'm not 100%
+    // sure.
+    sound_map_[0] = "Cursor";
+    sound_map_[1] = "Window";
+    sound_map_[2] = "Error";
+    sound_map_[3] = "Back";
+    sound_map_[4] = "Slash_Miss_?";
+    sound_map_[6] = "Chirp";
+    // TODO: Fill this list with somewhat descriptive names.
+}
 
 MediaDataInstaller::~MediaDataInstaller(){}
 
@@ -272,4 +295,83 @@ void MediaDataInstaller::InstallSprites(){
         // Delete Tex file.
         std::remove((output_dir_ + "images/" + f.file_name).c_str());
     }
+}
+
+void MediaDataInstaller::InstallSounds(){
+    File fmt(input_dir_ + "data/sound/audio.fmt");
+    File dat(input_dir_ + "data/sound/audio.dat");
+
+    for (int i = 0; i < TOTAL_SOUNDS; i ++){
+        FmtFile header;
+
+        header.size = fmt.readU32LE();
+        // If size is 0, this is a bad header. There are 112 bytes of bad data, and after that,
+        // the next header.
+        if (header.size == 0){
+            for (int b = 0; b < 112; b += 4) fmt.readU32LE();
+            continue;
+        }
+
+        header.offset = fmt.readU32LE();
+        // If the offset is less than the previous one, also bad header. 34 bytes of bad data, and
+        // after that, the next header.
+        if (header.offset < dat.GetCurrentOffset()){
+            for (int b = 0; b < 34; b += 2) fmt.readU16LE();
+            continue;
+        }
+
+        // This should never happen, but just in case, never read outside the file
+        if (header.offset + header.size > dat.GetFileSize()) continue;
+
+        for (int l = 0; l < 16; l ++) header.loop_metadata[l] = fmt.readU8();
+        for (int l = 0; l < 18; l ++) header.wav_header[l] = fmt.readU8();
+        header.samples_per_block = fmt.readU16LE();
+        header.adpcm = fmt.readU16LE();
+        for (int l = 0; l < 28; l ++) header.adpcm_sets[l] = fmt.readU8();
+
+        dat.SetOffset(header.offset);
+        std::ofstream out(
+          output_dir_ + "audio/sound/" + std::to_string(i) + ".wav", std::ios::out | std::ios::binary
+        );
+
+
+        // Write the standard wav header.
+        for (int b = 0; b < 78; b ++) out.put(WAV_HEADER[b]);
+        // Write the data from the dat file.
+        for (int b = 0; b < header.size; b ++) out.put(dat.readU8());
+        out.close();
+
+        // Convert to OGG.
+        // TODO: Don't use system calls! Integrate libav or something that can do the conversion
+        // natively
+        std::string command = (boost::format(
+          "ffmpeg -hide_banner -loglevel panic -y -i %1%audio/sound/%2%.wav %1%audio/sound/%2%.ogg;"
+          "rm %1%audio/sound/%2%.wav"
+        ) % output_dir_ % i).str();
+        std::system(command.c_str());
+
+        sounds_.push_back("audio/sound/" + std::to_string(i) + ".ogg");
+    }
+}
+
+void MediaDataInstaller::WriteSoundIndex(){
+    TiXmlDocument xml;
+    std::unique_ptr<TiXmlElement> container(new TiXmlElement("sounds"));
+    //for (string item : items_){
+    for (int id = 0; id < sounds_.size(); id ++){
+        std::string path = sounds_[id];
+        std::unique_ptr<TiXmlElement> xml_sound(new TiXmlElement("sound"));
+        xml_sound->SetAttribute("file_name", path);
+        xml_sound->SetAttribute("name", id);
+        container->LinkEndChild(xml_sound.release());
+        // If there is a friendly name for this sound, add another entry
+        if (sound_map_.count(id) != 0){
+            std::unique_ptr<TiXmlElement> xml_sound_name(new TiXmlElement("sound"));
+            xml_sound_name->SetAttribute("file_name", path);
+            xml_sound_name->SetAttribute("name", sound_map_[id]);
+            container->LinkEndChild(xml_sound_name.release());
+        }
+    }
+    xml.LinkEndChild(container.release());
+    xml.SaveFile(output_dir_ + "sounds.xml");
 }

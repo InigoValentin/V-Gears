@@ -21,9 +21,7 @@
 #include <OgreOverlayManager.h>
 #include <OgreOverlaySystem.h>
 #include "VGearsGameState.h"
-#ifdef VGears_SOUND
 #include "core/AudioManager.h"
-#endif
 #include "common/VGearsApplication.h"
 #include "core/CameraManager.h"
 #include "core/ConfigCmdManager.h"
@@ -106,10 +104,8 @@ int main(int argc, char *argv[]){
         auto input_manager = std::make_unique<InputManager>();
 
 
-#ifdef VGears_SOUND
-        //auto audio_manager = std::make_unique<AudioManager>();
+        auto audio_manager = std::make_unique<AudioManager>();
         //audio_manager->MusicPlay( "loop1" );
-#endif
 
         // Create this earlier than DisplayFrameListener cause it can fire
         // events there

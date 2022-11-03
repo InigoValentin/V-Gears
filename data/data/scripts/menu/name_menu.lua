@@ -52,18 +52,21 @@ UiContainer.NameMenu = {
         if UiContainer.current_menu == "name" then
             if UiContainer.current_submenu == "confirm" then
                 if button == "Right" then
+                    audio_manager:play_sound("Cursor")
                     self.confirm_position = self.confirm_position + 1
                     if self.confirm_position > self.confirm_position_total then
                         self.confirm_position = 1
                     end
                     ui_manager:get_widget("NameMenu.Container.Confirm.Cursor"):set_default_animation("Position" .. self.confirm_position)
                 elseif button == "Left" then
+                    audio_manager:play_sound("Cursor")
                     self.confirm_position = self.confirm_position - 1
                     if self.confirm_position < 1 then
                         self.confirm_position = self.confirm_position_total
                     end
                     ui_manager:get_widget("NameMenu.Container.Confirm.Cursor"):set_default_animation("Position" .. self.confirm_position)
                 elseif button == "Enter" then
+                    audio_manager:play_sound("Cursor")
                     if self.confirm_position == 2 then -- Back
                         UiContainer.current_submenu = ""
                         ui_manager:get_widget("NameMenu.Container.Confirm"):set_visible(false)
@@ -83,12 +86,14 @@ UiContainer.NameMenu = {
 
                 -- Handle buttons.
                 if button == "Down" then
+                    audio_manager:play_sound("Cursor")
                     self.options_position = self.options_position + 1
                     if self.options_position > self.options_position_total then
                         self.options_position = 1
                     end
                     ui_manager:get_widget("NameMenu.Container.Options.Cursor"):set_default_animation("Position" .. self.options_position)
                 elseif button == "Up" then
+                    audio_manager:play_sound("Cursor")
                     self.options_position = self.options_position - 1
                     if self.options_position < 1 then
                         self.options_position = self.options_position_total
@@ -98,19 +103,27 @@ UiContainer.NameMenu = {
                     if self.text_cursor > 1 then
                         self.text_cursor = self.text_cursor - 1
                         self.draw_cursor(self)
+                        audio_manager:play_sound("Cursor")
+                    else
+                        audio_manager:play_sound("Error")
                     end
                 elseif button == "Right" then
                     if self.text_cursor < self.max_characters then
+                        audio_manager:play_sound("Cursor")
                         self.text_cursor = self.text_cursor + 1
                         self.draw_cursor(self)
+                    else
+                        audio_manager:play_sound("Error")
                     end
                 elseif button == "Enter" then
                     if self.options_position == 1 then -- Clear name.
+                        audio_manager:play_sound("Cursor")
                         self.name = ""
                         self.text_cursor = 1
                         self.populate_name(self)
                         self.draw_cursor(self)
                     elseif self.options_position == 2 then -- Default name.
+                        audio_manager:play_sound("Cursor")
                         self.name = self.default_name
                         self.text_cursor = math.min(#(self.name) + 1, self.max_characters)
                         self.populate_name(self)
@@ -120,6 +133,7 @@ UiContainer.NameMenu = {
                         self.populate_name(self)
                         self.draw_cursor(self)
                         if #(self.name) > 0 then
+                            audio_manager:play_sound("Cursor")
                             UiContainer.current_submenu = "confirm"
                             local name_display = self.name -- Pad with spaces, to display only.
                             while #(name_display) < self.max_characters do
@@ -130,12 +144,13 @@ UiContainer.NameMenu = {
                             self.confirm_position = 1
                             ui_manager:get_widget("NameMenu.Container.Options.Cursor"):set_default_animation("Position" .. self.options_position)
                         else
-                            print("BEEP no name")
+                            audio_manager:play_sound("Error")
                         end
                     end
                 -- TODO: Implement backspace, but how?
                 -- Letters and spaces
                 elseif character_index ~= nil then
+                    audio_manager:play_sound("Cursor")
                     self.set_char(self, character_index)
                     self.text_cursor = math.min(self.text_cursor + 1, self.max_characters)
                     self.populate_name(self)

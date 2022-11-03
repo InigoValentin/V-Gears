@@ -1,18 +1,4 @@
+<!-- This file is to be overwritten by the installer -->
 <maps>
-    <map name="elevtr1" file_name="fields/elevtr1/map.xml" />
-    <map name="md1_1" file_name="fields/md1_1/map.xml" />
-    <map name="md1_2" file_name="fields/md1_2/map.xml" />
-    <map name="md1stin" file_name="fields/md1stin/map.xml" />
-    <map name="md8_1" file_name="fields/md8_1/map.xml" />
-    <map name="md8_4" file_name="fields/md8_4/map.xml" />
-    <map name="nmkin_1" file_name="fields/nmkin_1/map.xml" />
-    <map name="nmkin_2" file_name="fields/nmkin_2/map.xml" />
-    <map name="nmkin_3" file_name="fields/nmkin_3/map.xml" />
-    <map name="nmkin_4" file_name="fields/nmkin_4/map.xml" />
-    <map name="nmkin_5" file_name="fields/nmkin_5/map.xml" />
-    <map name="nrthmk" file_name="fields/nrthmk/map.xml" />
-    <map name="rootmap" file_name="fields/rootmap/map.xml" />
-    <map name="startmap" file_name="fields/startmap/map.xml" />
-    <map name="tin_1" file_name="fields/tin_1/map.xml" />
-    <map name="tin_2" file_name="fields/tin_2/map.xml" />
+    <map name="example" file_name="fields/example/map.xml" />
 </maps>

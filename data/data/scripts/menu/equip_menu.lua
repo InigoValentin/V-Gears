@@ -64,9 +64,11 @@ UiContainer.EquipMenu = {
                 -- TODO: Handle L1/R1 (change character)
                 -- TODO: Handle square: Materia menu
                 if button == "Escape" and event == "Press" then
+                    audio_manager:play_sound("Back")
                     UiContainer.current_menu = "main"
                     script:request_end_sync(Script.UI, "EquipMenu", "hide", 0)
                 elseif button == "Down" then
+                    audio_manager:play_sound("Cursor")
                     self.equip_position = self.equip_position + 1
                     if self.equip_position > self.equip_position_total then
                         self.equip_position = 1
@@ -74,6 +76,7 @@ UiContainer.EquipMenu = {
                     ui_manager:get_widget("EquipMenu.Container.Character.Cursor"):set_default_animation("Position" .. self.equip_position)
                     self.populate_details(self, false)
                 elseif button == "Up" then
+                    audio_manager:play_sound("Cursor")
                     self.equip_position = self.equip_position - 1
                     if self.equip_position < 1 then
                         self.equip_position = self.equip_position_total
@@ -88,6 +91,7 @@ UiContainer.EquipMenu = {
                     elseif self.equip_position == 3 then
                         self.selecting_slot = Inventory.ITEM_TYPE.ACCESSORY
                     end
+                    audio_manager:play_sound("Cursor")
                     self.submenu_select(self)
                 else
                     return 0
@@ -102,8 +106,10 @@ UiContainer.EquipMenu = {
                     list = self.avail_accessories
                 end
                 if button == "Escape" and event == "Press" then
+                    audio_manager:play_sound("Back")
                     self.submenu_none(self)
                 elseif button == "Down" then
+                    audio_manager:play_sound("Cursor")
                     -- Move one position down only if there is a next item
                     if #(list) <= self.list_item_selected + 1 then
                         return 0
@@ -122,6 +128,7 @@ UiContainer.EquipMenu = {
                     self.populate_details(self, true)
                     self.calculate_stat_diffs(self)
                 elseif button == "Up" then
+                    audio_manager:play_sound("Cursor")
                     -- Move one position up only if not in the first.
                     if self.list_item_selected <= 1 then
                         return 0
@@ -150,9 +157,11 @@ UiContainer.EquipMenu = {
                         item_id = self.avail_accessories[self.list_item_selected + 1]
                     end
                     if Characters.equip(self.char_id, item_id) == false then
-                        print("BEEP (error)")
+                        audio_manager:play_sound("Error")
                         return 0
                     end
+                    -- TODO: Replace for "Equip" sound
+                    audio_manager:play_sound("Cursor")
                     self.submenu_none(self)
                 end
             end
@@ -179,6 +188,7 @@ UiContainer.EquipMenu = {
         UiContainer.populate_character_data("EquipMenu.Container.Character", Characters[self.char_id])
         ui_manager:get_widget("EquipMenu.Container.Character.Portrait"):set_image("images/characters/" .. tostring(self.char_id) .. ".png")
         -- TODO: Do something for chars 9 and 10
+        ui_manager:get_widget("EquipMenu.Container.Character.WpnIcon"):set_image("images/icons/item_weapon_" .. tostring(self.char_id) .. ".png")
         ui_manager:get_widget("EquipMenu.Container.Character.WpnLbl"):set_text(Game.Items[Characters[self.char_id].weapon.id].name)
         ui_manager:get_widget("EquipMenu.Container.Character.ArmLbl"):set_text(Game.Items[Characters[self.char_id].armor.id].name)
         if Characters[self.char_id].accessory == nil then
@@ -218,7 +228,7 @@ UiContainer.EquipMenu = {
         self.list_position = 1
         self.list_item_selected = 1
         if self.populate_item_list(self) == false then
-            print("BEEP")
+            audio_manager:play_sound("Error")
             return
         end
         UiContainer.current_submenu = "item_select"

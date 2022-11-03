@@ -47,6 +47,7 @@ set(HEADER_FILES
     include/core/particles/ParticleTechniqueTranslator.h
     include/core/particles/ParticleVisual.h
     include/core/Assert.h
+    include/core/AudioManager.h
     include/core/Background2D.h
     include/core/Background2DAnimation.h
     include/core/CameraManager.h
@@ -89,10 +90,12 @@ set(HEADER_FILES
     include/core/XmlFontFile.h
     include/core/XmlFontsFile.h
     include/core/XmlMapFile.h
+    include/core/XmlMusicsFile.h
     include/core/XmlPrototypesFile.h
     include/core/XmlScreenFile.h
     include/core/XmlScreensFile.h
     include/core/XmlScriptsFile.h
+    include/core/XmlSoundsFile.h
     include/core/XmlTextFile.h
     include/core/XmlTextsFile.h
     include/core/DialogsManager.h
@@ -239,6 +242,7 @@ set(SOURCE_FILES
     src/core/particles/ParticleVisual.cpp
     src/core/particles/renderer/ParticleEntityRenderer.cpp
     src/core/particles/renderer/ParticleEntityRendererDictionary.cpp
+    src/core/AudioManager.cpp
     src/core/Background2D.cpp
     src/core/Background2DAnimation.cpp
     src/core/CameraManager.cpp
@@ -274,10 +278,12 @@ set(SOURCE_FILES
     src/core/XmlFontsFile.cpp
     src/core/XmlMapFile.cpp
     src/core/XmlMapsFile.cpp
+    src/core/XmlMusicsFile.cpp
     src/core/XmlPrototypesFile.cpp
     src/core/XmlScreenFile.cpp
     src/core/XmlScreensFile.cpp
     src/core/XmlScriptsFile.cpp
+    src/core/XmlSoundsFile.cpp
     src/core/XmlTextFile.cpp
     src/core/XmlTextsFile.cpp
     src/core/DialogsManager.cpp
@@ -299,20 +305,6 @@ set(SOURCE_FILES
     src/FF7Common.cpp
 )
 
-# If sound, add more files.
-if(VGears_SOUND)
-    set(HEADER_FILES
-        ${HEADER_FILES}
-        include/core/AudioManager.h
-        include/core/XmlMusicsFile.h
-    )
-    set(SOURCE_FILES
-        ${SOURCE_FILES}
-        src/core/AudioManager.cpp
-        src/core/XmlMusicsFile.cpp
-    )
-endif()
-
 # Find LibOIS. TODO: Find it.
 set(ois_lib "/usr/lib/x86_64-linux-gnu/libOIS.so")
 
@@ -321,7 +313,6 @@ include_directories(
     ${VGears_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     /usr/include/OIS/
-
 )
 
 # Compiler options

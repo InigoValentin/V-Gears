@@ -67,9 +67,58 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         /**
          * Plays a music track.
          *
+         * To be called from Lua scripts
+         *
+         * @param[in] name Name of the track to play.
+         */
+        void ScriptPlayMusic(const char* name);
+
+        /**
+         * Plays a music track.
+         *
          * @param[in] name Name of the track to play.
          */
         void MusicPlay(const Ogre::String& name);
+
+        /**
+         * Plays a sound.
+         *
+         * To be called from Lua scripts
+         *
+         * @param[in] name Name of the sound to play.
+         */
+        void ScriptPlaySound(const char* name);
+
+        /**
+         * Plays a sound in a channel.
+         *
+         * To be called from Lua scripts
+         *
+         * @param[in] name Name of the sound to play.
+         * @param[in] channel Channel to play the sound in (1-5).
+         */
+        void ScriptPlaySound(const char* name, const int channel);
+
+        /**
+         * Plays up to 4 sounds, in 4 different channels.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] name1 Name of the first sound to play.
+         * @param[in] name2 Name of the second sound to play.
+         * @param[in] name3 Name of the third sound to play.
+         * @param[in] name4 Name of the fourth sound to play.
+         */
+        void AudioManager::ScriptPlaySounds(
+          const char* name1, const char* name2, const char* name3, const char* name4
+        );
+
+        /**
+         * Plays a sound.
+         *
+         * @param[in] name Name of the sound to play.
+         */
+        void SoundPlay(const Ogre::String& name);
 
         /**
          * Stops the currently playing music.
@@ -81,7 +130,7 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         /**
          * Music structure.
          *
-         * Defines a music track.
+         * Defines a music entry in musics.xml.
          */
         struct Music{
 
@@ -101,7 +150,25 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
              * @todo How is a loop done with only one value? shouldn't it be
              * start and end of loop?
              */
-            float        loop;
+            float loop;
+        };
+
+        /**
+         * Music structure.
+         *
+         * Defines a sound entry in sound.xml.
+         */
+        struct Sound{
+
+            /**
+             * The name of the sound.
+             */
+            Ogre::String name;
+
+            /**
+             * Sound filename
+             */
+            Ogre::String file;
         };
 
         /**
@@ -112,13 +179,27 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         void AddMusic(const AudioManager::Music& music);
 
         /**
-         * Retrieves a muisc track by name.
+         * Retrieves a music track by name.
          *
-         * @param[in] name The track name
-         * @return The music track, or nullptr if there is no track by that
-         * name.
+         * @param[in] name The track name.
+         * @return The music track, or nullptr if there is no track by that name.
          */
         AudioManager::Music* GetMusic(const Ogre::String& name);
+
+        /**
+         * Adds a sound to the audio manager.
+         *
+         * @param[in] sound The sound to add.
+         */
+        void AddSound(const AudioManager::Sound& sound);
+
+        /**
+         * Retrieves a sound by name.
+         *
+         * @param[in] name The sound name.
+         * @return The sound track, or nullptr if there is no sound by that name.
+         */
+        AudioManager::Sound* GetSound(const Ogre::String& name);
 
     private:
 
@@ -235,6 +316,11 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
                 bool stream_finished_;
 
                 /**
+                 * Audio buffer.
+                 */
+                char* buffer_;
+
+                /**
                  * Audio source.
                  */
                 ALuint source_;
@@ -266,6 +352,8 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
 
         /**
          * Audio buffer.
+         *
+         * TODO: Unused? Not there are buffers per player. Remove.
          */
         char* buffer_;
 
@@ -275,7 +363,7 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         boost::recursive_mutex update_mutex_;
 
         /**
-         * Thread to handle consurrent operations.
+         * Thread to handle concurrent operations.
          */
         boost::thread* update_thread_;
 
@@ -285,14 +373,26 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         bool thread_continue_;
 
         /**
-         * Music player
+         * Music player.
          */
         AudioManager::Player music_;
+
+        /**
+         * Sound effect player.
+         *
+         * TODO: Unused? remove.
+         */
+        AudioManager::Player fx_;
 
         /**
          * List of music.
          */
         std::list<AudioManager::Music> music_list_;
+
+        /**
+         * List of music.
+         */
+        std::list<AudioManager::Sound> sound_list_;
 
         /**
          * Size of a channel buffer.

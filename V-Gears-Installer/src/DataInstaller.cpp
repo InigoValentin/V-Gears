@@ -136,6 +136,16 @@ int DataInstaller::Progress(){
         case MEDIA_IMAGES:
             write_output_line_("Extracting game images...", 2, true);
             media_installer_->InstallSprites();
+            installation_state_ = MEDIA_SOUNDS;
+            return CalcProgress();
+        case MEDIA_SOUNDS:
+            write_output_line_("Extracting sounds...", 2, true);
+            media_installer_->InstallSounds();
+            installation_state_ = MEDIA_SOUNDS_INDEX;
+            return CalcProgress();
+        case MEDIA_SOUNDS_INDEX:
+            write_output_line_("Building sound index...", 2, true);
+            media_installer_->WriteSoundIndex();
             installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
             return CalcProgress();
         case FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT:
@@ -225,6 +235,8 @@ void DataInstaller::CreateDirectories(){
     CreateDir("images/reels");
     CreateDir("images/window");
     CreateDir("models/fields/entities");
+    CreateDir("audio/fx");
+    CreateDir("audio/music");
     application_.ResMgr()->addResourceLocation("data/temp/char/", "FileSystem", "FFVII", true, true);
     application_.ResMgr()->addResourceLocation("data/models/", "FileSystem", "FFVII", true, true);
     fields_lgp_ = std::make_unique<ScopedLgp>(

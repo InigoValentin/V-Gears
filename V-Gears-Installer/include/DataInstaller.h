@@ -186,6 +186,16 @@ class DataInstaller{
             MEDIA_IMAGES,
 
             /**
+             * Extract game sounds.
+             */
+            MEDIA_SOUNDS,
+
+            /**
+             * Build sounds index.
+             */
+            MEDIA_SOUNDS_INDEX,
+
+            /**
              * Initializer for {@see SPAWN_POINTS_AND_SCALE_FACTORS}.
              */
             FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT,

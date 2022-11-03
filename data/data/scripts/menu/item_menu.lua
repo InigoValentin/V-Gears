@@ -87,9 +87,11 @@ UiContainer.ItemMenu = {
         if UiContainer.current_menu == "item" then
             if UiContainer.current_submenu == "bar_selection" then
                 if button == "Escape" and event == "Press" then
+                    audio_manager:play_sound("Back")
                     UiContainer.current_menu = "main"
                     script:request_end_sync(Script.UI, "ItemMenu", "hide", 0)
                 elseif button == "Right" then
+                    audio_manager:play_sound("Cursor")
                     self.bar_position = self.bar_position + 1
                     if self.bar_position > self.bar_position_total then
                         self.bar_position = 1
@@ -102,6 +104,7 @@ UiContainer.ItemMenu = {
                         ui_manager:get_widget("ItemMenu.Container.KeyItems"):set_visible(false)
                     end
                 elseif button == "Left" then
+                    audio_manager:play_sound("Cursor")
                     self.bar_position = self.bar_position - 1
                     if self.bar_position < 1 then
                         self.bar_position = self.bar_position_total
@@ -123,25 +126,30 @@ UiContainer.ItemMenu = {
                     else
                         return 0
                     end
+                    audio_manager:play_sound("Cursor")
                 else
                     return 0
                 end
             elseif UiContainer.current_submenu == "order_selection" then
                 if button == "Escape" and event == "Press" then
+                    audio_manager:play_sound("Back")
                     self.submenu_bar(self)
                 elseif button == "Down" then
+                    audio_manager:play_sound("Cursor")
                     self.order_cursor_position = self.order_cursor_position + 1
                     if self.order_cursor_position > self.order_cursor_position_total then
                         self.order_cursor_position = 1
                     end
                     ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_default_animation("Position" .. self.order_cursor_position)
                 elseif button == "Up" then
+                    audio_manager:play_sound("Cursor")
                     self.order_cursor_position = self.order_cursor_position - 1
                     if self.order_cursor_position <= 0 then
                         self.order_cursor_position = self.order_cursor_position_total
                     end
                     ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_default_animation("Position" .. self.order_cursor_position)
                 elseif button == "Enter" then
+                    audio_manager:play_sound("Cursor")
                     if self.order_cursor_position == 1 then
                         Inventory.sort(Inventory.ORDER.CUSTOM)
                     elseif self.order_cursor_position == 2 then
@@ -168,8 +176,10 @@ UiContainer.ItemMenu = {
                 if button == "Down" then
                     if self.item_cursor_item_selected >= self.inventory_size then
                         -- At the very end, do nothing
+                        audio_manager:play_sound("Error")
                         return 0
                     end
+                    audio_manager:play_sound("Cursor")
                     self.item_cursor_item_selected = self.item_cursor_item_selected + 1
                     if self.item_cursor_position == self.item_cursor_position_total then
                         -- The cursor is at the end. Scroll page, but dont change cursor.
@@ -189,8 +199,10 @@ UiContainer.ItemMenu = {
                 elseif button == "Up" then
                     if self.item_cursor_item_selected == 0 then
                         -- At the very begining, do nothing
+                        audio_manager:play_sound("Error")
                         return 0
                     end
+                    audio_manager:play_sound("Cursor")
                     self.item_cursor_item_selected = self.item_cursor_item_selected - 1
                     if self.item_cursor_position == 1 then
                         -- The cursor is at the end. Scroll page, but dont change cursor.
@@ -209,6 +221,7 @@ UiContainer.ItemMenu = {
                     end
                 elseif button == "PGDN" then -- TODO: Also, the bind to R1
                     if self.first_item_in_window + self.item_cursor_position_total < self.inventory_size - self.item_cursor_position_total then
+                        audio_manager:play_sound("Cursor")
                         self.item_cursor_item_selected = self.item_cursor_item_selected + self.item_cursor_position_total
                         self.first_item_in_window = self.first_item_in_window + self.item_cursor_position_total
                         self.populate_items(self)
@@ -217,9 +230,12 @@ UiContainer.ItemMenu = {
                         else
                             desc_label:set_text("")
                         end
+                    else
+                        audio_manager:play_sound("Error")
                     end
                 elseif button == "PGUP" then -- TODO: Also, the bind to L1
                     if self.first_item_in_window - self.item_cursor_position_total > 1 then
+                        audio_manager:play_sound("Cursor")
                         self.item_cursor_item_selected = self.item_cursor_item_selected - self.item_cursor_position_total
                         self.first_item_in_window = self.first_item_in_window - self.item_cursor_position_total
                         self.populate_items(self)
@@ -228,13 +244,17 @@ UiContainer.ItemMenu = {
                         else
                             desc_label:set_text("")
                         end
+                    else
+                        audio_manager:play_sound("Error")
                     end
                 elseif button == "Escape" and event == "Press" then
+                    audio_manager:play_sound("Back")
                     self.submenu_bar(self)
                     UiContainer.current_submenu = "bar_selection"
                     ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
                 elseif button == "Enter" then
                     if Game.Items[Inventory[self.item_cursor_item_selected].item].menu == 1 then
+                        audio_manager:play_sound("Cursor")
                         self.item_in_use = Inventory[self.item_cursor_item_selected].item
                         if (Game.Items[Inventory[self.item_cursor_item_selected - 1].item].target.default_multiple) == 1 then
                             self.item_in_use_party = true
@@ -244,7 +264,7 @@ UiContainer.ItemMenu = {
                             self.submenu_chars(self, false)
                         end
                     else
-                        print("BEEP")
+                        audio_manager:play_sound("Error")
                     end
                 end
             elseif UiContainer.current_submenu == "char_selection" then
@@ -252,6 +272,7 @@ UiContainer.ItemMenu = {
                     if self.item_in_use_party == true then
                         return 0
                     else
+                        audio_manager:play_sound("Cursor")
                         self.char_position = self.char_position + 1
                         if self.char_position > self.char_position_total then
                             self.char_position = 1
@@ -262,6 +283,7 @@ UiContainer.ItemMenu = {
                     if self.item_in_use_party == true then
                         return 0
                     else
+                        audio_manager:play_sound("Cursor")
                         self.char_position = self.char_position - 1
                         if self.char_position < 1 then
                             self.char_position = self.char_position_total
@@ -269,6 +291,7 @@ UiContainer.ItemMenu = {
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Cursor"):set_default_animation("Position" .. self.char_position)
                     end
                 elseif button == "Escape" then
+                    audio_manager:play_sound("Back")
                     self.submenu_items(self)
                 elseif button == "Enter" then
                     local use_result = false
@@ -278,15 +301,19 @@ UiContainer.ItemMenu = {
                         use_result = self.use_item(self, self.item_in_use, self.char_position)
                     end
                     if use_result == false then
-                        print("USE BEEP")
+                        audio_manager:play_sound("Error")
+                    else
+                        -- TODO: Audio here? or in use_item?
                     end
                 end
             elseif UiContainer.current_submenu == "key_item_selection" then
                 if button == "Down" then
                     if self.key_items_cursor_y_position == self.key_items_cursor_y_position_total and self.first_key_item_row_in_window == self.key_items_total_rows - self.key_items_cursor_y_position then
                         -- Last key item selected, do nothing
+                        audio_manager:play_sound("Error")
                         return 0
                     end
+                    audio_manager:play_sound("Cursor")
                     if self.key_items_cursor_y_position == self.key_items_cursor_y_position_total then
                         -- Scroll down by 1, don't move cursor
                         self.first_key_item_row_in_window = self.first_key_item_row_in_window + 1
@@ -306,8 +333,10 @@ UiContainer.ItemMenu = {
                 elseif button == "Up" then
                     if self.key_items_cursor_y_position == 1 and self.first_key_item_row_in_window == 1 then
                         -- First item, do nothing.
+                        audio_manager:play_sound("Error")
                         return 0
                     end
+                    audio_manager:play_sound("Cursor")
                     if self.key_items_cursor_y_position == 1 then
                         -- Scroll down by 1, don't move cursor
                         self.first_key_item_row_in_window = self.first_key_item_row_in_window - 1
@@ -328,8 +357,10 @@ UiContainer.ItemMenu = {
                     local k_selected_id = 2 * (self.first_key_item_row_in_window + self.key_items_cursor_y_position - 2) + self.key_items_cursor_x_position - 1
                     if k_selected_id >= 50 then
                         -- Already in last item, do nothing
+                        audio_manager:play_sound("Error")
                         return 0
                     end
+                    audio_manager:play_sound("Cursor")
                     k_selected_id = k_selected_id + 1
                     if self.key_items_cursor_x_position == 1 then
                         -- If on the left, move to the right. No scrolling.
@@ -357,8 +388,10 @@ UiContainer.ItemMenu = {
                     local k_selected_id = 2 * (self.first_key_item_row_in_window + self.key_items_cursor_y_position - 2) + self.key_items_cursor_x_position - 1
                     if k_selected_id <= 0 then
                         -- Already in first item, do nothing
+                        audio_manager:play_sound("Error")
                         return 0
                     end
+                    audio_manager:play_sound("Cursor")
                     k_selected_id = k_selected_id - 1
                     if self.key_items_cursor_x_position == 2 then
                         -- If on the right, move to the left. No scrolling.
@@ -384,6 +417,7 @@ UiContainer.ItemMenu = {
                     end
                 elseif button == "PGDN" then -- TODO: Also, the bind to R1
                     if self.first_key_item_row_in_window + self.key_items_cursor_y_position_total < self.key_items_total_rows - self.key_items_cursor_y_position_total then
+                        audio_manager:play_sound("Cursor")
                         self.first_key_item_row_in_window = self.first_key_item_row_in_window + self.key_items_cursor_y_position_total
                         self.populate_items(self)
                         -- Show description of the selected item, if any.
@@ -393,9 +427,12 @@ UiContainer.ItemMenu = {
                         else
                             ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
                         end
+                    else
+                        audio_manager:play_sound("Error")
                     end
                 elseif button == "PGUP" then -- TODO: Also, the bind to L1
                     if self.first_key_item_row_in_window + self.key_items_cursor_y_position_total > 1 then
+                        audio_manager:play_sound("Cursor")
                         self.first_key_item_row_in_window = self.first_key_item_row_in_window - self.key_items_cursor_y_position_total
                         self.populate_items(self)
                         -- Show description of the selected item, if any.
@@ -405,8 +442,11 @@ UiContainer.ItemMenu = {
                         else
                             ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
                         end
+                    else
+                        audio_manager:play_sound("Cursor")
                     end
                 elseif button == "Escape" then
+                    audio_manager:play_sound("Back")
                     self.submenu_bar(self)
                 end
 

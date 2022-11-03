@@ -5,7 +5,7 @@
             <animation name="Appear" length="0.3" x="0:105%,0.3:5%" />
             <animation name="Disappear" length="0.3" x="0:5%,0.3:105%" />
             <widget name="Character1" x="2%" y="2%" width="100%" height="30%" visible="true">
-                <sprite name="Portrait" image="images/other/choco.png" x="5" y="12" width="56" height="56" visible="true">
+                <sprite name="Portrait" image="images/other/choco.png" x="5" y="12" width="49" height="56" visible="true">
                     <animation name="RowFront" length="0" x="0:5" />
                     <animation name="RowBack" length="0" x="0:25" />
                 </sprite>

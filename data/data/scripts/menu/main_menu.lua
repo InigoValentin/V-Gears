@@ -41,28 +41,36 @@ UiContainer.MainMenu = {
             local location = ui_manager:get_widget("MainMenu.Container.Location")
             if UiContainer.current_submenu == "" then
                 if button == "Escape" and event == "Press" then
+                    audio_manager:play_sound("Back")
                     script:request_end_sync(Script.UI, "MainMenu", "hide", 0)
                 elseif button == "Enter" and event == "Press" then
                     if self.position == 1 then -- Item menu
+                        audio_manager:play_sound("Cursor")
                         script:request_end_sync(Script.UI, "ItemMenu", "show", 0)
                     elseif self.position == 8 then -- Config menu
+                        audio_manager:play_sound("Error")
                         print("TODO: Open config menu")
                     elseif self.position == 9 then -- PHS menu
+                        audio_manager:play_sound("Error")
                         print("TODO: Open PHS menu")
                     elseif self.position == 10 then -- Save menu
+                        audio_manager:play_sound("Error")
                         print("TODO: Open save menu")
                     else -- Any other menu that needs a character
+                        audio_manager:play_sound("Cursor")
                         self.select_character_for_menu = self.position
                         UiContainer.current_submenu = "main_character"
                         ui_manager:get_widget("MainMenu.Container.Characters.Cursor"):set_visible(true)
                     end
                 elseif button == "Down" then
+                    audio_manager:play_sound("Cursor")
                     self.position = self.position + 1
                     if self.position > self.position_total then
                         self.position = 1;
                     end
                     menu_cursor:set_default_animation("Position" .. self.position)
                 elseif button == "Up" then
+                    audio_manager:play_sound("Cursor")
                     self.position = self.position - 1
                     if self.position <= 0 then
                         self.position = self.position_total;
@@ -71,9 +79,11 @@ UiContainer.MainMenu = {
                 end
             elseif UiContainer.current_submenu == "main_character" then
                 if button == "Escape" and event == "Press" then
+                    audio_manager:play_sound("Back")
                     UiContainer.current_submenu = ""
                     ui_manager:get_widget("MainMenu.Container.Characters.Cursor"):set_visible(false)
                 elseif button == "Down" then
+                    audio_manager:play_sound("Cursor")
                     -- TODO: Skip empty character slots
                     self.character_position = self.character_position + 1
                     if self.character_position > self.character_position_total then
@@ -81,6 +91,7 @@ UiContainer.MainMenu = {
                     end
                     ui_manager:get_widget("MainMenu.Container.Characters.Cursor"):set_default_animation("Position" .. self.character_position)
                 elseif button == "Up" then
+                    audio_manager:play_sound("Cursor")
                     -- TODO: Skip empty character slots
                     self.character_position = self.character_position - 1
                     if self.character_position < 1 then
@@ -88,6 +99,8 @@ UiContainer.MainMenu = {
                     end
                     ui_manager:get_widget("MainMenu.Container.Characters.Cursor"):set_default_animation("Position" .. self.character_position)
                 elseif button == "Enter" then
+                    -- TODO: Check for empty character.
+                    audio_manager:play_sound("Cursor")
                     if self.select_character_for_menu == 2 then -- Magic menu
                         print("Open magic menu for char in slot " .. self.character_position)
                     elseif self.select_character_for_menu == 3 then -- Materia menu
@@ -107,6 +120,7 @@ UiContainer.MainMenu = {
             end
         elseif ui_manager:get_widget("MainMenu"):is_visible() == false and FFVII.MenuSettings.available == true then
             if button == "Escape" and event == "Press" then
+                audio_manager:play_sound("Back")
                 script:request_end_sync(Script.UI, "MainMenu", "show", 0)
             end
         else

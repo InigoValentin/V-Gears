@@ -19,6 +19,7 @@ UiContainer.PauseMenu = {
             local menu_cursor = ui_manager:get_widget( "PauseMenu.Menu.Cursor" )
 
             if button == "Enter" and event == "Press" then
+                audio_manager:play_sound("Cursor")
                 script:request_end_sync( Script.UI, "PauseMenu", "hide", 0 )
                 if self.position == 1 then
                     script:request_end_sync( Script.UI, "BeginMenu", "show", 0 )
@@ -28,15 +29,18 @@ UiContainer.PauseMenu = {
                     FFVII.MenuSettings.available = true
                 end
             elseif button == "Escape" and event == "Press" then
+                audio_manager:play_sound("Back")
                 script:request_end_sync( Script.UI, "PauseMenu", "hide", 0 )
                 FFVII.MenuSettings.available = true
             elseif button == "Right" then
+                audio_manager:play_sound("Cursor")
                 self.position = self.position + 1
                 if self.position > self.position_total then
                     self.position = 1;
                 end
                 menu_cursor:set_default_animation( "Position" .. self.position )
             elseif button == "Left" then
+                audio_manager:play_sound("Cursor")
                 self.position = self.position - 1
                 if self.position <= 0 then
                     self.position = self.position_total;
@@ -45,6 +49,7 @@ UiContainer.PauseMenu = {
             end
         elseif FFVII.MenuSettings.pause_available == true then
             if button == "Enter" and event == "Press" then
+                audio_manager:play_sound("Cursor")
                 FFVII.MenuSettings.available = false
                 script:request_end_sync( Script.UI, "PauseMenu", "show", 0 )
             end

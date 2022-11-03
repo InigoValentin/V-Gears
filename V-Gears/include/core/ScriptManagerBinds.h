@@ -18,6 +18,7 @@
 #include "Logger.h"
 #include "Entity.h"
 #include "EntityManager.h"
+#include "AudioManager.h"
 #include "Timer.h"
 #include "UiManager.h"
 #include "UiWidget.h"
@@ -189,7 +190,7 @@ void ScriptManager::InitBinds(){
 
     // Entity individual point commands
     luabind::module(lua_state_)[
-        luabind::class_< EntityPoint >("EntityPoint")
+        luabind::class_<EntityPoint>("EntityPoint")
           // Internally returns 3 values:
           .def("get_position", (void(EntityPoint::*)()) &EntityPoint::ScriptGetPosition)
           .def("get_rotation", (float(EntityPoint::*)()) &EntityPoint::ScriptGetRotation)
@@ -252,6 +253,22 @@ void ScriptManager::InitBinds(){
           .def(
             "set_entity_to_character",
             (void(EntityManager::*)(const char*, unsigned int)) &EntityManager::SetEntityToCharacter
+          )
+    ];
+
+    // Commands for the entity manager, not related to any particular entity.
+    luabind::module(lua_state_)[
+        luabind::class_<AudioManager>("AudioManager")
+          .def("play_music", (void(AudioManager::*)(const char*)) &AudioManager::ScriptPlayMusic)
+          .def("play_sound", (void(AudioManager::*)(const char*)) &AudioManager::ScriptPlaySound)
+          .def(
+            "play_sound",
+            (void(AudioManager::*)(const char*, const int)) &AudioManager::ScriptPlaySound
+          )
+          .def(
+            "play_sounds",
+            (void(AudioManager::*)(const char*, const char*, const char*, const char*))
+            &AudioManager::ScriptPlaySounds
           )
     ];
 
@@ -448,6 +465,7 @@ void ScriptManager::InitBinds(){
     //auto b = luabind::globals(lua_state_)["entity_manager"];
     luabind::globals(lua_state_)["entity_manager"]
       = boost::ref(*(EntityManager::getSingletonPtr()));
+    luabind::globals(lua_state_)["audio_manager"] = boost::ref(*(AudioManager::getSingletonPtr()));
     luabind::globals(lua_state_)["background2d"]
       = boost::ref(*(EntityManager::getSingletonPtr()->GetBackground2D()));
     luabind::globals(lua_state_)["walkmesh"]

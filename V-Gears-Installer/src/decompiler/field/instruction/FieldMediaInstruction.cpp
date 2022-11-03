@@ -30,7 +30,7 @@ void FieldMediaInstruction::ProcessInst(
     FunctionMetaData md(func.metadata);
     switch (opcode_){
         case OPCODES::BGMOVIE: code_gen->WriteTodo(md.GetEntityName(), "BGMOVIE"); break;
-        case OPCODES::AKAO2: ProcessAKAO2(code_gen); break;
+        case OPCODES::AKAO2: ProcessAKAO(code_gen); break;
         case OPCODES::MUSIC: ProcessMUSIC(code_gen); break;
         case OPCODES::SOUND: ProcessSOUND(code_gen); break;
         case OPCODES::AKAO: ProcessAKAO(code_gen); break;
@@ -77,10 +77,9 @@ void FieldMediaInstruction::ProcessAKAO2(CodeGenerator* code_gen){
 }
 
 void FieldMediaInstruction::ProcessMUSIC(CodeGenerator* code_gen){
-    code_gen->AddOutputLine((
-      boost::format("-- music:execute_akao(0x10, pointer_to_field_AKAO_%1%)")
-      % params_[0]->GetUnsigned()
-    ).str());
+    code_gen->AddOutputLine(
+      (boost::format("-- play_map_music(%1%)") % params_[0]->GetUnsigned()).str()
+    );
 }
 
 void FieldMediaInstruction::ProcessSOUND(CodeGenerator* code_gen){
@@ -91,9 +90,9 @@ void FieldMediaInstruction::ProcessSOUND(CodeGenerator* code_gen){
     const auto& panning = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
-    code_gen->AddOutputLine(
-      (boost::format("-- music:execute_akao(0x20, %1%, %2%)") % soundId % panning).str()
-    );
+    code_gen->AddOutputLine((
+      boost::format("audio_manager:play_sound(\"%1%\") -- Direction: %2%)") % soundId % panning
+    ).str());
 }
 
 void FieldMediaInstruction::ProcessAKAO(CodeGenerator* code_gen){
@@ -113,11 +112,86 @@ void FieldMediaInstruction::ProcessAKAO(CodeGenerator* code_gen){
     const auto& param5 = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[5]->GetUnsigned(), params_[11]->GetUnsigned()
     );
-    auto op = params_[6]->GetUnsigned();
-    code_gen->AddOutputLine((
-      boost::format("-- music:execute_akao(0x%6$02x, %1%, %2%, %3%, %4%, %5%)")
-      % param1 % param2 % param3 % param4 % param5 % op
-    ).str());
+    int op = static_cast<int>(params_[6]->GetUnsigned());
+    switch (op){
+        /*code_gen->AddOutputLine((
+            boost::format("-- music:execute_akao(0x%6$02x, %1%, %2%, %3%, %4%, %5%)")
+            % param1 % param2 % param3 % param4 % param5 % op
+        ).str());*/
+        case 0x10: // Play music.
+        case 0x14: // Play music.
+            code_gen->AddOutputLine(
+              (boost::format("audio_manager:play_music(\"%1%\")") % param1).str()
+            );
+            break;
+        case 0x18: // Resume music.
+        case 0x19: // Resume music.
+            code_gen->AddOutputLine(
+              (boost::format("audio_manager:play_music(\"%1%\")") % param1).str()
+            );
+            break;
+        case 0x20: // Play 1 sound, channel 1.
+        case 0x24: // Play 1 sound, channel 1.
+            code_gen->AddOutputLine((
+              boost::format("audio_manager:play_sounds(\"%1%\", nil, nil, nil) -- Panning %2%")
+              % param2 % param1
+            ).str());
+            break;
+        case 0x21: // Play 2 sounds, channels 1 and 2.
+        case 0x25: // Play 2 sounds, channels 1 and 2.
+            code_gen->AddOutputLine((
+              boost::format("audio_manager:play_sounds(\"%1%\", \"%2%\", nil, nil) -- Panning %3%")
+              % param2 % param3 % param1
+            ).str());
+            break;
+        case 0x22: // Play 3 sounds, channels 1, 2 and 3.
+        case 0x26: // Play 3 sounds, channels 1, 2 and 3.
+            code_gen->AddOutputLine((
+              boost::format(
+                "audio_manager:play_sounds(\"%1%\", \"%2%\", \"%3%\", nil) -- Panning %4%"
+              ) % param2 % param3 % param4 % param1
+            ).str());
+            break;
+        case 0x23: // Play 4 sounds, channels 1, 2, 3 and 4.
+        case 0x27: // Play 4 sounds, channels 1, 2, 3 and 4.
+            code_gen->AddOutputLine((
+              boost::format(
+                "audio_manager:play_sounds(\"%1%\", \"%2%\", \"%3%\", \"%4%\") -- Panning %5%"
+              ) % param2 % param3 % param4 % param5 % param1
+            ).str());
+            break;
+        case 0x28: // Play sound, channel 1.
+            code_gen->AddOutputLine(
+              (boost::format("audio_manager:play_sound(\"%1%\", 1)") % param1).str()
+            );
+            break;
+        case 0x29: // Play sound, channel 2.
+            code_gen->AddOutputLine(
+              (boost::format("audio_manager:play_sound(\"%1%\", 2)") % param1).str()
+            );
+            break;
+        case 0x2A: // Play sound, channel 3.
+            code_gen->AddOutputLine(
+              (boost::format("audio_manager:play_sound(\"%1%\", 3)") % param1).str()
+            );
+            break;
+        case 0x2B: // Play sound, channel 4.
+            code_gen->AddOutputLine(
+              (boost::format("audio_manager:play_sound(\"%1%\", 4)") % param1).str()
+            );
+            break;
+        case 0x30: // Play sound, channel 5.
+            code_gen->AddOutputLine(
+              (boost::format("audio_manager:play_sound(\"%1%\", 5)") % param1).str()
+            );
+            break;
+        case 0x15: // Unused.
+        default:
+            code_gen->AddOutputLine((
+                boost::format("-- Unknown akao operation AKAO(0x%6$02x, %1%, %2%, %3%, %4%, %5%)")
+                % param1 % param2 % param3 % param4 % param5 % op
+            ).str());
+    }
 }
 
 void FieldMediaInstruction::ProcessMULCK(CodeGenerator* code_gen){

@@ -175,6 +175,8 @@ void MainWindow::on_btn_data_run_clicked(){
           "data/field/flevel.lgp",
           "data/kernel/KERNEL.BIN",
           "data/menu/menu_us.lgp",
+          "data/sound/audio.fmt",
+          "data/sound/audio.dat",
           "ff7.exe"
         };
         // Ensure required files are in the input dir

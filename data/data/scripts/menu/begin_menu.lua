@@ -22,6 +22,7 @@ UiContainer.BeginMenu = {
 
             if button == "Enter" and event == "Press" then
                 if self.position == 1 then
+                    audio_manager:play_sound("Window")
                     load_field_map_request( "md1stin", "" )
                     console( "camera_free false" )
                     --console( "debug_walkmesh true" )
@@ -87,12 +88,14 @@ UiContainer.BeginMenu = {
                     FFVII.MenuSettings.pause_available = true
                 end
             elseif button == "Down" then
+                audio_manager:play_sound("Cursor")
                 self.position = self.position + 1
                 if self.position > self.position_total then
                     self.position = 1;
                 end
                 cursor:set_default_animation( "Position" .. self.position )
             elseif button == "Up" then
+                audio_manager:play_sound("Cursor")
                 self.position = self.position - 1
                 if self.position <= 0 then
                     self.position = self.position_total;
