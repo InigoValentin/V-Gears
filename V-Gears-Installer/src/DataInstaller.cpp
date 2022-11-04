@@ -145,7 +145,6 @@ int DataInstaller::Progress(){
             cur_substep_ = 0;
             return CalcProgress();
         case MEDIA_SOUNDS:
-            write_output_line_("Extracting sound " + std::to_string(cur_substep_), 2, true);
             if (media_installer_->InstallSounds() == true)
                 installation_state_ = MEDIA_SOUNDS_INDEX;
             else cur_substep_ ++;

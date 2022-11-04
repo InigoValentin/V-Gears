@@ -216,16 +216,16 @@ void FieldDisassembler::AddFunc(
             case 0: break;
             // [OK] - on_interact
             case 1: break;
-            // Move - on_enter_line
-            case 2: func->name = "on_enter_line"; break;
-            // Move - on_move_to_line
-            case 3: func->name = "on_move_to_line"; break;
-            // Go - on_cross_line
-            case 4: func->name = "on_cross_line"; break;
-            // Go1x - on_cross_line
-            case 5: func->name = "on_cross_line_once"; break;
-            // GoAway - on_leave_line
-            case 6: func->name = "on_leave_line"; break;
+            // Move - on_approach
+            case 2: func->name = "on_approach"; break;
+            // Move - on_cross
+            case 3: func->name = "on_cross"; break;
+            // Go - on_near
+            case 4: func->name = "on_near"; break;
+            // Go1x - on_near
+            case 5: func->name = "on_near_once"; break;
+            // GoAway - on_leave
+            case 6: func->name = "on_leave"; break;
         }
     }
     int id = FindId(func->start_addr, func->end_addr, insts_);

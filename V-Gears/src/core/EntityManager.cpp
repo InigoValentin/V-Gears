@@ -46,7 +46,9 @@ float EntityManager::PointElevation(
     return (_d - _c * point.y - _a * point.x) / _b;
 }
 
-float EntityManager::SideOfVector(const Ogre::Vector2& point, const Ogre::Vector2& p1, const Ogre::Vector2& p2){
+float EntityManager::SideOfVector(
+  const Ogre::Vector2& point, const Ogre::Vector2& p1, const Ogre::Vector2& p2
+){
     Ogre::Vector2 AB = p2    - p1;
     Ogre::Vector2 AP = point - p1;
     return AB.x * AP.y - AB.y * AP.x;
@@ -139,7 +141,7 @@ void EntityManager::Input(const VGears::Event& event){
             for (unsigned int i = 0; i < entity_triggers_.size(); ++ i){
                 if (
                   entity_triggers_[i]->IsEnabled() == true
-                  && entity_triggers_[i]->IsActivator(player_entity_) == true
+                  && entity_triggers_[i]->CheckApproached() == true
                 ){
                     ScriptEntity* scr_entity = ScriptManager::getSingleton().GetScriptEntityByName(
                       ScriptManager::ENTITY, entity_triggers_[i]->GetName()
@@ -148,7 +150,6 @@ void EntityManager::Input(const VGears::Event& event){
                       scr_entity, "on_interact", 1, "", "", false, false
                     );
                     if (added == false){
-                        // TODO: This pop's in almost any trigger, but it still works. Check it out.
                         LOG_WARNING(
                           "Script 'on_interact' for entity '" + entity_triggers_[i]->GetName()
                           + "' doesn't exist."
@@ -541,7 +542,7 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
     direction *= speed;
     // If movement is still needed but speed or time don't allow it, just return for now.
     if (direction.isZeroLength() == true){
-        CheckTriggers(entity, entity->GetPosition());
+        if (player_entity_ == entity) CheckTriggers(entity, entity->GetPosition());
         return false;
     }
     int current_triangle = entity->GetMoveTriangleId();
@@ -761,12 +762,12 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
       || third_entity_check != false
     ){
         // Event if the entity can't move, check for triggers, but use current position.
-        CheckTriggers(entity, entity->GetPosition());
+        if (player_entity_ == entity) CheckTriggers(entity, entity->GetPosition());
         return false;
     }
 
     // Check triggers before set entity position because move line is checked.
-    CheckTriggers(entity, end_point);
+    if (player_entity_ == entity) CheckTriggers(entity, end_point);
     entity->SetPosition(end_point);
 
     // If the entity has come to destination point, finish movement.
@@ -838,11 +839,14 @@ bool EntityManager::CheckSolidCollisions(Entity* entity, Ogre::Vector3& position
 
 void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position){
     if (entity->IsSolid() == false) return;
+    if (player_entity_ != entity) return;
+    if (player_entity_->IsSolid() == false) return;
+    if (player_lock_) return;
     bool is_moving = true;
     if (
-      std::fabs(entity->GetPosition().x - position.x) < 0.01f
-      && std::fabs(entity->GetPosition().y - position.y) < 0.01f
-      && std::fabs(entity->GetPosition().z - position.z) < 0.01f
+      std::fabs(entity->GetPosition().x - position.x) < 0.005f
+      && std::fabs(entity->GetPosition().y - position.y) < 0.005f
+      && std::fabs(entity->GetPosition().z - position.z) < 0.005f
     ){
         is_moving = false;
     }
@@ -869,76 +873,99 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
             Ogre::Degree angle = direction_to_line - movement_direction + Ogre::Degree(90);
             angle = (angle > Ogre::Degree(360)) ? angle - Ogre::Degree(360) : angle;
 
-            //bool active = false;
+
+            // Check on enter line.
+            // Must happen only once when the solid radius touches the line, while facing the line,
+            // while the entity is manually moving, and only if not already triggered.
+            if (
+              square_dist != -1 && square_dist <= solid_radius * solid_radius
+              && angle < Ogre::Degree(180) && angle > Ogre::Degree(0)
+              && entity_triggers_[i]->CheckApproached() == false
+              && is_moving
+            ){
+                entity_triggers_[i]->SetApproached(true);
+                //std::cout << "    [TRIGGER] " << entity->GetName() << " on_approach "
+                //  << entity_triggers_[i]->GetName() << std::endl;
+                ScriptManager::getSingleton().ScriptRequest(
+                  trigger, "on_approach", 1, entity->GetName(), "", false, false
+                );
+            }
+
+            // Check on move to line.
+            // Must happen only once when the entity center touches the line, if the entity has
+            // previously entered the line.
+            if (
+              square_dist != -1 && square_dist < 1
+              && entity_triggers_[i]->CheckCrossed() == false
+              && entity_triggers_[i]->CheckApproached() == true
+            ){
+                entity_triggers_[i]->SetCrossed(true);
+                //std::cout << "    [TRIGGER] " << entity->GetName() << " on_cross "
+                //  << entity_triggers_[i]->GetName() << std::endl;
+                ScriptManager::getSingleton().ScriptRequest(
+                  trigger, "on_cross", 1, entity->GetName(), "", false, false
+                );
+            }
+
+            // Check on cross line.
+            // Must happen on every frame while the entity solid radius collides with the line, if
+            // the entity has previously entered the line.
+            if (
+              square_dist != -1 && square_dist <= solid_radius * solid_radius
+              && entity_triggers_[i]->CheckApproached() == true
+            ){
+                // TODO: Fix this hack.
+                // After the on_near script is run, set a cooltime of 5 frames before running
+                // it again. This is because most of the time this trigger checks for a key, and
+                // if its pressed, is run multiple times.
+                if (entity_triggers_[i]->GetNearEventCooldown() == 0){
+                    //std::cout << "    [TRIGGER] " << entity->GetName()
+                    //  << " on_near " << entity_triggers_[i]->GetName() << std::endl;
+                    ScriptManager::getSingleton().ScriptRequest(
+                      trigger, "on_near", 1, entity->GetName(), "", true, true
+                    );
+                    entity_triggers_[i]->ResetNearEventCooldown();
+                }
+                else entity_triggers_[i]->DecreaseNearEventCooldown();
+            }
+
+            // Check on cross line once.
+            // The same as on cross line, but only once.
             if (
               square_dist != -1 && square_dist < solid_radius * solid_radius
-              //&& direction_to_line != destination_direction_to_line
-              //&& entity_triggers_[i]->IsActivator(entity) == false
-              // && angle < Ogre::Degree(180) && angle > Ogre::Degree(0)
+              && entity_triggers_[i]->CheckNearSingleEventTriggered() == false
+              && entity_triggers_[i]->CheckApproached() == true
             ){
+                entity_triggers_[i]->SetNearSingleEventTriggered(true);
+                //std::cout << "    [TRIGGER] " << entity->GetName()
+                //  << " on_near_once " << entity_triggers_[i]->GetName() << std::endl;
+                ScriptManager::getSingleton().ScriptRequest(
+                  trigger, "on_near_once", 1, entity->GetName(), "", false, false
+                );
 
-                // Test on_enter_line.
-                // To trigger it, the entity must currently be on one side on the line, and the
-                // destination point must be on the other side. The entity must be facing the line,
-                // and it must be moving.
-                if (is_moving && angle < Ogre::Degree(180) && angle > Ogre::Degree(0)){
-                    // Test on_move_to_line.
-                    // Same as on_enter_line, but even closer.
-                    if (square_dist < solid_radius * solid_radius * 0.5f){
-                        //std::cout << "    [TRIGGER] " << entity->GetName() << " on_move_to_line "
-                        //  << entity_triggers_[i]->GetName() << std::endl;
-                        ScriptManager::getSingleton().ScriptRequest(
-                          trigger, "on_move_to_line", 1, entity->GetName(), "", false, false
-                        );
-                        entity_triggers_[i]->AddActivator(entity);
-                    }
-                    //active = true;
-                    //std::cout << "    [TRIGGER] " << entity->GetName() << " on_enter_line "
-                    //  << entity_triggers_[i]->GetName() << std::endl;
-                    ScriptManager::getSingleton().ScriptRequest(
-                      trigger, "on_enter_line", 1, entity->GetName(), "", false, false
-                    );
-                    entity_triggers_[i]->AddActivator(entity);
-                }
+            }
 
-                // Test on_cross_line.
-                // To trigger it, the entity just needs to be close to the line.
-                if (square_dist != -1 && square_dist < solid_radius * solid_radius){
-                    //active = true;
-                    //std::cout << "    [TRIGGER] " << entity->GetName()
-                    //  << " on_cross_line " << entity_triggers_[i]->GetName() << std::endl;
-                    ScriptManager::getSingleton().ScriptRequest(
-                      //trigger, "on_cross_line", 1, entity->GetName(), "", false, false
-                      trigger, "on_cross_line", 1, entity->GetName(), "", true, true
-                    );
-                    // Test on_cross_line_once.
-                    // Same conditions that on_cross_line, but triggered only once (i.e. if the
-                    // entity has not been registered as an activator.
-                    //std::cout << "    [TRIGGER] " << entity->GetName()
-                    //  << " on_cross_line_once " << entity_triggers_[i]->GetName() << std::endl;
-                    if (entity_triggers_[i]->IsActivator(entity) == false){
-                        ScriptManager::getSingleton().ScriptRequest(
-                          trigger, "on_cross_line_once", 1, entity->GetName(), "", false, false
-                        );
-                    }
-                    entity_triggers_[i]->AddActivator(entity);
-                }
+            // Check on leave line.
+            // Must be triggered once when the line is not in the entity solid radius, but only if
+            // on enter script has been triggered previously.
+            if (
+              square_dist != -1 && square_dist > solid_radius * solid_radius
+              && entity_triggers_[i]->CheckApproached()
+            ){
+                //std::cout << "    [TRIGGER] " << entity->GetName() << " on_leave "
+                //  << entity_triggers_[i]->GetName() << std::endl;
+                ScriptManager::getSingleton().ScriptRequest(
+                  trigger, "on_leave", 1, entity->GetName(), "", false, false
+                );
             }
-            else{
-                // Test on_leave_line.
-                // To trigger it, on_enter_line must not be true, and the entity must be registered
-                // as an activator.
-                if (entity_triggers_[i]->IsActivator(entity)){
-                    //active = true;
-                    //std::cout << "    [TRIGGER] " << entity->GetName() << " on_leave_line "
-                    //  << entity_triggers_[i]->GetName() << std::endl;
-                    ScriptManager::getSingleton().ScriptRequest(
-                      trigger, "on_leave_line", 1, entity->GetName(), "", false, false
-                    );
-                    entity_triggers_[i]->RemoveActivator(entity);
-                }
+
+            // If the entity is far enough from the line, mark every trigger as inactive
+            if (square_dist == -1 || square_dist > solid_radius * solid_radius){
+                entity_triggers_[i]->Clear();
+                //std::cout << "    [TRIGGER] " << entity->GetName() << " clear of "
+                //  << entity_triggers_[i]->GetName() << std::endl;
             }
-            //if (active) std::cout << "--------------------" << std::endl;
+
         }
     }
 }

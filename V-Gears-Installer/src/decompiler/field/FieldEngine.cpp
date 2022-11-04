@@ -88,10 +88,10 @@ void FieldEngine::Entity::MarkAsLine(
     }
     // TODO: These are not getting to the final script.
     // Maybe this can be removed?
-    AddFunction("on_enter_line", 1);
-    AddFunction("on_move_to_line", 2);
-    AddFunction("on_cross_line", 3);
-    AddFunction("on_leave_line", 4);
+    AddFunction("on_approach", 1);
+    AddFunction("on_cross", 2);
+    AddFunction("on_near", 3);
+    AddFunction("on_leave", 4);
 }
 
 bool FieldEngine::Entity::IsLine(){return is_line_;}

@@ -106,7 +106,6 @@ void AudioManager::ScriptPlayMusic(const char* name){
 }
 
 void AudioManager::MusicPlay(const Ogre::String& name){
-    std::cout << "[MUSIC] play " << name << "\n";
     if (initialized_){
         boost::recursive_mutex::scoped_lock lock(update_mutex_);
         AudioManager::Music* music = GetMusic(name);
@@ -120,7 +119,6 @@ void AudioManager::MusicPlay(const Ogre::String& name){
 }
 
 void AudioManager::SoundPlay(const Ogre::String& name){
-    std::cout << "[FX] play " << name << "\n";
     if (initialized_){
         boost::recursive_mutex::scoped_lock lock(update_mutex_);
         AudioManager::Sound* fx = GetSound(name);
@@ -128,9 +126,6 @@ void AudioManager::SoundPlay(const Ogre::String& name){
             LOG_ERROR("No sound found with name \"" + name + "\".");
             return;
         }
-        //Player player(&update_mutex_);
-        //player.SetLoop(-1);
-        //player.Play(fx->file);
         fx_.SetLoop(-1);
         fx_.Play(fx->file);
     }
@@ -172,7 +167,6 @@ void AudioManager::AddMusic(const AudioManager::Music& music){
 }
 
 void AudioManager::AddSound(const AudioManager::Sound& sound){
-    std::cout << "[ADD_SOUND] " << sound.name << "\n";
     boost::recursive_mutex::scoped_lock lock(update_mutex_);
     for (
       std::list<AudioManager::Sound>::iterator it = sound_list_.begin();
@@ -312,18 +306,15 @@ void AudioManager::Player::Update(){
               static_cast<ALsizei>(buffer_size), static_cast<ALsizei>(vorbis_info_->rate)
             );
             alSourceQueueBuffers(source_, 1, &buffer_id);
-            std::cout << "Stream unfinished\n";
         }
         // Finished reading stream
         else{
-            std::cout << "Stream finished\n";
             stream_finished_ = true;
             break;
         }
     }
 
     if (stream_finished_ && loop_ < 0){
-        std::cout << "Stopping\n";
         Stop();
     }
 

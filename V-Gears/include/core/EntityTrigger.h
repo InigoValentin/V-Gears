@@ -67,36 +67,12 @@ class EntityTrigger{
         bool IsEnabled() const;
 
         /**
-         * Adds an activator to the trigger.
-         *
-         * @param[in] activator Trigger activator entity.
-         */
-        void AddActivator(Entity* activator);
-
-        /**
-         * Removes an activator from the trigger.
-         *
-         * @param[in] activator Entity to remove as activator.
-         */
-        void RemoveActivator(Entity* activator);
-
-        /**
-         * Checks if an entity is an activator of the trigger.
-         *
-         * @param[in] activator Entity to test as an activator.
-         * @return True if the entity is an activator, false otherwise.
-         */
-        bool IsActivator(Entity* activator);
-
-        /**
          * Sets the vertices of the line that acts as the trigger.
          *
          * @param[in] point1 One of the vertices of the line.
          * @param[in] point2 One of the vertices of the line.
          */
-        void SetPoints(
-          const Ogre::Vector3& point1, const Ogre::Vector3& point2
-        );
+        void SetPoints(const Ogre::Vector3& point1, const Ogre::Vector3& point2);
 
         /**
          * Retrieves the first vertex of the line that acts as trigger.
@@ -112,6 +88,112 @@ class EntityTrigger{
          */
         const Ogre::Vector3& GetPoint2() const;
 
+        /**
+         * Check if the line has been approached.
+         *
+         * @return True if the playable entity solid radius has collided with the line and has not
+         * existed yet, false otherwise.
+         */
+        const bool CheckApproached();
+
+        /**
+         * Sets if the the playable entity has approached the line.
+         *
+         * Must be set to true when the playable entity's solid radius touches the line while
+         * manually moving, and to false when the playable entity is not near the line.
+         *
+         * @param[in] entered If the line has been approached.
+         */
+        void SetApproached(const bool approached);
+
+        /**
+         * Check if the line has been crossed.
+         *
+         * @return True if the playable entity's center has collided with the line and has not
+         * existed yet (exit as in the line being outside the entity solid radius), false otherwise.
+         */
+        const bool CheckCrossed();
+
+        /**
+         * Sets if the the playable entity has crossed the line.
+         *
+         * Must be set to true when the playable entity's center touches the line while
+         * manually moving, and to false when the playable entity is not near the line.
+         *
+         * @param[in] crossed If the line has been approached.
+         */
+        void SetCrossed(const bool crossed);
+
+        /**
+         * Checks if the on_near_once event has been fired.
+         *
+         * @return True if the on_near_once event has been fired and the entity has not yet exited
+         * the line (exit as in the line being outside the entity solid radius), and false if the
+         * playable entity has approached the line but the event has not been triggered yet.
+         */
+        const bool CheckNearSingleEventTriggered();
+
+        /**
+         * Sets if the on_near_once have been triggered.
+         *
+         * Must be set to true when it's run, and to false when the playable entity is not near the
+         * line.
+         *
+         * @param[in] triggered If the on_near_once has been triggered.
+         */
+        void SetNearSingleEventTriggered(const bool triggered);
+
+        /**
+         * Checks if the cooldown that prevents caling the on_near event multiple times has ended.
+         *
+         * After the on_near script is run, a cooltime of a number of frames is set before running
+         * it again. This is because most of the time this trigger checks for a key, and if its
+         * pressed, is run multiple times.
+         *
+         * @return The number of frames remaining in the cooldown. If it's 0, the on_near event can
+         * be called again. If not, {@see DecreaseNearEventCooldown} must be called.
+         */
+        const int GetNearEventCooldown();
+
+        /**
+         * Decreases the cooldown time required between calls to on_near event by one.
+         *
+         * After the on_near script is run, a cooltime of a number of frames is set before running
+         * it again. This is because most of the time this trigger checks for a key, and if its
+         * pressed, is run multiple times.
+         */
+        void DecreaseNearEventCooldown();
+
+        /**
+         * Resets the cooldown time required between calls to on_near event.
+         *
+         * After the on_near script is run, a cooltime of a number of frames is set before running
+         * it again. This is because most of the time this trigger checks for a key, and if its
+         * pressed, is run multiple times.
+         *
+         * Must be called after firing the on_near event. After calling this, the cooldown will be
+         * reset, and all frames must be waited before calling it again.
+         */
+        void ResetNearEventCooldown();
+
+        /**
+         * Sets the cooldown time required between calls to on_near event to 0.
+         *
+         * After the on_near script is run, a cooltime of a number of frames is set before running
+         * it again. This is because most of the time this trigger checks for a key, and if its
+         * pressed, is run multiple times.
+         *
+         * Must be called whent the playable entity gets away from the line
+         */
+        void ClearNearEventCooldown();
+
+        /**
+         * Clears the proximity statuses and event triggering statuses.
+         *
+         * Can be called once the playable entity leaves the line.
+         */
+        void Clear();
+
     protected:
 
         /**
@@ -125,11 +207,6 @@ class EntityTrigger{
         bool enabled_;
 
         /**
-         * List of activators of the trigger.
-         */
-        std::vector<Entity*> activators_;
-
-        /**
          * One of the vertices of the trigger line.
          */
         Ogre::Vector3 point_1_;
@@ -138,5 +215,41 @@ class EntityTrigger{
          * One of the vertices of the trigger line.
          */
         Ogre::Vector3 point_2_;
+
+    private:
+
+        /**
+         * Frames to cooldown after triggering on_near event
+         *
+         * After the on_near script is run, a cooltime of a number of frames is set before running
+         * it again. This is because most of the time this trigger checks for a key, and if its
+         * pressed, is run multiple times.
+         */
+        static int NEAR_EVENT_COOLDOWN_FRAMES;
+
+        /**
+         * Indicates if the playable entity has approached the line.
+         */
+        bool approached_;
+
+        /**
+         * Indicates if the playable entity has crossed the line.
+         */
+        bool crossed_;
+
+        /**
+         * Indicates if the near_once event has been triggered.
+         */
+        bool near_single_event_triggered_;
+
+        /**
+         * Remaining frames to cooldown after triggering on_near event
+         *
+         * After the on_near script is run, a cooltime of a number of frames is set before running
+         * it again. This is because most of the time this trigger checks for a key, and if its
+         * pressed, is run multiple times.
+         */
+        int near_event_cooldown_;
+
 };
 

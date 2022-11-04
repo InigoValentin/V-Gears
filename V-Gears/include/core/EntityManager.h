@@ -439,7 +439,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          *
          * If there are triggers, and the conditions are met, the appropriate trigger function will
          * be added to the queue. This must be tested every time an entity moves. If the entity is
-         * not solid, it will do nothing.
+         * not the playable character, is not solid or is locked, it will do nothing.
          *
          * @param[in] entity Entity to check for nearby triggers.
          * @param[in] position The position of the entity.
