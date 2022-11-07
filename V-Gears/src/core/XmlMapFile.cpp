@@ -117,6 +117,13 @@ void XmlMapFile::LoadMap(){
             Ogre::String file_name = GetString(node, "file_name");
             if (file_name != "") ScriptManager::getSingleton().RunFile(file_name);
         }
+        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "tracks"){
+            for (TiXmlNode* track = node->FirstChild(); track; track = track->NextSibling()){
+                int id = GetInt(track, "id");
+                int track_id = GetInt(track, "track_id");
+                EntityManager::getSingleton().AddTrack(id, track_id);
+            }
+        }
         node = node->NextSibling();
     }
 }

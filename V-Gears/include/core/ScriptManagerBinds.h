@@ -254,6 +254,7 @@ void ScriptManager::InitBinds(){
             "set_entity_to_character",
             (void(EntityManager::*)(const char*, unsigned int)) &EntityManager::SetEntityToCharacter
           )
+          .def("get_track_id", (int(EntityManager::*)(int)) &EntityManager::GetTrack)
     ];
 
     // Commands for the entity manager, not related to any particular entity.

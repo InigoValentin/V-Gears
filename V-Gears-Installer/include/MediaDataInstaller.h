@@ -73,6 +73,32 @@ class MediaDataInstaller{
          */
         void WriteSoundIndex();
 
+        /**
+         * Prepares the installer for the sounds extraction.
+         *
+         * @return The total number of sounds to process.
+         */
+        int InstallMusicsInit();
+
+        /**
+         * Extracts the next music file contained in the midi.lgp, converts it and installs it.
+         *
+         * @return True if there are no more musics to extract, false otherwise.
+         */
+        bool InstallMusics();
+
+        /**
+         * Converts high quality musiscs to OGG.
+         *
+         * There are four of them.
+         */
+        void InstallHQMusics();
+
+        /**
+         * Writes the XML file with all music tracks.
+         */
+        void WriteMusicsIndex();
+
     private:
 
         /**
@@ -172,6 +198,26 @@ class MediaDataInstaller{
          * Sound data for each entry to write to the XML file
          */
         std::vector<std::string> sounds_;
+
+        /**
+         * The midi.lgp file.
+         */
+        VGears::LGPArchive midi_;
+
+        /**
+         * Number of music tracks already processed.
+         */
+        int processed_musics_;
+
+        /**
+         * Map for music files with descriptive names.
+         */
+        std::unordered_map<int, std::string> musics_map_;
+
+        /**
+         * Sound data for each entry to write to the XML file
+         */
+        std::vector<std::string> musics_;
 
 
 

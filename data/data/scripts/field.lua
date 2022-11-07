@@ -223,6 +223,18 @@ open_shop = function(id)
     -- TODO: Implement
 end
 
+--- Plays one of the tracks assigned to the field.
+--
+-- @param id ID of the track in the field.
+play_map_music = function(id)
+    local track_id = entity_manager:get_track_id(id)
+    if entity_manager:get_track_id(id) ~= -1 then
+        audio_manager:play_music(tostring(track_id))
+    else
+        print("Requested non-existent music track ID " .. tostring(id))
+    end
+end
+
 --- Utility to change fields and enter battles.
 System["MapChanger"] = {
     map_name = "",

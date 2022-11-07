@@ -21,6 +21,7 @@
 #include <OgreImage.h>
 #include <OgreColourValue.h>
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 #include <tinyxml.h>
 #include "MediaDataInstaller.h"
 #include "data/VGearsLGPArchive.h"
@@ -40,7 +41,8 @@ u8 MediaDataInstaller::WAV_HEADER[] = {
 MediaDataInstaller::MediaDataInstaller(const std::string input_dir, const std::string output_dir):
   input_dir_(input_dir), output_dir_(output_dir),
   menu_(input_dir + "data/menu/menu_us.lgp", "LGP"), window_(input_dir + "data/kernel/WINDOW.BIN"),
-  fmt_(input_dir_ + "data/sound/audio.fmt"), dat_(input_dir_ + "data/sound/audio.dat")
+  fmt_(input_dir_ + "data/sound/audio.fmt"), dat_(input_dir_ + "data/sound/audio.dat"),
+  midi_(input_dir + "data/midi/midi.lgp", "LGP")
 {PopulateMaps();}
 
 void MediaDataInstaller::PopulateMaps(){
@@ -390,3 +392,106 @@ void MediaDataInstaller::WriteSoundIndex(){
     xml.LinkEndChild(container.release());
     xml.SaveFile(output_dir_ + "sounds.xml");
 }
+
+int MediaDataInstaller::InstallMusicsInit(){
+    // Read the music index file.
+    std::ifstream music_idx(input_dir_ + "data/music/music.idx");
+    int i = 0;
+    std::string name;
+    if (music_idx.is_open()){
+        while (std::getline(music_idx, name)){
+            // Newlines are very likely WINDOWS/DOS format, but check them all.
+            boost::replace_all(name, "\r\n", "");
+            boost::replace_all(name, "\n", "");
+            boost::replace_all(name, "\r", "");
+            musics_map_[i] = name;
+            i ++;
+        }
+        music_idx.close();
+    }
+
+    // Load midi_
+    midi_.load();
+
+    processed_musics_ = 0;
+    return midi_.list(true, true)->size();
+}
+
+bool MediaDataInstaller::InstallMusics(){
+    VGears::LGPArchive::FileEntry f = midi_.GetFiles().at(processed_musics_);
+
+    // Find the index in the map.
+    int index = 1000 + processed_musics_;
+    for (auto const& m : musics_map_){
+        if (m.second + ".mid" == f.file_name){
+            index = m.first;
+            break;
+        }
+    }
+
+    File midi(input_dir_ + "data/midi/midi.lgp");
+
+    std::fstream out;
+    out.open(output_dir_ + "audio/music/" + std::to_string(index) + ".mid", std::ios::out);
+    midi.SetOffset(f.data_offset);
+    for (int j = 0; j < f.data_size; j ++) out << midi.readU8();
+    out.close();
+
+    // Convert to ogg (TiMidity + FFMpeg)
+    std::string command = (boost::format(
+      "timidity --quiet=3 %1%audio/music/%2%.mid -Ow -o - | ffmpeg -hide_banner -loglevel panic -y "
+      "-i - %1%audio/music/%2%.ogg; rm %1%audio/music/%2%.mid"
+    ) % output_dir_ % index).str();
+    std::system(command.c_str());
+
+
+    musics_.push_back("audio/music/" + std::to_string(processed_musics_) + ".ogg");
+    processed_musics_ ++;
+    if (processed_musics_ == midi_.list(true, true)->size()) return true;
+    else return false;
+}
+
+void MediaDataInstaller::InstallHQMusics(){
+    std::vector<std::string> hq_musics = {"hearth", "sato", "sensui", "wind"};
+    for (std::string hq_music : hq_musics){
+
+        int index = 2000;
+        for (auto const& m : musics_map_){
+            if (m.second == hq_music){
+                index = m.first;
+                break;
+            }
+        }
+
+        std::string command = (boost::format(
+          "ffmpeg -hide_banner -loglevel panic -y -i %1%music/%2%.wav %3%audio/sound/%4%.ogg"
+        ) % input_dir_ % hq_music % output_dir_ % index).str();
+        std::cout << "    HQ Command: " << command << "\n";
+        std::system(command.c_str());
+    }
+}
+
+void MediaDataInstaller::WriteMusicsIndex(){
+    TiXmlDocument xml;
+    std::unique_ptr<TiXmlElement> container(new TiXmlElement("musics"));
+    //for (string item : items_){
+    for (int id = 0; id < musics_.size(); id ++){
+        std::string path = musics_[id];
+        std::unique_ptr<TiXmlElement> xml_music(new TiXmlElement("music"));
+        xml_music->SetAttribute("file_name", path);
+        xml_music->SetAttribute("name", id);
+        xml_music->SetAttribute("loop", "0");
+        container->LinkEndChild(xml_music.release());
+        // If there is a friendly name for this sound, add another entry
+        if (musics_map_.count(id) != 0){
+            std::unique_ptr<TiXmlElement> xml_music_name(new TiXmlElement("music"));
+            xml_music_name->SetAttribute("file_name", path);
+            xml_music_name->SetAttribute("name", musics_map_[id]);
+            xml_music_name->SetAttribute("loop", "0");
+            container->LinkEndChild(xml_music_name.release());
+        }
+    }
+    xml.LinkEndChild(container.release());
+    xml.SaveFile(output_dir_ + "musics.xml");
+}
+

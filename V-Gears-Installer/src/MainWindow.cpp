@@ -14,6 +14,8 @@
  */
 
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 #include <QtCore/QProcess>
 #include <QtWidgets/QFileDialog>
 #include <QtCore/QDir>
@@ -177,6 +179,8 @@ void MainWindow::on_btn_data_run_clicked(){
           "data/menu/menu_us.lgp",
           "data/sound/audio.fmt",
           "data/sound/audio.dat",
+          "data/music/music.idx",
+          "data/midi/midi.lgp",
           "ff7.exe"
         };
         // Ensure required files are in the input dir
@@ -238,8 +242,13 @@ void MainWindow::OnInstallStopped(){EnableUi(true);}
 
 void MainWindow::DoProgress(){
     try{
-        const int progress = installer_->Progress();
-        main_window_->data_progress_bar->setValue(progress);
+        const float progress = installer_->Progress();
+        main_window_->data_progress_bar->setValue(std::floor(progress));
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision(2) << progress;
+        stream << "%";
+        std::string s = stream.str();
+        main_window_->label_percent->setText(QString::fromUtf8(s.c_str()));
         if (progress >= 100) OnInstallStopped();
     }
     catch (const std::exception& ex){

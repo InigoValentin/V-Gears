@@ -485,6 +485,15 @@ void EntityManager::SetEntityToCharacter(const char* entity_name, unsigned int c
         if (entity_[i]->GetName() == entity_name) entity_[i]->SetCharacter(char_id);
 }
 
+void EntityManager::AddTrack(const int id, const int track_id){
+    if (id >= 0 && id < 255) tracks_[id] = track_id;
+}
+
+int EntityManager::GetTrack(const int id){
+    if (tracks_.count(id) == 0) return -1;
+    else return tracks_[id];
+}
+
 bool EntityManager::SetEntityOnWalkmesh(Entity* entity){
     Ogre::Vector3 position3 = entity->GetPosition();
     Ogre::Vector2 position2;

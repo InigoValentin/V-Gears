@@ -78,7 +78,7 @@ void FieldMediaInstruction::ProcessAKAO2(CodeGenerator* code_gen){
 
 void FieldMediaInstruction::ProcessMUSIC(CodeGenerator* code_gen){
     code_gen->AddOutputLine(
-      (boost::format("-- play_map_music(%1%)") % params_[0]->GetUnsigned()).str()
+      (boost::format("play_map_music(%1%)") % params_[0]->GetUnsigned()).str()
     );
 }
 

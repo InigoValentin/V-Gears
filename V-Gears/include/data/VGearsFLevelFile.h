@@ -47,25 +47,20 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param[in] creator Pointer to the ResourceManager that is
-             * creating this resource.
+             * @param[in] creator Pointer to the ResourceManager that is creating this resource.
              * @param[in] name The unique name of the resource.
              * @param[in] handle @todo Understand and document.
-             * @param[in] group The name of the resource group to which this
-             * resource belong.
-             * @param[in] is_manual True if the resource is manually loaded,
-             * false otherwise.
-             * @param[in] loader Pointer to a ManualResourceLoader
-             * implementation which will be called when the Resource wishes to
-             * load (should be supplied if is_manual is set to true). It can be
-             * null, but the Resource will never be able to reload if anything
-             * ever causes it to unload. Therefore provision of a proper
-             * ManualResourceLoader instance is strongly recommended.
+             * @param[in] group The name of the resource group to which this resource belong.
+             * @param[in] is_manual True if the resource is manually loaded, false otherwise.
+             * @param[in] loader Pointer to a ManualResourceLoader implementation which will be
+             * called when the Resource wishes to load (should be supplied if is_manual is set to
+             * true). It can be null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper ManualResourceLoader
+             * instance is strongly recommended.
              */
             FLevelFile(
-              Ogre::ResourceManager *creator, const String &name,
-              Ogre::ResourceHandle handle, const String &group,
-              bool is_manual = false, Ogre::ManualResourceLoader *loader = NULL
+              Ogre::ResourceManager *creator, const String &name, Ogre::ResourceHandle handle,
+              const String &group, bool is_manual = false, Ogre::ManualResourceLoader *loader = NULL
             );
 
             /**
@@ -221,9 +216,7 @@ namespace VGears{
             /**
              * Loads the level animations
              */
-            void LoadAnimations(
-              const HRCFilePtr &model, const AnimationList &animations
-            );
+            void LoadAnimations(const HRCFilePtr &model, const AnimationList &animations);
 
             /**
              * Unloads the file.

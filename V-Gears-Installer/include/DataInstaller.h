@@ -63,7 +63,7 @@ class DataInstaller{
          *
          * @return Installation progress [0-100].
          */
-        int Progress();
+        float Progress();
 
     private:
 
@@ -72,7 +72,7 @@ class DataInstaller{
          *
          * @return Installation progress [0-100]
          */
-        const int CalcProgress();
+        const float CalcProgress();
 
         /**
          * Creates a directory in the outputh path.
@@ -201,6 +201,26 @@ class DataInstaller{
             MEDIA_SOUNDS_INDEX,
 
             /**
+             * Prepares the installer for music extraction.
+             */
+            MEDIA_MUSICS_INIT,
+
+            /**
+             * Extracts the game music.
+             */
+            MEDIA_MUSICS,
+
+            /**
+             * Extracts the game high quality music.
+             */
+            MEDIA_MUSICS_HQ,
+
+            /**
+             * Build the music index.
+             */
+            MEDIA_MUSICS_INDEX,
+
+            /**
              * Initializer for {@see SPAWN_POINTS_AND_SCALE_FACTORS}.
              */
             FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT,
@@ -261,10 +281,26 @@ class DataInstaller{
          */
         InstallationSteps installation_state_ = IDLE;
 
+        /**
+         * Substeps in the current installation step.
+         */
         int substeps_;
 
+        /**
+         * Current substep in the current installation step.
+         */
         int cur_substep_;
 
+        /**
+         * Weight of each installation step.
+         *
+         * Used to calculate current progress.
+         */
+        int step_weight_[STATE_COUNT];
+
+        /**
+         * List of field model names.
+         */
         std::vector<std::string> field_model_names_;
 
         /**

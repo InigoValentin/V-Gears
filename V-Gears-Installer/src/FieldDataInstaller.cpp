@@ -453,6 +453,25 @@ float FieldDataInstaller::GetFieldScaleFactor(size_t field_id){
     return it->second;
 }
 
+std::vector<int> FieldDataInstaller::ExtractMusicTrackIds(VGears::FLevelFilePtr& field){
+    // Search for the "AKAO" string in the raw field data.
+    // The next byte is a track id.
+    const std::vector<u8> raw = field->GetRawScript();
+    std::vector<int> tracks;
+    for (int i = 0; i < raw.size() - 5; i ++){
+        if (raw[i] == 0x41){                   // A
+            if (raw[i + 1] == 0x4B){           // K
+                if (raw[i + 2] == 0x41){       // A
+                    if (raw[i + 3] == 0x4f){   // O
+                        tracks.push_back(static_cast<int>(raw[i + 4]) - 2);
+                    }
+                }
+            }
+        }
+    }
+    return tracks;
+}
+
 void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
     // Generate triggers script to insert into main
     // decompiled FF7 field -> LUA script.
@@ -476,6 +495,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
     try{
         // Get the raw script bytes.
         const std::vector<u8> raw_field_data = field->GetRawScript();
+
         // Decompile to LUA.
         decompiled = FieldDecompiler::Decompile(
           field->getName(), raw_field_data, formatter, gateway_script_data,
@@ -486,7 +506,9 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
         );
         if (script_file.is_open()){
             script_file << decompiled.luaScript;
-            field_text_writer_.Begin(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/text.xml");
+            field_text_writer_.Begin(
+              output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/text.xml"
+            );
             try{field_text_writer_.Write(raw_field_data, field->getName());}
             catch (const std::out_of_range& ex){
                 write_output_line_(
@@ -727,7 +749,20 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                 element->LinkEndChild(xml_entity_trigger.release());
             }
         }
+
+        // Get music tracks
+        std::vector<int> tracks = ExtractMusicTrackIds(field);
+        std::unique_ptr<TiXmlElement> xml_tracks(new TiXmlElement("tracks"));
+        for (int t = 0; t < tracks.size(); t ++){
+            std::unique_ptr<TiXmlElement> xml_track(new TiXmlElement("track"));
+            xml_track->SetAttribute("id", t);
+            xml_track->SetAttribute("track_id", tracks[t]);
+            xml_tracks->LinkEndChild(xml_track.release());
+        }
+        element->LinkEndChild(xml_tracks.release());
+
         doc.LinkEndChild(element.release());
+
         doc.SaveFile(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/map.xml");
         const VGears::PaletteFilePtr& pal = field->GetPalette();
         const VGears::BackgroundFilePtr& bg = field->GetBackground();

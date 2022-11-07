@@ -36,9 +36,8 @@ namespace VGears{
     const String FLevelFile::SUFFIX_BACKGROUND_2D("/background_2d");
 
     FLevelFile::FLevelFile(
-      Ogre::ResourceManager *creator, const String &name,
-      Ogre::ResourceHandle handle, const String &group, bool is_manual,
-      Ogre::ManualResourceLoader *loader
+      Ogre::ResourceManager *creator, const String &name, Ogre::ResourceHandle handle,
+      const String &group, bool is_manual, Ogre::ManualResourceLoader *loader
     ) :
       Resource(creator, name, handle, group, is_manual, loader),
       background_texture_loader_(nullptr), background_2d_loader_(nullptr)
@@ -47,18 +46,14 @@ namespace VGears{
     FLevelFile::~FLevelFile(){
         if (background_texture_loader_){
             assert(background_texture_ != nullptr);
-            Ogre::TextureManager::getSingleton().remove(
-              background_texture_->getHandle()
-            );
+            Ogre::TextureManager::getSingleton().remove(background_texture_->getHandle());
             delete background_texture_loader_;
             background_texture_loader_ = nullptr;
         }
         background_texture_.reset();
         if (background_2d_loader_){
             assert(background_2d_ != nullptr);
-            Background2DFileManager::getSingleton().remove(
-              background_2d_->getHandle()
-            );
+            Background2DFileManager::getSingleton().remove(background_2d_->getHandle());
             delete background_2d_loader_;
             background_2d_loader_ = nullptr;
         }
@@ -81,11 +76,10 @@ namespace VGears{
         String background_2d_name(GetBackground2DName());
         if (background_2d_loader_ == nullptr){
             background_2d_loader_ = new FLevelBackground2DLoader(*this);
-            background_2d_
-              = Background2DFileManager::getSingleton().createResource(
-                background_2d_name, mGroup, true,
-                background_2d_loader_
-              ).staticCast<Background2DFile>();
+            background_2d_ = Background2DFileManager::getSingleton().createResource(
+              background_2d_name, mGroup, true,
+              background_2d_loader_
+            ).staticCast<Background2DFile>();
         }
     }
 
@@ -95,11 +89,9 @@ namespace VGears{
         ModelList::const_iterator it(models.begin()), it_end(models.end());
         while (it != it_end){
             String hrc_name(it->hrc_name);
-            Ogre::LogManager::getSingleton().stream() << "Loading Model: "
-              << hrc_name;
+            Ogre::LogManager::getSingleton().stream() << "Loading Model: " << hrc_name;
             StringUtil::toLowerCase(hrc_name);
-            HRCFilePtr hrc
-              = hrc_mgr.load(hrc_name, mGroup).staticCast<HRCFile>();
+            HRCFilePtr hrc = hrc_mgr.load(hrc_name, mGroup).staticCast<HRCFile>();
             LoadAnimations(hrc, it->animations);
             hrc_files_.push_back(hrc);
             ++ it;
@@ -117,13 +109,11 @@ namespace VGears{
             StringUtil::splitBase(it->name, animation_name);
             StringUtil::toLowerCase(animation_name);
             String animation_filename(animation_name + EXT_A);
-            AFilePtr animation
-              = a_mgr.load(
-                animation_filename, model->getGroup()
-              ).staticCast<AFile>();
+            AFilePtr animation = a_mgr.load(
+              animation_filename, model->getGroup()
+            ).staticCast<AFile>();
             animation_name = NameLookup::Animation(animation_name);
-            Ogre::LogManager::getSingleton().stream() << " Adding Animation: "
-              << animation_name;
+            Ogre::LogManager::getSingleton().stream() << " Adding Animation: " << animation_name;
             animation->AddTo(model->GetSkeleton(), animation_name);
             ++ it;
         }
@@ -148,21 +138,13 @@ namespace VGears{
 
     const std::vector<u8>& FLevelFile::GetRawScript() const{return raw_script_;}
 
-    const BackgroundFilePtr& FLevelFile::GetBackground(void) const{
-        return background_;
-    }
+    const BackgroundFilePtr& FLevelFile::GetBackground(void) const{return background_;}
 
-    void FLevelFile::SetRawScript(const std::vector<u8>& script_data){
-        raw_script_ = script_data;
-    }
+    void FLevelFile::SetRawScript(const std::vector<u8>& script_data){raw_script_ = script_data;}
 
-    void FLevelFile::SetBackground(const BackgroundFilePtr &background){
-        background_ = background;
-    }
+    void FLevelFile::SetBackground(const BackgroundFilePtr &background){background_ = background;}
 
-    const CameraMatrixFilePtr& FLevelFile::GetCameraMatrix(void) const{
-        return camera_matrix_;
-    }
+    const CameraMatrixFilePtr& FLevelFile::GetCameraMatrix(void) const{return camera_matrix_;}
 
     void FLevelFile::SetCameraMatrix(const CameraMatrixFilePtr &camera_matrix){
         camera_matrix_ = camera_matrix;
@@ -170,29 +152,19 @@ namespace VGears{
 
     const PaletteFilePtr& FLevelFile::GetPalette(void) const{return palette_;}
 
-    void FLevelFile::SetPalette(const PaletteFilePtr &palette){
-        palette_ = palette;
-    }
+    void FLevelFile::SetPalette(const PaletteFilePtr &palette){palette_ = palette;}
 
-    const ModelListFilePtr& FLevelFile::GetModelList() const{
-        return model_list_;
-    }
+    const ModelListFilePtr& FLevelFile::GetModelList() const{return model_list_;}
 
-    void FLevelFile::SetModelList(const ModelListFilePtr &model_list){
-        model_list_ = model_list;
-    }
+    void FLevelFile::SetModelList(const ModelListFilePtr &model_list){model_list_ = model_list;}
 
     const WalkmeshFilePtr& FLevelFile::GetWalkmesh() const{return walkmesh_;}
 
     const TriggersFilePtr& FLevelFile::GetTriggers() const{return triggers_;}
 
-    void FLevelFile::SetWalkmesh(const WalkmeshFilePtr &walkmesh){
-        walkmesh_ = walkmesh;
-    }
+    void FLevelFile::SetWalkmesh(const WalkmeshFilePtr &walkmesh){walkmesh_ = walkmesh;}
 
-    void FLevelFile::SetTriggers(const TriggersFilePtr& triggers){
-        triggers_ = triggers;
-    }
+    void FLevelFile::SetTriggers(const TriggersFilePtr& triggers){triggers_ = triggers;}
 
     String FLevelFile::GetBackgroundTextureName(void) const{
         String base_name;

@@ -324,6 +324,22 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          */
         void SetEntityToCharacter(const char* entity_name, unsigned int char_id);
 
+        /**
+         * Adds a music track ID to the list of music tracks of the field.
+         *
+         * @param[in] id ID of the track in the map.
+         * @param[in] Music track ID.
+         */
+        void AddTrack(const int id, const int track_id);
+
+        /**
+         * Adds a music track ID from the list of music tracks of the field.
+         *
+         * @param[in] id ID of the track in the map.
+         * @return The music track ID, or -1 if it doesn't exist.
+         */
+        int GetTrack(const int id);
+
     private:
 
         /**
@@ -583,4 +599,9 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * The encounter rate of the map.
          */
         float encounter_rate_;
+
+        /**
+         * IDs of the music tracks of the field.
+         */
+        std::unordered_map<int, int> tracks_;
 };

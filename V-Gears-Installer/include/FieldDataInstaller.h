@@ -536,6 +536,14 @@ class FieldDataInstaller{
         void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh);
 
         /**
+         * Reads the music track IDs from a specific field.
+         *
+         * @param[in] field The field to extract tracks from.
+         * @return The list of tracks. It can be empty.
+         */
+        std::vector<int> ExtractMusicTrackIds(VGears::FLevelFilePtr& field);
+
+        /**
          * Converts a FFVII PC field to a V-Gears field.
          *
          * @param[in] field The field map to convert.

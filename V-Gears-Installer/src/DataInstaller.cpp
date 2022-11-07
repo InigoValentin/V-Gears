@@ -31,15 +31,26 @@ DataInstaller::DataInstaller(
   write_output_line_(write_output_line)
 {
     if (!application_.initOgre(true)) throw std::runtime_error("Ogre init failure");
-    Ogre::Log* default_log( Ogre::LogManager::getSingleton().getDefaultLog());
+    Ogre::Log* default_log(Ogre::LogManager::getSingleton().getDefaultLog());
     assert( default_log );
     default_log->setLogDetail(Ogre::LL_LOW);
 
+    // Assign weights.
+    for (int i = IDLE; i < STATE_COUNT; i ++) step_weight_[i] = 1;
+    step_weight_[IDLE] = 0;
+    step_weight_[MEDIA_IMAGES] = 3;
+    step_weight_[MEDIA_SOUNDS] = 8;
+    step_weight_[MEDIA_MUSICS] = 9;
+    step_weight_[MEDIA_MUSICS_HQ] = 2;
+    step_weight_[FIELD_SPAWN_POINTS_AND_SCALE_FACTORS] = 3;
+    step_weight_[FIELD_CONVERT] = 3;
+    step_weight_[FIELD_WRITE] = 2;
+    step_weight_[FIELD_CONVERT_MODELS] = 3;
 }
 
 DataInstaller::~DataInstaller(){}
 
-int DataInstaller::Progress(){
+float DataInstaller::Progress(){
     switch (installation_state_){
         case IDLE:
             installation_state_ = CREATE_DIRECTORIES;
@@ -152,6 +163,28 @@ int DataInstaller::Progress(){
         case MEDIA_SOUNDS_INDEX:
             write_output_line_("Building sound index...", 2, true);
             media_installer_->WriteSoundIndex();
+            installation_state_ = MEDIA_MUSICS_INIT;
+            return CalcProgress();
+        case MEDIA_MUSICS_INIT:
+            write_output_line_("Extracting music...", 2, true);
+            substeps_ = media_installer_->InstallMusicsInit();
+            installation_state_ = MEDIA_MUSICS;
+            cur_substep_ = 0;
+            return CalcProgress();
+        case MEDIA_MUSICS:
+            if (media_installer_->InstallMusics() == true)
+                installation_state_ = MEDIA_MUSICS_HQ;
+            else cur_substep_ ++;
+            return CalcProgress();
+        case MEDIA_MUSICS_HQ:
+            substeps_ = 0;
+            cur_substep_ = 0;
+            media_installer_->InstallHQMusics();
+            installation_state_ = MEDIA_MUSICS_INDEX;
+            return CalcProgress();
+        case MEDIA_MUSICS_INDEX:
+            write_output_line_("Building music track index...", 2, true);
+            media_installer_->WriteMusicsIndex();
             installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
             return CalcProgress();
         case FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT:
@@ -221,18 +254,23 @@ int DataInstaller::Progress(){
     }
 }
 
-const int DataInstaller::CalcProgress(){
-    float curr_step = installation_state_ / static_cast<float>(STATE_COUNT);
-    if (substeps_ > 0 && cur_substep_ < substeps_){
-        curr_step
-          += (
-            (static_cast<float>(cur_substep_) / static_cast<float>(substeps_))
-            / static_cast<float>(STATE_COUNT)
-          );
+const float DataInstaller::CalcProgress(){
+    float weight_total = 0; // Sum of every step weight.
+    float weight_done = 0; // Sum of every previous step weight.
+    float weight = static_cast<float>(step_weight_[installation_state_]); // Weight of current step.
+    float weight_substeps = 0; // Weight of the already done substeps in current step.
+
+    for (int i = IDLE; i < STATE_COUNT; i ++){
+        weight_total += step_weight_[i];
+        if (installation_state_ > i) weight_done += step_weight_[i];
     }
-    curr_step = curr_step * 100.0f;
-    int progress = static_cast<int>(curr_step);
-    if (progress >= 100) progress = 99;
+
+    if (substeps_ > 0 && cur_substep_ < substeps_){
+        weight_substeps = (cur_substep_ * weight) / substeps_;
+    }
+
+    float progress = 100 * (weight_done + weight_substeps) / weight_total;
+    if (progress >= 100.0f) progress = 99.9f;
     return progress;
 }
 
