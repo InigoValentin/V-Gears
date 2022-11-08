@@ -15,6 +15,9 @@ GNU General Public License for more details.
 
 #include "map/VGearsMapFileManager.h"
 
+/**
+ * Map file manager singleton.
+ */
 template<> VGears::MapFileManager
   *Ogre::Singleton<VGears::MapFileManager>::msSingleton = nullptr;
 

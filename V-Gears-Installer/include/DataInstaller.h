@@ -32,6 +32,57 @@ class DataInstaller{
     public:
 
         /**
+         * Advanced options available in the installer.
+         */
+        struct AdvancedOptions{
+
+            /**
+             * Option to skip kernel data installation.
+             */
+            bool skip_kernel;
+
+            /**
+             * Option to skip image installation.
+             */
+            bool skip_images;
+
+            /**
+             * Option to skip sound effects installation.
+             */
+            bool skip_sounds;
+
+            /**
+             * Option to skip music tracks installation.
+             */
+            bool skip_music;
+
+            /**
+             * Option to skip field maps installation.
+             */
+            bool skip_fields;
+
+            /**
+             * Option to skip field models installation.
+             */
+            bool skip_field_models;
+
+            /**
+             * Option to keep original data after installation.
+             */
+            bool keep_originals;
+
+            /**
+             * Option to avoid calls to the ffmpeg executable.
+             */
+            bool no_ffmpeg;
+
+            /**
+             * Option to avoid calls to the timidity executable
+             */
+            bool no_timidity;
+        };
+
+        /**
          * The scale factor for line point coordinates.
          *
          * When a LINE opcode is found in the game scripts, the line points X and Y coordinates
@@ -42,14 +93,13 @@ class DataInstaller{
         /**
          * Installer constructor
          *
-         * @param[in] input_dir Path to the directory containing the original
-         * data to parse.
-         * @param[in] output_dir Path to the directory to write generated data
-         * to.
+         * @param[in] input_dir Path to the directory containing the original data to parse.
+         * @param[in] output_dir Path to the directory to write generated data to.
+         * @param[in] options Adavanced options for the installer.
          * @param[in] write_output_line Pointer to function to write output.
          */
         DataInstaller(
-          const std::string input_dir, const std::string output_dir,
+          const std::string input_dir, const std::string output_dir, AdvancedOptions options,
           std::function<void(std::string, int, bool)> write_output_line
         );
 
@@ -77,8 +127,7 @@ class DataInstaller{
         /**
          * Creates a directory in the outputh path.
          *
-         * @param[in] dir Path of the directory to create, relative to the
-         * output path..
+         * @param[in] dir Path of the directory to create, relative to the output path.
          * @throws std::runtime_error If the directory can't be created.
          */
         void CreateDir(const std::string& dir);
@@ -309,14 +358,14 @@ class DataInstaller{
         std::string input_dir_;
 
         /**
-         * The path to original PC game executable.
-         */
-        std::string exe_path_;
-
-        /**
          * The path to the directory where to save the V-Gears data.
          */
         std::string output_dir_;
+
+        /**
+         * Advanced options.
+         */
+        AdvancedOptions options_;
 
         /**
          * The installer application.

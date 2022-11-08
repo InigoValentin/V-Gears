@@ -15,6 +15,9 @@
 
 #include "data/VGearsCameraMatrixFileManager.h"
 
+/**
+ * Camera file manager singleton.
+ */
 template<> VGears::CameraMatrixFileManager
   *Ogre::Singleton<VGears::CameraMatrixFileManager>::msSingleton = nullptr;
 

@@ -20,6 +20,9 @@
 #include "core/Logger.h"
 #include "core/Timer.h"
 
+/**
+ * Input manager singleton.
+ */
 template<>InputManager *Ogre::Singleton<InputManager>::msSingleton = nullptr;
 
 InputManager::InputManager():
@@ -42,8 +45,7 @@ void InputManager::ButtonPressed(int button, char text, bool down){
         button_state_[button] = down;
         button_text_[button] = text;
         VGears::Event event;
-        event.type
-          = (down == true) ? VGears::ET_KEY_PRESS : VGears::ET_KEY_RELEASE;
+        event.type = (down == true) ? VGears::ET_KEY_PRESS : VGears::ET_KEY_RELEASE;
         event.param1 = button;
         event.param2 = text;
         event_queue_.push_back(event);
@@ -116,9 +118,7 @@ void InputManager::Update(){
     }
 }
 
-bool InputManager::IsButtonPressed(int button) const{
-    return button_state_[button];
-}
+bool InputManager::IsButtonPressed(int button) const{return button_state_[button];}
 
 void InputManager::GetInputEvents(InputEventArray& input_events){
     input_events = event_queue_;
@@ -135,9 +135,7 @@ void InputManager::BindCommand(
     binds_.push_back(info);
 }
 
-void InputManager::BindGameEvent(
-  const Ogre::String& event, const ButtonList& buttons
-){
+void InputManager::BindGameEvent(const Ogre::String& event, const ButtonList& buttons){
     BindGameEventInfo info;
     info.event = event;
     info.buttons = buttons;
@@ -178,32 +176,23 @@ void InputManager::ActivateBinds(const int button) {
     }
 }
 
-void InputManager::AddGameEvents(
-  const int button, const VGears::EventType type
-){
+void InputManager::AddGameEvents(const int button, const VGears::EventType type){
     std::vector< int > binds_indexes;
     for (unsigned int i = 0; i < bind_game_events_.size(); ++ i){
         // If the button is found in this bind
         if (
           std::find(
-            bind_game_events_[i].buttons.begin(),
-            bind_game_events_[i].buttons.end(), button
+            bind_game_events_[i].buttons.begin(), bind_game_events_[i].buttons.end(), button
           )
           != bind_game_events_[i].buttons.end()
         ){
             unsigned int j = 0;
             for (; j < bind_game_events_[i].buttons.size(); ++ j){
-                if (bind_game_events_[i].buttons[j] != button){
-                    if (
-                      IsButtonPressed(bind_game_events_[i].buttons[j]) == false
-                    ){
-                        break;
-                    }
-                }
+                if (bind_game_events_[i].buttons[j] != button)
+                    if (IsButtonPressed(bind_game_events_[i].buttons[j]) == false) break;
             }
 
-            if (j >= bind_game_events_[i].buttons.size())
-                binds_indexes.push_back(i);
+            if (j >= bind_game_events_[i].buttons.size()) binds_indexes.push_back(i);
         }
     }
 

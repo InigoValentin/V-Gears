@@ -16,6 +16,9 @@
 #include "data/worldmap/MapFileManager.h"
 #include "data/worldmap/MapFile.h"
 
+/**
+ * Map file manager singleton.
+ */
 template<> VGears::MapFileManager*
   Ogre::Singleton<VGears::MapFileManager>::msSingleton = nullptr;
 

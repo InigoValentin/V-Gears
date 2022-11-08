@@ -43,10 +43,7 @@ class UiWidget{
          * @param[in] path_name @todo Understand and document.
          * @param[in] parent Widget to be made parent of the new one.
          */
-        UiWidget(
-          const Ogre::String& name, const Ogre::String& path_name,
-          UiWidget* parent
-        );
+        UiWidget(const Ogre::String& name, const Ogre::String& path_name, UiWidget* parent);
 
         /**
          * Destructor.
@@ -517,7 +514,7 @@ class UiWidget{
          *
          * If the widget doesn't have text, it won't do anything.
          *
-         * @param[in] Text the text to set.
+         * @param[in] text The text to set.
          */
         virtual void SetText(const char* text);
 
@@ -544,7 +541,7 @@ class UiWidget{
          *
          * Doesn't modify percentages.
          *
-         * @param[in] Absolute width.
+         * @param[in] width Absolute width.
          */
         void ScriptSetWidth(float width);
 
@@ -562,7 +559,7 @@ class UiWidget{
          *
          * Doesn't modify percentages.
          *
-         * @param[in] Absolute height.
+         * @param[in] height Absolute height.
          */
         void ScriptSetHeight(float height);
 

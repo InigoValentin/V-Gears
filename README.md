@@ -2,23 +2,68 @@
 
 ## What is V-Gears? 
 
-V-Gears is a free implementation of the game Final Fantasy 7, designed to work with the original game data.
+V-Gears is a free implementation of the game Final Fantasy 7 engine, designed to work with the original game data.
+
+It's designed to run the original game data on modern operating systems, making the game playable without the need of emulators.
+
+It's free software, and it's designed to be cross-platform. It, of course, doesn't include any copyrighted data from the original game, but it provides an installer to get the required data from your own PC copy of the game.
+
+It's a continuation of [q-gears](https://github.com/q-gears/q-gears "Q-Gears on Github"), which is an enormous project started by some great people many years ago, with the same purpose as this, but which unfortunately became stalled.
+
+## Gallery
+
+Note that, while these are actual screenshots of V-Gears, none of the images, sprites, textures, backgrounds, etc are part of the project. They have been extracted locally from an original Final Fantasy VII game, and are in no way distributed here.
+### Field maps:
+|**Cloud model**|**Dialogs**|**Animations**|
+|--|--|--|
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/cloud.png" alt="Cloud model" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/cloud.png "Cloud model")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/dialog.png" alt="dialog" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/dialog.png "Dialogs")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/animation.png" alt="animation" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/animation.png "Animations")|
+|**Climbing**|**Mid-jump!**|**Materia**|
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/climb.png" alt="Climbing" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/climb.png "Climbing")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/midjump.png" alt="Mid-jump" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/midjump.png "Mid-jump")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/materia.png" alt="Materia" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/materia.png "Materia")|
+
+### Menus:
+|**Begin**|**Main**|**Name**|
+|--|--|--|
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/begin_menu.png" alt="Begin Menu" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/begin_menu.png "Begin Menu")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/main_menu.png" alt="Main Menu" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/main_menu.png "Main Menu")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/name_menu.png" alt="Name Menu" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/name_menu.png "Name Menu")|
+|**Items**|**Key Items**|**Equip**|
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/item_menu.png" alt="Item Menu" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/item_menu.png "Item Menu")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/item_menu_key.png" alt="Key items menuy" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/item_menu_key.png "Key items menu")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/equip_menu.png" alt="Equip Menu" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/equip_menu.png "Equip Menu")|
+|**Materia**|||
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/materia_menu.png" alt="Materia Menu" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/materia_menu.png "Materia Menu")|||
+
+### Installer:
+|**Installer**|**Advanced**|
+|--|--|
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/installer.png" alt="Installer" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/installer.png "Installer")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/installer_advanced.png" alt="Advanced options" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/installer_advanced.png "Advanced options")|
+
+### Debug Tools
+|**Field maps**|**Walkmesh**|**Console**|
+|--|--|--|
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/debug_dialog.png" alt="Debug fields" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/debug_dialog.png "Debug Fields")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/walkmesh.png" alt="Walkmesh" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/walkmesh.png "Walkmesh")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/console.png" alt="Console" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/console.png "Console")|
 
 ## What is it's current state?
 
-Well, if the question means "How deep into the game can I play?", the answer is "Not much". Exactly until here:
+Well, let's call it a work in progress... of a work in progress.
 
-![Max progress](doc/max-progress.png "Max progress")
+|**<span style='color:#22aa22;'>Things that work</span>**|**<span style='color:#aa2222;'>Things that don't</span>**|
+|:--:|:--:|
+|A few field maps|Most field maps|
+|Some menus|Some other menus|
+|Sound (mostly)|Battles, in general.|
+| |The world map, also in general|
+| |Saving / Loading|
+| |Minigames|
+| |Shops|
+| |Timers|
+| |Many other things|
 
-Also, there are no battles, and the world map doesn't work.
+
+If the question was "How deep into the game can I play?", then the answer is
+> You can ALMOST play the whole Mako Reactor 1 mission. But dumbass Biggs won't show up to open the way out, so you die on fire. Or you would, if the bomb timer actually worked.
 
 But don't worry! The engine is not fixed sequentially, or map by map. Once a fix is implememnted, it applies to all maps at once, anb big chunck of the game are unlocked after each fix.
-
-The field engine is almost completly functional. Once the little quircks in the original game script parser are fixed, all maps should be playable.
 
 ## In the meantime...
 
 If it picked your curiosity, you can check out the [history](doc/HISTORY.md "V-Gears history") behind the project. Or, if you want to try it for yourself, maybe the [build](doc/BUILD.md "Building guide") and [installaton](doc/INSTALL.md "Installation guide") guides are a good place to start.
 
-Or even better, if you want to see this done and want to contribute, clone the repo, read the [style guid](doc/STYLE.md "V-Gears C++ Style Guide") and have a go at it!
+Or even better, if you want to see this done and want to contribute, clone the repo, read the [style guide](doc/STYLE.md "V-Gears C++ Style Guide") and have a go at it!
 

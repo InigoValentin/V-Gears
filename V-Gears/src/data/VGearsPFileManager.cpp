@@ -15,6 +15,9 @@
 
 #include "data/VGearsPFileManager.h"
 
+/**
+ * '.P' file manager singleton.
+ */
 template<> VGears::PFileManager
   *Ogre::Singleton<VGears::PFileManager>::msSingleton = nullptr;
 

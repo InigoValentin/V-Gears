@@ -21,6 +21,9 @@
 #include "core/XmlSoundsFile.h"
 #include "core/Logger.h"
 
+/**
+ * Audio manager singleton.
+ */
 template<>AudioManager *Ogre::Singleton<AudioManager>::msSingleton = nullptr;
 
 ALsizei AudioManager::channel_buffer_number_ = 2;

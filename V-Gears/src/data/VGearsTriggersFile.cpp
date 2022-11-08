@@ -15,6 +15,9 @@
 
 #include "data/VGearsTriggersFile.h"
 
+/**
+ * Triggers file manager singleton.
+ */
 template<> VGears::TriggersFileManager
   *Ogre::Singleton<VGears::TriggersFileManager>::msSingleton = nullptr;
 

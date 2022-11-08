@@ -30,8 +30,10 @@
 #include "data/worldmap/TxzFileSerializer.h"
 #include "data/worldmap/MapFileManager.h"
 
-template<> VGears::WorldMapModule
-*Ogre::Singleton< VGears::WorldMapModule >::msSingleton = nullptr;
+/**
+ * World map module singleton.
+ */
+template<> VGears::WorldMapModule *Ogre::Singleton< VGears::WorldMapModule >::msSingleton = nullptr;
 
 namespace VGears {
 

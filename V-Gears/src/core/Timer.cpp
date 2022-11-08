@@ -20,15 +20,17 @@ ConfigVar cv_timer_scale_game(
   "timer_scale_game", "Timer speed for game related things", "1"
 );
 
+/**
+ * Timer singleton
+ */
 template<>Timer *Ogre::Singleton<Timer>::msSingleton = nullptr;
-
 
 Timer::Timer():
   system_time_total_(0),
   system_time_delta_(0),
   game_time_total_(0),
-  game_time_delta_( 0 ),
-  game_timer_( 0 )
+  game_time_delta_(0),
+  game_timer_(0)
 {}
 
 float Timer::GetSystemTimeTotal(){return system_time_total_;}

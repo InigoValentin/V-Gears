@@ -320,7 +320,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * Assigns a character to an entity.
          *
          * @param[in] entity_name The entity name.
-         * @param[in] charid The character ID.
+         * @param[in] char_id The character ID.
          */
         void SetEntityToCharacter(const char* entity_name, unsigned int char_id);
 
@@ -328,7 +328,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
          * Adds a music track ID to the list of music tracks of the field.
          *
          * @param[in] id ID of the track in the map.
-         * @param[in] Music track ID.
+         * @param[in] track_id Music track ID.
          */
         void AddTrack(const int id, const int track_id);
 

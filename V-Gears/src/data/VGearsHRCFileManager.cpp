@@ -16,6 +16,9 @@
 #include <OgreLogManager.h>
 #include "data/VGearsHRCFileManager.h"
 
+/**
+ * HRC file manager singleton.
+ */
 template<> VGears::HRCFileManager
   *Ogre::Singleton<VGears::HRCFileManager>::msSingleton = nullptr;
 

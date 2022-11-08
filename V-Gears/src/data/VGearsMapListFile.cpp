@@ -16,6 +16,9 @@
 #include <array>
 #include "data/VGearsMapListFile.h"
 
+/**
+ * Map list file manager singleton.
+ */
 template<> VGears::MapListFileManager
   *Ogre::Singleton<VGears::MapListFileManager>::msSingleton = nullptr;
 

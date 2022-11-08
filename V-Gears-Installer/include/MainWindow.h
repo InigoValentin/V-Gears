@@ -107,6 +107,11 @@ class MainWindow : public QMainWindow{
          */
         void on_btn_data_run_clicked();
 
+        /**
+         * Triggered when the advanced options checkbox is checked or unchecked.
+         */
+        void on_chk_advanced_options_stateChanged();
+
     //private slots:
 
         /**

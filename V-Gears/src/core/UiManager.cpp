@@ -29,16 +29,17 @@
 #include "core/XmlTextsFile.h"
 #include "core/TextManager.h"
 
+/**
+ * UI manager singleton.
+ */
 template<>UiManager *Ogre::Singleton<UiManager>::msSingleton = nullptr;
 
 UiManager::UiManager(){
-    Ogre::Root::getSingleton().getSceneManager("Scene")
-      ->addRenderQueueListener(this);
+    Ogre::Root::getSingleton().getSceneManager("Scene")->addRenderQueueListener(this);
 }
 
 UiManager::~UiManager(){
-    Ogre::Root::getSingleton().getSceneManager("Scene")
-      ->removeRenderQueueListener(this);
+    Ogre::Root::getSingleton().getSceneManager("Scene")->removeRenderQueueListener(this);
     for (size_t i = 0; i < fonts_.size(); ++ i) delete fonts_[i];
     for (size_t i = 0; i < widgets_.size(); ++ i) delete widgets_[i];
 }
@@ -69,10 +70,7 @@ void UiManager::AddFont(UiFont* font){fonts_.push_back(font);}
  * @return Lowercase string.
  */
 std::string toLower(std::string s) {
-    std::transform(
-      s.begin(), s.end(), s.begin(),
-      [](unsigned char c){return std::tolower(c);}
-    );
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){return std::tolower(c);});
     return s;
 }
 
@@ -82,8 +80,7 @@ UiFont* UiManager::GetFont(const Ogre::String& name){
     for (unsigned int i = 0; i < fonts_.size(); ++ i){
         if (fonts_[ i ]->GetName() == name){
             Ogre::String f_lang = fonts_[ i ]->GetLanguage();
-            if ((f_lang == "") || (toLower(f_lang) == toLower(language)))
-                return fonts_[ i ];
+            if ((f_lang == "") || (toLower(f_lang) == toLower(language))) return fonts_[i];
         }
     }
     return NULL;
@@ -112,32 +109,21 @@ UiWidget* UiManager::GetWidget(const Ogre::String& name){
         for (unsigned int i = 0; i < widgets_.size(); ++ i){
             if (widgets_[ i ]->GetName() == table_path[0]){
                 widget = widgets_[i];
-                for (
-                  unsigned int j = 1;
-                  (j < table_path.size()) && (widget != NULL);
-                  ++ j
-                ){
+                for (unsigned int j = 1; (j < table_path.size()) && (widget != NULL); ++ j)
                     widget = widget->GetChild(table_path[j]);
-                }
             }
         }
     }
     return widget;
 }
 
-UiWidget* UiManager::ScriptGetWidget(const char* name){
-    return GetWidget(Ogre::String(name));
-}
+UiWidget* UiManager::ScriptGetWidget(const char* name){return GetWidget(Ogre::String(name));}
 
 void UiManager::renderQueueStarted(
-  Ogre::uint8 queueGroupId, const Ogre::String& invocation,
-  bool& skipThisInvocation
+  Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation
 ){
     if (queueGroupId == Ogre::RENDER_QUEUE_OVERLAY){
-        Ogre::Root::getSingletonPtr()->getRenderSystem()->clearFrameBuffer(
-          Ogre::FBT_DEPTH
-        );
-        for (unsigned int i = 0; i < widgets_.size(); ++ i)
-            widgets_[ i ]->Render();
+        Ogre::Root::getSingletonPtr()->getRenderSystem()->clearFrameBuffer(Ogre::FBT_DEPTH);
+        for (unsigned int i = 0; i < widgets_.size(); ++ i) widgets_[i]->Render();
     }
 }

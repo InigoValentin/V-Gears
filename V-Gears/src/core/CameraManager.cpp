@@ -24,9 +24,11 @@
 #include "core/InputManager.h"
 #include "core/Logger.h"
 
-
 ConfigVar cv_cam_speed("camera_speed", "Camera speed", "0.02");
 
+/**
+ * Camera manager singleton.
+ */
 template<>CameraManager* Ogre::Singleton<CameraManager>::msSingleton = nullptr;
 
 CameraManager::CameraManager():

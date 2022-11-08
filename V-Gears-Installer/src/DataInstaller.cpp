@@ -14,21 +14,22 @@
  */
 
 #include <QtCore/QDir>
+#include <boost/filesystem.hpp>
 #include "DataInstaller.h"
 
 float DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
 
 DataInstaller::DataInstaller(
-  const std::string input_dir, const std::string output_dir,
+  const std::string input_dir, const std::string output_dir, AdvancedOptions options,
   std::function<void(std::string, int, bool)> write_output_line
 )
 #ifdef _DEBUG
-    : application_("plugins_d.cfg", "resources_d.cfg", "install_d.log"),
+  : application_("plugins_d.cfg", "resources_d.cfg", "install_d.log"),
 #else
   : application_("plugins.cfg", "resources.cfg", "install.log"),
 #endif
   input_dir_(input_dir), output_dir_(output_dir),
-  write_output_line_(write_output_line)
+  options_(options), write_output_line_(write_output_line)
 {
     if (!application_.initOgre(true)) throw std::runtime_error("Ogre init failure");
     Ogre::Log* default_log(Ogre::LogManager::getSingleton().getDefaultLog());
@@ -63,11 +64,20 @@ float DataInstaller::Progress(){
         case INITIALIZE:
             write_output_line_("Initializing installers...", 2, true);
             kernel_installer_ = std::make_unique<KernelDataInstaller>(input_dir_);
-            media_installer_ = std::make_unique<MediaDataInstaller>(input_dir_, output_dir_);
+            media_installer_ = std::make_unique<MediaDataInstaller>(
+              input_dir_, output_dir_, options_.keep_originals,
+              options_.no_ffmpeg, options_.no_timidity
+            );
             field_installer_ = std::make_unique<FieldDataInstaller>(input_dir_, output_dir_);
             installation_state_ = KERNEL_PRICES;
             return CalcProgress();
         case KERNEL_PRICES:
+            // Skip kernel data if option is set.
+            if (options_.skip_kernel){
+                write_output_line_("Skipping kernel data installation...", 2, true);
+                installation_state_ = MEDIA_SOUNDS_INIT;
+                return CalcProgress();
+            }
             write_output_line_("Parsing item and materia prices...", 2, true);
             kernel_installer_->ReadPrices();
             installation_state_ = KERNEL_COMMANDS;
@@ -145,11 +155,23 @@ float DataInstaller::Progress(){
             installation_state_ = MEDIA_IMAGES;
             return CalcProgress();
         case MEDIA_IMAGES:
+            // Skip images if option is set.
+            if (options_.skip_images){
+                write_output_line_("Skipping images installation...", 2, true);
+                installation_state_ = MEDIA_SOUNDS_INIT;
+                return CalcProgress();
+            }
             write_output_line_("Extracting game images...", 2, true);
             media_installer_->InstallSprites();
             installation_state_ = MEDIA_SOUNDS_INIT;
             return CalcProgress();
         case MEDIA_SOUNDS_INIT:
+            // Skip sounds if option is set.
+            if (options_.skip_sounds){
+                write_output_line_("Skipping sound effects installation...", 2, true);
+                installation_state_ = MEDIA_MUSICS_INIT;
+                return CalcProgress();
+            }
             write_output_line_("Extracting sounds...", 2, true);
             substeps_ = media_installer_->InstallSoundsInit();
             installation_state_ = MEDIA_SOUNDS;
@@ -166,6 +188,12 @@ float DataInstaller::Progress(){
             installation_state_ = MEDIA_MUSICS_INIT;
             return CalcProgress();
         case MEDIA_MUSICS_INIT:
+            // Skip music if option is set.
+            if (options_.skip_music){
+                write_output_line_("Skipping music tracks installation...", 2, true);
+                installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
+                return CalcProgress();
+            }
             write_output_line_("Extracting music...", 2, true);
             substeps_ = media_installer_->InstallMusicsInit();
             installation_state_ = MEDIA_MUSICS;
@@ -188,6 +216,12 @@ float DataInstaller::Progress(){
             installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
             return CalcProgress();
         case FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT:
+            // Skip fields if option is set.
+            if (options_.skip_fields){
+                write_output_line_("Skipping field maps installation...", 2, true);
+                installation_state_ = CLEAN;
+                return CalcProgress();
+            }
             write_output_line_("Collecting spawn points and scale factors...", 2, true);
             substeps_ = field_installer_->CollectSpawnAndScaleFactorsInit(application_.ResMgr());
             cur_substep_ = 0;
@@ -228,6 +262,12 @@ float DataInstaller::Progress(){
             installation_state_ = FIELD_CONVERT_MODELS_INIT;
             return CalcProgress();
         case FIELD_CONVERT_MODELS_INIT:
+            // Skip fields if option is set.
+            if (options_.skip_field_models){
+                write_output_line_("Skipping field maps installation...", 2, true);
+                installation_state_ = CLEAN;
+                return CalcProgress();
+            }
             write_output_line_("Converting field models...", 2, true);
             field_model_names_ = field_installer_->ConvertModelsInit();
             substeps_ = field_model_names_.size();
@@ -243,7 +283,8 @@ float DataInstaller::Progress(){
             }
             return CalcProgress();
         case CLEAN:
-            CleanInstall();
+            write_output_line_("Cleaning up...", 2, true);
+            if (!options_.keep_originals) CleanInstall();
             installation_state_ = DONE;
             return CalcProgress();
         case DONE:
@@ -294,8 +335,7 @@ void DataInstaller::CreateDirectories(){
 }
 
 void DataInstaller::CleanInstall(){
-    // TODO: Remove 'data/temp' directory.
-    // Either implement an option to keep it, o do it when the installer is mature enough.
+    boost::filesystem::remove_all(input_dir_ + "data/temp/");
 }
 
 void DataInstaller::CreateDir(const std::string& path){

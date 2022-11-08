@@ -15,6 +15,9 @@
 
 #include "data/VGearsPaletteFileManager.h"
 
+/**
+ * Palette file manager singleton.
+ */
 template<> VGears::PaletteFileManager
   *Ogre::Singleton<VGears::PaletteFileManager>::msSingleton = nullptr;
 

@@ -24,6 +24,9 @@
 #include "core/Logger.h"
 #include "core/UiTextArea.h"
 
+/**
+ * Debug drawer singleton.
+ */
 template<>DebugDraw *Ogre::Singleton<DebugDraw>::msSingleton = nullptr;
 
 DebugDraw::DebugDraw():

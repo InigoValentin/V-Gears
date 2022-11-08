@@ -19,6 +19,9 @@
 #include "core/Logger.h"
 #include "core/TextManager.h"
 
+/**
+ * Dialog manager singleton.
+ */
 template<>DialogsManager *Ogre::Singleton< DialogsManager >::msSingleton = NULL;
 
 ConfigVar cv_debug_message("debug_message", "Draw message debug", "false");

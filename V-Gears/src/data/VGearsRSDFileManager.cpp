@@ -15,6 +15,9 @@
 
 #include "data/VGearsRSDFileManager.h"
 
+/**
+ * RSD file manager singleton.
+ */
 template<> VGears::RSDFileManager
  *Ogre::Singleton<VGears::RSDFileManager>::msSingleton = nullptr;
 

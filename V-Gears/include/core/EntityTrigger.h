@@ -102,7 +102,7 @@ class EntityTrigger{
          * Must be set to true when the playable entity's solid radius touches the line while
          * manually moving, and to false when the playable entity is not near the line.
          *
-         * @param[in] entered If the line has been approached.
+         * @param[in] approached If the line has been approached.
          */
         void SetApproached(const bool approached);
 

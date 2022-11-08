@@ -32,9 +32,15 @@ class MediaDataInstaller{
          * Constructor
          *
          * @param[in] input_dir Path to the directory containing the original data to parse.
-         * @param[out] input_dir Path to the directory of the installation data.
+         * @param[in] output_dir Path to the directory of the installation data.
+         * @param[in] keep_originals True to keep original data after conversion, false to remove.
+         * @param[in] no_ffmpeg True to prevent system calls to ffmpeg command, false to allow.
+         * @param[in] no_timidity True to prevent system calls to timidity command, false to allow.
          */
-        MediaDataInstaller(const std::string input_dir, const std::string output_dir);
+        MediaDataInstaller(
+          const std::string input_dir, const std::string output_dir, const bool keep_originals,
+          const bool no_ffmpeg, const bool no_timidity
+        );
 
         /**
          * Destructor.
@@ -218,6 +224,21 @@ class MediaDataInstaller{
          * Sound data for each entry to write to the XML file
          */
         std::vector<std::string> musics_;
+
+        /**
+         * If true, orginal files will not be deleted after conversion.
+         */
+        bool keep_originals_;
+
+        /**
+         * Flag to prevent system calls to ffmpeg.
+         */
+        bool no_ffmpeg_;
+
+        /**
+         * Flag to prevent system calls to timidity.
+         */
+        bool no_timidity_;
 
 
 

@@ -51,7 +51,7 @@ class KernelDataInstaller{
         /**
          * Saves command data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteCommands(std::string file_name);
 
@@ -65,7 +65,7 @@ class KernelDataInstaller{
         /**
          * Saves command data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteAttacks(std::string file_name);
 
@@ -79,7 +79,7 @@ class KernelDataInstaller{
         /**
          * Saves character data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteCharacters(std::string file_name);
 
@@ -91,7 +91,7 @@ class KernelDataInstaller{
         /**
          * Saves growth data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteGrowth(std::string file_name);
 
@@ -105,7 +105,7 @@ class KernelDataInstaller{
         /**
          * Saves item data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteItems(std::string file_name);
 
@@ -119,7 +119,7 @@ class KernelDataInstaller{
         /**
          * Saves weapon data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteWeapons(std::string file_name);
 
@@ -133,7 +133,7 @@ class KernelDataInstaller{
         /**
          * Saves armor data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteArmors(std::string file_name);
 
@@ -147,7 +147,7 @@ class KernelDataInstaller{
         /**
          * Saves accessory data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteAccessories(std::string file_name);
 
@@ -161,7 +161,7 @@ class KernelDataInstaller{
         /**
          * Saves materia data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteMateria(std::string file_name);
 
@@ -175,7 +175,7 @@ class KernelDataInstaller{
         /**
          * Saves key item data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteKeyItems(std::string file_name);
 
@@ -189,7 +189,7 @@ class KernelDataInstaller{
         /**
          * Saves summon names data to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteSummonNames(std::string file_name);
 
@@ -201,7 +201,7 @@ class KernelDataInstaller{
         /**
          * Saves the initial savemap to a Lua script.
          *
-         * @param[in] file Absolute path to the target Lua file.
+         * @param[in] file_name Absolute path to the target Lua file.
          */
         void WriteInitialSaveMap(std::string file_name);
 
@@ -770,7 +770,7 @@ class KernelDataInstaller{
             /**
              * Targeting mode. 1 byte.
              *
-             * See {@see target} and {@TargetModes} for more information.
+             * See {@see target} and {@see TargetModes} for more information.
              */
             u8 target_raw;
 
@@ -885,7 +885,7 @@ class KernelDataInstaller{
             /**
              * Targeting mode. 1 byte.
              *
-             * See {@see target} and {@TargetModes} for more information.
+             * See {@see target} and {@see TargetModes} for more information.
              */
             u8 target_raw;
 
@@ -917,7 +917,7 @@ class KernelDataInstaller{
             /**
              * The restore type.
              *
-             * See {@restore_typ} and {@RESTORE_TYPE} for more information.
+             * See {@see restore_type} and {@see RESTORE_TYPE} for more information.
              */
             u8 condition_raw;
 
@@ -1066,7 +1066,7 @@ class KernelDataInstaller{
             /**
              * Targeting mode. 1 byte.
              *
-             * See {@see target} and {@TargetModes} for more information.
+             * See {@see target} and {@see TargetModes} for more information.
              */
             u8 target_raw;
 
@@ -1098,7 +1098,7 @@ class KernelDataInstaller{
             /**
              * The restore type.
              *
-             * See {@restore_typ} and {@RESTORE_TYPE} for more information.
+             * See {@see restore_type} and {@see RESTORE_TYPE} for more information.
              */
             u8 condition_raw;
 
@@ -1279,7 +1279,7 @@ class KernelDataInstaller{
             /**
              * Targeting mode. 1 byte.
              *
-             * See {@see target} and {@TargetModes} for more information.
+             * See {@see target} and {@see TargetModes} for more information.
              */
             u8 target_raw;
 
@@ -1530,7 +1530,7 @@ class KernelDataInstaller{
             /**
              * Bonus in stats.
              *
-             * Derived from {@see stat_raw} and {@stat_bonus_raw}.
+             * Derived from {@see stat_raw} and {@see stat_bonus_raw}.
              */
             std::vector<StatBonus> stat_bonus;
 
@@ -1714,7 +1714,7 @@ class KernelDataInstaller{
             /**
              * Bonus in stats.
              *
-             * Derived from {@see stat_raw} and {@stat_bonus_raw}.
+             * Derived from {@see stat_raw} and {@see stat_bonus_raw}.
              */
             std::vector<StatBonus> stat_bonus;
 
@@ -1862,7 +1862,7 @@ class KernelDataInstaller{
             /**
              * Bonus in stats.
              *
-             * Derived from {@see stat_raw} and {@stat_bonus_raw}.
+             * Derived from {@see stat_raw} and {@see stat_bonus_raw}.
              */
             std::vector<StatBonus> stat_bonus;
 

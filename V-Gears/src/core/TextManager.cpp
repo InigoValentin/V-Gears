@@ -19,6 +19,9 @@
 #include "core/XmlTextsFile.h"
 #include "core/XmlTextFile.h"
 
+/**
+ * Text manager singleton.
+ */
 template<>TextManager* Ogre::Singleton< TextManager >::msSingleton = NULL;
 
 TextManager::TextManager(): language_(""){

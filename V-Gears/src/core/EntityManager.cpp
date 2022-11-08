@@ -29,6 +29,10 @@
 #include "core/Timer.h"
 #include "core/DialogsManager.h"
 
+/**
+ * Entity manager singleton.
+ * @private
+ */
 template<>EntityManager *Ogre::Singleton<EntityManager>::msSingleton = nullptr;
 
 ConfigVar cv_debug_grid("debug_grid", "Draw debug grid", "false");

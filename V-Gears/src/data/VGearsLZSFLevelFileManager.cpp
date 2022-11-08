@@ -15,6 +15,9 @@
 
 #include "data/VGearsLZSFLevelFileManager.h"
 
+/**
+ * LZS-compressed FLevel file manager singleton.
+ */
 template<> VGears::LZSFLevelFileManager
   *Ogre::Singleton<VGears::LZSFLevelFileManager>::msSingleton = nullptr;
 

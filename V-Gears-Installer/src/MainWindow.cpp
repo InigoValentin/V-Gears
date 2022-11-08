@@ -16,12 +16,14 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <Qt>
 #include <QtCore/QProcess>
 #include <QtWidgets/QFileDialog>
 #include <QtCore/QDir>
 #include <QtCore/QSettings>
 #include <QtWidgets/QMessageBox>
 #include <QtCore/QTimer>
+#include <QtWidgets/QCheckBox>
 #include "DataInstaller.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
@@ -208,10 +210,26 @@ void MainWindow::on_btn_data_run_clicked(){
         }
         // Start data conversion
         try{
+
+            // Parse advanced options.
+            DataInstaller::AdvancedOptions options;
+            options.skip_kernel = (Qt::Checked == main_window_->chk_no_kernel->checkState());
+            options.skip_images = (Qt::Checked == main_window_->chk_no_images->checkState());
+            options.skip_sounds = (Qt::Checked == main_window_->chk_no_sounds->checkState());
+            options.skip_music = (Qt::Checked == main_window_->chk_no_music->checkState());
+            options.skip_fields = (Qt::Checked == main_window_->chk_no_fields->checkState());
+            options.skip_field_models
+              = (Qt::Checked == main_window_->chk_no_field_models->checkState());
+            options.no_ffmpeg = (Qt::Checked == main_window_->chk_no_ffmpeg->checkState());
+            options.no_timidity = (Qt::Checked == main_window_->chk_no_timidity->checkState());
+            options.keep_originals = (Qt::Checked == main_window_->chk_keep_original->checkState());
+
+
             installer_created = true;
             installer_ = std::make_unique<DataInstaller>(
               QDir::toNativeSeparators(input).toStdString(),
               QDir::toNativeSeparators(output).toStdString(),
+              options,
               [this](const std::string log_line, int level, bool as_progress = false){
                  main_window_->data_log->append(log_line.c_str());
                  std::cout << log_line << std::endl;
@@ -223,6 +241,12 @@ void MainWindow::on_btn_data_run_clicked(){
         }
         catch (const std::exception& ex){OnInstallStopped();}
     }
+}
+
+void MainWindow::on_chk_advanced_options_stateChanged(){
+    if (main_window_->chk_advanced_options->checkState() == Qt::Checked)
+        main_window_->advancedOptions->setMaximumHeight(500);
+    else main_window_->advancedOptions->setMaximumHeight(0);
 }
 
 void MainWindow::EnableUi(bool enable){

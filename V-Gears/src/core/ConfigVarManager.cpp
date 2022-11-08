@@ -15,6 +15,9 @@
 
 #include "core/ConfigVarManager.h"
 
+/**
+ * Configuration variable manager singleton.
+ */
 template<>ConfigVarManager *Ogre::Singleton<ConfigVarManager>::msSingleton = nullptr;
 
 ConfigVarManager::ConfigVarManager(){

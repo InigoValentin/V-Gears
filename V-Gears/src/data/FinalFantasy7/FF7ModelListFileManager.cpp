@@ -15,6 +15,9 @@
 
 #include "data/FinalFantasy7/FF7ModelListFileManager.h"
 
+/**
+ * Model list file manager singleton.
+ */
 template<> VGears::ModelListFileManager
   *Ogre::Singleton<VGears::ModelListFileManager>::msSingleton = NULL;
 

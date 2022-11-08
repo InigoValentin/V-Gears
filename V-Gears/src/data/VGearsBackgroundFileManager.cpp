@@ -15,15 +15,15 @@
 
 #include "data/VGearsBackgroundFileManager.h"
 
-
+/**
+ * Backgroun file manager singleton.
+ */
 template<> VGears::BackgroundFileManager
   *Ogre::Singleton<VGears::BackgroundFileManager>::msSingleton = nullptr;
 
 namespace VGears{
 
-    BackgroundFileManager *BackgroundFileManager::GetSingletonPtr(){
-        return msSingleton;
-    }
+    BackgroundFileManager *BackgroundFileManager::GetSingletonPtr(){return msSingleton;}
 
     BackgroundFileManager &BackgroundFileManager::GetSingleton(){
         assert( msSingleton );
@@ -36,15 +36,11 @@ namespace VGears{
         mLoadOrder = 30.0f;
 
         // This is how the ResourceManager registers with OGRE.
-        Ogre::ResourceGroupManager::getSingleton()._registerResourceManager(
-          mResourceType, this
-        );
+        Ogre::ResourceGroupManager::getSingleton()._registerResourceManager(mResourceType, this);
     }
 
     BackgroundFileManager::~BackgroundFileManager(){
-        Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(
-          mResourceType
-        );
+        Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(mResourceType);
     }
 
     Ogre::Resource *BackgroundFileManager::createImpl(

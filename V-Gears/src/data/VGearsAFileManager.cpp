@@ -14,8 +14,10 @@
  */
 #include "data/VGearsAFileManager.h"
 
-template<> VGears::AFileManager
-  *Ogre::Singleton<VGears::AFileManager>::msSingleton = nullptr;
+/**
+ * '.A' File manager singleton.
+ */
+template<> VGears::AFileManager *Ogre::Singleton<VGears::AFileManager>::msSingleton = nullptr;
 
 namespace VGears{
 
@@ -32,15 +34,11 @@ namespace VGears{
         mLoadOrder = 30.0f;
 
         // This is how the ResourceManager registers with OGRE.
-        Ogre::ResourceGroupManager::getSingleton()._registerResourceManager(
-          mResourceType, this
-        );
+        Ogre::ResourceGroupManager::getSingleton()._registerResourceManager(mResourceType, this);
     }
 
     AFileManager::~AFileManager(){
-        Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(
-          mResourceType
-        );
+        Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(mResourceType);
     }
 
     Ogre::Resource *AFileManager::createImpl(

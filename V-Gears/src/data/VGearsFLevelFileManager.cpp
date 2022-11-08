@@ -15,6 +15,9 @@
 
 #include "data/VGearsFLevelFileManager.h"
 
+/**
+ * FLevel file manager singleton.
+ */
 template<> VGears::FLevelFileManager
   *Ogre::Singleton<VGears::FLevelFileManager>::msSingleton = nullptr;
 

@@ -38,8 +38,12 @@ u8 MediaDataInstaller::WAV_HEADER[] = {
   0x30, 0xFF, 0x88, 0x01, 0x18, 0xFF, 0x64, 0x61, 0x74, 0x61, 0x2A, 0x0B, 0x00, 0x00
 };
 
-MediaDataInstaller::MediaDataInstaller(const std::string input_dir, const std::string output_dir):
-  input_dir_(input_dir), output_dir_(output_dir),
+MediaDataInstaller::MediaDataInstaller(
+  const std::string input_dir, const std::string output_dir, const bool keep_originals,
+  const bool no_ffmpeg, const bool no_timidity
+):
+  input_dir_(input_dir), output_dir_(output_dir), keep_originals_(keep_originals),
+  no_ffmpeg_(no_ffmpeg), no_timidity_(no_timidity),
   menu_(input_dir + "data/menu/menu_us.lgp", "LGP"), window_(input_dir + "data/kernel/WINDOW.BIN"),
   fmt_(input_dir_ + "data/sound/audio.fmt"), dat_(input_dir_ + "data/sound/audio.dat"),
   midi_(input_dir + "data/midi/midi.lgp", "LGP")
@@ -296,7 +300,7 @@ void MediaDataInstaller::InstallSprites(){
         // TODO: Extract arena reels from coloa.tex, colob.tex and coloc.tex
 
         // Delete Tex file.
-        std::remove((output_dir_ + "images/" + f.file_name).c_str());
+        if (!keep_originals_) std::remove((output_dir_ + "images/" + f.file_name).c_str());
     }
 }
 
@@ -360,10 +364,16 @@ bool MediaDataInstaller::InstallSounds(){
     // TODO: Don't use system calls! Integrate libav or something that can do the conversion
     // natively
     std::string command = (boost::format(
-      "ffmpeg -hide_banner -loglevel panic -y -i %1%audio/sound/%2%.wav %1%audio/sound/%2%.ogg;"
-      "rm %1%audio/sound/%2%.wav"
+      "ffmpeg -hide_banner -loglevel panic -y -i %1%audio/sound/%2%.wav %1%audio/sound/%2%.ogg"
     ) % output_dir_ % processed_sounds_).str();
-    std::system(command.c_str());
+    if (!no_ffmpeg_) std::system(command.c_str());
+
+    // Remove the wav file.
+    if (!keep_originals_){
+        std::remove(
+          (output_dir_ + "audio/sound/" + std::to_string(processed_sounds_) + ".wav").c_str()
+        );
+    }
 
     sounds_.push_back("audio/sound/" + std::to_string(processed_sounds_) + ".ogg");
     processed_sounds_ ++;
@@ -439,11 +449,14 @@ bool MediaDataInstaller::InstallMusics(){
 
     // Convert to ogg (TiMidity + FFMpeg)
     std::string command = (boost::format(
-      "timidity --quiet=3 %1%audio/music/%2%.mid -Ow -o - | ffmpeg -hide_banner -loglevel panic -y "
-      "-i - %1%audio/music/%2%.ogg; rm %1%audio/music/%2%.mid"
+      "timidity --quiet=3 %1%audio/music/%2%.mid -Ow -o - "
+      "| ffmpeg -hide_banner -loglevel panic -y -i - %1%audio/music/%2%.ogg"
     ) % output_dir_ % index).str();
-    std::system(command.c_str());
+    if (!no_ffmpeg_ && !no_timidity_) std::system(command.c_str());
 
+    // Remove the midi file.
+    if (!keep_originals_)
+        std::remove((output_dir_ + "audio/music/" + std::to_string(index) + ".mid").c_str());
 
     musics_.push_back("audio/music/" + std::to_string(processed_musics_) + ".ogg");
     processed_musics_ ++;
@@ -466,8 +479,7 @@ void MediaDataInstaller::InstallHQMusics(){
         std::string command = (boost::format(
           "ffmpeg -hide_banner -loglevel panic -y -i %1%music/%2%.wav %3%audio/sound/%4%.ogg"
         ) % input_dir_ % hq_music % output_dir_ % index).str();
-        std::cout << "    HQ Command: " << command << "\n";
-        std::system(command.c_str());
+        if (!no_ffmpeg_)  std::system(command.c_str());
     }
 }
 

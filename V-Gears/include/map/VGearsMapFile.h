@@ -134,7 +134,7 @@ namespace VGears{
             /**
              * Sets the map field texts file name.
              *
-             * @param[in] texts The texts file name.
+             * @param[in] texts_name The texts file name.
              */
             virtual void SetTextsName(const String& texts_name);
 

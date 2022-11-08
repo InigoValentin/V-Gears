@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>720</width>
-    <height>500</height>
+    <height>703</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -80,7 +80,7 @@
             </property>
             <property name="icon">
              <iconset theme="dialog-information">
-              <normaloff>.</normaloff>.</iconset>
+              <normaloff>Workspace/Software/V-Gears/V-Gears-Installer/src</normaloff>Workspace/Software/V-Gears/V-Gears-Installer/src</iconset>
             </property>
             <property name="checkable">
              <bool>false</bool>
@@ -144,7 +144,7 @@
             </property>
             <property name="icon">
              <iconset theme="dialog-information">
-              <normaloff>.</normaloff>.</iconset>
+              <normaloff>Workspace/Software/V-Gears/V-Gears-Installer/src</normaloff>Workspace/Software/V-Gears/V-Gears-Installer/src</iconset>
             </property>
             <property name="checkable">
              <bool>false</bool>
@@ -157,15 +157,182 @@
          </layout>
         </item>
         <item>
+         <widget class="QCheckBox" name="chk_advanced_options">
+          <property name="text">
+           <string>Show advanced options</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="advancedOptions">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="title">
+           <string/>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <property name="spacing">
+            <number>5</number>
+           </property>
+           <property name="leftMargin">
+            <number>11</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
+              <widget class="QCheckBox" name="chk_no_kernel">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract kernel data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, game data such as items, materia, character information or initial savemap will not be extracted. Data from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is usually quite fast, so there is no reason to skip it unless you have manually changed data.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Don't extract kernel data</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="chk_no_images">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract images.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, images will not be extracted. This includes window decorations, menus icons, character portraits... It doesn' include backgrounds or textures. Images from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is usually quite fast, so there is no reason to skip it unless you have manually edited the images.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Don't extract images</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <item>
+              <widget class="QCheckBox" name="chk_no_sounds">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract sounds.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, sound effects will not be extracted. This doesn' include music tracks. Sounds from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;Installing sounds can take a few minutes, and it's OK to skip this step if they are already installed. You can also check this if you are getting errors installing sounds or if FFmpeg is not installed in your system.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Don't extract sounds</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="chk_no_music">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract audio tracks.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, audio tracks will not be extracted. This doesn' include sound effects. Tracks from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;Installing music can take a few minutes, and it's OK to skip this step if they are already installed. You can also check this if you are getting errors installing sounds or if FFmpeg or TiMidity are not installed in your system.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Don't extract music tracks</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <item>
+              <widget class="QCheckBox" name="chk_no_fields">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract field maps.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, map fields will not be extracted. Field maps from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is not usually very long, so there is no reason to skip it unless you have manually edited the fields. Skipping field map installation will also skip the installation of field 3D models.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Don't extract field maps</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="chk_no_field_models">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract field 3D models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, field 3D models and textures will not be extracted. Models from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is not usually very long, so there is no reason to skip it unless you have manually edited the models. Skipping field map installation will also skip the installation of field 3D models.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Dont't extract field 3D models</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QCheckBox" name="chk_no_ffmpeg">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't use the ffmpeg command.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, sound effects and background music will not be available to V-Gears.&lt;br&gt;&lt;br&gt;Sound effects and music indexes will still be built, but you will need to provide your own ogg files.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Prevent FFmpeg calls</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="chk_no_timidity">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't use the timidity command.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, background music will not be available to V-Gears.&lt;br&gt;&lt;br&gt;Music indexes will still be built, but you will need to provide your own ogg tracks.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Prevent TiMidity calls</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QCheckBox" name="chk_keep_original">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't delete original data after installation.&lt;/b&gt;&lt;br&gt;&lt;br&gt;The installer extracts some original data from the installation disk, such as MIDI sounds, TEX images, and some LGP archives. If checked, this data will not be deleted when the installation is complete.&lt;br&gt;&lt;br&gt;This data is never used by V-Gears, and there is usually no need to check this.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Preserve original data</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_data_run">
+          <property name="text">
+           <string>Install data</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QProgressBar" name="data_progress_bar">
           <property name="value">
            <number>0</number>
           </property>
-          <property name="textVisible">
-           <bool>false</bool>
-          </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
+          </property>
+          <property name="textVisible">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -278,13 +445,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QPushButton" name="btn_data_run">
-          <property name="text">
-           <string>Install data</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_vgears">
@@ -377,7 +537,7 @@
      <x>0</x>
      <y>0</y>
      <width>720</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

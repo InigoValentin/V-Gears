@@ -25,7 +25,9 @@
 #include "core/Timer.h"
 #include "core/Utilites.h"
 
-
+/**
+ * Console singleton
+ */
 template<>Console *Ogre::Singleton<Console>::msSingleton = nullptr;
 
 ConfigVar cv_console_notification(

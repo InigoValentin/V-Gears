@@ -15,6 +15,9 @@
 
 #include "map/VGearsWalkmeshFileManager.h"
 
+/**
+ * Walkmesh file manager singleton.
+ */
 template<> VGears::WalkmeshFileManager
   *Ogre::Singleton<VGears::WalkmeshFileManager>::msSingleton = nullptr;
 

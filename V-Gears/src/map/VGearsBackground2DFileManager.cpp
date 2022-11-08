@@ -15,6 +15,9 @@
 
 #include "map/VGearsBackground2DFileManager.h"
 
+/**
+ * Background 2D file manager singleton.
+ */
 template<> VGears::Background2DFileManager
   *Ogre::Singleton<VGears::Background2DFileManager>::msSingleton = nullptr;
 

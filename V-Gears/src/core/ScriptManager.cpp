@@ -28,6 +28,9 @@ ConfigVar cv_debug_script(
   "debug_script", "Debug script flags. 0x01 - System, 0x02 - Entity, 0x04 - Ui.", "0"
 );
 
+/**
+ * Script manager singleton.
+ */
 template<>ScriptManager *Ogre::Singleton<ScriptManager>::msSingleton = nullptr;
 
 Ogre::String script_entity_type[] = {"SYSTEM", "ENTITY", "UI"};
