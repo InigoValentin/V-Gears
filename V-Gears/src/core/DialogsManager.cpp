@@ -247,16 +247,16 @@ void DialogsManager::SetText(const char* d_name, const char* text){
     float height = 0.0f;
     TiXmlNode* xmlText = TextManager::getSingleton().GetDialog(text, width, height);
     if (xmlText != NULL){
-        messages_[id]->text_area->SetText(xmlText);
         ShowMessage(
           id, data->x, data->y,
           width == 0.0f ? data->w : width,
           height == 0.0f ? data->h : height
         );
+        messages_[id]->text_area->SetText(xmlText);
     }
     else{
-        messages_[id]->text_area->SetText(std::string("[ERROR string not found:] ") + text);
         ShowMessage(id, data->x, data->y, data->w, data->h);
+        messages_[id]->text_area->SetText(std::string("[ERROR string not found:] ") + text);
     }
 }
 
@@ -333,18 +333,20 @@ int DialogsManager::GetCursor(const char* d_name) const{
 void DialogsManager::ShowMessage(
   const int id, const int x, const int y, const int width, const int height
 ){
+    // Add 5 pixels, to compensate character width operation roundowns.
+    int extra_width = width + 5;
     // Handle error when dialog window cross border of limit area
     float la_percent_width, la_width;
     limit_area_->GetWidth(la_percent_width, la_width);
     float move_back_x = 0;
-    if (x + width > la_width) move_back_x = x + width - la_width;
+    if (x + extra_width > la_width) move_back_x = x + extra_width - la_width;
     float la_percent_height, la_height;
     limit_area_->GetWidth(la_percent_height, la_height);
     float move_back_y = 0;
     if (y + height > la_height) move_back_y = y + height - la_height;
     messages_[id]->widget->SetX(0, x - move_back_x);
     messages_[id]->widget->SetY(0, y - move_back_y);
-    messages_[id]->widget->SetWidth(0, width);
+    messages_[id]->widget->SetWidth(0, extra_width);
     messages_[id]->widget->SetHeight(0, height);
     messages_[id]->widget->SetVisible(true);
     messages_[id]->auto_close = false;

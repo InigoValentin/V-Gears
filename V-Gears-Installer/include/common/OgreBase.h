@@ -158,24 +158,32 @@ class DisplayFrameListener :
             }
             if (keyboard_->isKeyDown(OIS::KC_A)){
                 assert(camera_);
-                camera_->moveRelative(Ogre::Vector3(-0.005f, 0.0f, 0.0f));
+                camera_->getParentSceneNode()->translate(
+                  Ogre::Vector3(-0.005f, 0.0f, 0.0f), Ogre::Node::TS_LOCAL
+                );
             }
             if (keyboard_->isKeyDown(OIS::KC_D)){
                 assert(camera_);
-                camera_->moveRelative(Ogre::Vector3(0.005f, 0.0f, 0.0f));
+                camera_->getParentSceneNode()->translate(
+                  Ogre::Vector3(0.005f, 0.0f, 0.0f), Ogre::Node::TS_LOCAL
+                );
             }
             if (keyboard_->isKeyDown(OIS::KC_W)){
                 assert(camera_);
-                camera_->moveRelative(Ogre::Vector3(0.0f, 0.0f, -0.005f));
+                camera_->getParentSceneNode()->translate(
+                  Ogre::Vector3(0.0f, 0.0f, -0.005f), Ogre::Node::TS_LOCAL
+                );
             }
             if (keyboard_->isKeyDown(OIS::KC_S)){
                 assert(camera_);
-                camera_->moveRelative(Ogre::Vector3(0.0f, 0.0f,  0.005f));
+                camera_->getParentSceneNode()->translate(
+                  Ogre::Vector3(0.0f, 0.0f,  0.005f), Ogre::Node::TS_LOCAL
+                );
             }
             if (mouse_rotate_ == true){
                 assert(camera_);
-                camera_->yaw(Ogre::Degree(-mouse_move_x_ * 0.13f));
-                camera_->pitch(Ogre::Degree(-mouse_move_y_ * 0.13f));
+                camera_->getParentSceneNode()->yaw(Ogre::Degree(-mouse_move_x_ * 0.13f));
+                camera_->getParentSceneNode()->pitch(Ogre::Degree(-mouse_move_y_ * 0.13f));
                 mouse_move_x_ = 0;
                 mouse_move_y_ = 0;
             }

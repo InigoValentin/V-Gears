@@ -37,9 +37,9 @@ void XmlTextFile::LoadTexts(){
             TextManager::getSingleton().AddText(name, node->Clone());
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "dialog"){
-            Ogre::String name = GetString( node, "name" );
-            float width = GetFloat( node, "width", 0.0f );
-            float height = GetFloat( node, "height", 0.0f );
+            Ogre::String name = GetString(node, "name");
+            float width = GetFloat(node, "width", 0.0f);
+            float height = GetFloat(node, "height", 0.0f);
             TextManager::getSingleton().AddDialog(name, node->Clone(), width, height);
         }
         node = node->NextSibling();

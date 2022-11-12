@@ -7,6 +7,7 @@ export_character_names()
 -- @param point_name Spawn point name in the target map for the PC.
 load_field_map_request = function(map_name, point_name)
     if type(map_name) == "string" and map_name ~= "" then
+
         System.MapChanger.map_name = map_name
         System.MapChanger.point_name = point_name
         script:request(Script.SYSTEM, "MapChanger", "ffvii_field", 0)
@@ -18,7 +19,7 @@ end
 -- @param entity_name The entity name.
 -- @param character_id Id of the character to assign.
 set_entity_to_character = function(entity_name, character_id)
-    if character_id == FFVII.Party[1] and entity_name ~= "" then
+    if character_id == Party[1] and entity_name ~= "" then
         if System.MapChanger.point_name ~= "" then
             local point = entity_manager:get_entity_point(System.MapChanger.point_name)
             if point ~= nil then
@@ -47,8 +48,8 @@ join_party = function(speed)
     end
     local x, y, z = player:get_position()
     for c = 2, 3 do
-        if FFVII.Party[c] ~= nil then
-            local character = entity_manager:get_entity_from_character_id(FFVII.Party[c])
+        if Party[c] ~= nil then
+            local character = entity_manager:get_entity_from_character_id(Party[c])
             --print("    Name: " .. character:get_name())
             if character ~= nil then
                 local cur_speed = character:get_move_auto_speed()
@@ -85,8 +86,8 @@ split_party = function(ax, ay, ar, bx, by, br, speed)
     local player = entity_manager:get_player_entity()
     local x, y, z = player:get_position()
     for c = 2, 3 do
-        if FFVII.Party[c] ~= nil then
-            local character = entity_manager:get_entity_from_character_id(FFVII.Party[c])
+        if Party[c] ~= nil then
+            local character = entity_manager:get_entity_from_character_id(Party[c])
             if character ~= nil then
                 local cur_speed = character:get_move_auto_speed()
                 -- Approximated speed, good enough for now.
@@ -123,7 +124,7 @@ end
 -- @param lock True to lock, false to unlock.
 player_lock = function(lock)
     entity_manager:player_lock(lock)
-    FFVII.MenuSettings.available = (lock == false)
+    MenuSettings.available = (lock == false)
 end
 
 --- Sets a bit variable on (1).

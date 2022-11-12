@@ -104,10 +104,10 @@ UiContainer.MainMenu = {
                     if self.select_character_for_menu == 2 then -- Magic menu
                         print("Open magic menu for char in slot " .. self.character_position)
                     elseif self.select_character_for_menu == 3 then -- Materia menu
-                        UiContainer.current_character_id = FFVII.Party[self.character_position]
+                        UiContainer.current_character_id = Party[self.character_position]
                         script:request_end_sync(Script.UI, "MateriaMenu", "show", 0)
                     elseif self.select_character_for_menu == 4 then -- Equip menu
-                        UiContainer.current_character_id = FFVII.Party[self.character_position]
+                        UiContainer.current_character_id = Party[self.character_position]
                         script:request_end_sync(Script.UI, "EquipMenu", "show", 0)
                     elseif self.select_character_for_menu == 5 then -- Status menu
                         print("Open status menu for char in slot " .. self.character_position)
@@ -118,7 +118,7 @@ UiContainer.MainMenu = {
                     end
                 end
             end
-        elseif ui_manager:get_widget("MainMenu"):is_visible() == false and FFVII.MenuSettings.available == true then
+        elseif ui_manager:get_widget("MainMenu"):is_visible() == false and MenuSettings.available == true then
             if button == "Escape" and event == "Press" then
                 audio_manager:play_sound("Back")
                 script:request_end_sync(Script.UI, "MainMenu", "show", 0)
@@ -137,7 +137,7 @@ UiContainer.MainMenu = {
         UiContainer.current_menu = "main"
         UiContainer.current_submenu = ""
         entity_manager:set_paused(true)
-        FFVII.MenuSettings.pause_available = false
+        MenuSettings.pause_available = false
         ui_manager:get_widget("MainMenu"):set_visible(true)
         local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
         local menu = ui_manager:get_widget("MainMenu.Container.Menu")
@@ -147,10 +147,10 @@ UiContainer.MainMenu = {
 
 
         for c = 1, 3 do
-            if FFVII.Party[c] ~= nil then
-                UiContainer.populate_character_data("MainMenu.Container.Characters.Character" .. tostring(c), Characters[FFVII.Party[c]])
-                ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_image("images/characters/" .. tostring(FFVII.Party[c]) .. ".png")
-                if Characters[FFVII.Party[c]].back_row == 1 then
+            if Party[c] ~= nil then
+                UiContainer.populate_character_data("MainMenu.Container.Characters.Character" .. tostring(c), Characters[Party[c]])
+                ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_image("images/characters/" .. tostring(Party[c]) .. ".png")
+                if Characters[Party[c]].back_row == 1 then
                     ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_default_animation("RowBack")
                 else
                     ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_default_animation("RowFront")
@@ -200,7 +200,7 @@ UiContainer.MainMenu = {
 
         ui_manager:get_widget("MainMenu"):set_visible(false)
 
-        FFVII.MenuSettings.pause_available = true
+        MenuSettings.pause_available = true
         entity_manager:set_paused(false)
 
         return 0;

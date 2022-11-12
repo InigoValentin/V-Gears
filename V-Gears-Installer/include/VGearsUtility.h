@@ -40,7 +40,12 @@ namespace VGears{
              */
             virtual ~Utility();
 
-            virtual Ogre::Camera* GetCamera( void );
+            /**
+             * Retrieves the camera.
+             *
+             * @return The camera.
+             */
+            virtual Ogre::Camera* GetCamera(void);
 
         protected:
 

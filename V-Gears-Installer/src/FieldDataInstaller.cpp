@@ -50,7 +50,7 @@ std::string FieldDataInstaller::CreateGateWayScript(
       "    end,\n\n"
       "    on_near = function(self, entity)\n"
       "        if entity == \"Cloud\" then\n"
-      "            if not FFVII.Data.DisableGateways then\n"
+      "            if not Data.DisableGateways then\n"
       "                load_field_map_request(\""
       + target_map_name + "\", \"" + source_spawn_point_name + "\")\n"
       "            end\n"

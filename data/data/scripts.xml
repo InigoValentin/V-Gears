@@ -13,6 +13,7 @@
     <script file="game/weapons.lua" />
 
     <script file="scripts/system.lua" />
+    <script file="scripts/save.lua" />
 
     <!-- TODO: Don't always parse initial savemap when loading is implemented. -->
     <script file="game/initial_savemap.lua" />

@@ -463,10 +463,10 @@ UiContainer.ItemMenu = {
         UiContainer.current_menu = "item"
         self.char_position_total = 0
         for c = 1, 3 do
-            if FFVII.Party[c] ~= nil then
+            if Party[c] ~= nil then
                 self.char_position_total = self.char_position_total + 1
-                UiContainer.populate_character_data("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c), Characters[FFVII.Party[c]])
-                ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c) .. ".Portrait"):set_image("images/characters/" .. tostring(FFVII.Party[c]) .. ".png")
+                UiContainer.populate_character_data("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c), Characters[Party[c]])
+                ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c) .. ".Portrait"):set_image("images/characters/" .. tostring(Party[c]) .. ".png")
             else
                 UiContainer.populate_character_data("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c), nil)
             end
@@ -581,7 +581,7 @@ UiContainer.ItemMenu = {
         char_id = -1
         if character_pos then
             -- Normal item, use in one character.
-            char_id = FFVII.Party[character_pos]
+            char_id = Party[character_pos]
         end
 
         -- TODO: When HP MAX is fixed, use it instead of base.

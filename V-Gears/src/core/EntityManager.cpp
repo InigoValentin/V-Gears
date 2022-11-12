@@ -31,7 +31,6 @@
 
 /**
  * Entity manager singleton.
- * @private
  */
 template<>EntityManager *Ogre::Singleton<EntityManager>::msSingleton = nullptr;
 

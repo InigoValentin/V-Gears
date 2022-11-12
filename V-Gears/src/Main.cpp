@@ -21,8 +21,8 @@
 #include <OgreOverlayManager.h>
 #include <OgreOverlaySystem.h>
 #include "VGearsGameState.h"
-#include "core/AudioManager.h"
 #include "common/VGearsApplication.h"
+#include "core/AudioManager.h"
 #include "core/CameraManager.h"
 #include "core/ConfigCmdManager.h"
 #include "core/ConfigFile.h"
@@ -33,6 +33,7 @@
 #include "core/GameFrameListener.h"
 #include "core/InputManager.h"
 #include "core/Logger.h"
+#include "core/SavemapManager.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"
 #include "core/UiManager.h"
@@ -103,9 +104,9 @@ int main(int argc, char *argv[]){
         // Initialize before GameFrameListener, but after ConfigCmdManager
         auto input_manager = std::make_unique<InputManager>();
 
-
         auto audio_manager = std::make_unique<AudioManager>();
-        //audio_manager->MusicPlay( "loop1" );
+
+        auto savemap_manager = std::make_unique<SavemapManager>();
 
         // Create this earlier than DisplayFrameListener cause it can fire
         // events there

@@ -167,7 +167,7 @@ UiContainer.NameMenu = {
     -- effect.
     show = function(self)
         entity_manager:set_paused(true)
-        FFVII.MenuSettings.pause_available = false
+        MenuSettings.pause_available = false
         script:request_end_sync(Script.UI, "Fade", "fade_out", 0)
         ui_manager:get_widget("NameMenu"):set_visible(true)
         UiContainer.current_menu = "name"
@@ -278,7 +278,7 @@ UiContainer.NameMenu = {
         ui_manager:get_widget("NameMenu"):set_visible(false)
         UiContainer.current_menu = ""
         UiContainer.current_submenu = ""
-        FFVII.MenuSettings.pause_available = true
+        MenuSettings.pause_available = true
         entity_manager:set_paused(false)
         script:request_end_sync(Script.UI, "Fade", "fade_in", 0)
         return 0;

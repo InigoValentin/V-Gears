@@ -173,19 +173,17 @@ Materia.LINK = {
     QUADRA_MAGIC = 99
 }
 
-
-FFVII = {}
-
-
-
-FFVII.BattleType = {
+--- Battle ATB modes.
+BattleType = {
     ATB = 0,
     WAIT = 1,
 }
 
 
-
-FFVII.Data = {
+--- Game data
+--
+-- TODO: Remove, use banks.
+Data = {
     progress_game = 0,
     moving_linear = false,
     moving_jump = false,
@@ -217,37 +215,21 @@ FFVII.Data = {
 
 
 
-FFVII.Script = {
+ScriptState = {
     is_executing = false,
 }
 
 
 
-FFVII.MenuSettings = {
+MenuSettings = {
     available = false,
     pause_available = false,
 
-    battle_type = FFVII.BattleType.ATB,
+    battle_type = BattleType.ATB,
     battle_speed = 10,
 }
 
-
-
-FFVII.ItemStorage = {
-}
-
 --- Current party.
---
--- @todo: Change to Party, don't include it in FFVII, which is to be deleted.
-FFVII.Party = {
-    [1] = nil,
-    [2] = nil,
-    [3] = nil
-}
-
---- Current party.
---
--- @todo: Change from FFVII.Party, which is to be deleted.
 Party = {
     [1] = nil,
     [2] = nil,
@@ -262,7 +244,7 @@ Party = {
 Banks = {}
 for i = 0, 14 do
     Banks[i] = {}
-    for j = 0, 255 do
+    for j = 0, 254 do
         Banks[i][j] = 0
     end
 end
@@ -272,9 +254,9 @@ end
 --
 -- @todo Delete this, and implement bit operations over Banks.
 BitBanks = {}
-for i = 0, 15 do
+for i = 0, 14 do
     BitBanks[i] = {}
-    for j = 0, 255 do
+    for j = 0, 254 do
         BitBanks[i][j] = {}
         for k = 0, 7 do
             BitBanks[i][j][k] = 0

@@ -1,17 +1,17 @@
 -- helper function for ai
-FFVII.Battle.in_front_row = function( self )
-    return self.row == FFVII.Battle.Row.FRONT
+Battle.in_front_row = function( self )
+    return self.row == Battle.Row.FRONT
 end
 
 
 
-FFVII.Battle.get_random_enemy_as_target = function( self )
+Battle.get_random_enemy_as_target = function( self )
     local target = {}
 
-    local enemy = FFVII.Battle.Type.ENEMY
+    local enemy = Battle.Type.ENEMY
     local number = EntityContainer.BattleLogic.enemy_number
-    if self.unit_type == FFVII.Battle.Type.ENEMY then
-        enemy = FFVII.Battle.Type.ALLY
+    if self.unit_type == Battle.Type.ENEMY then
+        enemy = Battle.Type.ALLY
         number = EntityContainer.BattleLogic.ally_number
     end
 
@@ -33,7 +33,7 @@ end;
 
 
 
-FFVII.Battle.add_command = function( self, target, action, attack )
+Battle.add_command = function( self, target, action, attack )
     local command = {
         self = self,
         target = target,

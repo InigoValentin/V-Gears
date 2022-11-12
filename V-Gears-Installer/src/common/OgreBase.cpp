@@ -107,11 +107,11 @@ void InitializeOgreBase(const Ogre::String& name){
     directional_light->setType(Ogre::Light::LT_DIRECTIONAL);
     directional_light->setDiffuseColour(Ogre::ColourValue(0.5, 0.5, 0.5));
     directional_light->setSpecularColour(Ogre::ColourValue(0.5, 0.5, 0.5));
-    directional_light->setDirection(Ogre::Vector3(0, 0, -1));
+    directional_light->getParentSceneNode()->setDirection(Ogre::Vector3(0, 0, -1));
     camera = scene_manager->createCamera("Camera");
     camera->setNearClipDistance(0.01f);
-    camera->setPosition(0, 5, 10);
-    camera->lookAt(0, 0, 0);
+    camera->getParentSceneNode()->setPosition(0, 5, 10);
+    camera->getParentSceneNode()->lookAt(Ogre::Vector3(0, 0, 0), Ogre::Node::TS_LOCAL);
     viewport = window->addViewport(camera);
     viewport->setBackgroundColour(Ogre::ColourValue(0.0f, 0.4f, 0.0f));
     camera->setAspectRatio(

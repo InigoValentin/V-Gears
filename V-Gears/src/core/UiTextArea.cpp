@@ -252,6 +252,7 @@ void UiTextArea::SetText(TiXmlNode* text){
         if (language != "")
             if (TextManager::getSingleton().GetLanguage() != language) SetFont(font_->GetName());
     }
+
     TextClear();
     PrepareTextFromNode(text, colour_1_);
     text_state_ = TS_SHOW_TEXT;
@@ -582,6 +583,7 @@ float UiTextArea::GetTextWidth() const{
 }
 
 void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colour){
+
     while (node != NULL){
         switch(node->Type()){
             case TiXmlNode::TINYXML_TEXT:

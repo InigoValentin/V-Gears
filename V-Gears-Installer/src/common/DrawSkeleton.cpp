@@ -118,8 +118,8 @@ void DrawBone(const Skeleton& skeleton, int parent_index, Ogre::RGBA* colours){
             Ogre::ColourValue colour2 = Ogre::ColourValue(1, 1, 0);
             Ogre::RenderSystem* rs
               = Ogre::Root::getSingleton().getRenderSystem();
-            rs->convertColourValue(colour1, colours + cur_index + 0);
-            rs->convertColourValue(colour2, colours + cur_index + 1);
+            colours[cur_index] = colour1.getAsBYTE();
+            colours[cur_index + 1] = colour2.getAsBYTE();
             index_data[cur_index + 0] = cur_index + 0;
             index_data[cur_index + 1] = cur_index + 1;
             Ogre::VertexBoneAssignment vba;

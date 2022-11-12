@@ -1,36 +1,36 @@
-FFVII.Battle = {}
+Battle = {}
 
-FFVII.Battle.Action = {
+Battle.Action = {
     MONSTER_ACTION = 32,
 }
 
-FFVII.Battle.Row = {
+Battle.Row = {
     BACK = 0,
     FRONT = 1,
 }
 
-FFVII.Battle.Type = {
+Battle.Type = {
     ENEMY = 0,
     ALLY = 1,
     LOGIC = 2,
 }
 
-FFVII.Battle.ActionDefaults = {
-    [ FFVII.Battle.Action.MONSTER_ACTION ] = { animation_script = "0" }
+Battle.ActionDefaults = {
+    [ Battle.Action.MONSTER_ACTION ] = { animation_script = "0" }
 }
 
-FFVII.Battle.AttackHitChance = {
+Battle.AttackHitChance = {
     PhysicalCritical = 1, -- 0x01 upper 4 bits of formula
 }
 
-FFVII.Battle.Damage = {
+Battle.Damage = {
     Physical = 1, -- 0x01 lower 4 bits of formula
 }
 
 
 
-FFVII.Battle.logic_script = {
-    unit_type = FFVII.Battle.Type.LOGIC,
+Battle.logic_script = {
+    unit_type = Battle.Type.LOGIC,
 
     battle_speed = 0,
     game_timer = 0,
@@ -62,7 +62,7 @@ FFVII.Battle.logic_script = {
 
         -- update timers
         for key, value in pairs( EntityContainer ) do
-            if value.unit_type ~= FFVII.Battle.Type.LOGIC then
+            if value.unit_type ~= Battle.Type.LOGIC then
                 if value.timer < 65535 then
                     value.timer = value.timer + delta * 30 * value.battle_speed
                     --print( tostring( key ) .. ".timer " .. tostring( value.timer ) )
@@ -82,7 +82,7 @@ FFVII.Battle.logic_script = {
         -- update command queue
         for key_p, value_p in pairs( self.command_queue ) do
             for key_c, value_c in pairs( value_p ) do
-                FFVII.Battle.run_command( self, value_c )
+                Battle.run_command( self, value_c )
 
                 value_c.self.timer = 0
 
@@ -98,14 +98,14 @@ FFVII.Battle.logic_script = {
 
 
 
-FFVII.Battle.init = function()
-    EntityContainer.BattleLogic = FFVII.Battle.logic_script
+Battle.init = function()
+    EntityContainer.BattleLogic = Battle.logic_script
     entity_manager:add_entity_script( "BattleLogic" )
 
 
 
     -- load players
-    EntityContainer.Cloud = FFVII.Characters.Cloud
+    EntityContainer.Cloud = Characters.Cloud
     entity_manager:add_entity( "Cloud", "models/ffvii/battle/units/first_ray.mesh", 0, 2, 0, 0 -1)
 
 
@@ -116,18 +116,18 @@ FFVII.Battle.init = function()
 
 
     -- init battle speed calculated from menu settings
-    EntityContainer.BattleLogic.battle_speed = 65536 / ( ( ( FFVII.MenuSettings.battle_speed * 480 / 256 ) + 120 ) * 2 )
+    EntityContainer.BattleLogic.battle_speed = 65536 / ( ( ( MenuSettings.battle_speed * 480 / 256 ) + 120 ) * 2 )
 
 
 
     local party_speed = 0
     for key, value in pairs( EntityContainer ) do
-        if value.unit_type == FFVII.Battle.Type.ALLY then
+        if value.unit_type == Battle.Type.ALLY then
             EntityContainer.BattleLogic.ally_number = EntityContainer.BattleLogic.ally_number + 1
 
             party_speed = party_speed + value.dexterity
             value.speed = value.dexterity + 50
-        elseif value.unit_type == FFVII.Battle.Type.ENEMY then
+        elseif value.unit_type == Battle.Type.ENEMY then
             EntityContainer.BattleLogic.enemy_number = EntityContainer.BattleLogic.enemy_number + 1
         end
     end
@@ -139,7 +139,7 @@ FFVII.Battle.init = function()
         party_speed = ( party_speed - 1 + EntityContainer.BattleLogic.ally_number ) / EntityContainer.BattleLogic.ally_number + 50;
 
         for key, value in pairs( EntityContainer ) do
-            if value.unit_type ~= FFVII.Battle.Type.LOGIC then
+            if value.unit_type ~= Battle.Type.LOGIC then
                 value.battle_speed = EntityContainer.BattleLogic.battle_speed * value.speed / party_speed
                 value.battle_speed = value.battle_speed * 2 -- normal speed (initial value calculated for slow)
             end
@@ -149,7 +149,7 @@ end
 
 
 
-FFVII.Battle.run_command = function( self, command )
+Battle.run_command = function( self, command )
     print( "Command: attack = \"" .. command.attack.name .. "\", target = \"" .. tostring( command.target[ 1 ] ) .. "\"" )
 
 
@@ -168,23 +168,23 @@ FFVII.Battle.run_command = function( self, command )
 
 
 
-    if command.action == FFVII.Battle.Action.MONSTER_ACTION then
+    if command.action == Battle.Action.MONSTER_ACTION then
         -- todo action_type_07
         -- todo action_type_0C
-        FFVII.Battle.calculate_and_apply_damage()   -- action_type_09
+        Battle.calculate_and_apply_damage()   -- action_type_09
     end
 end
 
 
 
 -- action_type_09
-FFVII.Battle.calculate_and_apply_damage = function()
+Battle.calculate_and_apply_damage = function()
     -- todo mp check
     -- todo a lot of fuctions
 
 
 
-    FFVII.Battle.set_base_damage()
+    Battle.set_base_damage()
 
 
 
@@ -194,7 +194,7 @@ FFVII.Battle.calculate_and_apply_damage = function()
 
     -- attack every unit in target
     for key, value in pairs( EntityContainer.BattleLogic.temp_data.target ) do
-        FFVII.Battle.main_damage_calculation( value )
+        Battle.main_damage_calculation( value )
     end
 
 
@@ -204,7 +204,7 @@ end
 
 
 
-FFVII.Battle.set_base_damage = function()
+Battle.set_base_damage = function()
     -- todo force physical attack settings in physical formula
     -- todo use special settings for special attacks
     -- todo use another base damage for magic attack
@@ -220,12 +220,12 @@ end
 
 
 
-FFVII.Battle.main_damage_calculation = function( target )
+Battle.main_damage_calculation = function( target )
     -- todo a lot of fuctions
 
 
 
-    FFVII.Battle.calculate_target_stats( target )
+    Battle.calculate_target_stats( target )
 
 
 
@@ -233,7 +233,7 @@ FFVII.Battle.main_damage_calculation = function( target )
 
 
 
-    FFVII.Battle.damage_formula_run()
+    Battle.damage_formula_run()
 
 
 
@@ -242,7 +242,7 @@ end
 
 
 
-FFVII.Battle.calculate_target_stats = function( target )
+Battle.calculate_target_stats = function( target )
     -- todo a lot of initialization
     -- todo a lot of initialization
     -- todo defense check and modification
@@ -268,11 +268,11 @@ end
 
 
 
-FFVII.Battle.damage_formula_run = function()
+Battle.damage_formula_run = function()
     -- run high formula
-    if EntityContainer.BattleLogic.temp_data.attack.hit_chance_formula == FFVII.Battle.AttackHitChance.PhysicalCritical then
-        FFVII.Battle.HighFormula.Physical()
-        FFVII.Battle.HighFormula.Critical()
+    if EntityContainer.BattleLogic.temp_data.attack.hit_chance_formula == Battle.AttackHitChance.PhysicalCritical then
+        Battle.HighFormula.Physical()
+        Battle.HighFormula.Critical()
     end
 
 
@@ -286,8 +286,8 @@ FFVII.Battle.damage_formula_run = function()
 
 
 
-        if EntityContainer.BattleLogic.temp_data.attack.damage_formula == FFVII.Battle.Damage.Physical then
-            FFVII.Battle.LowFormula.Physical()
+        if EntityContainer.BattleLogic.temp_data.attack.damage_formula == Battle.Damage.Physical then
+            Battle.LowFormula.Physical()
         end
 
 
@@ -298,27 +298,27 @@ end
 
 
 
-FFVII.Battle.HighFormula = {}
+Battle.HighFormula = {}
 
 
 
-FFVII.Battle.HighFormula.Physical = function()
+Battle.HighFormula.Physical = function()
     -- todo add physical hit
 end
 
 
 
-FFVII.Battle.HighFormula.Critical = function()
+Battle.HighFormula.Critical = function()
     -- todo add critical hit
 end
 
 
 
-FFVII.Battle.LowFormula = {}
+Battle.LowFormula = {}
 
 
 
-FFVII.Battle.LowFormula.Physical = function()
+Battle.LowFormula.Physical = function()
     local damage = EntityContainer.BattleLogic.temp_data.base_damage
     -- calculate base damage
     damage = damage + ( ( EntityContainer.BattleLogic.temp_data.attacker.level + damage ) / 32 ) * ( ( EntityContainer.BattleLogic.temp_data.attacker.level * damage ) / 32 )
@@ -339,7 +339,7 @@ FFVII.Battle.LowFormula.Physical = function()
 
 
 
-    damage = FFVII.Battle.add_random_modifier_and_zero_check( damage )
+    damage = Battle.add_random_modifier_and_zero_check( damage )
 
     EntityContainer.BattleLogic.temp_data.calculated_damage = damage
 
@@ -348,7 +348,7 @@ end
 
 
 
-FFVII.Battle.add_random_modifier_and_zero_check = function( damage )
+Battle.add_random_modifier_and_zero_check = function( damage )
     local random_damage = damage * ( 15 + math.random() ) / 16;
 
     if random_damage == 0 then

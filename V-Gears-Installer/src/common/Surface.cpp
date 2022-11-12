@@ -19,9 +19,9 @@
 #include <windows.h>
 #endif
 
-Surface::Surface(): pixels(NULL), width(0), height(0){}
+Surface::Surface(): width(0), height(0){}
 
-Surface::Surface(const Surface &copy):pixels(NULL), width(copy.width), height(copy.height){
+Surface::Surface(const Surface &copy): width(copy.width), height(copy.height){
   if (width && height) pixels = copy.pixels;
 }
 

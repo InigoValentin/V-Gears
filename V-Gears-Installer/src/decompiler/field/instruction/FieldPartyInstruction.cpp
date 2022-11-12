@@ -136,7 +136,7 @@ void FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
         else chars[i] = "nil";
     }
     code_gen->AddOutputLine((
-      boost::format("FFVII.set_party(%1%, %2%, %3%)") % chars[0] % chars[1] % chars[2]
+      boost::format("set_party(%1%, %2%, %3%)") % chars[0] % chars[1] % chars[2]
     ).str());
 }
 

@@ -104,7 +104,7 @@ Document every block of code with JavaDoc-style docstrings, for doxygen, like th
  @return 1 or 0
 ]]
 bit = function(bank, variable, bit)
-    return FFVII.BitBanks[bank + 1][variable + 1][bit + 1]
+    return BitBanks[bank + 1][variable + 1][bit + 1]
 end
 ```
 

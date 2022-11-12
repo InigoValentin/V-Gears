@@ -84,7 +84,7 @@ void FieldModuleInstruction::ProcessInst(
         case OPCODES::MPJPO:
             // Gateway function will do nothing if this is set to true
             code_gen->AddOutputLine(
-              std::string("FFVII.Data.DisableGateways=")
+              std::string("Data.DisableGateways=")
               + (params_[0]->GetUnsigned() ? "true" : "false")
             );
             break;

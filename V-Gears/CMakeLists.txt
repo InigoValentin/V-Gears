@@ -73,6 +73,8 @@ set(HEADER_FILES
     include/core/InputManagerCommands.h
     include/core/Logger.h
     include/core/Module.h
+    include/core/Savemap.h
+    include/core/SavemapManager.h
     include/core/ScriptManager.h
     include/core/ScriptManagerBinds.h
     include/core/ScriptManagerCommands.h
@@ -262,6 +264,8 @@ set(SOURCE_FILES
     src/core/EntityTrigger.cpp
     src/core/GameFrameListener.cpp
     src/core/InputManager.cpp
+    src/core/Savemap.cpp
+    src/core/SavemapManager.cpp
     src/core/ScriptManager.cpp
     src/core/Timer.cpp
     src/core/UiAnimation.cpp
