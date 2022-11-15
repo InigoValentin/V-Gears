@@ -82,6 +82,16 @@ TiXmlNode* TextManager::GetDialog(const Ogre::String& name, float &width, float&
     return NULL;
 }
 
+std::string TextManager::GetDialogText(const std::string name){
+    std::string text = "";
+    for (unsigned int i = 0; i < dialogs_.size(); ++ i){
+        if (dialogs_[i].name == name){
+            text = dialogs_[i].node->FirstChild()->ToText()->Value();
+            break;
+        }
+    }
+    return text;
+}
 void TextManager::UnloadTexts(){
     for (unsigned int i = 0; i < texts_.size(); ++ i) delete texts_[i].node;
     texts_.clear();
@@ -112,3 +122,4 @@ void TextManager::SetParty(int char_1, int char_2, int char_3){
     current_party_[2] = char_2;
     current_party_[3] = char_3;
 }
+

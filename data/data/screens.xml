@@ -12,7 +12,8 @@
     <screen file_name="screens/equip_menu/equip_menu.xml" />
     <screen file_name="screens/materia_menu/materia_menu.xml" />
     <screen file_name="screens/name_menu/name_menu.xml" />
-
+    <screen file_name="screens/save_menu/save_menu.xml" />
+    <prototype file_name="screens/save_menu/prototypes.xml" />
     <!-- Dialogs -->
     <prototype file_name="screens/dialog/prototypes.xml" />
     <screen file_name="screens/dialog/dialog.xml" />

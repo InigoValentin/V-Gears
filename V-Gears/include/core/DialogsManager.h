@@ -326,6 +326,27 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          */
         int GetCursor(const char* d_name) const;
 
+        /**
+         * Sets the map name from a text ID.
+         *
+         * @param[in] text_id The ID of the text to set as map name.
+         */
+        void ScriptSetMapName(const char* text_id);
+
+        /**
+         * Sets the map name from a text ID.
+         *
+         * @param[in] name The new map name.
+         */
+        void SetMapName(std::string name);
+
+        /**
+         * Retrieves the current map name.
+         *
+         * @return The map name.
+         */
+        std::string GetMapName();
+
     private:
 
         /**
@@ -395,5 +416,10 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          * Indicates if the 'down' button has been pressed.
          */
         bool down_pressed_;
+
+        /**
+         * Current map name.
+         */
+        std::string map_name_;
 };
 

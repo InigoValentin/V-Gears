@@ -32,7 +32,7 @@ void XmlScreensFile::LoadScreens(){
     }
     node = node->FirstChild();
     while (node != nullptr){
-        if (node->Type() == TiXmlNode::TINYXML_ELEMENT&& node->ValueStr() == "prototype"){
+        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "prototype"){
             XmlPrototypesFile prototypes("./data/" + GetString(node, "file_name"));
             prototypes.LoadPrototypes();
         }

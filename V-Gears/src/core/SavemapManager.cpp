@@ -49,6 +49,7 @@ std::vector<Savemap*> SavemapManager::GetSavemaps(){
 }
 
 bool SavemapManager::Save(unsigned int slot, bool force){
+    if (current_savemap_ == nullptr) return false;
     if (slot >= MAX_SAVE_SLOTS) return false;
     if (!savemaps_read_) ReadSavemaps();
     if (
@@ -59,7 +60,7 @@ bool SavemapManager::Save(unsigned int slot, bool force){
     }
     else{
         saved_savemaps_[slot] = current_savemap_;
-        saved_savemaps_[slot]->Write(SAVE_PATH + std::to_string(slot) + ".lua");
+        saved_savemaps_[slot]->Write(slot, SAVE_PATH + std::to_string(slot) + ".xml");
         return true;
     }
 }
@@ -76,7 +77,7 @@ bool SavemapManager::Save(Savemap savemap, unsigned int slot, bool force){
     else{
         *current_savemap_ = savemap;
         saved_savemaps_[slot] = current_savemap_;
-        saved_savemaps_[slot]->Write(SAVE_PATH + std::to_string(slot) + ".lua");
+        saved_savemaps_[slot]->Write(slot, SAVE_PATH + std::to_string(slot) + ".xml");
         return true;
     }
 }
@@ -90,8 +91,8 @@ void SavemapManager::Release(){
 void SavemapManager::ReadSavemaps(){
     saved_savemaps_.clear();
     for (int i = 0; i < MAX_SAVE_SLOTS; i ++){
-        Savemap* savemap;
-        savemap->Read(SAVE_PATH + std::to_string(i) + ".save");
+        Savemap* savemap = new Savemap();
+        savemap->Read(SAVE_PATH + std::to_string(i) + ".xml");
         saved_savemaps_.push_back(savemap);
     }
     savemaps_read_ = true;
@@ -131,11 +132,6 @@ void SavemapManager::SetGameTime(const unsigned int seconds){
 void SavemapManager::SetCountdownTime(const unsigned int seconds){
     if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
     current_savemap_->SetCountdownTime(seconds);
-}
-
-void SavemapManager::SetField(const char* field){
-    if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
-    current_savemap_->SetField(std::string(field));
 }
 
 void SavemapManager::SetKeyItem(const unsigned int item, const bool owned){
@@ -181,10 +177,10 @@ void SavemapManager::SetESkillMateriaStash(
 
 void SavemapManager::SetLocation(
   const unsigned int x, const unsigned int y, const int z,
-  const unsigned int triangle, const int angle
+  const unsigned int triangle, const int angle, const char* field, const char* name
 ){
     if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
-    current_savemap_->SetLocation(x, y, z, triangle, angle);
+    current_savemap_->SetLocation(x, y, z, triangle, angle, std::string(field), std::string(name));
 }
 
 void SavemapManager::SetSetting(const unsigned int key, const unsigned int value){
@@ -244,3 +240,62 @@ void SavemapManager::SetCharacterStatus(
     if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
     current_savemap_->SetCharacterStatus(id, status, inflicted);
 }
+
+bool SavemapManager::SlotIsEmpty(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return true;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsEmpty();
+}
+
+/*char* SavemapManager::GetPreviewData(const unsigned int slot){
+    std::cout << "[PREV_DATA] Start\n";
+    std::string data = "X";
+    std::cout << "[PREV_DATA] 1\n";
+    //char *empty_cstr= new char[1];
+    //strcpy(empty_cstr, data.c_str());
+    if (slot >= MAX_SAVE_SLOTS){
+        strcpy(temp_, data.c_str());
+        std::cout << "[PREV_DATA] RET 1 " << temp_ << " \n";
+        return temp_;
+    }
+    std::cout << "[PREV_DATA] 2\n";
+    if (savemaps_read_ == false) ReadSavemaps();
+    std::cout << "[PREV_DATA] 3\n";
+    if (saved_savemaps_[slot]->IsEmpty()){
+        strcpy(temp_, data.c_str());
+        std::cout << "[PREV_DATA] RET 2 " << temp_ << " \n";
+        return temp_;
+    }
+    std::cout << "[PREV_DATA] 4\n";
+    data = saved_savemaps_[slot]->GetPreviewData();
+    std::cout << "[PREV_DATA] 5\n";
+
+    //char cstr[data.length() + 1];
+    //strcpy(cstr, data.c_str());
+    //cstr[data.length()] = '\0';
+    temp_ = (char*) malloc(data.size() + 1);
+    for (int c = 0; c < data.size(); c ++){
+        temp_[c] = data[c];
+        std::cout << "    " << data[c] << " -> " << temp_[c] << "\n";
+    }
+    temp_[data.size()] = '\0';
+    strcpy(temp_, data.c_str());
+    std::cout << "[PREV_DATA] : " << data << " == " << std::string(temp_) << "\n";
+    return temp_;
+}*/
+
+std::string SavemapManager::GetPreviewData(const unsigned int slot){
+    std::string data = "";
+    if (slot >= MAX_SAVE_SLOTS) return data;
+    if (savemaps_read_ == false) ReadSavemaps();
+    if (saved_savemaps_[slot]->IsEmpty()) return data;
+    data = saved_savemaps_[slot]->GetPreviewData();
+    return data;
+}
+
+
+
+
+
+
+

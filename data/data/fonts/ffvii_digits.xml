@@ -13,4 +13,5 @@
     <char name="-" x="88" y="0" width="7" height="8" pre="0" post="0" />
     <char name="+" x="96" y="0" width="7" height="8" pre="0" post="0" />
     <char name="%" x="104" y="0" width="7" height="8" pre="0" post="0" />
+    <char name=":" x="112" y="0" width="7" height="8" pre="0" post="0" />
 </font>

@@ -4,7 +4,6 @@ save_game = function(slot)
     savemap_manager:set_money(Inventory.money)
     savemap_manager:set_game_time(123456) -- TODO Actual data
     savemap_manager:set_countdown_time(0) -- TODO Actual data
-    savemap_manager:set_field("FIELD_ID") -- TODO Actual data
     for i = 1, 50 do
        if Inventory.key[i] == true then
            savemap_manager:set_key_item(i - 1, true)
@@ -29,7 +28,7 @@ save_game = function(slot)
         end
     end
     -- TODO: Materia stash, when implemented.
-    savemap_manager:set_location(10, 20, -1, 3, 120) -- TODO Actual data
+    savemap_manager:set_location(10, 20, -1, 3, 120, "FIELD_ID", dialog:get_map_name()) -- TODO Actual data
     -- TODO Settings, when implemented
     for i = 0, 11 do
         if Characters[i] ~= nil and Characters[i].char_id ~= nil then
@@ -72,11 +71,9 @@ save_game = function(slot)
             -- TODO: Character statuses
         end
     end
-    print("TO_DATA")
     for b = 0, 14 do
         for a = 0, 254 do
             if (Banks[b] ~= nil and Banks[b][a] ~= nil and Banks[b][a] ~= 0) then
-                print("DATA " .. tostring(b) .. "." .. tostring(a))
                 savemap_manager:set_data(b, a, tonumber(Banks[b][a]))
             end
 

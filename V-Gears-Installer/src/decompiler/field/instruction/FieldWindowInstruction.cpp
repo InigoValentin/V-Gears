@@ -155,9 +155,9 @@ void FieldWindowInstruction::ProcessWCLSE(CodeGenerator* code_gen){
 }
 
 void FieldWindowInstruction::ProcessMPNAM(CodeGenerator* code_gen){
-    code_gen->AddOutputLine(
-      (boost::format("-- field:map_name(%1%)") % params_[0]->GetUnsigned()).str()
-    );
+    code_gen->AddOutputLine((
+      boost::format("dialog:set_map_name(%1%_%2%)") % script_name % params_[0]->GetUnsigned()
+    ).str());
 }
 
 void FieldWindowInstruction::ProcessMENU2(CodeGenerator* code_gen){

@@ -38,21 +38,19 @@ class Savemap{
         void operator = (const Savemap &to_copy);
 
         /**
-         * Indicates if the savemap is empty or contains actual data.
-         *
-         * @return True if the savemap is empty, false otherwise.
-         */
-        bool IsEmpty();
-
-        /**
          * Reads the savemap data from a file.
+         *
+         * @param[in] file_name The name of the file to read.
          */
         void Read(std::string file_name);
 
         /**
          * Writes the savemap to a file.
+         *
+         * @param[in] slot The slot the savemap is to be written to.
+         * @param[in] file_name Name of the file the savemap is to be written to.
          */
-        void Write(std::string file_name);
+        void Write(int slot, std::string file_name);
 
         /**
          * Retrieves a control string for a savemap.
@@ -112,15 +110,6 @@ class Savemap{
          * @param[in] seconds The current countdown timer time, in seconds.
          */
         void SetCountdownTime(const unsigned int seconds);
-
-        /**
-         * Sets the current field of the savemap.
-         *
-         * If set to an empty string, it will be assumed that it was saved in the world map.
-         *
-         * @param[in] field Field map ID, or empty for the world map.
-         */
-        void SetField(const std::string field);
 
         /**
          * Marks a key item as owned or non-owned in the savemap.
@@ -204,10 +193,12 @@ class Savemap{
          * @param[in] z Z coordinate. It's optional, set it to -1 to ignore it.
          * @param[in] triangle Walkmesh triangle ID.
          * @param[in] angle Facing direction.
+         * @param[in] field Field map ID, or empty for the world map.
+         * @param[in] Name of the location to show in the save slot.
          */
         void SetLocation(
           const unsigned int x, const unsigned int y, const int z,
-          const unsigned int triangle, const int angle
+          const unsigned int triangle, const int angle, std::string field, std::string name
         );
 
         /**
@@ -330,6 +321,32 @@ class Savemap{
         void SetData(const unsigned int bank, const unsigned int address, const int value);
 
         /**
+         * Checks if the savemap is empty.
+         *
+         * @return True if the savemap is empty, false if it contains a saved game.
+         */
+        bool IsEmpty();
+
+        /**
+         * Generates a string with all the required data to generate a preview of the savemap.
+         *
+         * The included information contains the following fields, separated by the character "#":
+         * - Slot
+         * - Control key
+         * - Party money
+         * - Game time (in seconds)
+         * - Location text
+         * - Party member 1 name
+         * - Party member 1 level
+         * - Party member 1 character ID.
+         * - Party member 2 character ID.
+         * - Party member 3 character ID.
+         *
+         * @return The generated string.
+         */
+        std::string GetPreviewData();
+
+        /**
          * Character basic stats.
          */
         enum class STAT{
@@ -425,7 +442,7 @@ class Savemap{
         /**
          * Level at which the limit level is full.
          */
-        static const unsigned int MAX_LIMIT_BAR = 255;
+        static const unsigned int MAX_LIMIT_BAR = 254;
 
         /**
          * Maximum number of party member.
@@ -440,7 +457,7 @@ class Savemap{
         /**
          * Number of addresses in each data bank.
          */
-        static const unsigned int BANK_ADDRESS_COUNT = 255;
+        static const unsigned int BANK_ADDRESS_COUNT = 254;
 
         /**
          * MAx colour component value.
@@ -513,17 +530,17 @@ class Savemap{
             /**
              * Battle speed.
              */
-            u8 battle_speed;
+            unsigned int battle_speed;
 
             /**
              * Battle message speed.
              */
-            u8 battle_msg_speed;
+            unsigned int battle_msg_speed;
 
             /**
              * Field message speed
              */
-            u8 msg_speed;
+            unsigned int msg_speed;
 
             /**
              * Magic order.
@@ -553,29 +570,41 @@ class Savemap{
             /**
              * X coordinate.
              */
-            u16 x;
+            unsigned int x;
 
             /**
              * Y coordinate.
              */
-            u16 y;
+            unsigned int y;
 
             /**
              * Z coordinate.
              *
              * Usually unused.
              */
-            u16 z;
+            int z;
 
             /**
              * Triangle in the walkmesh;
              */
-            u16 triangle;
+            unsigned int triangle;
 
             /**
              * Facing direction.
              */
-            u16 angle;
+            unsigned int angle;
+
+            /**
+             * Current field map.
+             *
+             * If null or empty, it means the player is in in the world map.
+             */
+            std::string field;
+
+            /**
+             * Location name. Used for the saveslot.
+             */
+            std::string name;
         };
 
         /**
@@ -591,7 +620,12 @@ class Savemap{
             /**
              * Total AP in the materia.
              */
-            u32 ap;
+            unsigned int ap;
+
+            /**
+             * Indicates if the materia is an enemy skill materia.
+             */
+            bool enemy_skill;
 
             /**
              * Learned enemy skills (only for Enemy Skill materia).
@@ -612,7 +646,7 @@ class Savemap{
             /**
              * Item stock.
              */
-            u16 quantity;
+            unsigned int quantity;
         };
 
         /**
@@ -628,13 +662,13 @@ class Savemap{
                 /**
                  * Stat base value.
                  */
-                u32 base;
+                unsigned int base;
 
                 /**
                  * For STR, VIT, DEX and LCK, it means the source bonus. For HP and MP, it means
                  * the current values.
                  */
-                u32 extra;
+                unsigned int extra;
             };
 
             /**
@@ -656,12 +690,12 @@ class Savemap{
             /**
              * Character ID, sequential.
              */
-            u8 id;
+            unsigned int id;
 
             /**
-             * Character ID, can change with the history.
+             * Character ID, can change with the history. -1 to not use.
              */
-            u8 char_id;
+            int char_id;
 
             /**
              * Indicates if the character has been unlocked for the PHS.
@@ -681,12 +715,12 @@ class Savemap{
             /**
              * Character level.
              */
-            u16 level;
+            unsigned int level;
 
             /**
              * Enemies killed by the character.
              */
-            u32 kills;
+            unsigned int kills;
 
             /**
              * Indicates if the character is in the back_row;
@@ -696,12 +730,12 @@ class Savemap{
             /**
              * Total experience.
              */
-            u32 exp;
+            unsigned int exp;
 
             /**
              * Experience required to reach next level.
              */
-            u32 exp_to_next;
+            unsigned int exp_to_next;
 
             /**
              * STR stat.
@@ -746,12 +780,12 @@ class Savemap{
             /**
              * Current limit level.
              */
-            u8 limit_level;
+            unsigned int limit_level;
 
             /**
              * Current limit bar.
              */
-            u8 limit_bar;
+            unsigned int limit_bar;
 
             /**
              * Learned limits.
@@ -763,7 +797,7 @@ class Savemap{
             /**
              * Uses of techniques in each limit level.
              */
-            u32 limit_uses[MAX_LIMIT_LEVELS];
+            unsigned int limit_uses[MAX_LIMIT_LEVELS];
 
             /**
              * Equipped weapon;
@@ -776,9 +810,9 @@ class Savemap{
             Equipment armor;
 
             /**
-             * Equipped accessory ID. 0 if none equipped.
+             * Equipped accessory ID. -1 if none equipped.
              */
-            u16 accessory;
+            int accessory;
 
             /**
              * Current status list.
@@ -790,6 +824,11 @@ class Savemap{
          * Indicates if the savemap is empty or contains actual data.
          */
         bool empty_;
+
+        /**
+         * The slot the savemap is saved at, or -1 if not saved
+         */
+        int slot_;
 
         /**
          * Control string.
@@ -839,24 +878,17 @@ class Savemap{
         /**
          * Current party money.
          */
-        u32 money_;
+        unsigned int money_;
 
         /**
          * Seconds played
          */
-        u32 seconds_;
+        unsigned int seconds_;
 
         /**
          * Current countdown remaining seconds.
          */
-        u32 countdown_;
-
-        /**
-         * Current field map.
-         *
-         * If null or empty, it means the player is in in the world map.
-         */
-        std::string field_map_;
+        unsigned int countdown_;
 
         /**
          * Current location.

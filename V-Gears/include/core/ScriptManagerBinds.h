@@ -279,129 +279,136 @@ void ScriptManager::InitBinds(){
     // Commands for the savemap manager.
     luabind::module(lua_state_)[
         luabind::class_<SavemapManager>("SavemapManager")
-        .def(
-          "get_current_savemap", (Savemap*(SavemapManager::*)()) &SavemapManager::GetCurrentSavemap
-        )
-        .def(
-          "get_savemap",
-          (Savemap*(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSavemap
-        )
-        .def(
-          "set_data",
-          (void(SavemapManager::*)(const unsigned int, const unsigned int, const int))
-            &SavemapManager::SetData
-        )
-        .def(
-          "set_control_key", (void(SavemapManager::*)(const char*)) &SavemapManager::SetControlKey
-        )
-        .def(
-          "set_window_colours",
-          (void(SavemapManager::*)(
-            const unsigned int, const unsigned int, const unsigned int,
-            const unsigned int, const unsigned int, const unsigned int,
-            const unsigned int, const unsigned int, const unsigned int,
-            const unsigned int, const unsigned int, const unsigned int
-          )) &SavemapManager::SetWindowColours
-        )
-        .def("set_money", (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetMoney)
-        .def(
-          "set_game_time",
-          (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetGameTime
-        )
-        .def(
-          "set_countdown_time",
-          (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetCountdownTime
-        )
-        .def(
-          "set_field", (void(SavemapManager::*)(const char*)) &SavemapManager::SetField
-        )
-        .def(
-          "set_key_item",
-          (void(SavemapManager::*)(const unsigned int, const bool)) &SavemapManager::SetKeyItem
-        )
-        .def(
-          "set_party",
-          (void(SavemapManager::*)(const int, const int, const int)) &SavemapManager::SetParty
-        )
-        .def(
-          "set_item",
-          (void(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
-            &SavemapManager::SetItem
-        )
-        .def(
-          "set_materia",
-          (void(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
-            &SavemapManager::SetMateria
-        )
-        .def(
-          "set_e_skill_materia",
-          (void(SavemapManager::*)(const unsigned int, const unsigned int, const bool))
-            &SavemapManager::SetESkillMateria
-        )
-        .def(
-          "set_materia_stash",
-          (void(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
-            &SavemapManager::SetMateriaStash
-        )
-        .def(
-          "set_e_skill_materia_stash",
-          (void(SavemapManager::*)(const unsigned int, const unsigned int, const bool))
-            &SavemapManager::SetESkillMateriaStash
-        )
-        .def(
-          "set_location",
-          (void(SavemapManager::*)(
-            const unsigned int, const unsigned int, const int, const unsigned int, const int)
-          ) &SavemapManager::SetLocation
-        )
-        .def(
-          "set_setting",
-          (void(SavemapManager::*)(const unsigned int, const unsigned int))
-            &SavemapManager::SetSetting
-        )
-        .def(
-          "set_character_info",
-          (void(SavemapManager::*)(
-            const unsigned int, const int, const char*, const bool, const bool, const unsigned int,
-            const unsigned int, const bool, const unsigned int, const unsigned int,
-            const unsigned int, const unsigned int, const unsigned int, const unsigned int,
-            const int
-          )) &SavemapManager::SetCharacterInfo
-        )
-        .def(
-          "set_character_stat",
-          (void(SavemapManager::*)(
-            const unsigned int, const unsigned int, const unsigned int, const unsigned int
-          )) &SavemapManager::SetCharacterStat
-        )
-        .def(
-          "set_character_limit_learned",
-          (void(SavemapManager::*)(
-            const unsigned int, const unsigned int, const unsigned int,
-            const bool, const unsigned int
-          )) &SavemapManager::SetCharacterLimitLearned
-        )
-        .def(
-          "set_character_materia",
-          (void(SavemapManager::*)(
-            const unsigned int, const bool, const unsigned int,
-            const unsigned int, const unsigned int
-          )) &SavemapManager::SetCharacterMateria
-        )
-        .def(
-          "set_character_e_skill_materia",
-          (void(SavemapManager::*)(
-            const unsigned int, const bool, const unsigned int, const unsigned int, const bool
-          )) &SavemapManager::SetCharacterESkillMateria
-        )
-        .def(
-          "set_character_status",
-          (void(SavemapManager::*)(const unsigned int, const unsigned int, const bool))
-            &SavemapManager::SetCharacterStatus
-        )
-        .def(
-          "save", (bool(SavemapManager::*)(const unsigned int, const bool)) &SavemapManager::Save
-        )
+          .def(
+            "get_current_savemap",
+            (Savemap*(SavemapManager::*)()) &SavemapManager::GetCurrentSavemap
+          )
+          .def(
+            "get_savemap",
+            (Savemap*(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSavemap
+          )
+          .def(
+            "set_data",
+            (void(SavemapManager::*)(const unsigned int, const unsigned int, const int))
+              &SavemapManager::SetData
+          )
+          .def(
+            "set_control_key", (void(SavemapManager::*)(const char*)) &SavemapManager::SetControlKey
+          )
+          .def(
+            "set_window_colours",
+            (void(SavemapManager::*)(
+              const unsigned int, const unsigned int, const unsigned int,
+              const unsigned int, const unsigned int, const unsigned int,
+              const unsigned int, const unsigned int, const unsigned int,
+              const unsigned int, const unsigned int, const unsigned int
+            )) &SavemapManager::SetWindowColours
+          )
+          .def("set_money", (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetMoney)
+          .def(
+            "set_game_time",
+            (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetGameTime
+          )
+          .def(
+            "set_countdown_time",
+            (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetCountdownTime
+          )
+          .def(
+            "set_key_item",
+            (void(SavemapManager::*)(const unsigned int, const bool)) &SavemapManager::SetKeyItem
+          )
+          .def(
+            "set_party",
+            (void(SavemapManager::*)(const int, const int, const int)) &SavemapManager::SetParty
+          )
+          .def(
+            "set_item",
+            (void(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
+              &SavemapManager::SetItem
+          )
+          .def(
+            "set_materia",
+            (void(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
+              &SavemapManager::SetMateria
+          )
+          .def(
+            "set_e_skill_materia",
+            (void(SavemapManager::*)(const unsigned int, const unsigned int, const bool))
+              &SavemapManager::SetESkillMateria
+          )
+          .def(
+            "set_materia_stash",
+            (void(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
+              &SavemapManager::SetMateriaStash
+          )
+          .def(
+            "set_e_skill_materia_stash",
+            (void(SavemapManager::*)(const unsigned int, const unsigned int, const bool))
+              &SavemapManager::SetESkillMateriaStash
+          )
+          .def(
+            "set_location",
+            (void(SavemapManager::*)(
+              const unsigned int, const unsigned int, const int, const unsigned int, const int,
+              const char*, const char*
+            )) &SavemapManager::SetLocation
+          )
+          .def(
+            "set_setting",
+            (void(SavemapManager::*)(const unsigned int, const unsigned int))
+              &SavemapManager::SetSetting
+          )
+          .def(
+            "set_character_info",
+            (void(SavemapManager::*)(
+              const unsigned int, const int, const char*, const bool, const bool, const unsigned int,
+              const unsigned int, const bool, const unsigned int, const unsigned int,
+              const unsigned int, const unsigned int, const unsigned int, const unsigned int,
+              const int
+            )) &SavemapManager::SetCharacterInfo
+          )
+          .def(
+            "set_character_stat",
+            (void(SavemapManager::*)(
+              const unsigned int, const unsigned int, const unsigned int, const unsigned int
+            )) &SavemapManager::SetCharacterStat
+          )
+          .def(
+            "set_character_limit_learned",
+            (void(SavemapManager::*)(
+              const unsigned int, const unsigned int, const unsigned int,
+              const bool, const unsigned int
+            )) &SavemapManager::SetCharacterLimitLearned
+          )
+          .def(
+            "set_character_materia",
+            (void(SavemapManager::*)(
+              const unsigned int, const bool, const unsigned int,
+              const unsigned int, const unsigned int
+            )) &SavemapManager::SetCharacterMateria
+          )
+          .def(
+            "set_character_e_skill_materia",
+            (void(SavemapManager::*)(
+              const unsigned int, const bool, const unsigned int, const unsigned int, const bool
+            )) &SavemapManager::SetCharacterESkillMateria
+          )
+          .def(
+            "set_character_status",
+            (void(SavemapManager::*)(const unsigned int, const unsigned int, const bool))
+              &SavemapManager::SetCharacterStatus
+          )
+          .def(
+            "save", (bool(SavemapManager::*)(const unsigned int, const bool)) &SavemapManager::Save
+          )
+          .def(
+            "slot_is_empty",
+            (bool(SavemapManager::*)(const unsigned int)) &SavemapManager::SlotIsEmpty
+          )
+          .def(
+            "get_preview_data",
+             (std::string(SavemapManager::*)(const unsigned int)) &SavemapManager::GetPreviewData
+           )
     ];
 
     // 2D background and camera commands
@@ -496,6 +503,13 @@ void ScriptManager::InitBinds(){
             luabind::value("TRANSPARENT", MSL_TRANSPARENT),
             luabind::value("NONE", MSL_NONE)
           ]
+          .def(
+              "set_map_name",
+              (void(DialogsManager::*)(const char*)) &DialogsManager::ScriptSetMapName
+            )
+            .def(
+              "get_map_name", (std::string(DialogsManager::*)()) &DialogsManager::GetMapName
+            )
     ];
 
     // UI widget commands

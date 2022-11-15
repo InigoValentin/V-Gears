@@ -54,8 +54,9 @@ UiContainer.MainMenu = {
                         audio_manager:play_sound("Error")
                         print("TODO: Open PHS menu")
                     elseif self.position == 10 then -- Save menu
-                        audio_manager:play_sound("Error")
-                        print("TODO: Open save menu")
+                        audio_manager:play_sound("Cursor")
+                        UiContainer.SaveMenu.operation = "save"
+                        script:request_end_sync(Script.UI, "SaveMenu", "show", 0)
                     else -- Any other menu that needs a character
                         audio_manager:play_sound("Cursor")
                         self.select_character_for_menu = self.position
@@ -164,6 +165,9 @@ UiContainer.MainMenu = {
 
         --ui_manager:get_widget("MainMenu.Container.Menu.PHSText"):set_visible(false)
         ui_manager:get_widget("MainMenu.Container.Menu.SaveText"):set_colour(0.4, 0.4, 0.4)
+
+        -- Set location
+        ui_manager:get_widget("MainMenu.Container.Location.Text"):set_text((dialog:get_map_name()))
 
         -- Set money
         local money_str = tostring(Inventory.money)

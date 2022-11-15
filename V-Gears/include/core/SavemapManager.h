@@ -153,15 +153,6 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
         void SetCountdownTime(const unsigned int seconds);
 
         /**
-         * Sets the current field of the current savemap.
-         *
-         * If set to an empty string, it will be assumed that it was saved in the world map.
-         *
-         * @param[in] field Field map ID, or empty for the world map.
-         */
-        void SetField(const char* field);
-
-        /**
          * Marks a key item as owned or non-owned in the current savemap.
          *
          * @param[in] item Key item id.
@@ -243,10 +234,12 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
          * @param[in] z Z coordinate. It's optional, set it to -1 to ignore it.
          * @param[in] triangle Walkmesh triangle ID.
          * @param[in] angle Facing direction.
+         * @param[in] field Field map ID, or empty for the world map.
+         * @param[in] Name of the location to show in the save slot.
          */
         void SetLocation(
           const unsigned int x, const unsigned int y, const int z,
-          const unsigned int triangle, const int angle
+          const unsigned int triangle, const int angle, const char* field, const char* name
         );
 
         /**
@@ -359,6 +352,36 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
           const unsigned int id, const unsigned int status, const bool inflicted
         );
 
+        /**
+         * Checks if a slot is empty.
+         *
+         * @return True if the slot is empty, or false if a game is saved there. If an invalid slot
+         * is queried, it will always return true.
+         */
+        bool SlotIsEmpty(const unsigned int slot);
+
+        /**
+         * Generates a string with all the required data to generate a preview of a savemap.
+         *
+         * The included information contains the following fields, separated by the character "#":
+         * - Slot
+         * - Control key
+         * - Party money
+         * - Game time (in seconds)
+         * - Location text
+         * - Party member 1 name
+         * - Party member 1 level
+         * - Party member 1 character ID.
+         * - Party member 2 character ID.
+         * - Party member 3 character ID.
+         *
+         * @param[in]
+         * @return The generated string. An empty string if a wrong slot is specified, or the slot
+         * is empty.
+         */
+        //char* GetPreviewData(const unsigned int slot);
+        std::string GetPreviewData(const unsigned int slot);
+
     private:
 
         /**
@@ -385,6 +408,8 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
          * Indicates if the saved savemaps have been read from files.
          */
         bool savemaps_read_;
+
+        //char* temp_;
 
 };
 

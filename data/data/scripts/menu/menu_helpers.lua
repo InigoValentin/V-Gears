@@ -8,6 +8,14 @@ UiContainer.pad_value = function(value, length)
     return str
 end
 
+UiContainer.zero_pad_value = function(value, length)
+    local str = tostring(value)
+    while #(str) < length do
+        str = "0" .. str
+    end
+    return str
+end
+
 --- Populates a character data.
 --
 -- @param widget Name of the widget with the character data.

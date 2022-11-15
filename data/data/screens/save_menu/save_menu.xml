@@ -1,0 +1,29 @@
+<screen name="SaveMenu" script="scripts/menu/save_menu.lua" visible="false">
+    <sprite name="Background" x="0" y="0" width="100%" height="100%" colour="0 0 0" visible="true"/>
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="TopBar" x="0" y="0" width="100%" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="DescSave" x="36" y="6" text_name="SaveMenuDescSave" font="FFVIIFont" visible="true" />
+            <text_area name="DescLoad" x="36" y="6" text_name="SaveMenuDescLoad" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Title" x="100%-86" y="0" width="86" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="TitleSave" x="16" y="6" text_name="SaveMenuTitleSave" font="FFVIIFont" visible="true" />
+            <text_area name="TitleLoad" x="16" y="6" text_name="SaveMenuTitleLoad" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Slot1" x="5%" y="28" width="90%" height="30%-8" visible="true">
+            <prototype name="SaveSlot" />
+        </widget>
+        <widget name="Slot2" x="5%" y="33%+20" width="90%" height="30%-8" visible="true">
+            <prototype name="SaveSlot" />
+        </widget>
+        <widget name="Slot3" x="5%" y="66%+12" width="90%" height="30%-8" visible="true">
+            <prototype name="SaveSlot" />
+        </widget>
+        <sprite name="Cursor" image="images/icons/cursor.png" x="2" y="15%+12" width="24" height="17" visible="true">
+            <animation name="Position1" length="0" y="0:15%+12" />
+            <animation name="Position2" length="0" y="0:48%+12" />
+            <animation name="Position3" length="0" y="0:81%+12" />
+        </sprite>
+    </widget>
+</screen>

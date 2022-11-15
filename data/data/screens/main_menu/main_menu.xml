@@ -112,7 +112,7 @@
 
         <widget name="Location" x="100%-200" y="100%-54" width="180" height="24" visible="true">
             <prototype name="Window" />
-            <text_area name="Text" x="8" y="6" text_name="MainMenuLocation" font="FFVIIFont" visible="true" />
+            <text_area name="Text" x="8" y="6" font="FFVIIFont" visible="true" />
             <animation name="Appear" length="0.3" y="0:-200%,0.3:100%-54" />
             <animation name="Disappear" length="0.3" y="0:100%-54,0.3:-200%" />
         </widget>

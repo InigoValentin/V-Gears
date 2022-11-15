@@ -37,7 +37,8 @@ DialogsManager::DialogsManager():
   next_repeated_(false),
   up_pressed_(false),
   down_pressed_(false),
-  limit_area_(NULL)
+  limit_area_(NULL),
+  map_name_("")
 {LOG_TRIVIAL("DialogsManager created.");}
 
 DialogsManager::~DialogsManager(){
@@ -92,6 +93,17 @@ void DialogsManager::Input(const VGears::Event& input){
     else if (input.type == VGears::ET_KEY_PRESS && input.event == "message_down")
         down_pressed_ = true;
 }
+
+void DialogsManager::ScriptSetMapName(const char* text_id){
+    std::string text = TextManager::getSingleton().GetDialogText(text_id);
+    SetMapName(text);
+}
+
+void DialogsManager::SetMapName(std::string name){
+    map_name_ = name;
+}
+
+std::string DialogsManager::GetMapName(){return map_name_;}
 
 void DialogsManager::Update(){
     for (unsigned int i = 0; i < messages_.size(); ++ i){

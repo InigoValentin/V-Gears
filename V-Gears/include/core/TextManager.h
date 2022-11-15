@@ -104,6 +104,14 @@ class TextManager : public Ogre::Singleton<TextManager>{
         TiXmlNode* GetDialog(const Ogre::String& name, float &width, float& height) const;
 
         /**
+         * Retrieves a dialog text by name.
+         *
+         * @param[in] name Text name or identifier.
+         * @return Dialog text, an empty string if there is none by the specified ID.
+         */
+        std::string GetDialogText(const std::string name);
+
+        /**
          * Deletes all texts in the manager.
          */
         void UnloadTexts();
