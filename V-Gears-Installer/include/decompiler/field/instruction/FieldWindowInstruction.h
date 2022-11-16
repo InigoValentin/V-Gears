@@ -43,7 +43,7 @@ class FieldWindowInstruction : public KernelCallInstruction{
 
         void ProcessMESSAGE(CodeGenerator* code_gen, const std::string& script_name);
 
-        void ProcessMPNAM(CodeGenerator* code_gen);
+        void ProcessMPNAM(CodeGenerator* code_gen, const std::string& script_name);
 
 
         /**

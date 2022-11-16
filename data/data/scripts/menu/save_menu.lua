@@ -38,7 +38,6 @@ UiContainer.SaveMenu = {
                     script:request_end_sync(Script.UI, "SaveMenu", "hide", 0)
                 elseif button == "Enter" then
                     self.action(self, self.first_visible - 1 + self.position)
-                    audio_manager:play_sound("Cursor")
                 elseif button == "Down" then
                     if self.position < self.position_total and self.first_visible + self.position < self.max_slots then
                         -- Move cursor down
@@ -85,6 +84,8 @@ UiContainer.SaveMenu = {
             print("before calling show()")
             return 0
         end
+        UiContainer.current_menu = "save"
+        UiContainer.current_submenu = ""
         if self.operation == "load" then
             ui_manager:get_widget("SaveMenu.Container.TopBar.DescSave"):set_visible(false)
             ui_manager:get_widget("SaveMenu.Container.TopBar.DescLoad"):set_visible(true)
@@ -107,22 +108,27 @@ UiContainer.SaveMenu = {
 
     populate_slots = function(self)
         for s = 1, 3 do
-            local slot = self.first_visible - 1 + s -- 0-index
-            if savemap_manager:slot_is_empty(slot) == true then
+            local slot = self.first_visible + s - 2 -- 0-index
+            if savemap_manager:is_slot_empty(slot) == true then
                 ui_manager:get_widget("SaveMenu.Container.Slot" .. tostring(s) .. ".Slot"):set_visible(false)
                 ui_manager:get_widget("SaveMenu.Container.Slot" .. tostring(s) .. ".Empty"):set_visible(true)
             else
                 local slot_id = "SaveMenu.Container.Slot" .. tostring(s) .. ".Slot."
-                local info = self.split_preview_data(savemap_manager:get_preview_data(slot))
-                ui_manager:get_widget(slot_id .. "TimeMoney.Money"):set_text(UiContainer.pad_value(info[3], 7))
-                local time = UiContainer.pad_value(math.floor(info[4] / 3600), 3) .. ":" .. UiContainer.zero_pad_value(math.floor((info[4] % 3600) / 60), 2)
+                ui_manager:get_widget(slot_id .. "TimeMoney.Money"):set_text(UiContainer.pad_value(savemap_manager:get_slot_money(slot), 7))
+                local seconds = savemap_manager:get_slot_game_time(slot)
+                local time = UiContainer.pad_value(math.floor(seconds / 3600), 3) .. ":" .. UiContainer.zero_pad_value(math.floor((seconds % 3600) / 60), 2)
                 ui_manager:get_widget(slot_id .. "TimeMoney.Time"):set_text(time)
-                ui_manager:get_widget(slot_id .. "Location.Name"):set_text(tostring(info[5]))
-                ui_manager:get_widget(slot_id .. "Name"):set_text(tostring(info[6]))
-                ui_manager:get_widget(slot_id .. "LvNumber"):set_text(UiContainer.pad_value(info[7], 3))
+                ui_manager:get_widget(slot_id .. "Location.Name"):set_text(savemap_manager:get_slot_location_name(slot))
+                local save_party = {
+                    [1] = savemap_manager:get_slot_party_member(slot, 0),
+                    [2] = savemap_manager:get_slot_party_member(slot, 1),
+                    [3] = savemap_manager:get_slot_party_member(slot, 2)
+                }
+                ui_manager:get_widget(slot_id .. "Name"):set_text(savemap_manager:get_slot_character_name(slot, save_party[1]))
+                ui_manager:get_widget(slot_id .. "LvNumber"):set_text(UiContainer.pad_value(savemap_manager:get_slot_character_level(slot, save_party[1]), 3))
                 for c = 1, 3 do
-                    if tonumber(info[7 + c]) ~= -1 and Characters[info[7 + c] + 1] ~= nil then
-                        ui_manager:get_widget(slot_id .. "Party.Portrait" .. tostring(c)):set_image("images/characters/" .. tostring(info[7 + c]) .. ".png")
+                    if save_party[c] ~= -1 and Characters[save_party[c] + 1] ~= nil then
+                        ui_manager:get_widget(slot_id .. "Party.Portrait" .. tostring(c)):set_image("images/characters/" .. tostring(save_party[c]) .. ".png")
                         ui_manager:get_widget(slot_id .. "Party.Portrait" .. tostring(c)):set_visible(true)
                     else
                         ui_manager:get_widget(slot_id .. "Party.Portrait" .. tostring(c)):set_visible(false)
@@ -134,24 +140,35 @@ UiContainer.SaveMenu = {
         end
     end,
 
-    split_preview_data = function(data)
-        local sep = "#"
-        local t={}
-        for str in string.gmatch(data, "([^"..sep.."]+)") do
-            table.insert(t, str)
-        end
-        return t
-    end,
-
-
     action = function(self, slot)
-        print("ACTION " .. self.operation .. " ON SLOT " .. tostring(slot))
+        if self.operation == "save" then
+            if savemap_manager:is_slot_empty(slot - 1) == false and ControlKey ~= savemap_manager:get_slot_control_key(slot - 1) then
+                -- TODO: Confirmation dialog
+                print("OVERRIDE ANOTHER SAVE")
+                save_game(slot - 1, true)
+                audio_manager:play_sound("Cursor")
+                self.populate_slots(self)
+            else
+                save_game(slot - 1, true)
+                audio_manager:play_sound("Cursor")
+                self.populate_slots(self)
+            end
+        elseif self.operation == "load" then
+            audio_manager:play_sound("Window")
+            script:request_end_sync(Script.UI, "SaveMenu", "hide", 0)
+            script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
+            load_game(slot - 1)
+        end
     end,
 
     --- Hides the item menu and goes back to the main menu.
     hide = function(self)
         ui_manager:get_widget("SaveMenu"):set_visible(false)
-        UiContainer.current_menu = "main"
+        if self.operation == "load" then
+            UiContainer.current_menu = "begin"
+        else
+            UiContainer.current_menu = "main"
+        end
         UiContainer.current_submenu = ""
         savemap_manager:release()
         return 0;

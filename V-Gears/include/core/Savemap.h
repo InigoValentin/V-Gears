@@ -328,68 +328,540 @@ class Savemap{
         bool IsEmpty();
 
         /**
-         * Generates a string with all the required data to generate a preview of the savemap.
+         * Retrieves the control key .
          *
-         * The included information contains the following fields, separated by the character "#":
-         * - Slot
-         * - Control key
-         * - Party money
-         * - Game time (in seconds)
-         * - Location text
-         * - Party member 1 name
-         * - Party member 1 level
-         * - Party member 1 character ID.
-         * - Party member 2 character ID.
-         * - Party member 3 character ID.
-         *
-         * @return The generated string.
+         * @return The control key of the slot.
          */
-        std::string GetPreviewData();
+        std::string GetControlKey();
+
+        /**
+         * Retrieves a colour component from a window corner.
+         *
+         * @param[in] corner The window corner. See {@see Corner}.
+         * @param[in] corner The color component to get. See {@see Colour}.
+         * @return The color component of the specified corner of windows. If an invalid slot is
+         * specified, or if the slot is empty, or if an invalid corner or color are requested, 0.
+         */
+        unsigned int GetWindowCornerColourComponent(
+          const unsigned int corner, const unsigned int comp
+        );
+
+        /**
+         * Retrieves the money.
+         *
+         * @return The money of the slot.
+         */
+        unsigned int GetMoney();
+
+        /**
+         * Retrieves the total playtime.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The total playtime, in seconds.
+         */
+        unsigned int GetGameTime();
+
+        /**
+         * Retrieves the time in the timer.
+         *
+         * @return The timer time, in seconds. If there is no timer saved, 0.
+         */
+        unsigned int GetCountdownTime();
+
+        /**
+         * Retrieves the ID of a party member.
+         *
+         * @param[in] pos Position in the party.
+         * @return The ID of the character at the requested position. If there is no character at
+         * the requested position, -1.
+         */
+        int GetPartyMember(const unsigned int pos);
+
+        /**
+         * Retrieves the ID of an item in the inventory.
+         *
+         * @param[in] pos Position in the inventory.
+         * @return The ID of the item at the requested inventory position. If there is no item at
+         * the requested position, 0.
+         */
+        unsigned int GetItemAtPosId(const unsigned int pos);
+
+        /**
+         * Retrieves the quantity of an item in the inventory.
+         *
+         * @param[in] pos Position in the inventory.
+         * @return The quantity of the item at the requested inventory position. If there is no
+         * item at the requested position, 0.
+         */
+        unsigned int GetItemAtPosQty(const unsigned int pos);
+
+        /**
+         * Checks if a key item is owned.
+         *
+         * @param[in] id Key item ID.
+         * @return True if the key item is owned, false if not. If an invalid id is passed, false.
+         */
+        bool GetKeyItem(const unsigned int id);
+
+        /**
+         * Retrieves the ID of a materia in the inventory.
+         *
+         * @param[in] pos Position in the materia inventory.
+         * @return The ID of the materia at the requested inventory position. If an invalid
+         * position is passed, or if there is no materia at the requested position, -1.
+         */
+        int GetMateriaAtPosId(const unsigned int pos);
+
+        /**
+         * Retrieves the AP of a materia in the inventory.
+         *
+         * @param[in] pos Position in the materia inventory.
+         * @return The AP of the materia at the requested inventory position. If an invalid
+         * position is passed, or if there is no materia at the requested position, 0.
+         */
+        unsigned int GetMateriaAtPosAp(const unsigned int pos);
+
+        /**
+         * Checks if there is an Enemy Skill materia at a inventory position.
+         *
+         * @param[in] pos Position in the materia inventory.
+         * @return True if the materia in the specified position is an Enemy Skill materia, false
+         * if not. If an invalid position is passed, or if there is no materia at that position,
+         * false.
+         */
+        bool IsMateriaAtPosESkill(const unsigned int pos);
+
+        /**
+         * Checks if a a enemy skill is learned by a materia in the inventory.
+         *
+         * @param[in] pos Position in the materia inventory.
+         * @param[in] skill Skill ID, starting from 0.
+         * @return True if the materia in the specified position exists, is an Enemy Skill materia
+         * and has learned the specified skill. False in any other case.
+         */
+        bool IsMateriaAtPosESkillLearned(const unsigned int pos, const unsigned int skill);
+
+        /**
+         * Retrieves the ID of a materia in the stash.
+         *
+         * @param[in] pos Position in the materia stash.
+         * @return The ID of the materia at the requested stahs position. If an invalid
+         * position is passed, or if there is no materia at the requested position, -1.
+         */
+        int GetStashAtPosId(const unsigned int pos);
+
+        /**
+         * Retrieves the AP of a materia in the stash.
+         *
+         * @param[in] pos Position in the materia stash.
+         * @return The AP of the materia at the requested inventory position. If an invalid
+         * position is passed, or if there is no materia at the requested position, 0.
+         */
+        unsigned int GetStashAtPosAp(const unsigned int pos);
+
+        /**
+         * Checks if there is an Enemy Skill materia at a stash position.
+         *
+         * @param[in] pos Position in the materia stash.
+         * @return True if the materia in the specified position is an Enemy Skill materia, false
+         * if not. If an invalid position is passed, or if there is no materia at that position,
+         * false.
+         */
+        bool IsStashAtPosESkill(const unsigned int pos);
+
+        /**
+         * Checks if a a enemy skill is learned by a materia in the stash.
+         *
+         * @param[in] pos Position in the materia stash.
+         * @param[in] skill Skill ID, starting from 0.
+         * @return True if the materia in the specified position exists, is an Enemy Skill materia
+         * and has learned the specified skill. False in any other case.
+         */
+        bool IsStashAtPosESkillLearned(const unsigned int pos, const unsigned int skill);
+
+        /**
+         * Retrieves the X coordinate of the player.
+         *
+         * @return The X coordinate.
+         */
+        unsigned int GetLocationX();
+
+        /**
+         * Retrieves the Y coordinate of the player.
+         *
+         * @return The Y coordinate.
+         */
+        unsigned int GetLocationY();
+
+        /**
+         * Retrieves the Z coordinate of the player.
+         *
+         * @return The Z coordinate. If it was not saved, -1.
+         */
+        int GetLocationZ();
+
+        /**
+         * Retrieves the walkmesh triangle of the player.
+         *
+         * @return The triangle ID.
+         */
+        unsigned int GetLocationTriangle();
+
+        /**
+         * Retrieves the facing angle of the player.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The angle.
+         */
+        int GetLocationAngle();
+
+        /**
+         * Retrieves the field ID.
+         *
+         * @return The field ID. If the savemap is saved in the worldmap, an empty string.
+         */
+        std::string GetLocationField();
+
+        /**
+         * Retrieves the location name.
+         *
+         * @return The location name to be displayed in the save slot. If the location name has not
+         * been saved, an empty string.
+         */
+        std::string GetLocationName();
+
+        /**
+         * Retrieves a setting.
+         *
+         * @param[in] key Setting key.
+         * @return The setting value.
+         * @todo Implement and document properly.
+         */
+        int GetSetting(const unsigned int key);
+
+        /**
+         * Retrieves the char ID of a character.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The char ID of the character. If an invalid id is passed, or if the character
+         * doesn't have a char ID, -1.
+         */
+        int GetCharacterCharId(const unsigned int id);
+
+        /**
+         * Retrieves the name of a character.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The name of the character. If an invalid id is passed, an empty string.
+         */
+        std::string GetCharacterName(const unsigned int id);
+
+        /**
+         * Retrieves the level of a character.
+         *
+         * @param[in] id The character ID.
+         * @return The level of the character. If an invalid id is passed, 1.
+         */
+        unsigned int GetCharacterLevel(const unsigned int id);
+
+        /**
+         * Retrieves the total kills of a character.
+         *
+         * @param[in] id The character ID.
+         * @return The kills of the character. If an invalid id is passed, 0.
+         */
+        unsigned int GetCharacterKills(const unsigned int id);
+
+        /**
+         * Checks if a character is enabled.
+         *
+         * @param[in] id The character ID.
+         * @return True if the character is enabled, false if not. If an invalid id is passed,
+         * false.
+         */
+        bool IsCharacterEnabled(const unsigned int id);
+
+        /**
+         * Checks if a character is locked in or out of the party
+         *
+         * @param[in] id The character ID.
+         * @return True if the character is enabled, false if not. If an invalid id is passed,
+         * false.
+         */
+        bool IsCharacterLocked(const unsigned int id);
+
+        /**
+         * Checks the row of a character.
+         *
+         * @param[in] id The character ID.
+         * @return True if the character is in the back row, false if not. If an invalid id is
+         * passed, false.
+         */
+        bool IsCharacterBackRow(const unsigned int id);
+
+        /**
+         * Retrieves the total experience of a character.
+         *
+         * @param[in] id The character ID.
+         * @return The experience of the character. If an invalid id is passed, 0.
+         */
+        unsigned int GetCharacterExp(const unsigned int id);
+
+        /**
+         * Retrieves the experience for next level of a character.
+         *
+         * @param[in] id The character ID.
+         * @return The experience of the character. If an invalid id is passed, 0.
+         */
+        unsigned int GetCharacterExpToNext(const unsigned int id);
+
+        /**
+         * Retrieves the current limit level of a character from a saved savemap.
+         *
+         * @param[in] id The character ID.
+         * @return The limit level of the character. If an invalid id is passed, 0.
+         */
+        unsigned int GetCharacterLimitLevel(const unsigned int id);
+
+        /**
+         * Retrieves the current limit bar status level of a character.
+         *
+         * @param[in] id The character ID.
+         * @return The limit bar status of the character. If an invalid id is passed, 0.
+         */
+        unsigned int GetCharacterLimitBar(const unsigned int id);
+
+        /**
+         * Retrieves the ID of the weapon of a character.
+         *
+         * @param[in] id The character ID.
+         * @return The character's weapon ID. If an invalid id is passed, 0.
+         */
+        unsigned int GetCharacterWeaponId(const unsigned int id);
+
+        /**
+         * Retrieves the ID of the armor of a character.
+         *
+         * @param[in] id The character ID.
+         * @return The character's armor ID. If an invalid id is passed, 0.
+         */
+        unsigned int GetCharacterArmorId(const unsigned int id);
+
+        /**
+         * Retrieves the ID of the weapon of a character.
+         *
+         * @param[in] id The character ID.
+         * @return The character's weapon ID. If an invalid id is passed, or if the characetr has
+         * no accessory, -1.
+         */
+        int GetCharacterAccessoryId(const unsigned int id);
+
+        /**
+         * Retrieves the base value of a stat of a character.
+         *
+         * @param[in] id The character ID.
+         * @param[in] stat The stat ID (see {@see STAT}).
+         * @return The base value of the specified stat. If an invalid id or stat is passed, 0.
+         */
+        unsigned int GetCharacterStatBase(const unsigned int id, const unsigned int stat);
+
+        /**
+         * Retrieves the extra value of a stat of a character.
+         *
+         * For HP and MP, the extra value means the current value. For any other stat, the bonus
+         * gained by using sources.
+         *
+         * @param[in] id The character ID.
+         * @param[in] stat The stat ID (see {@see Savemap::STAT}).
+         * @return The extra value of the specified stat. If an invalid id or stat is passed, 0.
+         */
+        unsigned int GetCharacterStatExtra(const unsigned int id, const unsigned int stat);
+
+        /**
+         * Retrieves the uses of a character's limit level.
+         *
+         * @param[in] id The character ID.
+         * @param[in] level The limit level.
+         * @return Number of uses of the techniques in the specified limit level. If an invalid id
+         * or limit level is passed, 0.
+         */
+        unsigned int GetCharacterLimitUses(const unsigned int id, const unsigned int level);
+
+        /**
+         * Checks if a limit technique is learned by a character.
+         *
+         * @param[in] id The character ID.
+         * @param[in] level The limit level.
+         * @param[in] tech The technique position in the level.
+         * @return True if the technique has been learned, false if not. If an invalid id, limit
+         * level or technique is passed, 0.
+         */
+        bool IsCharacterLimitLearned(
+          const unsigned int id, const unsigned int level, const unsigned int tech
+        );
+
+        /**
+         * Retrieves the ID of an equipped materia.
+         *
+         * @param[in] id The character ID.
+         * @param[in] weapon If false, check materia equipped in the weapon. If false, check
+         * materia equiped in the armor.
+         * @param[in] pos Position in the equipment slots.
+         * @return The ID of the equipped materia. Id or position is passed, or if there is no
+         * materia at the requested position, -1.
+         */
+        int GetCharacterMateriaId(const unsigned int id, const bool weapon, const unsigned int pos);
+
+        /**
+         * Retrieves the AP of an equipped materia.
+         *
+         * @param[in] id The character ID.
+         * @param[in] weapon If false, check materia equipped in the weapon. If false, check
+         * materia equiped in the armor.
+         * @param[in] pos Position in the equipment slots.
+         * @return The AP of the equipped materia. If an invalid id or position is passed, or if
+         * there is no materia at the requested position, 0.
+         */
+        unsigned int GetCharacterMateriaAp(
+          const unsigned int id, const bool weapon, const unsigned int pos
+        );
+
+        /**
+         * Checks if an equipped materia is Enemy Skill.
+         *
+         * @param[in] id The character ID.
+         * @param[in] weapon If false, check materia equipped in the weapon. If false, check
+         * materia equiped in the armor.
+         * @param[in] pos Position in the equipment slots.
+         * @return True if the materia in the specified position is an Enemy Skill materia, false
+         * if not. If an invalid position is passed, or if there is no materia at that position,
+         * false.
+         */
+        bool IsCharacterMateriaESkill(const unsigned int id, const bool weapon, const unsigned int pos);
+
+        /**
+         * Checks if a a enemy skill is learned by a equipped materia.
+         *
+         * @param[in] id The character ID.
+         * @param[in] weapon If false, check materia equipped in the weapon. If false, check
+         * materia equiped in the armor.
+         * @param[in] pos Position in the equipment slots.
+         * @param[in] skill Skill ID, starting from 0.
+         * @return True if the materia in the specified position exists, is an Enemy Skill materia
+         * and has learned the specified skill. False in any other case.
+         */
+        bool IsCharacterMateriaESkillLearned(
+          const unsigned int id, const bool weapon, const unsigned int pos, const unsigned int skill
+        );
+
+        /**
+         * Retrieves the value of a bank address.
+         *
+         * @param[in] bank The bank ID.
+         * @param[in] address The address in the bank.
+         * @return The value. If an invalid bank or address level is passed, 0.
+         */
+        int GetData(const unsigned int bank, const unsigned int address);
 
         /**
          * Character basic stats.
          */
-        enum class STAT{
+        class STAT{
 
-            /**
-             * Strength stat.
-             */
-            STR,
+            public:
 
-            /**
-             * Vtatlity stat.
-             */
-            VIT,
+                /**
+                 * Strength stat.
+                 */
+                static const unsigned int STR = 0;
 
-            /**
-             * Magic stat.
-             */
-            MAG,
+                /**
+                 * Vtatlity stat.
+                 */
+                static const unsigned int VIT = 1;
 
-            /**
-             * Spirit stat.
-             */
-            SPR,
+                /**
+                 * Magic stat.
+                 */
+                static const unsigned int MAG = 2;
 
-            /**
-             * Dexterity stat.
-             */
-            DEX,
+                /**
+                 * Spirit stat.
+                 */
+                static const unsigned int SPR = 3;
 
-            /**
-             * Luck stat.
-             */
-            LCK,
+                /**
+                 * Dexterity stat.
+                 */
+                static const unsigned int DEX = 4;
 
-            /**
-             * HP stat.
-             */
-            HP,
+                /**
+                 * Luck stat.
+                 */
+                static const unsigned int LCK = 5;
 
-            /**
-             * MP stat.
-             */
-            MP
+                /**
+                 * HP stat.
+                 */
+                static const unsigned int HP = 6;
+
+                /**
+                 * MP stat.
+                 */
+                static const unsigned int MP = 7;
+        };
+
+        /**
+         * Window corners.
+         */
+        class CORNER{
+
+            public:
+
+                /**
+                 * Top left window corner.
+                 */
+                static const unsigned int T_L = 0;
+
+                /**
+                 * Top right window corner.
+                 */
+                static const unsigned int T_R = 1;
+
+                /**
+                 * Bottom right window corner.
+                 */
+                static const unsigned int B_R = 2;
+
+                /**
+                 * Bottom left window corner.
+                 */
+                static const unsigned int B_L = 3;
+        };
+
+        /**
+         * Colour codes
+         */
+        class COLOUR{
+
+            public:
+
+                /**
+                 * Red colour.
+                 */
+                static const unsigned int R = 0;
+
+                /**
+                 * Green colour.
+                 */
+                static const unsigned int G = 1;
+
+                /**
+                 * Blue colour.
+                 */
+                static const unsigned int B = 2;
         };
 
     private:

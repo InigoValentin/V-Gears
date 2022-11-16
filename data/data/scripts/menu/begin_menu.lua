@@ -1,48 +1,54 @@
 if UiContainer == nil then UiContainer = {} end
 
-
-
+--- The begin menu
 UiContainer.BeginMenu = {
+
+    --- Current cursor position
     position = 1,
+
+    -- Max cursor position
     position_total = 6,
 
-
-
-    on_start = function( self )
-        local cursor = ui_manager:get_widget( "BeginMenu.Container.Cursor" )
-        cursor:set_default_animation( "Position" .. self.position )
+    --- Run when the menu is created.
+    --
+    -- Sets this menu as the one beind displayed.
+    on_start = function(self)
+        UiContainer.current_menu = "begin"
+        local cursor = ui_manager:get_widget("BeginMenu.Container.Cursor")
+        cursor:set_default_animation("Position" .. self.position)
         return 0
     end,
 
 
-
-    on_button = function( self, button, event )
-
-        if ui_manager:get_widget( "BeginMenu" ):is_visible() ~= false then
-            local cursor = ui_manager:get_widget( "BeginMenu.Container.Cursor" )
-
+    --- Handles button events.
+    --
+    -- Handles directional Up, Down and Enter keys.
+    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param event Trigger event. Normally, "Press".
+    on_button = function(self, button, event)
+        if UiContainer.current_menu == "begin" then
+            local cursor = ui_manager:get_widget("BeginMenu.Container.Cursor")
             if button == "Enter" and event == "Press" then
-                if self.position == 1 then
+                if self.position == 1 then -- New game
                     audio_manager:play_sound("Window")
-                    load_field_map_request( "md1stin", "" )
-                    console( "camera_free false" )
-                    --console( "debug_walkmesh true" )
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
+                    generate_control_key()
+                    load_field_map_request("md1stin", "")
+                    console("camera_free false")
+                    --console("debug_walkmesh true")
+                    script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
                     MenuSettings.pause_available = true
-                elseif self.position == 2 then
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
-                    console( "camera_free true" )
-                    console( "debug_walkmesh true" )
-                    map( "test_3" )
-                    MenuSettings.pause_available = true
+                elseif self.position == 2 then -- Load, show save menu.
+                    audio_manager:play_sound("Cursor")
+                    UiContainer.SaveMenu.operation = "load"
+                    script:request_end_sync(Script.UI, "SaveMenu", "show", 0)
                 elseif self.position == 3 then
                     -- NMKIN_3 START
                     Data.progress_game = 27
                     load_field_map_request("nmkin_3", "")
-                    console( "camera_free false" )
-                    console( "debug_walkmesh true" )
+                    console("camera_free false")
+                    console("debug_walkmesh true")
                     script:wait(1)
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
+                    script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
                     entity_manager:get_entity("Cloud"):set_position(-1.090750, 15.310307, 17.281244)
                     entity_manager:set_player_entity("Cloud")
                     script:wait(1)
@@ -59,7 +65,7 @@ UiContainer.BeginMenu = {
                     console("camera_free false")
                     console("debug_walkmesh true")
                     script:wait(1.5)
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
+                    script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
                     entity_manager:get_entity("Cloud"):set_position(-0.820312, 0.500000, 17.281244)
                     entity_manager:set_player_entity("Cloud")
                     set_party(0, 1, 4)
@@ -72,20 +78,20 @@ UiContainer.BeginMenu = {
                     MenuSettings.pause_available = true]]
                     -- NMKIN_4 END
                 elseif self.position == 4 then
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
-                    console( "camera_free true" )
-                    console( "debug_walkmesh true" )
-                    map( "test_2" )
+                    script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
+                    console("camera_free true")
+                    console("debug_walkmesh true")
+                    map("test_2")
                     MenuSettings.pause_available = true
                 elseif self.position == 5 then
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
-                    console( "camera_free true" )
+                    script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
+                    console("camera_free true")
                     world_map_module:init()
                 elseif self.position == 6 then
-                    load_field_map_request( "startmap", "" )
-                    console( "camera_free false" )
-                    console( "debug_walkmesh false" )
-                    script:request_end_sync( Script.UI, "BeginMenu", "hide", 0 )
+                    load_field_map_request("startmap", "")
+                    console("camera_free false")
+                    console("debug_walkmesh false")
+                    script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
                     MenuSettings.pause_available = true
                 end
             elseif button == "Down" then
@@ -94,33 +100,32 @@ UiContainer.BeginMenu = {
                 if self.position > self.position_total then
                     self.position = 1;
                 end
-                cursor:set_default_animation( "Position" .. self.position )
+                cursor:set_default_animation("Position" .. self.position)
             elseif button == "Up" then
                 audio_manager:play_sound("Cursor")
                 self.position = self.position - 1
                 if self.position <= 0 then
                     self.position = self.position_total;
                 end
-                cursor:set_default_animation( "Position" .. self.position )
+                cursor:set_default_animation("Position" .. self.position)
             end
         end
-
         return 0
     end,
 
-
-
-    show = function( self )
-        ui_manager:get_widget( "BeginMenu" ):set_visible( true )
-
+    --- Opens the save menu.
+    show = function(self)
+        UiContainer.current_menu = "begin"
+        ui_manager:get_widget("BeginMenu"):set_visible(true)
         return 0;
     end,
 
-
-
-    hide = function( self )
-        ui_manager:get_widget( "BeginMenu" ):set_visible( false )
-
+    --- Hiddens the begin menu.
+    --
+    -- It doesn't do anything else.
+    hide = function(self)
+        UiContainer.current_menu = ""
+        ui_manager:get_widget("BeginMenu"):set_visible(false)
         return 0;
     end,
 }

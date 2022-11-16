@@ -21,11 +21,12 @@
     <text name="MateriaEncountersChocobo">Chocobo</text>
 
     <text name="BeginMenuNewGame">NEW GAME</text>
-    <text name="BeginMenu1">DEBUG: Battle map</text>
-    <text name="BeginMenu2">DEBUG: Quick map</text>
-    <text name="BeginMenu3">DEBUG: Entity testarea</text>
-    <text name="BeginMenu4">DEBUG: World map test</text>
-    <text name="BeginMenu5">DEBUG: Debug Room</text>
+    <text name="BeginMenuLoadGame">LOAD GAME</text>
+    <text name="BeginMenu1"><colour value="0.5 0.5 0.5">DEBUG: Battle map</colour></text>
+    <text name="BeginMenu2"><colour value="0.5 0.5 0.5">DEBUG: Quick map</colour></text>
+    <text name="BeginMenu3"><colour value="0.5 0.5 0.5">DEBUG: Entity testarea</colour></text>
+    <text name="BeginMenu4"><colour value="0.5 0.5 0.5">DEBUG: World map test</colour></text>
+    <text name="BeginMenu5"><colour value="0.5 0.5 0.5">DEBUG: Debug Room</colour></text>
 
     <text name="PauseMenuHeader">Paused</text>
     <text name="PauseMenuText">Are you want to quit?</text>
@@ -101,6 +102,17 @@
     <text name="NameMenuDefault">Default</text>
     <text name="NameMenuConfirm">Confirm</text>
     <text name="NameMenuConfirmMsg">Confirm name</text>
+
+    <text name="SaveMenuSave">Save</text>
+    <text name="SaveMenuLoad">Load</text>
+    <text name="SaveMenuLevel"><colour value="0 0.8 1">Level</colour></text>
+    <text name="SaveMenuTime">Time</text>
+    <text name="SaveMenuMoney">Gil</text>
+    <text name="SaveMenuEmptySlot"><colour value="0.6 0.6 0.6">Empty slot</colour></text>
+    <text name="SaveMenuTitleSave">Save</text>
+    <text name="SaveMenuTitleLoad">Load</text>
+    <text name="SaveMenuDescSave">Select a slot to save</text>
+    <text name="SaveMenuDescLoad">Select a game to load</text>
 
     <text name="CharacterDataName">#Name#</text>
     <text name="CharacterDataLv">LV</text>

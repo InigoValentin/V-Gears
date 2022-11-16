@@ -48,12 +48,12 @@ std::vector<Savemap*> SavemapManager::GetSavemaps(){
     return saved_savemaps_;
 }
 
-bool SavemapManager::Save(unsigned int slot, bool force){
+bool SavemapManager::Save(unsigned int slot, const bool force){
     if (current_savemap_ == nullptr) return false;
     if (slot >= MAX_SAVE_SLOTS) return false;
     if (!savemaps_read_) ReadSavemaps();
     if (
-      !force && !saved_savemaps_[slot]->IsEmpty()
+        force == false && saved_savemaps_[slot]->IsEmpty() == false
       && current_savemap_->GetControlKey() != saved_savemaps_[slot]->GetControlKey()
     ){
         return false;
@@ -69,7 +69,7 @@ bool SavemapManager::Save(Savemap savemap, unsigned int slot, bool force){
     if (slot >= MAX_SAVE_SLOTS) return false;
     if (!savemaps_read_) ReadSavemaps();
     if (
-      !force && !saved_savemaps_[slot]->IsEmpty()
+      force == false && saved_savemaps_[slot]->IsEmpty() == false
       && savemap.GetControlKey() != saved_savemaps_[slot]->GetControlKey()
     ){
         return false;
@@ -241,56 +241,329 @@ void SavemapManager::SetCharacterStatus(
     current_savemap_->SetCharacterStatus(id, status, inflicted);
 }
 
-bool SavemapManager::SlotIsEmpty(const unsigned int slot){
+bool SavemapManager::IsSlotEmpty(const unsigned int slot){
     if (slot >= MAX_SAVE_SLOTS) return true;
     if (savemaps_read_ == false) ReadSavemaps();
     return saved_savemaps_[slot]->IsEmpty();
 }
 
-/*char* SavemapManager::GetPreviewData(const unsigned int slot){
-    std::cout << "[PREV_DATA] Start\n";
-    std::string data = "X";
-    std::cout << "[PREV_DATA] 1\n";
-    //char *empty_cstr= new char[1];
-    //strcpy(empty_cstr, data.c_str());
-    if (slot >= MAX_SAVE_SLOTS){
-        strcpy(temp_, data.c_str());
-        std::cout << "[PREV_DATA] RET 1 " << temp_ << " \n";
-        return temp_;
-    }
-    std::cout << "[PREV_DATA] 2\n";
+std::string SavemapManager::GetSlotControlKey(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return std::string("");
     if (savemaps_read_ == false) ReadSavemaps();
-    std::cout << "[PREV_DATA] 3\n";
-    if (saved_savemaps_[slot]->IsEmpty()){
-        strcpy(temp_, data.c_str());
-        std::cout << "[PREV_DATA] RET 2 " << temp_ << " \n";
-        return temp_;
-    }
-    std::cout << "[PREV_DATA] 4\n";
-    data = saved_savemaps_[slot]->GetPreviewData();
-    std::cout << "[PREV_DATA] 5\n";
+    return saved_savemaps_[slot]->GetControlKey();
+}
 
-    //char cstr[data.length() + 1];
-    //strcpy(cstr, data.c_str());
-    //cstr[data.length()] = '\0';
-    temp_ = (char*) malloc(data.size() + 1);
-    for (int c = 0; c < data.size(); c ++){
-        temp_[c] = data[c];
-        std::cout << "    " << data[c] << " -> " << temp_[c] << "\n";
-    }
-    temp_[data.size()] = '\0';
-    strcpy(temp_, data.c_str());
-    std::cout << "[PREV_DATA] : " << data << " == " << std::string(temp_) << "\n";
-    return temp_;
-}*/
-
-std::string SavemapManager::GetPreviewData(const unsigned int slot){
-    std::string data = "";
-    if (slot >= MAX_SAVE_SLOTS) return data;
+unsigned int SavemapManager::GetSlotWindowCornerColourComponent(
+  const unsigned int slot, const unsigned int corner, const unsigned int comp
+){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
     if (savemaps_read_ == false) ReadSavemaps();
-    if (saved_savemaps_[slot]->IsEmpty()) return data;
-    data = saved_savemaps_[slot]->GetPreviewData();
-    return data;
+    return saved_savemaps_[slot]->GetWindowCornerColourComponent(corner, comp);
+}
+
+unsigned int SavemapManager::GetSlotMoney(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetMoney();
+}
+
+unsigned int SavemapManager::GetSlotGameTime(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetGameTime();
+}
+
+unsigned int SavemapManager::GetSlotCountdownTime(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCountdownTime();
+}
+
+int SavemapManager::GetSlotPartyMember(const unsigned int slot, const unsigned int pos){
+    if (slot >= MAX_SAVE_SLOTS) return -1;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetPartyMember(pos);
+}
+
+unsigned int SavemapManager::GetSlotItemAtPosId(const unsigned int slot, const unsigned int pos){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetItemAtPosId(pos);
+}
+
+unsigned int SavemapManager::GetSlotItemAtPosQty(const unsigned int slot, const unsigned int pos){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetItemAtPosQty(pos);
+}
+
+bool SavemapManager::GetSlotKeyItem(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetKeyItem(id);
+}
+
+int SavemapManager::GetSlotMateriaAtPosId(const unsigned int slot, const unsigned int pos){
+    if (slot >= MAX_SAVE_SLOTS) return -1;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetMateriaAtPosId(pos);
+}
+
+unsigned int SavemapManager::GetSlotMateriaAtPosAp(const unsigned int slot, const unsigned int pos){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetMateriaAtPosAp(pos);
+}
+
+bool SavemapManager::IsSlotMateriaAtPosESkill(const unsigned int slot, const unsigned int pos){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsMateriaAtPosESkill(pos);
+}
+
+bool SavemapManager::IsSlotMateriaAtPosESkillLearned(const unsigned int slot, const unsigned int pos, const unsigned int skill){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsMateriaAtPosESkillLearned(pos, skill);
+}
+
+int SavemapManager::GetSlotStashAtPosId(const unsigned int slot, const unsigned int pos){
+    if (slot >= MAX_SAVE_SLOTS) return -1;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetStashAtPosId(pos);
+}
+
+unsigned int SavemapManager::GetSlotStashAtPosAp(const unsigned int slot, const unsigned int pos){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetStashAtPosAp(pos);
+}
+
+bool SavemapManager::IsSlotStashAtPosESkill(const unsigned int slot, const unsigned int pos){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsStashAtPosESkill(pos);
+}
+
+bool SavemapManager::IsSlotStashAtPosESkillLearned(const unsigned int slot, const unsigned int pos, const unsigned int skill){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsStashAtPosESkillLearned(pos, skill);
+}
+
+unsigned int SavemapManager::GetSlotLocationX(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetLocationX();
+}
+
+unsigned int SavemapManager::GetSlotLocationY(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetLocationY();
+}
+
+int SavemapManager::GetSlotLocationZ(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return -1;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetLocationZ();
+}
+
+unsigned int SavemapManager::GetSlotLocationTriangle(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetLocationTriangle();
+}
+
+int SavemapManager::GetSlotLocationAngle(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetLocationAngle();
+}
+
+std::string SavemapManager::GetSlotLocationField(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return "";
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetLocationField();
+}
+
+std::string SavemapManager::GetSlotLocationName(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return "";
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetLocationName();
+}
+
+int SavemapManager::GetSlotSetting(const unsigned int slot, const unsigned int key){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetSetting(key);
+}
+
+int SavemapManager::GetSlotCharacterCharId(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterCharId(id);
+}
+
+std::string SavemapManager::GetSlotCharacterName(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return "";
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterName(id);
+}
+
+unsigned int SavemapManager::GetSlotCharacterLevel(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return 1;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterLevel(id);
+}
+
+unsigned int SavemapManager::GetSlotCharacterKills(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterKills(id);
+}
+
+bool SavemapManager::IsSlotCharacterEnabled(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsCharacterEnabled(id);
+}
+
+bool SavemapManager::IsSlotCharacterLocked(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsCharacterLocked(id);
+}
+
+bool SavemapManager::IsSlotCharacterBackRow(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsCharacterBackRow(id);
+}
+
+unsigned int SavemapManager::GetSlotCharacterExp(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterExp(id);
+}
+
+unsigned int SavemapManager::GetSlotCharacterExpToNext(
+  const unsigned int slot, const unsigned int id
+){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterExpToNext(id);
+}
+
+unsigned int SavemapManager::GetSlotCharacterLimitLevel(
+  const unsigned int slot, const unsigned int id
+){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterLimitLevel(id);
+}
+
+unsigned int SavemapManager::GetSlotCharacterLimitBar(
+  const unsigned int slot, const unsigned int id
+){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterLimitBar(id);
+}
+
+unsigned int SavemapManager::GetSlotCharacterWeaponId(
+  const unsigned int slot, const unsigned int id
+){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterWeaponId(id);
+}
+
+unsigned int SavemapManager::GetSlotCharacterArmorId(
+  const unsigned int slot, const unsigned int id
+){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterArmorId(id);
+}
+
+int SavemapManager::GetSlotCharacterAccessoryId(const unsigned int slot, const unsigned int id){
+    if (slot >= MAX_SAVE_SLOTS) return -1;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterAccessoryId(id);
+}
+
+unsigned int SavemapManager::GetSlotCharacterStatBase(
+  const unsigned int slot, const unsigned int id, const unsigned int stat
+){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterStatBase(id, stat);
+}
+
+unsigned int SavemapManager::GetSlotCharacterStatExtra(
+  const unsigned int slot, const unsigned int id, const unsigned int stat
+){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterStatExtra(id, stat);
+}
+
+unsigned int SavemapManager::GetSlotCharacterLimitUses(
+  const unsigned int slot, const unsigned int id, const unsigned int level
+){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterLimitUses(id, level);
+}
+
+bool SavemapManager::IsSlotCharacterLimitLearned(
+  const unsigned int slot, const unsigned int id, const unsigned int level, const unsigned int tech
+){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsCharacterLimitLearned(id, level, tech);
+}
+
+int SavemapManager::GetSlotCharacterMateriaId(
+  const unsigned int slot, const unsigned int id, const bool weapon, const unsigned int pos
+){
+    if (slot >= MAX_SAVE_SLOTS) return -1;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterMateriaId(id, weapon, pos);
+}
+
+unsigned int SavemapManager::GetSlotCharacterMateriaAp(
+  const unsigned int slot, const unsigned int id, const bool weapon, const unsigned int pos
+ ){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetCharacterMateriaAp(id, weapon, pos);
+}
+
+bool SavemapManager::IsSlotCharacterMateriaESkill(
+  const unsigned int slot, const unsigned int id, const bool weapon, const unsigned int pos
+){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsCharacterMateriaESkill(id, weapon, pos);
+}
+
+bool SavemapManager::IsSlotCharacterMateriaESkillLearned(
+  const unsigned int slot, const unsigned int id, const bool weapon,
+  const unsigned int pos, const unsigned int skill
+){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->IsCharacterMateriaESkillLearned(id, weapon, pos, skill);
+}
+
+int SavemapManager::GetSlotData(
+  const unsigned int slot, const unsigned int bank, const unsigned int address
+){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetData(bank, address);
 }
 
 

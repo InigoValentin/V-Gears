@@ -2,19 +2,18 @@
     <widget name="Container" width="368" height="240" origin_x="50%" origin_y="50%" align="center" valign="middle" scale="2.61 3" visible="true">
         <sprite name="Sword" image="images/other/begin_menu.png" x="111" y="84" width="170" height="150" visible="true" />
         <sprite name="Cursor" image="images/icons/cursor.png" x="132" y="99" width="24" height="16" visible="true">
-            <animation name="Position1" length="0" y="0:99" />
-            <animation name="Position2" length="0" y="0:111" />
-            <animation name="Position3" length="0" y="0:123" />
-            <animation name="Position4" length="0" y="0:135" />
-            <animation name="Position5" length="0" y="0:147" />
-            <animation name="Position6" length="0" y="0:160" />
+            <animation name="Position1" length="0" y="0:80" />
+            <animation name="Position2" length="0" y="0:92" />
+            <animation name="Position3" length="0" y="0:110" />
+            <animation name="Position4" length="0" y="0:122" />
+            <animation name="Position5" length="0" y="0:134" />
+            <animation name="Position6" length="0" y="0:146" />
         </sprite>
-        <text_area name="Text1" x="158" y="99" text_name="BeginMenuNewGame" font="FFVIIFont" visible="true" />
-        <text_area name="Text2" x="158" y="111" text_name="BeginMenu1" font="FFVIIFont" visible="true" />
-        <text_area name="Text3" x="158" y="123" text_name="BeginMenu2" font="FFVIIFont" visible="true" />
-        <text_area name="Text4" x="158" y="135" text_name="BeginMenu3" font="FFVIIFont" visible="true" />
-        <text_area name="Text5" x="158" y="147" text_name="BeginMenu4" font="FFVIIFont" visible="true" />
-        <text_area name="Text6" x="158" y="160" text_name="BeginMenu5" font="FFVIIFont" visible="true" />
-
+        <text_area name="Text1" x="158" y="80" text_name="BeginMenuNewGame" font="FFVIIFont" visible="true" />
+        <text_area name="Text2" x="158" y="92" text_name="BeginMenuLoadGame" font="FFVIIFont" visible="true" />
+        <text_area name="Text3" x="158" y="110" text_name="BeginMenu2" font="FFVIIFont" visible="true" />
+        <text_area name="Text4" x="158" y="122" text_name="BeginMenu3" font="FFVIIFont" visible="true" />
+        <text_area name="Text5" x="158" y="134" text_name="BeginMenu4" font="FFVIIFont" visible="true" />
+        <text_area name="Text6" x="158" y="146" text_name="BeginMenu5" font="FFVIIFont" visible="true" />
     </widget>
 </screen>

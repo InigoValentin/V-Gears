@@ -1,4 +1,5 @@
 MAX_INVENTORY_SLOTS = 320
+MAX_KEY_SLOTS = 50
 MAX_MATERIA_SLOTS = 200
 
 --- Export character names to the text manager.

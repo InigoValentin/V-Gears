@@ -39,7 +39,7 @@ void FieldWindowInstruction::ProcessInst(
         case OPCODES::MESSAGE: ProcessMESSAGE(code_gen, eng.GetScriptName()); break;
         case OPCODES::MPARA: code_gen->WriteTodo(md.GetEntityName(), "MPARA"); break;
         case OPCODES::MPRA2: code_gen->WriteTodo(md.GetEntityName(), "MPRA2"); break;
-        case OPCODES::MPNAM: ProcessMPNAM(code_gen); break;
+        case OPCODES::MPNAM: ProcessMPNAM(code_gen, eng.GetScriptName()); break;
         case OPCODES::ASK: code_gen->WriteTodo(md.GetEntityName(), "ASK"); break;
         case OPCODES::MENU: ProcessMENU(code_gen); break;
         case OPCODES::MENU2: ProcessMENU2(code_gen); break;
@@ -154,7 +154,7 @@ void FieldWindowInstruction::ProcessWCLSE(CodeGenerator* code_gen){
     code_gen->AddOutputLine((boost::format("dialog:dialog_close(\"%1%\")") % windowId).str());
 }
 
-void FieldWindowInstruction::ProcessMPNAM(CodeGenerator* code_gen){
+void FieldWindowInstruction::ProcessMPNAM(CodeGenerator* code_gen, const std::string& script_name){
     code_gen->AddOutputLine((
       boost::format("dialog:set_map_name(%1%_%2%)") % script_name % params_[0]->GetUnsigned()
     ).str());

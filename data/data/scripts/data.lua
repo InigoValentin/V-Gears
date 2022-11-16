@@ -66,6 +66,8 @@ Game = {
     Summon_Names = {},
 }
 
+ControlKey = "";
+
 --- Playable characters
 Characters = {}
 for i = 1, 11 do
@@ -254,11 +256,11 @@ end
 --
 -- @todo Delete this, and implement bit operations over Banks.
 BitBanks = {}
-for i = 0, 14 do
+for i = 0, 15 do
     BitBanks[i] = {}
-    for j = 0, 254 do
+    for j = 0, 255 do
         BitBanks[i][j] = {}
-        for k = 0, 7 do
+        for k = 0, 8 do
             BitBanks[i][j][k] = 0
         end
     end

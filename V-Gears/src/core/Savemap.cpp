@@ -23,7 +23,7 @@
 #include "common/TypeDefine.h"
 
 Savemap::Savemap():
-  empty_(true), control_("X"), money_(0), seconds_(0), countdown_(0), slot_(-1)
+  empty_(true), control_(""), money_(0), seconds_(0), countdown_(0), slot_(-1)
 {
     for (int i = 0; i < 4; i ++){
         window_colours_[i][0] = 0;
@@ -62,7 +62,7 @@ Savemap::Savemap():
     }
     for (int i = 0; i < MAX_CHARACTERS; i ++){
         characters_[i].id = i;
-        characters_[i].char_id = 0;
+        characters_[i].char_id = -1;
         characters_[i].enabled = false;
         characters_[i].locked = false;
         characters_[i].name = "";
@@ -385,13 +385,292 @@ void Savemap::SetCharacterStatus(
 
 bool Savemap::IsEmpty(){return empty_;}
 
-std::string Savemap::GetPreviewData(){
-    std::string data = "";
-    data += std::to_string(slot_) + "#" + control_ + "#" + std::to_string(money_) + "#"
-      + std::to_string(seconds_) + "#" + location_.name + "#" + characters_[party_[0]].name + "#" +
-      std::to_string(characters_[party_[0]].level) + "#" + std::to_string(party_[0]) + "#"
-      + std::to_string(party_[1]) + "#" + std::to_string(party_[2]);
-    return data;
+std::string Savemap::GetControlKey(){return control_;}
+
+unsigned int Savemap::GetWindowCornerColourComponent(
+  const unsigned int corner, const unsigned int comp
+){
+    if (corner < 4 && comp < 3) return window_colours_[corner][comp];
+    else return 0;
+}
+
+unsigned int Savemap::GetMoney(){return money_;}
+
+unsigned int Savemap::GetGameTime(){return seconds_;}
+
+unsigned int Savemap::GetCountdownTime(){return countdown_;}
+
+int Savemap::GetPartyMember(const unsigned int pos){
+    if (pos < MAX_PARTY_MEMBERS) return party_[pos];
+    else return -1;
+}
+
+unsigned int Savemap::GetItemAtPosId(const unsigned int pos){
+    if (pos >= MAX_ITEM_SLOTS) return 0;
+    else if (items_[pos].quantity == 0) return 0;
+    else return items_[pos].id;
+}
+
+unsigned int Savemap::GetItemAtPosQty(const unsigned int pos){
+    if (pos >= MAX_ITEM_SLOTS) return 0;
+    else return items_[pos].quantity;
+}
+
+bool Savemap::GetKeyItem(const unsigned int id){
+    if (id >= MAX_KEY_ITEM_SLOTS) return false;
+    else return key_items_[id];
+}
+
+int Savemap::GetMateriaAtPosId(const unsigned int pos){
+    if (pos >= MAX_MATERIA_SLOTS) return -1;
+    else return materia_[pos].id;
+}
+
+unsigned int Savemap::GetMateriaAtPosAp(const unsigned int pos){
+    if (pos >= MAX_MATERIA_SLOTS) return 0;
+    else if (materia_[pos].id < 0) return 0;
+    else if (materia_[pos].enemy_skill) return 0;
+    else return materia_[pos].ap;
+}
+
+bool Savemap::IsMateriaAtPosESkill(const unsigned int pos){
+    if (pos >= MAX_MATERIA_SLOTS) return false;
+    else if (materia_[pos].id < 0) return false;
+    else return materia_[pos].enemy_skill;
+}
+
+bool Savemap::IsMateriaAtPosESkillLearned(const unsigned int pos, const unsigned int skill){
+    if (pos >= MAX_MATERIA_SLOTS) return false;
+    else if (materia_[pos].id < 0) return false;
+    else if (materia_[pos].enemy_skill == false) return false;
+    else if (skill >= MAX_ENEMY_SKILLS) return false;
+    else return materia_[pos].enemy_skill_learned[skill];
+}
+
+int Savemap::GetStashAtPosId(const unsigned int pos){
+    if (pos >= MAX_STASH_SLOTS) return -1;
+    else return materia_stash_[pos].id;
+}
+
+unsigned int Savemap::GetStashAtPosAp(const unsigned int pos){
+    if (pos >= MAX_STASH_SLOTS) return 0;
+    else if (materia_stash_[pos].id < 0) return 0;
+    else if (materia_stash_[pos].enemy_skill) return 0;
+    else return materia_stash_[pos].ap;
+}
+
+bool Savemap::IsStashAtPosESkill(const unsigned int pos){
+    if (pos >= MAX_STASH_SLOTS) return false;
+    else if (materia_stash_[pos].id < 0) return false;
+    else return materia_stash_[pos].enemy_skill;
+}
+
+bool Savemap::IsStashAtPosESkillLearned(const unsigned int pos, const unsigned int skill){
+    if (pos >= MAX_STASH_SLOTS) return false;
+    else if (materia_stash_[pos].id < 0) return false;
+    else if (materia_stash_[pos].enemy_skill == false) return false;
+    else if (skill >= MAX_ENEMY_SKILLS) return false;
+    else return materia_stash_[pos].enemy_skill_learned[skill];
+}
+
+unsigned int Savemap::GetLocationX(){return location_.x;}
+
+unsigned int Savemap::GetLocationY(){return location_.y;}
+
+int Savemap::GetLocationZ(){return location_.z;}
+
+unsigned int Savemap::GetLocationTriangle(){return location_.triangle;}
+
+int Savemap::GetLocationAngle(){return location_.angle;}
+
+std::string Savemap::GetLocationField(){return location_.field;}
+
+std::string Savemap::GetLocationName(){return location_.name;}
+
+int Savemap::GetSetting(const unsigned int key){
+    // TODO: Implement.
+    return 0;
+}
+
+int Savemap::GetCharacterCharId(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return -1;
+    else return characters_[id].char_id;
+}
+
+std::string Savemap::GetCharacterName(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return std::string("");
+    else return characters_[id].name;
+}
+
+unsigned int Savemap::GetCharacterLevel(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return 1;
+    else return characters_[id].level;
+}
+
+unsigned int Savemap::GetCharacterKills(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return 0;
+    else return characters_[id].kills;
+}
+
+bool Savemap::IsCharacterEnabled(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return false;
+    else return characters_[id].enabled;
+}
+
+bool Savemap::IsCharacterLocked(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return false;
+    else return characters_[id].locked;
+}
+
+bool Savemap::IsCharacterBackRow(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return false;
+    else return characters_[id].back_row;
+}
+
+unsigned int Savemap::GetCharacterExp(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return 0;
+    else return characters_[id].exp;
+}
+
+unsigned int Savemap::GetCharacterExpToNext(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return 0;
+    else return characters_[id].exp_to_next;
+}
+
+unsigned int Savemap::GetCharacterLimitLevel(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return 0;
+    else return characters_[id].limit_level;
+}
+
+unsigned int Savemap::GetCharacterLimitBar(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return 0;
+    else return characters_[id].limit_bar;
+}
+
+unsigned int Savemap::GetCharacterWeaponId(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return 0;
+    else return characters_[id].weapon.id;
+}
+
+unsigned int Savemap::GetCharacterArmorId(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return 0;
+    else return characters_[id].armor.id;
+}
+
+int Savemap::GetCharacterAccessoryId(const unsigned int id){
+    if (id >= MAX_CHARACTERS) return -1;
+    else return characters_[id].accessory;
+}
+
+unsigned int Savemap::GetCharacterStatBase(const unsigned int id, const unsigned int stat){
+    if (id >= MAX_CHARACTERS) return 0;
+    switch (stat){
+        case STAT::STR: return characters_[id].str.base; break;
+        case STAT::VIT: return characters_[id].vit.base; break;
+        case STAT::MAG: return characters_[id].mag.base; break;
+        case STAT::SPR: return characters_[id].spr.base; break;
+        case STAT::DEX: return characters_[id].dex.base; break;
+        case STAT::LCK: return characters_[id].lck.base; break;
+        case STAT::HP: return characters_[id].hp.base; break;
+        case STAT::MP: return characters_[id].mp.base; break;
+        default: return 0;
+    }
+}
+
+unsigned int Savemap::GetCharacterStatExtra(const unsigned int id, const unsigned int stat){
+    if (id >= MAX_CHARACTERS) return 0;
+    switch (stat){
+        case STAT::STR: return characters_[id].str.extra; break;
+        case STAT::VIT: return characters_[id].vit.extra; break;
+        case STAT::MAG: return characters_[id].mag.extra; break;
+        case STAT::SPR: return characters_[id].spr.extra; break;
+        case STAT::DEX: return characters_[id].dex.extra; break;
+        case STAT::LCK: return characters_[id].lck.extra; break;
+        case STAT::HP: return characters_[id].hp.extra; break;
+        case STAT::MP: return characters_[id].mp.extra; break;
+        default: return 0;
+    }
+}
+
+unsigned int Savemap::GetCharacterLimitUses(const unsigned int id, const unsigned int level){
+    if (id >= MAX_CHARACTERS) return 0;
+    else if (level >= MAX_LIMIT_LEVELS) return 0;
+    else return characters_[id].limit_uses[level];
+}
+
+bool Savemap::IsCharacterLimitLearned(
+  const unsigned int id, const unsigned int level, const unsigned int tech
+){
+    if (id >= MAX_CHARACTERS) return false;
+    else if (level >= MAX_LIMIT_LEVELS) return false;
+    else if (tech >= MAX_LIMIT_TECHNIQUES) return false;
+    else return characters_[id].limits_learned[level][tech];
+}
+
+
+int Savemap::GetCharacterMateriaId(
+  const unsigned int id, const bool weapon, const unsigned int pos
+){
+    if (id >= MAX_CHARACTERS) return -1;
+    else if (pos >= MAX_EQUIP_SLOTS) return -1;
+    if (weapon) return characters_[id].weapon.materia[pos].id;
+    else return characters_[id].armor.materia[pos].id;
+}
+
+unsigned int Savemap::GetCharacterMateriaAp(
+  const unsigned int id, const bool weapon, const unsigned int pos
+){
+    if (id >= MAX_CHARACTERS) return 0;
+    else if (pos >= MAX_EQUIP_SLOTS) return 0;
+    if (weapon){
+        if (characters_[id].weapon.materia[pos].id == -1) return 0;
+        else if (characters_[id].weapon.materia[pos].enemy_skill) return 0;
+        else return characters_[id].weapon.materia[pos].ap;
+    }
+    else{
+        if (characters_[id].armor.materia[pos].id == -1) return 0;
+        else if (characters_[id].armor.materia[pos].enemy_skill) return 0;
+        else return characters_[id].armor.materia[pos].ap;
+    }
+}
+
+bool Savemap::IsCharacterMateriaESkill(
+  const unsigned int id, const bool weapon, const unsigned int pos
+){
+    if (id >= MAX_CHARACTERS) return false;
+    else if (pos >= MAX_EQUIP_SLOTS) return false;
+    if (weapon){
+        if (characters_[id].weapon.materia[pos].id == -1) return false;
+        else return characters_[id].weapon.materia[pos].enemy_skill;
+    }
+    else{
+        if (characters_[id].armor.materia[pos].id == -1) return false;
+        else return characters_[id].armor.materia[pos].enemy_skill;
+    }
+}
+
+bool Savemap::IsCharacterMateriaESkillLearned(
+  const unsigned int id, const bool weapon, const unsigned int pos, const unsigned int skill
+){
+    if (id >= MAX_CHARACTERS) return false;
+    else if (pos >= MAX_EQUIP_SLOTS) return false;
+    else if (skill >= MAX_ENEMY_SKILLS) return false;
+    if (weapon){
+        if (characters_[id].weapon.materia[pos].id == -1) return false;
+        else if (characters_[id].weapon.materia[pos].enemy_skill == false) return false;
+        else return characters_[id].weapon.materia[pos].enemy_skill_learned[skill];
+    }
+    else{
+        if (characters_[id].armor.materia[pos].id == -1) return false;
+        else if (characters_[id].armor.materia[pos].enemy_skill == false) return false;
+        else return characters_[id].armor.materia[pos].enemy_skill_learned[skill];
+    }
+}
+
+int Savemap::GetData(const unsigned int bank, const unsigned int address){
+    if (bank >= BANK_COUNT) return 0;
+    else if (address >= BANK_ADDRESS_COUNT) return 0;
+    else return data_[bank][address];
 }
 
 void Savemap::Write(int slot, std::string file_name){

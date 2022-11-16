@@ -358,29 +358,538 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
          * @return True if the slot is empty, or false if a game is saved there. If an invalid slot
          * is queried, it will always return true.
          */
-        bool SlotIsEmpty(const unsigned int slot);
+        bool IsSlotEmpty(const unsigned int slot);
 
         /**
-         * Generates a string with all the required data to generate a preview of a savemap.
+         * Retrieves the control key from a saved savemap.
          *
-         * The included information contains the following fields, separated by the character "#":
-         * - Slot
-         * - Control key
-         * - Party money
-         * - Game time (in seconds)
-         * - Location text
-         * - Party member 1 name
-         * - Party member 1 level
-         * - Party member 1 character ID.
-         * - Party member 2 character ID.
-         * - Party member 3 character ID.
-         *
-         * @param[in]
-         * @return The generated string. An empty string if a wrong slot is specified, or the slot
-         * is empty.
+         * @param[in] slot The slot to read from.
+         * @return The control key of the slot. If an invalid slot is specified, or if the slot is
+         * empty, an empty string.
          */
-        //char* GetPreviewData(const unsigned int slot);
-        std::string GetPreviewData(const unsigned int slot);
+        std::string GetSlotControlKey(const unsigned int slot);
+
+        /**
+         * Retrieves a colour component from a window corner from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] corner The window corner. See {@see Savemap::Corner}.
+         * @param[in] corner The color component to get. See {@see Savemap::Colour}.
+         * @return The color component of the specified corner of windows. If an invalid slot is
+         * specified, or if the slot is empty, or if an invalid corner or color are requested, 0.
+         */
+        unsigned int GetSlotWindowCornerColourComponent(
+          const unsigned int slot, const unsigned int corner, const unsigned int comp
+        );
+
+        /**
+         * Retrieves the money from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The money of the slot. If an invalid slot is specified, or if the slot is
+         * empty, 0.
+         */
+        unsigned int GetSlotMoney(const unsigned int slot);
+
+        /**
+         * Retrieves the total playtime from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The total playtime, in seconds. If an invalid slot is specified, or if the slot
+         * is empty, 0.
+         */
+        unsigned int GetSlotGameTime(const unsigned int slot);
+
+        /**
+         * Retrieves the time in the timer from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The timer time, in seconds. If an invalid slot is specified, or if the slot
+         * is empty, or if there is no timer saved, 0.
+         */
+        unsigned int GetSlotCountdownTime(const unsigned int slot);
+
+        /**
+         * Retrieves the ID of a party member from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the party.
+         * @return The ID of the character at the requested position. If an invalid slot is
+         * specified, or if the slot is empty, or if an invalid position is passed, or if there is
+         * no character at the requested position, -1.
+         */
+        int GetSlotPartyMember(const unsigned int slot, const unsigned int pos);
+
+        /**
+         * Retrieves the ID of an item in the inventory from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the inventory.
+         * @return The ID of the item at the requested inventory position. If an invalid slot is
+         * specified, or if the slot is empty, or if an invalid position is passed, or if there is
+         * no item at the requested position, 0.
+         */
+        unsigned int GetSlotItemAtPosId(const unsigned int slot, const unsigned int pos);
+
+        /**
+         * Retrieves the quantity of an item in the inventory from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the inventory.
+         * @return The quantity of the item at the requested inventory position. If an invalid slot
+         * is specified, or if the slot is empty, or if an invalid position is passed, or if there
+         * is no item at the requested position, 0.
+         */
+        unsigned int GetSlotItemAtPosQty(const unsigned int slot, const unsigned int pos);
+
+        /**
+         * Checks the status of a key item from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id Key item ID.
+         * @return True if the key item is owned, false if not. If an invalid slot is specified,
+         * or if the slot is empty, or if an invalid id is passed, false.
+         */
+        bool GetSlotKeyItem(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the ID of a materia in the inventory from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the materia inventory.
+         * @return The ID of the materia at the requested inventory position. If an invalid slot is
+         * specified, or if the slot is empty, or if an invalid position is passed, or if there is
+         * no materia at the requested position, -1.
+         */
+        int GetSlotMateriaAtPosId(const unsigned int slot, const unsigned int pos);
+
+        /**
+         * Retrieves the AP of a materia in the inventory from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the materia inventory.
+         * @return The AP of the materia at the requested inventory position. If an invalid slot
+         * is specified, or if the slot is empty, or if an invalid position is passed, or if there
+         * is no materia at the requested position, 0.
+         */
+        unsigned int GetSlotMateriaAtPosAp(const unsigned int slot, const unsigned int pos);
+
+        /**
+         * Checks if there is an Enemy Skill materia at a inventory position from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the materia inventory.
+         * @return True if the materia in the specified position is an Enemy Skill materia, false
+         * if not. If an invalid slot is specified, or if the slot is empty, or if an invalid
+         * position is passed, or if there is no materia at that position, false.
+         */
+        bool IsSlotMateriaAtPosESkill(const unsigned int slot, const unsigned int pos);
+
+        /**
+         * Checks if a a enemy skill is learned by a materia at a position from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the materia inventory.
+         * @param[in] skill Skill ID, starting from 0.
+         * @return True if the materia in the specified position exists, is an Enemy Skill materia
+         * and has learned the specified skill. False in any other case.
+         */
+        bool IsSlotMateriaAtPosESkillLearned(
+          const unsigned int slot, const unsigned int pos, const unsigned int skill
+        );
+
+        /**
+         * Retrieves the ID of a materia in the stash from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the materia stash.
+         * @return The ID of the materia at the requested stash position. If an invalid slot is
+         * specified, or if the slot is empty, or if an invalid position is passed, or if there is
+         * no materia at the requested position, -1.
+         */
+        int GetSlotStashAtPosId(const unsigned int slot, const unsigned int pos);
+
+        /**
+         * Retrieves the AP of a materia in the stash from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the materia stash.
+         * @return The AP of the materia at the requested stash position. If an invalid slot
+         * is specified, or if the slot is empty, or if an invalid position is passed, or if there
+         * is no materia at the requested position, 0.
+         */
+        unsigned int GetSlotStashAtPosAp(const unsigned int slot, const unsigned int pos);
+
+        /**
+         * Checks if there is an Enemy Skill materia at a stash position from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the materia stash.
+         * @return True if the materia in the specified position is an Enemy Skill materia, false
+         * if not. If an invalid slot is specified, or if the slot is empty, or if an invalid
+         * position is passed, or if there is no materia at that position, false.
+         */
+        bool IsSlotStashAtPosESkill(const unsigned int slot, const unsigned int pos);
+
+        /**
+         * Checks if a a enemy skill is learned by a mat. at a stash position from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] pos Position in the materia stash.
+         * @param[in] skill Skill ID, starting from 0.
+         * @return True if the materia in the specified position exists, is an Enemy Skill materia
+         * and has learned the specified skill. False in any other case.
+         */
+        bool IsSlotStashAtPosESkillLearned(
+          const unsigned int slot, const unsigned int pos, const unsigned int skill
+        );
+
+        /**
+         * Retrieves the X coordinate of the player from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The X coordinate. If an invalid slot is specified, or if the slot is empty, 0.
+         */
+        unsigned int GetSlotLocationX(const unsigned int slot);
+
+        /**
+         * Retrieves the Y coordinate of the player from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The Y coordinate. If an invalid slot is specified, or if the slot is empty, 0.
+         */
+        unsigned int GetSlotLocationY(const unsigned int slot);
+
+        /**
+         * Retrieves the Z coordinate of the player from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The Z coordinate. If an invalid slot is specified, or if the slot is empty, or
+         * if the coordinate can be ignored -1.
+         */
+        int GetSlotLocationZ(const unsigned int slot);
+
+        /**
+         * Retrieves the walkmesh triangle of the player from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The triangle ID. If an invalid slot is specified, or if the slot is empty, 0.
+         */
+        unsigned int GetSlotLocationTriangle(const unsigned int slot);
+
+        /**
+         * Retrieves the facing angle of the player from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The angle. If an invalid slot is specified, or if the slot is empty, 0.
+         */
+        int GetSlotLocationAngle(const unsigned int slot);
+
+        /**
+         * Retrieves the field ID from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The field ID. If an invalid slot is specified, or if the slot is empty, or if the
+         * savemap is saved in the worldmap, an empty string.
+         */
+        std::string GetSlotLocationField(const unsigned int slot);
+
+        /**
+         * Retrieves the location name from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @return The location name to be displayed in the save slot. If an invalid slot is
+         * specified, or if the slot is empty, or if the location name has not been saved, an empty
+         * string.
+         */
+        std::string GetSlotLocationName(const unsigned int slot);
+
+        /**
+         * Retrieves a setting from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] key Setting key.
+         * @return The setting value.
+         * @todo Implement and document properly.
+         */
+        int GetSlotSetting(const unsigned int slot, const unsigned int key);
+
+        /**
+         * Retrieves the char ID of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The char ID of the character. If an invalid slot is specified, or if the slot is
+         * empty, or if an invalid id is passed, or if the character doesn't have a char ID, -1.
+         */
+        int GetSlotCharacterCharId(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the name of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The name of the character. If an invalid slot is specified, or if the slot is
+         * empty, or if an invalid id is passed, an empty string.
+         */
+        std::string GetSlotCharacterName(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the level of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The level of the character. If an invalid slot is specified, or if the slot is
+         * empty, or if an invalid id is passed, 1.
+         */
+        unsigned int GetSlotCharacterLevel(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the total kills of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The kills of the character. If an invalid slot is specified, or if the slot is
+         * empty, or if an invalid id is passed, 0.
+         */
+        unsigned int GetSlotCharacterKills(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Checks the enabled status of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return True if the character is enabled, false if not. If an invalid slot is specified,
+         * or if the slot is empty, or if an invalid id is passed, false.
+         */
+        bool IsSlotCharacterEnabled(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Checks the lock status of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return True if the character is enabled, false if not. If an invalid slot is specified,
+         * or if the slot is empty, or if an invalid id is passed, false.
+         */
+        bool IsSlotCharacterLocked(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Checks the row of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return True if the character is in the back row, false if not. If an invalid slot is
+         * specified, or if the slot is empty, or if an invalid id is passed, false.
+         */
+        bool IsSlotCharacterBackRow(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the total experience of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The experience of the character. If an invalid slot is specified, or if the slot
+         * is empty, or if an invalid id is passed, 0.
+         */
+        unsigned int GetSlotCharacterExp(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the experience for next level of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The experience of the character. If an invalid slot is specified, or if the slot
+         * is empty, or if an invalid id is passed, 0.
+         */
+        unsigned int GetSlotCharacterExpToNext(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the current limit level of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The limit level of the character. If an invalid slot is specified, or if the
+         * slot is empty, or if an invalid id is passed, 0.
+         */
+        unsigned int GetSlotCharacterLimitLevel(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the current limit bar status level of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The limit bar status of the character. If an invalid slot is specified, or if
+         * the slot is empty, or if an invalid id is passed, 0.
+         */
+        unsigned int GetSlotCharacterLimitBar(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the ID of the weapon of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The character's weapon ID. If an invalid slot is specified, or if the slot is
+         * empty, or if an invalid id is passed, 0.
+         */
+        unsigned int GetSlotCharacterWeaponId(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the ID of the armor of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The character's armor ID. If an invalid slot is specified, or if the slot is
+         * empty, or if an invalid id is passed, 0.
+         */
+        unsigned int GetSlotCharacterArmorId(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the ID of the accessory of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @return The character's accessory ID. If an invalid slot is specified, or if the slot is
+         * empty, or if an invalid id is passed, or if the character has no accessory equipped, -1.
+         */
+        int GetSlotCharacterAccessoryId(const unsigned int slot, const unsigned int id);
+
+        /**
+         * Retrieves the base value of a stat of a character from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @param[in] stat The stat ID (see {@see Savemap::STAT}).
+         * @return The base value of the specified stat. If an invalid slot is specified, or if the
+         * slot is empty, or if an invalid id or stat is passed, 0.
+         */
+        unsigned int GetSlotCharacterStatBase(
+          const unsigned int slot, const unsigned int id, const unsigned int stat
+        );
+
+        /**
+         * Retrieves the extra value of a stat of a character from a saved savemap.
+         *
+         * For HP and MP, the extra value means the current value. For any other stat, the bonus
+         * gained by using sources.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @param[in] stat The stat ID (see {@see Savemap::STAT}).
+         * @return The extra value of the specified stat. If an invalid slot is specified, or if
+         * the slot is empty, or if an invalid id or stat is passed, 0.
+         */
+        unsigned int GetSlotCharacterStatExtra(
+          const unsigned int slot, const unsigned int id, const unsigned int stat
+        );
+
+        /**
+         * Retrieves the uses of a character's limit level from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @param[in] level The limit level.
+         * @return Number of uses of the techniques in the specified limit level. If an invalid
+         * slot is specified, or if the slot is empty, or if an invalid id or limit level is
+         * passed, 0.
+         */
+        unsigned int GetSlotCharacterLimitUses(
+          const unsigned int slot, const unsigned int id, const unsigned int level
+        );
+
+        /**
+         * Checks if a limit technique is learned by a character from a savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @param[in] level The limit level.
+         * @param[in] tech The technique position in the level.
+         * @return True if the technique has been learned, false if not. If an invalid slot is
+         * specified, or if the slot is empty, or if an invalid id, limit level or technique is
+         * passed, false.
+         */
+        bool IsSlotCharacterLimitLearned(
+          const unsigned int slot, const unsigned int id,
+          const unsigned int level, const unsigned int tech
+        );
+
+        /**
+         * Retrieves the ID of an equipped materia from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @param[in] weapon If false, check materia equipped in the weapon. If false, check
+         * materia equiped in the armor.
+         * @param[in] pos Position in the equipment slots.
+         * @return The ID of the equipped materia. If an invalid slot is specified, or if the slot
+         * is empty, or if an invalid id or position is passed, or if there is no materia at the
+         * requested position, -1.
+         */
+        int GetSlotCharacterMateriaId(
+          const unsigned int slot, const unsigned int id, const bool weapon, const unsigned int pos
+        );
+
+        /**
+         * Retrieves the AP of an equipped materia from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @param[in] weapon If false, check materia equipped in the weapon. If false, check
+         * materia equiped in the armor.
+         * @param[in] pos Position in the equipment slots.
+         * @return The AP of the equipped materia. If an invalid slot is specified, or if the slot
+         * is empty, or if an invalid id or position is passed, or if there is no materia at the
+         * requested position, 0.
+         */
+        unsigned int GetSlotCharacterMateriaAp(
+          const unsigned int slot, const unsigned int id, const bool weapon, const unsigned int pos
+        );
+
+        /**
+         * Checks if an equipped materia is Enemy Skill from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @param[in] weapon If false, check materia equipped in the weapon. If false, check
+         * materia equiped in the armor.
+         * @param[in] pos Position in the equipment slots.
+         * @return True if the materia in the specified position is an Enemy Skill materia, false
+         * if not. If an invalid id or slot is specified, or if the slot is empty, or if an invalid
+         * position is passed, or if there is no materia at that position, false.
+         */
+        bool IsSlotCharacterMateriaESkill(
+          const unsigned int slot, const unsigned int id, const bool weapon, const unsigned int pos
+        );
+
+        /**
+         * Checks if a a enemy skill is learned by a equipped materia from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] id The character ID.
+         * @param[in] weapon If false, check materia equipped in the weapon. If false, check
+         * materia equiped in the armor.
+         * @param[in] pos Position in the equipment slots.
+         * @param[in] skill Skill ID, starting from 0.
+         * @return True if the materia in the specified position exists, is an Enemy Skill materia
+         * and has learned the specified skill. False in any other case.
+         */
+        bool IsSlotCharacterMateriaESkillLearned(
+          const unsigned int slot, const unsigned int id, const bool weapon,
+          const unsigned int pos, const unsigned int skill
+        );
+
+        /**
+         * Retrieves the value of a bank address from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] bank The bank ID.
+         * @param[in] address The address in the bank.
+         * @return The value. If an invalid slot is specified, or if the slot is empty, or if an
+         * invalid bank or address level is passed, 0.
+         */
+        int GetSlotData(
+          const unsigned int slot, const unsigned int bank, const unsigned int address
+        );
 
     private:
 
@@ -408,8 +917,6 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
          * Indicates if the saved savemaps have been read from files.
          */
         bool savemaps_read_;
-
-        //char* temp_;
 
 };
 
