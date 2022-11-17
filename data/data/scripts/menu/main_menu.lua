@@ -167,7 +167,7 @@ UiContainer.MainMenu = {
         ui_manager:get_widget("MainMenu.Container.Menu.SaveText"):set_colour(0.4, 0.4, 0.4)
 
         -- Set location
-        ui_manager:get_widget("MainMenu.Container.Location.Text"):set_text((dialog:get_map_name()))
+        ui_manager:get_widget("MainMenu.Container.Location.Text"):set_text((System["MapChanger"].location_name))
 
         -- Set money
         local money_str = tostring(Inventory.money)

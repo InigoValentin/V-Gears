@@ -19,6 +19,8 @@ Note that, while these are actual screenshots of V-Gears, none of the images, sp
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/cloud.png" alt="Cloud model" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/cloud.png "Cloud model")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/dialog.png" alt="dialog" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/dialog.png "Dialogs")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/animation.png" alt="animation" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/animation.png "Animations")|
 |**Climbing**|**Mid-jump!**|**Materia**|
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/climb.png" alt="Climbing" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/climb.png "Climbing")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/midjump.png" alt="Mid-jump" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/midjump.png "Mid-jump")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/materia.png" alt="Materia" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/materia.png "Materia")|
+|**Transparencies**|**Timers**||
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png" alt="Transparency" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png "TRansparency")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/timers.png" alt="Timers" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/timers.png "Timers")||
 
 ### Menus:
 |**Begin**|**Main**|**Name**|
@@ -48,11 +50,11 @@ Well, let's call it a work in progress... of a work in progress.
 |A few field maps|Most field maps|
 |Some menus|Some other menus|
 |Sound (mostly)|Battles, in general.|
-| |The world map, also in general|
-| |Saving / Loading|
-| |Minigames|
+|Saving / Loading|The world map, also in general|
+|Timers|Minigames|
+| |Party switching|
 | |Shops|
-| |Timers|
+| |Alternate controllable characters|
 | |Many other things|
 
 

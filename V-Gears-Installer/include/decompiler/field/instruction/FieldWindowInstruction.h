@@ -41,6 +41,38 @@ class FieldWindowInstruction : public KernelCallInstruction{
 
     private:
 
+        /**
+         * Processes a STTIM opcode.
+         *
+         * Opcode: 0x38
+         * Short name: STTIM
+         * Long name: Set Timer
+         *
+         * Memory layout (6 bytes)
+         * |0x38|B1/B2|0/B3|H|M|S|
+         *
+         * Arguments
+         * - const Bit[4] B1: Bank to find hours value, or zero if hours (B1) is passed as a value.
+         * - const Bit[4] B2: Bank to find minutes value, or zero if minutes (B2) is passed as a
+         * value.
+         * - const Bit[4] 0: Zero.
+         * - const Bit[4] B3: Bank to find seconds value, or zero if seconds (B3) is passed as a
+         * value.
+         * - const UByte H: Hours, or address to find hours value, if B1 is non-zero.
+         * - const UByte M: Minutes, or address to find minutes value, if B2 is non-zero.
+         * - const UByte S: Seconds, or address to find seconds value, if B3 is non-zero.
+         *
+         * Sets the clock, as found in the WSPCL opcode. If the hours, minutes or seconds are
+         * specified in the argument, the corresponding B nybble is zero. Otherwise, the value for
+         * the time component is retrieved from the bank and address specified. The separate time
+         * components can be retrieved from memory or specified as a value, in the same argument
+         * list. Hours are not directly visible on the clock, as it only displays minutes and
+         * seconds. Hours are translated into minutes.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         */
+        void ProcessSTTIM(CodeGenerator* code_gen);
+
         void ProcessMESSAGE(CodeGenerator* code_gen, const std::string& script_name);
 
         void ProcessMPNAM(CodeGenerator* code_gen, const std::string& script_name);
@@ -98,4 +130,62 @@ class FieldWindowInstruction : public KernelCallInstruction{
         void ProcessWINDOW(CodeGenerator* code_gen);
 
         void ProcessWCLSE(CodeGenerator* code_gen);
+
+        /**
+         * Processes a WSPCL opcode.
+         *
+         * Opcode: 0x36
+         * Short name: WSPCL
+         * Long name: Window Special (Numerical Display)
+         *
+         * Memory layout (5 bytes.)
+         * |0x36|W|T|X|Y|
+         *
+         * Arguments
+         *
+         * - const UByte W: WINDOW ID to apply the change to.
+         * - const UByte T: Type of display.
+         * - const UByte X: X-coordinate of the numerical display, relative to the top-left of the
+         * window.
+         * - const UByte Y: Y-coordinate of the numerical display, relative to the top-left of the
+         * window.
+         *
+         * Creates a numerical display inside the given window. The display can be either in the
+         * form of a clock, or a scoreboard with six digits. This only creates the numerical
+         * display; to actually show it, a MESSAGE or ASK command needs to be issued. Using a blank
+         * line of dialog will allow you to create a numerical display in the top-left of the
+         * window without field dialog hidden behind it. Alternatively, dialog can be shown along
+         * with the display by placing the display in an appropriate area of the window. To set the
+         * time for the clock variant, STTIM is used. To set the number for the numerical display,
+         * WNUMB is used.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         */
+        void ProcessWSPCL(CodeGenerator* code_gen);
+
+        /**
+         * Processes a WMODE opcode.
+         *
+         * Opcode: 0x52
+         * Short name: WMODE
+         * Long name: Window Mode
+         *
+         * Memory layout (4 bytes)
+         * |0x52|N|M|C|
+         *
+         * Arguments
+         *
+         * - const UByte N: The ID of the window whose mode will be set.
+         * - const UByte M: Mode of the window.
+         * - const UByte C: Window permanency.
+         *
+         * Changes properties associated with the WINDOW whose ID is specified. The mode byte sets
+         * the style of the window, as detailed below. If the final byte is set to 1, the window
+         * cannot be closed by the player pushing [OK]. The mode of the window should be changed
+         * before it is displayed with MESSAGE or ASK, or the changes will not be visible unless
+         * the window is closed and reopened.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         */
+        void ProcessWMODE(CodeGenerator* code_gen);
 };

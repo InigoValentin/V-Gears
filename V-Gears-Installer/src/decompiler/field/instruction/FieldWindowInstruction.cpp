@@ -33,9 +33,9 @@ void FieldWindowInstruction::ProcessInst(
         case OPCODES::TUTOR: code_gen->WriteTodo(md.GetEntityName(), "TUTOR"); break;
         case OPCODES::WCLS: code_gen->WriteTodo(md.GetEntityName(), "WCLS"); break;
         case OPCODES::WSIZW: code_gen->WriteTodo(md.GetEntityName(), "WSIZW"); break;
-        case OPCODES::WSPCL: code_gen->WriteTodo(md.GetEntityName(), "WSPCL"); break;
+        case OPCODES::WSPCL: ProcessWSPCL(code_gen); break;
         case OPCODES::WNUMB: code_gen->WriteTodo(md.GetEntityName(), "WNUMB"); break;
-        case OPCODES::STTIM: code_gen->WriteTodo(md.GetEntityName(), "STTIM"); break;
+        case OPCODES::STTIM: ProcessSTTIM(code_gen); break;
         case OPCODES::MESSAGE: ProcessMESSAGE(code_gen, eng.GetScriptName()); break;
         case OPCODES::MPARA: code_gen->WriteTodo(md.GetEntityName(), "MPARA"); break;
         case OPCODES::MPRA2: code_gen->WriteTodo(md.GetEntityName(), "MPRA2"); break;
@@ -45,7 +45,7 @@ void FieldWindowInstruction::ProcessInst(
         case OPCODES::MENU2: ProcessMENU2(code_gen); break;
         case OPCODES::WINDOW: ProcessWINDOW(code_gen); break;
         case OPCODES::WMOVE: code_gen->WriteTodo(md.GetEntityName(), "WMOVE"); break;
-        case OPCODES::WMODE: code_gen->WriteTodo(md.GetEntityName(), "WMODE"); break;
+        case OPCODES::WMODE: ProcessWMODE(code_gen); break;
         case OPCODES::WREST: code_gen->WriteTodo(md.GetEntityName(), "WREST"); break;
         case OPCODES::WCLSE: ProcessWCLSE(code_gen); break;
         case OPCODES::WROW: code_gen->WriteTodo(md.GetEntityName(), "WROW"); break;
@@ -56,6 +56,34 @@ void FieldWindowInstruction::ProcessInst(
               md.GetEntityName(), address_, opcode_
             ));
     }
+}
+
+void FieldWindowInstruction::ProcessWSPCL(CodeGenerator* code_gen){
+    auto window_id = params_[0]->GetUnsigned();
+    std::string numeric = "false";
+    std::string timer = "false";
+    if (params_[1]->GetUnsigned() == 1){
+        numeric = "true";
+        timer = "true";
+    }
+    else if (params_[1]->GetUnsigned() == 2){
+        numeric = "true";
+        timer = "false";
+    }
+    code_gen->AddOutputLine((
+      boost::format("dialog:set_numeric(\"%1%\", %2%, %3%) -- x: %4%,  y: %5%")
+      % window_id % numeric % timer % params_[2]->GetUnsigned() % params_[3]->GetUnsigned()
+    ).str());
+}
+
+void FieldWindowInstruction::ProcessWMODE(CodeGenerator* code_gen){
+    auto window_id = params_[0]->GetUnsigned();
+    std::string closeable = "true";
+    if (params_[2]->GetUnsigned() == 1) closeable = "false";
+    code_gen->AddOutputLine((
+      boost::format("dialog:set_mode(\"%1%\", %2%, %3%)")
+      % window_id % params_[1]->GetUnsigned() % closeable
+    ).str());
 }
 
 void FieldWindowInstruction::ProcessWINDOW(CodeGenerator* code_gen){
@@ -132,6 +160,28 @@ void FieldWindowInstruction::ProcessMENU(CodeGenerator* code_gen){
     }
 }
 
+void FieldWindowInstruction::ProcessSTTIM(CodeGenerator* code_gen){
+    std::cout << "STTIM params:\n";
+    for (int i = 0; i < params_.size(); i ++) std::cout << "    " << params_[i] << "\n";
+    std::cout << "STTIM params END\n";
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    int h = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned(),
+      FieldCodeGenerator::ValueType::Integer
+    ));
+    int m = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetSigned(),
+      FieldCodeGenerator::ValueType::Integer
+    ));
+    int s = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[6]->GetSigned(),
+      FieldCodeGenerator::ValueType::Integer
+    ));
+    code_gen->AddOutputLine((
+      boost::format("Timer.set(%1%) -- %2%:%3%:%4%") % (3600 * h + 60 * m + s) % h % m % s
+    ).str());
+}
+
 void FieldWindowInstruction::ProcessMESSAGE(
   CodeGenerator* code_gen, const std::string& script_name
 ){
@@ -145,7 +195,6 @@ void FieldWindowInstruction::ProcessMESSAGE(
     code_gen->AddOutputLine(
       (boost::format("dialog:dialog_wait_for_close(\"%1%\")") % window_id).str()
     );
-
 }
 
 void FieldWindowInstruction::ProcessWCLSE(CodeGenerator* code_gen){
@@ -156,7 +205,7 @@ void FieldWindowInstruction::ProcessWCLSE(CodeGenerator* code_gen){
 
 void FieldWindowInstruction::ProcessMPNAM(CodeGenerator* code_gen, const std::string& script_name){
     code_gen->AddOutputLine((
-      boost::format("dialog:set_map_name(%1%_%2%)") % script_name % params_[0]->GetUnsigned()
+      boost::format("set_map_name(\"%1%_%2%\")") % script_name % params_[0]->GetUnsigned()
     ).str());
 }
 

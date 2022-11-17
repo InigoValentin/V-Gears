@@ -2,6 +2,37 @@ MAX_INVENTORY_SLOTS = 320
 MAX_KEY_SLOTS = 50
 MAX_MATERIA_SLOTS = 200
 
+Timer = {
+    -- TODO When the game clock is implemented, dont use FPS, call this every second.
+    FPS = 250,
+    time = 0,
+    frames = 0,
+    update = function()
+        if Timer.time > 0 or Timer.frames > 0 then
+            Timer.frames = Timer.frames - 1
+            if Timer.frames == 0 then
+                Timer.time = Timer.time - 1
+                dialog:update_timer(Timer.time)
+                if Timer.time > 0 then
+                    Timer.frames = Timer.FPS
+                end
+                Banks[1][20]--[[timer_hours]] = math.floor(Timer.time / 3600)
+                Banks[1][21]--[[timer_minutes]] = math.floor(Timer.time / 60) % 60
+                Banks[1][22]--[[timer_seconds]] = Timer.time % 60
+            end
+            Banks[1][23]--[[timer_frames]] = Timer.frames
+        end
+    end,
+    set = function(time)
+        Timer.time = tonumber(time)
+        Timer.frames = Timer.FPS
+        Banks[1][20]--[[timer_hours]] = math.floor(Timer.time / 3600)
+        Banks[1][21]--[[timer_minutes]] = math.floor(Timer.time / 60) % 60
+        Banks[1][22]--[[timer_seconds]] = Timer.time % 60
+        Banks[1][23]--[[timer_frames]] = Timer.frames
+    end
+}
+
 --- Export character names to the text manager.
 --
 -- Used to compose dialog with character names. Must be called on start and when a character is
@@ -692,4 +723,78 @@ end
 Party.steal_materia = function()
     -- TODO: Implement.
     -- TODO: How is this reversed?
+end
+
+--- Implementation of OR bit operation.
+--
+-- @param a First operand.
+-- @param b Second operand.
+-- @return a | b.
+function bit_or(a, b)
+    local r, m, s = 0, 2 ^ 31
+    repeat
+        s, a, b = a + b + m, a % m, b % m
+        r, m = r + m * 1 % (s - a - b), m / 2
+    until m < 1
+    return r
+end
+
+--- Implementation of XOR bit operation.
+--
+-- @param a First operand.
+-- @param b Second operand.
+-- @return a ^^ b.
+function bit_xor(a, b)
+    local r, m, s = 0, 2 ^ 31
+    repeat
+        s, a, b = a + b + m, a % m, b % m
+        r, m = r + m * 3 % (s - a - b), m / 2
+    until m < 1
+    return r
+end
+
+--- Implementation of AND bit operation.
+--
+-- @param a First operand.
+-- @param b Second operand.
+-- @return a & b.
+function bit_and(a, b)
+    local r, m, s = 0, 2 ^ 31
+    repeat
+        s, a, b = a + b + m, a % m, b % m
+        r, m = r + m * 4 % (s - a - b), m / 2
+    until m < 1
+    return r
+end
+
+--- Obtains a bit from an address in a data bank
+--
+-- @param bank The bank (0-14)
+-- @param address The bank address (0-254)
+-- @param bit The bit to get (0-7)
+-- @return The bit value (1-0)
+function get_bank_bit(bank, address, bit)
+    -- TODO: Validation
+    local val = Banks[bank][address]
+    return get_byte_nth_bit(val, bit)
+end
+
+--- Obtains a bit from an unsigned byte
+--
+-- @param value The value (0-254)
+-- @param bit The bit to get (0-7)
+-- @return The bit value (1-0)
+function get_byte_nth_bit(value, n)
+    if n < 0 or n > 7 then
+        return 0
+    end
+    -- Convert to binary string
+    local s = ""
+    local temp = value
+    for i = 1, 8 do
+        s = s .. tostring(temp % 2)
+        temp = math.floor(temp / 2)
+    end
+    print("S:" .. s)
+    return tonumber(string.sub(s, n + 1, n + 1))
 end

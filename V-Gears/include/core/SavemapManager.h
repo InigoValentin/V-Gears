@@ -231,14 +231,14 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
          *
          * @param[in] x X coordinate.
          * @param[in] y Y coordinate.
-         * @param[in] z Z coordinate. It's optional, set it to -1 to ignore it.
+         * @param[in] z Z coordinate. It's optional, set it to lower than 0 to ignore it.
          * @param[in] triangle Walkmesh triangle ID.
          * @param[in] angle Facing direction.
          * @param[in] field Field map ID, or empty for the world map.
          * @param[in] Name of the location to show in the save slot.
          */
         void SetLocation(
-          const unsigned int x, const unsigned int y, const int z,
+          const float x, const float y, const float z,
           const unsigned int triangle, const int angle, const char* field, const char* name
         );
 
@@ -548,26 +548,26 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
          * Retrieves the X coordinate of the player from a saved savemap.
          *
          * @param[in] slot The slot to read from.
-         * @return The X coordinate. If an invalid slot is specified, or if the slot is empty, 0.
+         * @return The X coordinate. If an invalid slot is specified, or if the slot is empty, 0.0.
          */
-        unsigned int GetSlotLocationX(const unsigned int slot);
+        float GetSlotLocationX(const unsigned int slot);
 
         /**
          * Retrieves the Y coordinate of the player from a saved savemap.
          *
          * @param[in] slot The slot to read from.
-         * @return The Y coordinate. If an invalid slot is specified, or if the slot is empty, 0.
+         * @return The Y coordinate. If an invalid slot is specified, or if the slot is empty, 0.0.
          */
-        unsigned int GetSlotLocationY(const unsigned int slot);
+        float GetSlotLocationY(const unsigned int slot);
 
         /**
          * Retrieves the Z coordinate of the player from a saved savemap.
          *
          * @param[in] slot The slot to read from.
          * @return The Z coordinate. If an invalid slot is specified, or if the slot is empty, or
-         * if the coordinate can be ignored -1.
+         * if the coordinate can be ignored, lower than 0.
          */
-        int GetSlotLocationZ(const unsigned int slot);
+        float GetSlotLocationZ(const unsigned int slot);
 
         /**
          * Retrieves the walkmesh triangle of the player from a saved savemap.

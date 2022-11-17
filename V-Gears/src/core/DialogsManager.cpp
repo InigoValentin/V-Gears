@@ -38,7 +38,9 @@ DialogsManager::DialogsManager():
   up_pressed_(false),
   down_pressed_(false),
   limit_area_(NULL),
-  map_name_("")
+  map_name_(""),
+  timer_window_id_(-1),
+  timer_seconds_(0)
 {LOG_TRIVIAL("DialogsManager created.");}
 
 DialogsManager::~DialogsManager(){
@@ -143,11 +145,13 @@ void DialogsManager::Update(){
             case MS_OPENED:
                 {
                     if (messages_[i]->clickable == true && next_pressed_ == true){
-                        messages_[i]->auto_close = true;
-                        if ((messages_[i]->cursor != NULL) && (messages_[i]->show_cursor == true)){
-                            messages_[i]->show_cursor = false;
-                            messages_[i]->cursor_row_selected = messages_[i]->cursor_row_current;
-                            messages_[i]->cursor->SetVisible(false);
+                        if (messages_[i]->closeable == true){
+                            messages_[i]->auto_close = true;
+                            if ((messages_[i]->cursor != NULL) && (messages_[i]->show_cursor == true)){
+                                messages_[i]->show_cursor = false;
+                                messages_[i]->cursor_row_selected = messages_[i]->cursor_row_current;
+                                messages_[i]->cursor->SetVisible(false);
+                            }
                         }
                     }
                     if (AutoCloseCheck(i) == true) break;
@@ -272,6 +276,73 @@ void DialogsManager::SetText(const char* d_name, const char* text){
     }
 }
 
+void DialogsManager::SetNumeric(const char* d_name, const bool numeric, const bool timer){
+    int id = GetMessageId(d_name);
+    if (id == -1){
+        LOG_TRIVIAL("SetNumeric: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
+        return;
+    }
+    if (numeric){
+        messages_[id]->text_area->SetFont("FFVIITimerFont");
+        if (timer){
+            messages_[id]->numeric = false;
+            messages_[id]->timer = true;
+            timer_window_id_ = id;
+        }
+        else{
+            messages_[id]->numeric = false;
+            messages_[id]->timer = true;
+        }
+    }
+    else{
+        messages_[id]->text_area->SetFont("FFVIIFont");
+        messages_[id]->numeric = false;
+        messages_[id]->timer = false;
+        timer_window_id_ = -1;
+    }
+}
+
+void DialogsManager::UpdateTimer(const unsigned int seconds){
+    if (
+      timer_window_id_ != - 1 && timer_window_id_ < messages_.size() && seconds != timer_seconds_
+    ){
+        std::string m = std::to_string(seconds / 60);
+        while (m.size() < 2) m = "0" + m;
+        std::string s = std::to_string(seconds % 60);
+        while (s.size() < 2) s = "0" + s;
+        messages_[timer_window_id_]->text_area->SetText(m + ":" + s);
+    }
+}
+
+void DialogsManager::SetMode(const char* d_name, const int bg, const bool closeable){
+    int id = GetMessageId(d_name);
+    if (id == -1){
+        LOG_TRIVIAL("SetMode: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
+        return;
+    }
+    messages_[id]->closeable = closeable;
+    switch (bg){
+        case 1:
+            messages_[id]->visible = false;
+            messages_[id]->translucent = false;
+            for (int i = 0; i < messages_[id]->window->GetNumberOfChildren(); i ++)
+                messages_[id]->window->GetChild(i)->SetAlpha(0.0);
+            break;
+        case 2:
+            messages_[id]->visible = true;
+            messages_[id]->translucent = true;
+            if (messages_[id]->window->GetChild("Center") != nullptr)
+                messages_[id]->window->GetChild("Center")->SetAlpha(0.35);
+            break;
+        default:
+            messages_[id]->visible = true;
+            messages_[id]->translucent = false;
+            for (int i = 0; i < messages_[id]->window->GetNumberOfChildren(); i ++)
+                messages_[id]->window->GetChild(i)->SetAlpha(1.0);
+            break;
+    }
+}
+
 int DialogsManager::Sync(const char* d_name){
     int id = GetMessageId(d_name);
     if (id == -1){
@@ -379,6 +450,14 @@ void DialogsManager::HideMessage(const int id){
     for (unsigned int i = 0; i < messages_[id]->sync.size(); ++ i)
         ScriptManager::getSingleton().ContinueScriptExecution(messages_[id]->sync[i]);
     messages_[id]->sync.clear();
+    // Reset mode.
+    messages_[id]->closeable = true;
+    messages_[id]->visible = true;
+    messages_[id]->translucent = false;
+    if (messages_[id]->window != NULL){
+        for (int i = 0; i < messages_[id]->window->GetNumberOfChildren(); i ++)
+            messages_[id]->window->GetChild(i)->SetAlpha(1.0);
+    }
 }
 
 int DialogsManager::GetMessageId(const char* d_name) const{

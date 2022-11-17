@@ -115,7 +115,10 @@ bool FieldDataInstaller::IsTestField(const Ogre::String& resource_name){
       || resource_name == "tin_1"
       || resource_name == "tin_2"
       || resource_name == "rootmap"
-      || resource_name == "md8_4"
+      || resource_name == "md8_1"
+      //|| resource_name == "md8_2"
+      //|| resource_name == "md8_3"
+      //|| resource_name == "md8_4"
     ){return true;}
     return false;
 }

@@ -273,7 +273,9 @@ class FieldCodeGenerator : public CodeGenerator{
                         );
                         if (friendly_name.empty())
                             return (boost::format("Banks[%1%][%2%]") % bank % address).str();
-                        return (boost::format("Data.%1%") % friendly_name).str();
+                        return (
+                          boost::format("Banks[%1%][%2%]--[[%3%]]") % bank % address % friendly_name
+                        ).str();
                     }
                 case 5:
                 case 6:
@@ -282,7 +284,9 @@ class FieldCodeGenerator : public CodeGenerator{
                         const  auto friendly_name = formatter.GetFriendlyVarName(bank, address);
                         if (friendly_name.empty())
                             return (boost::format("Banks[%1%][%2%]") % bank % address).str();
-                        return "Data." + friendly_name;
+                        return (
+                          boost::format("Banks[%1%][%2%]--[[%3%]]") % bank % address % friendly_name
+                        ).str();
                     }
                 default:
                     return (

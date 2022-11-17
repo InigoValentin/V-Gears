@@ -2,7 +2,7 @@
     <prototype name="MenuCharacterData">
         <text_area name="Name" x="0" y="0" font="FFVIIFont" visible="true" />
         <text_area name="Lv" x="0" y="5" text_name="CharacterDataLv" colour="0 0.9 0.9" font="FFVIIMenuFont" visible="true" />
-        <text_area name="LvNumber" x="18" y="13" font="FFVIIMenuDigits" visible="true" />
+        <text_area name="LvNumber" x="18" y="13" font="FFVIITimerFont" visible="true" />
         <text_area name="Hp" x="0" y="16" text_name="CharacterDataHp" colour="0 0.9 0.9" font="FFVIIMenuFont" visible="true" />
         <text_area name="HpCurrent" x="16" y="23" colour="0.9 0.9 0.9" font="FFVIIMenuDigits" visible="true" />
         <sprite name="HpSlash" image="images/icons/slash.png" x="51" y="23" width="4" height="8" visible="true" />

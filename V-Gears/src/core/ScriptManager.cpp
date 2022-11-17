@@ -169,6 +169,9 @@ void ScriptManager::Update(const ScriptManager::Type type){
         }
     }
 
+    // Before updating entities, call on_update on the system timer.
+    RunString("Timer.update()");
+
     for (unsigned int i = 0; i < script_entity_.size(); ++ i){
         if (script_entity_[i].type == type){
             if (script_entity_[i].queue.size() > 0){
@@ -190,7 +193,6 @@ void ScriptManager::Update(const ScriptManager::Type type){
                           type, current_script_id_.entity,
                           script_entity_[i].queue[0].state
                         );
-
                         if (
                           table.is_valid()
                           && luabind::type(table) == LUA_TTABLE
@@ -204,15 +206,18 @@ void ScriptManager::Update(const ScriptManager::Type type){
                                   script_entity_[i].queue[0].argument2.c_str()
                                 );
                             }
-                            catch(luabind::error& e){
-                                LOG_ERROR(
-                                  "LUA error in entity " + script_entity_[i].name + " ("
-                                  + current_script_id_.entity + ") " + " in function "
+                            catch (luabind::error& e){
+                                std::string msg = "LUA error in entity " + script_entity_[i].name
+                                  + " (" + current_script_id_.entity + ") " + " in function "
                                   + script_entity_[i].queue[0].function + " ("
-                                  + current_script_id_.function + "). Details: "
-                                  + Ogre::String(lua_tostring(script_entity_[i].queue[0].state, -1))
-                                  + " : " + e.what()
-                                );
+                                  + current_script_id_.function + ")";
+                                if (lua_tostring(script_entity_[i].queue[0].state, -1) != NULL){
+                                    msg = msg + ". Details: " + std::string(
+                                      lua_tostring(script_entity_[i].queue[0].state, -1)
+                                    );
+                                }
+                                msg = msg + ". Exception: " + e.what();
+                                LOG_ERROR(msg);
                             }
 
                             if (ret == 0){

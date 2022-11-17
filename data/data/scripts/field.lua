@@ -236,10 +236,25 @@ play_map_music = function(id)
     end
 end
 
+set_map_name = function(text_id)
+    dialog:set_map_name(text_id)
+    System["MapChanger"].location_name = dialog:get_map_name()
+end
+
 --- Utility to change fields and enter battles.
 System["MapChanger"] = {
+
+    --- ID of the map to change to.
     map_name = "",
+
+    --- Point of the map to change to.
     point_name = "",
+
+    --- ID of the current field.
+    current_map_name = "",
+
+    --- Location name, to display in the main menu and in save slots.
+    location_name = "",
 
     --- Jumps to a new map.
     ffvii_field = function(self)
@@ -248,6 +263,7 @@ System["MapChanger"] = {
             script:request_end_sync(Script.UI, "Fade", "fade_out", 0)
             map(self.map_name)
             player_lock(false) -- enable menu and pc movement after load map
+            self.current_map_name = self.map_name
             self.map_name = ""
             script:request_end_sync(Script.UI, "Fade", "fade_in", 0)
         end
@@ -264,7 +280,7 @@ System["MapChanger"] = {
             map(self.map_name)
             -- load battle ui
             -- load player entity
-            self.map_name = ""
+            --self.map_name = ""
             script:request_end_sync(Script.UI, "Fade", "fade_in", 0)
         end
 

@@ -110,6 +110,7 @@ void ScriptManager::InitBinds(){
           .def("set_move_auto_speed", (void(Entity::*)(const float)) &Entity::SetMoveAutoSpeed)
           .def("get_move_auto_speed", (float(Entity::*)()) &Entity::GetMoveAutoSpeed)
           .def("get_move_triangle_id", (int(Entity::*)()) &Entity::GetMoveTriangleId)
+          .def("set_move_triangle_id", (void(Entity::*)(const int)) &Entity::SetMoveTriangleId)
           .def("move_auto_rotation", (void(Entity::*)(const bool)) &Entity::SetMoveAutoRotation)
           .def("move_auto_animation", (void(Entity::*)(const bool)) &Entity::SetMoveAutoAnimation)
           .def(
@@ -360,7 +361,7 @@ void ScriptManager::InitBinds(){
           .def(
             "set_location",
             (void(SavemapManager::*)(
-              const unsigned int, const unsigned int, const int, const unsigned int, const int,
+              const float, const float, const float, const unsigned int, const int,
               const char*, const char*
             )) &SavemapManager::SetLocation
           )
@@ -503,15 +504,15 @@ void ScriptManager::InitBinds(){
           )
           .def(
             "get_slot_location_x",
-            (unsigned int(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotLocationX
+            (float(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotLocationX
           )
           .def(
             "get_slot_location_y",
-            (unsigned int(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotLocationX
+            (float(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotLocationY
           )
           .def(
             "get_slot_location_z",
-            (int(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotLocationZ
+            (float(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotLocationZ
           )
           .def(
             "get_slot_location_triangle",
@@ -727,6 +728,20 @@ void ScriptManager::InitBinds(){
           .def(
             "dialog_open",
             (void(DialogsManager::*)(const char*, int, int, int, int)) &DialogsManager::OpenDialog
+          )
+          .def(
+            "set_numeric",
+            (void(DialogsManager::*)(const char*, const bool, const bool))
+              &DialogsManager::SetNumeric
+          )
+          .def(
+            "update_timer",
+            (void(DialogsManager::*)(const unsigned int)) &DialogsManager::UpdateTimer
+          )
+          .def(
+            "set_mode",
+            (void(DialogsManager::*)(const char*, const unsigned int, const bool))
+              &DialogsManager::SetMode
           )
           .def(
             "dialog_set_text",

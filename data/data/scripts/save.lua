@@ -1,3 +1,6 @@
+--- Generates a control key for savegames.
+--
+-- It's a random character string, used to differenciate savegames.
 generate_control_key = function()
     ControlKey = ""
     for i = 1, 8 do
@@ -5,8 +8,12 @@ generate_control_key = function()
     end
 end
 
+--- Saves the game.
+--
+-- @param slot The slot to save at (0-15).
+-- @param force If false, exisiting game data will not be overwritten if control keys are different.
 save_game = function(slot, force)
-    savemap_manager:set_control_key("CONTROL_EXAMPLE") -- TODO Actual data
+    savemap_manager:set_control_key(ControlKey)
     savemap_manager:set_window_colours(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12) -- TODO Actual data
     savemap_manager:set_money(Inventory.money)
     savemap_manager:set_game_time(123456) -- TODO Actual data
@@ -35,7 +42,10 @@ save_game = function(slot, force)
         end
     end
     -- TODO: Materia stash, when implemented.
-    savemap_manager:set_location(10, 20, -1, 3, 120, "FIELD_ID", dialog:get_map_name()) -- TODO Actual data
+    local player = entity_manager:get_player_entity()
+    local x, y, z = player:get_position()
+
+    savemap_manager:set_location(x, y, z, player:get_move_triangle_id(), player:get_rotation(), System["MapChanger"].current_map_name, System["MapChanger"].location_name) -- TODO Actual data
     -- TODO Settings, when implemented
     for i = 0, 11 do
         if Characters[i] ~= nil and Characters[i].char_id ~= nil then
@@ -89,8 +99,10 @@ save_game = function(slot, force)
     savemap_manager:save(slot, force or true)
 end
 
+--- Laods a game.
+--
+-- @param slot The slot to load (0-15).
 load_game = function(slot)
-    print("LAOD SLOT " .. tostring(slot))
     -- Populate banks
     for b = 0, 14 do
         for a = 0, 254 do
@@ -240,7 +252,6 @@ load_game = function(slot)
             end
             -- TODO: Status
             Characters[c].status = {}
-            print("RECALC " .. tostring(c))
             Characters.recalculate_stats(c)
         end
 
@@ -249,6 +260,25 @@ load_game = function(slot)
     -- TODO: Location
     -- TODO: Update character stats
     -- TODO: Handle world map when implemented
+
+    console("camera_free false")
     load_field_map_request(savemap_manager:get_slot_location_field(slot), "")
+    System["MapChanger"].location_name = savemap_manager:get_slot_location_name(slot)
+    System["MapChanger"].current_map_name = savemap_manager:get_slot_location_field(slot)
+    -- TODO: For now, assume the PC is Cloub, but it must be saved.
+    local player = nil
+    while player == nil do
+        entity_manager:set_player_entity("Cloud")
+        player = entity_manager:get_player_entity()
+        script:wait(0)
+    end
+    --local player = entity_manager:get_entity("Cloud")
+    if player ~= nil then
+        player:set_position(savemap_manager:get_slot_location_x(slot), savemap_manager:get_slot_location_y(slot), savemap_manager:get_slot_location_z(slot))
+        player:set_move_triangle_id(savemap_manager:get_slot_location_triangle(slot))
+        player:set_rotation(savemap_manager:get_slot_location_angle(slot))
+        background2d:autoscroll_to_entity(player)
+        local x, y, z = player:get_position()
+    end
     MenuSettings.pause_available = true
 end

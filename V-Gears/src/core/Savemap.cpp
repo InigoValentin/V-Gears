@@ -33,9 +33,9 @@ Savemap::Savemap():
     party_[0] = -1;
     party_[1] = -1;
     party_[2] = -1;
-    location_.x = 0;
-    location_.y = 0;
-    location_.z = -1;
+    location_.x = 0.0f;
+    location_.y = 0.0f;
+    location_.z = -1.0f;
     location_.triangle = 0;
     location_.angle = 0;
     location_.field = "";
@@ -241,18 +241,17 @@ void Savemap::SetESkillMateriaStash(
 }
 
 void Savemap::SetLocation(
-  const unsigned int x, const unsigned int y, const int z,
+  const float x, const float y, const float z,
   const unsigned int triangle, const int angle, std::string field, std::string name
 ){
-    if (z >= -1 && angle >= -360 && angle <= 360){
-        location_.x = x;
-        location_.y = y;
-        location_.z = z;
-        location_.triangle = triangle;
-        location_.angle = angle;
-        location_.field = field;
-        location_.name = name;
-    }
+
+    location_.x = x;
+    location_.y = y;
+    location_.z = z;
+    location_.triangle = triangle;
+    if (angle >= -360 && angle <= 360) location_.angle = angle;
+    location_.field = field;
+    location_.name = name;
 }
 
 void Savemap::SetSetting(const unsigned int key, const unsigned int value){
@@ -473,11 +472,11 @@ bool Savemap::IsStashAtPosESkillLearned(const unsigned int pos, const unsigned i
     else return materia_stash_[pos].enemy_skill_learned[skill];
 }
 
-unsigned int Savemap::GetLocationX(){return location_.x;}
+float Savemap::GetLocationX(){return location_.x;}
 
-unsigned int Savemap::GetLocationY(){return location_.y;}
+float Savemap::GetLocationY(){return location_.y;}
 
-int Savemap::GetLocationZ(){return location_.z;}
+float Savemap::GetLocationZ(){return location_.z;}
 
 unsigned int Savemap::GetLocationTriangle(){return location_.triangle;}
 
@@ -727,9 +726,10 @@ void Savemap::Write(int slot, std::string file_name){
 
     // Location.
     std::unique_ptr<TiXmlElement> location(new TiXmlElement("Location"));
-    location->SetAttribute("x", location_.x);
-    location->SetAttribute("y", location_.y);
-    if (location_.z >= 0) location->SetAttribute("z", location_.z);
+    location->SetDoubleAttribute("x", location_.x);
+    location->SetDoubleAttribute("y", location_.y);
+    if (location_.z < 0) location->SetAttribute("z", -1);
+    else location->SetDoubleAttribute("z", location_.z);
     location->SetAttribute("triangle", location_.triangle);
     location->SetAttribute("orientation", location_.angle);
     location->SetAttribute("field", location_.field);
@@ -1114,20 +1114,14 @@ void Savemap::Read(std::string file_name){
             if (seconds >= 0) countdown_ = seconds;
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "Location"){
+            node->ToElement()->QueryFloatAttribute("x", &location_.x);
+            node->ToElement()->QueryFloatAttribute("y", &location_.y);
+            node->ToElement()->QueryFloatAttribute("z", &location_.z);
             int val = -1;
-            node->ToElement()->QueryIntAttribute("x", &val);
-            if (val >= 0) location_.x = val;
-            val = -1;
-            node->ToElement()->QueryIntAttribute("y", &val);
-            if (val >= 0) location_.y = val;
-            val = -1;
-            node->ToElement()->QueryIntAttribute("z", &val);
-            if (val >= -1) location_.z = val;
-            val = -1;
             node->ToElement()->QueryIntAttribute("triangle", &val);
             if (val >= 0) location_.triangle = val;
             val = -1;
-            node->ToElement()->QueryIntAttribute("angle", &val);
+            node->ToElement()->QueryIntAttribute("orientation", &val);
             if (val >= -360 && val <=360) location_.angle = val;
             node->ToElement()->QueryStringAttribute("field", &location_.field);
             node->ToElement()->QueryStringAttribute("name", &location_.name);

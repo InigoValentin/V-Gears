@@ -176,7 +176,7 @@ void SavemapManager::SetESkillMateriaStash(
 }
 
 void SavemapManager::SetLocation(
-  const unsigned int x, const unsigned int y, const int z,
+  const float x, const float y, const float z,
   const unsigned int triangle, const int angle, const char* field, const char* name
 ){
     if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
@@ -351,20 +351,20 @@ bool SavemapManager::IsSlotStashAtPosESkillLearned(const unsigned int slot, cons
     return saved_savemaps_[slot]->IsStashAtPosESkillLearned(pos, skill);
 }
 
-unsigned int SavemapManager::GetSlotLocationX(const unsigned int slot){
-    if (slot >= MAX_SAVE_SLOTS) return 0;
+float SavemapManager::GetSlotLocationX(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return 0.0f;
     if (savemaps_read_ == false) ReadSavemaps();
     return saved_savemaps_[slot]->GetLocationX();
 }
 
-unsigned int SavemapManager::GetSlotLocationY(const unsigned int slot){
-    if (slot >= MAX_SAVE_SLOTS) return 0;
+float SavemapManager::GetSlotLocationY(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return 0.0f;
     if (savemaps_read_ == false) ReadSavemaps();
     return saved_savemaps_[slot]->GetLocationY();
 }
 
-int SavemapManager::GetSlotLocationZ(const unsigned int slot){
-    if (slot >= MAX_SAVE_SLOTS) return -1;
+float SavemapManager::GetSlotLocationZ(const unsigned int slot){
+    if (slot >= MAX_SAVE_SLOTS) return -1.0f;
     if (savemaps_read_ == false) ReadSavemaps();
     return saved_savemaps_[slot]->GetLocationZ();
 }

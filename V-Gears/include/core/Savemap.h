@@ -35,6 +35,13 @@ class Savemap{
          */
         ~Savemap();
 
+        /**
+         * Assignment operator.
+         *
+         * Copies a savemap into another, including control data.
+         *
+         * @param[in] The savemap to copy from.
+         */
         void operator = (const Savemap &to_copy);
 
         /**
@@ -197,7 +204,7 @@ class Savemap{
          * @param[in] Name of the location to show in the save slot.
          */
         void SetLocation(
-          const unsigned int x, const unsigned int y, const int z,
+          const float x, const float y, const float z,
           const unsigned int triangle, const int angle, std::string field, std::string name
         );
 
@@ -484,21 +491,21 @@ class Savemap{
          *
          * @return The X coordinate.
          */
-        unsigned int GetLocationX();
+        float GetLocationX();
 
         /**
          * Retrieves the Y coordinate of the player.
          *
          * @return The Y coordinate.
          */
-        unsigned int GetLocationY();
+        float GetLocationY();
 
         /**
          * Retrieves the Z coordinate of the player.
          *
-         * @return The Z coordinate. If it was not saved, -1.
+         * @return The Z coordinate. If it was not saved, it will be lower than 0.
          */
-        int GetLocationZ();
+        float GetLocationZ();
 
         /**
          * Retrieves the walkmesh triangle of the player.
@@ -1042,19 +1049,19 @@ class Savemap{
             /**
              * X coordinate.
              */
-            unsigned int x;
+            float x;
 
             /**
              * Y coordinate.
              */
-            unsigned int y;
+            float y;
 
             /**
              * Z coordinate.
              *
              * Usually unused.
              */
-            int z;
+            float z;
 
             /**
              * Triangle in the walkmesh;

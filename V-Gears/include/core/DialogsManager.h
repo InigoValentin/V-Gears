@@ -92,7 +92,12 @@ struct MessageData{
       cursor_row_selected(0),
       cursor_row_current(0),
       cursor_row_first(0),
-      cursor_row_last(0)
+      cursor_row_last(0),
+      closeable(true),
+      visible(true),
+      translucent(false),
+      timer(false),
+      numeric(false)
     {}
 
     /**
@@ -200,6 +205,31 @@ struct MessageData{
      * Last chooseable line.
      */
     int cursor_row_last;
+
+    /**
+     * Indicates if the window is closeable.
+     */
+    bool closeable;
+
+    /**
+     * Indicates if the window background is visible.
+     */
+    bool visible;
+
+    /**
+     * Indicates if the window background is translucent.
+     */
+    bool translucent;
+
+    /**
+     * Indicates if the window is for a timer.
+     */
+    bool timer;
+
+    /**
+     * Indicates if the window background is for a number.
+     */
+    bool numeric;
 };
 
 /**
@@ -263,6 +293,34 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          * @param[in] text Text to set in the dialog.
          */
         void SetText(const char* d_name, const char* text);
+
+        /**
+         * Sets or unsets a dialog window as numeric
+         *
+         * @param[in] d_name Name of the dialog.
+         * @param[in] numeric True to make it numeric, false otherwise.
+         * @param[in] timer True to use the window for times, false for regular numbers. If used
+         * for timer, the window will be used when calling {@see UpdateTimer}
+         */
+        void SetNumeric(const char* d_name, const bool numeric, const bool timer);
+
+        /**
+         * Updates the timer.
+         *
+         * Displays the formatted time in the timer window. To do so, a timer window must have been
+         * set as timer with {@see SetNumeric}
+         */
+        void UpdateTimer(const unsigned int seconds);
+
+        /**
+         * Sets the window mode.
+         *
+         * @param[in] d_name Name of the dialog.
+         * @param[in] bg Background mode. 1: No background/border. 2: Translucent background.
+         * Anything else: Normal.
+         * @param[in] closeable True if the window can be closed manually, false to lock it.
+         */
+        void SetMode(const char* d_name, const int bg, const bool closeable);
 
         /**
          * Syncs the dialog and makes the script wait until it is closed.
@@ -421,5 +479,17 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          * Current map name.
          */
         std::string map_name_;
+
+        /**
+         * The ID of the window that contains the timer, is any
+         */
+        int timer_window_id_;
+
+        /**
+         * The number of seconds in the timer.
+         *
+         * Stored solely to not re-set the text if the time is the same.
+         */
+        unsigned int timer_seconds_;
 };
 
