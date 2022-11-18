@@ -28,6 +28,7 @@ void FieldBackgroundInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
+    //std::cout << "Background opcode: " << opcode_ << "\n";
     switch (opcode_){
         case OPCODES::BGPDH: code_gen->WriteTodo(md.GetEntityName(), "BGPDH");break;
         case OPCODES::BGSCR: code_gen->WriteTodo(md.GetEntityName(), "BGSCR"); break;

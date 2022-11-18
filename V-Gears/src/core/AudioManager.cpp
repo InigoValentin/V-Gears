@@ -231,11 +231,18 @@ void AudioManager::Player::Pause(){
 
 void AudioManager::Player::Play(const Ogre::String &file){
     boost::recursive_mutex::scoped_lock lock(*update_mutex_);
+
+
+    // If the same track is already playing, don't restart.
+
+    if (file_ == file) return;
+
     // Open vorbis file.
     if (ov_fopen(const_cast<char*>(file.c_str()), &vorbis_file_)){
         LOG_ERROR("Can't play file \"" + file + "\".");
         return;
     }
+    file_ = file;
     // Get file info.
     vorbis_info_ = ov_info(&vorbis_file_, -1.0f);
     // Create sound source
@@ -284,6 +291,7 @@ void AudioManager::Player::Stop(){
     // Cleanup
     ov_clear(&vorbis_file_);
     stream_finished_ = false;
+    file_ = "";
 }
 
 void AudioManager::Player::SetLoop(const float loop){

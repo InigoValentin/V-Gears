@@ -174,6 +174,8 @@ UiContainer.NameMenu = {
         UiContainer.current_submenu = ""
         self.options_position = 1
         self.confirm_position = 1
+        ui_manager:get_widget("NameMenu.Container.Confirm.Cursor"):set_default_animation("Position" .. self.confirm_position)
+        ui_manager:get_widget("NameMenu.Container.Options.Cursor"):set_default_animation("Position" .. self.options_position)
         ui_manager:get_widget("NameMenu.Container.Character.Portrait"):set_image("images/characters/" .. tostring(self.id) .. ".png")
         if (string.lower(Characters[self.id].name) == "ex-soldier") then
             -- HACK: Hack for Ex-Soldier default. Can this be extracted from menu.lgp?

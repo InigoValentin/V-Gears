@@ -14,7 +14,7 @@ project(V-Gears)
 set(CMAKE_PACKAGE_ICON v-gears.png)
 set(VGears_VERSION__MAJOR 0)
 set(VGears_VERSION__MINOR 1)
-set(VGears_VERSION__PATCH 0)
+set(VGears_VERSION__PATCH 1)
 set(VGears_VERSION ${VGears_VERSION__MAJOR}.${VGears_VERSION__MINOR}.${VGears_VERSION__PATCH})
 
 # Generate version header.

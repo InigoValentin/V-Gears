@@ -88,8 +88,8 @@ save_game = function(slot, force)
             -- TODO: Character statuses
         end
     end
-    for b = 0, 14 do
-        for a = 0, 254 do
+    for b = 0, Banks.COUNT do
+        for a = 0, Banks.SIZE do
             if (Banks[b] ~= nil and Banks[b][a] ~= nil and Banks[b][a] ~= 0) then
                 savemap_manager:set_data(b, a, tonumber(Banks[b][a]))
             end
@@ -104,8 +104,8 @@ end
 -- @param slot The slot to load (0-15).
 load_game = function(slot)
     -- Populate banks
-    for b = 0, 14 do
-        for a = 0, 254 do
+    for b = 0, Banks.COUNT do
+        for a = 0, Banks.SIZE do
             Banks[b][a] = savemap_manager:get_slot_data(slot, b, a)
         end
     end

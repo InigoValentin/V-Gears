@@ -59,7 +59,10 @@ Well, let's call it a work in progress... of a work in progress.
 
 
 If the question was "How deep into the game can I play?", then the answer is
-> You can ALMOST play the whole Mako Reactor 1 mission. But dumbass Biggs won't show up to open the way out, so you die on fire. Or you would, if the bomb timer actually worked.
+
+[<img src="https://v-gears.inigovalentin.com/img/screenshot/max_progress.png" alt="Max progress" width="450"/>](https://v-gears.inigovalentin.com/img/screenshot/max_progress.png "Max progress")
+
+Until there. Whitout cheats, and without using the developer console, the game hangs there.
 
 But don't worry! The engine is not fixed sequentially, or map by map. Once a fix is implememnted, it applies to all maps at once, anb big chunck of the game are unlocked after each fix.
 

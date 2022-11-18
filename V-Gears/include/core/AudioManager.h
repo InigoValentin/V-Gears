@@ -296,6 +296,11 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
                 float loop_;
 
                 /**
+                 * Name of the file currently being played.
+                 */
+                Ogre::String file_;
+
+                /**
                  * File played or to play.
                  */
                 OggVorbis_File vorbis_file_;

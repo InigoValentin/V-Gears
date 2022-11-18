@@ -29,6 +29,7 @@ void FieldMathInstruction::ProcessInst(
 ){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     FunctionMetaData md(func.metadata);
+    //std::cout << "Math opcode: " << opcode_ << "\n";
     switch (opcode_){
         case OPCODES::PLUS_: ProcessSaturatedPLUS(code_gen); break;
         case OPCODES::PLUS2_: ProcessSaturatedPLUS2(code_gen); break;
@@ -223,13 +224,13 @@ void FieldMathInstruction::ProcessSETBYTE_SETWORD(CodeGenerator* code_gen){
 }
 
 void FieldMathInstruction::ProcessBITON(CodeGenerator* code_gen){
-    code_gen->AddOutputLine((boost::format("bit_on(%1%, %2%, %3%)")
+    code_gen->AddOutputLine((boost::format("set_bank_bit(%1%, %2%, %3%, 1)")
       % params_[0]->GetUnsigned() % params_[2]->GetUnsigned() % params_[3]->GetUnsigned()
     ).str());
 }
 
 void FieldMathInstruction::ProcessBITOFF(CodeGenerator* code_gen){
-    code_gen->AddOutputLine((boost::format("bit_off(%1%, %2%, %3%)")
+    code_gen->AddOutputLine((boost::format("set_bank_bit(%1%, %2%, %3%, 0)")
       % params_[0]->GetUnsigned() % params_[2]->GetUnsigned() % params_[3]->GetUnsigned()
     ).str());
 }

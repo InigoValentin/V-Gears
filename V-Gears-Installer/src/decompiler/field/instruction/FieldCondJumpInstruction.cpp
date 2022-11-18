@@ -74,7 +74,7 @@ void FieldCondJumpInstruction::ProcessInst(
         case 8: op = "|"; break;
         case 9:
             {
-                op = "bit(" + params_[0]->GetString() + ", " + params_[2]->GetString()
+                op = "get_bank_bit(" + params_[0]->GetString() + ", " + params_[2]->GetString()
                   + ", " + destination + ") == 1";
                 ValuePtr v = new UnquotedStringValue(op);
                 stack.Push(v);
@@ -82,7 +82,7 @@ void FieldCondJumpInstruction::ProcessInst(
             return;
         case 0xA:
             {
-                op = "bit(" + params_[0]->GetString() + ", " + params_[2]->GetString()
+                op = "get_bank_bit(" + params_[0]->GetString() + ", " + params_[2]->GetString()
                   + ", " + destination + ") == 0";
                 ValuePtr v = new UnquotedStringValue(op);
                 stack.Push(v);

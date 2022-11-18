@@ -28,6 +28,7 @@ void FieldModuleInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
+    //std::cout << "Module opcode: " << opcode_ << "\n";
     switch (opcode_){
         case OPCODES::DSKCG: code_gen->WriteTodo(md.GetEntityName(), "DSKCG"); break;
         case (OPCODES::SPECIAL << 8) | OPCODES_SPECIAL::ARROW:

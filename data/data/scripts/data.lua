@@ -233,6 +233,7 @@ MenuSettings = {
 
 --- Current party.
 Party = {
+    MAX = 3,
     [1] = nil,
     [2] = nil,
     [3] = nil
@@ -244,9 +245,11 @@ Party = {
 -- 15 banks (indexes 0-14) with 255 addresses (indexes 0-254) each. Memory banks 4, 5, 7, 8 and 9
 -- are temporary and are not saved to the savemap.
 Banks = {}
-for i = 0, 14 do
+Banks.COUNT = 15
+Banks.SIZE = 255
+for i = 0, Banks.COUNT do
     Banks[i] = {}
-    for j = 0, 254 do
+    for j = 0, Banks.SIZE do
         Banks[i][j] = 0
     end
 end
@@ -256,9 +259,11 @@ end
 --
 -- @todo Delete this, and implement bit operations over Banks.
 BitBanks = {}
-for i = 0, 15 do
+BitBanks.COUNT = 15
+BitBanks.SIZE = 255
+for i = 0, BitBanks.COUNT do
     BitBanks[i] = {}
-    for j = 0, 255 do
+    for j = 0, BitBanks.SIZE do
         BitBanks[i][j] = {}
         for k = 0, 8 do
             BitBanks[i][j][k] = 0

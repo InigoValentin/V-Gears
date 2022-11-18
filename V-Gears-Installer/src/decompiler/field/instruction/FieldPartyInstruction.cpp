@@ -28,6 +28,7 @@ void FieldPartyInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
+    //std::cout << "Party opcode: " << opcode_ << "\n";
     switch (opcode_){
         case OPCODES::SPTYE: code_gen->WriteTodo(md.GetEntityName(), "SPTYE"); break;
         case OPCODES::GTPYE: code_gen->WriteTodo(md.GetEntityName(), "GTPYE"); break;
@@ -124,7 +125,7 @@ void FieldPartyInstruction::ProcessDLITM(CodeGenerator* code_gen){
 
 void FieldPartyInstruction::ProcessCKITM(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
-      boost::format("Banks[%1][%2] = Inventory.get_item_quantity(%3%)")
+      boost::format("Banks[%1%][%2%] = Inventory.get_item_quantity(%3%)")
       % params_[0]->GetUnsigned() % params_[2]->GetUnsigned() % params_[1]->GetUnsigned()
     ).str());
 }
@@ -142,7 +143,7 @@ void FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
 
 void FieldPartyInstruction::ProcessCHGLD(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
-      boost::format("Inventory.money_to_banks(%1%, %2%, %3, %4)")
+      boost::format("Inventory.money_to_banks(%1%, %2%, %3%, %4%)")
         % params_[0]->GetUnsigned() % params_[1]->GetUnsigned()
         % params_[2]->GetUnsigned() % params_[3]->GetUnsigned()
     ).str());

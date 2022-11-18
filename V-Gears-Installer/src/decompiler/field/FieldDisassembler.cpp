@@ -684,10 +684,10 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
             case OPCODES::GOLDU:
                 // Goldu can have two argument formats: (nybble, word) or (nybble, byte, 3 bytes)
                 // Read it as nybble, byte, byte, byte, byte and operate later
-                ParseOpcode(full_opcode, "GOLDU", new FieldPartyInstruction(), 0, "BBBBB");
+                ParseOpcode(full_opcode, "GOLDU", new FieldPartyInstruction(), 0, "NBBBB");
                 break;
             case OPCODES::GOLDD:
-                ParseOpcode(full_opcode, "GOLDD", new FieldPartyInstruction(), 0, "Nww");
+                ParseOpcode(full_opcode, "GOLDD", new FieldPartyInstruction(), 0, "NBBBB");
                 break;
             case OPCODES::CHGLD:
                 ParseOpcode(full_opcode, "CHGLD", new FieldPartyInstruction(), 0, "NBB");

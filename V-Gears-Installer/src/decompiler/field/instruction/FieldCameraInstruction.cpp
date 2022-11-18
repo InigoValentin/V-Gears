@@ -28,6 +28,7 @@ void FieldCameraInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
+    //std::cout << "Camera opcode: " << opcode_ << "\n";
     switch (opcode_){
     case OPCODES::NFADE: ProcessNFADE(code_gen); break;
     case OPCODES::SHAKE: code_gen->WriteTodo(md.GetEntityName(), "SHAKE"); break;

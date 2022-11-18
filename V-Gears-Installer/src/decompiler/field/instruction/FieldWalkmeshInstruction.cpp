@@ -28,6 +28,7 @@ void FieldWalkmeshInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
     FunctionMetaData md(func.metadata);
+    //std::cout << "WMesh opcode: " << opcode_ << "\n";
     switch (opcode_){
         case OPCODES::SLIP: code_gen->WriteTodo(md.GetEntityName(), "SLIP"); break;
         case OPCODES::UC: ProcessUC(code_gen); break;

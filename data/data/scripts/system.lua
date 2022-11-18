@@ -774,9 +774,31 @@ end
 -- @param bit The bit to get (0-7)
 -- @return The bit value (1-0)
 function get_bank_bit(bank, address, bit)
-    -- TODO: Validation
+    if bank < 0 or bank > Banks.COUNT or address < 0 or address > Banks.SIZE or bit < 0 or bit > 7 then
+        print("ERROR: Tried to check invalid bit " .. tostring(bit) .. " from bank " .. tostring(bank) .. " at address " .. tostring(address) .. ".")
+        return 0
+    end
     local val = Banks[bank][address]
     return get_byte_nth_bit(val, bit)
+end
+
+--- Sets a bit in an address in a data bank
+--
+-- @param bank The bank (0-14)
+-- @param address The bank address (0-254)
+-- @param bit The bit to set (0-7)
+-- @param value The bit value (1-0)
+function set_bank_bit(bank, address, bit, value)
+    if bank < 0 or bank > Banks.COUNT or address < 0 or address > Banks.SIZE or bit < 0 or bit > 7 then
+        print("ERROR: Tried to set invalid bit " .. tostring(bit) .. " from bank " .. tostring(bank) .. " at address " .. tostring(address) .. ".")
+        return
+    end
+    if value ~= 1 and value ~= 0  then
+        print("ERROR: Tried to set bit to invalid value " .. tostring(value) .. " from bank " .. tostring(bank) .. " at address " .. tostring(address) .. ".")
+        return
+    end
+    local val = Banks[bank][address]
+    Banks[bank][address] =  set_byte_nth_bit(val, bit, value)
 end
 
 --- Obtains a bit from an unsigned byte
@@ -786,6 +808,15 @@ end
 -- @return The bit value (1-0)
 function get_byte_nth_bit(value, n)
     if n < 0 or n > 7 then
+        print("ERROR: Tried to get invalid bit " .. tostring(bit) .. " from value " .. tostring(value) .. ".")
+        return 0
+    end
+    if value < 0 then
+        print("ERROR: Tried to get bit " .. tostring(bit) .. " from negative value " .. tostring(value) .. ".")
+        return 0
+    end
+    if value > 254 then
+        print("ERROR: Tried to get bit " .. tostring(bit) .. " from value " .. tostring(value) .. " that exceeds byte size.")
         return 0
     end
     -- Convert to binary string
@@ -795,6 +826,45 @@ function get_byte_nth_bit(value, n)
         s = s .. tostring(temp % 2)
         temp = math.floor(temp / 2)
     end
-    print("S:" .. s)
     return tonumber(string.sub(s, n + 1, n + 1))
 end
+
+--- Obtains a bit from an unsigned byte
+--
+-- @param value The value (0-254)
+-- @param bit The bit to get (0-7)
+-- @return The bit value (1-0)
+function set_byte_nth_bit(value, n, bit)
+    if bit ~= 0 and bit ~= 1 then
+        print("ERROR: Tried to set bit " .. tostring(bit) .. " to an invalid value " .. tostring(bit) .. " from value " .. tostring(value) .. ".")
+        return value
+    end
+    if n < 0 or n > 7 then
+        print("ERROR: Tried to set invalid bit " .. tostring(bit) .. " to " .. tostring(bit) .. " from value " .. tostring(value) .. ".")
+        return value
+    end
+    if value < 0 then
+        print("ERROR: Tried to set bit " .. tostring(bit) .. " to " .. tostring(bit) .. "from negative value " .. tostring(value) .. ".")
+        return value
+    end
+    if value > 254 then
+        print("ERROR: Tried to set bit " .. tostring(bit) .. " to " .. tostring(bit) .. "from value " .. tostring(value) .. " that exceeds byte size.")
+        return value
+    end
+    -- Convert to binary string.
+    local s = ""
+    local temp = value
+    for i = 1, 8 do
+        s = s .. tostring(temp % 2)
+        temp = math.floor(temp / 2)
+    end
+    -- Replace the requested bit.
+    s = string.sub(s, 1, n) .. tostring(bit) .. string.sub(s, n + 2)
+    -- Convert back to a number.
+    val = 0
+    for i = 1, 8 do
+        val = val + (tonumber(string.sub(s, i, i )) * 2 ^ (i - 1))
+    end
+    return math.floor(val)
+end
+set_byte_nth_bit(25, 2, 1)

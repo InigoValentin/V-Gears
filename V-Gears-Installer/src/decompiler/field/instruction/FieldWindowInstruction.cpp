@@ -29,6 +29,7 @@ void FieldWindowInstruction::ProcessInst(
 ){
     FieldEngine& eng = static_cast<FieldEngine&>(*engine);
     FunctionMetaData md(func.metadata);
+    //std::cout << "Window opcode: " << opcode_ << "\n";
     switch (opcode_){
         case OPCODES::TUTOR: code_gen->WriteTodo(md.GetEntityName(), "TUTOR"); break;
         case OPCODES::WCLS: code_gen->WriteTodo(md.GetEntityName(), "WCLS"); break;
@@ -161,9 +162,6 @@ void FieldWindowInstruction::ProcessMENU(CodeGenerator* code_gen){
 }
 
 void FieldWindowInstruction::ProcessSTTIM(CodeGenerator* code_gen){
-    std::cout << "STTIM params:\n";
-    for (int i = 0; i < params_.size(); i ++) std::cout << "    " << params_[i] << "\n";
-    std::cout << "STTIM params END\n";
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     int h = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned(),

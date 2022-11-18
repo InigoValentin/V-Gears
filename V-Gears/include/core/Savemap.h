@@ -931,12 +931,12 @@ class Savemap{
         /**
          * Number of data banks.
          */
-        static const unsigned int BANK_COUNT = 15;
+        static const unsigned int BANK_COUNT = 16;
 
         /**
          * Number of addresses in each data bank.
          */
-        static const unsigned int BANK_ADDRESS_COUNT = 254;
+        static const unsigned int BANK_ADDRESS_COUNT = 256;
 
         /**
          * MAx colour component value.

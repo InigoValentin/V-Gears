@@ -29,6 +29,7 @@ void FieldModelInstruction::ProcessInst(
 ){
     FieldEngine& eng = static_cast<FieldEngine&>(*engine);
     FunctionMetaData md(func.metadata);
+    //std::cout << "Model opcode: " << opcode_ << "\n";
     switch (opcode_){
         case OPCODES::JOIN: ProcessJOIN(code_gen); break;
         case OPCODES::SPLIT: ProcessSPLIT(code_gen); break;
