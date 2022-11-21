@@ -156,6 +156,7 @@ UiContainer.MainMenu = {
                 else
                     ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_default_animation("RowFront")
                 end
+                ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".LimitLevel"):set_text(tostring(Characters[Party[c]].limit.current))
             else
                 UiContainer.populate_character_data("MainMenu.Container.Characters.Character" .. tostring(c), nil)
             end
@@ -167,7 +168,7 @@ UiContainer.MainMenu = {
         ui_manager:get_widget("MainMenu.Container.Menu.SaveText"):set_colour(0.4, 0.4, 0.4)
 
         -- Set location
-        ui_manager:get_widget("MainMenu.Container.Location.Text"):set_text((System["MapChanger"].location_name))
+        ui_manager:get_widget("MainMenu.Container.Location.Text"):set_text(System["MapChanger"].location_name)
 
         -- Set money
         local money_str = tostring(Inventory.money)

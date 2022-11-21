@@ -113,6 +113,14 @@ class Background2D : public Ogre::RenderQueueListener{
         Entity* GetAutoScrollEntity() const;
 
         /**
+         * Scrolls the background to the position of the playable character.
+         *
+         * @param[in] type Scroll type.
+         * @param[in] seconds Scroll duration.
+         */
+        void ScriptScrollToPlayer(const SCROLL_TYPE type, const unsigned int seconds);
+
+        /**
          * Scrolls the background to a position.
          *
          * @param[in] x X coordinate to scroll to.

@@ -231,6 +231,11 @@ namespace VGears{
             typedef std::vector<SpriteData*> SpritePtrList;
 
             /**
+             * Sorts the sprites.
+             */
+            void SortSprites();
+
+            /**
              * A layer of a background.
              */
             struct Layer{
@@ -408,6 +413,15 @@ namespace VGears{
              * The background pages.
              */
             std::array<Page, PAGE_COUNT> pages_;
+
+            /**
+             * Sorting algorithm for sprite sorting.
+             *
+             * @param[in] sprite1 First sprite to compare.
+             * @param[in] sprite2 Second sprite to compare.
+             * @return Ture if sprite 1 goes before sprite 2, false otherwise.
+             */
+            static bool SpriteSorter(SpriteData sprite1, SpriteData sprite2);
     };
 
     typedef Ogre::SharedPtr<BackgroundFile> BackgroundFilePtr;

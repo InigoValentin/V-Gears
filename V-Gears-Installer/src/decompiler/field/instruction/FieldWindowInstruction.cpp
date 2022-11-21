@@ -41,7 +41,7 @@ void FieldWindowInstruction::ProcessInst(
         case OPCODES::MPARA: code_gen->WriteTodo(md.GetEntityName(), "MPARA"); break;
         case OPCODES::MPRA2: code_gen->WriteTodo(md.GetEntityName(), "MPRA2"); break;
         case OPCODES::MPNAM: ProcessMPNAM(code_gen, eng.GetScriptName()); break;
-        case OPCODES::ASK: code_gen->WriteTodo(md.GetEntityName(), "ASK"); break;
+        case OPCODES::ASK: ProcessASK(code_gen, eng.GetScriptName()); break;
         case OPCODES::MENU: ProcessMENU(code_gen); break;
         case OPCODES::MENU2: ProcessMENU2(code_gen); break;
         case OPCODES::WINDOW: ProcessWINDOW(code_gen); break;
@@ -193,6 +193,22 @@ void FieldWindowInstruction::ProcessMESSAGE(
     code_gen->AddOutputLine(
       (boost::format("dialog:dialog_wait_for_close(\"%1%\")") % window_id).str()
     );
+}
+
+void FieldWindowInstruction::ProcessASK(CodeGenerator* code_gen, const std::string& script_name){
+    auto bank = params_[0]->GetUnsigned() + params_[1]->GetUnsigned();
+    auto window_id = params_[2]->GetUnsigned();
+    auto dialog_id = params_[3]->GetUnsigned();
+    auto first = params_[4]->GetUnsigned();
+    auto last = params_[5]->GetUnsigned();
+    auto address = params_[6]->GetUnsigned();
+    code_gen->AddOutputLine((
+      boost::format("dialog_ask(\"%1%\", \"%2%_%3%\", %4%, %5%, %6%, %7%)")
+      % window_id % script_name % dialog_id % first % last % bank % address
+    ).str());
+    //code_gen->AddOutputLine(
+    //  (boost::format("dialog:ask_wait_for_close(\"%1%\")") % window_id).str()
+    //);
 }
 
 void FieldWindowInstruction::ProcessWCLSE(CodeGenerator* code_gen){

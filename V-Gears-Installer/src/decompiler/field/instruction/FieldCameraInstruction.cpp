@@ -33,12 +33,12 @@ void FieldCameraInstruction::ProcessInst(
     case OPCODES::NFADE: ProcessNFADE(code_gen); break;
     case OPCODES::SHAKE: code_gen->WriteTodo(md.GetEntityName(), "SHAKE"); break;
     case OPCODES::SCRLO: code_gen->WriteTodo(md.GetEntityName(), "SCRLO"); break;
-    case OPCODES::SCRLC: code_gen->WriteTodo(md.GetEntityName(), "SCRLC"); break;
+    case OPCODES::SCRLC: ProcessSCRLC(code_gen); break;
     case OPCODES::SCR2D: ProcessSCR2D(code_gen); break;
-    case OPCODES::SCRCC: code_gen->WriteTodo(md.GetEntityName(), "SCRCC"); break;
+    case OPCODES::SCRCC: ProcessSCRCC(code_gen); break;
     case OPCODES::SCR2DC: ProcessSCR2DC(code_gen); break;
     case OPCODES::SCRLW: code_gen->WriteTodo(md.GetEntityName(), "SCRLW"); break;
-    case OPCODES::SCR2DL: code_gen->WriteTodo(md.GetEntityName(), "SCR2DL"); break;
+    case OPCODES::SCR2DL: ProcessSCR2DL(code_gen); break;
     case OPCODES::VWOFT: ProcessVWOFT(code_gen); break;
     case OPCODES::FADE: ProcessFADE(code_gen); break;
     case OPCODES::FADEW: code_gen->WriteTodo(md.GetEntityName(), "FADEW"); break;
@@ -78,6 +78,13 @@ void FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
     );
 }
 
+void FieldCameraInstruction::ProcessSCRLC(CodeGenerator* code_gen){
+    std::string mode = "Background2D.NONE";
+    if (params_[3]->GetUnsigned() == 2) mode = "Background2D.LINEAR";
+    else if (params_[3]->GetUnsigned() == 3) mode = "Background2D.SMOOTH";
+    code_gen->AddOutputLine("background2d:scroll_to_player(" + mode + ", 0)");
+}
+
 void FieldCameraInstruction::ProcessSCR2D(CodeGenerator* code_gen){
     // kUpScaler.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
@@ -90,6 +97,28 @@ void FieldCameraInstruction::ProcessSCR2D(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("background2d:scroll_to_position(%1% * 3, %2% * 3, Background2D.NONE, 0)")
       % x % y
+    ).str());
+}
+
+void FieldCameraInstruction::ProcessSCRCC(CodeGenerator* code_gen){
+    code_gen->AddOutputLine("background2d:scroll_to_player(Background2D.NONE, 0)");
+}
+
+void FieldCameraInstruction::ProcessSCR2DL(CodeGenerator* code_gen){
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned()
+    );
+    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetSigned()
+    );
+    const auto& speed = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[6]->GetUnsigned(),
+      FieldCodeGenerator::ValueType::Float, 30.0f
+    );
+    code_gen->AddOutputLine((
+      boost::format("background2d:scroll_to_position(%1% * 3, %2% * 3, Background2D.LINEAR, %3%)")
+      % x % y % speed
     ).str());
 }
 

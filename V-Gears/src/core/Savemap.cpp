@@ -1292,8 +1292,8 @@ void Savemap::Read(std::string file_name){
                                 TiXmlNode* stat_node = char_node->FirstChild();
                                 while (stat_node != nullptr){
                                     if (
-                                      char_node->Type() == TiXmlNode::TINYXML_ELEMENT
-                                      && char_node->ValueStr() == "Stat"
+                                      stat_node->Type() == TiXmlNode::TINYXML_ELEMENT
+                                      && stat_node->ValueStr() == "Stat"
                                     ){
                                         std::string stat = "";
                                         int base = -1;
@@ -1526,6 +1526,37 @@ void Savemap::Read(std::string file_name){
                     }
                 }
                 character_node = character_node->NextSibling();
+            }
+        }
+        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "DataBanks"){
+            TiXmlNode* bank_node = node->FirstChild();
+            while (bank_node != nullptr){
+                if (
+                  bank_node->Type() == TiXmlNode::TINYXML_ELEMENT
+                  && bank_node->ValueStr() == "Bank"
+                ){
+                    int bank = -1;
+                    TiXmlElement* bank_elm = bank_node->ToElement();
+                    bank_elm->QueryIntAttribute("id", &bank);
+                    if (bank >= 0 && bank < BANK_COUNT){
+                        TiXmlNode* addr_node = bank_node->FirstChild();
+                        while (addr_node != nullptr){
+                            if (
+                                addr_node->Type() == TiXmlNode::TINYXML_ELEMENT
+                              && addr_node->ValueStr() == "Address"
+                            ){
+                                int addr = -1;
+                                int val = 0;
+                                TiXmlElement* addr_elm = addr_node->ToElement();
+                                addr_elm->QueryIntAttribute("address", &addr);
+                                addr_elm->QueryIntAttribute("value", &val);
+                                if (addr >= 0 && addr < BANK_ADDRESS_COUNT) data_[bank][addr] = val;
+                            }
+                            addr_node = addr_node->NextSibling();
+                        }
+                    }
+                }
+                bank_node = bank_node->NextSibling();
             }
         }
         node = node->NextSibling();

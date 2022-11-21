@@ -99,7 +99,7 @@ void FieldModelInstruction::ProcessInst(
         case OPCODES::MOVE: ProcessMOVE(code_gen, md.GetEntityName()); break;
         case OPCODES::CMOVE: code_gen->WriteTodo(md.GetEntityName(), "CMOVE"); break;
         case OPCODES::MOVA: code_gen->WriteTodo(md.GetEntityName(), "MOVA"); break;
-        case OPCODES::TURA: code_gen->WriteTodo(md.GetEntityName(), "TURA"); break;
+        case OPCODES::TURA: ProcessTURA(code_gen, md.GetEntityName(), eng); break;
         case OPCODES::ANIMW: code_gen->WriteTodo(md.GetEntityName(), "ANIMW"); break;
         case OPCODES::FMOVE: code_gen->WriteTodo(md.GetEntityName(), "FMOVE"); break;
         case OPCODES::ANIME2: code_gen->WriteTodo(md.GetEntityName(), "ANIME2"); break;
@@ -133,7 +133,7 @@ void FieldModelInstruction::ProcessInst(
             code_gen->AddOutputLine("self." + md.GetEntityName() + ":offset_sync()");
             break;
         case OPCODES::TALKR: code_gen->WriteTodo(md.GetEntityName(), "TALKR"); break;
-        case OPCODES::SLIDR: code_gen->WriteTodo(md.GetEntityName(), "SLIDR"); break;
+        case OPCODES::SLIDR: ProcessSLIDR(code_gen, md.GetEntityName()); break;
         case OPCODES::SOLID: ProcessSOLID(code_gen, md.GetEntityName()); break;
         case OPCODES::TLKR2: code_gen->WriteTodo(md.GetEntityName(), "TLKR2"); break;
         case OPCODES::SLDR2: code_gen->WriteTodo(md.GetEntityName(), "SLDR2"); break;
@@ -286,6 +286,28 @@ void FieldModelInstruction::ProcessMOVE(CodeGenerator* code_gen, const std::stri
       (boost::format("self.%1%:move_to_position(%2%, %3%)") % entity % x % y).str()
     );
     code_gen->AddOutputLine((boost::format("self.%1%:move_sync()") % entity).str());
+}
+
+void FieldModelInstruction::ProcessTURA(
+  CodeGenerator* code_gen, const std::string& entity, const FieldEngine& engine
+){
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto& dest_entity = engine.EntityByIndex(params_[0]->GetSigned());
+    std::string direction;
+    switch (params_[1]->GetUnsigned()){
+        case 0: direction = "Entity.CLOCKWISE"; break;
+        case 1: direction = "Entity.ANTICLOCKWISE"; break;
+        case 2: direction = "Entity.CLOSEST"; break;
+        // Default to closest:
+        default: direction = "Entity.CLOSEST"; break;
+    }
+    auto steps = params_[2]->GetUnsigned();
+    const float scaled_steps = static_cast<float>(steps) / 30.0f;
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:turn_to_entity(entity_manager:get_entity(\"%2%\"), %3%, %4%)")
+      % entity % dest_entity.GetName() % direction % scaled_steps
+    ).str());
+    code_gen->AddOutputLine((boost::format("self.%1%:turn_sync()") % entity).str());
 }
 
 void FieldModelInstruction::ProcessMSPED(CodeGenerator* code_gen, const std::string& entity){
@@ -488,6 +510,19 @@ void FieldModelInstruction::ProcessLADER(CodeGenerator* code_gen, const std::str
       ) % entity % x % y % z % keys % orientation % end_triangle % animation % speed
     ).str());
     code_gen->AddOutputLine((boost::format("self.%1%:linear_sync()") % entity).str());
+}
+
+void FieldModelInstruction::ProcessSLIDR(CodeGenerator* code_gen, const std::string& entity){
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->GetScaleFactor();
+    float radius = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetSigned(),
+      FieldCodeGenerator::ValueType::Float, scale
+    ));
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:set_solid_radius(%2%)")
+      % entity % radius
+    ).str());
 }
 
 void FieldModelInstruction::ProcessSOLID(CodeGenerator* code_gen, const std::string& entity){

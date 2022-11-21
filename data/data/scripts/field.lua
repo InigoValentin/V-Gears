@@ -8,8 +8,8 @@ export_character_names()
 load_field_map_request = function(map_name, point_name)
     if type(map_name) == "string" and map_name ~= "" then
 
-        System.MapChanger.map_name = map_name
-        System.MapChanger.point_name = point_name
+        System["MapChanger"].map_name = map_name
+        System["MapChanger"].point_name = point_name
         script:request(Script.SYSTEM, "MapChanger", "ffvii_field", 0)
     end
 end
@@ -236,9 +236,31 @@ play_map_music = function(id)
     end
 end
 
+--- Sets the map name
+--
+-- It's not set from a literal text, but from a dialog identifier.
+--
+-- @param text_id ID of the dialog text that holds the map name.
 set_map_name = function(text_id)
     dialog:set_map_name(text_id)
     System["MapChanger"].location_name = dialog:get_map_name()
+end
+
+--- Shows a choice dialog and stores the result in the selected bank address.
+--
+-- @param window_id ID of the window to show the dialog in.
+-- @param message_id ID of the text to show in the window.
+-- @param first First selectable line.
+-- @param last Last selectable line.
+-- @param bank Data bank to store the selected line in.
+-- @param address Addres of the bank at which to store the selected line in.
+
+dialog_ask = function(window_id, message_id, first, last, bank, address)
+    dialog:set_clickable(window_id, true)
+    dialog:set_cursor(window_id, first, last)
+    dialog:dialog_set_text(window_id, message_id)
+    dialog:dialog_wait_for_close(window_id)
+    Banks[bank][address] = dialog:get_cursor(window_id)
 end
 
 --- Utility to change fields and enter battles.

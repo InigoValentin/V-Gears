@@ -86,6 +86,15 @@ namespace VGears{
                     SpriteData* ptr = &it;
                     sprites.push_back(ptr);
                 }
+                std::sort(layers_[i].sprites.begin(), layers_[i].sprites.end(), SpriteSorter);
+            }
+        }
+    }
+
+    void BackgroundFile::SortSprites(){
+        for (size_t i(0); i < LAYER_COUNT; ++ i){
+            if (layers_[i].enabled){
+                std::sort(layers_[i].sprites.begin(), layers_[i].sprites.end(), SpriteSorter);
             }
         }
     }
@@ -250,7 +259,6 @@ namespace VGears{
                         color[data_index] = colour.getAsARGB();
                     }
                 }
-                
             }
             // Source in the texture atlas is where it's just copied to.
             sprite.src.x = dst_x;
@@ -260,6 +268,11 @@ namespace VGears{
         Ogre::Image *image(new Ogre::Image());
         image->loadRawData(stream, width, height, format);
         return image;
+    }
+
+    bool BackgroundFile::SpriteSorter(SpriteData sprite1, SpriteData sprite2){
+        if (sprite1.dst.y == sprite2.dst.y) return sprite1.dst.x < sprite2.dst.x;
+        else return sprite1.dst.y < sprite2.dst.y;
     }
 
 }

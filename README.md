@@ -19,8 +19,8 @@ Note that, while these are actual screenshots of V-Gears, none of the images, sp
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/cloud.png" alt="Cloud model" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/cloud.png "Cloud model")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/dialog.png" alt="dialog" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/dialog.png "Dialogs")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/animation.png" alt="animation" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/animation.png "Animations")|
 |**Climbing**|**Mid-jump!**|**Materia**|
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/climb.png" alt="Climbing" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/climb.png "Climbing")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/midjump.png" alt="Mid-jump" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/midjump.png "Mid-jump")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/materia.png" alt="Materia" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/materia.png "Materia")|
-|**Transparencies**|**Timers**||
-|[<img src="https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png" alt="Transparency" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png "TRansparency")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/timers.png" alt="Timers" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/timers.png "Timers")||
+|**Transparencies**|**Timers**|**Choices**|
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png" alt="Transparency" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png "Transparency")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/timers.png" alt="Timers" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/timers.png "Timers")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/choices.png" alt="Choices" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/choices.png "Choices")|
 
 ### Menus:
 |**Begin**|**Main**|**Name**|
@@ -62,7 +62,7 @@ If the question was "How deep into the game can I play?", then the answer is
 
 [<img src="https://v-gears.inigovalentin.com/img/screenshot/max_progress.png" alt="Max progress" width="450"/>](https://v-gears.inigovalentin.com/img/screenshot/max_progress.png "Max progress")
 
-Until there. Whitout cheats, and without using the developer console, the game hangs there.
+Until there. Whitout cheats, and without using the developer console, it's not possible to get to the next wagon. The dialogs start looping there.
 
 But don't worry! The engine is not fixed sequentially, or map by map. Once a fix is implememnted, it applies to all maps at once, anb big chunck of the game are unlocked after each fix.
 

@@ -674,6 +674,11 @@ void ScriptManager::InitBinds(){
             (void(Background2D::*)(Entity*)) &Background2D::ScriptAutoScrollToEntity
           )
           .def(
+            "scroll_to_player",
+            (void(Background2D::*)(const Background2D::SCROLL_TYPE, const unsigned int))
+              &Background2D::ScriptScrollToPlayer
+          )
+          .def(
             "scroll_to_position",
             (void(Background2D::*)(
               const float, const float, const Background2D::SCROLL_TYPE, const float

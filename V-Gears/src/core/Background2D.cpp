@@ -21,6 +21,7 @@
 #include <OgreTechnique.h>
 #include "core/Background2D.h"
 #include "core/CameraManager.h"
+#include "core/EntityManager.h"
 #include "core/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "core/Logger.h"
@@ -260,6 +261,19 @@ void Background2D::Clear(){
 void Background2D::ScriptAutoScrollToEntity(Entity* entity){scroll_entity_ = entity;}
 
 Entity* Background2D::GetAutoScrollEntity() const{return scroll_entity_;}
+
+void Background2D::ScriptScrollToPlayer(const SCROLL_TYPE type, const unsigned int seconds){
+    Entity* player = EntityManager::getSingleton().ScriptGetPlayerEntity();
+    if (player == nullptr) return;
+    Ogre::Vector2 position(player->GetPosition().x, player->GetPosition().y);
+    scroll_position_start_ = position_;
+    scroll_position_end_ = position;
+    scroll_type_ = type;
+    scroll_seconds_ = seconds;
+    scroll_current_seconds_ = 0;
+
+    return;
+}
 
 void Background2D::ScriptScrollToPosition(
   const float x, const float y, const SCROLL_TYPE type, const float seconds

@@ -349,7 +349,6 @@ int DialogsManager::Sync(const char* d_name){
         LOG_TRIVIAL("sync: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
         return 1;
     }
-
     ScriptId script = ScriptManager::getSingleton().GetCurrentScriptId();
     messages_[id]->sync.push_back(script);
     return -1;

@@ -115,6 +115,9 @@ load_game = function(slot)
     -- TODO: Countdown
     for p = 1, 3 do
         Party[p] = savemap_manager:get_slot_party_member(slot, p - 1)
+        if Party[p] == -1 then
+            Party[p] = nil
+        end
     end
     for i = 0, MAX_INVENTORY_SLOTS do
         Inventory[i] = {item = 0, quantity = 0}
