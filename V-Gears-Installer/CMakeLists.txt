@@ -1,8 +1,8 @@
 # Include directories.
 include_directories(
     ${VGears_INCLUDE_DIRS}
-    ${VGears_SOURCE_DIR}/V-Gears/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${VGears_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${ZLIB_INCLUDE_DIRS}
 )

@@ -18,7 +18,7 @@ set(VGears_VERSION__PATCH 1)
 set(VGears_VERSION ${VGears_VERSION__MAJOR}.${VGears_VERSION__MINOR}.${VGears_VERSION__PATCH})
 
 # Generate version header.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/Version.h) 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.h) 
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
     # CMake defaults to leaving CMAKE_BUILD_TYPE empty. This screws up
@@ -76,7 +76,7 @@ else()
     set(CMAKE_MODULE_PATH "${OGRE_CMAKE_MODULE_PATH};${CMAKE_MODULE_PATH}")
 endif()
 
-set(VGears_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+set(VGears_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
 message("VGears_SOURCE_DIR ${VGears_SOURCE_DIR}")
 
@@ -173,7 +173,7 @@ endif()
 
 set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${OGRE_Overlay_LIBRARIES})
 
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+#find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 if (Boost_LIBRARIES STREQUAL "")
     message(SEND_ERROR "Boost_LIBRARIES is not set")
@@ -181,7 +181,7 @@ endif()
 
 set(VGears_INCLUDE_DIRS
     ${VGears_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/V-Gears/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/
     ${OIS_INCLUDE_DIRS}
     ${OGRE_Overlay_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
@@ -189,7 +189,6 @@ set(VGears_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/luajit/src
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/luabind
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/luabind/luabind/detail
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/tinyxml
 )
 
 if (MSVC)
@@ -213,18 +212,18 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O0")
 
 add_definitions(-DTIXML_USE_STL)
 add_subdirectory(lib)
-add_subdirectory(V-Gears)
+add_subdirectory(src)
 
 if(VGears_BUILD_PLUGINS)
     add_subdirectory(PlugIns)
 endif()
 
 if(VGears_BUILD_UTILITIES)
-    add_subdirectory(V-Gears-Installer)
+    add_subdirectory(src/installer)
 endif()
 
 if(VGears_BUILD_TESTS)
-    add_subdirectory(Tests)
+    add_subdirectory(test)
 endif()
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/output)
