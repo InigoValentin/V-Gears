@@ -7,10 +7,8 @@
 *.sln
 *.filters
 *.lib
-*.cmake
 *.log
 **/ogre.cfg
-**/Makefile
 **/CMakeCache.txt
 build/
 output/share

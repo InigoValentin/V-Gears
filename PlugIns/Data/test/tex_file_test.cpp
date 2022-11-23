@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 #include <fstream>
 
-#include <OgreDataStream.h>
+#include <Ogre/OgreDataStream.h>
 
 #include "data/VGearsTexFile.h"
 

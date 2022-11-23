@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include <OgreRoot.h>
+#include <Ogre/OgreRoot.h>
 #include "VGearsDataPlugin.h"
 
 #ifndef VGEARS_STATIC_LIB

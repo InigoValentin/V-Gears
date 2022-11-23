@@ -1,15 +1,13 @@
 include_directories(
-    ${VGears_INCLUDE_DIRS}
     luabind
     luajit/src
     luabind/luabind
     luabind/luabind/detail
 )
 
-# LuaJIT has it's own configuration.
-add_subdirectory(luajit)
+add_subdirectory(luajit) # LuaJIT has it's own configuration.
 
-aux_source_directory(luabind/luabind LuaBind_header_FILES)
-aux_source_directory(luabind/luabind/details LuaBind_header_details_FILES)
-aux_source_directory(luabind/src LuaBind_src_FILES)
-add_library(LuaBind STATIC ${LuaBind_src_FILES} ${LuaBind_header_FILES} ${LuaBind_header_details_FILES})
+aux_source_directory(luabind/luabind LUABIND_HEADER_FILES)
+aux_source_directory(luabind/luabind/details LUABIND_HEADER_DETAILS_FILES)
+aux_source_directory(luabind/src LUABIND_SRC_FILES)
+add_library(libluabind STATIC ${LUABIND_SRC_FILES} ${LUABIND_HEADER_FILES} ${LUABIND_HEADER_DETAILS_FILES})

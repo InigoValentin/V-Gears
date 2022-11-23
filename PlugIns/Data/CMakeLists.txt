@@ -1,17 +1,17 @@
-set(V-Gears_SOURCE_DIR ../../V-Gears)
+set(V-Gears_SOURCE_DIR ../../src)
 
 # Define header and source files for the library.
 set(HEADER_FILES
-    ${V-Gears_SOURCE_DIR}/include/VGearsPrerequisites.h
-    ${V-Gears_SOURCE_DIR}/include/common/VGearsManualObject.h
-    ${V-Gears_SOURCE_DIR}/include/common/VGearsStringUtil.h
-    ${V-Gears_SOURCE_DIR}/include/common/TypeDefine.h
+    ${V-Gears_SOURCE_DIR}/VGearsPrerequisites.h
+    ${V-Gears_SOURCE_DIR}/common/VGearsManualObject.h
+    ${V-Gears_SOURCE_DIR}/common/VGearsStringUtil.h
+    ${V-Gears_SOURCE_DIR}/common/TypeDefine.h
     include/VGearsDataPlugin.h
 )
 set(SOURCE_FILES
-    ${V-Gears_SOURCE_DIR}/src/common/VGearsManualObject.cpp
-    ${V-Gears_SOURCE_DIR}/src/common/VGearsStringUtil.cpp
-    ${V-Gears_SOURCE_DIR}/src/common/TypeDefine.cpp
+    ${V-Gears_SOURCE_DIR}/common/VGearsManualObject.cpp
+    ${V-Gears_SOURCE_DIR}/common/VGearsStringUtil.cpp
+    ${V-Gears_SOURCE_DIR}/common/TypeDefine.cpp
     src/VGearsDataPlugin.cpp
     src/VGearsDataPluginDll.cpp
 )
@@ -20,7 +20,7 @@ include_directories(
     ${OIS_INCLUDE_DIRS}
     ${OGRE_INCLUDE_DIRS}
     ${OGRE_SAMPLES_INCLUDEPATH}
-    ${V-Gears_SOURCE_DIR}/include
+    ${V-Gears_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../../lib
 )

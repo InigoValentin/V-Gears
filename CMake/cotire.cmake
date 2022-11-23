@@ -4207,6 +4207,6 @@ else()
 			"Defaults to empty string."
 	)
 
-	message (STATUS "cotire ${COTIRE_CMAKE_MODULE_VERSION} loaded.")
+	#message (STATUS "cotire ${COTIRE_CMAKE_MODULE_VERSION} loaded.")
 
 endif()

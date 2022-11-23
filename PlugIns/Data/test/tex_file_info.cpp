@@ -19,7 +19,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
-#include <OgreDataStream.h>
+#include <Ogre/OgreDataStream.h>
 #include "data/VGearsTexFile.h"
 
 using std::back_inserter;

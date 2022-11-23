@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <OgrePlugin.h>
+#include <Ogre/OgrePlugin.h>
 
 #include "data/VGearsBackgroundFileManager.h"
 #include "data/VGearsPaletteFileManager.h"
