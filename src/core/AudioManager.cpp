@@ -289,7 +289,7 @@ void AudioManager::Player::Stop(){
     // Delete source
     alDeleteSources(1, &source_);
     // Cleanup
-    ov_clear(&vorbis_file_);
+    //ov_clear(&vorbis_file_);
     stream_finished_ = false;
     file_ = "";
 }

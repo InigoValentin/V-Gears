@@ -14,7 +14,10 @@ end
 -- @param force If false, exisiting game data will not be overwritten if control keys are different.
 save_game = function(slot, force)
     savemap_manager:set_control_key(ControlKey)
-    savemap_manager:set_window_colours(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12) -- TODO Actual data
+    savemap_manager:set_window_colour(0, 10, 10, 50) -- TODO Actual data
+    savemap_manager:set_window_colour(1, 15, 15, 75) -- TODO Actual data
+    savemap_manager:set_window_colour(2, 20, 20, 100) -- TODO Actual data
+    savemap_manager:set_window_colour(3, 15, 15, 75) -- TODO Actual data
     savemap_manager:set_money(Inventory.money)
     savemap_manager:set_game_time(123456) -- TODO Actual data
     savemap_manager:set_countdown_time(0) -- TODO Actual data
@@ -50,7 +53,8 @@ save_game = function(slot, force)
     for i = 0, 11 do
         if Characters[i] ~= nil and Characters[i].char_id ~= nil then
             local c = Characters[i]
-            savemap_manager:set_character_info(i, c.char_id, c.name, c.enabled, c.locked, c.level, c.kills, c.back_row, c.exp, c.exp_to_next, c.limit.current, c.limit.bar, c.weapon.id, c.armor.id, c.accessory or -1)
+            savemap_manager:set_character_info_1(i, c.char_id, c.name, c.enabled, c.locked, c.level, c.kills, c.back_row)
+            savemap_manager:set_character_info_2(i, c.exp, c.exp_to_next, c.limit.current, c.limit.bar, c.weapon.id, c.armor.id, c.accessory or -1)
             savemap_manager:set_character_stat(i, 0, c.stats.str.base, c.stats.str.bonus)
             savemap_manager:set_character_stat(i, 1, c.stats.vit.base, c.stats.vit.bonus)
             savemap_manager:set_character_stat(i, 2, c.stats.mag.base, c.stats.mag.bonus)

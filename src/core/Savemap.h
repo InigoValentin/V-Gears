@@ -75,26 +75,17 @@ class Savemap{
         void SetControlKey(const std::string control);
 
         /**
-         * Sets the window colours in the current savemap.
+         * Sets a window corner colour in the savemap.
          *
-         * @param[in] t_l_r Top-left corner, red component.
-         * @param[in] t_l_r Top-left corner, green component.
-         * @param[in] t_l_r Top-left corner, blue component.
-         * @param[in] t_r_r Top-right corner, red component.
-         * @param[in] t_r_r Top-right corner, green component.
-         * @param[in] t_r_r Top-right corner, blue component.
-         * @param[in] b_r_r Bottom-right corner, red component.
-         * @param[in] b_r_r Bottom-right corner, green component.
-         * @param[in] b_r_r Bottom-right corner, blue component.
-         * @param[in] b_l_r Bottom-left corner, red component.
-         * @param[in] b_l_r Bottom-left corner, green component.
-         * @param[in] b_l_r Bottom-left corner, blue component.
+         * @param[in] corner The window corner. 0: Top left, 1: Top right, 2: Bottom right, 3:
+         * bottom left.
+         * @param[in] red Red component.
+         * @param[in] green Green component.
+         * @param[in] blue Blue component.
          */
-        void SetWindowColours(
-          const unsigned int t_l_r, const unsigned int t_l_g, const unsigned int t_l_b,
-          const unsigned int t_r_r, const unsigned int t_r_g, const unsigned int t_r_b,
-          const unsigned int b_r_r, const unsigned int b_r_g, const unsigned int b_r_b,
-          const unsigned int b_l_r, const unsigned int b_l_g, const unsigned int b_l_b
+        void SetWindowColour(
+          const unsigned int corner,
+          const unsigned int red, const unsigned int green, const unsigned int blue
         );
 
         /**
@@ -220,6 +211,10 @@ class Savemap{
         /**
          * Sets a character basic information in the savemap.
          *
+         * This must be called immediately before {@see SetCharacterInfo2}. In fact, the only
+         * reason they are separated functions if for the limitation of 10 parameters per function
+         * imposed by Luabind (imposed, in turn, by Boost).
+         *
          * @param[in] id Character ID.
          * @param[in] char_id Character identifier.
          * @param[in] name Character name.
@@ -228,6 +223,20 @@ class Savemap{
          * @param[in] level Character level.
          * @param[in] kills Total kills.
          * @param[in] back_row If the character is in the back row.
+         */
+        void SetCharacterInfo1(
+          const unsigned int id, const int char_id, const std::string name, const bool enabled,
+          const bool locked, const unsigned int level, const unsigned int kills, const bool back_row
+        );
+
+        /**
+         * Sets a character basic information in the savemap.
+         *
+         * This must be called immediately after {@see SetCharacterInfo1}. In fact, the only
+         * reason they are separated functions if for the limitation of 10 parameters per function
+         * imposed by Luabind (imposed, in turn, by Boost).
+         *
+         * @param[in] id Character ID.
          * @param[in] exp Total experience.
          * @param[in] exp_to_next Experience to reach next level.
          * @param[in] limit_level Currently selected limit level.
@@ -236,11 +245,8 @@ class Savemap{
          * @param[in] armor Equipped armor ID.
          * @param[in] accessory Equipped accessory ID. -1 if none equipped.
          */
-        void SetCharacterInfo(
-          const unsigned int id, const int char_id, const std::string name,
-          const bool enabled, const bool locked,
-          const unsigned int level, const unsigned int kills,
-          const bool back_row, const unsigned int exp, const unsigned int exp_to_next,
+        void SetCharacterInfo2(
+          const unsigned int id, const unsigned int exp, const unsigned int exp_to_next,
           const unsigned int limit_level, const unsigned int limit_bar,
           const unsigned int weapon, const unsigned int armor, const int accessory
         );

@@ -108,16 +108,12 @@ void SavemapManager::SetControlKey(const char* control){
     current_savemap_->SetControlKey(std::string(control));
 }
 
-void SavemapManager::SetWindowColours(
-  const unsigned int t_l_r, const unsigned int t_l_g, const unsigned int t_l_b,
-  const unsigned int t_r_r, const unsigned int t_r_g, const unsigned int t_r_b,
-  const unsigned int b_r_r, const unsigned int b_r_g, const unsigned int b_r_b,
-  const unsigned int b_l_r, const unsigned int b_l_g, const unsigned int b_l_b
+void SavemapManager::SetWindowColour(
+  const unsigned int corner,
+  const unsigned int red, const unsigned int green, const unsigned int blue
 ){
     if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
-    current_savemap_->SetWindowColours(
-      t_l_r, t_l_g, t_l_b, t_r_r, t_r_g, t_r_b, b_r_r, b_r_g, b_r_b, b_l_r, b_l_g, b_l_b
-    );
+    current_savemap_->SetWindowColour(corner, red, green, blue);
 }
 
 void SavemapManager::SetMoney(const unsigned int money){
@@ -188,18 +184,24 @@ void SavemapManager::SetSetting(const unsigned int key, const unsigned int value
     current_savemap_->SetSetting(key, value);
 }
 
-void SavemapManager::SetCharacterInfo(
-  const unsigned int id, const int char_id, const char* name,
-  const bool enabled, const bool locked,
-  const unsigned int level, const unsigned int kills,
-  const bool back_row, const unsigned int exp, const unsigned int exp_to_next,
+void SavemapManager::SetCharacterInfo1(
+  const unsigned int id, const int char_id, const char* name, const bool enabled, const bool locked,
+  const unsigned int level, const unsigned int kills, const bool back_row
+){
+    if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
+    current_savemap_->SetCharacterInfo1(
+      id, char_id, std::string(name), enabled, locked, level, kills, back_row
+    );
+}
+
+void SavemapManager::SetCharacterInfo2(
+  const unsigned int id,  const unsigned int exp, const unsigned int exp_to_next,
   const unsigned int limit_level, const unsigned int limit_bar,
   const unsigned int weapon, const unsigned int armor, const int accessory
 ){
     if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
-    current_savemap_->SetCharacterInfo(
-      id, char_id, std::string(name), enabled, locked, level, kills, back_row, exp, exp_to_next,
-      limit_level, limit_bar, weapon, armor, accessory
+    current_savemap_->SetCharacterInfo2(
+      id, exp, exp_to_next, limit_level, limit_bar, weapon, armor, accessory
     );
 }
 

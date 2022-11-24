@@ -171,7 +171,7 @@ void ScriptManager::InitBinds(){
             (void(Entity::*)(const char*)) &Entity::ScriptSetDefaultAnimation
           )
           .def("animation_sync", (int(Entity::*)()) &Entity::ScriptAnimationSync, luabind::yield)
-          .enum_("constants")[
+          /*.enum_("constants")[
              luabind::value("NONE", AT_NONE),
              luabind::value("LINEAR", AT_LINEAR),
              luabind::value("SMOOTH", AT_SMOOTH),
@@ -182,7 +182,7 @@ void ScriptManager::InitBinds(){
              luabind::value("DOWN_TO_UP", LM_DOWN_TO_UP),
              luabind::value("LEFT_TO_RIGHT", LM_LEFT_TO_RIGHT),
              luabind::value("RIGHT_TO_LEFT", LM_RIGHT_TO_LEFT)
-           ]
+           ]*/
     ];
 
     // Field commands.
@@ -308,13 +308,11 @@ void ScriptManager::InitBinds(){
             "set_control_key", (void(SavemapManager::*)(const char*)) &SavemapManager::SetControlKey
           )
           .def(
-            "set_window_colours",
+            "set_window_colour",
             (void(SavemapManager::*)(
-              const unsigned int, const unsigned int, const unsigned int,
-              const unsigned int, const unsigned int, const unsigned int,
-              const unsigned int, const unsigned int, const unsigned int,
+              const unsigned int,
               const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::SetWindowColours
+            )) &SavemapManager::SetWindowColour
           )
           .def("set_money", (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetMoney)
           .def(
@@ -371,14 +369,19 @@ void ScriptManager::InitBinds(){
               &SavemapManager::SetSetting
           )
           .def(
-            "set_character_info",
+            "set_character_info_1",
             (void(SavemapManager::*)(
               const unsigned int, const int, const char*, const bool, const bool, const unsigned int,
-              const unsigned int, const bool, const unsigned int, const unsigned int,
-              const unsigned int, const unsigned int, const unsigned int, const unsigned int,
-              const int
-            )) &SavemapManager::SetCharacterInfo
+              const unsigned int, const bool
+            )) &SavemapManager::SetCharacterInfo1
           )
+          .def(
+              "set_character_info_2",
+              (void(SavemapManager::*)(
+                const unsigned int, const unsigned int, const unsigned int, const unsigned int,
+                const unsigned int, const unsigned int, const unsigned int, const int
+              )) &SavemapManager::SetCharacterInfo2
+            )
           .def(
             "set_character_stat",
             (void(SavemapManager::*)(

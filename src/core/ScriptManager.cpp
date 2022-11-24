@@ -23,6 +23,8 @@
 #include "core/Utilites.h"
 #include "core/XmlScriptsFile.h"
 #include "LuaIncludes.h"
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 ConfigVar cv_debug_script(
   "debug_script", "Debug script flags. 0x01 - System, 0x02 - Entity, 0x04 - Ui.", "0"
@@ -34,6 +36,26 @@ ConfigVar cv_debug_script(
 template<>ScriptManager *Ogre::Singleton<ScriptManager>::msSingleton = nullptr;
 
 Ogre::String script_entity_type[] = {"SYSTEM", "ENTITY", "UI"};
+
+void lua_custom_open(lua_State* L){
+
+    bool is_main_thread = lua_pushthread(L) == 1;
+    lua_pop(L, 1);
+
+    if (!is_main_thread)
+    {
+        std::cout << "CUSTOM NO MAIN\n";
+    }
+    std::cout << "CUSTOM MAIN\n";
+
+
+}
+
+extern "C" int lua_init(lua_State* L){
+    using namespace luabind;
+
+    open(L);
+}
 
 /**
  * Compares the priority of two scripts.
@@ -48,18 +70,32 @@ bool priority_queue_compare(QueueScript a, QueueScript b){return a.priority < b.
 ScriptManager::ScriptManager():
   system_table_name_("System"), entity_table_name_("EntityContainer"), ui_table_name_("UiContainer")
 {
-    lua_state_ = lua_open();
-    luabind::open(lua_state_);
+    if (lua_state_ == nullptr) std::cout << "lua_state WAS nullptr\n";
+    else std::cout << "lua_state WAS NOT nullptr\n";
+    lua_state_ = luaL_newstate();//lua_open();
+    std::cout << "LUA THREAD " << lua_pushthread(lua_state_) << "\n";
+    std::cout << "LUA MAIN THREAD " << std::to_string(lua_pushthread(lua_state_) == 1) << "\n";
+    if (lua_state_ == nullptr) std::cout << "lua_state IS nullptr\n";
+    else std::cout << "lua_state IS NOT nullptr\n";
     luaopen_base(lua_state_);
     luaopen_string(lua_state_);
     luaopen_table(lua_state_);
     luaopen_math(lua_state_);
+    lua_custom_open(lua_state_);
+    luabind::open(lua_state_);
+    //lua_init(lua_state_);
     luaopen_io(lua_state_);
+    std::cout << "ScriptManager: 1\n";
+    std::cout << "ScriptManager: 2\n";
     InitBinds();
     InitCmd();
+    std::cout << "ScriptManager: 3\n";
     RunFile("system/system.lua");
+    std::cout << "ScriptManager: 4\n";
     XmlScriptsFile scripts("./data/scripts.xml");
+    std::cout << "ScriptManager: 5\n";
     scripts.LoadScripts();
+    std::cout << "ScriptManager: End\n";
 }
 
 ScriptManager::~ScriptManager(){lua_close(lua_state_);}

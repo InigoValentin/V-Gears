@@ -140,40 +140,16 @@ void Savemap::SetControlKey(const std::string control){
     empty_ = false;
 }
 
-/**
- * Sets the window colours in the current savemap.
- *
- * @param[in] t_l_r Top-left corner, red component.
- * @param[in] t_l_r Top-left corner, green component.
- * @param[in] t_l_r Top-left corner, blue component.
- * @param[in] t_r_r Top-right corner, red component.
- * @param[in] t_r_r Top-right corner, green component.
- * @param[in] t_r_r Top-right corner, blue component.
- * @param[in] b_r_r Bottom-right corner, red component.
- * @param[in] b_r_r Bottom-right corner, green component.
- * @param[in] b_r_r Bottom-right corner, blue component.
- * @param[in] b_l_r Bottom-left corner, red component.
- * @param[in] b_l_r Bottom-left corner, green component.
- * @param[in] b_l_r Bottom-left corner, blue component.
- */
-void Savemap::SetWindowColours(
-  const unsigned int t_l_r, const unsigned int t_l_g, const unsigned int t_l_b,
-  const unsigned int t_r_r, const unsigned int t_r_g, const unsigned int t_r_b,
-  const unsigned int b_r_r, const unsigned int b_r_g, const unsigned int b_r_b,
-  const unsigned int b_l_r, const unsigned int b_l_g, const unsigned int b_l_b
+
+void Savemap::SetWindowColour(
+  const unsigned int corner,
+  const unsigned int red, const unsigned int green, const unsigned int blue
 ){
-    window_colours_[0][0] = std::min(MAX_COLOUR, t_l_r);
-    window_colours_[0][1] = std::min(MAX_COLOUR, t_l_g);
-    window_colours_[0][2] = std::min(MAX_COLOUR, t_l_b);
-    window_colours_[1][0] = std::min(MAX_COLOUR, t_r_r);
-    window_colours_[1][1] = std::min(MAX_COLOUR, t_r_g);
-    window_colours_[1][2] = std::min(MAX_COLOUR, t_r_b);
-    window_colours_[2][0] = std::min(MAX_COLOUR, b_r_r);
-    window_colours_[2][1] = std::min(MAX_COLOUR, b_r_g);
-    window_colours_[2][2] = std::min(MAX_COLOUR, b_r_b);
-    window_colours_[3][0] = std::min(MAX_COLOUR, b_l_r);
-    window_colours_[3][1] = std::min(MAX_COLOUR, b_l_g);
-    window_colours_[3][2] = std::min(MAX_COLOUR, b_l_b);
+    if (corner <= 3){
+        window_colours_[corner][0] = std::min(MAX_COLOUR, red);
+        window_colours_[corner][1] = std::min(MAX_COLOUR, green);
+        window_colours_[corner][2] = std::min(MAX_COLOUR, blue);
+    }
 }
 
 std::string Savemap::GetControlKey() const {return control_;}
@@ -258,13 +234,9 @@ void Savemap::SetSetting(const unsigned int key, const unsigned int value){
     // TODO : Implements when settings are working.
 }
 
-void Savemap::SetCharacterInfo(
-  const unsigned int id, const int char_id, const std::string name,
-  const bool enabled, const bool locked,
-  const unsigned int level, const unsigned int kills,
-  const bool back_row, const unsigned int exp, const unsigned int exp_to_next,
-  const unsigned int limit_level, const unsigned int limit_bar,
-  const unsigned int weapon, const unsigned int armor, const int accessory
+void Savemap::SetCharacterInfo1(
+  const unsigned int id, const int char_id, const std::string name, const bool enabled,
+  const bool locked, const unsigned int level, const unsigned int kills, const bool back_row
 ){
     if (id < MAX_CHARACTERS){
         characters_[id].id = id;
@@ -275,6 +247,15 @@ void Savemap::SetCharacterInfo(
         characters_[id].level = level;
         characters_[id].kills = kills;
         characters_[id].back_row = back_row;
+    }
+}
+
+void Savemap::SetCharacterInfo2(
+  const unsigned int id, const unsigned int exp, const unsigned int exp_to_next,
+  const unsigned int limit_level, const unsigned int limit_bar,
+  const unsigned int weapon, const unsigned int armor, const int accessory
+){
+    if (id < MAX_CHARACTERS){
         characters_[id].exp = exp;
         characters_[id].exp_to_next = exp_to_next;
         characters_[id].limit_level = std::min(limit_level, MAX_LIMIT_LEVELS);

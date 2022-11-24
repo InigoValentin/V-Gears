@@ -30,12 +30,27 @@
 #undef check
 #endif
 
-#include <luabind/luabind.hpp>
-#include <luabind/yield_policy.hpp>
+#define LUABIND_USE_CXX11
+#define LUABIND_DYNAMIC_LINK
+
+// Max number of arguments in functions bind to Lua.
+// Some of them have quite many, so keep it high.
+//#ifndef LUABIND_MAX_ARITY
+//    #define LUABIND_MAX_ARITY 16
+//#define BOOST_PARAMETER_MAX_ARITY 24
+//#else
+//    #undef LUABIND_MAX_ARITY
+//    #define LUABIND_MAX_ARITY 32
+//#endif
 
 extern "C"{
     #include "lua.h"
-    #include <lualib.h>
-    #include <lauxlib.h>
+    #include "lualib.h"
+    #include "lauxlib.h"
 }
 
+#include <luabind/luabind.hpp>
+#include <luabind/operator.hpp>
+#include <luabind/function.hpp>
+#include <luabind/class.hpp>
+#include <luabind/yield_policy.hpp>

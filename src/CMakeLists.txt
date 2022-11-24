@@ -309,14 +309,25 @@ set(SOURCE_FILES
     FF7Common.cpp
 )
 
+# Maximum number of parameters in functions bind to Lua.
+# Some of them have quite many of them, so keep it high.
+#add_definitions(-DLUABIND_MAX_ARITY=32)
+
 # Find LibOIS. TODO: Find it.
 set(ois_lib "/usr/lib/x86_64-linux-gnu/libOIS.so")
+
+set(luabind_lib "/usr/lib/x86_64-linux-gnu/libluabind.so")
+#set(luabind_lib "/usr/lib/x86_64-linux-gnu/liblua5.1.so")
+set(luajit_lib "/usr/lib/x86_64-linux-gnu/libluajit-5.1.a")
+set(lua_lib "/usr/lib/x86_64-linux-gnu/liblua5.2.so")
 
 # TODO: Find OIS
 include_directories(
     ${VGears_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     /usr/include/OIS/
+    /usr/include/luabind/
+    /usr/include/luajit-2.1/
 )
 
 # Compiler options
@@ -388,10 +399,13 @@ endif()
 
 target_link_libraries(V-Gears 
     ${VGears_LIBRARIES}
-    LuaBind
-    liblua
+    #${lua_lib}
+    luabind
+    #lua
     tinyxml
     ${ois_lib}
+    ${luabind_lib}
+    ${luajit_lib}
 )
 
 target_link_libraries(v-gears 
@@ -399,6 +413,7 @@ target_link_libraries(v-gears
     ${Boost_LIBRARIES}
     v-gears-data
     ${ois_lib}
+    ${luabind_lib}
 )
 
 target_link_libraries(v-gears-data
