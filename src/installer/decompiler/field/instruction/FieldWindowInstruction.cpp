@@ -33,7 +33,7 @@ void FieldWindowInstruction::ProcessInst(
     switch (opcode_){
         case OPCODES::TUTOR: code_gen->WriteTodo(md.GetEntityName(), "TUTOR"); break;
         case OPCODES::WCLS: code_gen->WriteTodo(md.GetEntityName(), "WCLS"); break;
-        case OPCODES::WSIZW: code_gen->WriteTodo(md.GetEntityName(), "WSIZW"); break;
+        case OPCODES::WSIZW: ProcessWSIZW(code_gen); break;
         case OPCODES::WSPCL: ProcessWSPCL(code_gen); break;
         case OPCODES::WNUMB: code_gen->WriteTodo(md.GetEntityName(), "WNUMB"); break;
         case OPCODES::STTIM: ProcessSTTIM(code_gen); break;
@@ -57,6 +57,19 @@ void FieldWindowInstruction::ProcessInst(
               md.GetEntityName(), address_, opcode_
             ));
     }
+}
+
+void FieldWindowInstruction::ProcessWSIZW(CodeGenerator* code_gen){
+    // Do the same as window.
+    auto windowId = params_[0]->GetUnsigned();
+    auto x = params_[1]->GetUnsigned();
+    auto y = params_[2]->GetUnsigned();
+    auto width = params_[3]->GetUnsigned();
+    auto height = params_[4]->GetUnsigned();
+    code_gen->AddOutputLine((
+      boost::format("dialog:dialog_open(\"%1%\", %2%, %3%, %4%, %5%) -- WSIZW")
+      % windowId % x % y % width % height
+    ).str());
 }
 
 void FieldWindowInstruction::ProcessWSPCL(CodeGenerator* code_gen){

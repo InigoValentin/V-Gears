@@ -79,4 +79,23 @@ class FieldWalkmeshInstruction : public KernelCallInstruction{
          * @param[in] entity The entity name.
          */
         void ProcessLINE(CodeGenerator* code_gen, const std::string& entity);
+
+        /**
+         * Processes a LINON opcode.
+         *
+         * Opcode: 0xD1
+         * Short name: LINON
+         * Long name: Line Switch
+         *
+         * Memory layout (2 bytes):
+         * |0xD1|S|
+         *
+         * const UByte S: Switch on/off (1/0, respectively).
+         *
+         * Turns on or off the LINE that was registered by this entity in the current field. If set
+         * to off, the line will not be triggered by the character walking through them.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         */
+        void ProcessLINON(CodeGenerator* code_gen);
 };

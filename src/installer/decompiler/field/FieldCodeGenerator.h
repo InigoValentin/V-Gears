@@ -159,6 +159,7 @@ class FunctionMetaData{
          * The character ID.
          */
         int character_id_ = -1;
+
 };
 
 /**

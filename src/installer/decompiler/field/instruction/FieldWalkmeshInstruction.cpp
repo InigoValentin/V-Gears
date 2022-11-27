@@ -40,7 +40,7 @@ void FieldWalkmeshInstruction::ProcessInst(
                 % FieldCodeGenerator::FormatBool(params_[1]->GetUnsigned())).str());
             break;
         case OPCODES::LINE: ProcessLINE(code_gen, md.GetEntityName()); break;
-        case OPCODES::LINON: code_gen->WriteTodo(md.GetEntityName(), "LINON"); break;
+        case OPCODES::LINON: ProcessLINON(code_gen); break;
         case OPCODES::SLINE: code_gen->WriteTodo(md.GetEntityName(), "SLINE"); break;
         default:
             code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
@@ -75,4 +75,9 @@ void FieldWalkmeshInstruction::ProcessLINE(CodeGenerator* code_gen, const std::s
       "-- LINE (" + std::to_string(xa) + ", " + std::to_string(ya) + ", " + std::to_string(za)
       + ")-(" + std::to_string(xb) + ", " +std::to_string(yb) + ", " + std::to_string(zb) + ")"
     );
+}
+
+void FieldWalkmeshInstruction::ProcessLINON(CodeGenerator* code_gen){
+    std::string on = ((params_[0]->GetSigned() == 1) ? "true" : "false");
+    code_gen->AddOutputLine("self.on = " + on);
 }

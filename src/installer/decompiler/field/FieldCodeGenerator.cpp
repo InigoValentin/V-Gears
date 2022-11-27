@@ -240,6 +240,15 @@ void FieldCodeGenerator::OnStartFunction(const Function& func){
         AddOutputLine("entity_manager:set_player_entity(\"Cloud\")");
         AddOutputLine("background2d:autoscroll_to_entity(entity_manager:get_entity(\"Cloud\"))\n");
     }
+    // For lines, exit if they are off.
+    if (
+      func.name == "on_approach" || func.name == "on_cross"
+      || func.name == "on_near" || func.name == "on_leave"
+    ){
+        AddOutputLine("if self.on ~= nill and self.on == false then", false, true);
+        AddOutputLine("return 0");
+        AddOutputLine("end", true, false);
+    }
     AddOutputLine("--[[");
     for (const auto& inst : insts_){
         if (inst->GetAddress() >= func.start_addr && inst->GetAddress() <= func.end_addr){

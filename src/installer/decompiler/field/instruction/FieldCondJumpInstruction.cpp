@@ -69,6 +69,7 @@ void FieldCondJumpInstruction::ProcessInst(
         case 3: op = "<"; break;
         case 4: op = ">="; break;
         case 5: op = "<="; break;
+        // TODO: FIX those, use the new binary functions.
         case 6: op = "&"; break;
         case 7: op = "^"; break;
         case 8: op = "|"; break;

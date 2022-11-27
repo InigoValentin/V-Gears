@@ -604,6 +604,15 @@ bool ScriptManager::ScriptRequest(
         if (start_sync == true)
             script.paused_script_start = GetCurrentScriptId();
         if (end_sync == true) script.paused_script_end = GetCurrentScriptId();
+
+        // If the script is already running, don't queue it.
+        for (int i = 0; i < script_entity->queue.size(); i ++){
+             if (script_entity->queue[i].function == function){
+                 script_entity->resort = true;
+                 return true;
+            }
+        }
+
         script_entity->queue.push_back(script);
         script_entity->resort = true;
         return true;

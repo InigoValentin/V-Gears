@@ -518,7 +518,7 @@ bool EntityManager::SetEntityOnWalkmesh(Entity* entity){
         }
     }
     // If the coordinates doesn't match any triangle, exit.
-    if (triangles.size() == 0){
+    if (triangles.size() == 0 && entity == player_entity_){
         LOG_ERROR(
           "Can't find any triangle to place entity '" + entity->GetName() + "' on walkmesh."
         );
@@ -534,7 +534,7 @@ bool EntityManager::SetEntityOnWalkmesh(Entity* entity){
             closest_z_distance = std::abs(pos_z - triangles[i].second);
         }
     }
-    if (closest_z_triangle == -1){
+    if (closest_z_triangle == -1 && entity == player_entity_){
         LOG_ERROR(
           "Can't find nearby triangle to place entity '" + entity->GetName() + "' on walkmesh."
         );
@@ -596,6 +596,11 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
         entity->SetRotation(Ogre::Degree(angle));
     }
     float solid = (entity->IsSolid() == true) ? entity->GetSolidRadius() : 0.01f;
+
+    // For not playable entities, be a bit more lenient with solid collisions.
+    // Don't use the solid radius.
+    if (entity != player_entity_) solid /= 10;
+
     // Get ending point.
     end_point.z = start_point.z;
     for (

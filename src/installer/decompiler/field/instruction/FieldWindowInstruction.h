@@ -157,6 +157,32 @@ class FieldWindowInstruction : public KernelCallInstruction{
         void ProcessWCLSE(CodeGenerator* code_gen);
 
         /**
+         * Processes a WSIZW opcode.
+         *
+         * Opcode: 0x2F
+         * Short name: WSIZW
+         * Long name: Window Resize
+         *
+         * Memory layout (6 bytes).
+         * |0x2F|I|X|Y|W|H|
+         *
+         * Arguments:
+         *
+         * - const UByte I: WINDOW ID to resize.
+         * - const UShort X: X-coordinate of the window.
+         * - const UShort Y: Y-coordinate of the window.
+         * - const UShort W: Width of the window.
+         * - const UShort H: Height of the window.
+         *
+         * Resizes and/or repositions the window, after it has been created with the WINDOW opcode.
+         * On the next MESSAGE or ASK, the window will be positioned and sized with the new
+         * properties.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         */
+        void ProcessWSIZW(CodeGenerator* code_gen);
+
+        /**
          * Processes a WSPCL opcode.
          *
          * Opcode: 0x36

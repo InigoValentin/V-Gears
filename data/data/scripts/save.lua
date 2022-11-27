@@ -259,6 +259,7 @@ load_game = function(slot)
         end
 
     end
+    export_character_names()
     -- TODO: Settings
     -- TODO: Location
     -- TODO: Update character stats
