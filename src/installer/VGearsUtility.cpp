@@ -13,7 +13,9 @@
  * GNU General Public License for more details.
  */
 
+#include <boost/algorithm/string.hpp>
 #include "VGearsUtility.h"
+#include "Characters.h"
 
 namespace VGears{
 
@@ -57,6 +59,14 @@ namespace VGears{
         delete frame_listener_;
         frame_listener_ = NULL;
         Application::destroyComponents();
+    }
+
+    std::string Utility::DecodeString(const u8* bytes, const unsigned int size){
+        std::string decoded("");
+        for (int i = 0; i < size; i ++)
+            if (bytes[i] > 0x00 && bytes[i] < 0XFF) decoded += ENGLISH_CHARS[bytes[i]];
+        boost::algorithm::trim(decoded);
+        return decoded;
     }
 
 }

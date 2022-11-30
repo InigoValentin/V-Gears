@@ -40,7 +40,7 @@ class Savemap{
          *
          * Copies a savemap into another, including control data.
          *
-         * @param[in] The savemap to copy from.
+         * @param[in] to_copy The savemap to copy from.
          */
         void operator = (const Savemap &to_copy);
 
@@ -78,17 +78,17 @@ class Savemap{
          * Sets the window colours in the current savemap.
          *
          * @param[in] t_l_r Top-left corner, red component.
-         * @param[in] t_l_r Top-left corner, green component.
-         * @param[in] t_l_r Top-left corner, blue component.
+         * @param[in] t_l_g Top-left corner, green component.
+         * @param[in] t_l_b Top-left corner, blue component.
          * @param[in] t_r_r Top-right corner, red component.
-         * @param[in] t_r_r Top-right corner, green component.
-         * @param[in] t_r_r Top-right corner, blue component.
+         * @param[in] t_r_g Top-right corner, green component.
+         * @param[in] t_r_b Top-right corner, blue component.
          * @param[in] b_r_r Bottom-right corner, red component.
-         * @param[in] b_r_r Bottom-right corner, green component.
-         * @param[in] b_r_r Bottom-right corner, blue component.
+         * @param[in] b_r_g Bottom-right corner, green component.
+         * @param[in] b_r_b Bottom-right corner, blue component.
          * @param[in] b_l_r Bottom-left corner, red component.
-         * @param[in] b_l_r Bottom-left corner, green component.
-         * @param[in] b_l_r Bottom-left corner, blue component.
+         * @param[in] b_l_g Bottom-left corner, green component.
+         * @param[in] b_l_b Bottom-left corner, blue component.
          */
         void SetWindowColours(
           const unsigned int t_l_r, const unsigned int t_l_g, const unsigned int t_l_b,
@@ -201,7 +201,7 @@ class Savemap{
          * @param[in] triangle Walkmesh triangle ID.
          * @param[in] angle Facing direction.
          * @param[in] field Field map ID, or empty for the world map.
-         * @param[in] Name of the location to show in the save slot.
+         * @param[in] name Name of the location to show in the save slot.
          */
         void SetLocation(
           const float x, const float y, const float z,
@@ -345,7 +345,7 @@ class Savemap{
          * Retrieves a colour component from a window corner.
          *
          * @param[in] corner The window corner. See {@see Corner}.
-         * @param[in] corner The color component to get. See {@see Colour}.
+         * @param[in] comp The color component to get. See {@see Colour}.
          * @return The color component of the specified corner of windows. If an invalid slot is
          * specified, or if the slot is empty, or if an invalid corner or color are requested, 0.
          */
@@ -549,7 +549,6 @@ class Savemap{
         /**
          * Retrieves the char ID of a character.
          *
-         * @param[in] slot The slot to read from.
          * @param[in] id The character ID.
          * @return The char ID of the character. If an invalid id is passed, or if the character
          * doesn't have a char ID, -1.
@@ -559,7 +558,6 @@ class Savemap{
         /**
          * Retrieves the name of a character.
          *
-         * @param[in] slot The slot to read from.
          * @param[in] id The character ID.
          * @return The name of the character. If an invalid id is passed, an empty string.
          */

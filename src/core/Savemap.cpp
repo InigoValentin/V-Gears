@@ -140,22 +140,6 @@ void Savemap::SetControlKey(const std::string control){
     empty_ = false;
 }
 
-/**
- * Sets the window colours in the current savemap.
- *
- * @param[in] t_l_r Top-left corner, red component.
- * @param[in] t_l_r Top-left corner, green component.
- * @param[in] t_l_r Top-left corner, blue component.
- * @param[in] t_r_r Top-right corner, red component.
- * @param[in] t_r_r Top-right corner, green component.
- * @param[in] t_r_r Top-right corner, blue component.
- * @param[in] b_r_r Bottom-right corner, red component.
- * @param[in] b_r_r Bottom-right corner, green component.
- * @param[in] b_r_r Bottom-right corner, blue component.
- * @param[in] b_l_r Bottom-left corner, red component.
- * @param[in] b_l_r Bottom-left corner, green component.
- * @param[in] b_l_r Bottom-left corner, blue component.
- */
 void Savemap::SetWindowColours(
   const unsigned int t_l_r, const unsigned int t_l_g, const unsigned int t_l_b,
   const unsigned int t_r_r, const unsigned int t_r_g, const unsigned int t_r_b,

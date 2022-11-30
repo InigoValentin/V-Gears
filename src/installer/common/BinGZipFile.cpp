@@ -14,6 +14,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include <zlib.h>
 #include "installer/common/Logger.h"
 #include "installer/common/BinGZipFile.h"
@@ -136,6 +137,7 @@ void BinGZipFile::InnerGetNumberOfFiles(){
     file_count_ = 0;
     for (u32 pointer = 0; pointer < buffer_size_;){
         u16 temp = GetU16LE(pointer);
+        if (temp == 0xFFFF) temp = 0; // Hack to deal with scene.bin
         pointer += 6;
         // Condition for GZip header.
         if (
@@ -147,9 +149,10 @@ void BinGZipFile::InnerGetNumberOfFiles(){
     }
 
     if (file_count_ == 0){
-        LOGGER->Log(
+        std::cout << "Warning: " + file_name_ + " isn't archive. number_of_files == 0\n";
+        /*LOGGER->Log(
           "Warning: " + file_name_ + " isn't archive. number_of_files == 0"
-        );
+        );*/
     }
 }
 

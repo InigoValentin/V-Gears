@@ -183,6 +183,7 @@ void MainWindow::on_btn_data_run_clicked(){
           "data/sound/audio.dat",
           "data/music/music.idx",
           "data/midi/midi.lgp",
+          "data/battle/scene.bin",
           "ff7.exe"
         };
         // Ensure required files are in the input dir

@@ -47,6 +47,17 @@ namespace VGears{
              */
             virtual Ogre::Camera* GetCamera(void);
 
+            /**
+             * Decodes a FF7 encoded string.
+             *
+             * It doesn't work for compressed strings.
+             *
+             * @param[in] bytes Raw bytes to read from.
+             * @param[in] size Number of bytes in the bytes parameter.
+             * @return The decoded string.
+             */
+            static std::string DecodeString(const u8* bytes, const unsigned int size);
+
         protected:
 
             /**

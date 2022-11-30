@@ -7,6 +7,7 @@ find_package(Qt5 COMPONENTS Core REQUIRED)
 # Source files for the installer.
 set(INSTALLER_SOURCE_FILES
     main.cpp
+    BattleDataInstaller.cpp
     DataInstaller.cpp
     FieldDataInstaller.cpp
     FieldTextWriter.cpp
@@ -27,6 +28,7 @@ set(INSTALLER_SOURCE_FILES
     common/Surface.cpp
     common/TimToVram.cpp
     common/Vram.cpp
+    data/BattleSceneFile.cpp
     decompiler/CodeGenerator.cpp
     decompiler/ControlFlow.cpp
     decompiler/DecompilerException.cpp

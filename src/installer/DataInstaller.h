@@ -22,6 +22,7 @@
 #include "FieldDataInstaller.h"
 #include "KernelDataInstaller.h"
 #include "MediaDataInstaller.h"
+#include "BattleDataInstaller.h"
 #include "ModelsAndAnimationsDb.h"
 
 /**
@@ -163,6 +164,31 @@ class DataInstaller{
              * Initialize data for installation.
              */
             INITIALIZE,
+
+            /**
+             * Initializes the battle installer.
+             */
+            BATTLE_INIT,
+
+            /**
+             * Extracts battle scenes.
+             */
+            BATTLE_SCENES,
+
+            /**
+             * Writes attack data.
+             */
+            BATTLE_WRITE_ATTACKS,
+
+            /**
+             * Writes enemy data.
+             */
+            BATTLE_WRITE_ENEMIES,
+
+            /**
+             * Writes enemy formation data.
+             */
+            BATTLE_WRITE_FORMATIONS,
 
             /**
              * Parses item and materia prices from ff7.exe.
@@ -394,6 +420,11 @@ class DataInstaller{
          * The installer for media files.
          */
         std::unique_ptr<MediaDataInstaller> media_installer_;
+
+        /**
+         * The installer for battle data.
+         */
+        std::unique_ptr<BattleDataInstaller> battle_installer_;
 
         /**
          * Function used to print text to the log output, line by line.

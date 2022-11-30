@@ -64,8 +64,8 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
         /**
          * Copies the current savemap to a slot and writes the file.
          *
-         * @param slot[in] Slot at which to save.
-         * @param force[in] If false, it will check if the control data is the save (i.e. if its
+         * @param[in] slot Slot at which to save.
+         * @param[in] force If false, it will check if the control data is the save (i.e. if its
          * trying to overwrite a savemap of the same playthrought), and if they do not match, it
          * will do nothing and return false. If true, it will not be checked.
          * @return True if the data was saved, false ifforce was false and control data strings did
@@ -76,8 +76,9 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
         /**
          * Saves a savemap to a slot and writes the file.
          *
-         * @param slot[in] Slot at which to save.
-         * @param force[in] If false, it will check if the control data is the save (i.e. if its
+         * @param[in] savemap The savemap to save.
+         * @param[in] slot Slot at which to save.
+         * @param[in] force If false, it will check if the control data is the save (i.e. if its
          * trying to overwrite a savemap of the same playthrought), and if they do not match, it
          * will do nothing and return false. If true, it will not be checked.
          * @return True if the data was saved, false ifforce was false and control data strings did
@@ -112,17 +113,17 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
          * Sets the window colours in the current savemap.
          *
          * @param[in] t_l_r Top-left corner, red component.
-         * @param[in] t_l_r Top-left corner, green component.
-         * @param[in] t_l_r Top-left corner, blue component.
+         * @param[in] t_l_g Top-left corner, green component.
+         * @param[in] t_l_b Top-left corner, blue component.
          * @param[in] t_r_r Top-right corner, red component.
-         * @param[in] t_r_r Top-right corner, green component.
-         * @param[in] t_r_r Top-right corner, blue component.
+         * @param[in] t_r_g Top-right corner, green component.
+         * @param[in] t_r_b Top-right corner, blue component.
          * @param[in] b_r_r Bottom-right corner, red component.
-         * @param[in] b_r_r Bottom-right corner, green component.
-         * @param[in] b_r_r Bottom-right corner, blue component.
+         * @param[in] b_r_g Bottom-right corner, green component.
+         * @param[in] b_r_b Bottom-right corner, blue component.
          * @param[in] b_l_r Bottom-left corner, red component.
-         * @param[in] b_l_r Bottom-left corner, green component.
-         * @param[in] b_l_r Bottom-left corner, blue component.
+         * @param[in] b_l_g Bottom-left corner, green component.
+         * @param[in] b_l_b Bottom-left corner, blue component.
          */
         void SetWindowColours(
           const unsigned int t_l_r, const unsigned int t_l_g, const unsigned int t_l_b,
@@ -235,7 +236,7 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
          * @param[in] triangle Walkmesh triangle ID.
          * @param[in] angle Facing direction.
          * @param[in] field Field map ID, or empty for the world map.
-         * @param[in] Name of the location to show in the save slot.
+         * @param[in] name Name of the location to show in the save slot.
          */
         void SetLocation(
           const float x, const float y, const float z,
@@ -374,7 +375,7 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
          *
          * @param[in] slot The slot to read from.
          * @param[in] corner The window corner. See {@see Savemap::Corner}.
-         * @param[in] corner The color component to get. See {@see Savemap::Colour}.
+         * @param[in] comp The color component to get. See {@see Savemap::Colour}.
          * @return The color component of the specified corner of windows. If an invalid slot is
          * specified, or if the slot is empty, or if an invalid corner or color are requested, 0.
          */

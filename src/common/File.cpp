@@ -57,7 +57,7 @@ File::File(const File* file){
     file->GetFileBuffer(buffer_, 0, buffer_size_);
 }
 
-File::~File(){free(buffer_);}
+File::~File(){/*free(buffer_);*/}
 
 void File::WriteFile(const Ogre::String& file) const{
     FileSystem::WriteNewFile(file, buffer_, buffer_size_);

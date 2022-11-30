@@ -39,6 +39,7 @@ DataInstaller::DataInstaller(
     // Assign weights.
     for (int i = IDLE; i < STATE_COUNT; i ++) step_weight_[i] = 1;
     step_weight_[IDLE] = 0;
+    step_weight_[BATTLE_SCENES] = 1;
     step_weight_[MEDIA_IMAGES] = 3;
     step_weight_[MEDIA_SOUNDS] = 8;
     step_weight_[MEDIA_MUSICS] = 9;
@@ -69,6 +70,39 @@ float DataInstaller::Progress(){
               options_.no_ffmpeg, options_.no_timidity
             );
             field_installer_ = std::make_unique<FieldDataInstaller>(input_dir_, output_dir_);
+            std::cout << "CREATE BATTLE INSTALLER: " << (input_dir_ + "data/battle/scene.bin") << "\n";
+            battle_installer_ = std::make_unique<BattleDataInstaller>(input_dir_, output_dir_);
+            installation_state_ = BATTLE_INIT;
+            return CalcProgress();
+        case BATTLE_INIT:
+            write_output_line_("Parsing battle scenes...", 2, true);
+            substeps_ = battle_installer_->Initialize();
+            cur_substep_ = 0;
+            installation_state_ = BATTLE_SCENES;
+            return CalcProgress();
+        case BATTLE_SCENES:
+            cur_substep_ = battle_installer_->ProcessScene();
+            if (cur_substep_ >= substeps_) installation_state_ = BATTLE_WRITE_ATTACKS;
+            return CalcProgress();
+        case BATTLE_WRITE_ATTACKS:
+            write_output_line_("Saving attacks...", 2, true);
+            cur_substep_ = 0;
+            substeps_ = 0;
+            battle_installer_->WriteAttacks();
+            installation_state_ = BATTLE_WRITE_ENEMIES;
+            return CalcProgress();
+        case BATTLE_WRITE_ENEMIES:
+            write_output_line_("Saving enemies...", 2, true);
+            cur_substep_ = 0;
+            substeps_ = 0;
+            battle_installer_->WriteEnemies();
+            installation_state_ = BATTLE_WRITE_FORMATIONS;
+            return CalcProgress();
+        case BATTLE_WRITE_FORMATIONS:
+            write_output_line_("Saving enemy formations...", 2, true);
+            cur_substep_ = 0;
+            substeps_ = 0;
+            battle_installer_->WriteFormations();
             installation_state_ = KERNEL_PRICES;
             return CalcProgress();
         case KERNEL_PRICES:
@@ -318,6 +352,9 @@ const float DataInstaller::CalcProgress(){
 void DataInstaller::CreateDirectories(){
     CreateDir("temp");
     CreateDir("game");
+    CreateDir("game/enemy");
+    CreateDir("game/attack");
+    CreateDir("game/formation");
     CreateDir("images/icons");
     CreateDir("images/other");
     CreateDir("images/characters");
