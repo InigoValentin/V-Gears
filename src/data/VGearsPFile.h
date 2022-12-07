@@ -29,11 +29,10 @@ namespace VGears{
     /**
      * Handles P files.
      *
-     * P files are binary files containing data which form 3D model. The files
-     * specify model's vertices, polygons, colors, texture coordinates and
-     * model sub-groups. The files do not specify references to the texture
-     * files, animations, model skeleton or anything else. P-files are used as
-     * parts of field models, battle models, battle locations on PC version of
+     * P files are binary files containing data which form 3D model. The files specify model's
+     * vertices, polygons, colors, texture coordinates and model sub-groups. The files do not
+     * specify references to the texture files, animations, model skeleton or anything else.
+     * P-files are used as parts of field models, battle models, battle locations on PC version of
      * FF7.
      */
     class PFile : public Ogre::Resource{
@@ -43,25 +42,20 @@ namespace VGears{
             /**
              * Constructor.
              *
-             * @param[in] creator Pointer to the ResourceManager that is
-             * creating this resource.
+             * @param[in] creator Pointer to the ResourceManager that is creating this resource.
              * @param[in] name The unique name of the resource.
              * @param[in] handle @todo Understand and document.
-             * @param[in] group The name of the resource group to which this
-             * resource belong.
-             * @param[in] is_manual True if the resource is manually loaded,
-             * false otherwise.
-             * @param[in] loader Pointer to a ManualResourceLoader
-             * implementation which will be called when the Resource wishes to
-             * load (should be supplied if is_manual is set to true). It can be
-             * null, but the Resource will never be able to reload if anything
-             * ever causes it to unload. Therefore provision of a proper
-             * ManualResourceLoader instance is strongly recommended.
+             * @param[in] group The name of the resource group to which this resource belong.
+             * @param[in] is_manual True if the resource is manually loaded, false otherwise.
+             * @param[in] loader Pointer to a ManualResourceLoader implementation which will be
+             * called when the Resource wishes to load (should be supplied if is_manual is set to
+             * true). It can be null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper ManualResourceLoader
+             * instance is strongly recommended.
              */
             PFile(
-              Ogre::ResourceManager* creator, const String &name,
-              Ogre::ResourceHandle handle, const String& group,
-              bool is_manual = false,
+              Ogre::ResourceManager* creator, const String &name, Ogre::ResourceHandle handle,
+              const String& group, bool is_manual = false,
               Ogre::ManualResourceLoader* loader = nullptr
             );
 
@@ -80,20 +74,18 @@ namespace VGears{
             /**
              * Indicates if the poligons definitions are valid.
              *
-             * @return True if all the poligon definitions are valid, false
-             * otherwise.
+             * @return True if all the poligon definitions are valid, false otherwise.
              */
             virtual bool IsPolygonDefinitionListValid();
 
             /**
              * Adds a resource group.
              *
-             * A resource group includes a bone, a mesh and a graphical
-             * resource.
+             * A resource group includes a bone, a mesh and a graphical resource.
              *
              * @param[in] mesh The mesh to add to the group.
-             * @param[in] bone_name The bone in the skeleton to which to add
-             * the group. The bone must be in a skeleton assigned to MESH.
+             * @param[in] bone_name The bone in the skeleton to which to add the group. The bone
+             * must be in a skeleton assigned to MESH.
              * @param[in] rsd File with the resource to add to the group.
              */
             virtual void AddGroups(
@@ -275,66 +267,65 @@ namespace VGears{
             typedef std::vector<BBoxEntry> BBoxList;
 
             /**
+             * The type of resource.
+             */
+            static const String RESOURCE_TYPE;
+
+            /**
              * Retrieves the vertices in the file.
              *
              * @return The vertices in the file.
              */
-            virtual VertexList& GetVertices(){return vertices_;}
+            virtual VertexList& GetVertices();
 
             /**
              * Retrieves the normals in the file.
              *
              * @return The normals in the file.
              */
-            virtual NormalList& GetNormals(){return normals_;}
+            virtual NormalList& GetNormals();
 
             /**
              * Retrieves unknown data from the file.
              *
              * @return Unknown data.
              */
-            virtual Unkown1List& GetUnknown1(){return unknown_1_;}
+            virtual Unkown1List& GetUnknown1();
 
             /**
              * Retrieves the texture coordinates in the file.
              *
              * @return The texture coordinates in the file.
              */
-            virtual TextureCoordinateList& GetTextureCoordinates(){
-                return texture_coordinates_;
-            }
+            virtual TextureCoordinateList& GetTextureCoordinates();
 
             /**
              * Retrieves the vertex colurs in the file.
              *
              * @return The vertex colurs in the file.
              */
-            virtual VertexColorList& GetVertexColors(){return vertex_colours_;}
+            virtual VertexColorList& GetVertexColors();
 
             /**
              * Retrieves the polygon colours in the file.
              *
              * @return The polygon colours in the file.
              */
-            virtual PolygonColorList& GetPolygonColors(){
-                return polygon_colours_;
-            }
+            virtual PolygonColorList& GetPolygonColors();
 
             /**
              * Retrieves the edges in the file.
              *
              * @return The edgesvertices in the file.
              */
-            virtual EdgeList& GetEdges(){return edges_;}
+            virtual EdgeList& GetEdges();
 
             /**
              * Retrieves the polygon definitions in the file.
              *
              * @return The polygon definitions in the file.
              */
-            virtual PolygonDefinitionList& GetPolygonDefinitions(){
-                return polygon_definitions_;
-            }
+            virtual PolygonDefinitionList& GetPolygonDefinitions();
 
             /**
              * Retrieves the groups in the file.
@@ -343,16 +334,14 @@ namespace VGears{
              *
              * @return The groups in the file.
              */
-            virtual GroupList& GetGroups(){return groups_;}
+            virtual GroupList& GetGroups();
 
             /**
              * Retrieves the bounding boxes in the file.
              *
              * @return The vertices in the file.
              */
-            virtual BBoxList& GetBBoxes(){return bounding_boxes_;}
-
-            static const String RESOURCE_TYPE;
+            virtual BBoxList& GetBBoxes();
 
         protected:
             /**
@@ -376,8 +365,7 @@ namespace VGears{
             /**
              * Add a group to the file.
              *
-             * A resource group includes a bone, a mesh and a graphical
-             * resource.
+             * A resource group includes a bone, a mesh and a graphical resource.
              *
              * @param[in] group The group to add to the file.
              * @param[in,out] mo The object to add to the group.

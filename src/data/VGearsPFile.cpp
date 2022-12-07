@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include <OgreBone.h>
 #include <OgreLogManager.h>
 #include <OgreStringConverter.h>
@@ -28,9 +29,8 @@ namespace VGears{
     const Ogre::Quaternion PFile::STATIC_ROTATION(PFile::CreateStaticRotation());
 
     PFile::PFile(
-      Ogre::ResourceManager *creator, const String &name,
-      Ogre::ResourceHandle handle, const String &group, bool is_manual,
-      Ogre::ManualResourceLoader *loader
+      Ogre::ResourceManager *creator, const String &name, Ogre::ResourceHandle handle,
+      const String &group, bool is_manual, Ogre::ManualResourceLoader *loader
     ) : Ogre::Resource(creator, name, handle, group, is_manual, loader)
     {createParamDictionary(RESOURCE_TYPE);}
 
@@ -39,9 +39,7 @@ namespace VGears{
     void PFile::loadImpl(){
         PFileSerializer serializer;
         Ogre::DataStreamPtr stream(
-          Ogre::ResourceGroupManager::getSingleton().openResource(
-            mName, mGroup, true, this
-          )
+          Ogre::ResourceGroupManager::getSingleton().openResource(mName, mGroup, true, this)
         );
         serializer.ImportPFile(stream, this);
     }
@@ -58,6 +56,30 @@ namespace VGears{
         groups_.clear();
         bounding_boxes_.clear();
     }
+
+    PFile::VertexList& PFile::GetVertices(){return vertices_;}
+
+    PFile::NormalList& PFile::GetNormals(){return normals_;}
+
+    PFile::Unkown1List& PFile::GetUnknown1(){return unknown_1_;}
+
+    PFile::TextureCoordinateList& PFile::GetTextureCoordinates(){
+        return texture_coordinates_;
+    }
+
+    PFile::VertexColorList& PFile::GetVertexColors(){return vertex_colours_;}
+
+    PFile::PolygonColorList& PFile::GetPolygonColors(){return polygon_colours_;}
+
+    PFile::EdgeList& PFile::GetEdges(){return edges_;}
+
+    PFile::PolygonDefinitionList& PFile::GetPolygonDefinitions(){
+        return polygon_definitions_;
+    }
+
+    PFile::GroupList& PFile::GetGroups(){return groups_;}
+
+    PFile::BBoxList& PFile::GetBBoxes(){return bounding_boxes_;}
 
     size_t PFile::calculateSize() const{
         return
@@ -84,21 +106,18 @@ namespace VGears{
             const PolygonDefinition& def(polygon_definitions_[p]);
             for (int i(3); i --;){
                 if (def.vertex[i] >= vertex_count){
-                    log << "Error: index to vertex is out of Bounds "
-                      << " polygon_definitions_[" << p << "]"
-                      << ".vertex[" << i << "]: " << def.vertex[i];
+                    log << "Error: index to vertex is out of Bounds: polygon_definitions_[" << p
+                      << "].vertex[" << i << "]: " << def.vertex[i];
                     return false;
                 }
                 if (def.normal[i] >= normal_count){
-                    log << "Error: index to normal is out of Bounds "
-                      << " polygon_definitions_[" << p << "]"
-                      << ".normal[" << i << "]: " << def.normal[i];
+                    log << "Error: index to normal is out of Bounds: polygon_definitions_[" << p
+                      << "].normal[" << i << "]: " << def.normal[i];
                     return false;
                 }
                 if (def.edge[i] >= edge_count){
-                    log << "Error: index to edge is out of Bounds "
-                      << " polygon_definitions_[" << p << "]"
-                      << ".edge[" << i << "]: " << def.edge[i];
+                    log << "Error: index to edge is out of Bounds: polygon_definitions_[" << p
+                      << "].edge[" << i << "]: " << def.edge[i];
                     return false;
                 }
             }
@@ -106,9 +125,7 @@ namespace VGears{
         return true;
     }
 
-    void PFile::AddGroups(
-      Ogre::Mesh *mesh, const String &bone_name, const RSDFilePtr &rsd
-    ) const{
+    void PFile::AddGroups(Ogre::Mesh *mesh, const String &bone_name, const RSDFilePtr &rsd) const{
         const Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
         const String material_base_name(rsd->GetMaterialBaseName());
         String rsd_base;
@@ -116,13 +133,9 @@ namespace VGears{
         ManualObject mo(mesh);
         for (size_t g(0); g < groups_.size(); ++ g){
             const String sub_name(
-              bone_name + "/" + rsd_base + "/"
-              + Ogre::StringConverter::toString(g)
+              bone_name + "/" + rsd_base + "/" + Ogre::StringConverter::toString(g)
             );
-            AddGroup(
-              groups_[g], mo, sub_name, material_base_name,
-              skeleton->getBone(bone_name)
-            );
+            AddGroup(groups_[g], mo, sub_name, material_base_name, skeleton->getBone(bone_name));
         }
     }
 
@@ -142,7 +155,9 @@ namespace VGears{
     ) const{
         size_t material_index(0);
         if (group.has_texture) material_index = group.texture_index + 1;
-        String material_name(material_base_name + "/" + Ogre::StringConverter::toString(material_index));
+        String material_name(
+          material_base_name + "/" + Ogre::StringConverter::toString(material_index)
+        );
         const uint16 bone_handle(bone->getHandle());
         const Ogre::Vector3 bone_position(GetPosition(bone));
         size_t index(0);
@@ -155,16 +170,12 @@ namespace VGears{
             for (int i(3); i --;){
                 uint32 v(group.vertex_start_index + polygon.vertex[i]);
                 uint32 n(0 + polygon.normal[i]);
-                uint32 t(
-                  group.texture_coordinate_start_index + polygon.vertex[i]
-                );
+                uint32 t(group.texture_coordinate_start_index + polygon.vertex[i]);
                 Ogre::Vector3 pos(vertices_[v]);
-                mo.position(
-                  (STATIC_ROTATION * (pos / HRCFile::DOWN_SCALER))
-                  + bone_position
-                );
+                mo.position((STATIC_ROTATION * (pos / HRCFile::DOWN_SCALER)) + bone_position);
                 mo.colour(vertex_colours_[v]);
-                mo.normal(STATIC_ROTATION * normals_[n]);
+                if (n < normals_.size()) mo.normal(STATIC_ROTATION * normals_[n]);
+                else mo.normal(STATIC_ROTATION * Ogre::Vector3(1.0f, 1.0f, 1.0f));
                 if (group.has_texture) mo.textureCoord(texture_coordinates_[t]);
                 mo.bone(index, bone_handle);
                 mo.index(index++);

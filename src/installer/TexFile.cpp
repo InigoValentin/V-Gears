@@ -17,12 +17,25 @@
 #include <iostream>
 #include <OgreImage.h>
 #include <OgreColourValue.h>
-#include "common/File.h"
 #include "TexFile.h"
 
 TexFile::TexFile(std::string path){
     File file(path);
+    Read(file);
+}
+
+TexFile::TexFile(File file){
+    Read(file);
+}
+
+void TexFile::Read(File file){
+    file.SetOffset(0);
     version_ = file.readU32LE();
+    if (version_ != 0x00000001){
+        std::cout << "[WARNING] Tried to read an invalid TEX file to png. Version ID: "
+          << version_ << std::endl;
+        return;
+    }
     unknown_0_ = file.readU32LE();
     colour_key_ = file.readU32LE();
     unknown_1_ = file.readU32LE();
@@ -83,6 +96,8 @@ TexFile::TexFile(std::string path){
     unknown_9_ = file.readU32LE();
     if (has_palette_ == 0){
         // Non palleted images.
+        // Skip unused pallete data.
+        for (int c = 0; c < palette_size_; c ++) file.readU32LE();
         // Read 32 byte colours in format BGRA.
         for (int p = 0; p < width_ * height_; p ++){
             float b = file.readU8() / 255.0f;
@@ -95,11 +110,11 @@ TexFile::TexFile(std::string path){
     }
     else {
         // Palleted_images.
-
+        palette_count_ = palette_size_ / palette_colour_count_;
         // Read palette data.
         for (int c = 0; c < palette_count_; c ++){
             std::vector<Ogre::ColourValue> palette_colours;
-            for (int p = 0; p < colours_per_palette_; p ++){
+            for (int p = 0; p < palette_colour_count_; p ++){
                 float b = file.readU8() / 255.0f;
                 float g = file.readU8() / 255.0f;
                 float r = file.readU8() / 255.0f;
@@ -110,8 +125,7 @@ TexFile::TexFile(std::string path){
             palettes_.push_back(palette_colours);
         }
         // Read bytes as references to a palette colour.
-        for (int p = 0; p < width_ * height_; p ++)
-            pixel_ref_.push_back(file.readU8());
+        for (int p = 0; p < width_ * height_; p ++) pixel_ref_.push_back(file.readU8());
     }
 }
 
@@ -121,6 +135,12 @@ void TexFile::SavePng(
   std::string file_name, unsigned int x, unsigned int y, unsigned int w, unsigned int h,
   unsigned int palette
 ){
+    if (version_ != 0x00000001){
+        std::cout
+          << "[WARNING] Tried to convert an invalid TEX file to png. Version ID: "
+          << version_ << std::endl;
+        return;
+    }
     // TODO: Warn if wrong palette index.
     Ogre::Image* image = new Ogre::Image(Ogre::PF_R8G8B8A8_UINT, w, h);
     int target_x = 0;
@@ -139,10 +159,19 @@ void TexFile::SavePng(
                 a = pixel_colour_.at(i).a;
             }
             else{
-                r = palettes_.at(palette).at(pixel_ref_.at(i)).r;
-                g = palettes_.at(palette).at(pixel_ref_.at(i)).g;
-                b = palettes_.at(palette).at(pixel_ref_.at(i)).b;
-                a = palettes_.at(palette).at(pixel_ref_.at(i)).a;
+                if (palettes_.at(palette).size() <= pixel_ref_.at(i)){
+                    // If invalid index, use alpha
+                    r = 0;
+                    g = 0;
+                    b = 0;
+                    a = 0;
+                }
+                else{
+                    r = palettes_.at(palette).at(pixel_ref_.at(i)).r;
+                    g = palettes_.at(palette).at(pixel_ref_.at(i)).g;
+                    b = palettes_.at(palette).at(pixel_ref_.at(i)).b;
+                    a = palettes_.at(palette).at(pixel_ref_.at(i)).a;
+                }
             }
             image->setColourAt(Ogre::ColourValue(r, g, b, a), target_x, target_y, 0);
             target_x ++;
@@ -163,6 +192,12 @@ void TexFile::SavePng(
   std::string file_name, unsigned int x1, unsigned int x2, unsigned int y1, unsigned int y2,
   unsigned int w1, unsigned int w2, unsigned int h, unsigned int palette
 ){
+    if (version_ != 0x00000001){
+        std::cout
+          << "[WARNING] Tried to convert an invalid TEX file to png. Version ID: "
+          << version_ << std::endl;
+        return;
+    }
     // TODO: Warn if wrong palette index.
     Ogre::Image* image = new Ogre::Image(Ogre::PF_R8G8B8A8_UINT, w1 + w2, h);
     int target_x = 0;

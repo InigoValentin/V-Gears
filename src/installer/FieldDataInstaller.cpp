@@ -219,8 +219,8 @@ int FieldDataInstaller::CollectSpawnAndScaleFactorsInit(Ogre::ResourceGroupManag
     flevel_file_list_ = res_mgr->listResourceNames("FFVIIFields", "*");
     // Load the map list field.
     VGears::MapListFilePtr map_list = VGears::MapListFileManager::GetSingleton().load(
-        "maplist", "FFVIIFields"
-      ).staticCast<VGears::MapListFile>();
+      "maplist", "FFVIIFields"
+    ).staticCast<VGears::MapListFile>();
     map_list_ = map_list->GetMapList();
     return flevel_file_list_->size();
 }
@@ -258,7 +258,6 @@ void FieldDataInstaller::Convert(int field_index){
         // TODO: DEBUG: Only test fields
         if (IsTestField(resource_name) && !WillCrash(resource_name)){
             //write_output_line_("Converting field " + resource_name);
-            std::cout << " - Converting field: " << resource_name << std::endl;
             CreateDir(FIELD_MAPS_DIR + "/" + resource_name);
             VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton().load(
                 resource_name, "FFVIIFields"
@@ -301,7 +300,6 @@ void FieldDataInstaller::WriteEnd(){
 }
 
 std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){
-
     std::vector<std::string> models;
 
     // Open char_lgp as a lgp archive
@@ -324,7 +322,9 @@ std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){
         out.close();
         //field_model_file_list_->push_back(f.file_name);
     }
-    for (auto it = used_models_and_anims_.map.begin(); it != used_models_and_anims_.map.end(); it ++){
+    for (
+      auto it = used_models_and_anims_.map.begin(); it != used_models_and_anims_.map.end(); it ++
+    ){
         models.push_back(it->first);
     }
     return models;
@@ -351,16 +351,13 @@ void FieldDataInstaller::ConvertModels(std::string model_name){
     }
     catch (const Ogre::Exception& ex){
         write_output_line_(
-          "[ERROR] Ogre exception converting model "
-          + model->first + ": " + ex.what()
+          "[ERROR] Ogre exception converting model " + model->first + ": " + ex.what()
         );
         std::cerr << "[ERROR] Ogre exception converting model "
           << model->first <<": " << ex.what() << std::endl;
     }
     catch (const std::exception& ex){
-        write_output_line_(
-          "[ERROR] Exception converting model " + model->first + ": " + ex.what()
-        );
+        write_output_line_("[ERROR] Exception converting model " + model->first + ": " + ex.what());
         std::cerr << "[ERROR] Exception converting model "
           << model->first << ": " << ex.what() << std::endl;
     }
@@ -440,8 +437,6 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
                 }
             }
             if (std::count(materials_.begin(), materials_.end(), sub_mesh->getMaterialName()) == 0){
-                //std::cout << "[MATERIAL] Writting material "
-                // << sub_mesh->getMaterialName() << std::endl;
                 mat_ser.queueForExport(mat);
                 materials_.push_back(sub_mesh->getMaterialName());
             }

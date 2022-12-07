@@ -54,7 +54,6 @@
  */
 int main(int argc, char *argv[]){
     try{
-        std::cout << "V-Gears Init" << std::endl;
         VGears::Application app(argc, argv);
         if (!app.initOgre()) return 0;
         Ogre::Root *root(app.getRoot());
@@ -72,9 +71,7 @@ int main(int argc, char *argv[]){
         // TODO: Why is this used twice?
         scene_manager->setAmbientLight(Ogre::ColourValue(1, 1, 1));
         scene_manager->setAmbientLight(Ogre::ColourValue(0.5, 0.5, 0.5));
-        Ogre::Light *directionalLight(
-          scene_manager->createLight("directionalLight")
-        );
+        Ogre::Light *directionalLight(scene_manager->createLight("directionalLight"));
         directionalLight->setType(Ogre::Light::LT_DIRECTIONAL);
         directionalLight->setDiffuseColour(Ogre::ColourValue(0.5, 0.5, 0.5));
         directionalLight->setSpecularColour(Ogre::ColourValue(0.0, 0.0, 0.0));

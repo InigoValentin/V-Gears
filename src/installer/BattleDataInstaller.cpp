@@ -17,9 +17,17 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <zlib.h>
 #include <tinyxml.h>
+#include <boost/filesystem.hpp>
+#include <OgreMesh.h>
 #include "BattleDataInstaller.h"
+#include "TexFile.h"
+#include "data/VGearsHRCFileManager.h"
+#include "data/VGearsAFileManager.h"
+#include "common/VGearsStringUtil.h"
+#include "common/FinalFantasy7/FF7NameLookup.h"
 
 BattleDataInstaller::BattleDataInstaller(const std::string input_dir, const std::string output_dir):
   input_dir_(input_dir), output_dir_(output_dir),
@@ -28,10 +36,12 @@ BattleDataInstaller::BattleDataInstaller(const std::string input_dir, const std:
 
 BattleDataInstaller::~BattleDataInstaller(){}
 
-unsigned int BattleDataInstaller::Initialize(){
+unsigned int BattleDataInstaller::InitializeScenes(){
     next_scene_ = 0;
     scenes_.clear();
     enemies_.clear();
+    attacks_.clear();
+    // Get all scenes from scene.bin.
     for (int i = 0; i < 32; i ++){
         File scene_bin_block(&scene_bin_, i * 0x2000, 0x2000);
         for (int o = 0; o < 10; o ++){
@@ -55,8 +65,32 @@ unsigned int BattleDataInstaller::Initialize(){
     return total_scenes_;
 }
 
+unsigned int BattleDataInstaller::InitializeModels(){
+    next_model_to_process_ = 0;
+    next_model_to_convert_ = 0;
+    battle_lgp_files_.clear();
+    battle_lgp_file_names_.clear();
+    models_.clear();
+    // Open battle.lgp
+    File battle_lgp_file(input_dir_ + "data/battle/battle.lgp");
+    // Also, open it as a LGP archive.
+    VGears::LGPArchive battle_lgp(input_dir_ + "data/battle/battle.lgp", "LGP");
+    battle_lgp.open(input_dir_ + "data/battle/battle.lgp", true);
+    battle_lgp.load();
+    VGears::LGPArchive::FileList file_list = battle_lgp.GetFiles();
+    for (int i = 0; i < file_list.size(); i ++){
+        VGears::LGPArchive::FileEntry f = file_list.at(i);
+        if (f.data_offset + f.data_size <= battle_lgp_file.GetFileSize()){
+            File b_lgp_file(&battle_lgp_file, f.data_offset, f.data_size);
+            battle_lgp_files_.push_back(b_lgp_file);
+            battle_lgp_file_names_.push_back("btl_" + f.file_name);
+        }
+    }
+    return battle_lgp_files_.size();
+}
+
 unsigned int BattleDataInstaller::ProcessScene(){
-    if (next_scene_ >= scenes_uncompressed_.size()) return false;
+    if (next_scene_ >= scenes_uncompressed_.size()) return total_scenes_;
     BattleSceneFile scene(next_scene_, scenes_uncompressed_[next_scene_]);
     scenes_.push_back(scene);
     // Add new enemies to the list.
@@ -95,9 +129,169 @@ unsigned int BattleDataInstaller::ProcessScene(){
     return next_scene_;
 }
 
+unsigned int BattleDataInstaller::ProcessModel(){
+    if (next_model_to_process_ >= battle_lgp_files_.size()) return battle_lgp_files_.size();
+    // TODO: Do something with the files.
+    // A little explanation. Each file has a 4 letter name, for example: 1234
+    // 12 is the model identifier.
+    // 34 if the type of file:
+    //  - aa: Skeleton file (.hrc)
+    //  - ab: Unknown
+    //  - ac - al: Textures (.tex)
+    //  - am - cz: Polygon files (.p)
+    //  - da: Animations (.anim)
+    // Note that the names in battle_lgp_file_names_ are prefixed with "btl_"
+    std::string id = battle_lgp_file_names_[next_model_to_process_].substr(4, 2);
+    if (id != "at"){next_model_to_process_ ++; return next_model_to_process_;} // TODO: DEBUG
+    std::string type = battle_lgp_file_names_[next_model_to_process_].substr(6, 2);
+    if (type == "aa"){
+        // HRC file.
+        battle_lgp_files_[next_model_to_process_].WriteFile(
+          output_dir_ + "temp/battle_models/"
+          + battle_lgp_file_names_[next_model_to_process_] + ".hrcbin"
+        );
+        bool found = false;
+        for (int m = 0; m < models_.size(); m ++){
+            if (models_[m].id == id){
+                models_[m].hrc = battle_lgp_file_names_[next_model_to_process_] + ".hrc";
+                found = true;
+                break;
+            }
+        }
+        if (found == false){
+            Model model;
+            model.id = id;
+            model.hrc = battle_lgp_file_names_[next_model_to_process_] + ".hrc";
+            models_.push_back(model);
+        }
+    }
+    else if (type == "ab"){
+        battle_lgp_files_[next_model_to_process_].WriteFile(
+          output_dir_ + "temp/battle_models/"
+          + battle_lgp_file_names_[next_model_to_process_] + ".unknown"
+        );
+    } // Unknown and not needed.
+    else if (type == "da"){
+        // .a Animation file.
+        battle_lgp_files_[next_model_to_process_].WriteFile(
+          output_dir_ + "temp/battle_models/"
+          + battle_lgp_file_names_[next_model_to_process_] + ".anim"
+        );
+        bool found = false;
+        for (int m = 0; m < models_.size(); m ++){
+            if (models_[m].id == id){
+                models_[m].anim = battle_lgp_file_names_[next_model_to_process_] + ".anim";
+                found = true;
+                break;
+            }
+        }
+        if (found == false){
+            Model model;
+            model.id = id;
+            model.anim = battle_lgp_file_names_[next_model_to_process_] + ".anim";
+            models_.push_back(model);
+        }
+    }
+    else if (
+      type == "ac" || type == "ad" || type == "ae" || type == "af" || type == "ag"
+      || type == "ah"|| type == "ai" || type == "aj" || type == "ak" || type == "al"
+    ){
+        // .tex texture files. Save directly to their directory.
+        battle_lgp_files_[next_model_to_process_].WriteFile(
+          output_dir_ + "temp/battle_models/"
+          + battle_lgp_file_names_[next_model_to_process_] + ".tex"
+        );
+        TexFile tex(battle_lgp_files_[next_model_to_process_]);
+        tex.SavePng(
+          output_dir_ + "models/battle/entities/"
+            + battle_lgp_file_names_[next_model_to_process_] + ".png",
+          0
+          );
+        bool found = false;
+        for (int m = 0; m < models_.size(); m ++){
+            if (models_[m].id == id){
+                models_[m].tex.push_back(battle_lgp_file_names_[next_model_to_process_] + ".tex");
+                found = true;
+                break;
+            }
+        }
+        if (found == false){
+            Model model;
+            model.id = id;
+            model.tex.push_back(battle_lgp_file_names_[next_model_to_process_] + ".tex");
+            models_.push_back(model);
+        }
+    }
+    else{
+        // .p polygon file.
+        battle_lgp_files_[next_model_to_process_].WriteFile(
+          output_dir_ + "temp/battle_models/"
+          + battle_lgp_file_names_[next_model_to_process_] + ".p"
+        );
+        bool found = false;
+        for (int m = 0; m < models_.size(); m ++){
+            if (models_[m].id == id){
+                models_[m].p.push_back(battle_lgp_file_names_[next_model_to_process_] + ".p");
+                found = true;
+                break;
+            }
+        }
+        if (found == false){
+            Model model;
+            model.id = id;
+            model.p.push_back(battle_lgp_file_names_[next_model_to_process_] + ".p");
+            models_.push_back(model);
+        }
+    }
+    next_model_to_process_ ++;
+    return next_model_to_process_;
+}
+
+unsigned int BattleDataInstaller::ConvertModelsInit(){
+    next_model_to_convert_ = 0;
+    return models_.size();
+}
+
+unsigned int BattleDataInstaller::ConvertModel(){
+    if (next_model_to_convert_ >= models_.size()) return models_.size();
+    Model model = models_[next_model_to_convert_];
+    try{
+        DecompileHrc(File(output_dir_ + "temp/battle_models/" + model.hrc + "bin"), model, output_dir_ + "temp/battle_models/" + model.hrc);
+        GenerateRsdFiles(model, output_dir_ + "temp/battle_models/");
+        ExtractAFilesFromDAFile(File(output_dir_ + "temp/battle_models/" + model.anim), &model, output_dir_ + "temp/battle_models/");
+        Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(model.hrc, "FFVII");
+        Ogre::String base_name;
+        VGears::StringUtil::splitBase(model.hrc, base_name);
+        auto mesh_name = VGears::NameLookup::model(base_name) + ".mesh";
+        Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
+        Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
+        for (std::string anim : model.a){
+        //if (model.anim != ""){
+            VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
+            Ogre::String a_base_name;
+            VGears::StringUtil::splitBase(anim, a_base_name);
+            VGears::AFilePtr a = afl_mgr.load(a_base_name + ".a", "FFVII")
+              .staticCast<VGears::AFile>();
+            // Convert the FF7 name to a more readable name set in the meta data.
+            VGears::StringUtil::splitBase(anim, base_name);
+            a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
+        }
+        ExportMesh(output_dir_ + "models/battle/entities/", mesh);
+    }
+    catch (const Ogre::Exception& ex){
+        std::cerr << "[ERROR] Ogre exception converting battle model "
+          << model.hrc <<": " << ex.what() << std::endl;
+    }
+    catch (const std::exception& ex){
+        std::cerr << "[ERROR] Exception converting battle model "
+          << model.hrc << ": " << ex.what() << std::endl;
+    }
+    next_model_to_convert_ ++;
+    return next_model_to_convert_;
+}
+
 void BattleDataInstaller::WriteEnemies(){
     for (Enemy enemy : enemies_){
-        //std::cout << "Writting enemy " << enemy.id << ": " << (output_dir_ + "game/enemy/" + std::to_string(enemy.id) + ".xml") << "\n";
         TiXmlDocument xml;
         std::unique_ptr<TiXmlElement> container(new TiXmlElement("Enemy"));
         container->SetAttribute("id", enemy.id);
@@ -201,7 +395,6 @@ void BattleDataInstaller::WriteEnemies(){
 }
 
 void BattleDataInstaller::WriteAttacks(){
-    //std::cout << "WRITE ATTACKS TOTAL: " << attacks_.size() << "\n";
     for (Attack attack : attacks_){
         TiXmlDocument xml;
         std::unique_ptr<TiXmlElement> container(new TiXmlElement("Attack"));
@@ -348,7 +541,6 @@ void BattleDataInstaller::WriteAttacks(){
 
 void BattleDataInstaller::WriteFormations(){
     for (Formation formation : formations_){
-        //std::cout << "Writting enemy " << enemy.id << ": " << (output_dir_ + "game/enemy/" + std::to_string(enemy.id) + ".xml") << "\n";
         TiXmlDocument xml;
         std::unique_ptr<TiXmlElement> container(new TiXmlElement("Formation"));
         container->SetAttribute("id", formation.id);
@@ -459,7 +651,6 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
     u8* extract_buffer = static_cast<u8*>(malloc(extract_size));
     int ret;
     z_stream strm;
-
     strm.zalloc = Z_NULL; // Used to allocate the internal state.
     strm.zfree = Z_NULL; // Used to free the internal state.
     strm.opaque = Z_NULL; // Private data object passed to zalloc and zfree.
@@ -506,7 +697,6 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
                 std::cout << "Warning: inflate - Z_MEM_ERROR in file " << std::endl;
                 return NULL;
         }
-
         if (ret != Z_STREAM_END){
             extract_buffer = static_cast<u8*>(realloc(extract_buffer, extract_size * 2));
             if (extract_buffer == NULL){
@@ -527,4 +717,284 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
     }
     File* out_file = new File(extract_buffer, 0, extract_size);
     return out_file;
+}
+
+void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
+    VGears::String base_mesh_name;
+    VGears::StringUtil::splitFull(mesh->getName(), base_mesh_name);
+    Ogre::MeshSerializer mesh_serializer;
+    Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
+    Ogre::SkeletonSerializer skeleton_serializer;
+    skeleton_serializer.exportSkeleton(
+      skeleton.getPointer(), outdir + base_mesh_name + ".skeleton"
+    );
+    mesh->setSkeletonName("models/battle/entities/" + base_mesh_name + ".skeleton");
+    mesh_serializer.exportMesh(mesh.getPointer(), outdir + mesh->getName());
+    Ogre::Mesh::SubMeshIterator it(mesh->getSubMeshIterator());
+    Ogre::MaterialSerializer mat_ser;
+    size_t i(0);
+    std::set<std::string> textures;
+    while (it.hasMoreElements()){
+        Ogre::SubMesh *sub_mesh(it.getNext());
+        Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(
+          sub_mesh->getMaterialName())
+        );
+        if (mat != nullptr){
+            for (size_t techs = 0; techs < mat->getNumTechniques(); techs ++){
+                Ogre::Technique* tech = mat->getTechnique(techs);
+                if (tech){
+                    for (size_t pass_num = 0; pass_num < tech->getNumPasses(); pass_num ++){
+                        Ogre::Pass* pass = tech->getPass(pass_num);
+                        if (pass){
+                            for (
+                              size_t texture_unit_num = 0;
+                              texture_unit_num < pass->getNumTextureUnitStates();
+                              texture_unit_num ++
+                            ){
+                                Ogre::TextureUnitState* unit  = pass->getTextureUnitState(
+                                  texture_unit_num
+                                );
+                                if (unit && unit->getTextureName().empty() == false){
+                                     // Ensure the output material script references png files
+                                    // rather than tex files.
+                                    Ogre::String base_name;
+                                    VGears::StringUtil::splitBase(
+                                      unit->getTextureName(), base_name
+                                    );
+                                    unit->setTextureName(base_name + ".png");
+                                    textures.insert(unit->getTextureName());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (std::count(materials_.begin(), materials_.end(), sub_mesh->getMaterialName()) == 0){
+                 << sub_mesh->getMaterialName() << std::endl;
+                mat_ser.queueForExport(mat);
+                materials_.push_back(sub_mesh->getMaterialName());
+            }
+        }
+        ++ i;
+    }
+    mat_ser.exportQueued(outdir + base_mesh_name + VGears::EXT_MATERIAL);
+    for (auto& texture_name : textures){
+        std::string tex_name = texture_name.c_str();
+        Ogre::String base_name;
+        VGears::StringUtil::splitBase(
+          tex_name, base_name
+        );
+        base_name += ".png";
+        try{
+            Ogre::TexturePtr texture_ptr
+              = Ogre::TextureManager::getSingleton().load(base_name, "FFVIITextures");
+            Ogre::Image image;
+            texture_ptr->convertToImage(image);
+            Ogre::String base_name;
+            VGears::StringUtil::splitBase(texture_name, base_name);
+            image.save(outdir + base_mesh_name + "_" + base_name + ".png");
+        }
+        catch (std::exception const& ex){
+            std::cerr << "[ERROR] Exception: " << ex.what() << std::endl;
+        }
+    }
+}
+
+void BattleDataInstaller::GenerateRsdFiles(Model model, std::string path){
+    std::sort(model.tex.begin(), model.tex.end());
+    // For each p file, generate a rsd file.
+    for (std::string p : model.p){
+        std::string base_name = p.substr(0, 8);
+        std::string content = "@RSD940102\n";
+
+        content += "PLY=" + base_name + ".PLY\n";
+        content += "MAT=" + base_name + ".MAT\n";
+        content += "GRP=" + base_name + ".GRP\n";
+        content += "NTEX=" + std::to_string(model.tex.size()) + "\n";
+        for (int t = 0; t < model.tex.size(); t ++)
+            content += "TEX[" + std::to_string(t) + "]=" + model.tex[t] + "\n";
+        content += "\n";
+        std::ofstream out(path + base_name + ".rsd");
+        out << content;
+        out.close();
+    }
+}
+
+void BattleDataInstaller::DecompileHrc(File compiled, Model model, std::string path){
+    compiled.SetOffset(0);
+    compiled.readU32LE();
+    compiled.readU32LE();
+    compiled.readU32LE();
+    std::sort(model.p.begin(), model.p.end());
+    std::string decompiled(":HEADER_BLOCK 2\n:SKELETON " + model.id + "aa\n");
+    int bones = compiled.readU32LE();
+    compiled.SetOffset(compiled.GetFileSize() - (bones * 12));
+    decompiled += ":BONES " + std::to_string(bones) + "\n\n";
+    int p_file_index = 0;
+    for (int b = 0; b < bones; b ++){
+        decompiled += "bone" + std::to_string(b) + "\n";
+        int parent = compiled.readU32LE();
+        if (parent == 0xFFFFFFFF) decompiled += "root\n";
+        else decompiled += "bone" + std::to_string(parent) + "\n";
+        union {
+            float f;
+            unsigned long ul;
+            unsigned char b[4];
+        } u;
+        u.b[0] = compiled.readU8();
+        u.b[1] = compiled.readU8();
+        u.b[2] = compiled.readU8();
+        u.b[3] = compiled.readU8();
+        decompiled += std::to_string(u.f * -1) + "\n";
+        int offset = compiled.readU32LE();
+        if (offset == 0) decompiled += "0\n\n";
+        else {
+            decompiled += std::to_string(offset) + " ";
+            if (p_file_index < model.p.size()){
+                decompiled += model.p[p_file_index].substr(0, 8);
+            }
+            p_file_index ++;
+            decompiled += "\n\n";
+        }
+    }
+    std::ofstream out(path);
+    out << decompiled;
+    out.close();
+}
+
+void BattleDataInstaller::ExtractAFilesFromDAFile(File da, Model* model, std::string path){
+
+    struct Bone{
+        int raw[3]; // Z, Y, X.
+        float angle[3]; // Z, Y, X.
+    };
+
+    da.SetOffset(0);
+    int num_animations = da.readU32LE();
+    for (int anim = 0; anim < num_animations; anim ++){
+        std::string file_index_name = std::to_string(anim);
+        while (file_index_name.size() < 2) file_index_name = "0" + file_index_name;
+        std::ofstream a(
+          path + model->id + "_" + file_index_name + ".a", std::ios::out | std::ios::binary
+        );
+        model->a.push_back(path + model->id + "_" + file_index_name + ".a");
+        u32 zero = 0x00000000;
+        u32 version = 0x00000001;
+        u32 rotation_order = 0x00020001;
+        u32 bone_count = da.readU32LE() - 1;
+        u32 frames = da.readU32LE();
+        Bone bones[frames][bone_count];
+        a.write(reinterpret_cast<const char*>(&version), 4);
+        a.write(reinterpret_cast<const char*>(&frames), 4);
+        a.write(reinterpret_cast<const char*>(&bone_count), 4);
+        a.write(reinterpret_cast<const char*>(&rotation_order), 4);
+        a.write(reinterpret_cast<const char*>(&zero), 4);
+        a.write(reinterpret_cast<const char*>(&zero), 4);
+        a.write(reinterpret_cast<const char*>(&zero), 4);
+        a.write(reinterpret_cast<const char*>(&zero), 4);
+        a.write(reinterpret_cast<const char*>(&zero), 4);
+        int next_offset = da.GetCurrentOffset() + da.readU32LE() + 4;
+        da.readU16LE(); // Frames, again.
+        da.readU16LE(); // Size, again.
+        int key = da.readU8(); // Scale decoding key.
+        da.readU8(); // ???
+        da.readU32LE(); // ???
+        da.readU32LE(); // ???
+        int frame = 0;
+        while (frame < frames){
+            a.write(reinterpret_cast<const char*>(&zero), 4);
+            a.write(reinterpret_cast<const char*>(&zero), 4);
+            a.write(reinterpret_cast<const char*>(&zero), 4);
+            a.write(reinterpret_cast<const char*>(&zero), 4);
+            a.write(reinterpret_cast<const char*>(&zero), 4);
+            a.write(reinterpret_cast<const char*>(&zero), 4);
+            int bone = 0;
+            while (bone < bone_count){
+                if (bone == 0){
+                    // Uncompressed, 3 bytes per bone rotations. Read one bone.
+                    for (int d = 0; d < 3; d ++){ // Read Z, Y, X.
+                        int delta = da.readU16LE();
+                        delta = delta << key;
+                        bones[frame][bone].raw[d] = delta;
+                        bones[frame][bone].angle[d] = delta;
+                        if (bones[frame][bone].angle[d] < 0) bones[frame][bone].angle[d] += 0x1000;
+                        bones[frame][bone].angle[d]
+                          = bones[frame][bone].angle[d] / 4096.0f * 360.0f;
+                        a.write(reinterpret_cast<const char*>(&bones[frame][bone].angle[d]), 4);
+                    }
+                    bone ++;
+                }
+                else if (key == 0){
+                    // 12 bits per bone rotation, 36 bits per bone. Read two bones (9 bytes).
+                    u8 data[9];
+                    for (int d = 0; d < 9; d ++) data[d] = da.readU8();
+                    // Read two bones.
+                    float rot[6]; // Z, Y, X, Z, Y, X
+                    bones[frame][bone].raw[0] = data[0] * 16 + (data[1] >> 4);
+                    bones[frame][bone].raw[1] = (data[1] & 15) * 256 + data[2];
+                    bones[frame][bone].raw[2] = data[3] * 16 + (data[4] >> 4);
+                    bones[frame][bone + 1].raw[0] = (data[4] & 15) * 256 + data[5];
+                    bones[frame][bone + 1].raw[1] = data[6] * 16 + (data[7] >> 4);
+                    bones[frame][bone + 1].raw[2] = (data[7] & 15) * 256 + data[8];
+                    if (frame > 0){ // Frames 1 and up, sum to the previous frame.
+                        bones[frame][bone].raw[0] += bones[frame - 1][bone].raw[0];
+                        bones[frame][bone].raw[1] += bones[frame - 1][bone].raw[1];
+                        bones[frame][bone].raw[2] += bones[frame - 1][bone].raw[2];
+                        bones[frame][bone + 1].raw[0] += bones[frame - 1][bone + 1].raw[0];
+                        bones[frame][bone + 1].raw[1] += bones[frame - 1][bone + 1].raw[1];
+                        bones[frame][bone + 1].raw[2] += bones[frame - 1][bone + 1].raw[2];
+                    }
+
+                    // Quaternion to degree.
+                    for (int b = bone; b < bone + 2; b ++){
+                        for (int r = 0; r < 3; r ++){
+                            bones[frame][b].angle[r] = bones[frame][b].raw[r];
+                            if (bones[frame][b].angle[r] < 0) bones[frame][b].angle[r] += 0x1000;
+                            bones[frame][b].angle[r] = bones[frame][b].angle[r] / 4096.0f * 360.0f;
+                            a.write(reinterpret_cast<const char*>(&bones[frame][b].angle[r]), 4);
+                        }
+                    }
+                    bone += 2;
+
+                }
+                else if (key == 2){
+                    // 10 bits per bone rotation, 30 bits per bone. Read four bones (15 bytes).
+                    std::cout << "TODO: Decode bones with key 2.\n";
+                    // TODO
+                    bone += 4;
+                }
+                else if (key == 4){
+                    // 8 bits per bone rotation, 24 bits per bone. Read one bone (3 bytes).
+                    std::cout << "TODO: Decode bones with key 4.\n";
+                    // TODO: Fix this and do the same as key 0.
+                    u8 data[3];
+                    for (int d = 0; d < 3; d ++){
+                        if (bone + d < bone_count) data[d] = da.readU8();
+                        else data[d] = 0;
+                    }
+                    // Read two bones.
+                    float rot[3]; // Z, Y, X
+                    rot[0] = data[0];
+                    rot[1] = data[1];
+                    rot[2] = data[3];
+                    // Quaternion to degree.
+                    for (int d = 0; d < 3; d ++) rot[d] = rot[d] * 360 / 4096;
+                    // Write.
+                    if (bone < bone_count){
+                        a.write(reinterpret_cast<const char*>(&rot[0]), 4);
+                        a.write(reinterpret_cast<const char*>(&rot[1]), 4);
+                        a.write(reinterpret_cast<const char*>(&rot[2]), 4);
+                        bone ++;
+                    }
+                }
+                else{
+                    // This should not happen.
+                    bone ++;
+                }
+            }
+            frame ++;
+        }
+        a.close();
+        da.SetOffset(next_offset);
+    }
 }

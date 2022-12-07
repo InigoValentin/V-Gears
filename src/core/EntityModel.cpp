@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include <OgreEntity.h>
 #include <OgreRoot.h>
 #include "core/EntityModel.h"
@@ -50,7 +51,10 @@ void EntityModel::PlayAnimation(
   Entity::AnimationPlayType play_type, const float start, const float end
 ){
     if (animation_current_ != nullptr) animation_current_->setEnabled(false);
-    if (model_->getAllAnimationStates()->hasAnimationState(animation) == true){
+    if (
+      model_->getAllAnimationStates() != nullptr
+      && model_->getAllAnimationStates()->hasAnimationState(animation) == true
+    ){
         animation_current_name_ = animation;
         animation_current_ = model_->getAnimationState(animation);
         animation_current_->setLoop((play_type == Entity::PLAY_LOOPED) ? true : false);

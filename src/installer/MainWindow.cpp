@@ -240,7 +240,10 @@ void MainWindow::on_btn_data_run_clicked(){
             );
             OnInstallStarted();
         }
-        catch (const std::exception& ex){OnInstallStopped();}
+        catch (const std::exception& ex){
+            std::cout << "Exception: " << ex.what() << std::endl;
+            OnInstallStopped();
+        }
     }
 }
 
@@ -277,6 +280,7 @@ void MainWindow::DoProgress(){
         if (progress >= 100) OnInstallStopped();
     }
     catch (const std::exception& ex){
+        std::cout << "Exception: " << ex.what() << std::endl;
         OnInstallStopped();
         QMessageBox::critical(this, tr("Data conversion exception"), ex.what());
     }

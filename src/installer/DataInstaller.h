@@ -166,29 +166,49 @@ class DataInstaller{
             INITIALIZE,
 
             /**
-             * Initializes the battle installer.
+             * Initializes the battle installer for scene processing.
              */
-            BATTLE_INIT,
+            BATTLE_SCENES_INIT,
 
             /**
              * Extracts battle scenes.
              */
-            BATTLE_SCENES,
+            BATTLE_SCENES_PROCESS,
 
             /**
              * Writes attack data.
              */
-            BATTLE_WRITE_ATTACKS,
+            BATTLE_SCENES_WRITE_ATTACKS,
 
             /**
              * Writes enemy data.
              */
-            BATTLE_WRITE_ENEMIES,
+            BATTLE_SCENES_WRITE_ENEMIES,
 
             /**
              * Writes enemy formation data.
              */
-            BATTLE_WRITE_FORMATIONS,
+            BATTLE_SCENES_WRITE_FORMATIONS,
+
+            /**
+             * Initializes the battle installer for 3D model processing.
+             */
+            BATTLE_MODELS_INIT,
+
+            /**
+             * Extracts 3D battle models.
+             */
+            BATTLE_MODELS_PROCESS,
+
+            /**
+             * Prepares for 3D battle model conversion.
+             */
+            BATTLE_MODELS_CONVERT_INIT,
+
+            /**
+             * Converts 3D battle models.
+             */
+            BATTLE_MODELS_CONVERT,
 
             /**
              * Parses item and materia prices from ff7.exe.

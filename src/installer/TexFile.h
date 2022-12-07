@@ -16,13 +16,30 @@
 #pragma once
 
 #include "common/TypeDefine.h"
+#include "common/File.h"
 
 class TexFile{
 
     public:
 
+        /**
+         * Constructor.
+         *
+         * @param[in,out] File with the tex data. The file data will not be modified, but it's
+         * offset will.
+         */
+        TexFile(File file);
+
+        /**
+         * Constructor.
+         *
+         * @param[in] path Path to the tex file.
+         */
         TexFile(std::string path);
 
+        /**
+         * Destructor.
+         */
         ~TexFile();
 
         /**
@@ -69,12 +86,19 @@ class TexFile{
          */
         void SavePng(
           std::string file_name, unsigned int x1, unsigned int x2, unsigned int y1, unsigned int y2,
-          unsigned int w1, unsigned int w2, unsigned int h, unsigned int palette
+          unsigned int w1, unsigned int w2, unsigned int h, unsigned int palette = 0
         );
 
     private:
 
-        // HEADER
+        /**
+         * Reads data from a file.
+         *
+         * Called from constructors.
+         *
+         * @param[in] file The file to read from.
+         */
+        void Read(File file);
 
         /**
          * File format version. Always 1. 4 bytes.

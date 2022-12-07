@@ -21,6 +21,7 @@
 #include "common/BinGZipFile.h"
 #include "common/TypeDefine.h"
 #include "data/BattleSceneFile.h"
+#include "data/VGearsLGPArchive.h"
 
 /**
  * The battle data installer.
@@ -44,11 +45,18 @@ class BattleDataInstaller{
         ~BattleDataInstaller();
 
         /**
-         * Prepares the installer.
+         * Prepares the installer for scene processing.
          *
-         * @return The total number of scenes.
+         * @return The total number of scenes to process.
          */
-        unsigned int Initialize();
+        unsigned int InitializeScenes();
+
+        /**
+         * Prepares the installer for 3D model processing.
+         *
+         * @return The total number of models to process.
+         */
+        unsigned int InitializeModels();
 
         /**
          * Processes the next battle scene.
@@ -56,6 +64,30 @@ class BattleDataInstaller{
          * @return The total number of processed scenes.
          */
         unsigned int ProcessScene();
+
+        /**
+         * Processes the 3D model.
+         *
+         * Saves .hrc, .a and .p files for later conversion. .tex files are converted directly to
+         * png.
+         *
+         * @return The total number of processed models.
+         */
+        unsigned int ProcessModel();
+
+        /**
+         * Prepres the installer for model conversion.
+         *
+         * @return The total number of models to convert.
+         */
+        unsigned int ConvertModelsInit();
+
+        /**
+         * Converts a model.
+         *
+         * @return The total number of converted models.
+         */
+        unsigned int ConvertModel();
 
         /**
          * Writes enemy data to files.
@@ -73,6 +105,52 @@ class BattleDataInstaller{
         void WriteFormations();
 
     private:
+
+        /**
+         * Files to compose a model.
+         */
+        struct Model{
+
+            /**
+             * Model identifier, two letters.
+             */
+            std::string id;
+
+            /**
+             * Name of the model .hrc file
+             */
+            std::string hrc;
+
+            /**
+             * Name of the "da" animation file.
+             */
+            std::string anim;
+
+            /**
+             * List of .p polygon files associated to the model
+             */
+            std::vector<std::string> p;
+
+            /**
+             * List of .tex texture files associated to the model
+             */
+            std::vector<std::string> tex;
+
+            /**
+             * List of .a animation files associated to the model
+             */
+            std::vector<std::string> a;
+
+            /**
+             * Constructor, initializes default values.
+             */
+            Model(): id(""), hrc(""), anim(""){
+                p.clear();
+                tex.clear();
+                a.clear();
+            }
+
+        };
 
         /**
          * Extract a gzipped file.
@@ -108,6 +186,35 @@ class BattleDataInstaller{
         std::string BuildAttackFileName(Attack attack);
 
         /**
+         * Exports a mesh to a file.
+         *
+         * The file will have the mesh name.
+         *
+         * @param[in] outdir Path to the directory where the file will be saved.
+         * @param[in] mesh The mesh to export.
+         */
+        void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh);
+
+        /**
+         * Generates all required .rsd models for a model.
+         */
+        void GenerateRsdFiles(Model model, std::string path);
+
+        /**
+         * Decompiles a compiled HRC file.
+         *
+         * Note that this is not a general purpose HRC decompiler, it only works for files in
+         * battle.lgp.
+         *
+         * @param[in] compiled The compiles HRC file.
+         * @param[in] model The model.
+         * @param[in] path PAth to save the decompiled file to.
+         */
+        void DecompileHrc(File compiled, Model model, std::string path);
+
+        void ExtractAFilesFromDAFile(File da, Model* model, std::string path);
+
+        /**
          * The path to the directory from which to read the PC game data.
          */
         std::string input_dir_;
@@ -116,6 +223,11 @@ class BattleDataInstaller{
          * The path to the directory where to save the V-Gears data.
          */
         std::string output_dir_;
+
+        /**
+         * Function used to print text to the log output, line by line.
+         */
+        std::function<void(std::string)> write_output_line_;
 
         /**
          * Next scene file to process;
@@ -171,5 +283,36 @@ class BattleDataInstaller{
          * Map of formations, ID and xml file path.
          */
         std::map<int, std::string> formation_map_;
+
+        /**
+         * The files in the original battle.lgp file.
+         */
+        std::vector<File> battle_lgp_files_;
+
+        /**
+         * File names for the files in {@see battle_lgp_files_}.
+         */
+        std::vector<std::string> battle_lgp_file_names_;
+
+        /**
+         * Next model to process;
+         */
+        unsigned int next_model_to_process_;
+
+        /**
+         * Next model to convert.
+         */
+        unsigned int next_model_to_convert_;
+
+        /**
+         * List of models files found in battle.lgp
+         */
+        std::vector<Model> models_;
+
+        /**
+         * List of model materials;
+         */
+        std::vector<std::string> materials_;
+
 
 };

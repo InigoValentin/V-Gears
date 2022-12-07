@@ -138,9 +138,7 @@ namespace VGears{
             while(it != end){
                 archive_type = it->first;
                 archive_name = it->second;
-                res_mgr_->addResourceLocation(
-                  archive_name, archive_type, section_name, true
-                );
+                res_mgr_->addResourceLocation(archive_name, archive_type, section_name, true);
                 ++ it;
             }
         }

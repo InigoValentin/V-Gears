@@ -88,7 +88,16 @@ namespace VGears{
     void HRCFileSerializer::readObject(Ogre::DataStreamPtr &stream, Bone &dest){
         Block bone_block;
         ReadBlock(stream, bone_block);
+
         Block::const_iterator it(bone_block.begin());
+        if (bone_block.size() < 2){
+            dest.length = 0;
+            dest.parent = "";
+            dest.name = "";
+            dest.rsd_names.clear();
+            return;
+        }
+
         dest.name = *(it ++);
         dest.parent = *(it ++);
         dest.length

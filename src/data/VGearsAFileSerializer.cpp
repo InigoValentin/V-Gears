@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include <OgreException.h>
 #include <OgreLogManager.h>
 #include "data/VGearsAFileSerializer.h"
@@ -42,20 +43,15 @@ namespace VGears{
         flipFromLittleEndian(&header_, 4, header_size / 4);
     }
 
-    void AFileSerializer::readObject(
-      Ogre::DataStreamPtr &stream, AFile::Frame &dest
-    ){
+    void AFileSerializer::readObject(Ogre::DataStreamPtr &stream, AFile::Frame &dest){
         readObject(stream, dest.root_rotation);
         readObject(stream, dest.root_translation);
         dest.root_translation = dest.root_translation / HRCFile::DOWN_SCALER;
         ReadVector(stream, dest.bone_rotations, header_.bone_count);
     }
 
-    void AFileSerializer::ImportAFile(
-      Ogre::DataStreamPtr &stream, AFile* dest
-    ){
+    void AFileSerializer::ImportAFile(Ogre::DataStreamPtr &stream, AFile* dest){
         ReadFileHeader(stream);
-
         if(header_.version != 1){
             OGRE_EXCEPT(
               Ogre::Exception::ERR_INVALIDPARAMS,
