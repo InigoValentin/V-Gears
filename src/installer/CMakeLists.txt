@@ -19,6 +19,7 @@ set(INSTALLER_SOURCE_FILES
     TexFile.cpp
     VGearsUtility.cpp
     WorldInstaller.cpp
+    common/BinaryFile.cpp
     common/BinGZipFile.cpp
     common/DrawSkeleton.cpp
     common/FontFile.cpp

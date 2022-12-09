@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <cstdint>
 #include <fstream>
 #include <zlib.h>
 #include <tinyxml.h>
@@ -27,6 +28,7 @@
 #include "data/VGearsHRCFileManager.h"
 #include "data/VGearsAFileManager.h"
 #include "common/VGearsStringUtil.h"
+#include "common/BinaryFile.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
 
 BattleDataInstaller::BattleDataInstaller(const std::string input_dir, const std::string output_dir):
@@ -770,7 +772,6 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
                 }
             }
             if (std::count(materials_.begin(), materials_.end(), sub_mesh->getMaterialName()) == 0){
-                 << sub_mesh->getMaterialName() << std::endl;
                 mat_ser.queueForExport(mat);
                 materials_.push_back(sub_mesh->getMaterialName());
             }
@@ -862,15 +863,18 @@ void BattleDataInstaller::DecompileHrc(File compiled, Model model, std::string p
     out.close();
 }
 
-void BattleDataInstaller::ExtractAFilesFromDAFile(File da, Model* model, std::string path){
+void BattleDataInstaller::ExtractAFilesFromDAFile(File da_file, Model* model, std::string path){
+
+    BinaryFile da(&da_file);
 
     struct Bone{
-        int raw[3]; // Z, Y, X.
+        u16 raw[3]; // Z, Y, X.
         float angle[3]; // Z, Y, X.
     };
 
     da.SetOffset(0);
-    int num_animations = da.readU32LE();
+    int num_animations = da.ReadU32LE();
+    std::cout << "TOTAL ANIMATIONS " << num_animations << "\n";
     for (int anim = 0; anim < num_animations; anim ++){
         std::string file_index_name = std::to_string(anim);
         while (file_index_name.size() < 2) file_index_name = "0" + file_index_name;
@@ -881,8 +885,8 @@ void BattleDataInstaller::ExtractAFilesFromDAFile(File da, Model* model, std::st
         u32 zero = 0x00000000;
         u32 version = 0x00000001;
         u32 rotation_order = 0x00020001;
-        u32 bone_count = da.readU32LE() - 1;
-        u32 frames = da.readU32LE();
+        u32 bone_count = da.ReadU32LE() - 1;
+        u32 frames = da.ReadU32LE();
         Bone bones[frames][bone_count];
         a.write(reinterpret_cast<const char*>(&version), 4);
         a.write(reinterpret_cast<const char*>(&frames), 4);
@@ -893,13 +897,13 @@ void BattleDataInstaller::ExtractAFilesFromDAFile(File da, Model* model, std::st
         a.write(reinterpret_cast<const char*>(&zero), 4);
         a.write(reinterpret_cast<const char*>(&zero), 4);
         a.write(reinterpret_cast<const char*>(&zero), 4);
-        int next_offset = da.GetCurrentOffset() + da.readU32LE() + 4;
-        da.readU16LE(); // Frames, again.
-        da.readU16LE(); // Size, again.
-        int key = da.readU8(); // Scale decoding key.
-        da.readU8(); // ???
-        da.readU32LE(); // ???
-        da.readU32LE(); // ???
+        int next_offset = da.GetCurrentOffset() / 8 + da.ReadU32LE() + 4;
+        da.ReadU16LE(); // Frames, again.
+        da.ReadU16LE(); // Size, again.
+        int key = da.ReadU8(); // Scale decoding key.
+        da.ReadU8(); // ???
+        da.ReadU32LE(); // ???
+        da.ReadU32LE(); // ???
         int frame = 0;
         while (frame < frames){
             a.write(reinterpret_cast<const char*>(&zero), 4);
@@ -913,7 +917,7 @@ void BattleDataInstaller::ExtractAFilesFromDAFile(File da, Model* model, std::st
                 if (bone == 0){
                     // Uncompressed, 3 bytes per bone rotations. Read one bone.
                     for (int d = 0; d < 3; d ++){ // Read Z, Y, X.
-                        int delta = da.readU16LE();
+                        int delta = da.ReadU16LE();
                         delta = delta << key;
                         bones[frame][bone].raw[d] = delta;
                         bones[frame][bone].angle[d] = delta;
@@ -926,8 +930,8 @@ void BattleDataInstaller::ExtractAFilesFromDAFile(File da, Model* model, std::st
                 }
                 else if (key == 0){
                     // 12 bits per bone rotation, 36 bits per bone. Read two bones (9 bytes).
-                    u8 data[9];
-                    for (int d = 0; d < 9; d ++) data[d] = da.readU8();
+                    /*u8 data[9];
+                    for (int d = 0; d < 9; d ++) data[d] = da.ReadU8();
                     // Read two bones.
                     float rot[6]; // Z, Y, X, Z, Y, X
                     bones[frame][bone].raw[0] = data[0] * 16 + (data[1] >> 4);
@@ -954,7 +958,24 @@ void BattleDataInstaller::ExtractAFilesFromDAFile(File da, Model* model, std::st
                             a.write(reinterpret_cast<const char*>(&bones[frame][b].angle[r]), 4);
                         }
                     }
-                    bone += 2;
+                    bone += 2;*/
+
+
+                    // 12 bits per bone rotations.
+                    for (int r = 0; r < 3; r ++){
+                        bones[frame][bone].raw[r] = da.ReadBits(12);
+                        if (frames > 0){ // Frames 1 and up, sum to the previous frame.
+                            bones[frame][bone].raw[r] += bones[frame - 1][bone].raw[r];
+                        }
+                        bones[frame][bone].angle[r] = bones[frame][bone].raw[r];
+                        std::cout << "ROTATION: " << bones[frame][bone].raw[r] << " -> " << bones[frame][bone].angle[r];
+                        if (bones[frame][bone].angle[r] < 0) bones[frame][bone].angle[r] += 0x1000;
+                        std::cout << " -> " << bones[frame][bone].angle[r];
+                        bones[frame][bone].angle[r] = bones[frame][bone].angle[r] / 4096.0f * 360.0f;
+                        std::cout << " -> " << bones[frame][bone].angle[r] << "\n";
+                        a.write(reinterpret_cast<const char*>(&bones[frame][bone].angle[r]), 4);
+                    }
+                    bone ++;
 
                 }
                 else if (key == 2){
@@ -969,7 +990,7 @@ void BattleDataInstaller::ExtractAFilesFromDAFile(File da, Model* model, std::st
                     // TODO: Fix this and do the same as key 0.
                     u8 data[3];
                     for (int d = 0; d < 3; d ++){
-                        if (bone + d < bone_count) data[d] = da.readU8();
+                        if (bone + d < bone_count) data[d] = da.ReadU8();
                         else data[d] = 0;
                     }
                     // Read two bones.
@@ -995,6 +1016,6 @@ void BattleDataInstaller::ExtractAFilesFromDAFile(File da, Model* model, std::st
             frame ++;
         }
         a.close();
-        da.SetOffset(next_offset);
+        da.SetOffset(next_offset * 8); // In bits
     }
 }

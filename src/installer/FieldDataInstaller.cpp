@@ -17,8 +17,9 @@
 #include <boost/filesystem.hpp>
 #include <QtCore/QDir>
 #include "FieldDataInstaller.h"
+
+#include "common/BinaryFile.h"
 #include "TexFile.h"
-#include "common/File.h"
 #include "data/VGearsMapListFile.h"
 #include "data/VGearsLZSFLevelFileManager.h"
 #include "data/VGearsHRCFileManager.h"

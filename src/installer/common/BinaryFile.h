@@ -17,57 +17,29 @@
 
 #include <OgreString.h>
 #include "common/TypeDefine.h"
+#include "common/File.h"
 
 /**
  * Represents a file.
+ *
+ * This class is for files that need a lot of bit-reading for parsing. It's slower than it's
+ * counterpart {@see File}, which is better used in the rest of cases.
  */
-class File{
+class BinaryFile{
 
     public:
 
         /**
          * Opens a file.
          *
-         * @param[in] file Path to the file.
-         */
-        File(const Ogre::String& file);
-
-        /**
-         * Opens a file.
-         *
          * @param[in] file Pointer to the file.
          */
-        File(const File* file);
-
-        /**
-         * Loads a file fragment.
-         *
-         * @param[in] file Pointer to the file.
-         * @param[in] offset Offset to the data to load.
-         * @param[in] length Length of the data to load.
-         */
-        File(const File* file, u32 offset, u32 length);
-
-        /**
-         * Loads a file fragment from a buffer.
-         *
-         * @param[in] buffer Pointer to the buffer to load from.
-         * @param[in] offset Offset to the data to load.
-         * @param[in] length Length of the data to load.
-         */
-        File(const u8* buffer, u32 offset, u32 length);
+        BinaryFile(const File* file);
 
         /**
          * Destructor.
          */
-        virtual ~File();
-
-        /**
-         * Writes the contents of the buffer to a file.
-         *
-         * @param[in] file Path of the file to save
-         */
-        void WriteFile(const Ogre::String& file) const;
+        virtual ~BinaryFile();
 
         /**
          * Retrieves the file name.
@@ -91,6 +63,25 @@ class File{
          * @param[in] length Length of the data to load.
          */
         void GetFileBuffer(u8* buffer, const u32 &start, const u32 &length) const;
+
+        /**
+         * Retrieves bits from the file.
+         *
+         * @param[in] offset_bits The offset, in bytes, to the bits to read.
+         * @param[in] offset_bits The offset, in bits, of the byte at {@see offset_byte} to read
+         * from.
+         * @param[in] bits Number of bits to read.
+         * @return Decimal valud of the read bits.
+         */
+        int GetBits(u32 offset_bytes, u8 offset_bits, u8 bits) const;
+
+        /**
+         * Retrieves bits from the file at the current offset.
+         *
+         * @param[in] bits Number of bits to read.
+         * @return Decimal valud of the read bits.
+         */
+        int ReadBits(u8 bits);
 
         /**
          * Retrieves a byte.
@@ -118,39 +109,43 @@ class File{
         /**
          * Reads a byte from the file at the current offset.
          *
-         * Advances the current offset by one byte.
+         * Before reading, it aligns the current offset to the next byte.Advances the current
+         * offset by one byte when done.
          *
          * @return The data in the byte in the current offset of the file.
          */
-        u8 readU8();
+        u8 ReadU8();
 
         /**
          * Reads two bytes from the file (little endian) at the current offset.
          *
-         * Advances the current offset by two bytes.
+         * Before reading, it aligns the current offset to the next byte.Advances the current
+         * offset by two bytes when done.
          *
          * @return Two bytes of data from the current offset of the file.
          */
-        u16 readU16LE();
+        u16 ReadU16LE();
 
         /**
          * Reads four bytes from the file (little endian) at the current offset.
          *
-         * Advances the current offset by four byte.
+         * Before reading, it aligns the current offset to the next byte.Advances the current
+         * offset by four bytes when done.
          *
          * @return Four bytes of data from the current offset of the file.
          */
-        u32 readU32LE();
+        u32 ReadU32LE();
+
 
         /**
-         * Checks the current offset of the file.
+         * Checks the current offset, in bits, of the file.
          *
          * Default is 0. Can be set on instantiation with {@see
-         * File(const File* file, u32 offset, u32 length)} or {@see
-         * File(const u8* buffer, u32 offset, u32 length)} and advanced with
-         * {@see readU8}, {@see readU16LE} or {@see readU32LE}
+         * BinaryFile(const File* file, u32 offset, u32 length)} or {@see
+         * BinaryFile(const u8* buffer, u32 offset, u32 length)} and advanced with
+         * {@see GeadBitsLE}, or {@see ReadBitsLE}
          */
-        u32 GetCurrentOffset();
+        unsigned int GetCurrentOffset();
 
         /**
          * Sets the file offset for reading.
@@ -158,11 +153,37 @@ class File{
          * If the offset is larger than the file size, the offset will be set to the end of the
          * file
          *
-         * @param[in] offset The new offset.
+         * @param[in] offset The new offset, in bits.
          */
-        void SetOffset(u32 offset);
+        void SetOffset(unsigned int offset);
 
-    protected:
+        /**
+         * Aligns the current offset to the next byte.
+         */
+        void Align();
+
+    private:
+
+        /**
+         * Offset, to the bit.
+         */
+        struct Offset{
+
+            /**
+             * File offset, in bytes.
+             */
+            u32 bytes;
+
+            /**
+             * Ofset of the current byte, in bits
+             */
+            u8 bits;
+
+            /**
+             * Constructor, initializes to 0.
+             */
+            Offset(): bytes(0), bits(0){};
+        };
 
         /**
          * The file name.
@@ -177,17 +198,29 @@ class File{
          * File(const u8* buffer, u32 offset, u32 length)} and advanced with
          * {@see readU8}, {@see readU16LE} or {@see readU32LE}
          */
-        u32 offset_ = 0;
+        Offset offset_;
 
         /**
-         * The file buffer.
+         * The file buffer, in bytes.
          *
-         * It contains the file data.
+         * It contains the file data, in bytes.
          */
-        u8* buffer_;
+        u8* buffer_bytes_;
 
         /**
-         * The allocated size of {@see buffer_}.
+         * The allocated size of {@see buffer_bytes_}, in bytes.
          */
-        u32 buffer_size_;
+        u32 buffer_size_bytes_;
+
+        /**
+         * The file buffer, bit by bit.
+         *
+         * It contains the file data, in bits.
+         */
+        u8* buffer_bits_;
+
+        /**
+         * The allocated size of {@see buffer_bits_}, in bits.
+         */
+        u32 buffer_size_bits_;
 };
