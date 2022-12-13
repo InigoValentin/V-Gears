@@ -26,6 +26,7 @@
 #include "TexFile.h"
 #include "data/VGearsHRCFileManager.h"
 #include "data/VGearsAFileManager.h"
+#include "data/DaFile.h"
 #include "common/VGearsStringUtil.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
 
@@ -256,9 +257,24 @@ unsigned int BattleDataInstaller::ConvertModel(){
     if (next_model_to_convert_ >= models_.size()) return models_.size();
     Model model = models_[next_model_to_convert_];
     try{
-        DecompileHrc(File(output_dir_ + "temp/battle_models/" + model.hrc + "bin"), model, output_dir_ + "temp/battle_models/" + model.hrc);
+        DecompileHrc(
+          File(output_dir_ + "temp/battle_models/" + model.hrc + "bin"),
+          model,
+          output_dir_ + "temp/battle_models/" + model.hrc
+        );
         GenerateRsdFiles(model, output_dir_ + "temp/battle_models/");
-        ExtractAFilesFromDAFile(File(output_dir_ + "temp/battle_models/" + model.anim), &model, output_dir_ + "temp/battle_models/");
+        //ExtractAFilesFromDAFile(
+        //  File(output_dir_ + "temp/battle_models/" + model.anim),
+        //  &model,
+        //  output_dir_ + "temp/battle_models/"
+        //);
+
+        DaFile da(File(output_dir_ + "temp/battle_models/" + model.anim));
+        std::vector<std::string> a_files = da.GenerateAFiles(
+          model.id, output_dir_ + "temp/battle_models/"
+        );
+        for (std::string file_name : a_files) model.a.push_back(file_name);
+
         Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(model.hrc, "FFVII");
         Ogre::String base_name;
         VGears::StringUtil::splitBase(model.hrc, base_name);
@@ -761,7 +777,9 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
                                     VGears::StringUtil::splitBase(
                                       unit->getTextureName(), base_name
                                     );
-                                    unit->setTextureName(base_name + ".png");
+                                    unit->setTextureName(
+                                      "models/battle/entities/" + base_name + ".png"
+                                    );
                                     textures.insert(unit->getTextureName());
                                 }
                             }
@@ -770,7 +788,6 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
                 }
             }
             if (std::count(materials_.begin(), materials_.end(), sub_mesh->getMaterialName()) == 0){
-                 << sub_mesh->getMaterialName() << std::endl;
                 mat_ser.queueForExport(mat);
                 materials_.push_back(sub_mesh->getMaterialName());
             }

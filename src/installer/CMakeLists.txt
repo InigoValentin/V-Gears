@@ -29,6 +29,7 @@ set(INSTALLER_SOURCE_FILES
     common/TimToVram.cpp
     common/Vram.cpp
     data/BattleSceneFile.cpp
+    data/DaFile.cpp
     decompiler/CodeGenerator.cpp
     decompiler/ControlFlow.cpp
     decompiler/DecompilerException.cpp
