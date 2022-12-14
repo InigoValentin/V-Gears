@@ -69,10 +69,18 @@ float DataInstaller::Progress(){
               options_.no_ffmpeg, options_.no_timidity
             );
             field_installer_ = std::make_unique<FieldDataInstaller>(input_dir_, output_dir_);
-            battle_installer_ = std::make_unique<BattleDataInstaller>(input_dir_, output_dir_);
+            battle_installer_ = std::make_unique<BattleDataInstaller>(
+              input_dir_, output_dir_, application_.ResMgr()
+            );
             installation_state_ = BATTLE_SCENES_INIT;
             return CalcProgress();
         case BATTLE_SCENES_INIT:
+            // Skip kernel data if option is set.
+            if (options_.skip_battle_data){
+                write_output_line_("Skipping battle data installation...", 2, true);
+                installation_state_ = BATTLE_MODELS_INIT;
+                return CalcProgress();
+            }
             write_output_line_("Parsing battle scenes...", 2, true);
             substeps_ = battle_installer_->InitializeScenes();
             cur_substep_ = 0;
@@ -104,6 +112,12 @@ float DataInstaller::Progress(){
             installation_state_ = BATTLE_MODELS_INIT;
             return CalcProgress();
         case BATTLE_MODELS_INIT:
+            // Skip kernel data if option is set.
+            if (options_.skip_battle_models){
+                write_output_line_("Skipping battle models installation...", 2, true);
+                installation_state_ = KERNEL_PRICES;
+                return CalcProgress();
+            }
             write_output_line_("Extracting battle models...", 2, true);
             substeps_ = battle_installer_->InitializeModels();
             cur_substep_ = 0;
@@ -381,7 +395,9 @@ void DataInstaller::CreateDirectories(){
     CreateDir("images/reels");
     CreateDir("images/window");
     CreateDir("models/fields/entities");
-    CreateDir("models/battle/entities");
+    CreateDir("models/battle/char");
+    CreateDir("models/battle/scene");
+    CreateDir("models/battle/enemy");
     CreateDir("audio/sound");
     CreateDir("audio/music");
     application_.ResMgr()->addResourceLocation(
@@ -397,16 +413,20 @@ void DataInstaller::CreateDirectories(){
       output_dir_ + "models/fields/entities/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/battle/entities/", "FileSystem", "FFVIITextures", true, true
+      output_dir_ + "models/battle/char/", "FileSystem", "FFVIITextures", true, true
+    );
+    application_.ResMgr()->addResourceLocation(
+      output_dir_ + "models/battle/scene/", "FileSystem", "FFVIITextures", true, true
+    );
+    application_.ResMgr()->addResourceLocation(
+      output_dir_ + "models/battle/enemy/", "FileSystem", "FFVIITextures", true, true
     );
     fields_lgp_ = std::make_unique<ScopedLgp>(
       application_.getRoot(), input_dir_ + "data/field/flevel.lgp", "LGP", "FFVIIFields"
     );
 }
 
-void DataInstaller::CleanInstall(){
-    boost::filesystem::remove_all(input_dir_ + "data/temp/");
-}
+void DataInstaller::CleanInstall(){boost::filesystem::remove_all(output_dir_ + "data/temp/");}
 
 void DataInstaller::CreateDir(const std::string& path){
     QString target = QString::fromStdString(output_dir_ + path);

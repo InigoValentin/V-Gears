@@ -214,6 +214,10 @@ void MainWindow::on_btn_data_run_clicked(){
 
             // Parse advanced options.
             DataInstaller::AdvancedOptions options;
+            options.skip_battle_data
+              = (Qt::Checked == main_window_->chk_no_battle_data->checkState());
+            options.skip_battle_models
+              = (Qt::Checked == main_window_->chk_no_battle_models->checkState());
             options.skip_kernel = (Qt::Checked == main_window_->chk_no_kernel->checkState());
             options.skip_images = (Qt::Checked == main_window_->chk_no_images->checkState());
             options.skip_sounds = (Qt::Checked == main_window_->chk_no_sounds->checkState());

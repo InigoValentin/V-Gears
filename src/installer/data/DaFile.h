@@ -239,7 +239,7 @@ class DaFile{
             /**
              * Position offset.
              *
-             * @todo Verify if it's the previuos frame?
+             * @todo Verify if it's the previous frame?
              */
             BoneRotation position_offset;
 

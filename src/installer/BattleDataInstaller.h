@@ -36,8 +36,12 @@ class BattleDataInstaller{
          *
          * @param[in] input_dir Path to the directory containing the original data to parse.
          * @param[in] output_dir Path to the directory of the installation data.
+         * @param[in] res_mgt The application resource manager..
          */
-        BattleDataInstaller(const std::string input_dir, const std::string output_dir);
+        BattleDataInstaller(
+          const std::string input_dir, const std::string output_dir,
+          Ogre::ResourceGroupManager* res_mgr
+        );
 
         /**
          * Destructor.
@@ -208,11 +212,10 @@ class BattleDataInstaller{
          *
          * @param[in] compiled The compiles HRC file.
          * @param[in] model The model.
-         * @param[in] path PAth to save the decompiled file to.
+         * @param[in] path Path to save the decompiled file to.
+         * @param[in] skeleton_name Name for the skeleton.
          */
-        void DecompileHrc(File compiled, Model model, std::string path);
-
-        void ExtractAFilesFromDAFile(File da, Model* model, std::string path);
+        void DecompileHrc(File compiled, Model model, std::string path, std::string skeleton_name);
 
         /**
          * The path to the directory from which to read the PC game data.
@@ -223,6 +226,11 @@ class BattleDataInstaller{
          * The path to the directory where to save the V-Gears data.
          */
         std::string output_dir_;
+
+        /**
+         * Pointer to the application resource manager.
+         */
+        Ogre::ResourceGroupManager* res_mgr_;
 
         /**
          * Function used to print text to the log output, line by line.

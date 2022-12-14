@@ -190,6 +190,30 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
+              <widget class="QCheckBox" name="chk_no_battle_data">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract battle data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, battle data such as enemies, attacks or enemy formations will not be extracted. Data from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is usually quite fast, so there is no reason to skip it unless you have manually changed data.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Don't extract battle data</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="chk_no_battle_models">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract battle models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, battle 3D models will not be extracted. This includes models for players, enemies, attacks, battle scenarios... Models from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is usually quite fast, so there is no reason to skip it unless you have manually edited the models.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Don't extract battle models</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
               <widget class="QCheckBox" name="chk_no_kernel">
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract kernel data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, game data such as items, materia, character information or initial savemap will not be extracted. Data from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is usually quite fast, so there is no reason to skip it unless you have manually changed data.&lt;/body&gt;&lt;/html&gt;</string>

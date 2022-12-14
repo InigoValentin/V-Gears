@@ -38,6 +38,16 @@ class DataInstaller{
         struct AdvancedOptions{
 
             /**
+             * Option to skip battle scenes installation.
+             */
+            bool skip_battle_data;
+
+            /**
+             * Option to skip battle models installation.
+             */
+            bool skip_battle_models;
+
+            /**
              * Option to skip kernel data installation.
              */
             bool skip_kernel;
