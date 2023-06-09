@@ -19,6 +19,54 @@ class GameData{
 
     public:
 
+        /**
+         * Character or enemy stats.
+         */
+        class STAT{
+
+            public:
+
+                /**
+                 * Strength stat.
+                 */
+                static const unsigned int STR = 0;
+
+                /**
+                 * Vtatlity stat.
+                 */
+                static const unsigned int VIT = 1;
+
+                /**
+                 * Magic stat.
+                 */
+                static const unsigned int MAG = 2;
+
+                /**
+                 * Spirit stat.
+                 */
+                static const unsigned int SPR = 3;
+
+                /**
+                 * Dexterity stat.
+                 */
+                static const unsigned int DEX = 4;
+
+                /**
+                 * Luck stat.
+                 */
+                static const unsigned int LCK = 5;
+
+                /**
+                 * HP stat.
+                 */
+                static const unsigned int HP = 6;
+
+                /**
+                 * MP stat.
+                 */
+                static const unsigned int MP = 7;
+        };
+
         class ELEMENT{
 
             public:

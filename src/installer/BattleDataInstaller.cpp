@@ -576,7 +576,7 @@ void BattleDataInstaller::WriteAttacks(){
 void BattleDataInstaller::WriteFormations(){
     for (Formation formation : formations_){
         TiXmlDocument xml;
-        std::unique_ptr<TiXmlElement> container(new TiXmlElement("Formation"));
+        std::unique_ptr<TiXmlElement> container(new TiXmlElement("formation"));
         container->SetAttribute("id", formation.id);
         container->SetAttribute("next", formation.next_formation);
         container->SetDoubleAttribute("escape_difficulty", formation.escape_counter);
@@ -586,13 +586,13 @@ void BattleDataInstaller::WriteFormations(){
         container->SetAttribute("skip_victory_pose", formation.skip_victory_pose);
         container->SetAttribute("preemptive_disabled", formation.preemptive_disabled);
         container->SetAttribute("layout", static_cast<int>(formation.layout));
-        std::unique_ptr<TiXmlElement> location(new TiXmlElement("Location"));
+        std::unique_ptr<TiXmlElement> location(new TiXmlElement("location"));
         location->SetAttribute("id", formation.location);
         location->SetAttribute("name", formation.location_name);
         container->LinkEndChild(location.release());
-        std::unique_ptr<TiXmlElement> enemies(new TiXmlElement("Enemies"));
+        std::unique_ptr<TiXmlElement> enemies(new TiXmlElement("enemies"));
         for (Formation::Enemy enemy : formation.enemies){
-            std::unique_ptr<TiXmlElement> enemy_xml(new TiXmlElement("Enemy"));
+            std::unique_ptr<TiXmlElement> enemy_xml(new TiXmlElement("enemy"));
             enemy_xml->SetAttribute("id", enemy.id);
             enemy_xml->SetAttribute("x", enemy.x);
             enemy_xml->SetAttribute("y", enemy.y);
@@ -608,11 +608,11 @@ void BattleDataInstaller::WriteFormations(){
             enemies->LinkEndChild(enemy_xml.release());
         }
         container->LinkEndChild(enemies.release());
-        std::unique_ptr<TiXmlElement> cameras(new TiXmlElement("Camera"));
+        std::unique_ptr<TiXmlElement> cameras(new TiXmlElement("camera"));
         cameras->SetAttribute("initial", formation.initial_camera_position);
         int c = 0;
         for (Formation::Camera camera : formation.camera_positions){
-            std::unique_ptr<TiXmlElement> camera_xml(new TiXmlElement("Position"));
+            std::unique_ptr<TiXmlElement> camera_xml(new TiXmlElement("position"));
             camera_xml->SetAttribute("id", c);
             camera_xml->SetAttribute("x", camera.x);
             camera_xml->SetAttribute("y", camera.y);
@@ -624,10 +624,10 @@ void BattleDataInstaller::WriteFormations(){
             c ++;
         }
         container->LinkEndChild(cameras.release());
-        std::unique_ptr<TiXmlElement> arena(new TiXmlElement("Arena"));
+        std::unique_ptr<TiXmlElement> arena(new TiXmlElement("arena"));
         arena->SetAttribute("is_arena", formation.is_arena_battle);
         for (int next : formation.next_arena_formation_candidates){
-            std::unique_ptr<TiXmlElement> next_xml(new TiXmlElement("NextCandidate"));
+            std::unique_ptr<TiXmlElement> next_xml(new TiXmlElement("next_candidate"));
             next_xml->SetAttribute("id", next);
             arena->LinkEndChild(next_xml.release());
         }

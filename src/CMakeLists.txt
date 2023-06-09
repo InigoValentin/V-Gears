@@ -82,6 +82,7 @@ set(VGEARS_SOURCE_FILES
     core/AudioManager.cpp
     core/Background2DAnimation.cpp
     core/Background2D.cpp
+    core/BattleManager.cpp
     core/CameraManager.cpp
     core/ConfigCmd.cpp
     core/ConfigCmdManager.cpp
@@ -91,6 +92,7 @@ set(VGEARS_SOURCE_FILES
     core/Console.cpp
     core/DebugDraw.cpp
     core/DialogsManager.cpp
+    core/Enemy.cpp
     core/EntityCollision.cpp
     core/Entity.cpp
     core/EntityDirection.cpp
@@ -132,9 +134,11 @@ set(VGEARS_SOURCE_FILES
     core/Utilites.cpp
     core/Walkmesh.cpp
     core/XmlBackground2DFile.cpp
+    core/XmlEnemyFile.cpp
     core/XmlFile.cpp
     core/XmlFontFile.cpp
     core/XmlFontsFile.cpp
+    core/XmlFormationFile.cpp
     core/XmlMapFile.cpp
     core/XmlMapsFile.cpp
     core/XmlMusicsFile.cpp

@@ -142,6 +142,23 @@ class FF7Data{
         };
 
         /**
+         * Retrieves an enemy model ID from an enemy ID.
+         *
+         * @param[in] enemy_id Numeric enemy ID.
+         * @return Enemy alphanumeric ID. Two-lowercase letters. If an invalid ID is provided, an
+         * empty string will be returned.
+         */
+        static std::string GetEnemyModelId(const unsigned int enemy_id){
+            if (enemy_id > 25 * 26) return "";
+            std::string model_id = "";
+            char letter = (enemy_id % 26) + 97; // 97 -> a, 122 -> z
+            model_id += letter;
+            letter = (enemy_id / 26) + 97;
+            model_id += letter;
+            return model_id;
+        }
+
+        /**
          * Retrieves information about a battle model from it's name.
          *
          * The return structure has the following properties ({@see BattleModelInfo}):
