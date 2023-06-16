@@ -25,102 +25,102 @@ class Enemy{
 
     public:
 
-        /**
-         * Enemy animation states.
-         */
-        enum AnimationState{
+        struct Element{
 
             /**
-             * An animation has been requested.
+             * The element ID.
              */
-            REQUESTED_ANIMATION,
+            unsigned int id;
 
             /**
-             * An animation is set to play automatically.
+             * Damage modification factor when attacked by the element.
+             *
+             * 1 means normal damage taken.
+             * 0 means no damage taken.
+             * [0-1] means reduced damage.
+             * [1-10) means extended damage.
+             * (-10-0) means recovery
+             * >10 means death.
+             * <-10 means full recovery.
              */
-            AUTO_ANIMATION
+            float factor;
         };
 
         /**
-         * Types of animations.
+         * Enemy attack data.
          */
-        enum AnimationPlayType{
+        struct Attack{
 
             /**
-             * Default animation mode.
+             * Attack ID.
+             */
+            unsigned int id;
+
+            /**
+             * Camera ID to use during the attack.
              *
-             * @todo Same as PLAY_ONCE?
+             * -1 to not move the camera.
              */
-            PLAY_DEFAULT,
-
-            /**
-             * Play the animation once, then stop.
-             */
-            PLAY_ONCE,
-
-            /**
-             * Play an animation in a continous loop.
-             */
-            PLAY_LOOPED
-        };
-
-
-        /**
-         * Action types.
-         */
-        enum ActionType{
-
-            /**
-             * No action.
-             */
-            AT_NONE,
-
-            /**
-             * Linear action.
-             *
-             * It starts and ends at full speed.
-             */
-            AT_LINEAR,
-
-            /**
-             * Smooth action.
-             *
-             * The action speed steadily increases when started, and it steadily
-             * decreases before the end.
-             */
-            AT_SMOOTH
+            int camera;
         };
 
         /**
-         * The direction for an entity turn.
+         * Data for drop and steal items.
          */
-        enum TurnDirection{
+        struct Item{
 
             /**
-             * Turn clockwise.
+             * Item ID.
              */
-            TD_CLOCKWISE,
+            unsigned int id;
 
             /**
-             * Turn anticlockwise.
+             * Steal or drop rate.
              */
-            TD_ANTICLOCKWISE,
+            float rate;
+        };
+
+        /**
+         * Status immunity.
+         */
+        struct Immunity{
 
             /**
-             * Choose direction automatically.
+             * Status ID.
+             */
+            unsigned int status;
+
+            /**
+             * Immunity rate.
              *
-             * The direction in which the turn is shorter will be selected.
+             * 0 or lower means no immunity, 1 or higher completely immune. Values between 0 and 1
+             * indicate resistance.
              */
-            TD_CLOSEST
+            float rate;
         };
 
         /**
          * Constructor.
          *
-         * @param[in] name Enemy ID.
-         * @param[in] node Scene node to which the enemy should be attached.
+         * @param[in] id Enemy ID.
          */
-        Enemy(const int enemy_id, Ogre::SceneNode* node);
+        Enemy(const unsigned int id);
+
+        /**
+         * Constructor.
+         *
+         * @param[in] id Enemy ID.
+         * @param[in] pos Enemy position (x, y, z).
+         * @param[in] front True to set the enemy in the front row, false for back row.
+         * @param[in] visible Indicates enemy visibility.
+         * @param[in] targeteable Indicates if the enemy can be targeted.
+         * @param[in] active Indicates whether the enemy main script is active or not.
+         * @param[in] cover Cover binary flags string.
+         */
+        Enemy(
+          const unsigned int id, const Ogre::Vector3 pos, const bool front, const bool visible,
+          const bool targeteable, const bool active, const std::string cover
+        );
 
         /**
          * Destructor.
@@ -128,28 +128,18 @@ class Enemy{
         virtual ~Enemy();
 
         /**
-         * Updates the enemy status.
-         */
-        virtual void Update();
-
-        /**
-         * Updates the enemy status with debug information.
-         */
-        virtual void UpdateDebug();
-
-        /**
          * Retrieves the enemy ID.
          *
          * @return The enemy ID, or -1 if it's not loaded.
          */
-        const int GetEnemyId() const;
+        const int GetId() const;
 
         /**
          * Sets the enemy ID.
          *
          * @param[in] id The enemy ID.
          */
-        void SetEnemyId(const int id);
+        void SetId(const int id);
 
         /**
          * Retrieves the enemy name.
@@ -220,6 +210,107 @@ class Enemy{
          * @param[in] money The money gain.
          */
         void SetMoney(const unsigned int money);
+
+        /**
+         * Retrieves the enemy animation IDs.
+         *
+         * @return The list of animation IDs
+         */
+        std::vector<unsigned int> GetAnimations() const;
+
+        /**
+         * Adds an animation for the enemy.
+         *
+         * @param[in] Animation ID.
+         */
+        void AddAnimation(const unsigned int animation);
+
+        /**
+         * Retrieves the enemy attacks.
+         *
+         * @return The list of attacks.
+         */
+        std::vector<Attack> GetAttacks() const;
+
+        /**
+         * Adds an attack for the enemy.
+         *
+         * @param[in] Attack to add.
+         */
+        void AddAttack(const Attack attack);
+
+        /**
+         * Retrieves the enemy possible item drops.
+         *
+         * @return List of items that can be droped by the enemy.
+         */
+        std::vector<Item> GetDrop() const;
+
+        /**
+         * Adds an item drop for the enemy.
+         *
+         * @param[in] item The dropable item.
+         */
+        void AddDrop(const Item item);
+
+        /**
+         * Retrieves the list of the enemy elemental affinities.
+         *
+         * @return The list of elemental affinities.
+         */
+        std::vector<Element> GetElements() const;
+
+        /**
+         * Adds an elemental affinity to the monster.
+         *
+         * @param[in] element Elemental affinity.
+         */
+        void AddElement(const Element element);
+
+        /**
+         * Retrieves the list of status immunities.
+         *
+         * @return The list of status immunities.
+         */
+        std::vector<Immunity> GetImmunities() const;
+
+        /**
+         * Adds an immunity to the monster.
+         *
+         * @param[in] immunity The immunity to add.
+         */
+        void AddImmunity(const Immunity immunity);
+
+        /**
+         * Retrieves the list of attacks that can be used during the manipulated state.
+         *
+         * The first attack of the list is also the attack the enemy will use when in berserkr
+         * state. If the list is empty, the enemy can't be manipulated or berserkred.
+         *
+         * @return List of IDs of attacks usable during manipulation
+         */
+        std::vector<unsigned int> GetManipulateAttacks() const;
+
+        /**
+         * Adds an attack usable during manipulation.
+         *
+         * @param[in] attack ID of the attack.
+         */
+        void AddManipulateAttack(const unsigned int attack);
+
+        /**
+         * Retrieves the enemy possible item stelas.
+         *
+         * @return List of items that can be stolen from the enemy.
+         */
+        std::vector<Item> GetSteal() const;
+
+        /**
+         * Adds an item steal to the enemy.
+         *
+         * @param[in] item The stealableitem.
+         */
+        void AddSteal(const Item item);
 
         /**
          * Retrieves the ID of the item the monster can be morphed into.
@@ -334,6 +425,34 @@ class Enemy{
         void SetLck(const unsigned int lck);
 
         /**
+         * Retrieves the enemy's evasion stat.
+         *
+         * @return The evasion stat.
+         */
+        unsigned int GetEva() const;
+
+        /**
+         * Sets the enemy's evasion stat.
+         *
+         * @param[in] eva The evasion stat.
+         */
+        void SetEva(const unsigned int eva);
+
+        /**
+         * Retrieves the enemy's magic evasion stat.
+         *
+         * @return The magic evasion stat.
+         */
+        unsigned int GetMeva() const;
+
+        /**
+         * Sets the enemy's magic evasion stat.
+         *
+         * @param[in] meva The magic evasion stat.
+         */
+        void SetMeva(const unsigned int meva);
+
+        /**
          * Retrieves the enemy's current HP.
          *
          * @return The current HP.
@@ -402,482 +521,106 @@ class Enemy{
         void SetMpMax(const unsigned int mp_max);
 
         /**
-         * Sets the enemy position.
+         * Retrieves the enemy position in the battlefield.
          *
-         * @param[in] position Enemy's new position.
+         * @return The enemy position (x, y, z).
          */
-        void SetPosition(const Ogre::Vector3& position);
+        Ogre::Vector3& GetPos();
 
         /**
-         * Sets the enemy position.
+         * Sets the enemy position in the battlefield.
          *
-         * @param[in] x Enemy's new position X coordinate.
-         * @param[in] y Enemy's new position Y coordinate.
-         * @param[in] z Enemy's new position Z coordinate.
+         * @param[in] pos The enemy position (x, y, z).
          */
-        void ScriptSetPosition(const float x, const float y, const float z);
+        void SetPos(const Ogre::Vector3 &pos);
 
         /**
-         * Retrieves the enemy position.
+         * Checks if the enemy is in the front row.
          *
-         * @return The enemy position.
+         * @return True if the enemy is in the front row. false if not.
          */
-        const Ogre::Vector3 GetPosition() const;
+        bool IsFront() const;
 
         /**
-         * Informs the script manager of the enemy position.
+         * Sets the enemy in or out the front row.
+         *
+         * @param[in] front True to set the enemy in the front row, false for the back row.
          */
-        void ScriptGetPosition() const;
+        void SetFront(bool front);
 
         /**
-         * Sets the enemy offset.
+         * Checks the enemy visibility.
          *
-         * The offset is relative to it's defined position.
-         *
-         * @param[in] position The enemy's offset.
+         * @return True if the enemy is visible, false if not.
          */
-        void SetOffset(const Ogre::Vector3& position);
+        bool IsVisible() const;
 
         /**
-         * Retrieves the enemy offset.
+         * Toggles the enemy visibility.
          *
-         * The offset is relative to it's defined position.
-         *
-         * @return The enemy's offset.
+         * @param[in] visible True to make the enemy visible, false to make it invisible.
          */
-        const Ogre::Vector3 GetOffset() const;
+        void SetVisible(bool visible);
 
         /**
-         * Sets the enemy rotation.
+         * Checks whether the enemy can be targeted.
          *
-         * @param[in] rotation The enemy rotation.
+         * @return True if the enemy can be targeted, false if not.
          */
-        void SetRotation(const Ogre::Degree& rotation);
+        bool IsTargeteable() const;
 
         /**
-         * Sets the enemy rotation.
+         * Determines whether the enemy can be targeted.
          *
-         * @param[in] rotation The enemy rotation, in degrees (0-360).
+         * @param[in] targeteable True to allow targeting the enemy false to prevent it.
          */
-        void ScriptSetRotation(const float rotation);
+        void SetTargeteable(bool targeteable);
 
         /**
-         * Retrieves the enemy rotation.
+         * Checks whether the enemy's main script is active.
          *
-         * @return The enemy rotation, in degrees.
+         * @return True if the script is active, false if not.
          */
-        Ogre::Degree GetRotation() const;
+        bool IsActive() const;
 
         /**
-         * Retrieves the enemy rotation.
+         * Activates or deactivates the enemy main script.
          *
-         * @return The enemy rotation (0-360).
+         * @param[in] active True to activate the script, false to deactivate it.
          */
-        float ScriptGetRotation() const;
+        void SetActive(bool active);
 
         /**
-         * Sets the enemy scale.
+         * Retrieves the flags for enemy covering.
          *
-         * @param[in] scale Three dimensional scale.
+         * {@see https://wiki.ffrtt.ru/index.php/FF7/Battle/Battle_Scenes#Binary_.22Cover_Flags.22}
+         * for more info about cover flags.
+         *
+         * @return A string with five 0s or 1s indicating the cover flags.
          */
-        virtual void setScale(const Ogre::Vector3 &scale);
+        std::string GetCover() const;
 
         /**
-         * Sets the enemy index in the field.
+         * Sets the flags for enemy covering.
          *
-         * @param[in] index Index of the enemy.
+         * {@see https://wiki.ffrtt.ru/index.php/FF7/Battle/Battle_Scenes#Binary_.22Cover_Flags.22}
+         * for more info about cover flags.
+         *
+         * @param[in] A string with five 0s or 1s indicating the cover flags.
          */
-        void SetIndex(const int index);
+        void SetCover(std::string cover);
+
+    private:
 
         /**
-         * Retrieves the enemy index in the field.
-         *
-         * @return Index of the enemy.
+         * Reads enemy data from the xml file.
          */
-        int GetIndex();
-
-        /**
-         * Sets the enemy's absolute orientation.
-         *
-         * @param[in] root_orientation The enemy's new orientation.
-         */
-        virtual void setRootOrientation(const Ogre::Quaternion &root_orientation);
-
-        /**
-         * Retrieves the enemy's height.
-         *
-         * @return The enemy's height.
-         */
-        float GetHeight() const;
-
-        /**
-         * Makes the enemy visible or invisible.
-         *
-         * Invisible entities can't be interacted with.
-         *
-         * @param[in] visible True to make the unit visible, false to make it invisible.
-         */
-        virtual void SetVisible(const bool visible) = 0;
-
-        /**
-         * Checks if the enemy is visible or invisible.
-         *
-         * Invisible entities can't be interacted with.
-         *
-         * @return True if the unit is visible, false if it's invisible.
-         */
-        virtual bool IsVisible() const = 0;
-
-        /**
-         * Sets the enemy's movement destination position.
-         *
-         * @param[in] target The destination position.
-         */
-        void SetMovePosition(const Ogre::Vector3& target);
-
-        /**
-         * Sets the enemy's model movement speed.
-         *
-         * @param[in] speed Movement speed.
-         */
-        void SetMoveSpeed(const float speed);
-
-        /**
-         * Retrieves the enemy's automatic movement speed.
-         *
-         * @return The movement speed.
-         */
-        float GetMoveSpeed() const;
-
-        /**
-         * Retrieves the enemy's movement destination position.
-         *
-         * @return The destination position.
-         */
-        const Ogre::Vector3& GetMovePosition() const;
-
-        /**
-         * Retrieves the distance to destination.
-         *
-         * It's the distance between the enemy's current position and it's current movement
-         * destination point.
-         *
-         * @return The distance to destination.
-         */
-        float GetMoveStopDistance() const;
-
-        /**
-         * Makes the enemy move to a point in the map.
-         *
-         * @param[in] x X coordinate of the destination point.
-         * @param[in] y Y coordinate of the destination point.
-         */
-        void ScriptMoveToPosition(const float x, const float y);
-
-        /**
-         * Waits for enemy's movement to end.
-         *
-         * @return Always -1.
-         */
-        int ScriptMoveSync();
-
-        /**
-         * Cancels the enemy's current movement.
-         *
-         * It also clears the movement sync queue.
-         */
-        void UnsetMove();
-
-        /**
-         * @todo Understand and document.
-         *
-         * @param[in] x X coordinate of the destination point.
-         * @param[in] y Y coordinate of the destination point.
-         * @param[in] z Z coordinate of the destination point.
-         * @param[in] type Type of action.
-         * @param[in] seconds Duration of the action, in seconds.
-         */
-        void ScriptOffsetToPosition(
-          const float x, const float y, const float z,
-          const ActionType type, const float seconds
-        );
-
-        /**
-         * @todo Understand and document.
-         *
-         * @return Always -1.
-         */
-        int ScriptOffsetSync();
-
-        /**
-         * @todo Understand and document.
-         */
-        void UnsetOffset();
-
-        /**
-         * @todo Understand and document.
-         *
-         * @return Starting position.
-         */
-        const Ogre::Vector3& GetOffsetPositionStart() const;
-
-        /**
-         * @todo Understand and document.
-         *
-         * @return Ending position.
-         */
-        const Ogre::Vector3& GetOffsetPositionEnd() const;
-
-        /**
-         * @todo Understand and document.
-         *
-         * @return The action type.
-         */
-        ActionType GetOffsetType() const;
-
-        /**
-         * @todo Understand and document.
-         *
-         * @return Action total duration in seconds.
-         */
-        float GetOffsetSeconds() const;
-
-        /**
-         * @todo Understand and document.
-         *
-         * @param[in] seconds Action current duration in seconds.
-         */
-        void SetOffsetCurrentSeconds(const float seconds);
-
-        /**
-         * @todo Understand and document.
-         *
-         * @return Action current duration in seconds.
-         */
-        float GetOffsetCurrentSeconds() const;
-
-        /**
-         * Makes the enemy turn to a fixed direction.
-         *
-         * @param[in] direction Final direction to turn the enemy's to.
-         * @param[in] turn_direction Direction of the turn.
-         * @param[in] turn_type Turn mode.
-         * @param[in] seconds Total turn duration, in seconds.
-         */
-        void ScriptTurnToDirection(
-          const float direction, const TurnDirection turn_direction,
-          const ActionType turn_type, const float seconds
-        );
-
-        /**
-         * Makes the enemy turn to a fixed point.
-         *
-         * @param[in] x X coordinate of the point to turn to.
-         * @param[in] y Y coordinate of the point to turn to.
-         * @param[in] turn_direction Direction of the turn.
-         * @param[in] turn_type Turn mode.
-         * @param[in] seconds Total turn duration, in seconds.
-         */
-        void ScriptTurnToPosition(
-          const int x, const int y, const TurnDirection turn_direction,
-          const ActionType turn_type, const float seconds
-        );
-
-        /**
-         * Adds the enemy's turn to the sync queue.
-         *
-         * @return Always -1.
-         * @todo Properly describe this.
-         */
-        int ScriptTurnSync();
-
-        /**
-         * Makes the enemy turn towards a point or another enemy.
-         *
-         * @param[in] direction_to Final direction to turn the enemy's to.
-         * @param[in] turn_direction Direction of the turn.
-         * @param[in] turn_type Turn mode.
-         * @param[in] seconds Total turn duration, in seconds.
-         * @todo What if the point
-         */
-        void SetTurn(
-          const Ogre::Degree& direction_to, const TurnDirection turn_direction,
-          const ActionType turn_type, const float seconds
-        );
-
-        /**
-         * Cancels the enemy's current turn.
-         *
-         * It also clears the movement sync queue.
-         */
-        void UnsetTurn();
-
-        /**
-         * Calculates the turn angle.
-         *
-         * If the turn direction is {@see TD_CLOSEST}, the result is the
-         * smallest angle between the two orientations. Otherwise, is the angle
-         * in the specified turn direction.
-         *
-         * @param[in] start Starting angle.
-         * @param[in] end Ending angle.
-         * @return[in] Calculated turn angle.
-         */
-        Ogre::Degree CalculateTurnAngle(const Ogre::Degree& start, const Ogre::Degree& end) const;
-
-        /**
-         * Retrieves the turn staring orientation.
-         *
-         * @return The turn starting orientation.
-         */
-        Ogre::Degree GetTurnDirectionStart() const;
-
-        /**
-         * Retrieves the turn ending orientation.
-         *
-         * @return The turn ending orientation.
-         */
-        Ogre::Degree GetTurnDirectionEnd() const;
-
-        /**
-         * Retrieves the turn type.
-         *
-         * @return The turn type.
-         */
-        ActionType GetTurnType() const;
-
-        /**
-         * Retrieves the turn total duration.
-         *
-         * @return The turn total duration, in seconds.
-         */
-        float GetTurnSeconds() const;
-
-        /**
-         * Sets the turn current duration.
-         *
-         * @param[in] seconds The turn current duration, in seconds.
-         */
-        void SetTurnCurrentSeconds(const float seconds);
-
-        /**
-         * Retrieves the turn current duration.
-         *
-         * @return The turn current duration, in seconds.
-         */
-        float GetTurnCurrentSeconds() const;
-
-        /**
-         * Sets the animation speed.
-         *
-         * @param[in] speed The animation speed.
-         * @todo Indicate units, max and mins, or references.
-         */
-        void ScriptSetAnimationSpeed(const float speed);
-
-        /**
-         * Retrieves the enemy's default animation name.
-         *
-         * @return The default animation name.
-         */
-        const Ogre::String& GetDefaultAnimationName() const;
-
-        /**
-         * Retrieves the enemy's current animation name.
-         *
-         * @return The current animation name.
-         */
-        const Ogre::String& GetCurrentAnimationName() const;
-
-        /**
-         * Retrieves the enemy's current animation state.
-         *
-         * @return The current animation state.
-         */
-        AnimationState GetAnimationState() const;
-
-        /**
-         * Plays one of the enemy's animations.
-         *
-         * @param[in] animation Name of the animation to play.
-         * @param[in] state The animation initial state.
-         * @param[in] play_type The animation play type, to play it once or in
-         * a loop.
-         * @param[in] start Animation starting point in time, in seconds.
-         * @param[in] end Animation ending point in time, in seconds.
-         */
-        virtual void PlayAnimation(
-          const Ogre::String& animation, AnimationState state,
-          AnimationPlayType play_type, const float start, const float end
-        ) = 0;
-
-        /**
-         * Resumes an animation.
-         *
-         * @param[in] animation Name of the animation to resume.
-         */
-        virtual void PlayAnimationContinue(const Ogre::String& animation) = 0;
-
-        /**
-         * Updates the animation state.
-         *
-         * @param[in] delta The animation delta.
-         */
-        virtual void UpdateAnimation(const float delta) = 0;
-
-        /**
-         * Plays one of the enemy's animations.
-         *
-         * @param[in] name Name of the animation to play.
-         */
-        void ScriptPlayAnimation(const char* name);
-
-        /**
-         * Stops one of the enemy's animations.
-         *
-         * @param[in] name Name of the animation to stop.
-         */
-        void ScriptPlayAnimationStop(const char* name);
-
-        /**
-         * Plays one of the enemy's animations.
-         *
-         * @param[in] name Name of the animation to play.
-         * @param[in] start Animation starting point in time, in seconds.
-         * @param[in] end Animation ending point in time, in seconds.
-         */
-        void ScriptPlayAnimation(const char* name, const float start, const float end);
-
-        /**
-         * Stops one of the enemy's animations.
-         *
-         * @param[in] name Name of the animation to stop.
-         * @param[in] start Animation starting point in time, in seconds.
-         * @param[in] end Animation ending point in time, in seconds.
-         */
-        void ScriptPlayAnimationStop(const char* name, const float start, const float end);
-
-        /**
-         * Sets the default animation of the enemy.
-         *
-         * @param[in] animation Name of the default animation.
-         */
-        void ScriptSetDefaultAnimation(const char* animation);
-
-        /**
-         * Adds the enemy's animation to the sync queue.
-         *
-         * @return Always -1.
-         * @todo Properly describe this.
-         */
-        int ScriptAnimationSync();
-
-    protected:
+        void ReadFromXml();
 
         /**
          * The enemy ID.
          */
-        int enemy_id_;
+        int id_;
 
         /**
          * The name of the enemy.
@@ -903,6 +646,44 @@ class Enemy{
          * Money given upon defeating the enemy.
          */
         unsigned int money_;
+
+        /**
+         * List of animations.
+         */
+        std::vector<unsigned int> animations_;
+
+        /**
+         * Elemental affinities.
+         */
+        std::vector<Element> elements_;
+
+        /**
+         * Status immunities and resistances.
+         */
+        std::vector<Immunity> immunities_;
+
+        /**
+         * Enemy attacks.
+         */
+        std::vector<Attack> attacks_;
+
+        /**
+         * List of attacks that can be used while manipulated.
+         *
+         * The first one is also the one used in berserkr. If empty, it means the enemy can't be
+         * manipulated or berserkd.
+         */
+        std::vector<unsigned int> manipulate_attacks_;
+
+        /**
+         * List of the items that can be stolen from the enemy.
+         */
+        std::vector<Item> steal_;
+
+        /**
+         * List of the items that can be dropped from the enemy.
+         */
+        std::vector<Item> drop_;
 
         /**
          * ID of the item the enemy can be morphed into. -1 if none..
@@ -940,9 +721,19 @@ class Enemy{
         unsigned int dex_;
 
         /**
-         * Enemy luck stat
+         * Enemy luck stat.
          */
         unsigned int lck_;
+
+        /**
+         * Enemy evasion stat.
+         */
+        unsigned int eva_;
+
+        /**
+         * Enemy magic evasion stat.
+         */
+        unsigned int meva_;
 
         /**
          * Enemy's current HP.
@@ -965,179 +756,34 @@ class Enemy{
         unsigned int mp_max_;
 
         /**
-         * The scene node the enemy is attached to.
+         * Enemy position in the battlefield (x, y, z).
          */
-        Ogre::SceneNode* scene_node_;
+        Ogre::Vector3 pos_;
 
         /**
-         * The enemy's model.
+         * Indicates if the enmy is in the frontline.
          */
-        Ogre::SceneNode* model_node_;
+        bool front_;
 
         /**
-         * The enemy's root node.
+         * Indicates if the enemy is visible.
          */
-        Ogre::SceneNode* model_root_node_;
+        bool visible_;
 
         /**
-         * The enemy's height.
+         * Indicates if the enemy can be targeted.
          */
-        float height_;
+        bool targeteable_;
 
         /**
-         * Enemy's movement sync queue.
+         * Indicates if the enemy's main script is active.
          */
-        std::vector<ScriptId> sync_;
+        bool active_;
 
         /**
-         * The speed of the models movements.
+         * Cover binary flags.
          */
-        float move_speed_;
-
-        /**
-         * The enemy's movement destination point.
-         */
-        Ogre::Vector3 move_position_;
-
-        /**
-         * Distance between the enemy and it's movement destination point.
-         */
-        float move_stop_distance_;
-
-        /**
-         * Indicates if the enemy can rotate while moving.
-         */
-        bool move_auto_rotation_;
-
-        /**
-         * Indicates if the enemy can animate while moving.
-         */
-        bool move_auto_animation_;
-
-        /**
-         * @todo Understand and document.
-         */
-        Ogre::Vector3 offset_position_start_;
-
-        /**
-         * @todo Understand and document.
-         */
-        Ogre::Vector3 offset_position_end_;
-
-        /**
-         * @todo Understand and document.
-         */
-        ActionType offset_type_;
-
-        /**
-         * @todo Understand and document.
-         */
-        float offset_seconds_;
-
-        /**
-         * @todo Understand and document.
-         */
-        float offset_current_seconds_;
-
-        /**
-         * @todo Understand and document.
-         */
-        std::vector<ScriptId> offset_sync_;
-
-        /**
-         * Turn movement direction.
-         */
-        TurnDirection turn_direction_;
-
-        /**
-         * Turn initial orientation.
-         */
-        Ogre::Degree turn_direction_start_;
-
-        /**
-         * Turn final orientation.
-         */
-        Ogre::Degree turn_direction_end_;
-
-        /**
-         * The turn type.
-         */
-        ActionType turn_type_;
-
-        /**
-         * Total turn duration.
-         */
-        float turn_seconds_;
-
-        /**
-         * Current turn duration.
-         */
-        float turn_current_seconds_;
-
-        /**
-         * Enemy's turning sync queue.
-         */
-        std::vector<ScriptId> turn_sync_;
-
-        /**
-         * The animation speed.
-         */
-        float animation_speed_;
-
-        /**
-         * The enemy's current animation name.
-         */
-        Ogre::String animation_current_name_;
-
-        /**
-         * Enemy's animation sync queue.
-         */
-        std::vector<ScriptId> animation_sync_;
-
-        /**
-         * The enemy's current animation state.
-         */
-        AnimationState animation_state_;
-
-        /**
-         * The enemy's current animation type.
-         */
-        AnimationPlayType animation_play_type_;
-
-        /**
-         * The name of the enemy's default name.
-         */
-        Ogre::String animation_default_;
-
-        /**
-         * @todo Understand and document.
-         */
-        float animation_end_time_;
-
-        /**
-         * Indicates if an automation must be played automatically.
-         */
-        bool animation_auto_play_;
-
-    private:
-
-        /**
-         * Constructor.
-         */
-        Enemy();
-
-        /**
-         * Calculates the angular distance to a point.
-         *
-         * @param[in] point Point to calculate the angular distance to.
-         * @return Angular distance to the specified point.
-         */
-        Ogre::Degree GetDirectionToPoint(Ogre::Vector2 point) const;
-
-        /**
-         * Index of the enemy on the battle.
-         */
-        int index_;
+        std::string cover_;
 
 };
 

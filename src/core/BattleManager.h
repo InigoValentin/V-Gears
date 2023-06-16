@@ -16,11 +16,8 @@
 #pragma once
 
 #include <OgreSingleton.h>
-#include "Entity.h"
-#include "EntityPoint.h"
-#include "EntityTrigger.h"
+#include "Enemy.h"
 #include "Event.h"
-#include "Walkmesh.h"
 
 /**
  * The battle manager.
@@ -137,6 +134,41 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
         virtual ~BattleManager();
 
         /**
+         * Starts a battle.
+         *
+         * @param id Battle ID.
+         */
+        void StartBattle(const unsigned int id);
+
+        /**
+         * Ends the current battle.
+         */
+        void EndBattle();
+
+        /**
+         * Retrieves the list of enemies.
+         *
+         * @return The list of enemies.
+         */
+        std::vector<Enemy> GetEnemies() const;
+
+        /**
+         * Adds an enemy to the manager for the next battle.
+         *
+         * @param[in] id Enemy ID.
+         * @param[in] pos Enemy position (x, y, z).
+         * @param[in] front True to set the enemy in the front row, false for back row.
+         * @param[in] visible Indicates enemy visibility.
+         * @param[in] targeteable Indicates if the enemy can be targeted.
+         * @param[in] active Indicates whether the enemy main script is active or not.
+         * @param[in] cover Cover binary flags string.
+         */
+        void AddEnemy(
+          const unsigned int id, const Ogre::Vector3 pos, const bool front, const bool visible,
+          const bool targeteable, const bool active, const std::string cover
+        );
+
+        /**
          * Handles an input event.
          *
          * @param[in] event Event to handle.
@@ -232,48 +264,24 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
         void SetArenaBattle(const bool arena);
 
         /**
-         * Adds an camera for the battle.
-         *
-         * @param[in] id The camera ID.
-         * @param[in] x X coordinate for the camera.
-         * @param[in] y Y coordinate for the camera.
-         * @param[in] z Z coordinate for the camera.
-         * @param[in] direction_x X rotation for the camera.
-         * @param[in] direction_y Y rotation for the camera.
-         * @param[in] direction_z Z rotation for the camera.
-         */
-        void AddCamera(
-          const unsigned int id, const int x, const int y, const int z,
-          const int direction_x, const int direction_y, const int direction_z
-        );
-
-        /**
          * Sets the initial camera.
          *
          * Can be set before configuring the camera, but if the battle starts and this index is
          * invalid, it's undefined behavior.
          *
-         * @param[in] ID of the initial camera.
+         * @param[in] id ID of the initial camera.
          */
         void SetInitialCamera(const unsigned int id);
 
         /**
-         * Adds an enemy to the enemy formation.
+         * Adds a camera for the next battle.
          *
-         * @param[in] id The enemy ID.
-         * @param[in] x X coordinate for the enemy (center, cursor position).
-         * @param[in] y Y coordinate for the enemy (center, cursor position).
-         * @param[in] z Z coordinate for the enemy (center, cursor position).
-         * @param[in] front_row True to set the enemy in the front row, fals efor the back row.
-         * @param[in] cover Binary cover flags. {@see
-         * https://wiki.ffrtt.ru/index.php/FF7/Battle/Battle_Scenes#Binary_.22Cover_Flags.22}.
-         * @param[in] visible Enemy visibility.
-         * @param[in] target Indicates if the enemy can be targeted.
-         * @param[in] script Indicates the main script for the enemy.
+         * @param[in] id Camera ID.
+         * @param[in] pos Camera position (x, y, z).
+         * @param[in] dir Camera orientation (x, y, z).
          */
-        void AddEnemy(
-          const unsigned int id, const int x, const int y, const int z, const bool front_row,
-          const Ogre::String cover, const bool visible, const bool target, const int script
+        void AddCamera(
+          const unsigned int id, const Ogre::Vector3 pos, const Ogre::Vector3 dir
         );
 
     private:
@@ -352,7 +360,7 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
         /**
          * List of enemies for the battle.
          */
-        // TODO std::vector<Enemy> enemy_;
+        std::vector<Enemy> enemies_;
 
         /**
          * List of party members in the battle.

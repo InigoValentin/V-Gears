@@ -20,6 +20,7 @@
 #include "Logger.h"
 #include "Entity.h"
 #include "EntityManager.h"
+#include "BattleManager.h"
 #include "AudioManager.h"
 #include "SavemapManager.h"
 #include "Timer.h"
@@ -266,6 +267,15 @@ void ScriptManager::InitBinds(){
             (void(EntityManager::*)(const char*, unsigned int)) &EntityManager::SetEntityToCharacter
           )
           .def("get_track_id", (int(EntityManager::*)(int)) &EntityManager::GetTrack)
+    ];
+
+    // Commands for the battle manager.
+    luabind::module(lua_state_)[
+        luabind::class_<BattleManager>("BattleManager")
+          .def(
+            "start_battle", (void(BattleManager::*)(const unsigned int)) &BattleManager::StartBattle
+          )
+          .def("end_battle", (void(BattleManager::*)()) &BattleManager::EndBattle)
     ];
 
     // Commands for the audio manager.
@@ -779,12 +789,11 @@ void ScriptManager::InitBinds(){
             luabind::value("NONE", MSL_NONE)
           ]
           .def(
-              "set_map_name",
-              (void(DialogsManager::*)(const char*)) &DialogsManager::ScriptSetMapName
-            )
-            .def(
-              "get_map_name", (std::string(DialogsManager::*)()) &DialogsManager::GetMapName
-            )
+            "set_map_name", (void(DialogsManager::*)(const char*)) &DialogsManager::ScriptSetMapName
+          )
+          .def(
+            "get_map_name", (std::string(DialogsManager::*)()) &DialogsManager::GetMapName
+          )
     ];
 
     // UI widget commands
@@ -886,6 +895,8 @@ void ScriptManager::InitBinds(){
     //auto b = luabind::globals(lua_state_)["entity_manager"];
     luabind::globals(lua_state_)["entity_manager"]
       = boost::ref(*(EntityManager::getSingletonPtr()));
+    luabind::globals(lua_state_)["battle_manager"]
+      = boost::ref(*(BattleManager::getSingletonPtr()));
     luabind::globals(lua_state_)["audio_manager"] = boost::ref(*(AudioManager::getSingletonPtr()));
     luabind::globals(lua_state_)["savemap_manager"]
       = boost::ref(*(SavemapManager::getSingletonPtr()));

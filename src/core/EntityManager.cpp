@@ -95,6 +95,7 @@ Ogre::Degree EntityManager::GetDirectionToPoint(
 }
 
 EntityManager::EntityManager():
+  module_(MODULE::FIELD),
   paused_(false),
   player_entity_(nullptr),
   player_move_(Ogre::Vector3::ZERO),
@@ -126,6 +127,50 @@ EntityManager::~EntityManager(){
       "EntityManager"
     );
     LOG_TRIVIAL("EntityManager destroyed.");
+}
+
+EntityManager::MODULE EntityManager::GetModule(){return module_;}
+
+bool EntityManager::IsModule(EntityManager::MODULE module){return (module_ == module);}
+
+bool EntityManager::IsFieldModule(){return (module_ == MODULE::FIELD);}
+
+bool EntityManager::IsBattleModule(){return (module_ == MODULE::BATTLE);}
+
+bool EntityManager::IsWorldModule(){return (module_ == MODULE::WORLD);}
+
+void EntityManager::SetModule(EntityManager::MODULE module){
+    if (module == MODULE::FIELD){
+        ClearBattle();
+        ClearWorld();
+    }
+    else if (module == MODULE::WORLD){
+        ClearBattle();
+        ClearField();
+    }
+    else if (module == MODULE::BATTLE) prev_module_ = module_;
+    module_ = module;
+}
+
+void EntityManager::SetFieldModule(){SetModule(MODULE::FIELD);}
+
+void EntityManager::SetBattleModule(){SetModule(MODULE::BATTLE);}
+
+void EntityManager::SetWorldModule(){SetModule(MODULE::WORLD);}
+
+void EntityManager::SetPreviousModule(){
+    if (module_ != MODULE::BATTLE)
+        LOG_WARNING(
+          "Called EntityManager::SetPreviousModule without battle module active. Doing nothing"
+          + "Current module is " + std::to_string(module_)
+        );
+    else if(module_ = prev_module_)
+        LOG_WARNING(
+          "Called EntityManager::SetPreviousModule but there is no previous module. Doing nothing"
+          + "Current module is " + std::to_string(module_)
+        );
+    else module_ = prev_module_;
+    return;
 }
 
 void EntityManager::Input(const VGears::Event& event){
@@ -171,7 +216,24 @@ void EntityManager::Input(const VGears::Event& event){
 void EntityManager::Update(){
     UpdateDebug();
     if (paused_ == true) return;
+    Update(module_);
+}
 
+void EntityManager::Update(MODULE module){
+    switch (module){
+        case MODULE::FIELD:
+            UpdateField();
+            break;
+        case MODULE::BATTLE:
+            UpdateBattle();
+            break;
+        case MODULE::WORLD:
+            UpdateWorld();
+            break;
+    }
+}
+
+void EntityManager::UpdateField(){
     // Update all entity scripts
     ScriptManager::getSingleton().Update(ScriptManager::ENTITY);
 
@@ -289,19 +351,47 @@ void EntityManager::Update(){
     background_2d_.Update();
 }
 
+void EntityManager::UpdateBattle(){
+    // TODO: Implement
+}
+
+void EntityManager::UpdateWorld(){
+    // TODO: Implement
+}
+
 void EntityManager::UpdateDebug(){
     grid_->setVisible(cv_debug_grid.GetB());
     axis_->setVisible(cv_debug_axis.GetB());
-    for (unsigned int i = 0; i < entity_.size(); ++ i) entity_[i]->UpdateDebug();
-    for (unsigned int i = 0; i < entity_triggers_.size(); ++ i) entity_triggers_[i]->UpdateDebug();
-    for (unsigned int i = 0; i < entity_points_.size(); ++ i) entity_points_[i]->UpdateDebug();
-    walkmesh_.UpdateDebug();
+    if (module_ == MODULE::BATTLE)
+        for (unsigned int i = 0; i < battle_entity_.size(); ++ i) battle_entity_[i]->UpdateDebug();
+    else{
+        for (unsigned int i = 0; i < entity_.size(); ++ i) entity_[i]->UpdateDebug();
+        for (unsigned int i = 0; i < entity_triggers_.size(); ++ i) entity_triggers_[i]->UpdateDebug();
+        for (unsigned int i = 0; i < entity_points_.size(); ++ i) entity_points_[i]->UpdateDebug();
+        walkmesh_.UpdateDebug();
+    }
     background_2d_.UpdateDebug();
 }
 
 void EntityManager::OnResize(){background_2d_.OnResize();}
 
-void EntityManager::Clear(){
+void EntityManager::Clear(){Clear(module_);}
+
+void EntityManager::Clear(MODULE module){
+    switch (module){
+        case MODULE::FIELD:
+            ClearField();
+            break;
+        case MODULE::BATTLE:
+            ClearBattle();
+            break;
+        case MODULE::WORLD:
+            ClearWorld();
+            break;
+    }
+}
+
+void EntityManager::ClearField(){
     walkmesh_.Clear();
     background_2d_.Clear();
     DialogsManager::getSingleton().Clear();
@@ -326,6 +416,20 @@ void EntityManager::Clear(){
     for (unsigned int i = 0; i < entity_scripts_.size(); ++ i)
         ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, entity_scripts_[i]);
     scene_node_->removeAndDestroyAllChildren();
+}
+
+void EntityManager::ClearBattle(){
+    // TODO implement
+}
+
+void EntityManager::ClearWorld(){
+    // TODO implement
+}
+
+void EntityManager::ClearAll(){
+    ClearField();
+    ClearBattle();
+    ClearWorld();
 }
 
 void EntityManager::ScriptSetPaused(const bool paused){paused_ = paused;}
@@ -356,7 +460,8 @@ void EntityManager::AddEntity(
     entity->setScale(scale);
     entity->SetIndex(index);
     entity->setRootOrientation(root_orientation);
-    entity_.push_back(entity);
+    if (module_ == MODULE::BATTLE) battle_entity_.push_back(entity);
+    else entity_.push_back(entity);
     ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
 }
 

@@ -48,9 +48,18 @@ void BattleSceneFile::Read(File file){
     }
     for (int c = 0; c < 4; c ++){
         for (int p = 0; p < 3; p ++){
-            scene_.camera[c].camera[p].x = file.readU16LE();
-            scene_.camera[c].camera[p].y = file.readU16LE();
-            scene_.camera[c].camera[p].x = file.readU16LE();
+            // Camera positions are stored as 16 bit floats.
+            // Here, ideally, 16 bits would be read, and then turned to float values, but...
+            // since the rounding is not really important, this is just reading the most
+            // significative byte as an integer, and skipping the other byte. Also, it's being
+            // multiplied by 10 to use bigger numbers in the XML.
+            scene_.camera[c].camera[p].x = file.readU8();
+            file.readU8();
+            // Y and Z are inverted in original data.
+            scene_.camera[c].camera[p].z = file.readU8();
+            file.readU8();
+            scene_.camera[c].camera[p].y = file.readU8();
+            file.readU8();
             scene_.camera[c].camera[p].d_x = file.readU16LE();
             scene_.camera[c].camera[p].d_y = file.readU16LE();
             scene_.camera[c].camera[p].d_x = file.readU16LE();
@@ -60,9 +69,18 @@ void BattleSceneFile::Read(File file){
     for (int f = 0; f < 4; f ++){
         for (int e = 0; e < 6; e ++){
             scene_.formation[f][e].id = file.readU16LE();
-            scene_.formation[f][e].x = file.readU16LE();
-            scene_.formation[f][e].y = file.readU16LE();
-            scene_.formation[f][e].z = file.readU16LE();
+            // Enemy positions are stored as 16 bit floats.
+            // Here, ideally, 16 bits would be read, and then turned to float values, but...
+            // since the rounding is not really important, this is just reading the most
+            // significative byte as an integer, and skipping the other byte. Also, it's being
+            // multiplied by 10 to use bigger numbers in the XML.
+            scene_.formation[f][e].x = file.readU8();
+            file.readU8();
+            // Y and Z are inverted in original data.
+            scene_.formation[f][e].z = file.readU8();
+            file.readU8();
+            scene_.formation[f][e].y = file.readU8();
+            file.readU8();
             scene_.formation[f][e].row = file.readU16LE();
             scene_.formation[f][e].cover_flags = file.readU16LE();
             scene_.formation[f][e].flags = file.readU32LE();
@@ -804,10 +822,10 @@ void BattleSceneFile::Read(File file){
             Formation::Camera camera;
             camera.x = scene_.camera[f].camera[c].x;
             camera.y = scene_.camera[f].camera[c].y;
-            camera.y = scene_.camera[f].camera[c].z;
+            camera.z = scene_.camera[f].camera[c].z;
             camera.d_x = scene_.camera[f].camera[c].d_x;
             camera.d_y = scene_.camera[f].camera[c].d_y;
-            camera.d_y = scene_.camera[f].camera[c].d_z;
+            camera.d_z = scene_.camera[f].camera[c].d_z;
             formation.camera_positions.push_back(camera);
         }
         if (scene_.setup[f].camera < formation.camera_positions.size())

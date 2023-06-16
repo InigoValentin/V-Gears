@@ -29,6 +29,34 @@
 class EntityManager : public Ogre::Singleton<EntityManager>{
 
     public:
+
+        /**
+         * The modules the entity manager can handle.
+         */
+        enum MODULE{
+
+            /**
+             * Field module.
+             *
+             * Used in field maps. It has background, walkmesh, entities...
+             */
+            FIELD = 0,
+
+            /**
+             * Battle module.
+             *
+             * Used in battles. During battles there is no walkmesh.
+             */
+            BATTLE = 1,
+
+            /**
+             * World map module.
+             *
+             * Used in the world map. It has background, walkmesh, entities...
+             */
+            WORLD = 2
+        };
+
         /**
          * Constructor.
          */
@@ -40,6 +68,88 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         virtual ~EntityManager();
 
         /**
+         * Retrieves the currently selected module.
+         *
+         * @return The currently selected module.
+         */
+        MODULE GetModule();
+
+        /**
+         * Checks the currently selected module.
+         *
+         * @param[in] module The module to check.
+         * @return True if the currently selected module matches the module to check, false
+         * otherwise.
+         */
+        bool IsModule(MODULE module);
+
+        /**
+         * Checks if the currently selected module is the field module.
+         *
+         * @return True if the currently selected module is the field module, false otherwise.
+         */
+        bool IsFieldModule();
+
+        /**
+         * Checks if the currently selected module is the battle module.
+         *
+         * @return True if the currently selected module is the battle module, false otherwise.
+         */
+        bool IsBattleModule();
+
+        /**
+         * Checks if the currently selected module is the world module.
+         *
+         * @return True if the currently selected module is the world module, false otherwise.
+         */
+        bool IsWorldModule();
+
+        /**
+         * Sets the current module for the entity manager.
+         *
+         * Operation availability and entity visibility will depend on the loaded module. Check
+         * {@see SetFieldModule()}, {@see SetBattleModule()} and {@see SetWorldModule()} for
+         * information about what changing modules implies.
+         */
+        void SetModule(MODULE module);
+
+        /**
+         * Sets the current module to the field mode.
+         *
+         * While the field module is active. All field entities are present and updated each frame,
+         * and the walkmesh is active. Setting the field module will clear all the information
+         * stored in the battle and world modules.
+         */
+        void SetFieldModule();
+
+        /**
+         * Sets the current module to the battle mode.
+         *
+         * While the battle module is active. Battle entities are present and updated each frame.
+         * Setting the field module will not clear the information stored in the field and world
+         * modules.
+         */
+        void SetBattleModule();
+
+        /**
+         * Sets the current module to the world map mode.
+         *
+         * While the world module is active. All world entities are present and updated each frame,
+         * and the walkmesh is active. Setting the world module will clear all the information
+         * stored in the battle and field modeules.
+         */
+        void SetWorldModule();
+
+        /**
+         * Sets the module that was loaded before a battle.
+         *
+         * Calling this will call either {@see SetFieldModule()} or {@see SetWorldModule},
+         * depending on which module was loaded before. Calling this while not in the battle module
+         * will do nothing.
+         */
+        void SetPreviousModule();
+
+        /**
          * Handles an input event.
          *
          * @param[in] event Event to handle.
@@ -48,6 +158,8 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
 
         /**
          * Updates the entities in the manager.
+         *
+         * It only updates the entities of the currenly selected module.
          */
         void Update();
 
@@ -65,8 +177,53 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
 
         /**
          * Clears the entity manager.
+         *
+         * Clears the entity manager for the currently loaded module. Check {@see ClearField()},
+         * {@see ClearBattle()}, {@see ClearWorld()} for information about what this does
+         * depending on the currently loaded module.
          */
         void Clear();
+
+        /**
+         * Clears the entity manager.
+         *
+         * Clears the entity manager for the selected module. Check {@see ClearField()},
+         * {@see ClearBattle()}, {@see ClearWorld()} for information about what this does
+         * depending on the currently loaded module.
+         *
+         * @param[in] module The module to clear.
+         */
+        void Clear(MODULE module);
+
+        /**
+         * Clear all field information in the entity manager.
+         *
+         * It clears the background, the walkmesh, any pending actions and all the field entities.
+         */
+        void ClearField();
+
+        /**
+         * Clear all battle information in the entity manager.
+         *
+         * It clears any pending actions and all the battle entities.
+         */
+        void ClearBattle();
+
+        /**
+         * Clear all world map information in the entity manager.
+         *
+         * It clears the background, the walkmesh, any pending actions and all the world entities.
+         */
+        void ClearWorld();
+
+        /**
+         * Clears the entity manager.
+         *
+         * Clears the entity manager for every module. Check {@see ClearField()},
+         * {@see ClearBattle()}, {@see ClearWorld()} for information about what this does
+         * depending on the currently loaded module.
+         */
+        void ClearAll();
 
         /**
          * Pauses or resumes an entity scripts.
@@ -400,6 +557,28 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         );
 
         /**
+         * Updates the field entities in the manager.
+         */
+        void UpdateField();
+
+        /**
+         * Updates the battle entities in the manager.
+         */
+        void UpdateBattle();
+
+        /**
+         * Updates the world map entities in the manager.
+         */
+        void UpdateWorld();
+
+        /**
+         * Updates the entities of one module in the manager.
+         *
+         * @param[in] module The module whose entities to update.
+         */
+        void Update(MODULE module);
+
+        /**
          * Attaches an entity to the walkmesh.
          *
          * It sets the triangle from the entity position coordinates. To account for multiple
@@ -506,6 +685,16 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         void SetNextScrollStep();
 
         /**
+         * The currently selected module.
+         */
+        MODULE module_;
+
+        /**
+         * The previous module.
+         */
+        MODULE prev_module_;
+
+        /**
          * Indicates if the script execution is paused.
          */
         bool paused_;
@@ -526,9 +715,14 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         Ogre::String entity_table_name_;
 
         /**
-         * The list of entities.
+         * The list of field or world entities.
          */
         std::vector<Entity*> entity_;
+
+        /**
+         * The list of battle entities.
+         */
+        std::vector<Entity*> battle_entity_;
 
         /**
          * The player controlled entity.

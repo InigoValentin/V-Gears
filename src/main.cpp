@@ -23,6 +23,7 @@
 #include "VGearsGameState.h"
 #include "common/VGearsApplication.h"
 #include "core/AudioManager.h"
+#include "core/BattleManager.h"
 #include "core/CameraManager.h"
 #include "core/ConfigCmdManager.h"
 #include "core/ConfigFile.h"
@@ -112,6 +113,7 @@ int main(int argc, char *argv[]){
         auto ui_manager = std::make_unique<UiManager>();
         auto dialogs_manager = std::make_unique<DialogsManager>();
         auto entity_manager = std::make_unique<EntityManager>();
+        auto battle_manager = std::make_unique<BattleManager>();
         auto console = std::make_unique<Console>();
         auto worldMapModule = std::make_unique<VGears::WorldmapModule>();
 
@@ -141,6 +143,7 @@ int main(int argc, char *argv[]){
 
         // Must be destroyed before the script manager.
         entity_manager.reset();
+        battle_manager.reset();
         ui_manager.reset();
         script_manager.reset();
     }

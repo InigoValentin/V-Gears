@@ -107,7 +107,7 @@ void FieldModuleInstruction::ProcessBATTLE(CodeGenerator* code_gen){
     const auto& battle_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
     );
-    code_gen->AddOutputLine((boost::format("entity_manager:battle_run(%1%)") % battle_id).str());
+    code_gen->AddOutputLine((boost::format("attle_manager:start_battle(%1%)") % battle_id).str());
 }
 
 void FieldModuleInstruction::ProcessBTLON(CodeGenerator* code_gen){

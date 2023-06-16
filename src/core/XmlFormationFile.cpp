@@ -42,9 +42,7 @@ void XmlFormationFile::LoadFormation(){
             Ogre::String name(GetString(node, "name"));
             BattleManager::getSingleton().SetLocation(id, name);
         }
-        else if (
-          node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "arena"
-        ){
+        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "arena"){
             bool is_arena = GetInt(node, "is_arena") == 1;
             BattleManager::getSingleton().SetArenaBattle(is_arena);
             if (is_arena){
@@ -53,10 +51,37 @@ void XmlFormationFile::LoadFormation(){
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "camera"){
             BattleManager::getSingleton().SetInitialCamera(GetInt(node, "initial"));
-            // TODO: Loop cameras
+            TiXmlNode* camera_node = node->FirstChild();
+            while (camera_node != nullptr){
+                int id = GetInt(camera_node, "id");
+                Ogre::Vector3 pos = Ogre::Vector3(
+                  GetInt(camera_node, "x"), GetInt(camera_node, "y"), GetInt(camera_node, "z")
+                );
+                Ogre::Vector3 dir = Ogre::Vector3(
+                  GetInt(camera_node, "direction_x"), GetInt(camera_node, "direction_y"),
+                  GetInt(camera_node, "direction_z")
+                );
+                BattleManager::getSingleton().AddCamera(id, pos, dir);
+                camera_node = camera_node->NextSibling();
+            }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "enemies"){
-            // TODO: Loop enemies
+            TiXmlNode* enemy_node = node->FirstChild();
+            while (enemy_node != nullptr){
+                int id = GetInt(enemy_node, "id");
+                Ogre::Vector3 pos = Ogre::Vector3(
+                  GetInt(enemy_node, "x"), GetInt(enemy_node, "y"), GetInt(enemy_node, "z")
+                );
+                bool front = GetInt(enemy_node, "row") == 1;
+                bool visible = GetInt(enemy_node, "visible") == 1;
+                bool targeteable = GetInt(enemy_node, "targeteable") == 1;
+                bool active = GetInt(enemy_node, "main_script_active") == 1;
+                std::string cover = GetString(enemy_node, "cover");
+                BattleManager::getSingleton().AddEnemy(
+                  id, pos, front, visible, targeteable, active, cover
+                );
+                enemy_node = enemy_node->NextSibling();
+            }
         }
         node = node->NextSibling();
     }

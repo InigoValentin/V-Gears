@@ -327,7 +327,7 @@ unsigned int BattleDataInstaller::ConvertModel(){
 void BattleDataInstaller::WriteEnemies(){
     for (Enemy enemy : enemies_){
         TiXmlDocument xml;
-        std::unique_ptr<TiXmlElement> container(new TiXmlElement("Enemy"));
+        std::unique_ptr<TiXmlElement> container(new TiXmlElement("enemy"));
         container->SetAttribute("id", enemy.id);
         container->SetAttribute("name", enemy.name);
         container->SetAttribute("level", enemy.level);
@@ -336,86 +336,87 @@ void BattleDataInstaller::WriteEnemies(){
         container->SetAttribute("money", enemy.money);
         container->SetAttribute("morph", enemy.morph);
         container->SetDoubleAttribute("back_damage", enemy.back_damage);
-        std::unique_ptr<TiXmlElement> stats(new TiXmlElement("Stats"));
-        std::unique_ptr<TiXmlElement> stat_str(new TiXmlElement("Stat"));
+        std::unique_ptr<TiXmlElement> stats(new TiXmlElement("stats"));
+        std::unique_ptr<TiXmlElement> stat_str(new TiXmlElement("stat"));
         stat_str->SetAttribute("id", "str");
         stat_str->SetAttribute("value", enemy.str);
         stats->LinkEndChild(stat_str.release());
-        std::unique_ptr<TiXmlElement> stat_mag(new TiXmlElement("Stat"));
+        std::unique_ptr<TiXmlElement> stat_mag(new TiXmlElement("stat"));
         stat_mag->SetAttribute("id", "mag");
         stat_mag->SetAttribute("value", enemy.mag);
         stats->LinkEndChild(stat_mag.release());
-        std::unique_ptr<TiXmlElement> stat_def(new TiXmlElement("Stat"));
+        std::unique_ptr<TiXmlElement> stat_def(new TiXmlElement("stat"));
         stat_def->SetAttribute("id", "def");
         stat_def->SetAttribute("value", enemy.def);
         stats->LinkEndChild(stat_def.release());
-        std::unique_ptr<TiXmlElement> stat_mdef(new TiXmlElement("Stat"));
+        std::unique_ptr<TiXmlElement> stat_mdef(new TiXmlElement("stat"));
         stat_mdef->SetAttribute("id", "mdef");
         stat_mdef->SetAttribute("value", enemy.mdef);
         stats->LinkEndChild(stat_mdef.release());
-        std::unique_ptr<TiXmlElement> stat_spd(new TiXmlElement("Stat"));
+        std::unique_ptr<TiXmlElement> stat_spd(new TiXmlElement("stat"));
         stat_spd->SetAttribute("id", "spd");
         stat_spd->SetAttribute("value", enemy.spd);
         stats->LinkEndChild(stat_spd.release());
-        std::unique_ptr<TiXmlElement> stat_lck(new TiXmlElement("Stat"));
+        std::unique_ptr<TiXmlElement> stat_lck(new TiXmlElement("stat"));
         stat_lck->SetAttribute("id", "lck");
         stat_lck->SetAttribute("value", enemy.lck);
         stats->LinkEndChild(stat_lck.release());
-        std::unique_ptr<TiXmlElement> stat_eva(new TiXmlElement("Stat"));
+        std::unique_ptr<TiXmlElement> stat_eva(new TiXmlElement("stat"));
         stat_eva->SetAttribute("id", "eva");
         stat_eva->SetAttribute("value", enemy.eva);
         stats->LinkEndChild(stat_eva.release());
         container->LinkEndChild(stats.release());
-        std::unique_ptr<TiXmlElement> elements(new TiXmlElement("Elements"));
+        std::unique_ptr<TiXmlElement> elements(new TiXmlElement("elements"));
         for (Enemy::Element element : enemy.elements){
-            std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("Element"));
+            std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("element"));
             xml_element->SetAttribute("id", element.id);
             xml_element->SetDoubleAttribute("factor", element.factor);
             elements->LinkEndChild(xml_element.release());
         }
         container->LinkEndChild(elements.release());
-        std::unique_ptr<TiXmlElement> immunities(new TiXmlElement("Immunities"));
+        std::unique_ptr<TiXmlElement> immunities(new TiXmlElement("immunities"));
         for (Enemy::Immunity immunity : enemy.immunities){
-            std::unique_ptr<TiXmlElement> xml_immunity(new TiXmlElement("Immunity"));
+            std::unique_ptr<TiXmlElement> xml_immunity(new TiXmlElement("immunity"));
             xml_immunity->SetAttribute("status", immunity.status);
             xml_immunity->SetDoubleAttribute("rate", immunity.rate);
             immunities->LinkEndChild(xml_immunity.release());
         }
         container->LinkEndChild(immunities.release());
-        std::unique_ptr<TiXmlElement> attacks(new TiXmlElement("Attacks"));
+        std::unique_ptr<TiXmlElement> attacks(new TiXmlElement("attacks"));
         for (Enemy::Attack attack : enemy.attacks){
-            std::unique_ptr<TiXmlElement> xml_attack(new TiXmlElement("Attack"));
+            std::unique_ptr<TiXmlElement> xml_attack(new TiXmlElement("attack"));
             xml_attack->SetAttribute("status", attack.id);
             xml_attack->SetAttribute("camera", attack.camera);
             attacks->LinkEndChild(xml_attack.release());
         }
         container->LinkEndChild(attacks.release());
-        std::unique_ptr<TiXmlElement> manip_attacks(new TiXmlElement("ManipulateAttacks"));
+        std::unique_ptr<TiXmlElement> manip_attacks(new TiXmlElement("manipulate"));
+        manip_attacks->SetAttribute("manipulable", enemy.manipulate_attacks.size() > 0 ? 1 : 0);
         for (u16 attack : enemy.manipulate_attacks){
-            std::unique_ptr<TiXmlElement> xml_manip_attack(new TiXmlElement("Attack"));
+            std::unique_ptr<TiXmlElement> xml_manip_attack(new TiXmlElement("attack"));
             xml_manip_attack->SetAttribute("id", attack);
             manip_attacks->LinkEndChild(xml_manip_attack.release());
         }
         container->LinkEndChild(manip_attacks.release());
-        std::unique_ptr<TiXmlElement> steals(new TiXmlElement("Steal"));
+        std::unique_ptr<TiXmlElement> steals(new TiXmlElement("steal"));
         for (Enemy::Item item : enemy.steal){
-            std::unique_ptr<TiXmlElement> xml_steal(new TiXmlElement("Item"));
+            std::unique_ptr<TiXmlElement> xml_steal(new TiXmlElement("item"));
             xml_steal->SetAttribute("id", item.id);
             xml_steal->SetDoubleAttribute("rate", item.rate);
             steals->LinkEndChild(xml_steal.release());
         }
         container->LinkEndChild(steals.release());
-        std::unique_ptr<TiXmlElement> drops(new TiXmlElement("Drops"));
+        std::unique_ptr<TiXmlElement> drops(new TiXmlElement("drop"));
         for (Enemy::Item item : enemy.drop){
-            std::unique_ptr<TiXmlElement> xml_drop(new TiXmlElement("Item"));
+            std::unique_ptr<TiXmlElement> xml_drop(new TiXmlElement("item"));
             xml_drop->SetAttribute("id", item.id);
             xml_drop->SetDoubleAttribute("rate", item.rate);
             drops->LinkEndChild(xml_drop.release());
         }
         container->LinkEndChild(drops.release());
-        std::unique_ptr<TiXmlElement> animations(new TiXmlElement("Animations"));
+        std::unique_ptr<TiXmlElement> animations(new TiXmlElement("animations"));
         for (unsigned int animation : enemy.animations){
-            std::unique_ptr<TiXmlElement> xml_animation(new TiXmlElement("Animation"));
+            std::unique_ptr<TiXmlElement> xml_animation(new TiXmlElement("animation"));
             xml_animation->SetAttribute("id", animation);
             animations->LinkEndChild(xml_animation.release());
         }
@@ -645,7 +646,7 @@ std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){
     std::string file_name = "game/enemy/";
     std::string id = std::to_string(enemy.id);
     while (id.size() < 4) id = "0" + id;
-    file_name += (id + "_");
+    /*file_name += (id + "_");
     for (int n = 0; n < enemy.name.size(); n ++){
         if (
           (enemy.name[n] >= '0' && enemy.name[n] <= '9')
@@ -654,8 +655,8 @@ std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){
         ){
             file_name += enemy.name[n];
         }
-    }
-    file_name += ".xml";
+    }*/
+    file_name += id + ".xml";
     return file_name;
 }
 

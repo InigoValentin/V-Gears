@@ -19,8 +19,11 @@
 #include <OgreRoot.h>
 #include <OgreViewport.h>
 #include "core/BattleManager.h"
+#include "core/Enemy.h"
+#include "core/EntityManager.h"
 #include "core/ConfigVar.h"
 #include "core/Logger.h"
+#include "core/XmlFormationFile.h"
 
 /**
  * Battle manager singleton.
@@ -42,6 +45,41 @@ BattleManager::~BattleManager(){
       "BattleManager"
     );
     LOG_TRIVIAL("BattleManager destroyed.");
+}
+
+void BattleManager::StartBattle(const unsigned int id){
+    formation_id_ = id;
+    EntityManager::getSingleton().SetBattleModule();
+    // Load the formation XML file (name is dddd.xml)
+    std::string filename = std::to_string(formation_id_);
+    while (filename.length() < 4) filename = "0" + filename;
+    filename = "./data/game/formation/" + filename + ".xml";
+    // This sets the data in the battle manager singleton.
+    XmlFormationFile(filename).LoadFormation();
+    // TODO: Read formation file, enemy files...
+    // TODO: Music
+    // TODO: Camera
+}
+
+void BattleManager::EndBattle(){
+    formation_id_ = -1;
+    EntityManager::getSingleton().SetPreviousModule();
+}
+
+std::vector<Enemy> BattleManager::GetEnemies() const{return enemies_;}
+
+void BattleManager::AddEnemy(
+  const unsigned int id, const Ogre::Vector3 pos, const bool front, const bool visible,
+  const bool targeteable, const bool active, const std::string cover
+){
+    Enemy* enemy = new Enemy(id, pos, front, visible, targeteable, active, cover);
+    enemies_.push_back(*enemy);
+}
+
+void BattleManager::AddCamera(
+  const unsigned int id, const Ogre::Vector3 pos, const Ogre::Vector3 dir
+){
+    // TODO implrement
 }
 
 void BattleManager::Input(const VGears::Event& event){
@@ -122,18 +160,4 @@ void BattleManager::SetLocation(const int id, const Ogre::String name){
 
 void BattleManager::SetArenaBattle(const bool arena){arena_battle_ = arena;}
 
-void BattleManager::AddCamera(
-  const unsigned int id, const int x, const int y, const int z,
-  const int direction_x, const int direction_y, const int direction_z
-){
-    // TODO
-}
-
 void BattleManager::SetInitialCamera(const unsigned int id){initial_camera_ = id;}
-
-void BattleManager::AddEnemy(
-  const unsigned int id, const int x, const int y, const int z, const bool front_row,
-  const Ogre::String cover, const bool visible, const bool target, const int script
-){
-    // TODO
-}
