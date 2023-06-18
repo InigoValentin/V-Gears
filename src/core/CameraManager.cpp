@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
@@ -32,6 +33,7 @@ ConfigVar cv_cam_speed("camera_speed", "Camera speed", "0.02");
 template<>CameraManager* Ogre::Singleton<CameraManager>::msSingleton = nullptr;
 
 CameraManager::CameraManager():
+  battle_(false),
   camera_free_(false),
   camera_free_rotate_(false),
   d2_position_(Ogre::Vector3::ZERO),
@@ -43,8 +45,15 @@ CameraManager::CameraManager():
     InitCommands();
     camera_ = Ogre::Root::getSingleton().getSceneManager("Scene")
       ->createCamera("Camera");
+    position_initial_
+      = Ogre::Vector3(camera_->getPosition().x, camera_->getPosition().y, camera_->getPosition().z);
+    orientation_initial_ = Ogre::Quaternion(
+      camera_->getOrientation().w, camera_->getOrientation().x,
+      camera_->getOrientation().z, camera_->getOrientation().z
+    );
     camera_->setNearClipDistance(0.001f);
     camera_->setFarClipDistance(1000.0f);
+    //camera_->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
     //camera_->setPosition(Ogre::Vector3(0, 0, 0));
     Ogre::Root::getSingleton().getSceneManager("Scene")->getRootSceneNode()
       ->setPosition(Ogre::Vector3(0, 0, 0));
@@ -193,6 +202,56 @@ void CameraManager::Set2DCamera(
     Set2DScroll(Ogre::Vector2::ZERO);
 }
 
+void CameraManager::StartBattleCamera(
+  const Ogre::Vector3 position, const Ogre::Vector3 orientation
+){
+    if (battle_){
+        LOG_ERROR("Tried to start battle camera but the CameraManager is already in battle mode");
+        return;
+    }
+    battle_ = true;
+    std::cout << "CAMERA BATTLE START: " << camera_->getPosition().x << ", " << camera_->getPosition().y << ", " << camera_->getPosition().z << ", "
+        << camera_->getOrientation().w << ", "<< camera_->getOrientation().x << ", " << camera_->getOrientation().y << ", "
+        << camera_->getOrientation().z << std::endl;
+    position_backup_ = Ogre::Vector3(
+      camera_->getPosition().x, camera_->getPosition().y,
+      camera_->getPosition().z
+    );
+    orientation_backup_ = Ogre::Quaternion(
+      camera_->getOrientation().w, camera_->getOrientation().x,
+      camera_->getOrientation().y, camera_->getOrientation().z
+    );
+    camera_->setPosition(position);
+    //CameraManager::getSingleton().GetCurrentCamera()->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+    camera_->lookAt(Ogre::Vector3(orientation.x, orientation.y, camera_->getPosition().z));
+    camera_->lookAt(orientation);
+
+
+    std::cout << "CAMERA BATTLE START FINISH: " << camera_->getPosition().x << ", " << camera_->getPosition().y << ", " << camera_->getPosition().z << ", "
+            << camera_->getOrientation().w << ", "<< camera_->getOrientation().x << ", " << camera_->getOrientation().y << ", "
+            << camera_->getOrientation().z << std::endl;
+}
+
+void CameraManager::EndBattleCamera(){
+    if (!battle_){
+        LOG_ERROR("Tried to end battle camera but the CameraManager is not in battle mode");
+        return;
+    }
+    battle_ = false;
+        std::cout << "CAMERA BATTLE END: " << camera_->getPosition().x << ", " << camera_->getPosition().y << ", " << camera_->getPosition().z << ", "
+            << camera_->getOrientation().w << ", "<< camera_->getOrientation().x << ", " << camera_->getOrientation().y << ", "
+            << camera_->getOrientation().z << std::endl;
+    CameraManager::getSingleton().GetCurrentCamera()->setPosition(
+      Ogre::Vector3(position_backup_.x, position_backup_.y, position_backup_.z)
+    );
+    CameraManager::getSingleton().GetCurrentCamera()->setOrientation(Ogre::Quaternion(
+      orientation_backup_.w, orientation_backup_.x, orientation_backup_.y, orientation_backup_.z
+    ));
+    std::cout << "CAMERA BATTLE END FINISH: " << camera_->getPosition().x << ", " << camera_->getPosition().y << ", " << camera_->getPosition().z << ", "
+                << camera_->getOrientation().w << ", "<< camera_->getOrientation().x << ", " << camera_->getOrientation().y << ", "
+                << camera_->getOrientation().z << std::endl;
+}
+
 void CameraManager::Set2DScroll(const Ogre::Vector2& position){
     d2_scroll_ = position;
     if(camera_free_ == true) return;
@@ -241,4 +300,20 @@ void CameraManager::EnableWireFrame(bool enable){
         //);
         camera_->setFarClipDistance(900000000);
     }
+}
+
+void CameraManager::ScriptSetCamera(
+  const int x, const int y, const int z, const int d_x, const int d_y, const int d_z
+){
+    Ogre::Vector3 position = Ogre::Vector3(x, y, z);
+    camera_->setPosition(position);
+    //Ogre::Quaternion orientation = position.getRotationTo(Ogre::Vector3(d_x, d_y, d_z));
+    //camera_->setOrientation(Ogre::Quaternion(orientation_initial_.w, orientation_initial_.x, orientation_initial_.y, orientation_initial_.z));
+    //CameraManager::getSingleton().GetCurrentCamera()->setFixedYawAxis(false);
+    //camera_->setOrientation(orientation);
+    //camera_->roll(orientation.getRoll());
+    //camera_->yaw(orientation.getYaw());
+    //camera_->pitch(orientation.getPitch());
+    camera_->lookAt(Ogre::Vector3(d_x, d_y, camera_->getPosition().z));
+    camera_->lookAt(Ogre::Vector3(d_x, d_y, d_z));
 }

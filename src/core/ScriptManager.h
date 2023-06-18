@@ -166,6 +166,33 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         };
 
         /**
+         * The modules the script manager can handle.
+         */
+        enum MODULE{
+
+            /**
+             * Field module.
+             *
+             * Used in field maps. It has background, walkmesh, entities...
+             */
+            FIELD = 0,
+
+            /**
+             * Battle module.
+             *
+             * Used in battles. During battles there is no walkmesh.
+             */
+            BATTLE = 1,
+
+            /**
+             * World map module.
+             *
+             * Used in the world map. It has background, walkmesh, entities...
+             */
+            WORLD = 2
+        };
+
+        /**
          * Constructor.
          */
         ScriptManager();

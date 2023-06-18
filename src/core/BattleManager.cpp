@@ -13,12 +13,14 @@
  * GNU General Public License for more details.
  */
 
+#include <algorithm>
 #include <iostream>
 #include <cmath>
 #include <OgreEntity.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
 #include "core/BattleManager.h"
+#include "core/CameraManager.h"
 #include "core/Enemy.h"
 #include "core/EntityManager.h"
 #include "core/ConfigVar.h"
@@ -32,6 +34,8 @@ template<>BattleManager *Ogre::Singleton<BattleManager>::msSingleton = nullptr;
 
 ConfigVar cv_debug_battle_grid("debug_battle_grid", "Draw debug battle grid", "false");
 ConfigVar cv_debug_battle_axis("debug_battle_axis", "Draw debug battle axis", "false");
+
+const float BattleManager::MODEL_SCALE = 0.0015f;
 
 BattleManager::BattleManager(): paused_(false){
     LOG_TRIVIAL("BattleManager created.");
@@ -56,14 +60,30 @@ void BattleManager::StartBattle(const unsigned int id){
     filename = "./data/game/formation/" + filename + ".xml";
     // This sets the data in the battle manager singleton.
     XmlFormationFile(filename).LoadFormation();
-    // TODO: Read formation file, enemy files...
     // TODO: Music
-    // TODO: Camera
+    if (camera_.size() == 0)
+        LOG_ERROR("Unable to start battle camera. No cameras defined in the BattleManager.");
+    else if (initial_camera_ > camera_.size()){
+        LOG_ERROR(
+          "Unable to set initial battle camera. Default camera is set to "
+          + std::to_string(initial_camera_) + " but only " + std::to_string(camera_.size())
+          + " cameras are defined in the CameraManager. Defaulting to first camera.");
+        CameraManager::getSingleton().StartBattleCamera(
+          camera_.at(0).location, camera_.at(0).orientation
+        );
+    }
+    else
+        CameraManager::getSingleton().StartBattleCamera(
+          camera_.at(initial_camera_).location, camera_.at(initial_camera_).orientation
+        );
+    LoadParty();
+    //EndBattle();// TODO: Debug
 }
 
 void BattleManager::EndBattle(){
     formation_id_ = -1;
     EntityManager::getSingleton().SetPreviousModule();
+    CameraManager::getSingleton().EndBattleCamera();
 }
 
 std::vector<Enemy> BattleManager::GetEnemies() const{return enemies_;}
@@ -74,12 +94,29 @@ void BattleManager::AddEnemy(
 ){
     Enemy* enemy = new Enemy(id, pos, front, visible, targeteable, active, cover);
     enemies_.push_back(*enemy);
+    EntityManager::getSingleton().AddBattleEntity(
+      enemy->GetName() + "_" + std::to_string(enemies_.size() - 1),
+      "models/battle/enemy/" + enemy->GetModel() + ".mesh", enemy->GetPos(), Ogre::Degree(0),
+      Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), id, visible
+    );
+
+    /*EntityManager::getSingleton().AddBattleEntity(
+      enemy->GetName() + "_" + std::to_string(enemies_.size() - 1),
+      "models/battle/enemy/" + enemy->GetModel() + ".mesh",
+      Ogre::Vector3(
+        28.554688 + 5 * (enemies_.size() - 1), 214.312500 + 10 * (enemies_.size() - 1), 2.421875
+      ), Ogre::Degree(0), Ogre::Vector3(0.0015, 0.0015, 0.0015), id, visible
+    );*/
 }
 
 void BattleManager::AddCamera(
   const unsigned int id, const Ogre::Vector3 pos, const Ogre::Vector3 dir
 ){
-    // TODO implrement
+    BattleCamera camera;
+    camera.id = id;
+    camera.location = pos;
+    camera.orientation = dir;
+    camera_.push_back(camera);
 }
 
 void BattleManager::Input(const VGears::Event& event){
@@ -161,3 +198,31 @@ void BattleManager::SetLocation(const int id, const Ogre::String name){
 void BattleManager::SetArenaBattle(const bool arena){arena_battle_ = arena;}
 
 void BattleManager::SetInitialCamera(const unsigned int id){initial_camera_ = id;}
+
+void BattleManager::LoadParty(){
+    std::vector<int> positions {0, 1, 2};
+    Ogre::Vector3 position = Ogre::Vector3(0, 5, 0);
+    // Randomize party member positions.
+    std::random_shuffle(positions.begin(), positions.end());
+    for (int i = 0; i < positions.size(); i ++){
+        EntityManager::getSingleton().AddBattleEntity(
+          "party_" + std::to_string(i),
+          "models/fields/entities/avfe.mesh", position, Ogre::Degree(0),
+          //Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), 100 + i, true
+          Ogre::Vector3(0.1, 0.1, 0.1), 100 + i, true
+        );
+
+        // Next position in Y axis
+        position.x += ((i + 1) * (i % 2 == 0 ? 5 : -5));
+
+
+    }
+
+    EntityManager::getSingleton().AddBattleEntity(
+          "center",
+          "models/fields/entities/avfe.mesh", position, Ogre::Degree(0),
+          //Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), 100 + i, true
+          Ogre::Vector3(0.01, 0.01, 0.01), 999, true
+        );
+
+}

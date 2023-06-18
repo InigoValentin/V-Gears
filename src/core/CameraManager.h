@@ -88,6 +88,25 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
         );
 
         /**
+         * Starts the battle camera
+         *
+         * Saves the position and orientation of the current camera to return once the battle is
+         * over.
+         *
+         * @param[in] position Initial position of the battle camera.
+         * @param[in] orientation Initial orientation of the battle camera. It indicates the point
+         * the camera will look at.
+         */
+        void StartBattleCamera(const Ogre::Vector3 position, const Ogre::Vector3 orientation);
+
+        /**
+         * Ends the battle camera
+         *
+         * Returns the camera to the state it was when {@see StartBattleCamera} was called.
+         */
+        void EndBattleCamera();
+
+        /**
          * Sets the camera scroll.
          *
          * Moves the camera to the desired position. If the camera is in free
@@ -138,6 +157,23 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
          */
         void EnableWireFrame(bool enable);
 
+        /**
+         * Sets the camera position and orientation.
+         *
+         * It's only meand to be used for 3D cameras (battle, world map...), and using it while on
+         * a field can have unexpected results.
+         *
+         * @param[in] x X coordinate for the camera position.
+         * @param[in] y Y coordinate for the camera position.
+         * @param[in] z Z coordinate for the camera position.
+         * @param[in] d_x X coordinate of the point the camera looks at.
+         * @param[in] d_y Y coordinate of the point the camera looks at.
+         * @param[in] d_y Z coordinate of the point the camera looks at.
+         */
+        void ScriptSetCamera(
+          const int x, const int y, const int z, const int d_x, const int d_y, const int d_z
+        );
+
     private:
 
         /**
@@ -148,6 +184,11 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
         void InitCommands();
 
         /**
+         * Indicates if the camera is in battle mode.
+         */
+        bool battle_;
+
+        /**
          * The camera.
          */
         Ogre::Camera *camera_;
@@ -156,6 +197,26 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
          * The viewport.
          */
         Ogre::Viewport *viewport_;
+
+        /**
+         * The initial position of the camera, saved when created.
+         */
+        Ogre::Vector3 position_initial_;
+
+        /**
+         * The initial orientation of the camera, saved when created.
+         */
+        Ogre::Quaternion orientation_initial_;
+
+        /**
+         * A backup of the field or world camera position for when the battle camera is activated.
+         */
+        Ogre::Vector3 position_backup_;
+
+        /**
+         * A backup of the field or world camera orientation for when the battle camera is active.
+         */
+        Ogre::Quaternion orientation_backup_;
 
         /**
          * Flag to indicate a free camera.

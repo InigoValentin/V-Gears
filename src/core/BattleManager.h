@@ -124,6 +124,29 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
         };
 
         /**
+         * A battle camera settings.
+         */
+        struct BattleCamera{
+
+            /**
+             * Camera ID.
+             */
+            unsigned int id;
+
+            /**
+             * Camera location.
+             */
+            Ogre::Vector3 location;
+
+            /**
+             * Camera orientation.
+             *
+             * It's not an angle, or a rotation. but the coordinates the camera points at.
+             */
+            Ogre::Vector3 orientation;
+        };
+
+        /**
          * Constructor.
          */
         BattleManager();
@@ -278,13 +301,23 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
          *
          * @param[in] id Camera ID.
          * @param[in] pos Camera position (x, y, z).
-         * @param[in] dir Camera orientation (x, y, z).
+         * @param[in] dir Camera orientation (a point the camera will point to).
          */
         void AddCamera(
           const unsigned int id, const Ogre::Vector3 pos, const Ogre::Vector3 dir
         );
 
     private:
+
+        /**
+         * Loads the party members into the battle.
+         */
+        void LoadParty();
+
+        /**
+         * Scale factor for all battle models.
+         */
+        static const float MODEL_SCALE;
 
         /**
          * The scene node.
@@ -310,7 +343,7 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
         //BattleLocation location_;
 
         // TODO: Camera list
-        //std::vector<BattleCamera> camera_;
+        std::vector<BattleCamera> camera_;
 
         /**
          * Default camera ID

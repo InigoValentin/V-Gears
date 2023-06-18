@@ -19,6 +19,7 @@
 #include <iostream>
 #include "BattleSceneFile.h"
 #include "VGearsUtility.h"
+#include "FF7Data.h"
 
 BattleSceneFile::BattleSceneFile(const unsigned int id, File file): id_(id){Read(file);}
 
@@ -48,39 +49,54 @@ void BattleSceneFile::Read(File file){
     }
     for (int c = 0; c < 4; c ++){
         for (int p = 0; p < 3; p ++){
-            // Camera positions are stored as 16 bit floats.
-            // Here, ideally, 16 bits would be read, and then turned to float values, but...
-            // since the rounding is not really important, this is just reading the most
-            // significative byte as an integer, and skipping the other byte. Also, it's being
-            // multiplied by 10 to use bigger numbers in the XML.
-            scene_.camera[c].camera[p].x = file.readU8();
-            file.readU8();
+            // Camera positions are stored as 16 bit floats. Here, 16 bit are being read, then, the
+            // sign is checked to fit it into -32766 and 32767 (0x7F9b). Then, the number is
+            // divided by 255 (0xFF) to keep just the integer part.
+            //
+            scene_.camera[c].camera[p].x = file.readU16LE();
+            if (scene_.camera[c].camera[p].x > 0x7F9B) scene_.camera[c].camera[p].x -= 0xFFFF;
+            scene_.camera[c].camera[p].x /= 0xFF;
             // Y and Z are inverted in original data.
-            scene_.camera[c].camera[p].z = file.readU8();
-            file.readU8();
-            scene_.camera[c].camera[p].y = file.readU8();
-            file.readU8();
+            scene_.camera[c].camera[p].y = file.readU16LE();
+            if (scene_.camera[c].camera[p].y > 0x7F9B) scene_.camera[c].camera[p].y -= 0xFFFF;
+            scene_.camera[c].camera[p].y /= 0xFF;
+            scene_.camera[c].camera[p].z = file.readU16LE();
+            if (scene_.camera[c].camera[p].z > 0x7F9B) scene_.camera[c].camera[p].z -= 0xFFFF;
+            scene_.camera[c].camera[p].z /= 0xFF;
             scene_.camera[c].camera[p].d_x = file.readU16LE();
+            if (scene_.camera[c].camera[p].d_x > 0x7F9B) scene_.camera[c].camera[p].d_x -= 0xFFFF;
+            scene_.camera[c].camera[p].d_x /= 0xFF;
             scene_.camera[c].camera[p].d_y = file.readU16LE();
-            scene_.camera[c].camera[p].d_x = file.readU16LE();
+            if (scene_.camera[c].camera[p].d_y > 0x7F9B) scene_.camera[c].camera[p].d_y -= 0xFFFF;
+            scene_.camera[c].camera[p].d_y /= 0xFF;
+            scene_.camera[c].camera[p].d_z = file.readU16LE();
+            if (scene_.camera[c].camera[p].d_z > 0x7F9B) scene_.camera[c].camera[p].d_z -= 0xFFFF;
+            scene_.camera[c].camera[p].d_z /= 0xFF;
         }
         for (int p = 0; p < 12; p ++) scene_.camera[c].unused[p] = file.readU8();
     }
     for (int f = 0; f < 4; f ++){
         for (int e = 0; e < 6; e ++){
             scene_.formation[f][e].id = file.readU16LE();
-            // Enemy positions are stored as 16 bit floats.
-            // Here, ideally, 16 bits would be read, and then turned to float values, but...
-            // since the rounding is not really important, this is just reading the most
-            // significative byte as an integer, and skipping the other byte. Also, it's being
-            // multiplied by 10 to use bigger numbers in the XML.
-            scene_.formation[f][e].x = file.readU8();
-            file.readU8();
+            // Enemy positions are stored as 16 bit floats. Here, 16 bit are being read, then, the
+            // sign is checked to fit it into -32766 and 32767 (0x7F9b). Then, the number is
+            // divided by 255 (0xFF) to keep just the integer part.
+            scene_.formation[f][e].x = file.readU16LE();
+            if (scene_.formation[f][e].id == 347) std::cout << "TAILVAULT: x1 = " << std::to_string(scene_.formation[f][e].x) << std::endl;
+            if (scene_.formation[f][e].x > 0x7F9B) scene_.formation[f][e].x -= 0xFFFF;
+            scene_.formation[f][e].x /= 0xFF;
+            if (scene_.formation[f][e].id == 347) std::cout << "         : x2 = " << std::to_string(scene_.formation[f][e].x) << std::endl;
             // Y and Z are inverted in original data.
-            scene_.formation[f][e].z = file.readU8();
-            file.readU8();
-            scene_.formation[f][e].y = file.readU8();
-            file.readU8();
+            scene_.formation[f][e].y = file.readU16LE();
+            if (scene_.formation[f][e].id == 347) std::cout << "         : y1 = " << std::to_string(scene_.formation[f][e].y) << std::endl;
+            if (scene_.formation[f][e].y > 0x7F9B) scene_.formation[f][e].y -= 0xFFFF;
+            scene_.formation[f][e].y /= 0xFF;
+            if (scene_.formation[f][e].id == 347) std::cout << "         : y2 = " << std::to_string(scene_.formation[f][e].y) << std::endl;
+            scene_.formation[f][e].z = file.readU16LE();
+            if (scene_.formation[f][e].id == 347) std::cout << "         : z1 = " << std::to_string(scene_.formation[f][e].z) << std::endl;
+            if (scene_.formation[f][e].z > 0x7F9B) scene_.formation[f][e].z -= 0xFFFF;
+            scene_.formation[f][e].z /= 0xFF;
+            if (scene_.formation[f][e].id == 347) std::cout << "         : z2 = " << std::to_string(scene_.formation[f][e].z) << std::endl;
             scene_.formation[f][e].row = file.readU16LE();
             scene_.formation[f][e].cover_flags = file.readU16LE();
             scene_.formation[f][e].flags = file.readU32LE();
@@ -159,6 +175,7 @@ void BattleSceneFile::Read(File file){
         // Create a new enemy
         Enemy enemy;
         enemy.id = scene_.enemy[e];
+        enemy.model = FF7Data::GetEnemyModelFromEnemyId(enemy.id);
         enemy.name = VGears::Utility::DecodeString(scene_.enemy_data[e].name, 32);
         enemy.level = scene_.enemy_data[e].level;
         enemy.str = scene_.enemy_data[e].str;

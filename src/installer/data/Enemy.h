@@ -215,6 +215,11 @@ struct Enemy{
     std::vector<Item> drop;
 
     /**
+     * Two-letter model code.
+     */
+    std::string model;
+
+    /**
      * ID of the item the enemy can be morphed into.
      *
      * If -1, it can't be morphed.

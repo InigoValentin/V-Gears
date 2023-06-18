@@ -28,6 +28,7 @@ void XmlEnemyFile::LoadEnemy(Enemy& enemy){
         return;
     }
     enemy.SetId(GetInt(node, "id"));
+    enemy.SetModel(GetString(node, "model"));
     enemy.SetName(GetString(node, "name"));
     enemy.SetLevel(GetInt(node, "level"));
     enemy.SetExp(GetInt(node, "exp"));

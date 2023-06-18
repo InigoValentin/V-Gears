@@ -143,32 +143,32 @@ class BattleSceneFile{
                     /**
                      * X position.
                      */
-                    u16 x;
+                    int x;
 
                     /**
                      * Y position.
                      */
-                    u16 y;
+                    int y;
 
                     /**
                      * z position.
                      */
-                    u16 z;
+                    int z;
 
                     /**
                      * X direction.
                      */
-                    u16 d_x;
+                    int d_x;
 
                     /**
                      * Y direction.
                      */
-                    u16 d_y;
+                    int d_y;
 
                     /**
                      * z direction.
                      */
-                    u16 d_z;
+                    int d_z;
                 };
 
                 /**
@@ -190,24 +190,24 @@ class BattleSceneFile{
             struct Formation{
 
                 /**
-                 * Enemy ID,
+                 * Enemy ID.
                  */
                 u16 id;
 
                 /**
                  * Enemy X position.
                  */
-                u16 x;
+                int x;
 
                 /**
                  * Enemy Y position.
                  */
-                u16 y;
+                int y;
 
                 /**
                  * Enemy Z position.
                  */
-                u16 z;
+                int z;
 
                 /**
                  * Enemy row.

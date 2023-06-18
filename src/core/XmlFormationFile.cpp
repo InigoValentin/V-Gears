@@ -69,6 +69,7 @@ void XmlFormationFile::LoadFormation(){
             TiXmlNode* enemy_node = node->FirstChild();
             while (enemy_node != nullptr){
                 int id = GetInt(enemy_node, "id");
+                std::cout << "LOADING ENEMY " << id << std::endl;
                 Ogre::Vector3 pos = Ogre::Vector3(
                   GetInt(enemy_node, "x"), GetInt(enemy_node, "y"), GetInt(enemy_node, "z")
                 );

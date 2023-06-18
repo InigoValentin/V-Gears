@@ -142,6 +142,24 @@ class Enemy{
         void SetId(const int id);
 
         /**
+         * Retrieves the enemy model.
+         *
+         * The model name is the filename of the .mesh file, without extension.
+         *
+         * @return The enemy model.
+         */
+        const std::string GetModel() const;
+
+        /**
+         * Sets the enemy model.
+         *
+         * The model name must be the filename of the .mesh file, without extension.
+         *
+         * @param[in] The enemy model name.
+         */
+        void SetModel(const std::string model);
+
+        /**
          * Retrieves the enemy name.
          *
          * @return The enemy name.
@@ -621,6 +639,11 @@ class Enemy{
          * The enemy ID.
          */
         int id_;
+
+        /**
+         * NAme of the enemy model file.
+         */
+        std::string model_;
 
         /**
          * The name of the enemy.

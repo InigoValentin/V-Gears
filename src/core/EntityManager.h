@@ -262,7 +262,7 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
         );
 
         /**
-         * Adds an entity to the manager.
+         * Adds a field entity to the manager.
          *
          * @param[in] name Entity name.
          * @param[in] file_name Path to the entity model file.
@@ -276,6 +276,25 @@ class EntityManager : public Ogre::Singleton<EntityManager>{
           const Ogre::String& name, const Ogre::String& file_name,
           const Ogre::Vector3& position, const Ogre::Degree& rotation,
           const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, int index
+        );
+
+        /**
+         * Adds a battle entity to the manager.
+         *
+         * If the manager is not in the battle module, it will do nothing.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] position Entity position.
+         * @param[in] rotation Entity face direction.
+         * @param[in] scale Entity scale.
+         * @param[in] index Index of the entity.
+         * @param[in] visible True to make the entity visible, false otherwise.
+         */
+        void AddBattleEntity(
+          const Ogre::String& name, const Ogre::String& file_name,
+          const Ogre::Vector3& position, const Ogre::Degree& rotation,
+          const Ogre::Vector3& scale, const int index, const int visible
         );
 
         /**

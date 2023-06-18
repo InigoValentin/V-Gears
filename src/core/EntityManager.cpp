@@ -148,7 +148,9 @@ void EntityManager::SetModule(EntityManager::MODULE module){
         ClearBattle();
         ClearField();
     }
-    else if (module == MODULE::BATTLE) prev_module_ = module_;
+    else if (module == MODULE::BATTLE){
+        prev_module_ = module_;
+    }
     module_ = module;
 }
 
@@ -352,7 +354,11 @@ void EntityManager::UpdateField(){
 }
 
 void EntityManager::UpdateBattle(){
-    // TODO: Implement
+    for (unsigned int i = 0; i < battle_entity_.size(); ++ i){
+        battle_entity_[i]->Update();
+        battle_entity_[i]->PlayAnimationContinue(battle_entity_[i]->GetDefaultAnimationName());
+    }
+    //CameraManager::getSingleton().GetCurrentCamera()->roll(Ogre::Radian(0.01));
 }
 
 void EntityManager::UpdateWorld(){
@@ -419,7 +425,13 @@ void EntityManager::ClearField(){
 }
 
 void EntityManager::ClearBattle(){
-    // TODO implement
+    for (unsigned int i = 0; i < battle_entity_.size(); ++ i){
+        ScriptManager::getSingleton().RemoveEntity(
+          ScriptManager::ENTITY, battle_entity_[i]->GetName()
+        );
+        delete battle_entity_[i];
+    }
+    battle_entity_.clear();
 }
 
 void EntityManager::ClearWorld(){
@@ -453,6 +465,10 @@ void EntityManager::AddEntity(
   const Ogre::Degree& rotation, const Ogre::Vector3& scale,
   const Ogre::Quaternion& root_orientation, int index
 ){
+    if (module_ != MODULE::FIELD){
+        LOG_ERROR("Tried to add field Entity but the EntityManager is not in field mode.");
+        return;
+    }
     Ogre::SceneNode* node = scene_node_->createChildSceneNode("Model_" + name);
     EntityModel* entity = new EntityModel(name, file_name, node);
     entity->SetPosition(position);
@@ -460,8 +476,26 @@ void EntityManager::AddEntity(
     entity->setScale(scale);
     entity->SetIndex(index);
     entity->setRootOrientation(root_orientation);
-    if (module_ == MODULE::BATTLE) battle_entity_.push_back(entity);
-    else entity_.push_back(entity);
+    entity_.push_back(entity);
+    ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
+}
+
+void EntityManager::AddBattleEntity(
+  const Ogre::String& name, const Ogre::String& file_name, const Ogre::Vector3& position,
+  const Ogre::Degree& rotation, const Ogre::Vector3& scale, const int index, const int visible
+){
+    if (module_ != MODULE::BATTLE){
+        LOG_ERROR("Tried to add battle Entity but the EntityManager is not in battle mode.");
+        return;
+    }
+    Ogre::SceneNode* node = scene_node_->createChildSceneNode("Model_" + name);
+    EntityModel* entity = new EntityModel(name, file_name, node);
+    entity->SetPosition(position);
+    entity->SetRotation(rotation);
+    entity->setScale(scale);
+    entity->SetIndex(index);
+    entity->SetVisible(visible);
+    battle_entity_.push_back(entity);
     ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
 }
 

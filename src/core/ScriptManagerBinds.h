@@ -18,6 +18,7 @@
 #include "../modules/worldmap/WorldmapModule.h"
 #include "Console.h"
 #include "Logger.h"
+#include "CameraManager.h"
 #include "Entity.h"
 #include "EntityManager.h"
 #include "BattleManager.h"
@@ -294,7 +295,15 @@ void ScriptManager::InitBinds(){
           )
     ];
 
-
+    // Commands for the audio manager.
+    luabind::module(lua_state_)[
+        luabind::class_<CameraManager>("CameraManager")
+          .def("set_camera",
+             (void(CameraManager::*)(
+               const int, const int, const int, const int, const int, const int
+             )) &CameraManager::ScriptSetCamera
+           )
+    ];
 
     // Commands for the savemap manager.
     luabind::module(lua_state_)[
@@ -893,6 +902,8 @@ void ScriptManager::InitBinds(){
     auto a = boost::ref(*(EntityManager::getSingletonPtr()));
     luabind::globals(lua_state_);
     //auto b = luabind::globals(lua_state_)["entity_manager"];
+    luabind::globals(lua_state_)["camera_manager"]
+      = boost::ref(*(CameraManager::getSingletonPtr()));
     luabind::globals(lua_state_)["entity_manager"]
       = boost::ref(*(EntityManager::getSingletonPtr()));
     luabind::globals(lua_state_)["battle_manager"]

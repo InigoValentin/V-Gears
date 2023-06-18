@@ -146,7 +146,7 @@ unsigned int BattleDataInstaller::ProcessModel(){
     //  - am - cz: Polygon files (.p)
     //  - da: Animations (.anim)
     std::string id = battle_lgp_file_names_[next_model_to_process_].substr(0, 2);
-    if (id != "at"){next_model_to_process_ ++; return next_model_to_process_;} // TODO: DEBUG
+    //if (id != "at"){next_model_to_process_ ++; return next_model_to_process_;} // TODO: DEBUG
     std::string type = battle_lgp_file_names_[next_model_to_process_].substr(2, 2);
     FF7Data::BattleModelInfo info = FF7Data::GetBattleModelInfo(id);
     if (type == "aa"){
@@ -329,6 +329,7 @@ void BattleDataInstaller::WriteEnemies(){
         TiXmlDocument xml;
         std::unique_ptr<TiXmlElement> container(new TiXmlElement("enemy"));
         container->SetAttribute("id", enemy.id);
+        container->SetAttribute("model", enemy.model);
         container->SetAttribute("name", enemy.name);
         container->SetAttribute("level", enemy.level);
         container->SetAttribute("exp", enemy.exp);
@@ -769,8 +770,10 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
     std::set<std::string> textures;
     Ogre::Mesh::SubMeshList sub_meshes = mesh->getSubMeshes();
     for (Ogre::SubMesh* sub_mesh : sub_meshes){
+        // Change material name to avoid conflicts with field model materials.
+        sub_mesh->setMaterialName(sub_mesh->getMaterialName() + "_btl");
         Ogre::MaterialPtr mat(
-          Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName())
+            Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName())
         );
         if (mat == nullptr) continue;
         for (size_t techs = 0; techs < mat->getNumTechniques(); techs ++){

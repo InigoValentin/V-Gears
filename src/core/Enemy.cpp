@@ -95,6 +95,10 @@ const int Enemy::GetId() const{return id_;}
 
 void Enemy::SetId(const int id){id_ = id;}
 
+const std::string Enemy::GetModel() const{return model_;}
+
+void Enemy::SetModel(const std::string model){model_ = model;}
+
 const Ogre::String& Enemy::GetName() const{return name_;}
 
 void Enemy::SetName(const Ogre::String& name){name_ = name;}
