@@ -19,6 +19,7 @@
 #include <OgreString.h>
 #include "Event.h"
 #include "LuaIncludes.h"
+#include "Manager.h"
 
 class Entity;
 
@@ -127,7 +128,7 @@ struct QueueScript{
 
 
 
-class ScriptManager : public Ogre::Singleton<ScriptManager>{
+class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
 
     public:
 
@@ -166,33 +167,6 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         };
 
         /**
-         * The modules the script manager can handle.
-         */
-        enum MODULE{
-
-            /**
-             * Field module.
-             *
-             * Used in field maps. It has background, walkmesh, entities...
-             */
-            FIELD = 0,
-
-            /**
-             * Battle module.
-             *
-             * Used in battles. During battles there is no walkmesh.
-             */
-            BATTLE = 1,
-
-            /**
-             * World map module.
-             *
-             * Used in the world map. It has background, walkmesh, entities...
-             */
-            WORLD = 2
-        };
-
-        /**
          * Constructor.
          */
         ScriptManager();
@@ -207,7 +181,7 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
          *
          * @param[in] event The event to handle.
          */
-        void Input(const VGears::Event& event);
+        void Input(const VGears::Event& event) override;
 
         /**
          * Updates the state of all scripts of a given type.
@@ -215,6 +189,31 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
          * @param[in] type Type of the scripts to update.
          */
         void Update(const Type type);
+
+        /**
+         * Updates the script in the manager with debug information.
+         */
+        void UpdateDebug() override;
+
+        /**
+         * Handles resizing events
+         */
+        void OnResize() override;
+
+        /**
+         * Clears all field information in the script manager.
+         */
+        void ClearField() override;
+
+        /**
+         * Clears all battle information in the script manager.
+         */
+        void ClearBattle() override;
+
+        /**
+         * Clears all world map information in the script manager.
+         */
+        void ClearWorld() override;
 
         /**
          * Runs a lua command string.
@@ -421,6 +420,21 @@ class ScriptManager : public Ogre::Singleton<ScriptManager>{
         void AddValueToStack(const float value);
 
     private:
+
+        /**
+         * Updates the script while in a field.
+         */
+        void UpdateField() override;
+
+        /**
+         * Updates the scripts during a battle.
+         */
+        void UpdateBattle() override;
+
+        /**
+         * Updates the scripts while on the world map.
+         */
+        void UpdateWorld() override;
 
         /**
          * Lua state.

@@ -13,8 +13,9 @@
  * GNU General Public License for more details.
  */
 
+#include "../../src/core/ConfigVarHandler.h"
+
 #include <boost/test/unit_test.hpp>
-#include "core/ConfigVarManager.h"
 
 #pragma message("Unimplemented test file: " __FILE__)
 

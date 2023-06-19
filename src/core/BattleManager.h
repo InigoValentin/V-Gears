@@ -18,11 +18,12 @@
 #include <OgreSingleton.h>
 #include "Enemy.h"
 #include "Event.h"
+#include "Manager.h"
 
 /**
  * The battle manager.
  */
-class BattleManager : public Ogre::Singleton<BattleManager>{
+class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
 
     public:
 
@@ -157,6 +158,42 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
         virtual ~BattleManager();
 
         /**
+         * Handles an input event.
+         *
+         * @param[in] event Event to handle.
+         */
+        void Input(const VGears::Event& event) override;
+
+        /**
+         * Updates the battle in the manager with debug information.
+         *
+         * It's automatically called from {@see Update}.
+         */
+        void UpdateDebug() override;
+
+        /**
+         * Handles resizing events
+         */
+        void OnResize() override;
+
+        /**
+         * Clears all field information in the battle manager.
+         *
+         * Does nothing.
+         */
+        void ClearField() override;
+
+        /**
+         * Clears all battle information in the battle manager.
+         */
+        void ClearBattle() override;
+
+        /**
+         * Clears all world map information in the battle manager.
+         */
+        void ClearWorld() override;
+
+        /**
          * Starts a battle.
          *
          * @param id Battle ID.
@@ -192,40 +229,9 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
         );
 
         /**
-         * Handles an input event.
-         *
-         * @param[in] event Event to handle.
-         */
-        void Input(const VGears::Event& event);
-
-        /**
          * Loads enemy info from the enemy XML enemy file.
          */
         void Load();
-
-        /**
-         * Updates the entities in the manager.
-         */
-        void Update();
-
-        /**
-         * Updates the entities in the manager with debug information.
-         *
-         * It's automatically called from {@see Update}.
-         */
-        void UpdateDebug();
-
-        /**
-         * Clears the entity manager.
-         */
-        void Clear();
-
-        /**
-         * Pauses or resumes the battle.
-         *
-         * @param[in] paused True to pause, false to resume.
-         */
-        void ScriptSetPaused(const bool paused);
 
         /**
          * Sets the battle layout.
@@ -315,6 +321,25 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
         void LoadParty();
 
         /**
+         * Updates the manager while in the field.
+         *
+         * It does nothing
+         */
+        void UpdateField() override;
+
+        /**
+         * Updates the manager during a battle.
+         */
+        void UpdateBattle() override;
+
+        /**
+         * Updates manager while in the world map.
+         *
+         * It does nothing
+         */
+        void UpdateWorld() override;
+
+        /**
          * Scale factor for all battle models.
          */
         static const float MODEL_SCALE;
@@ -323,11 +348,6 @@ class BattleManager : public Ogre::Singleton<BattleManager>{
          * The scene node.
          */
         Ogre::SceneNode* scene_node_;
-
-        /**
-         * Indicates if the script execution is paused.
-         */
-        bool paused_;
 
         /**
          * The current battle formation ID.

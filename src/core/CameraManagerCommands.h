@@ -17,7 +17,7 @@
 
 #include <OgreStringConverter.h>
 #include "CameraManager.h"
-#include "ConfigCmdManager.h"
+#include "ConfigCmdHandler.h"
 #include "Console.h"
 
 void CommandCameraFree(const Ogre::StringVector& params){
@@ -36,7 +36,7 @@ void CommandCameraFreeCompletition( Ogre::StringVector& complete_params ){
 }
 
 void CameraManager::InitCommands(){
-    ConfigCmdManager::getSingleton().AddCommand(
+    ConfigCmdHandler::getSingleton().AddCommand(
       "camera_free", "Enable or disable free camera", "",
       CommandCameraFree, CommandCameraFreeCompletition
     );

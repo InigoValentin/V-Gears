@@ -20,8 +20,10 @@
 #include <OgreColourValue.h>
 #include "core/Savemap.h"
 
-
-class SavemapManager : public Ogre::Singleton<SavemapManager>{
+/**
+ * A handler for savemaps.
+ */
+class SavemapHandler : public Ogre::Singleton<SavemapHandler>{
 
     public:
 
@@ -33,12 +35,12 @@ class SavemapManager : public Ogre::Singleton<SavemapManager>{
         /**
          * Constructor.
          */
-        SavemapManager();
+        SavemapHandler();
 
         /**
          * Destructor.
          */
-        virtual ~SavemapManager();
+        virtual ~SavemapHandler();
 
         /**
          * Retrieves the current savemap.

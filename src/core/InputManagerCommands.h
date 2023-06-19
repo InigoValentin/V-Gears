@@ -14,9 +14,10 @@
  */
 
 #include <OgreStringConverter.h>
+
+#include "ConfigCmdHandler.h"
+#include "ConfigVarHandler.h"
 #include "Console.h"
-#include "ConfigCmdManager.h"
-#include "ConfigVarManager.h"
 #include "Logger.h"
 #include "Utilites.h"
 
@@ -72,7 +73,7 @@ void CmdBind(const Ogre::StringVector& params){
         Ogre::StringVector params_cmd = StringTokenise(params[2]);
 
         // Handle command
-        ConfigCmd* cmd = ConfigCmdManager::getSingleton().Find(params_cmd[0]);
+        ConfigCmd* cmd = ConfigCmdHandler::getSingleton().Find(params_cmd[0]);
         if (cmd != NULL){
             InputManager::getSingleton().BindCommand(
               cmd, params_cmd, key_codes
@@ -118,10 +119,10 @@ void CmdBindGameEvent(const Ogre::StringVector& params){
 
 // TODO: Move this to InpuManager.cpp?
 void InputManager::InitCmd(){
-    ConfigCmdManager::getSingleton().AddCommand(
+    ConfigCmdHandler::getSingleton().AddCommand(
       "bind", "Bind command to keys", "", CmdBind, NULL
     );
-    ConfigCmdManager::getSingleton().AddCommand(
+    ConfigCmdHandler::getSingleton().AddCommand(
       "bind_game_event", "Bind game event to keys", "", CmdBindGameEvent, NULL
     );
 }

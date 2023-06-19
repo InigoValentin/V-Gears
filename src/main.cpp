@@ -25,22 +25,22 @@
 #include "core/AudioManager.h"
 #include "core/BattleManager.h"
 #include "core/CameraManager.h"
-#include "core/ConfigCmdManager.h"
+#include "core/ConfigCmdHandler.h"
 #include "core/ConfigFile.h"
-#include "core/ConfigVarManager.h"
+#include "core/ConfigVarHandler.h"
 #include "core/Console.h"
 #include "core/DebugDraw.h"
 #include "core/EntityManager.h"
 #include "core/GameFrameListener.h"
 #include "core/InputManager.h"
 #include "core/Logger.h"
-#include "core/SavemapManager.h"
+#include "core/SavemapHandler.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"
 #include "core/UiManager.h"
 #include "core/particles/ParticleSystemManager.h"
-#include "core/TextManager.h"
 #include "core/DialogsManager.h"
+#include "core/TextHandler.h"
 #include "data/VGearsLZSFLevelFileManager.h"
 #include "data/VGearsLGPArchiveFactory.h"
 #include "data/worldmap/WorldmapFileManager.h"
@@ -95,8 +95,8 @@ int main(int argc, char *argv[]){
         Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
         // Initialize it before console because it may use it
-        auto config_var_manager = std::make_unique<ConfigVarManager>();
-        auto config_cmd_manager = std::make_unique<ConfigCmdManager>();
+        auto config_var_manager = std::make_unique<ConfigVarHandler>();
+        auto config_cmd_manager = std::make_unique<ConfigCmdHandler>();
         auto debug_draw = std::make_unique<DebugDraw>();
 
         // Initialize before GameFrameListener, but after ConfigCmdManager
@@ -104,12 +104,12 @@ int main(int argc, char *argv[]){
 
         auto audio_manager = std::make_unique<AudioManager>();
 
-        auto savemap_manager = std::make_unique<SavemapManager>();
+        auto savemap_manager = std::make_unique<SavemapHandler>();
 
         // Create this earlier than DisplayFrameListener cause it can fire
         // events there
         auto camera_manager = std::make_unique<CameraManager>();
-        auto text_manager = std::make_unique<TextManager>();
+        auto text_manager = std::make_unique<TextHandler>();
         auto ui_manager = std::make_unique<UiManager>();
         auto dialogs_manager = std::make_unique<DialogsManager>();
         auto entity_manager = std::make_unique<EntityManager>();

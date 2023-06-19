@@ -26,10 +26,10 @@
 #include "core/Logger.h"
 #include "core/UiManager.h"
 #include "core/UiTextArea.h"
-#include "core/TextManager.h"
 #include "core/Timer.h"
 #include "core/UiSprite.h"
 #include "core/Utilites.h"
+#include "TextHandler.h"
 
 UiTextArea::UiTextArea(const Ogre::String& name): UiWidget(name){
     Initialise();
@@ -250,7 +250,7 @@ void UiTextArea::SetText(TiXmlNode* text){
     if (font_ != NULL){
         Ogre::String language = font_->GetLanguage();
         if (language != "")
-            if (TextManager::getSingleton().GetLanguage() != language) SetFont(font_->GetName());
+            if (TextHandler::getSingleton().GetLanguage() != language) SetFont(font_->GetName());
     }
 
     TextClear();
@@ -660,7 +660,7 @@ void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& c
                     }
                     else if (name == "character"){
                         const std::string* id = node->ToElement()->Attribute(Ogre::String("id"));
-                        const std::string char_name = TextManager::getSingleton().GetCharacterName(
+                        const std::string char_name = TextHandler::getSingleton().GetCharacterName(
                           std::stoi(*id)
                         );
                         for (unsigned int i = 0; i < char_name.length(); ++ i){
@@ -673,7 +673,7 @@ void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& c
                     else if (name == "party"){
                         const std::string* pos = node->ToElement()->Attribute(Ogre::String("pos"));
                         const std::string char_name
-                          = TextManager::getSingleton().GetPartyCharacterName(std::stoi(*pos));
+                          = TextHandler::getSingleton().GetPartyCharacterName(std::stoi(*pos));
                         for (unsigned int i = 0; i < char_name.length(); ++ i){
                             TextChar text_char;
                             text_char.char_code = char_name.at(i);
@@ -686,7 +686,7 @@ void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& c
                           Ogre::String("name")
                         );
                         if (text_name != NULL){
-                            TiXmlNode* text = TextManager::getSingleton().GetText(*text_name);
+                            TiXmlNode* text = TextHandler::getSingleton().GetText(*text_name);
                             if (text != NULL) PrepareTextFromNode(text, colour_child);
                         }
                     }
@@ -826,7 +826,7 @@ void UiTextArea::SetTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colou
                 }
                 else if (name == "character"){
                     const std::string* id = node->ToElement()->Attribute(Ogre::String("id"));
-                    const std::string char_name = TextManager::getSingleton().GetCharacterName(
+                    const std::string char_name = TextHandler::getSingleton().GetCharacterName(
                       std::stoi(*id)
                     );
                     for (unsigned int i = 0; i < char_name.length(); ++ i){
@@ -839,7 +839,7 @@ void UiTextArea::SetTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colou
                 else if (name == "party"){
                     const std::string* pos = node->ToElement()->Attribute(Ogre::String("pos"));
                     const std::string char_name
-                      = TextManager::getSingleton().GetPartyCharacterName(std::stoi(*pos));
+                      = TextHandler::getSingleton().GetPartyCharacterName(std::stoi(*pos));
                     for (unsigned int i = 0; i < char_name.length(); ++ i){
                         TextChar text_char;
                         text_char.char_code = char_name.at(i);
@@ -852,7 +852,7 @@ void UiTextArea::SetTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colou
                       Ogre::String("name")
                     );
                     if (text_name != NULL){
-                        TiXmlNode* text = TextManager::getSingleton().GetText(*text_name);
+                        TiXmlNode* text = TextHandler::getSingleton().GetText(*text_name);
                         if (text != NULL) SetTextFromNode(text, colour_child);
                     }
                 }

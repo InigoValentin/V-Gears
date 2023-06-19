@@ -16,8 +16,10 @@
 #pragma once
 
 #include <OgreSingleton.h>
+#include "Manager.h"
 #include "UiManager.h"
 #include "UiTextArea.h"
+#include "InputManager.h"
 
 
 /**
@@ -235,7 +237,7 @@ struct MessageData{
 /**
  * The dialog manager.
  */
-class DialogsManager : public Ogre::Singleton<DialogsManager>{
+class DialogsManager : public Manager, public Ogre::Singleton<DialogsManager>{
 
     public:
 
@@ -259,17 +261,32 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          *
          * @param[in] event Event to process.
          */
-        void Input(const VGears::Event& event);
+        void Input(const VGears::Event& event) override;
 
         /**
-         * Updates all the messages in the manager.
+         * Updates the messagemanager with debug information.
          */
-        void Update();
+        void UpdateDebug();
 
         /**
-         * Hides every dialog in the manager.
+         * Handles resizing events
          */
-        void Clear();
+        void OnResize() override;
+
+        /**
+         * Clears all field messages.
+         */
+        void ClearField() override;
+
+        /**
+         * Clears all battle messages.
+         */
+        void ClearBattle() override;
+
+        /**
+         * Clears all world map maeeages.
+         */
+        void ClearWorld() override;
 
         /**
          * Opens a dialog.
@@ -408,6 +425,21 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
     private:
 
         /**
+         * Updates the dialogs while in a field.
+         */
+        void UpdateField() override;
+
+        /**
+         * Updates the dialogs during a battle.
+         */
+        void UpdateBattle() override;
+
+        /**
+         * Updates the dialogs while on the world map.
+         */
+        void UpdateWorld() override;
+
+        /**
          * Shows a message in a dialog.
          *
          * @param[in] id Message id.
@@ -417,10 +449,7 @@ class DialogsManager : public Ogre::Singleton<DialogsManager>{
          * @param[in] height Height of the text, in pixels.
          * @todo Is this a window-limit-aware version of SetText?
          */
-        void ShowMessage(
-          const int id, const int x, const int y,
-          const int width, const int height
-        );
+        void ShowMessage(const int id, const int x, const int y, const int width, const int height);
 
         /**
          * Closes and hides a message.

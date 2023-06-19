@@ -17,13 +17,13 @@
 
 #include <OgreString.h>
 
-class ConfigVarManager;
+class ConfigVarHandler;
 
 /**
  * A configuration variable
  */
 class ConfigVar{
-    friend class ConfigVarManager;
+    friend class ConfigVarHandler;
 
     public:
 
@@ -31,8 +31,7 @@ class ConfigVar{
          * Constructor.
          *
          * @param[in] name The variable name.
-         * @param[in] description A human-friendly description for the
-         * variable.
+         * @param[in] description A human-friendly description for the variable.
          * @param[in] default_value The default value for the variable.
          */
         ConfigVar(
@@ -137,46 +136,46 @@ class ConfigVar{
         /**
          * The variable name.
          */
-        Ogre::String    name_;
+        Ogre::String name_;
 
         /**
          * The variable description.
          */
-        Ogre::String    description_;
+        Ogre::String description_;
 
         /**
          * The variable default value.
          */
-        Ogre::String    default_value_;
+        Ogre::String default_value_;
 
         /**
          * Variable value, integer format.
          */
-        int             value_i_;
+        int value_i_;
 
         /**
          * Variable value, float format.
          */
-        float           value_f_;
+        float value_f_;
 
         /**
          * Variable value, integer format.
          */
-        bool            value_b_;
+        bool value_b_;
 
         /**
          * Variable value, string format.
          */
-        Ogre::String    value_s_;
+        Ogre::String value_s_;
 
         /**
          * @todo Understand and document.
          */
-        ConfigVar*          previous_;
+        ConfigVar* previous_;
 
         /**
          * @todo Understand and document.
          */
-        static ConfigVar*   static_config_var_list_;
+        static ConfigVar* static_config_var_list_;
 };
 

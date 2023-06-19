@@ -13,14 +13,15 @@
  * GNU General Public License for more details.
  */
 
+#include "core/AudioManager.h"
 #include "core/EntityManager.h"
 #include "core/Logger.h"
 #include "core/ScriptManager.h"
-#include "core/TextManager.h"
 #include "core/XmlBackground2DFile.h"
 #include "core/XmlMapFile.h"
 #include "map/VGearsBackground2DFileManager.h"
 #include "map/VGearsWalkmeshFileManager.h"
+#include "TextHandler.h"
 
 XmlMapFile::XmlMapFile(const Ogre::String& file): XmlFile(file){}
 
@@ -60,7 +61,7 @@ void XmlMapFile::LoadMap(){
             }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "texts"){
-            TextManager::getSingleton().LoadFieldText(GetString(node, "file_name"));
+            TextHandler::getSingleton().LoadFieldText(GetString(node, "file_name"));
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "entity_model"){
             Ogre::String name = GetString(node, "name");
@@ -121,7 +122,7 @@ void XmlMapFile::LoadMap(){
             for (TiXmlNode* track = node->FirstChild(); track; track = track->NextSibling()){
                 int id = GetInt(track, "id");
                 int track_id = GetInt(track, "track_id");
-                EntityManager::getSingleton().AddTrack(id, track_id);
+                AudioManager::getSingleton().AddTrack(id, track_id);
             }
         }
         node = node->NextSibling();

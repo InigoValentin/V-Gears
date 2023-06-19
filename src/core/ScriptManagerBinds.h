@@ -23,14 +23,14 @@
 #include "EntityManager.h"
 #include "BattleManager.h"
 #include "AudioManager.h"
-#include "SavemapManager.h"
+#include "SavemapHandler.h"
 #include "Timer.h"
 #include "UiManager.h"
 #include "UiWidget.h"
 #include "XmlMapFile.h"
 #include "XmlMapsFile.h"
 #include "DialogsManager.h"
-#include "TextManager.h"
+#include "TextHandler.h"
 
 
 /*
@@ -267,7 +267,6 @@ void ScriptManager::InitBinds(){
             "set_entity_to_character",
             (void(EntityManager::*)(const char*, unsigned int)) &EntityManager::SetEntityToCharacter
           )
-          .def("get_track_id", (int(EntityManager::*)(int)) &EntityManager::GetTrack)
     ];
 
     // Commands for the battle manager.
@@ -293,6 +292,11 @@ void ScriptManager::InitBinds(){
             (void(AudioManager::*)(const char*, const char*, const char*, const char*))
             &AudioManager::ScriptPlaySounds
           )
+          .def("get_track_id", (int(AudioManager::*)(int)) &AudioManager::ScriptGetTrack)
+          .def("get_battle_track_id", (int(AudioManager::*)()) &AudioManager::ScriptGetBattleTrack)
+          .def(
+            "set_battle_track_id", (void(AudioManager::*)(int)) &AudioManager::ScriptSetBattleTrack
+          )
     ];
 
     // Commands for the audio manager.
@@ -305,384 +309,384 @@ void ScriptManager::InitBinds(){
            )
     ];
 
-    // Commands for the savemap manager.
+    // Commands for the savemap handelr.
     luabind::module(lua_state_)[
-        luabind::class_<SavemapManager>("SavemapManager")
+        luabind::class_<SavemapHandler>("SavemapHandler")
           .def(
-            "release", (void(SavemapManager::*)()) &SavemapManager::Release
+            "release", (void(SavemapHandler::*)()) &SavemapHandler::Release
           )
           .def(
             "get_current_savemap",
-            (Savemap*(SavemapManager::*)()) &SavemapManager::GetCurrentSavemap
+            (Savemap*(SavemapHandler::*)()) &SavemapHandler::GetCurrentSavemap
           )
           .def(
             "get_savemap",
-            (Savemap*(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSavemap
+            (Savemap*(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSavemap
           )
           .def(
             "set_data",
-            (void(SavemapManager::*)(const unsigned int, const unsigned int, const int))
-              &SavemapManager::SetData
+            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const int))
+              &SavemapHandler::SetData
           )
           .def(
-            "set_control_key", (void(SavemapManager::*)(const char*)) &SavemapManager::SetControlKey
+            "set_control_key", (void(SavemapHandler::*)(const char*)) &SavemapHandler::SetControlKey
           )
           .def(
             "set_window_colours",
-            (void(SavemapManager::*)(
+            (void(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int,
               const unsigned int, const unsigned int, const unsigned int,
               const unsigned int, const unsigned int, const unsigned int,
               const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::SetWindowColours
+            )) &SavemapHandler::SetWindowColours
           )
-          .def("set_money", (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetMoney)
+          .def("set_money", (void(SavemapHandler::*)(const unsigned int)) &SavemapHandler::SetMoney)
           .def(
             "set_game_time",
-            (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetGameTime
+            (void(SavemapHandler::*)(const unsigned int)) &SavemapHandler::SetGameTime
           )
           .def(
             "set_countdown_time",
-            (void(SavemapManager::*)(const unsigned int)) &SavemapManager::SetCountdownTime
+            (void(SavemapHandler::*)(const unsigned int)) &SavemapHandler::SetCountdownTime
           )
           .def(
             "set_key_item",
-            (void(SavemapManager::*)(const unsigned int, const bool)) &SavemapManager::SetKeyItem
+            (void(SavemapHandler::*)(const unsigned int, const bool)) &SavemapHandler::SetKeyItem
           )
           .def(
             "set_party",
-            (void(SavemapManager::*)(const int, const int, const int)) &SavemapManager::SetParty
+            (void(SavemapHandler::*)(const int, const int, const int)) &SavemapHandler::SetParty
           )
           .def(
             "set_item",
-            (void(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
-              &SavemapManager::SetItem
+            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const unsigned int))
+              &SavemapHandler::SetItem
           )
           .def(
             "set_materia",
-            (void(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
-              &SavemapManager::SetMateria
+            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const unsigned int))
+              &SavemapHandler::SetMateria
           )
           .def(
             "set_e_skill_materia",
-            (void(SavemapManager::*)(const unsigned int, const unsigned int, const bool))
-              &SavemapManager::SetESkillMateria
+            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const bool))
+              &SavemapHandler::SetESkillMateria
           )
           .def(
             "set_materia_stash",
-            (void(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
-              &SavemapManager::SetMateriaStash
+            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const unsigned int))
+              &SavemapHandler::SetMateriaStash
           )
           .def(
             "set_e_skill_materia_stash",
-            (void(SavemapManager::*)(const unsigned int, const unsigned int, const bool))
-              &SavemapManager::SetESkillMateriaStash
+            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const bool))
+              &SavemapHandler::SetESkillMateriaStash
           )
           .def(
             "set_location",
-            (void(SavemapManager::*)(
+            (void(SavemapHandler::*)(
               const float, const float, const float, const unsigned int, const int,
               const char*, const char*
-            )) &SavemapManager::SetLocation
+            )) &SavemapHandler::SetLocation
           )
           .def(
             "set_setting",
-            (void(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::SetSetting
+            (void(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::SetSetting
           )
           .def(
             "set_character_info",
-            (void(SavemapManager::*)(
+            (void(SavemapHandler::*)(
               const unsigned int, const int, const char*, const bool, const bool, const unsigned int,
               const unsigned int, const bool, const unsigned int, const unsigned int,
               const unsigned int, const unsigned int, const unsigned int, const unsigned int,
               const int
-            )) &SavemapManager::SetCharacterInfo
+            )) &SavemapHandler::SetCharacterInfo
           )
           .def(
             "set_character_stat",
-            (void(SavemapManager::*)(
+            (void(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::SetCharacterStat
+            )) &SavemapHandler::SetCharacterStat
           )
           .def(
             "set_character_limit_learned",
-            (void(SavemapManager::*)(
+            (void(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int,
               const bool, const unsigned int
-            )) &SavemapManager::SetCharacterLimitLearned
+            )) &SavemapHandler::SetCharacterLimitLearned
           )
           .def(
             "set_character_materia",
-            (void(SavemapManager::*)(
+            (void(SavemapHandler::*)(
               const unsigned int, const bool, const unsigned int,
               const unsigned int, const unsigned int
-            )) &SavemapManager::SetCharacterMateria
+            )) &SavemapHandler::SetCharacterMateria
           )
           .def(
             "set_character_e_skill_materia",
-            (void(SavemapManager::*)(
+            (void(SavemapHandler::*)(
               const unsigned int, const bool, const unsigned int, const unsigned int, const bool
-            )) &SavemapManager::SetCharacterESkillMateria
+            )) &SavemapHandler::SetCharacterESkillMateria
           )
           .def(
             "set_character_status",
-            (void(SavemapManager::*)(const unsigned int, const unsigned int, const bool))
-              &SavemapManager::SetCharacterStatus
+            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const bool))
+              &SavemapHandler::SetCharacterStatus
           )
           .def(
-            "save", (bool(SavemapManager::*)(const unsigned int, const bool)) &SavemapManager::Save
+            "save", (bool(SavemapHandler::*)(const unsigned int, const bool)) &SavemapHandler::Save
           )
           .def(
             "is_slot_empty",
-            (bool(SavemapManager::*)(const unsigned int)) &SavemapManager::IsSlotEmpty
+            (bool(SavemapHandler::*)(const unsigned int)) &SavemapHandler::IsSlotEmpty
           )
           .def(
             "get_slot_control_key",
-            (std::string(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotControlKey
+            (std::string(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotControlKey
           )
           .def(
             "get_slot_control_key",
-            (unsigned int(SavemapManager::*)(
+            (unsigned int(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::GetSlotWindowCornerColourComponent
+            )) &SavemapHandler::GetSlotWindowCornerColourComponent
           )
           .def(
             "get_slot_money",
-            (unsigned int(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotMoney
+            (unsigned int(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotMoney
           )
           .def(
             "get_slot_game_time",
-            (unsigned int(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotGameTime
+            (unsigned int(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotGameTime
           )
           .def(
             "get_slot_countdown_time",
-            (unsigned int(SavemapManager::*)(const unsigned int))
-              &SavemapManager::GetSlotCountdownTime
+            (unsigned int(SavemapHandler::*)(const unsigned int))
+              &SavemapHandler::GetSlotCountdownTime
           )
           .def(
             "get_slot_party_member",
-            (int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotPartyMember
+            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotPartyMember
           )
           .def(
             "get_slot_item_at_pos_id",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotItemAtPosId
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotItemAtPosId
           )
           .def(
             "get_slot_item_at_pos_qty",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotItemAtPosQty
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotItemAtPosQty
           )
           .def(
             "get_slot_key_item",
-            (bool(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotKeyItem
+            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotKeyItem
           )
           .def(
             "get_slot_materia_at_pos_id",
-            (int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotMateriaAtPosId
+            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotMateriaAtPosId
           )
           .def(
             "get_slot_materia_at_pos_ap",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotMateriaAtPosAp
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotMateriaAtPosAp
           )
           .def(
             "is_slot_materia_at_pos_e_skill",
-            (bool(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::IsSlotMateriaAtPosESkill
+            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::IsSlotMateriaAtPosESkill
           )
           .def(
             "is_slot_materia_at_pos_e_skill_learned",
-            (bool(SavemapManager::*)(
+            (bool(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::IsSlotMateriaAtPosESkillLearned
+            )) &SavemapHandler::IsSlotMateriaAtPosESkillLearned
           )
           .def(
             "get_slot_stash_at_pos_id",
-            (int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotStashAtPosId
+            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotStashAtPosId
           )
           .def(
             "get_slot_stash_at_pos_ap",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotStashAtPosAp
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotStashAtPosAp
           )
           .def(
             "is_slot_stash_at_pos_e_skill",
-            (bool(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::IsSlotStashAtPosESkill
+            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::IsSlotStashAtPosESkill
           )
           .def(
             "is_slot_stash_at_pos_e_skill_learned",
-            (bool(SavemapManager::*)(
+            (bool(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::IsSlotStashAtPosESkillLearned
+            )) &SavemapHandler::IsSlotStashAtPosESkillLearned
           )
           .def(
             "get_slot_location_x",
-            (float(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotLocationX
+            (float(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotLocationX
           )
           .def(
             "get_slot_location_y",
-            (float(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotLocationY
+            (float(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotLocationY
           )
           .def(
             "get_slot_location_z",
-            (float(SavemapManager::*)(const unsigned int)) &SavemapManager::GetSlotLocationZ
+            (float(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotLocationZ
           )
           .def(
             "get_slot_location_triangle",
-            (unsigned int(SavemapManager::*)(const unsigned int))
-              &SavemapManager::GetSlotLocationTriangle
+            (unsigned int(SavemapHandler::*)(const unsigned int))
+              &SavemapHandler::GetSlotLocationTriangle
           )
           .def(
             "get_slot_location_angle",
-            (unsigned int(SavemapManager::*)(const unsigned int))
-              &SavemapManager::GetSlotLocationAngle
+            (unsigned int(SavemapHandler::*)(const unsigned int))
+              &SavemapHandler::GetSlotLocationAngle
           )
           .def(
             "get_slot_location_field",
-            (std::string(SavemapManager::*)(const unsigned int))
-              &SavemapManager::GetSlotLocationField
+            (std::string(SavemapHandler::*)(const unsigned int))
+              &SavemapHandler::GetSlotLocationField
           )
           .def(
             "get_slot_location_name",
-            (std::string(SavemapManager::*)(const unsigned int))
-              &SavemapManager::GetSlotLocationName
+            (std::string(SavemapHandler::*)(const unsigned int))
+              &SavemapHandler::GetSlotLocationName
           )
           .def(
             "get_slot_setting",
-            (int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotSetting
+            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotSetting
           )
           .def(
             "get_slot_character_char_id",
-            (int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterCharId
+            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterCharId
           )
           .def(
             "get_slot_character_name",
-            (std::string(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterName
+            (std::string(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterName
           )
           .def(
             "get_slot_character_level",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterLevel
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterLevel
           )
           .def(
             "get_slot_character_kills",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterKills
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterKills
           )
           .def(
             "is_slot_character_enabled",
-            (bool(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::IsSlotCharacterEnabled
+            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::IsSlotCharacterEnabled
           )
           .def(
             "is_slot_character_locked",
-            (bool(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::IsSlotCharacterLocked
+            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::IsSlotCharacterLocked
           )
           .def(
             "is_slot_character_back_row",
-            (bool(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::IsSlotCharacterBackRow
+            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::IsSlotCharacterBackRow
           )
           .def(
             "get_slot_character_exp",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterExp
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterExp
           )
           .def(
             "get_slot_character_exp_to_next",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterExpToNext
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterExpToNext
           )
           .def(
             "get_slot_character_limit_level",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterLimitLevel
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterLimitLevel
           )
           .def(
             "get_slot_character_limit_bar",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterLimitBar
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterLimitBar
           )
           .def(
             "get_slot_character_weapon_id",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterWeaponId
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterWeaponId
           )
           .def(
             "get_slot_character_armor_id",
-            (unsigned int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterArmorId
+            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterArmorId
           )
           .def(
             "get_slot_character_accessory_id",
-            (int(SavemapManager::*)(const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotCharacterAccessoryId
+            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotCharacterAccessoryId
           )
           .def(
             "get_slot_character_stat_base",
-            (unsigned int(SavemapManager::*)(
+            (unsigned int(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::GetSlotCharacterStatBase
+            )) &SavemapHandler::GetSlotCharacterStatBase
           )
           .def(
             "get_slot_character_stat_extra",
-            (unsigned int(SavemapManager::*)(
+            (unsigned int(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::GetSlotCharacterStatExtra
+            )) &SavemapHandler::GetSlotCharacterStatExtra
           )
           .def(
             "get_slot_character_limit_uses",
-            (unsigned int(SavemapManager::*)(
+            (unsigned int(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::GetSlotCharacterLimitUses
+            )) &SavemapHandler::GetSlotCharacterLimitUses
           )
           .def(
             "is_slot_character_limit_learned",
-            (unsigned int(SavemapManager::*)(
+            (unsigned int(SavemapHandler::*)(
               const unsigned int, const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapManager::IsSlotCharacterLimitLearned
+            )) &SavemapHandler::IsSlotCharacterLimitLearned
           )
           .def(
             "get_slot_character_materia_id",
-            (int(SavemapManager::*)(
+            (int(SavemapHandler::*)(
               const unsigned int, const unsigned int, const bool, const unsigned int
-            )) &SavemapManager::GetSlotCharacterMateriaId
+            )) &SavemapHandler::GetSlotCharacterMateriaId
           )
           .def(
             "get_slot_character_materia_ap",
-            (unsigned int(SavemapManager::*)(
+            (unsigned int(SavemapHandler::*)(
               const unsigned int, const unsigned int, const bool, const unsigned int
-            )) &SavemapManager::GetSlotCharacterMateriaAp
+            )) &SavemapHandler::GetSlotCharacterMateriaAp
           )
           .def(
             "get_slot_character_materia_e_skill",
-            (bool(SavemapManager::*)(
+            (bool(SavemapHandler::*)(
               const unsigned int, const unsigned int, const bool,
               const unsigned int, const unsigned int
-            )) &SavemapManager::IsSlotCharacterMateriaESkill
+            )) &SavemapHandler::IsSlotCharacterMateriaESkill
           )
           .def(
             "get_slot_character_materia_e_skill_learned",
-            (bool(SavemapManager::*)(
+            (bool(SavemapHandler::*)(
               const unsigned int, const unsigned int, const bool,
               const unsigned int, const unsigned int
-            )) &SavemapManager::IsSlotCharacterMateriaESkillLearned
+            )) &SavemapHandler::IsSlotCharacterMateriaESkillLearned
           )
           .def(
             "get_slot_data",
-            (int(SavemapManager::*)(const unsigned int, const unsigned int, const unsigned int))
-              &SavemapManager::GetSlotData
+            (int(SavemapHandler::*)(const unsigned int, const unsigned int, const unsigned int))
+              &SavemapHandler::GetSlotData
           )
     ];
 
@@ -737,14 +741,14 @@ void ScriptManager::InitBinds(){
           .def("is_locked", (bool(Walkmesh ::*)(unsigned int)) &Walkmesh ::IsLocked)
     ];
 
-    // Text manager commands
+    // Text handler commands
     luabind::module(lua_state_)[
-        luabind::class_<TextManager>("TextManager")
+        luabind::class_<TextHandler>("TextHandler")
           .def(
             "set_character_name",
-            (void(TextManager ::*)(unsigned int, const char*)) &TextManager::SetCharacterName
+            (void(TextHandler ::*)(unsigned int, const char*)) &TextHandler::SetCharacterName
           )
-          .def("set_party", (void(TextManager ::*)(int, int, int)) &TextManager::SetParty)
+          .def("set_party", (void(TextHandler ::*)(int, int, int)) &TextHandler::SetParty)
     ];
 
     // Dialog commands
@@ -910,12 +914,12 @@ void ScriptManager::InitBinds(){
       = boost::ref(*(BattleManager::getSingletonPtr()));
     luabind::globals(lua_state_)["audio_manager"] = boost::ref(*(AudioManager::getSingletonPtr()));
     luabind::globals(lua_state_)["savemap_manager"]
-      = boost::ref(*(SavemapManager::getSingletonPtr()));
+      = boost::ref(*(SavemapHandler::getSingletonPtr()));
     luabind::globals(lua_state_)["background2d"]
       = boost::ref(*(EntityManager::getSingletonPtr()->GetBackground2D()));
     luabind::globals(lua_state_)["walkmesh"]
       = boost::ref(*(EntityManager::getSingletonPtr()->GetWalkmesh()));
-    luabind::globals(lua_state_)["text_manager"] = boost::ref(*(TextManager::getSingletonPtr()));
+    luabind::globals(lua_state_)["text_manager"] = boost::ref(*(TextHandler::getSingletonPtr()));
     luabind::globals(lua_state_)["dialog"] = boost::ref(*(DialogsManager::getSingletonPtr()));
     luabind::globals(lua_state_)["ui_manager"] = boost::ref(*(UiManager::getSingletonPtr()));
     luabind::globals(lua_state_)["world_map_module"]

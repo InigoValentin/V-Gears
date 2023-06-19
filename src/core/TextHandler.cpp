@@ -13,47 +13,48 @@
  * GNU General Public License for more details.
  */
 
+#include "TextHandler.h"
+
 #include <iostream>
-#include "core/TextManager.h"
-#include "core/TextManagerCommands.h"
+#include "core/TextHandlerCommands.h"
 #include "core/XmlTextsFile.h"
 #include "core/XmlTextFile.h"
 
 /**
- * Text manager singleton.
+ * Text handler singleton.
  */
-template<>TextManager* Ogre::Singleton< TextManager >::msSingleton = NULL;
+template<>TextHandler* Ogre::Singleton<TextHandler>::msSingleton = NULL;
 
-TextManager::TextManager(): language_(""){
+TextHandler::TextHandler(): language_(""){
     for (int i = 0; i < 3; i ++) current_party_[i] = -1;
     for (int i = 0; i < 11; i ++) character_names_[i] = std::string("CHAR_") + std::to_string(i);
     InitCmd();
 }
 
-TextManager::~TextManager(){UnloadTexts();}
+TextHandler::~TextHandler(){UnloadTexts();}
 
-void TextManager::LoadFieldText(const std::string file_name){
+void TextHandler::LoadFieldText(const std::string file_name){
     XmlTextFile texts("./data/" + file_name);
     texts.LoadTexts();
 }
 
-void TextManager::SetLanguage(const Ogre::String& language){
+void TextHandler::SetLanguage(const Ogre::String& language){
     language_ = language;
     UnloadTexts();
     XmlTextsFile texts("./data/texts.xml");
     texts.LoadTexts();
 }
 
-const Ogre::String& TextManager::GetLanguage(){return language_;}
+const Ogre::String& TextHandler::GetLanguage(){return language_;}
 
-void TextManager::AddText(const Ogre::String& name, TiXmlNode* node){
+void TextHandler::AddText(const Ogre::String& name, TiXmlNode* node){
     Text text;
     text.name = name;
     text.node = node;
     texts_.push_back(text);
 }
 
-void TextManager::AddDialog(
+void TextHandler::AddDialog(
   const Ogre::String& name, TiXmlNode* node, const float width, const float height
 ){
     Dialog dialog;
@@ -64,14 +65,14 @@ void TextManager::AddDialog(
     dialogs_.push_back(dialog);
 }
 
-TiXmlNode* TextManager::GetText(const Ogre::String& name) const{
+TiXmlNode* TextHandler::GetText(const Ogre::String& name) const{
     for (unsigned int i = 0; i < texts_.size(); ++ i)
         if (texts_[i].name == name) return texts_[i].node;
     LOG_WARNING("Can't find text '" + name + "'.");
     return NULL;
 }
 
-TiXmlNode* TextManager::GetDialog(const Ogre::String& name, float &width, float& height) const{
+TiXmlNode* TextHandler::GetDialog(const Ogre::String& name, float &width, float& height) const{
     for (unsigned int i = 0; i < dialogs_.size(); ++ i){
         if (dialogs_[i].name == name){
             width = dialogs_[i].width;
@@ -82,7 +83,7 @@ TiXmlNode* TextManager::GetDialog(const Ogre::String& name, float &width, float&
     return NULL;
 }
 
-std::string TextManager::GetDialogText(const std::string name){
+std::string TextHandler::GetDialogText(const std::string name){
     std::string text = "";
     for (unsigned int i = 0; i < dialogs_.size(); ++ i){
         if (dialogs_[i].name == name){
@@ -92,19 +93,19 @@ std::string TextManager::GetDialogText(const std::string name){
     }
     return text;
 }
-void TextManager::UnloadTexts(){
+void TextHandler::UnloadTexts(){
     for (unsigned int i = 0; i < texts_.size(); ++ i) delete texts_[i].node;
     texts_.clear();
     for (unsigned int i = 0; i < dialogs_.size(); ++ i) delete dialogs_[i].node;
     dialogs_.clear();
 }
 
-std::string TextManager::GetCharacterName(int id){
+std::string TextHandler::GetCharacterName(int id){
     if (id >= 0 && id < 11) return character_names_[id];
     else return std::string("UNKNOWN_CHAR_" + id);
 }
 
-std::string TextManager::GetPartyCharacterName(int position){
+std::string TextHandler::GetPartyCharacterName(int position){
     if (position >= 1 && position <= 3){
         if (current_party_[position - 1] < 0) return "";
         else return GetCharacterName(current_party_[position - 1]);
@@ -112,12 +113,12 @@ std::string TextManager::GetPartyCharacterName(int position){
     else return std::string("UNKNOWN_PARTY_POS_" + position);
 }
 
-void TextManager::SetCharacterName(int id, char* name){
+void TextHandler::SetCharacterName(int id, char* name){
     if (id >= 0 && id < 11) character_names_[id] = std::string(name);
     else LOG_WARNING("Not setting character name for character ID " + std::to_string(id) + ".");
 }
 
-void TextManager::SetParty(int char_1, int char_2, int char_3){
+void TextHandler::SetParty(int char_1, int char_2, int char_3){
     current_party_[0] = char_1;
     current_party_[2] = char_2;
     current_party_[3] = char_3;

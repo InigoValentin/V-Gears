@@ -13,14 +13,15 @@
  * GNU General Public License for more details.
  */
 
+#include "../../src/core/ConfigCmdHandler.h"
+
 #include <boost/test/unit_test.hpp>
-#include "core/TextManager.h"
 
 #pragma message("Unimplemented test file: " __FILE__)
 
-BOOST_AUTO_TEST_CASE(TestTextManager){
+BOOST_AUTO_TEST_CASE(TestConfigCmdManager){
     // TODO
-    BOOST_WARN_MESSAGE(false, "Unimplemented test file: TextManager");
+    BOOST_WARN_MESSAGE(false, "Unimplemented test file: ConfigCmdManager");
     BOOST_CHECK(0 == 0);
 }
 

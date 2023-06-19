@@ -17,6 +17,7 @@
 #include <list>
 #include <boost/thread.hpp>
 #include "core/AudioManager.h"
+#include "core/Event.h"
 #include "core/XmlMusicsFile.h"
 #include "core/XmlSoundsFile.h"
 #include "core/Logger.h"
@@ -31,7 +32,7 @@ int AudioManager::channel_buffer_size_ = 96 * 1024;
 
 AudioManager::AudioManager():
   initialized_(false), thread_continue_(true), update_mutex_(), music_(&update_mutex_),
-  fx_(&update_mutex_)
+  battle_music_(&update_mutex_), fx_(&update_mutex_)
 {
     al_device_ = alcOpenDevice(nullptr);
     if (al_device_ != nullptr){
@@ -46,7 +47,7 @@ AudioManager::AudioManager():
             alListenerfv(AL_VELOCITY, velocity);
             alListenerfv(AL_ORIENTATION, orientation);
             initialized_ = true;
-            buffer_       = new char[channel_buffer_size_];
+            buffer_ = new char[channel_buffer_size_];
             update_thread_ = new boost::thread(boost::ref(*this));
             LOG_TRIVIAL("AudioManager initialised.");
         }
@@ -92,15 +93,28 @@ void AudioManager::operator()(){
     }
 }
 
-void AudioManager::Update(){
-    boost::recursive_mutex::scoped_lock lock(update_mutex_);
-    music_.Update();
-    fx_.Update();
-}
+void AudioManager::Input(const VGears::Event& event){}
+
+void AudioManager::UpdateDebug(){}
+
+void AudioManager::OnResize(){}
+
+void AudioManager::ClearField(){tracks_.clear();}
+
+void AudioManager::ClearBattle(){battle_track_ = -1;}
+
+void AudioManager::ClearWorld(){tracks_.clear();}
 
 void AudioManager::MusicPause(){
     boost::recursive_mutex::scoped_lock lock(update_mutex_);
-    music_.Pause();
+    if (module_ == Module::BATTLE) battle_music_.Pause();
+    else music_.Pause();
+}
+
+void AudioManager::MusicResume(){
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    if (module_ == Module::BATTLE) battle_music_.Resume();
+    else music_.Resume();
 }
 
 void AudioManager::ScriptPlayMusic(const char* name){
@@ -116,8 +130,16 @@ void AudioManager::MusicPlay(const Ogre::String& name){
             LOG_ERROR("No music found with name \"" + name + "\".");
             return;
         }
-        music_.SetLoop(music->loop);
-        music_.Play(music->file);
+        if (module_ == Module::BATTLE){
+            music_.Pause();
+            battle_music_.SetLoop(music->loop);
+            battle_music_.Play(music->file);
+        }
+        else{
+            battle_music_.Stop();
+            music_.SetLoop(music->loop);
+            music_.Play(music->file);
+        }
     }
 }
 
@@ -198,6 +220,33 @@ AudioManager::Sound* AudioManager::GetSound(const Ogre::String& name){
     return nullptr;
 }
 
+void AudioManager::AddTrack(const int id, const int track_id){
+    if (id >= 0 && id < 255) tracks_[id] = track_id;
+}
+
+int AudioManager::ScriptGetTrack(int id){
+    if (tracks_.count(id) == 0) return -1;
+    else return tracks_[id];
+}
+
+int AudioManager::ScriptGetBattleTrack(){return battle_track_;}
+
+void AudioManager::ScriptSetBattleTrack(int track){battle_track_ = track;}
+
+void AudioManager::UpdateField(){
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    music_.Update();
+    fx_.Update();
+}
+
+void AudioManager::UpdateBattle(){
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    battle_music_.Update();
+    fx_.Update();
+}
+
+void AudioManager::UpdateWorld(){UpdateField();}
+
 const char* AudioManager::ALError(){
     //ALenum error_code = alGetError();
     //if (error_code == AL_NO_ERROR)
@@ -218,9 +267,7 @@ const char* AudioManager::ALCError(const ALCdevice* device){
 AudioManager::Player::Player(boost::recursive_mutex* mutex):
   loop_(-1.0), vorbis_info_(nullptr), vorbis_section_(0),
   stream_finished_(false), update_mutex_(mutex)
-{
-    buffer_ = new char[1024 * 96];
-}
+{buffer_ = new char[1024 * 96];}
 
 AudioManager::Player::~Player(){Stop();}
 
@@ -229,12 +276,19 @@ void AudioManager::Player::Pause(){
     alSourcePause(source_);
 }
 
+void AudioManager::Player::Resume(){
+    if (!alIsSource(source_)){
+        LOG_WARNING("AudioManager::Player: Resume called but no track was paused.");
+        return;
+    }
+    alSourcePlay(source_);
+}
+
 void AudioManager::Player::Play(const Ogre::String &file){
     boost::recursive_mutex::scoped_lock lock(*update_mutex_);
 
 
     // If the same track is already playing, don't restart.
-
     if (file_ == file) return;
 
     // Open vorbis file.
@@ -275,6 +329,7 @@ void AudioManager::Player::Play(const Ogre::String &file){
 
 void AudioManager::Player::Stop(){
     boost::recursive_mutex::scoped_lock lock(*update_mutex_);
+    if (!alIsSource(source_)) return;
     // Stop source
     alSourceStop(source_);
     // Get source buffers
@@ -310,8 +365,7 @@ void AudioManager::Player::Update(){
             ALuint buffer_id;
             alSourceUnqueueBuffers(source_, 1, &buffer_id);
             alBufferData(
-              buffer_id, vorbis_info_->channels == 1 ?
-                AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+              buffer_id, vorbis_info_->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
               //static_cast<const ALvoid*>(AudioManager::getSingleton().buffer_),
               static_cast<const ALvoid*>(buffer_),
               static_cast<ALsizei>(buffer_size), static_cast<ALsizei>(vorbis_info_->rate)

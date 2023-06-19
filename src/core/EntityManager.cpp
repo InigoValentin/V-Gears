@@ -95,8 +95,6 @@ Ogre::Degree EntityManager::GetDirectionToPoint(
 }
 
 EntityManager::EntityManager():
-  module_(MODULE::FIELD),
-  paused_(false),
   player_entity_(nullptr),
   player_move_(Ogre::Vector3::ZERO),
   player_move_rotation_(0),
@@ -127,52 +125,6 @@ EntityManager::~EntityManager(){
       "EntityManager"
     );
     LOG_TRIVIAL("EntityManager destroyed.");
-}
-
-EntityManager::MODULE EntityManager::GetModule(){return module_;}
-
-bool EntityManager::IsModule(EntityManager::MODULE module){return (module_ == module);}
-
-bool EntityManager::IsFieldModule(){return (module_ == MODULE::FIELD);}
-
-bool EntityManager::IsBattleModule(){return (module_ == MODULE::BATTLE);}
-
-bool EntityManager::IsWorldModule(){return (module_ == MODULE::WORLD);}
-
-void EntityManager::SetModule(EntityManager::MODULE module){
-    if (module == MODULE::FIELD){
-        ClearBattle();
-        ClearWorld();
-    }
-    else if (module == MODULE::WORLD){
-        ClearBattle();
-        ClearField();
-    }
-    else if (module == MODULE::BATTLE){
-        prev_module_ = module_;
-    }
-    module_ = module;
-}
-
-void EntityManager::SetFieldModule(){SetModule(MODULE::FIELD);}
-
-void EntityManager::SetBattleModule(){SetModule(MODULE::BATTLE);}
-
-void EntityManager::SetWorldModule(){SetModule(MODULE::WORLD);}
-
-void EntityManager::SetPreviousModule(){
-    if (module_ != MODULE::BATTLE)
-        LOG_WARNING(
-          "Called EntityManager::SetPreviousModule without battle module active. Doing nothing"
-          + "Current module is " + std::to_string(module_)
-        );
-    else if(module_ = prev_module_)
-        LOG_WARNING(
-          "Called EntityManager::SetPreviousModule but there is no previous module. Doing nothing"
-          + "Current module is " + std::to_string(module_)
-        );
-    else module_ = prev_module_;
-    return;
 }
 
 void EntityManager::Input(const VGears::Event& event){
@@ -212,26 +164,6 @@ void EntityManager::Input(const VGears::Event& event){
         Ogre::Quaternion q1;
         q1.FromAngleAxis(player_move_rotation_, Ogre::Vector3::UNIT_Z);
         player_move_ = q1 * player_move_;
-    }
-}
-
-void EntityManager::Update(){
-    UpdateDebug();
-    if (paused_ == true) return;
-    Update(module_);
-}
-
-void EntityManager::Update(MODULE module){
-    switch (module){
-        case MODULE::FIELD:
-            UpdateField();
-            break;
-        case MODULE::BATTLE:
-            UpdateBattle();
-            break;
-        case MODULE::WORLD:
-            UpdateWorld();
-            break;
     }
 }
 
@@ -368,7 +300,7 @@ void EntityManager::UpdateWorld(){
 void EntityManager::UpdateDebug(){
     grid_->setVisible(cv_debug_grid.GetB());
     axis_->setVisible(cv_debug_axis.GetB());
-    if (module_ == MODULE::BATTLE)
+    if (module_ == Module::BATTLE)
         for (unsigned int i = 0; i < battle_entity_.size(); ++ i) battle_entity_[i]->UpdateDebug();
     else{
         for (unsigned int i = 0; i < entity_.size(); ++ i) entity_[i]->UpdateDebug();
@@ -380,22 +312,6 @@ void EntityManager::UpdateDebug(){
 }
 
 void EntityManager::OnResize(){background_2d_.OnResize();}
-
-void EntityManager::Clear(){Clear(module_);}
-
-void EntityManager::Clear(MODULE module){
-    switch (module){
-        case MODULE::FIELD:
-            ClearField();
-            break;
-        case MODULE::BATTLE:
-            ClearBattle();
-            break;
-        case MODULE::WORLD:
-            ClearWorld();
-            break;
-    }
-}
 
 void EntityManager::ClearField(){
     walkmesh_.Clear();
@@ -438,14 +354,6 @@ void EntityManager::ClearWorld(){
     // TODO implement
 }
 
-void EntityManager::ClearAll(){
-    ClearField();
-    ClearBattle();
-    ClearWorld();
-}
-
-void EntityManager::ScriptSetPaused(const bool paused){paused_ = paused;}
-
 Walkmesh* EntityManager::GetWalkmesh(){return &walkmesh_;}
 
 Background2D* EntityManager::GetBackground2D(){return &background_2d_;}
@@ -465,7 +373,7 @@ void EntityManager::AddEntity(
   const Ogre::Degree& rotation, const Ogre::Vector3& scale,
   const Ogre::Quaternion& root_orientation, int index
 ){
-    if (module_ != MODULE::FIELD){
+    if (module_ != Module::FIELD){
         LOG_ERROR("Tried to add field Entity but the EntityManager is not in field mode.");
         return;
     }
@@ -484,7 +392,7 @@ void EntityManager::AddBattleEntity(
   const Ogre::String& name, const Ogre::String& file_name, const Ogre::Vector3& position,
   const Ogre::Degree& rotation, const Ogre::Vector3& scale, const int index, const int visible
 ){
-    if (module_ != MODULE::BATTLE){
+    if (module_ != Module::BATTLE){
         LOG_ERROR("Tried to add battle Entity but the EntityManager is not in battle mode.");
         return;
     }
@@ -625,15 +533,6 @@ bool EntityManager::IsKeyOff(unsigned int key_code){return !IsKeyOn(key_code);}
 void EntityManager::SetEntityToCharacter(const char* entity_name, unsigned int char_id){
     for (unsigned int i = 0; i < entity_.size(); ++ i)
         if (entity_[i]->GetName() == entity_name) entity_[i]->SetCharacter(char_id);
-}
-
-void EntityManager::AddTrack(const int id, const int track_id){
-    if (id >= 0 && id < 255) tracks_[id] = track_id;
-}
-
-int EntityManager::GetTrack(const int id){
-    if (tracks_.count(id) == 0) return -1;
-    else return tracks_[id];
 }
 
 bool EntityManager::SetEntityOnWalkmesh(Entity* entity){

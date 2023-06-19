@@ -18,11 +18,12 @@
 #include <OgreCamera.h>
 #include <OgreSingleton.h>
 #include "Event.h"
+#include "Manager.h"
 
 /**
  * The camera manager.
  */
-class CameraManager : public Ogre::Singleton<CameraManager>{
+class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
 
     public:
 
@@ -45,25 +46,45 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
          * Handles the scene manager camera actions based on events.
          *
          * @param[in] event Event that triggers the camera action.
-         * @param[in] time_since_last_frame For speed calculation.
          */
-        void Input(
-          const VGears::Event& event , Ogre::Real time_since_last_frame
-        );
+        void Input(const VGears::Event& event) override;
 
         /**
-         * Triggered when updated.
+         * Handles camera actions.
          *
-         * Unused.
+         * Handles the scene manager camera actions based on events.
+         *
+         * @param[in] event Event that triggers the camera action.
+         * @param[in] time_since_last_frame For speed calculation.
          */
-        void Update();
+        void Input(const VGears::Event& event , Ogre::Real time_since_last_frame);
 
         /**
          * Trigered when the viewport is resized.
          *
          * Resets the aspect ratio.
          */
-        void OnResize();
+        void OnResize() override;
+
+        /**
+         * Updates debug information.
+         */
+        void UpdateDebug() override;
+
+        /**
+         * Clears all field information in the camera manager.
+         */
+        void ClearField() override;
+
+        /**
+         * Clears all battle information in the camera manager.
+         */
+        void ClearBattle() override;
+
+        /**
+         * Clears all world map information in the camera manager.
+         */
+        void ClearWorld() override;
 
         /**
          * Enables or disables the free camera.
@@ -184,9 +205,19 @@ class CameraManager : public Ogre::Singleton<CameraManager>{
         void InitCommands();
 
         /**
-         * Indicates if the camera is in battle mode.
+         * Updates while the camera is in the field.
          */
-        bool battle_;
+        void UpdateField() override;
+
+        /**
+         * Updates while the camera is in battle.
+         */
+        void UpdateBattle() override;
+
+        /**
+         * Updates while the camera is in the world map.
+         */
+        void UpdateWorld() override;
 
         /**
          * The camera.

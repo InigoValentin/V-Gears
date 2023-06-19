@@ -18,9 +18,9 @@
 #include <OgreString.h>
 #include <OgreStringVector.h>
 
-class ConfigCmdManager;
+class ConfigCmdHandler;
 
-typedef void (*ConfigCmdHandler)(const Ogre::StringVector& params);
+typedef void (*ConfigCmdParams)(const Ogre::StringVector& params);
 
 typedef void (*ConfigCmdCompletion)(Ogre::StringVector& complete_params);
 
@@ -30,7 +30,7 @@ typedef void (*ConfigCmdCompletion)(Ogre::StringVector& complete_params);
  */
 class ConfigCmd{
 
-    friend class ConfigCmdManager;
+    friend class ConfigCmdHandler;
 
     public:
 
@@ -42,12 +42,12 @@ class ConfigCmd{
          * @param[in] name Command name.
          * @param[in] description Command description.
          * @param[in] params_description Command parameters description.
-         * @param[in] handler Command handler.
+         * @param[in] params Command parameter handler.
          * @param[in] completion Command completion.
          */
         ConfigCmd(
           const Ogre::String& name, const Ogre::String& description,
-          const Ogre::String& params_description, ConfigCmdHandler handler,
+          const Ogre::String& params_description, ConfigCmdParams params,
           ConfigCmdCompletion completion
         );
 
@@ -77,7 +77,7 @@ class ConfigCmd{
          *
          * @return The command parameter description.
          */
-        ConfigCmdHandler GetHandler() const;
+        ConfigCmdParams GetHandler() const;
 
         /**
          * Checks the command completion
@@ -118,9 +118,9 @@ class ConfigCmd{
         Ogre::String params_description_;
 
         /**
-         * The command handler.
+         * The command parameter handler.
          */
-        ConfigCmdHandler handler_;
+        ConfigCmdParams params_;
 
         /**
          * The command completion.

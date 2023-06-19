@@ -33,7 +33,6 @@ ConfigVar cv_cam_speed("camera_speed", "Camera speed", "0.02");
 template<>CameraManager* Ogre::Singleton<CameraManager>::msSingleton = nullptr;
 
 CameraManager::CameraManager():
-  battle_(false),
   camera_free_(false),
   camera_free_rotate_(false),
   d2_position_(Ogre::Vector3::ZERO),
@@ -71,73 +70,45 @@ CameraManager::CameraManager():
 
 CameraManager::~CameraManager(){LOG_TRIVIAL("CameraManager finished.");}
 
-void CameraManager::Input(
-  const VGears::Event& event, Ogre::Real time_since_last_frame
-){
+void CameraManager::Input(const VGears::Event& event){}
+
+void CameraManager::Input(const VGears::Event& event, Ogre::Real time_since_last_frame){
     if (camera_free_ == true){
         float speed = cv_cam_speed.GetF() * time_since_last_frame;
         if(
           InputManager::getSingleton().IsButtonPressed(OIS::KC_RSHIFT)
           || InputManager::getSingleton().IsButtonPressed(OIS::KC_LSHIFT)
-        ){
-            speed *= 4;
-        }
+        ) speed *= 4;
 
         Ogre::SceneNode* rootScene =
-          Ogre::Root::getSingleton().getSceneManager("Scene")
-            ->getRootSceneNode();
+          Ogre::Root::getSingleton().getSceneManager("Scene") ->getRootSceneNode();
 
         if (event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_W){
             //camera_->moveRelative(Ogre::Vector3(0, 0, -speed));
-            rootScene->translate(
-              Ogre::Vector3(0, 0, -speed), Ogre::Node::TS_LOCAL
-            );
+            rootScene->translate(Ogre::Vector3(0, 0, -speed), Ogre::Node::TS_LOCAL);
         }
-        else if (
-          event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_A
-        ){
+        else if (event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_A){
             //camera_->moveRelative(Ogre::Vector3(-speed, 0, 0));
-            rootScene->translate(
-              Ogre::Vector3(-speed, 0, 0), Ogre::Node::TS_LOCAL
-            );
+            rootScene->translate(Ogre::Vector3(-speed, 0, 0), Ogre::Node::TS_LOCAL);
         }
-        else if (
-          event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_S
-        ){
+        else if (event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_S){
             //camera_->moveRelative(Ogre::Vector3(0, 0, speed));
-            rootScene->translate(
-              Ogre::Vector3(0, 0, speed), Ogre::Node::TS_LOCAL
-            );
+            rootScene->translate(Ogre::Vector3(0, 0, speed), Ogre::Node::TS_LOCAL);
         }
-        else if (
-          event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_D
-        ){
+        else if (event.type == VGears::ET_KEY_IMPULSE && event.param1 == OIS::KC_D){
             //camera_->moveRelative(Ogre::Vector3(speed, 0, 0));
-            rootScene->translate(
-              Ogre::Vector3(speed, 0, 0), Ogre::Node::TS_LOCAL
-            );
+            rootScene->translate(Ogre::Vector3(speed, 0, 0), Ogre::Node::TS_LOCAL);
         }
-        else if (
-          event.type == VGears::ET_MOUSE_PRESS && event.param1 == OIS::MB_Right
-        ){
+        else if (event.type == VGears::ET_MOUSE_PRESS && event.param1 == OIS::MB_Right)
             camera_free_rotate_ = true;
-        }
-        else if (
-          event.type == VGears::ET_MOUSE_RELEASE
-          && event.param1 == OIS::MB_Right
-        ){
+        else if (event.type == VGears::ET_MOUSE_RELEASE && event.param1 == OIS::MB_Right)
             camera_free_rotate_ = false;
-        }
-        else if (
-          event.type == VGears::ET_MOUSE_MOVE && camera_free_rotate_ == true
-        ){
+        else if (event.type == VGears::ET_MOUSE_MOVE && camera_free_rotate_ == true){
             //camera_->rotate(
-            //  Ogre::Vector3::UNIT_Z,
-            //  Ogre::Radian(Ogre::Degree(-event.param1 * 0.13f))
+            //  Ogre::Vector3::UNIT_Z, Ogre::Radian(Ogre::Degree(-event.param1 * 0.13f))
             //);
             rootScene->rotate(
-              Ogre::Vector3::UNIT_Z,
-              Ogre::Radian(Ogre::Degree(-event.param1 * 0.13f))
+              Ogre::Vector3::UNIT_Z, Ogre::Radian(Ogre::Degree(-event.param1 * 0.13f))
             );
             //camera_->pitch(Ogre::Degree(-event.param2 * 0.13f));
             rootScene->pitch(Ogre::Degree(-event.param2 * 0.13f));
@@ -145,14 +116,19 @@ void CameraManager::Input(
     }
 }
 
-void CameraManager::Update(){}
-
 void CameraManager::OnResize(){
     camera_->setAspectRatio(
-      Ogre::Real(viewport_->getActualWidth())
-      / Ogre::Real(viewport_->getActualHeight())
+      Ogre::Real(viewport_->getActualWidth()) / Ogre::Real(viewport_->getActualHeight())
     );
 }
+
+void CameraManager::UpdateDebug(){}
+
+void CameraManager::ClearField(){}
+
+void CameraManager::ClearBattle(){}
+
+void CameraManager::ClearWorld(){}
 
 void CameraManager::SetCameraFree(const bool enable){
     camera_free_ = enable;
@@ -183,8 +159,7 @@ void CameraManager::SetCameraFree(const bool enable){
 
 
 void CameraManager::Set2DCamera(
-  const Ogre::Vector3 position,
-  const Ogre::Quaternion orientation, const Ogre::Radian fov
+  const Ogre::Vector3 position, const Ogre::Quaternion orientation, const Ogre::Radian fov
 ){
     d2_position_ = position;
     d2_orientation_ = orientation;
@@ -193,9 +168,7 @@ void CameraManager::Set2DCamera(
     CameraManager::getSingleton().GetCurrentCamera()->setPosition(d2_position_);
     //Ogre::Root::getSingleton().getSceneManager("Scene")
     //  ->getRootSceneNode()->setPosition(d2_position_);
-    CameraManager::getSingleton().GetCurrentCamera()->setOrientation(
-      d2_orientation_
-    );
+    CameraManager::getSingleton().GetCurrentCamera()->setOrientation(d2_orientation_);
     //Ogre::Root::getSingleton().getSceneManager("Scene")
     //  ->getRootSceneNode()->setOrientation(d2_orientation_);
     CameraManager::getSingleton().GetCurrentCamera()->setFOVy(d2_fov_);
@@ -205,17 +178,15 @@ void CameraManager::Set2DCamera(
 void CameraManager::StartBattleCamera(
   const Ogre::Vector3 position, const Ogre::Vector3 orientation
 ){
-    if (battle_){
+    if (module_ != Module::BATTLE){
         LOG_ERROR("Tried to start battle camera but the CameraManager is already in battle mode");
         return;
     }
-    battle_ = true;
     std::cout << "CAMERA BATTLE START: " << camera_->getPosition().x << ", " << camera_->getPosition().y << ", " << camera_->getPosition().z << ", "
         << camera_->getOrientation().w << ", "<< camera_->getOrientation().x << ", " << camera_->getOrientation().y << ", "
         << camera_->getOrientation().z << std::endl;
     position_backup_ = Ogre::Vector3(
-      camera_->getPosition().x, camera_->getPosition().y,
-      camera_->getPosition().z
+      camera_->getPosition().x, camera_->getPosition().y, camera_->getPosition().z
     );
     orientation_backup_ = Ogre::Quaternion(
       camera_->getOrientation().w, camera_->getOrientation().x,
@@ -223,7 +194,6 @@ void CameraManager::StartBattleCamera(
     );
     camera_->setPosition(position);
     //CameraManager::getSingleton().GetCurrentCamera()->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-    camera_->lookAt(Ogre::Vector3(orientation.x, orientation.y, camera_->getPosition().z));
     camera_->lookAt(orientation);
 
 
@@ -233,11 +203,6 @@ void CameraManager::StartBattleCamera(
 }
 
 void CameraManager::EndBattleCamera(){
-    if (!battle_){
-        LOG_ERROR("Tried to end battle camera but the CameraManager is not in battle mode");
-        return;
-    }
-    battle_ = false;
         std::cout << "CAMERA BATTLE END: " << camera_->getPosition().x << ", " << camera_->getPosition().y << ", " << camera_->getPosition().z << ", "
             << camera_->getOrientation().w << ", "<< camera_->getOrientation().x << ", " << camera_->getOrientation().y << ", "
             << camera_->getOrientation().z << std::endl;
@@ -267,16 +232,12 @@ void CameraManager::Set2DScroll(const Ogre::Vector2& position){
     bottom = frustrumRect.bottom;
     float move_x = ((right - left) / width) * position.x;
     float move_y = ((bottom - top) / height) * -position.y;
-    camera_->setFrustumExtents(
-      left - move_x, right - move_x, top + move_y, bottom + move_y
-    );
+    camera_->setFrustumExtents(left - move_x, right - move_x, top + move_y, bottom + move_y);
 }
 
 const Ogre::Vector2& CameraManager::Get2DScroll() const{return d2_scroll_;}
 
-const Ogre::Vector3 CameraManager::ProjectPointToScreen(
-  const Ogre::Vector3& point
-){
+const Ogre::Vector3 CameraManager::ProjectPointToScreen(const Ogre::Vector3& point){
     Ogre::Vector3 view = camera_->getViewMatrix() * point;
     float z = view.z;
     view = camera_->getProjectionMatrix() * view;
@@ -317,3 +278,9 @@ void CameraManager::ScriptSetCamera(
     camera_->lookAt(Ogre::Vector3(d_x, d_y, camera_->getPosition().z));
     camera_->lookAt(Ogre::Vector3(d_x, d_y, d_z));
 }
+
+void CameraManager::UpdateField(){}
+
+void CameraManager::UpdateBattle(){}
+
+void CameraManager::UpdateWorld(){}

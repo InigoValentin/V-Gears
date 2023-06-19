@@ -13,14 +13,14 @@
  * GNU General Public License for more details.
  */
 
-#include "core/ConfigVarManager.h"
+#include "ConfigVarHandler.h"
 
 /**
  * Configuration variable manager singleton.
  */
-template<>ConfigVarManager *Ogre::Singleton<ConfigVarManager>::msSingleton = nullptr;
+template<>ConfigVarHandler *Ogre::Singleton<ConfigVarHandler>::msSingleton = nullptr;
 
-ConfigVarManager::ConfigVarManager(){
+ConfigVarHandler::ConfigVarHandler(){
     // TODO: Properly cast this.
     if (reinterpret_cast<std::uintptr_t>(&ConfigVar::static_config_var_list_) != 0xffffffff){
         for (ConfigVar* cvar = ConfigVar::static_config_var_list_; cvar; cvar = cvar->previous_)
@@ -30,14 +30,14 @@ ConfigVarManager::ConfigVarManager(){
     }
 }
 
-ConfigVar* ConfigVarManager::Find(const Ogre::String& name) const{
+ConfigVar* ConfigVarHandler::Find(const Ogre::String& name) const{
     for (size_t i = 0; i < config_vars_.size(); ++ i)
         if (config_vars_[i]->GetName() == name) return config_vars_[i];
     return nullptr;
 }
 
-unsigned int ConfigVarManager::GetConfigVarNumber() const{return config_vars_.size();}
+unsigned int ConfigVarHandler::GetConfigVarNumber() const{return config_vars_.size();}
 
-ConfigVar* ConfigVarManager::GetConfigVar(const unsigned int i) const{
+ConfigVar* ConfigVarHandler::GetConfigVar(const unsigned int i) const{
     if (i < config_vars_.size()) return config_vars_[i]; return nullptr;
 }

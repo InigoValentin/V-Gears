@@ -17,7 +17,7 @@
 #include "core/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "core/Logger.h"
-#include "core/TextManager.h"
+#include "TextHandler.h"
 
 /**
  * Dialog manager singleton.
@@ -96,8 +96,20 @@ void DialogsManager::Input(const VGears::Event& input){
         down_pressed_ = true;
 }
 
+void DialogsManager::UpdateDebug(){}
+
+void DialogsManager::OnResize(){}
+
+void DialogsManager::ClearField(){
+    for (unsigned int i = 0; i < messages_.size(); ++ i) HideMessage(i);
+}
+
+void DialogsManager::ClearBattle(){}
+
+void DialogsManager::ClearWorld(){}
+
 void DialogsManager::ScriptSetMapName(const char* text_id){
-    std::string text = TextManager::getSingleton().GetDialogText(text_id);
+    std::string text = TextHandler::getSingleton().GetDialogText(text_id);
     SetMapName(text);
 }
 
@@ -107,126 +119,6 @@ void DialogsManager::SetMapName(std::string name){
 
 std::string DialogsManager::GetMapName(){return map_name_;}
 
-void DialogsManager::Update(){
-    for (unsigned int i = 0; i < messages_.size(); ++ i){
-        switch(messages_[i]->state){
-            case MS_SHOW_WINDOW:
-                {
-                    if (
-                      (messages_[i]->window == NULL)
-                      || (messages_[i]->window->GetCurrentAnimationName() == Ogre::BLANKSTRING)
-                    ){
-                        messages_[i]->text_area->PlayAnimation("Show", UiAnimation::ONCE, 0, -1);
-                        messages_[i]->text_area->SetVisible(true);
-                        messages_[i]->state = MS_SHOW_TEXT;
-                    }
-                }
-                break;
-            case MS_SHOW_TEXT:{
-                if (AutoCloseCheck(i) == true) break;
-                if (messages_[i]->clickable == true){
-                    if (next_pressed_ == true) messages_[i]->text_area->InputPressed();
-                    if (next_repeated_ == true) messages_[i]->text_area->InputRepeated();
-                }
-
-                if (messages_[i]->text_area->GetTextState() == TS_DONE){
-                    messages_[i]->state = MS_OPENED;
-                    if (messages_[i]->cursor != NULL && messages_[i]->show_cursor == true){
-                        messages_[i]->cursor->SetY(
-                          messages_[i]->cursor_percent_y,
-                          messages_[i]->cursor_y + messages_[i]->cursor_row_current
-                            * messages_[i]->text_area->GetFont()->GetHeight()
-                        );
-                        messages_[i]->cursor->SetVisible(true);
-                    }
-                }
-            }
-                break;
-            case MS_OPENED:
-                {
-                    if (messages_[i]->clickable == true && next_pressed_ == true){
-                        if (messages_[i]->closeable == true){
-                            messages_[i]->auto_close = true;
-                            if ((messages_[i]->cursor != NULL) && (messages_[i]->show_cursor == true)){
-                                messages_[i]->show_cursor = false;
-                                messages_[i]->cursor_row_selected = messages_[i]->cursor_row_current;
-                                messages_[i]->cursor->SetVisible(false);
-                            }
-                        }
-                    }
-                    if (AutoCloseCheck(i) == true) break;
-                    if (
-                      (messages_[i]->cursor != NULL)
-                      && (messages_[i]->show_cursor == true)
-                      && (messages_[i]->clickable == true)
-                    ){
-                        if (up_pressed_ == true) messages_[i]->cursor_row_current -= 1;
-                        else if (down_pressed_ == true) messages_[i]->cursor_row_current += 1;
-                        messages_[i]->cursor_row_current =
-                          (messages_[i]->cursor_row_current < messages_[i]->cursor_row_first)
-                            ? messages_[i]->cursor_row_last : messages_[i]->cursor_row_current;
-                        messages_[i]->cursor_row_current =
-                          (messages_[i]->cursor_row_current > messages_[i]->cursor_row_last)
-                            ? messages_[i]->cursor_row_first : messages_[i]->cursor_row_current;
-                        messages_[i]->cursor->SetY(
-                          messages_[i]->cursor_percent_y,
-                          messages_[i]->cursor_y + messages_[i]->cursor_row_current
-                            * messages_[i]->text_area->GetFont()->GetHeight()
-                        );
-                    }
-                }
-                break;
-            case MS_HIDE_WINDOW:{
-                    if (
-                      (messages_[i]->window == NULL)
-                      || (messages_[i]->window->GetCurrentAnimationName() == Ogre::BLANKSTRING)
-                    ){
-                        HideMessage(i);
-                    }
-                }
-            break;
-        }
-    }
-
-    if (cv_debug_message.GetB() == true){
-        DEBUG_DRAW.SetColour(Ogre::ColourValue::White);
-        DEBUG_DRAW.SetTextAlignment(DEBUG_DRAW.LEFT);
-        DEBUG_DRAW.SetScreenSpace(true);
-        int y = 34;
-        for (unsigned int i = 0; i < messages_.size(); ++ i){
-            Ogre::String caption;
-            caption += "Message " + Ogre::StringConverter::toString(i) + ": "
-              + message_state_string[messages_[i]->state];
-
-            if (messages_[i]->state == MS_SHOW_TEXT){
-                caption += " ("
-                  + Ogre::StringConverter::toString(int(messages_[i]->text_area->GetTextLimit()))
-                  + "/" + Ogre::StringConverter::toString(messages_[i]->text_area->GetTextSize());
-
-                switch(messages_[i]->text_area->GetTextState()){
-                    case TS_PAUSE_OK: caption += " pause ok"; break;
-                    case TS_PAUSE_TIME:
-                        caption += " pause time " + Ogre::StringConverter::toString(
-                          int(messages_[i]->text_area->GetPauseTime())
-                        );
-                        break;
-                    case TS_OVERFLOW: caption += " overflow"; break;
-                    case TS_NEXT_PAGE: caption += " next page"; break;
-                    case TS_SCROLL_TEXT: caption += " scroll"; break;
-                }
-                caption += ")";
-            }
-            DEBUG_DRAW.Text(10, y, caption);
-            y += 16;
-        }
-    }
-    next_pressed_ = false;
-    next_repeated_ = false;
-    up_pressed_ = false;
-    down_pressed_ = false;
-}
-
-void DialogsManager::Clear(){for (unsigned int i = 0; i < messages_.size(); ++ i) HideMessage(i);}
 
 void DialogsManager::OpenDialog(const char* d_name, int x, int y, int w, int h){
     int id = GetMessageId(d_name);
@@ -261,7 +153,7 @@ void DialogsManager::SetText(const char* d_name, const char* text){
     // XML data can change dialog w/h VS what is in the lua script
     float width = 0.0f;
     float height = 0.0f;
-    TiXmlNode* xmlText = TextManager::getSingleton().GetDialog(text, width, height);
+    TiXmlNode* xmlText = TextHandler::getSingleton().GetDialog(text, width, height);
     if (xmlText != NULL){
         ShowMessage(
           id, data->x, data->y,
@@ -475,3 +367,126 @@ bool DialogsManager::AutoCloseCheck(const unsigned int id){
     }
     return false;
 }
+
+void DialogsManager::UpdateField(){
+    for (unsigned int i = 0; i < messages_.size(); ++ i){
+        switch(messages_[i]->state){
+            case MS_SHOW_WINDOW:
+                {
+                    if (
+                      (messages_[i]->window == NULL)
+                      || (messages_[i]->window->GetCurrentAnimationName() == Ogre::BLANKSTRING)
+                    ){
+                        messages_[i]->text_area->PlayAnimation("Show", UiAnimation::ONCE, 0, -1);
+                        messages_[i]->text_area->SetVisible(true);
+                        messages_[i]->state = MS_SHOW_TEXT;
+                    }
+                }
+                break;
+            case MS_SHOW_TEXT:{
+                if (AutoCloseCheck(i) == true) break;
+                if (messages_[i]->clickable == true){
+                    if (next_pressed_ == true) messages_[i]->text_area->InputPressed();
+                    if (next_repeated_ == true) messages_[i]->text_area->InputRepeated();
+                }
+
+                if (messages_[i]->text_area->GetTextState() == TS_DONE){
+                    messages_[i]->state = MS_OPENED;
+                    if (messages_[i]->cursor != NULL && messages_[i]->show_cursor == true){
+                        messages_[i]->cursor->SetY(
+                          messages_[i]->cursor_percent_y,
+                          messages_[i]->cursor_y + messages_[i]->cursor_row_current
+                            * messages_[i]->text_area->GetFont()->GetHeight()
+                        );
+                        messages_[i]->cursor->SetVisible(true);
+                    }
+                }
+            }
+                break;
+            case MS_OPENED:
+                {
+                    if (messages_[i]->clickable == true && next_pressed_ == true){
+                        if (messages_[i]->closeable == true){
+                            messages_[i]->auto_close = true;
+                            if ((messages_[i]->cursor != NULL) && (messages_[i]->show_cursor == true)){
+                                messages_[i]->show_cursor = false;
+                                messages_[i]->cursor_row_selected = messages_[i]->cursor_row_current;
+                                messages_[i]->cursor->SetVisible(false);
+                            }
+                        }
+                    }
+                    if (AutoCloseCheck(i) == true) break;
+                    if (
+                      (messages_[i]->cursor != NULL)
+                      && (messages_[i]->show_cursor == true)
+                      && (messages_[i]->clickable == true)
+                    ){
+                        if (up_pressed_ == true) messages_[i]->cursor_row_current -= 1;
+                        else if (down_pressed_ == true) messages_[i]->cursor_row_current += 1;
+                        messages_[i]->cursor_row_current =
+                          (messages_[i]->cursor_row_current < messages_[i]->cursor_row_first)
+                            ? messages_[i]->cursor_row_last : messages_[i]->cursor_row_current;
+                        messages_[i]->cursor_row_current =
+                          (messages_[i]->cursor_row_current > messages_[i]->cursor_row_last)
+                            ? messages_[i]->cursor_row_first : messages_[i]->cursor_row_current;
+                        messages_[i]->cursor->SetY(
+                          messages_[i]->cursor_percent_y,
+                          messages_[i]->cursor_y + messages_[i]->cursor_row_current
+                            * messages_[i]->text_area->GetFont()->GetHeight()
+                        );
+                    }
+                }
+                break;
+            case MS_HIDE_WINDOW:{
+                    if (
+                      (messages_[i]->window == NULL)
+                      || (messages_[i]->window->GetCurrentAnimationName() == Ogre::BLANKSTRING)
+                    ){
+                        HideMessage(i);
+                    }
+                }
+            break;
+        }
+    }
+
+    if (cv_debug_message.GetB() == true){
+        DEBUG_DRAW.SetColour(Ogre::ColourValue::White);
+        DEBUG_DRAW.SetTextAlignment(DEBUG_DRAW.LEFT);
+        DEBUG_DRAW.SetScreenSpace(true);
+        int y = 34;
+        for (unsigned int i = 0; i < messages_.size(); ++ i){
+            Ogre::String caption;
+            caption += "Message " + Ogre::StringConverter::toString(i) + ": "
+              + message_state_string[messages_[i]->state];
+
+            if (messages_[i]->state == MS_SHOW_TEXT){
+                caption += " ("
+                  + Ogre::StringConverter::toString(int(messages_[i]->text_area->GetTextLimit()))
+                  + "/" + Ogre::StringConverter::toString(messages_[i]->text_area->GetTextSize());
+
+                switch(messages_[i]->text_area->GetTextState()){
+                    case TS_PAUSE_OK: caption += " pause ok"; break;
+                    case TS_PAUSE_TIME:
+                        caption += " pause time " + Ogre::StringConverter::toString(
+                          int(messages_[i]->text_area->GetPauseTime())
+                        );
+                        break;
+                    case TS_OVERFLOW: caption += " overflow"; break;
+                    case TS_NEXT_PAGE: caption += " next page"; break;
+                    case TS_SCROLL_TEXT: caption += " scroll"; break;
+                }
+                caption += ")";
+            }
+            DEBUG_DRAW.Text(10, y, caption);
+            y += 16;
+        }
+    }
+    next_pressed_ = false;
+    next_repeated_ = false;
+    up_pressed_ = false;
+    down_pressed_ = false;
+}
+
+void DialogsManager::UpdateBattle(){}
+
+void DialogsManager::UpdateWorld(){}

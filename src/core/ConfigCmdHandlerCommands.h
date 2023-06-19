@@ -19,14 +19,14 @@
 #include <OgreRoot.h>
 #include <OgreStringConverter.h>
 #include "Console.h"
-#include "ConfigCmdManager.h"
-#include "ConfigVarManager.h"
 #include "EntityManager.h"
 #include "Logger.h"
 #include "XmlMapFile.h"
 #include "XmlMapsFile.h"
 #include "VGearsGameState.h"
 #include "common/VGearsApplication.h"
+#include "ConfigCmdHandler.h"
+#include "ConfigVarHandler.h"
 
 /**
  * Command to quit the application.
@@ -40,8 +40,8 @@ void CmdQuit(const Ogre::StringVector& params){
 /**
  * Command to print to console.
  *
- * @param[in] params Command parameters. All of them will be concatenated and
- * printed. If none are supplied, a command usage text will be printed instead.
+ * @param[in] params Command parameters. All of them will be concatenated and printed. If none are
+ * supplied, a command usage text will be printed instead.
  */
 void CmdEcho(const Ogre::StringVector& params){
     if (params.size() < 1){
@@ -61,23 +61,21 @@ void CmdEcho(const Ogre::StringVector& params){
 /**
  * Searches variables in the variable list and prints them.
  *
- * @param[in] params Command parameters. The first one is the command name. If
- * no more are passed, all variables will be printed. If another parameter is
- * passed, the variables with that name (if any) will be printed. If more than
- * two parameter are passed, a command usage string will be printed instead.
+ * @param[in] params Command parameters. The first one is the command name. If no more are passed,
+ * all variables will be printed. If another parameter is passed, the variables with that name (if
+ * any) will be printed. If more than two parameter are passed, a command usage string will be
+ * printed instead.
  */
 void CmdConfigVarList(const Ogre::StringVector& params){
     if (params.size() > 2){
-        Console::getSingleton().AddTextToOutput(
-          "Usage: /config_var_list [search string]"
-       );
+        Console::getSingleton().AddTextToOutput("Usage: /config_var_list [search string]");
         return;
     }
 
     int number = 0;
-    int num_vars = ConfigVarManager::getSingleton().GetConfigVarNumber();
+    int num_vars = ConfigVarHandler::getSingleton().GetConfigVarNumber();
     for (int i = 0; i < num_vars; ++ i){
-        ConfigVar* var = ConfigVarManager::getSingleton().GetConfigVar(i);
+        ConfigVar* var = ConfigVarHandler::getSingleton().GetConfigVar(i);
         Ogre::String name = var->GetName();
 
         if (params.size() > 1){
@@ -86,14 +84,12 @@ void CmdConfigVarList(const Ogre::StringVector& params){
                 Console::getSingleton().AddTextToOutput(
                   var->GetName() + " = \"" + var->GetS() + "\""
                );
-                ++number;
+                ++ number;
             }
         }
         else{
-            Console::getSingleton().AddTextToOutput(
-              var->GetName() + " = \"" + var->GetS() + "\""
-           );
-            ++number;
+            Console::getSingleton().AddTextToOutput(var->GetName() + " = \"" + var->GetS() + "\"");
+            ++ number;
         }
     }
     Console::getSingleton().AddTextToOutput(
@@ -104,33 +100,31 @@ void CmdConfigVarList(const Ogre::StringVector& params){
 /**
  * Searches the command list and prints the comands.
  *
- * @param[in] params Command parameters. The first one is the command name. If
- * no more is passed, all commands will be printed. If another parameter is
- * passed, the command with that name (if any) will be printed. If more than
- * two parameter are passed, a command usage string will be printed instead.
+ * @param[in] params Command parameters. The first one is the command name. If no more is passed,
+ * all commands will be printed. If another parameter is passed, the command with that name (if
+ * any) will be printed. If more than two parameter are passed, a command usage string will be
+ * printed instead.
  */
 void CmdConfigCmdList(const Ogre::StringVector& params){
     if (params.size() > 2){
-        Console::getSingleton().AddTextToOutput(
-          "Usage: /config_cmd_list [search string]"
-       );
+        Console::getSingleton().AddTextToOutput("Usage: /config_cmd_list [search string]");
         return;
     }
     int number = 0;
-    int num_cmds = ConfigCmdManager::getSingleton().GetConfigCmdNumber();
+    int num_cmds = ConfigCmdHandler::getSingleton().GetConfigCmdNumber();
     for (int i = 0; i < num_cmds; ++ i){
-        ConfigCmd* cmd = ConfigCmdManager::getSingleton().GetConfigCmd(i);
+        ConfigCmd* cmd = ConfigCmdHandler::getSingleton().GetConfigCmd(i);
         Ogre::String name = cmd->GetName();
         if (params.size() > 1){
             int found = name.find(params[1]);
             if (found == 0){
                 Console::getSingleton().AddTextToOutput(cmd->GetName());
-                ++number;
+                ++ number;
             }
         }
         else{
             Console::getSingleton().AddTextToOutput(cmd->GetName());
-            ++number;
+            ++ number;
         }
     }
     Console::getSingleton().AddTextToOutput(
@@ -141,24 +135,20 @@ void CmdConfigCmdList(const Ogre::StringVector& params){
 /**
  * Sets the value of a configuration value.
  *
- * @param[in] params Command parameters. The first one is the command name. The
- * second one is a variable name. The third one is optional and is a value for
- * the variable. If a value is supplied, the variable will be given that value.
- * If not, the variable will be reset to it's default value. If there is no
- * variable by that name, nothing will be done. In any case, a feddback will be
- * printed to console. If less than two or more than three parameters are
- * passed, a usage text wil be printed and nothing will be done.
+ * @param[in] params Command parameters. The first one is the command name. The second one is a
+ * variable name. The third one is optional and is a value for the variable. If a value is supplied,
+ * the variable will be given that value. If not, the variable will be reset to it's default value.
+ * If there is no variable by that name, nothing will be done. In any case, a feedback will be
+ * printed to console. If less than two or more than three parameters are passed, a usage text will
+ * be printed and nothing will be done.
  */
-void CmdSetConfigVar(const Ogre::StringVector& params)
-{
+void CmdSetConfigVar(const Ogre::StringVector& params){
     if (params.size() < 2 || params.size() > 3){
-        Console::getSingleton().AddTextToOutput(
-          "Usage: /set <config variable> [value]"
-       );
+        Console::getSingleton().AddTextToOutput("Usage: /set <config variable> [value]");
         return;
     }
     Ogre::String name = params[1];
-    ConfigVar* cvar = ConfigVarManager::getSingleton().Find(name);
+    ConfigVar* cvar = ConfigVarHandler::getSingleton().Find(name);
     if (cvar == NULL){
         LOG_ERROR("Config variable \"" + name + "\" not found.");
         return;
@@ -166,28 +156,23 @@ void CmdSetConfigVar(const Ogre::StringVector& params)
     if (params.size() == 3){
         cvar->SetS(params[2]);
         Console* console = Console::getSingletonPtr();
-        if (console != NULL)
-            LOG_TRIVIAL(params[1] + " changed to \"" + params[2] + "\".");
+        if (console != NULL) LOG_TRIVIAL(params[1] + " changed to \"" + params[2] + "\".");
     }
     else{
         // Reset to default
         cvar->SetS(cvar->GetDefaultValue());
-        LOG_TRIVIAL(
-          params[1] + " changed to default \""
-          + cvar->GetDefaultValue() + "\"."
-       );
+        LOG_TRIVIAL(params[1] + " changed to default \"" + cvar->GetDefaultValue() + "\".");
     }
 }
 
 /**
  * Changes the value of a configuration value conditionally.
  *
- * @param[in] params Command parameters. The first one is the command name. The
- * next ones are possible values for the variables. If the value of the
- * variable is the current one, the next one will be assigned. Once the value
- * is changed once, no more steps will be taken and the function will return.
- * If the last provided value is the current value of the variable, it will not
- * be changed.
+ * @param[in] params Command parameters. The first one is the command name. The next ones are
+ * possible values for the variables. If the value of the variable is the current one, the next one
+ * will be assigned. Once the value is changed once, no more steps will be taken and the function
+ * will return. If the last provided value is the current value of the variable, it will not be
+ * changed.
  */
 void CmdToggleConfigVar(const Ogre::StringVector& params){
     if (params.size() < 4){
@@ -196,7 +181,7 @@ void CmdToggleConfigVar(const Ogre::StringVector& params){
         return;
     }
     Ogre::String name = params[1];
-    ConfigVar* cvar = ConfigVarManager::getSingleton().Find(name);
+    ConfigVar* cvar = ConfigVarHandler::getSingleton().Find(name);
     if (cvar == NULL){
         LOG_ERROR("Config variable \"" + name + "\" not found.");
         return;
@@ -219,14 +204,13 @@ void CmdToggleConfigVar(const Ogre::StringVector& params){
 /**
  * Increments the value of a configuration variable.
  *
- * @param[in] params Command parameters. Exactly five must be provided. The
- * first one is the command name. The second one is the variable to increment.
- * The third one is the minimum value the variable will take. The fourth one is
- * the maximum value the variable will take. The fifth value is the increment
- * to apply to the variable. The variable in the second parameter will be
- * incremented by the value in the fith one, but it will be capped between the
- * third and fourth one. If there are more or less than five parameters, a
- * usage text will be printed and nothing will be done.
+ * @param[in] params Command parameters. Exactly five must be provided. The first one is the command
+ * name. The second one is the variable to increment. The third one is the minimum value the
+ * variable will take. The fourth one is the maximum value the variable will take. The fifth value
+ * is the increment to apply to the variable. The variable in the second parameter will be
+ * incremented by the value in the fith one, but it will be capped between the third and fourth one.
+ * If there are more or less than five parameters, a usage text will be printed and nothing will be
+ * done.
  */
 void CmdIncrementConfigVar(const Ogre::StringVector& params){
     if (params.size() != 5){
@@ -236,7 +220,7 @@ void CmdIncrementConfigVar(const Ogre::StringVector& params){
         return;
     }
     Ogre::String name = params[1];
-    ConfigVar* cvar = ConfigVarManager::getSingleton().Find(name);
+    ConfigVar* cvar = ConfigVarHandler::getSingleton().Find(name);
     if (cvar == NULL){
         LOG_ERROR("Config variable \"" + name + "\" not found.");
         return;
@@ -254,17 +238,15 @@ void CmdIncrementConfigVar(const Ogre::StringVector& params){
 /**
  * Configures the log level.
  *
- * @param[in] params Command parameters. Exactly two must be provided. The
- * first one is the command name. The second one is the log level. Accepted
- * values are 1 (only errors), 2 (errors and warnings) and 3 (all). If there
- * are more or less than five parameters, a usage text will be printed and
- * nothing will be done.
+ * @param[in] params Command parameters. Exactly two must be provided. The first one is the command
+ * name. The second one is the log level. Accepted values are 1 (only errors), 2 (errors and
+ * warnings) and 3 (all). If there are more or less than five parameters, a usage text will be
+ * printed and nothing will be done.
  */
 void CmdSetLogLevel(const Ogre::StringVector& params){
     if (params.size() != 2){
         Console::getSingleton().AddTextToOutput(
-          "Usage: /log_level "
-          "<level: 1 - only errors, 2 - errors and warnings, 3 - all>"
+          "Usage: /log_level <level: 1 - only errors, 2 - errors and warnings, 3 - all>"
         );
         return;
     }
@@ -286,9 +268,7 @@ void CmdSetLogLevel(const Ogre::StringVector& params){
                 );
                 break;
             case 3:
-                Console::getSingleton().AddTextToOutput(
-                  "Logger level changed to \"all\".\n"
-                );
+                Console::getSingleton().AddTextToOutput("Logger level changed to \"all\".\n");
                 break;
         }
     }
@@ -303,10 +283,9 @@ void CmdSetLogLevel(const Ogre::StringVector& params){
 /**
  * Changes the game map.
  *
- * @param[in] params Command parameters. Exactly two must be provided. The
- * first one is the command name. The second one is the map ID. If there
- * are more or less than five parameters, a usage text will be printed and
- * nothing will be done.
+ * @param[in] params Command parameters. Exactly two must be provided. The first one is the command
+ * name. The second one is the map ID. If there are more or less than five parameters, a usage text
+ * will be printed and nothing will be done.
  */
 void CmdMap(const Ogre::StringVector& params){
     if (params.size() != 2){
@@ -333,11 +312,10 @@ void CmdMapCompletion(Ogre::StringVector& complete_params){
 /**
  * Sets the resolution and full screen mode.
  *
- * @param[in] params Command parameters. Three or four must be provided. The
- * first one is the command name. The second one is the resolution width. The
- * third one is the resolution height. The fourth one is optional and can be
- * used to toggle the full screen. "true", "yes" or 1 will set the game in full
- * screen mode. Anything else will set it to windowed mode.
+ * @param[in] params Command parameters. Three or four must be provided. The first one is the
+ * command name. The second one is the resolution width. The third one is the resolution height. The
+ * fourth one is optional and can be used to toggle the full screen. "true", "yes" or 1 will set the
+ * game in full screen mode. Anything else will set it to windowed mode.
  */
 void CmdResolution(const Ogre::StringVector& params){
     if (params.size() < 3){
@@ -349,15 +327,13 @@ void CmdResolution(const Ogre::StringVector& params){
     Ogre::RenderWindow* window = VGears::Application::getSingleton().getRenderWindow();
     if (params.size() >= 4){
         window->setFullscreen(
-          Ogre::StringConverter::parseBool(params[3]),
-          Ogre::StringConverter::parseInt(params[1]),
+          Ogre::StringConverter::parseBool(params[3]), Ogre::StringConverter::parseInt(params[1]),
           Ogre::StringConverter::parseInt(params[2])
         );
     }
     else{
         window->resize(
-          Ogre::StringConverter::parseInt(params[1]),
-          Ogre::StringConverter::parseInt(params[2])
+          Ogre::StringConverter::parseInt(params[1]), Ogre::StringConverter::parseInt(params[2])
         );
         window->getViewport(0)->setDimensions(0.0f, 0.0f, 1.0f, 1.0f);
     }
@@ -366,10 +342,9 @@ void CmdResolution(const Ogre::StringVector& params){
 /**
  * Loads a list of resolution modes.
  *
- * A resolution mode is represented by a string with the format "[w] [h] [f]",
- * where [w] is the resolution width, in pixels, [h] is the resolution height,
- * in pixels and [f] is the full screen state (0 for windowed mode, 1 for full
- * screen)
+ * A resolution mode is represented by a string with the format "[w] [h] [f]", where [w] is the
+ * resolution width, in pixels, [h] is the resolution height, in pixels and [f] is the full screen
+ * state (0 for windowed mode, 1 for full screen)
  *
  * @param[in] complete_params The resolution modes will be loaded here.
  */
@@ -392,10 +367,8 @@ void CmdResolutionCompletition(Ogre::StringVector& complete_params){
  * @param[in] params Command parameters. Unused.
  */
 void CmdScreenshot(const Ogre::StringVector& params){
-    Ogre::RenderWindow* window
-      = VGears::Application::getSingleton().getRenderWindow();
-    Ogre::String ret
-      = window->writeContentsToTimestampedFile("screenshot_", ".tga");
+    Ogre::RenderWindow* window = VGears::Application::getSingleton().getRenderWindow();
+    Ogre::String ret = window->writeContentsToTimestampedFile("screenshot_", ".tga");
     Console::getSingleton().AddTextToOutput("Screenshot " + ret + " saved.");
 }
 
@@ -452,40 +425,29 @@ void CmdViewerCompletion(Ogre::StringVector& complete_params){
 /**
  * Initializes all available commands.
  */
-void ConfigCmdManager::InitCmd(){
+void ConfigCmdHandler::InitCmd(){
     AddCommand("quit", "Stops application and quit", "", CmdQuit, NULL);
     AddCommand("echo", "Print command parameters", "", CmdEcho, NULL);
     AddCommand(
-      "config_var_list", "List of registered config variables",
-      "[<filter substring>]", CmdConfigVarList, NULL
+      "config_var_list", "List of registered config variables", "[<filter substring>]",
+      CmdConfigVarList, NULL
     );
     AddCommand(
       "config_cmd_list", "List of registered config commands",
       "[<filter substring>]", CmdConfigCmdList, NULL
     );
+    AddCommand("set", "Set cvar value", "<cvar name> [value]", CmdSetConfigVar, NULL);
     AddCommand(
-      "set", "Set cvar value", "<cvar name> [value]", CmdSetConfigVar, NULL
+      "toggle", "Toggle cvar value", "<cvar name> [value1] [value2] ...", CmdToggleConfigVar, NULL
     );
     AddCommand(
-      "toggle", "Toggle cvar value",
-      "<cvar name> [value1] [value2] ...", CmdToggleConfigVar, NULL
-    );
-    AddCommand(
-      "increment",
-      "Increment cvar value", "<cvar name> [value min] [value max] [step]",
+      "increment", "Increment cvar value", "<cvar name> [value min] [value max] [step]",
       CmdIncrementConfigVar, NULL
     );
-    AddCommand(
-      "set_log_level", "Set log messages level", "", CmdSetLogLevel, NULL
-    );
+    AddCommand("set_log_level", "Set log messages level", "", CmdSetLogLevel, NULL);
     AddCommand("map", "Run game module", "", CmdMap, CmdMapCompletion);
-    AddCommand(
-      "resolution", "Change resolution", "",
-      CmdResolution, CmdResolutionCompletition
-    );
-    AddCommand(
-      "screenshot", "Capture current screen content", "", CmdScreenshot, NULL
-    );
+    AddCommand("resolution", "Change resolution", "", CmdResolution, CmdResolutionCompletition);
+    AddCommand("screenshot", "Capture current screen content", "", CmdScreenshot, NULL);
     //AddCommand(
     //  "viewer", "Run viewer module", "", CmdViewer, CmdViewerCompletion
     //);

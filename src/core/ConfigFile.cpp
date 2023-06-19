@@ -13,10 +13,10 @@
  * GNU General Public License for more details.
  */
 
-#include "core/ConfigCmdManager.h"
 #include "core/ConfigFile.h"
 #include "core/Logger.h"
 #include "core/Utilites.h"
+#include "ConfigCmdHandler.h"
 
 void ConfigFile::Execute(const Ogre::String& name){
     // Open the configuration file
@@ -36,7 +36,7 @@ void ConfigFile::Execute(const Ogre::String& name){
                 if (params.size() > 0){
                     // handle command
                     ConfigCmd* cmd
-                      = ConfigCmdManager::getSingleton().Find(params[0]);
+                      = ConfigCmdHandler::getSingleton().Find(params[0]);
                     if (cmd != nullptr) cmd->GetHandler()(params);
                     else
                         LOG_ERROR("Can't find command \"" + params[0] + "\".");
@@ -53,7 +53,7 @@ void ConfigFile::Execute(const Ogre::String& name){
 
             if (params.size() > 0){
                 ConfigCmd* cmd
-                  = ConfigCmdManager::getSingleton().Find(params[0]);
+                  = ConfigCmdHandler::getSingleton().Find(params[0]);
 
                 if(cmd != nullptr) cmd->GetHandler()(params);
                 else LOG_ERROR("Can't find command \"" + params[0] + "\".");

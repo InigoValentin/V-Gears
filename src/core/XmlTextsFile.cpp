@@ -16,7 +16,8 @@
 #include "core/Logger.h"
 #include "core/XmlTextFile.h"
 #include "core/XmlTextsFile.h"
-#include "core/TextManager.h"
+
+#include "TextHandler.h"
 
 XmlTextsFile::XmlTextsFile(const Ogre::String& file): XmlFile(file){}
 
@@ -26,7 +27,7 @@ void XmlTextsFile::GetAvailableLanguages(Ogre::StringVector& languages){
     TiXmlNode* node = file_.RootElement();
     if (node == NULL || node->ValueStr() != "texts"){
         LOG_ERROR(
-          "UI Text Manager: " + file_.ValueStr() + " is not a valid texts file! No <texts> in root."
+          "Texts File: " + file_.ValueStr() + " is not a valid texts file! No <texts> in root."
         );
         return;
     }
@@ -42,11 +43,11 @@ void XmlTextsFile::LoadTexts(){
     TiXmlNode* node = file_.RootElement();
     if (node == NULL || node->ValueStr() != "texts"){
         LOG_ERROR(
-          "Text Manager: " + file_.ValueStr() + " is not a valid texts file! No <texts> in root."
+          "Texts File: " + file_.ValueStr() + " is not a valid texts file! No <texts> in root."
         );
         return;
     }
-    Ogre::String language = TextManager::getSingleton().GetLanguage();
+    Ogre::String language = TextHandler::getSingleton().GetLanguage();
     node = node->FirstChild();
     while (node != nullptr){
         if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "language"){

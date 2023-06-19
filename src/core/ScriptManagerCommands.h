@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "ConfigCmdManager.h"
+#include "ConfigCmdHandler.h"
 #include "Console.h"
 
 /**
@@ -53,10 +53,10 @@ void CmdScriptRunFile(const Ogre::StringVector& params){
 }
 
 void ScriptManager::InitCmd(){
-    ConfigCmdManager::getSingleton().AddCommand(
+    ConfigCmdHandler::getSingleton().AddCommand(
       "script_run_string", "Run script string", "", CmdScriptRunString, NULL
     );
-    ConfigCmdManager::getSingleton().AddCommand(
+    ConfigCmdHandler::getSingleton().AddCommand(
       "script_run_file", "Run script file", "", CmdScriptRunFile, NULL
     );
 }

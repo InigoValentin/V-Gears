@@ -19,14 +19,15 @@
 #include <OgreSingleton.h>
 #include <OgreUTFString.h>
 #include <tinyxml.h>
+#include "Manager.h"
 #include "UiFont.h"
 #include "UiWidget.h"
 
 /**
  * The UI manager.
  */
-class UiManager
-  : public Ogre::RenderQueueListener, public Ogre::Singleton<UiManager>
+class UiManager :
+  public Manager, public Ogre::RenderQueueListener, public Ogre::Singleton<UiManager>
 {
 
     public:
@@ -50,14 +51,36 @@ class UiManager
         void Initialise();
 
         /**
-         * Updates the UI elements in the manager.
+         * Handles an input event.
+         *
+         * @param[in] event Event to handle.
          */
-        void Update();
+        void Input(const VGears::Event& event) override;
+
+        /**
+         * Updates the elements in the manager with debug information.
+         */
+        void UpdateDebug() override;
 
         /**
          * Handles resizing events.
          */
         void OnResize();
+
+        /**
+         * Clears all field UI elements in the manager.
+         */
+        void ClearField() override;
+
+        /**
+         * Clears all battle UI elements in the manager.
+         */
+        void ClearBattle() override;
+
+        /**
+         * Clears all world map UI elements in the manager.
+         */
+        void ClearWorld() override;
 
         /**
          * Adds a font to the manager.
@@ -129,6 +152,21 @@ class UiManager
         );
 
     private:
+
+        /**
+         * Updates the field UI elements in the manager.
+         */
+        void UpdateField() override;
+
+        /**
+         * Updates the battle UI elements in the manager.
+         */
+        void UpdateBattle() override;
+
+        /**
+         * Updates the world map UI elements in the manager.
+         */
+        void UpdateWorld() override;
 
         /**
          * List of fonts in the manager.

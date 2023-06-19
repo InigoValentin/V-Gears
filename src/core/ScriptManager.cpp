@@ -315,6 +315,16 @@ void ScriptManager::Update(const ScriptManager::Type type){
     }
 }
 
+void ScriptManager::UpdateDebug(){}
+
+void ScriptManager::OnResize(){}
+
+void ScriptManager::ClearField(){}
+
+void ScriptManager::ClearBattle(){}
+
+void ScriptManager::ClearWorld(){}
+
 void ScriptManager::RunString(const Ogre::String& lua){
     int pre_eval_index = lua_gettop(lua_state_);
     if (luaL_dostring(lua_state_, lua.c_str()) == 1)
@@ -624,3 +634,9 @@ void ScriptManager::AddValueToStack(const float value){
     QueueScript* script = GetScriptByScriptId(current_script_id_);
     if (script != nullptr) lua_pushnumber(script->state, value);
 }
+
+void ScriptManager::UpdateField(){}
+
+void ScriptManager::UpdateBattle(){}
+
+void ScriptManager::UpdateWorld(){}

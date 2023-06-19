@@ -13,28 +13,38 @@
  * GNU General Public License for more details.
  */
 
-#include "core/ConfigCmdManager.h"
 #include "core/Console.h"
 #include "core/InputManager.h"
 #include "core/InputManagerCommands.h"
 #include "core/Logger.h"
 #include "core/Timer.h"
+#include "core/Manager.h"
+#include "ConfigCmdHandler.h"
 
 /**
  * Input manager singleton.
  */
 template<>InputManager *Ogre::Singleton<InputManager>::msSingleton = nullptr;
 
-InputManager::InputManager():
-  repeat_first_wait_(true),
-  repeat_timer_(0)
-{
+InputManager::InputManager():repeat_first_wait_(true), repeat_timer_(0){
     InitCmd();
     Reset();
+    Update();
 }
 
 InputManager::~InputManager(){}
 
+void InputManager::Input(const VGears::Event& event){}
+
+void InputManager::UpdateDebug(){}
+
+void InputManager::OnResize(){}
+
+void InputManager::ClearField(){}
+
+void InputManager::ClearBattle(){}
+
+void InputManager::ClearWorld(){}
 
 void InputManager::Reset(){
     for (int button = 0; button < 256; ++ button) button_state_[button] = false;
@@ -183,15 +193,13 @@ void InputManager::AddGameEvents(const int button, const VGears::EventType type)
         if (
           std::find(
             bind_game_events_[i].buttons.begin(), bind_game_events_[i].buttons.end(), button
-          )
-          != bind_game_events_[i].buttons.end()
+          ) != bind_game_events_[i].buttons.end()
         ){
             unsigned int j = 0;
             for (; j < bind_game_events_[i].buttons.size(); ++ j){
                 if (bind_game_events_[i].buttons[j] != button)
                     if (IsButtonPressed(bind_game_events_[i].buttons[j]) == false) break;
             }
-
             if (j >= bind_game_events_[i].buttons.size()) binds_indexes.push_back(i);
         }
     }
@@ -215,3 +223,9 @@ void InputManager::AddGameEvents(const int button, const VGears::EventType type)
         event_queue_.push_back(event);
     }
 }
+
+void InputManager::UpdateField(){Update();}
+
+void InputManager::UpdateBattle(){Update();}
+
+void InputManager::UpdateWorld(){Update();}

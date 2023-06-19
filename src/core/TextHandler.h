@@ -20,24 +20,24 @@
 #include <tinyxml.h>
 
 /**
- * The text manager.
+ * The text handler.
  */
-class TextManager : public Ogre::Singleton<TextManager>{
+class TextHandler : public Ogre::Singleton<TextHandler>{
 
     public:
 
         /**
          * Constructor.
          */
-        TextManager();
+        TextHandler();
 
         /**
          * Destructor.
          */
-        virtual ~TextManager();
+        virtual ~TextHandler();
 
         /**
-         * Initializes the commands for the text manager.
+         * Initializes the commands for the text handler.
          */
         void InitCmd();
 
@@ -112,7 +112,7 @@ class TextManager : public Ogre::Singleton<TextManager>{
         std::string GetDialogText(const std::string name);
 
         /**
-         * Deletes all texts in the manager.
+         * Deletes all texts in the handler.
          */
         void UnloadTexts();
 
@@ -176,7 +176,7 @@ class TextManager : public Ogre::Singleton<TextManager>{
         };
 
         /**
-         * The list of texts in the manager.
+         * The list of texts in the handler.
          */
         std::vector<Text> texts_;
 
@@ -207,7 +207,7 @@ class TextManager : public Ogre::Singleton<TextManager>{
         };
 
         /**
-         * The list of dialogs in the manager.
+         * The list of dialogs in the handler.
          */
         std::vector<Dialog> dialogs_;
 

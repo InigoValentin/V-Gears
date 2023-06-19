@@ -16,14 +16,14 @@
 #include <OgreFontManager.h>
 #include <OgreRenderWindow.h>
 #include "common/VGearsApplication.h"
-#include "core/ConfigCmdManager.h"
-#include "core/ConfigVarManager.h"
 #include "core/Console.h"
 #include "core/DebugDraw.h"
 #include "core/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"
 #include "core/Utilites.h"
+#include "ConfigCmdHandler.h"
+#include "ConfigVarHandler.h"
 
 /**
  * Console singleton
@@ -447,7 +447,7 @@ void Console::ExecuteCommand(const Ogre::String& command){
     bool handled = false;
     Ogre::StringVector params = StringTokenise(command);
     // Is it cvar?
-    ConfigVar* cvar = ConfigVarManager::getSingleton().Find(params[0]);
+    ConfigVar* cvar = ConfigVarHandler::getSingleton().Find(params[0]);
     if (cvar != nullptr){
         handled = true;
         if (params.size() > 1){
@@ -463,7 +463,7 @@ void Console::ExecuteCommand(const Ogre::String& command){
     }
     if (handled == false){
         // Handle command
-        ConfigCmd* cmd = ConfigCmdManager::getSingleton().Find(params[0]);
+        ConfigCmd* cmd = ConfigCmdHandler::getSingleton().Find(params[0]);
         if (cmd != nullptr){
             cmd->GetHandler()(params);
             return;
@@ -484,17 +484,17 @@ void Console::CompleteInput(){
         Ogre::StringVector params = StringTokenise(input_line_);
         if (params.size() == 0){
             // Add cvars.
-            int num_vars = ConfigVarManager::getSingleton().GetConfigVarNumber();
+            int num_vars = ConfigVarHandler::getSingleton().GetConfigVarNumber();
             for (int i = 0; i < num_vars; ++ i){
                 auto_completition_.push_back(
-                  ConfigVarManager::getSingleton().GetConfigVar(i)->GetName()
+                  ConfigVarHandler::getSingleton().GetConfigVar(i)->GetName()
                 );
             }
             // Add commands.
-            int num_cmds = ConfigCmdManager::getSingleton().GetConfigCmdNumber();
+            int num_cmds = ConfigCmdHandler::getSingleton().GetConfigCmdNumber();
             for (int i = 0; i < num_cmds; ++i){
                 auto_completition_.push_back(
-                  ConfigCmdManager::getSingleton().GetConfigCmd(i)->GetName()
+                  ConfigCmdHandler::getSingleton().GetConfigCmd(i)->GetName()
                 );
             }
             add_slash = true;
@@ -502,9 +502,9 @@ void Console::CompleteInput(){
         else if (params.size() == 1){
             input_line_ = params[0];
             // Add Cvars.
-            int num_vars = ConfigVarManager::getSingleton().GetConfigVarNumber();
+            int num_vars = ConfigVarHandler::getSingleton().GetConfigVarNumber();
             for (int i = 0; i < num_vars; ++ i){
-                Ogre::String name = ConfigVarManager::getSingleton().GetConfigVar(i)->GetName();
+                Ogre::String name = ConfigVarHandler::getSingleton().GetConfigVar(i)->GetName();
                 unsigned int pos = name.find(input_line_);
                 if (pos == 0){
                     add_slash = true;
@@ -515,9 +515,9 @@ void Console::CompleteInput(){
                 }
             }
             // Add commands.
-            int num_cmds = ConfigCmdManager::getSingleton().GetConfigCmdNumber();
+            int num_cmds = ConfigCmdHandler::getSingleton().GetConfigCmdNumber();
             for (int i = 0; i < num_cmds; ++ i){
-                Ogre::String name = ConfigCmdManager::getSingleton().GetConfigCmd(i)->GetName();
+                Ogre::String name = ConfigCmdHandler::getSingleton().GetConfigCmd(i)->GetName();
                 int pos = name.find(input_line_);
                 if (pos == 0){
                     add_slash = true;
@@ -526,10 +526,10 @@ void Console::CompleteInput(){
                         auto_completition_.push_back(part);
                     }
                     else if (
-                      ConfigCmdManager::getSingleton().GetConfigCmd(i)->GetCompletion() != nullptr
+                      ConfigCmdHandler::getSingleton().GetConfigCmd(i)->GetCompletion() != nullptr
                     ){
                         input_line_ += " ";
-                        ConfigCmdManager::getSingleton().GetConfigCmd(i)->GetCompletion()(
+                        ConfigCmdHandler::getSingleton().GetConfigCmd(i)->GetCompletion()(
                           auto_completition_
                         );
                     }
@@ -540,7 +540,7 @@ void Console::CompleteInput(){
             Ogre::String all_params = params[1];
             for (size_t i = 2; i < params.size(); ++ i) all_params += " " + params[i];
             // Add commands arguments
-            ConfigCmd* cmd = ConfigCmdManager::getSingleton().Find(params[0]);
+            ConfigCmd* cmd = ConfigCmdHandler::getSingleton().Find(params[0]);
             if (cmd != nullptr){
                 add_slash = true;
                 if (cmd->GetCompletion() != nullptr){

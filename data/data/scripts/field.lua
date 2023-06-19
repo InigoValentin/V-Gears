@@ -228,8 +228,8 @@ end
 --
 -- @param id ID of the track in the field.
 play_map_music = function(id)
-    local track_id = entity_manager:get_track_id(id)
-    if entity_manager:get_track_id(id) ~= -1 then
+    local track_id = audio_manager:get_track_id(id)
+    if track_id ~= -1 then
         audio_manager:play_music(tostring(track_id))
     else
         print("Requested non-existent music track ID " .. tostring(id))

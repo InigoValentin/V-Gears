@@ -85,10 +85,10 @@ set(VGEARS_SOURCE_FILES
     core/BattleManager.cpp
     core/CameraManager.cpp
     core/ConfigCmd.cpp
-    core/ConfigCmdManager.cpp
+    core/ConfigCmdHandler.cpp
     core/ConfigFile.cpp
     core/ConfigVar.cpp
-    core/ConfigVarManager.cpp
+    core/ConfigVarHandler.cpp
     core/Console.cpp
     core/DebugDraw.cpp
     core/DialogsManager.cpp
@@ -102,6 +102,7 @@ set(VGEARS_SOURCE_FILES
     core/EntityTrigger.cpp
     core/GameFrameListener.cpp
     core/InputManager.cpp
+    core/Manager.cpp
     core/particles/Particle.cpp
     core/particles/ParticleEmitter.cpp
     core/particles/ParticleEmitterDictionary.cpp
@@ -121,9 +122,9 @@ set(VGEARS_SOURCE_FILES
     core/particles/renderer/ParticleEntityRenderer.cpp
     core/particles/renderer/ParticleEntityRendererDictionary.cpp
     core/Savemap.cpp
-    core/SavemapManager.cpp
+    core/SavemapHandler.cpp
     core/ScriptManager.cpp
-    core/TextManager.cpp
+    core/TextHandler.cpp
     core/Timer.cpp
     core/UiAnimation.cpp
     core/UiFont.cpp

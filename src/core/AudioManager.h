@@ -18,6 +18,7 @@
 #include <OgreSingleton.h>
 #include <boost/thread.hpp>
 #include <vorbis/vorbisfile.h>
+#include "Manager.h"
 
 // Include OpenAL
 #if defined(__WIN32__) || defined(_WIN32)
@@ -31,11 +32,54 @@
 /**
  * The audio manager.
  *
- * It handles all music and sounds in the application.
+ * It handles all music and sounds in the application. The manager has three players: one for
+ * battle music, another for music shared between fields and the world map, and a third one for
+ * sounds, that can be used anytime.
  */
-class AudioManager : public Ogre::Singleton<AudioManager>{
+class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
 
     public:
+
+        /**
+         * Music structure.
+         *
+         * Defines a music entry in musics.xml.
+         */
+        struct Music{
+
+            /**
+             * The name of the track.
+             */
+            Ogre::String name;
+
+            /**
+             * Track filename
+             */
+            Ogre::String file;
+
+            /**
+             * Music loop location for continuous playback.
+             */
+            float loop;
+        };
+
+        /**
+         * Music structure.
+         *
+         * Defines a sound entry in sound.xml.
+         */
+        struct Sound{
+
+            /**
+             * The name of the sound.
+             */
+            Ogre::String name;
+
+            /**
+             * Sound filename
+             */
+            Ogre::String file;
+        };
 
         /**
          * Constructor.
@@ -53,16 +97,59 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         void operator()();
 
         /**
-         * Updates the music player.
+         * Handles an input event.
+         *
+         * @param[in] event Event to handle.
          */
-        void Update();
+        void Input(const VGears::Event& event) override;
+
+        /**
+         * Updates the audio manager with debug information.
+         */
+        void UpdateDebug() override;
+
+        /**
+         * Handles resizing events
+         */
+        void OnResize() override;
+
+        /**
+         * Clears all field information in the audio manager.
+         *
+         * It clears the music tracks assigned for the fields.
+         */
+        void ClearField() override;
+
+        /**
+         * Clears all battle information in the audio manager.
+         *
+         * It clears the music track assigned for the battle.
+         */
+        void ClearBattle() override;
+
+        /**
+         * Clears all world map information in the audio manager.
+         *
+         * It clears the tracks assigned for the world map.
+         */
+        void ClearWorld() override;
 
         /**
          * Pauses currently playing music.
          *
-         * @todo How to resume it?
+         * If the manager is in battle mode, the battle music player will be paused. If not, the
+         * field or world map player will be paused. Playback can be resumed by calling
+         * {@see MusicResume}.
          */
         void MusicPause();
+
+        /**
+         * resumes currently paused music.
+         *
+         * If the manager is in battle mode, the battle music player will be resumed. If not, the
+         * field or world map player will be resumed.
+         */
+        void MusicResume();
 
         /**
          * Plays a music track.
@@ -75,6 +162,11 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
 
         /**
          * Plays a music track.
+         *
+         * If the manager is in battle mode, the field or world map player will be paused, and the
+         * battle player will play. If not, the battle music player will stop and the field or
+         * world map will start playing. If there is no music by the specified name, an error will
+         * be printed and nothing will be done.
          *
          * @param[in] name Name of the track to play.
          */
@@ -123,53 +215,10 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         /**
          * Stops the currently playing music.
          *
-         * Playback can't be resumed.
+         * Playback can't be resumed. If the battle mode is active, the battle music player will be
+         * the one stoped. If not, the field/world map player will be the one stopping.
          */
         void MusicStop();
-
-        /**
-         * Music structure.
-         *
-         * Defines a music entry in musics.xml.
-         */
-        struct Music{
-
-            /**
-             * The name of the track.
-             */
-            Ogre::String name;
-
-            /**
-             * Track filename
-             */
-            Ogre::String file;
-
-            /**
-             * Music loop location for continous playback.
-             *
-             * @todo How is a loop done with only one value? shouldn't it be
-             * start and end of loop?
-             */
-            float loop;
-        };
-
-        /**
-         * Music structure.
-         *
-         * Defines a sound entry in sound.xml.
-         */
-        struct Sound{
-
-            /**
-             * The name of the sound.
-             */
-            Ogre::String name;
-
-            /**
-             * Sound filename
-             */
-            Ogre::String file;
-        };
 
         /**
          * Adds a music track to the audio manager.
@@ -201,30 +250,39 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
          */
         AudioManager::Sound* GetSound(const Ogre::String& name);
 
+        /**
+         * Adds a music track ID to the list of music tracks of the field.
+         *
+         * @param[in] id ID of the track in the map.
+         * @param[in] track_id Music track ID.
+         */
+        void AddTrack(const int id, const int track_id);
+
+        /**
+         * Retrieves the music ID for the specified track for a field or world map.
+         *
+         * @param[in] id ID of the track in the field or world map.
+         * @return The music track ID, or -1 if it doesn't exist.
+         */
+        int ScriptGetTrack(int id);
+
+        /**
+         * Retrieves the music ID for the current or next battle.
+         *
+         * @return The music track ID for the current or upcoming battles.
+         */
+        int ScriptGetBattleTrack();
+
+        /**
+         * Sets the music track for upcoming battles.
+         *
+         * Must be called before entering the battle mode.
+         *
+         * @param[in] id ID of the track for the upcoming battles.
+         */
+        void ScriptSetBattleTrack(int id);
+
     private:
-
-        /**
-         * Initializes the audio manager.
-         *
-         * @todo Verify this comment.
-         */
-        const bool Init();
-
-        /**
-         * Handles errors
-         *
-         * @return nullptr
-         * @todo Implement and get error info.
-         */
-        const char* ALError();
-
-        /**
-         * Handles errors
-         *
-         * @return nullptr
-         * @todo Implement and get error info.
-         */
-        const char* ALCError( const ALCdevice* device );
 
         /**
          * An audio player
@@ -255,6 +313,13 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
                  * @param[in] file Path to the file to play
                  */
                 void Play(const Ogre::String& file);
+
+                /**
+                 * Resumes the playback of a paused player.
+                 *
+                 * If no track was paused, an error wilt be printed and nothing will be done.
+                 */
+                void Resume();
 
                 /**
                  * Stops the audio player.
@@ -338,10 +403,46 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
                 ALsizei FillBuffer();
         };
 
-    private:
+        /**
+         * Initializes the audio manager.
+         *
+         * @todo Verify this comment.
+         */
+        const bool Init();
 
         /**
-         * Indicatesif the audio manager has been initialized.
+         * Handles errors
+         *
+         * @return nullptr
+         * @todo Implement and get error info.
+         */
+        const char* ALError();
+
+        /**
+         * Handles errors
+         *
+         * @return nullptr
+         * @todo Implement and get error info.
+         */
+        const char* ALCError( const ALCdevice* device );
+
+        /**
+         * Updates the audio manager while on the field.
+         */
+        void UpdateField() override;
+
+        /**
+         * Updates the audio manager while on a battle.
+         */
+        void UpdateBattle() override;
+
+        /**
+         * Updates the audio manager while on the world map.
+         */
+        void UpdateWorld() override;
+
+        /**
+         * Indicates if the audio manager has been initialized.
          */
         bool initialized_;
 
@@ -378,14 +479,17 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
         bool thread_continue_;
 
         /**
-         * Music player.
+         * Music player for either fields or world map.
          */
         AudioManager::Player music_;
 
         /**
+         * Music player for battles.
+         */
+        AudioManager::Player battle_music_;
+
+        /**
          * Sound effect player.
-         *
-         * TODO: Unused? remove.
          */
         AudioManager::Player fx_;
 
@@ -393,6 +497,16 @@ class AudioManager : public Ogre::Singleton<AudioManager>{
          * List of music.
          */
         std::list<AudioManager::Music> music_list_;
+
+        /**
+         * IDs of the music tracks of the current content (field or world map).
+         */
+        std::unordered_map<unsigned int, unsigned int> tracks_;
+
+        /**
+         * ID of the track for the current battle.
+         */
+        int battle_track_;
 
         /**
          * List of music.

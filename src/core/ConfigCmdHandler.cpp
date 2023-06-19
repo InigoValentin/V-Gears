@@ -13,44 +13,45 @@
  * GNU General Public License for more details.
  */
 
+#include "ConfigCmdHandler.h"
+
 #include "core/Assert.h"
-#include "core/ConfigCmdManager.h"
-#include "core/ConfigCmdManagerCommands.h"
+#include "ConfigCmdHandlerCommands.h"
 
 /**
  * Configuration manager singleton.
  */
-template<>ConfigCmdManager *Ogre::Singleton<ConfigCmdManager>::msSingleton = nullptr;
+template<>ConfigCmdHandler *Ogre::Singleton<ConfigCmdHandler>::msSingleton = nullptr;
 
-ConfigCmdManager::ConfigCmdManager(){InitCmd();}
+ConfigCmdHandler::ConfigCmdHandler(){InitCmd();}
 
-ConfigCmdManager::~ConfigCmdManager(){}
+ConfigCmdHandler::~ConfigCmdHandler(){}
 
-void ConfigCmdManager::AddCommand(
+void ConfigCmdHandler::AddCommand(
   const Ogre::String& name, const Ogre::String& description, const Ogre::String& params_description,
-  ConfigCmdHandler handler, ConfigCmdCompletion completion
+  ConfigCmdParams params, ConfigCmdCompletion completion
 ){
     VGEARS_ASSERT(name != "", "Command name shouldn't be empty.");
-    VGEARS_ASSERT(handler, "Null command handler.");
+    VGEARS_ASSERT(params, "Null command parameter list.");
     // Check if command already added
     for (unsigned int i = 0; i < commands_.size(); ++ i)
         VGEARS_ASSERT(commands_[i]->GetName() != name, "Command already exist.");
     commands_.emplace_back(std::make_unique<ConfigCmd>(
-      name, description, params_description, handler, completion
+      name, description, params_description, params, completion
     ));
 }
 
-void ConfigCmdManager::ExecuteString(const Ogre::String& cmd_string){}
+void ConfigCmdHandler::ExecuteString(const Ogre::String& cmd_string){}
 
-ConfigCmd* ConfigCmdManager::Find(const Ogre::String& name) const{
+ConfigCmd* ConfigCmdHandler::Find(const Ogre::String& name) const{
     for (unsigned int i = 0; i < commands_.size(); ++ i)
         if (commands_[i]->GetName() == name) return commands_[i].get();
     return nullptr;
 }
 
-int ConfigCmdManager::GetConfigCmdNumber(){return commands_.size();}
+int ConfigCmdHandler::GetConfigCmdNumber(){return commands_.size();}
 
-ConfigCmd* ConfigCmdManager::GetConfigCmd(unsigned int i) const{
+ConfigCmd* ConfigCmdHandler::GetConfigCmd(unsigned int i) const{
     if (i < commands_.size()) return commands_[i].get();
     return nullptr;
 }

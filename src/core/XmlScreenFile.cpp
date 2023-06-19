@@ -19,9 +19,9 @@
 #include "core/UiSprite.h"
 #include "core/UiTextArea.h"
 #include "core/UiWidget.h"
-#include "core/TextManager.h"
 #include "core/XmlScreenFile.h"
 #include "core/Utilites.h"
+#include "TextHandler.h"
 
 XmlScreenFile::XmlScreenFile(const Ogre::String& file): XmlFile(file){}
 
@@ -90,7 +90,7 @@ void XmlScreenFile::LoadScreenRecursive(
                     if (node->ValueStr() == "text_area"){
                         Ogre::String text = GetString(node, "text_name", "");
                         if (text != ""){
-                            TiXmlNode* utf = TextManager::getSingleton().GetText(text);
+                            TiXmlNode* utf = TextHandler::getSingleton().GetText(text);
                             if (utf != nullptr) static_cast<UiTextArea*>(widget2)->SetText(utf);
                         }
                         Ogre::String font = GetString(node, "font", "");

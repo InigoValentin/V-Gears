@@ -20,23 +20,22 @@
 #include "ConfigVar.h"
 
 /**
- * Configuration variable manager.
+ * Configuration variable hanlder.
  */
-class ConfigVarManager : public Ogre::Singleton<ConfigVarManager>{
+class ConfigVarHandler : public Ogre::Singleton<ConfigVarHandler>{
 
     public:
 
         /**
          * Constructor.
          */
-        ConfigVarManager();
+        ConfigVarHandler();
 
         /**
          * Finds a variable by name.
          *
          * @param[in] name Name of the variable to retrieve.
-         * @return The variable by the specified name, nullptr if there is no
-         * one by that name.
+         * @return The variable by the specified name, nullptr if there is no one by that name.
          */
         ConfigVar* Find(const Ogre::String& name) const;
 

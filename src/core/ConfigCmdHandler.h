@@ -21,21 +21,21 @@
 #include "ConfigCmd.h"
 
 /**
- * A manager for configuration commands.
+ * A handler for configuration commands.
  */
-class ConfigCmdManager : public Ogre::Singleton<ConfigCmdManager>{
+class ConfigCmdHandler : public Ogre::Singleton<ConfigCmdHandler>{
 
     public:
 
         /**
          * Constructor.
          */
-        ConfigCmdManager();
+        ConfigCmdHandler();
 
         /**
          * Destructor.
          */
-        ~ConfigCmdManager();
+        ~ConfigCmdHandler();
 
         /**
          * Adds a command to the manager.
@@ -43,12 +43,12 @@ class ConfigCmdManager : public Ogre::Singleton<ConfigCmdManager>{
          * @param[in] name Command name.
          * @param[in] description Command description.
          * @param[in] params_description Command parameters description.
-         * @param[in] handler Command handler.
-         * @param[in] completion Command completion.
+         * @param[in] params Command parameter list.
+         * @param[in] completion Command completion list.
          */
         void AddCommand(
           const Ogre::String& name, const Ogre::String& description,
-          const Ogre::String& params_description, ConfigCmdHandler handler,
+          const Ogre::String& params_description, ConfigCmdParams params,
           ConfigCmdCompletion completion
         );
 
@@ -77,8 +77,7 @@ class ConfigCmdManager : public Ogre::Singleton<ConfigCmdManager>{
         /**
          * Retrieves a command by index.
          *
-         * A command index is the position at which it was added to the
-         * manager.
+         * A command index is the position at which it was added to the manager.
          */
         ConfigCmd* GetConfigCmd(unsigned int i) const;
 
@@ -89,14 +88,14 @@ class ConfigCmdManager : public Ogre::Singleton<ConfigCmdManager>{
          *
          * @param[in] rhs Manager to not copy.
          */
-        ConfigCmdManager(const ConfigCmdManager& rhs) = delete;
+        ConfigCmdHandler(const ConfigCmdHandler& rhs) = delete;
 
         /**
          * Forbidden copy constructor.
          *
          * @param[in] rhs Manager to not copy.
          */
-        ConfigCmdManager operator =(const ConfigCmdManager& rhs) = delete;
+        ConfigCmdHandler operator =(const ConfigCmdHandler& rhs) = delete;
 
         /**
          * Initializes the command.

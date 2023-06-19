@@ -21,6 +21,7 @@
 #include <OgreStringVector.h>
 #include <OIS/OIS.h>
 #include "Event.h"
+#include "Manager.h"
 
 typedef std::vector<VGears::Event> InputEventArray;
 
@@ -33,7 +34,7 @@ class ConfigCmd;
  *
  * It handles input events and creates {@see Event}s.
  */
-class InputManager : public Ogre::Singleton<InputManager>{
+class InputManager : public Manager, public Ogre::Singleton<InputManager>{
 
     public:
 
@@ -48,15 +49,58 @@ class InputManager : public Ogre::Singleton<InputManager>{
         virtual ~InputManager();
 
         /**
+         * Makes the input manager itself handles an input event.
+         *
+         * @param[in] event Event to handle.
+         */
+        void Input(const VGears::Event& event) override;
+
+        /**
+         * Update keyboard and mouse buttons, movements and scroll status.
+         */
+        void Update();
+
+        /**
+         * Updates the input manager with debug information.
+         */
+        void UpdateDebug() override;
+
+        /**
+         * Handles resizing events
+         */
+        void OnResize() override;
+
+        /**
+         * Clears all field information in the input manager.
+         *
+         * It does nothing.
+         */
+        void ClearField() override;
+
+        /**
+         * Clears all battle information in the input manager.
+         *
+         * It does nothing.
+         */
+        void ClearBattle() override;
+
+        /**
+         * Clears all world map information in the input manager.
+         *
+         * It does nothing.
+         */
+        void ClearWorld() override;
+
+        /**
          * Triggered when a keyboard button is pressed or released.
          *
          * Creates an {@see Event}.
          *
          * @param[in] button Pressed button ID.
-         * @param[in] text @todo The key code? It gets assigned to parameter 1
-         * of the generated event.
-         * @param[in] down True if the button has been pressed, false if it has
-         * been released. It gets assigned to parameter 2 of the event.
+         * @param[in] text @todo The key code? It gets assigned to parameter 1 of the generated
+         * event.
+         * @param[in] down True if the button has been pressed, false if it has been released. It
+         * gets assigned to parameter 2 of the event.
          */
         void ButtonPressed(int button, char text, bool down);
 
@@ -66,8 +110,8 @@ class InputManager : public Ogre::Singleton<InputManager>{
          * Creates an {@see Event}.
          *
          * @param[in] button Pressed button ID.
-         * @param[in] down True if the button has been pressed, false if it has
-         * been released. It gets assigned to parameter 1 of the event.
+         * @param[in] down True if the button has been pressed, false if it has been released. It
+         * gets assigned to parameter 1 of the event.
          */
         void MousePressed(int button, bool down);
 
@@ -76,10 +120,8 @@ class InputManager : public Ogre::Singleton<InputManager>{
          *
          * Creates an {@see Event}.
          *
-         * @param[in] x New mouse's X coordinate. It gets assigned to parameter
-         * 1 of the event.
-         * @param[in] y New mouse's Y coordinate. It gets assigned to parameter
-         * 2 of the event.
+         * @param[in] x New mouse's X coordinate. It gets assigned to parameter 1 of the event.
+         * @param[in] y New mouse's Y coordinate. It gets assigned to parameter 2 of the event.
          */
         void MouseMoved(int x, int y);
 
@@ -88,9 +130,8 @@ class InputManager : public Ogre::Singleton<InputManager>{
          *
          * Creates an {@see Event}.
          *
-         * @param[in] value Number of lines scrolled. Positive for scroll down,
-         * negative for scroll up. It gets assigned to parameter 1 of the
-         * event.
+         * @param[in] value Number of lines scrolled. Positive for scroll down, negative for scroll
+         * up. It gets assigned to parameter 1 of the event.
          */
         void MouseScrolled(int value);
 
@@ -103,10 +144,11 @@ class InputManager : public Ogre::Singleton<InputManager>{
         void Reset();
 
         /**
-         * Update keyboard and mouse buttons, movements and scroll status.
+         * Checks if a button is being pressed.
+         *
+         * @param[in] button Button code.
+         * @return true if the button is being pressed, false otherwise.
          */
-        void Update();
-
         bool IsButtonPressed(int button) const;
 
         /**
@@ -161,6 +203,27 @@ class InputManager : public Ogre::Singleton<InputManager>{
         void AddGameEvents(const int button, const VGears::EventType type);
 
     private:
+
+        /**
+         * Updates the input manager while on the fields.
+         *
+         * It just calls the generic {@see Update()}.
+         */
+        void UpdateField() override;
+
+        /**
+         * Updates the input manager while on a battle.
+         *
+         * It just calls the generic {@see Update()}.
+         */
+        void UpdateBattle() override;
+
+        /**
+         * Updates the input manager while on the world map.
+         *
+         * It just calls the generic {@see Update()}.
+         */
+        void UpdateWorld() override;
 
         /**
          * The state of eahc button.

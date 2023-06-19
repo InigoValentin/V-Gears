@@ -27,7 +27,7 @@
 #include "core/XmlPrototypesFile.h"
 #include "core/XmlScreensFile.h"
 #include "core/XmlTextsFile.h"
-#include "core/TextManager.h"
+#include "TextHandler.h"
 
 /**
  * UI manager singleton.
@@ -51,11 +51,15 @@ void UiManager::Initialise(){
     screens.LoadScreens();
 }
 
-void UiManager::Update(){
-    // Update all ui scripts
-    ScriptManager::getSingleton().Update(ScriptManager::UI);
-    for (unsigned int i = 0; i < widgets_.size(); ++ i) widgets_[i]->Update();
-}
+void UiManager::Input(const VGears::Event& event){}
+
+void UiManager::UpdateDebug(){}
+
+void UiManager::ClearField(){}
+
+void UiManager::ClearBattle(){}
+
+void UiManager::ClearWorld(){}
 
 void UiManager::OnResize(){
     for (unsigned int i = 0; i < widgets_.size(); ++ i) widgets_[i]->OnResize();
@@ -75,7 +79,7 @@ std::string toLower(std::string s) {
 }
 
 UiFont* UiManager::GetFont(const Ogre::String& name){
-    Ogre::String language = TextManager::getSingleton().GetLanguage();
+    Ogre::String language = TextHandler::getSingleton().GetLanguage();
 
     for (unsigned int i = 0; i < fonts_.size(); ++ i){
         if (fonts_[ i ]->GetName() == name){
@@ -127,3 +131,13 @@ void UiManager::renderQueueStarted(
         for (unsigned int i = 0; i < widgets_.size(); ++ i) widgets_[i]->Render();
     }
 }
+
+void UiManager::UpdateField(){
+    // Update all ui scripts
+    ScriptManager::getSingleton().Update(ScriptManager::UI);
+    for (unsigned int i = 0; i < widgets_.size(); ++ i) widgets_[i]->Update();
+}
+
+void UiManager::UpdateBattle(){}
+
+void UiManager::UpdateWorld(){}
