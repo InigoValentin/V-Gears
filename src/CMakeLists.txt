@@ -225,10 +225,6 @@ include_directories(
     ${OGRE_INCLUDE_DIRS}
     ${OGRE_INCLUDE_DIRS}/Overlay
     ${OGRE_INCLUDE_DIRS}/Bites
-    ${CMAKE_SOURCE_DIR}/lib/luajit
-    ${CMAKE_SOURCE_DIR}/lib/luajit/src
-    ${CMAKE_SOURCE_DIR}/lib/luabind
-    ${CMAKE_SOURCE_DIR}/lib/luabind/luabind/detail
 )
 
 
@@ -285,8 +281,6 @@ if(WIN32 AND NOT (CMAKE_BUILD_TYPE MATCHES "Debug"))
     endif()
 endif()
 set(VGEARS_LIBRARIES
-    libluabind
-    liblua
     ${OPENAL_LIBRARY}
     ${OGGVORBIS_LIBRARIES}
     ${OGRE_LIBRARIES}

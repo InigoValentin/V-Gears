@@ -48,13 +48,28 @@ bool priority_queue_compare(QueueScript a, QueueScript b){return a.priority < b.
 ScriptManager::ScriptManager():
   system_table_name_("System"), entity_table_name_("EntityContainer"), ui_table_name_("UiContainer")
 {
-    lua_state_ = lua_open();
-    luabind::open(lua_state_);
-    luaopen_base(lua_state_);
+    lua_state_ = luaL_newstate();
+    /*luaL_openlibs(lua_state_);
     luaopen_string(lua_state_);
     luaopen_table(lua_state_);
     luaopen_math(lua_state_);
     luaopen_io(lua_state_);
+    */
+    lua_pushcfunction(L, luaopen_base);
+    lua_pushliteral(L, "");
+    lua_call(L, 1, 0);
+    lua_pushcfunction(L, luaopen_string);
+    lua_pushliteral(L, LUA_STRLIBNAME);
+    lua_call(L, 1, 0);
+    lua_pushcfunction(L, luaopen_table);
+    lua_pushliteral(L, LUA_TABLIBNAME);
+    lua_call(L, 1, 0);
+    lua_pushcfunction(L, luaopen_math);
+    lua_pushliteral(L, LUA_MATHLIBNAME);
+    lua_call(L, 1, 0);
+    lua_pushcfunction(L, luaopen_io);
+    lua_pushliteral(L, LUA_IOLIBNAME);
+    lua_call(L, 1, 0);
     InitBinds();
     InitCmd();
     RunFile("system/system.lua");

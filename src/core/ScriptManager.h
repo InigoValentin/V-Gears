@@ -297,7 +297,7 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
          * @return The table.
          * @todo Understand and document.
          */
-        luabind::object GetTableByEntityName(
+        void* GetTableByEntityName(
           const ScriptManager::Type type, const Ogre::String& name,
           lua_State* state
         ) const;

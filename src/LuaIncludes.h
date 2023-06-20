@@ -30,9 +30,6 @@
 #undef check
 #endif
 
-#include <luabind/luabind.hpp>
-#include <luabind/yield_policy.hpp>
-
 extern "C"{
     #include "lua.h"
     #include <lualib.h>

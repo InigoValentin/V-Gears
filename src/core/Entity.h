@@ -213,18 +213,6 @@ class Entity{
         void SetPosition(const Ogre::Vector3& position);
 
         /**
-         * Sets the entity position.
-         *
-         * It also resets the walkmesh triangle to reattach entity to walkmesh
-         * again if needed.
-         *
-         * @param[in] x Entity's new position X coordinate.
-         * @param[in] y Entity's new position Y coordinate.
-         * @param[in] z Entity's new position Z coordinate.
-         */
-        void ScriptSetPosition(const float x, const float y, const float z);
-
-        /**
          * Retrieves the entity position.
          *
          * @return The entity position.

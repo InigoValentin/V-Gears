@@ -199,19 +199,6 @@ const Ogre::String& Entity::GetName() const{return name_;}
 
 void Entity::SetPosition(const Ogre::Vector3& position){scene_node_->setPosition(position);}
 
-void Entity::ScriptSetPosition(const float x, const float y, const float z){
-    SetPosition(Ogre::Vector3(x, y, z));
-
-    // Make the entity solid, visible and talkable. TODO: Check if neccessary.
-    SetVisible(true);
-    SetSolid(true);
-    SetTalkable(true);
-
-    // If set from a script:
-    // Reset walkmesh triangle to reattach entity to walkmesh again if needed.
-    move_triangle_id_ = -1;
-}
-
 const Ogre::Vector3 Entity::GetPosition() const{return scene_node_->getPosition();}
 
 void Entity::ScriptGetPosition() const{

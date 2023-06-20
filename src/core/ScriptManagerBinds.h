@@ -15,7 +15,7 @@
 
 #include <iostream>
 
-#include "../modules/worldmap/WorldmapModule.h"
+#include "modules/worldmap/WorldmapModule.h"
 #include "Console.h"
 #include "Logger.h"
 #include "CameraManager.h"
@@ -43,9 +43,13 @@
 /**
  * Prints to the game console.
  *
- * @param[in] text The text to be printed.
+ * To be called from Lua only. Will take the first stack parameter as a string and print it
+ * to the game console.
+ *
+ * @param[in] lua Lua Reference state.
  */
-void ScriptPrint(const char* text){
+static int ScriptPrint(lua_State* lua){
+    const char* text = lua_tostring(lua, 1);
     std::cout << "[SCRIPT] " << text << std::endl;
     Console::getSingleton().AddTextToOutput(text);
 }
@@ -53,12 +57,13 @@ void ScriptPrint(const char* text){
 /**
  * Changes the current map.
  *
- * Reads the data for the next map, initializes all it's entities, scripts, etc
- * and loads it.
+ * To be called from Lua only. Will take the first stack parameter as a string with the map name,
+ * read the map and load it.
  *
- * @param[in] text The new map name.
+ * @param[in] lua Lua Reference state.
  */
-void ScriptMap(const char* text){
+static int ScriptMap(lua_State* lua){
+    const char* text = lua_tostring(lua, 1);
     EntityManager::getSingleton().Clear();
     XmlMapsFile xml("./data/maps.xml");
     Ogre::String file_name = xml.GetMapFileNameByName(text);
@@ -67,27 +72,44 @@ void ScriptMap(const char* text){
 }
 
 /**
+ * Sets the entity position.
+ *
+ * To be called from Lua only. It will read from the stack one Entity and 3 doubles, as X, Y, and Z
+ * coordinates, and move th entity to that point. It also resets the walkmesh triangle to reattach
+ * entity to walkmesh again if needed.
+ *
+ * @param[in] lua LuaReference state.
+ */
+static int ScriptEntitySetPosition(lua_State* lua){
+    Entity* entity = reinterpret_cast<Entity*>(luaL_checkudata(lua, 1, "Entity"));
+    float x = (float) lua_tonumber(lua, 2);
+    float y = (float) lua_tonumber(lua, 3);
+    float z = (float) lua_tonumber(lua, 4);
+    entity->SetPosition(Ogre::Vector3(x, y, z));
+    return 0;
+}
+
+/**
  * Executes a script in the game console.
  *
- * It should not be related to the game itself. The script output will be
- * written to the game console.
+ * To be called from Lua only. Will take the first stack parameter as a string, and execute it in
+ * the game console. All output will be written to the game console.
  *
- * @param[in] text The script command to execute.
+ * @param[in] lua Lua Reference state.
  */
-void ScriptConsole(const char* text){
+static int ScriptConsole(lua_State* lua){
+    const char* text = lua_tostring(lua, 1);
     Console::getSingleton().ExecuteCommand(text);
 }
 
 void ScriptManager::InitBinds(){
 
     // Global functions.
-    luabind::module(lua_state_)[
-        luabind::def("print", (void(*)(const char*)) &ScriptPrint),
-        luabind::def("map", (void(*)(const char*)) &ScriptMap),
-        luabind::def("console", (void(*)(const char*)) &ScriptConsole)
-    ];
+    lua_register(lua_state_, "print", *ScriptPrint);
+    lua_register(lua_state_, "map", *ScriptMap);
+    lua_register(lua_state_, "Entity:set_position", *ScriptEntitySetPosition);
 
-    // Individual entity commands.
+    /*// Individual entity commands.
     luabind::module(lua_state_)[
         luabind::class_<Entity>("Entity")
           .def(
@@ -926,4 +948,5 @@ void ScriptManager::InitBinds(){
       = boost::ref(*(VGears::WorldmapModule::getSingletonPtr()));
     luabind::globals(lua_state_)["timer"] = boost::ref(*(Timer::getSingletonPtr()));
     luabind::globals(lua_state_)["script"] = boost::ref(*this);
+    */
 }

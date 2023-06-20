@@ -62,8 +62,7 @@ int main(int argc, char *argv[]){
         Ogre::SceneManager *scene_manager(nullptr);
 
         auto timer = std::make_unique<Timer>();
-        auto particle_system_manager =
-          std::make_unique<ParticleSystemManager>();
+        auto particle_system_manager =std::make_unique<ParticleSystemManager>();
 
         // Set scene camera and viewport for other modules.
         // Create this before initialize particle because some of them use
@@ -82,15 +81,12 @@ int main(int argc, char *argv[]){
 
         // Initialize resources.
         // TODO: Use correct file location in the end, now is OK for testing
-        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          ".", "FileSystem"
-        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(".", "FileSystem");
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
           "./data/wm", "FileSystem", "TEST"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/wm/world_us.lgp",
-          VGears::LGPArchiveFactory::ARCHIVE_TYPE, "TEST"
+          "./data/wm/world_us.lgp", VGears::LGPArchiveFactory::ARCHIVE_TYPE, "TEST"
         );
         Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 

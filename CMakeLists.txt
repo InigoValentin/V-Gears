@@ -61,9 +61,6 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     )
 endif()
 
-# First, build external libraries (luabind and luajit).
-add_subdirectory(lib)
-
 # Build v-gears (and, if requested, the installer).
 add_subdirectory(src)
 
