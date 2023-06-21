@@ -23,17 +23,17 @@ Manager::Manager(): module_(Module::FIELD), prev_module_(Module::FIELD), paused_
 
 Manager::~Manager(){}
 
-Manager::Module Manager::GetModule(){return module_;}
+Manager::Module Manager::GetModule() const{return module_;}
 
-bool Manager::IsModule(Manager::Module module){return (module_ == module);}
+bool Manager::IsModule(Module module) const{return (module_ == module);}
 
-bool Manager::IsFieldModule(){return (module_ == Module::FIELD);}
+bool Manager::IsFieldModule() const{return (module_ == Module::FIELD);}
 
-bool Manager::IsBattleModule(){return (module_ == Module::BATTLE);}
+bool Manager::IsBattleModule() const{return (module_ == Module::BATTLE);}
 
-bool Manager::IsWorldModule(){return (module_ == Module::WORLD);}
+bool Manager::IsWorldModule() const{return (module_ == Module::WORLD);}
 
-void Manager::SetModule(Manager::Module module){
+void Manager::SetModule(const Module module){
     if (module == Module::FIELD){
         ClearBattle();
         ClearWorld();
@@ -76,7 +76,7 @@ void Manager::Update(){
 }
 
 
-void Manager::Update(Module module){
+void Manager::Update(const Module module){
     switch (module){
         case Module::FIELD:
             UpdateField();
@@ -92,7 +92,7 @@ void Manager::Update(Module module){
 
 void Manager::Clear(){Clear(module_);}
 
-void Manager::Clear(Module module){
+void Manager::Clear(const Module module){
     switch (module){
         case Module::FIELD:
             ClearField();

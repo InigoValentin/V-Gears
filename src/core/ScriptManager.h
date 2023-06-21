@@ -145,9 +145,9 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
             SYSTEM,
 
             /**
-             * A field entity script.
+             * A field or world map entity script.
              *
-             * The script belongs to any of the enities on a map.
+             * The script belongs to any of the entities on a map.
              */
             ENTITY,
 
@@ -159,11 +159,11 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
             UI,
 
             /**
-             * A field script.
+             * A battle entity script.
              *
-             * The script ios triggered by the map itself
+             * The script belongs to any of the entities on the battle.
              */
-            FIELD
+            BATTLE
         };
 
         /**
@@ -229,8 +229,7 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
          *
          * No errors are handled, and nothing is returned
          *
-         * @param[in] file Path to the lua file to run (relative to the
-         * data directory).
+         * @param[in] file Path to the lua file to run (relative to the data directory).
          */
         void RunFile(const Ogre::String& file);
 
@@ -249,47 +248,54 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
         /**
          * Adds an entity to the manager.
          *
+         * Usage depends on the currently active module. The entity will be added to the list of
+         * entities of the module.
+         *
          * @param[in] type Type of entity to add.
          * @param[in] entity_name The entity name.
          * @param[in] entity The entity to add.
          */
-        void AddEntity(
-          const Type type, const Ogre::String& entity_name, Entity* entity
-        );
+        void AddEntity(const Type type, const Ogre::String& entity_name, Entity* entity);
 
         /**
          * Deletes an entity from the manager.
          *
-         * If there is no entity with name ENTITY_NAME and type TYPE, nothing
-         * will be done.
+         * Usage depends on the currently active module. The entity will be removed from the list of
+         * entities of the module. If there is no entity with name ENTITY_NAME and type TYPE,
+         * nothing will be done.
          *
          * @param[in] type Type of the entity to remove.
-         * @param[in] entity_name NAme of the entity to remove.
+         * @param[in] entity_name Name of the entity to remove.
          */
         void RemoveEntity(const Type type, const Ogre::String& entity_name);
 
         /**
          * Adds an script to an entity.
          *
+         * Usage depends on the currently active module. The script will be added to the list of
+         * scripts of the module.
+         *
          * @param[in] entity_name Name of the entity to add a script to.
          * @param[in] function_name Name of the script to add.
-         * @param[in] priority Script priority. Lower numbers have higher
-         * priority.
+         * @param[in] priority Script priority. Lower numbers have higher priority.
          */
         void AddEntityScript(
-          const Ogre::String& entity_name, const Ogre::String& function_name,
-          int priority
+          const Ogre::String& entity_name, const Ogre::String& function_name, int priority
         );
 
         /**
          * Removes the top script of an entity.
          *
-         * @param[in] entity Enthity whose first script to remove.
+         * The entity must be in one of the currently active modules for it's script to be removed.
+         *
+         * @param[in] entity Entity whose first script to remove.
          */
         void RemoveEntityTopScript(ScriptEntity& entity);
 
         /**
          * Retrieves a table.
+         *
+         * The retrieved table depends on the currently active module.
          *
          * @param[in] type Type of script.
          * @param[in] name Script name.
@@ -298,30 +304,28 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
          * @todo Understand and document.
          */
         luabind::object GetTableByEntityName(
-          const ScriptManager::Type type, const Ogre::String& name,
-          lua_State* state
+          const ScriptManager::Type type, const Ogre::String& name, lua_State* state
         ) const;
 
         /**
          * Retrieves a script from it's ID.
          *
          * @param[in] script Script ID.
-         * @return The script with the corresponding ID, or nullptr if there is
-         * none
+         * @return The script with the corresponding ID, or nullptr if there is none.
          */
         QueueScript* GetScriptByScriptId(const ScriptId& script) const;
 
         /**
          * Retrieves a script entity by it's name and type.
          *
+         * Usage depends on the currently active module. The entity will be searched among the
+         * entities of the currently active module.
+         *
          * @param[in] type Entity type.
          * @param[in] entity_name The entity name.
-         * @return The entity by that type and name, or nullptr if there is
-         * no one that matches.
+         * @return The entity by that type and name, or nullptr if there is no one that matches.
          */
-        ScriptEntity* GetScriptEntityByName(
-          const Type type, const Ogre::String& entity_name
-        ) const;
+        ScriptEntity* GetScriptEntityByName(const Type type, const Ogre::String& entity_name) const;
 
         /**
          * Retrieves the current script ID.
@@ -352,8 +356,7 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
          *
          * @param[in] type Script type.
          * @param[in] entity Entity the scripts belong to.
-         * @param[in] function Name of the function of the selected entity to
-         * execute.
+         * @param[in] function Name of the function of the selected entity to execute.
          * @param[in] priority Execution priority.
          */
         void ScriptRequest(
@@ -365,45 +368,39 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
          *
          * @param[in] type Script type.
          * @param[in] entity Entity the scripts belong to.
-         * @param[in] function Name of the function of the selected entity to
-         * execute.
+         * @param[in] function Name of the function of the selected entity to execute.
          * @param[in] priority Execution priority.
          * @return -1 on success, 1 if the entity or the script don't exist.
          */
         int ScriptRequestStartSync(
-          const Type type, const char* entity,
-          const char* function, const int priority);
+          const Type type, const char* entity, const char* function, const int priority
+        );
 
         /**
          * Request a synchronous script execution to end.
          *
          * @param[in] type Script type.
          * @param[in] entity Entity the scripts belong to.
-         * @param[in] function Name of the function of the selected entity to
-         * execute.
+         * @param[in] function Name of the function of the selected entity to execute.
          * @param[in] priority Execution priority.
          * @return -1 if the execution stops or if the script was not running,
          * 1 if the entity or the script don't exist.
          */
         int ScriptRequestEndSync(
-          const Type type, const char* entity,
-          const char* function, const int priority
+          const Type type, const char* entity, const char* function, const int priority
         );
 
         /**
          * Request a script execution.
          *
          * @param[in] script_entity Entity the scripts belong to.
-         * @param[in] function Name of the function of the selected entity to
-         * execute.
+         * @param[in] function Name of the function of the selected entity to execute.
          * @param[in] priority Execution priority.
          * @param[in] argument1 First argument for the script.
          * @param[in] argument2 Second argument for the script.
-         * @param[in] start_sync If true, the script will be started
-         * synchronously.
+         * @param[in] start_sync If true, the script will be started synchronously.
          * @param[in] end_sync @todo Understand and document.
-         * @return True on success, false on error (i.e. if the entity or the
-         * script don't exist)
+         * @return True on success, false on error (i.e. if the entity or the script don't exist)
          */
         bool ScriptRequest(
           ScriptEntity* script_entity, const Ogre::String& function,
@@ -452,12 +449,17 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
         Ogre::String entity_table_name_;
 
         /**
+         * The battle entity script table name.
+         */
+        Ogre::String battle_table_name_;
+
+        /**
          * The UI script table name.
          */
         Ogre::String ui_table_name_;
 
         /**
-         * The list of script entities.
+         * The list of map entity scripts.
          */
         std::vector<ScriptEntity> script_entity_;
 
@@ -474,11 +476,7 @@ struct ScriptEntity{
      *
      *By default, the type is {@see ScriptManager::SYSTEM}.
      */
-    ScriptEntity():
-      name(""),
-      type(ScriptManager::SYSTEM),
-      resort(false)
-    {}
+    ScriptEntity(): name(""), type(ScriptManager::SYSTEM), resort(false){}
 
     /**
      * The script name.

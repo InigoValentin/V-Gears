@@ -138,6 +138,6 @@ void UiManager::UpdateField(){
     for (unsigned int i = 0; i < widgets_.size(); ++ i) widgets_[i]->Update();
 }
 
-void UiManager::UpdateBattle(){}
+void UiManager::UpdateBattle(){UpdateField();}
 
-void UiManager::UpdateWorld(){}
+void UiManager::UpdateWorld(){UpdateField();}

@@ -104,21 +104,22 @@ void DialogsManager::ClearField(){
     for (unsigned int i = 0; i < messages_.size(); ++ i) HideMessage(i);
 }
 
-void DialogsManager::ClearBattle(){}
+void DialogsManager::ClearBattle(){
+    for (unsigned int i = 0; i < battle_messages_.size(); ++ i) HideMessage(i);
+}
 
-void DialogsManager::ClearWorld(){}
+void DialogsManager::ClearWorld(){
+    for (unsigned int i = 0; i < messages_.size(); ++ i) HideMessage(i);
+}
 
 void DialogsManager::ScriptSetMapName(const char* text_id){
     std::string text = TextHandler::getSingleton().GetDialogText(text_id);
     SetMapName(text);
 }
 
-void DialogsManager::SetMapName(std::string name){
-    map_name_ = name;
-}
+void DialogsManager::SetMapName(std::string name){map_name_ = name;}
 
 std::string DialogsManager::GetMapName(){return map_name_;}
-
 
 void DialogsManager::OpenDialog(const char* d_name, int x, int y, int w, int h){
     int id = GetMessageId(d_name);
@@ -383,25 +384,26 @@ void DialogsManager::UpdateField(){
                     }
                 }
                 break;
-            case MS_SHOW_TEXT:{
-                if (AutoCloseCheck(i) == true) break;
-                if (messages_[i]->clickable == true){
-                    if (next_pressed_ == true) messages_[i]->text_area->InputPressed();
-                    if (next_repeated_ == true) messages_[i]->text_area->InputRepeated();
-                }
+            case MS_SHOW_TEXT:
+                {
+                    if (AutoCloseCheck(i) == true) break;
+                    if (messages_[i]->clickable == true){
+                        if (next_pressed_ == true) messages_[i]->text_area->InputPressed();
+                        if (next_repeated_ == true) messages_[i]->text_area->InputRepeated();
+                    }
 
-                if (messages_[i]->text_area->GetTextState() == TS_DONE){
-                    messages_[i]->state = MS_OPENED;
-                    if (messages_[i]->cursor != NULL && messages_[i]->show_cursor == true){
-                        messages_[i]->cursor->SetY(
-                          messages_[i]->cursor_percent_y,
-                          messages_[i]->cursor_y + messages_[i]->cursor_row_current
-                            * messages_[i]->text_area->GetFont()->GetHeight()
-                        );
-                        messages_[i]->cursor->SetVisible(true);
+                    if (messages_[i]->text_area->GetTextState() == TS_DONE){
+                        messages_[i]->state = MS_OPENED;
+                        if (messages_[i]->cursor != NULL && messages_[i]->show_cursor == true){
+                            messages_[i]->cursor->SetY(
+                              messages_[i]->cursor_percent_y,
+                              messages_[i]->cursor_y + messages_[i]->cursor_row_current
+                                * messages_[i]->text_area->GetFont()->GetHeight()
+                            );
+                            messages_[i]->cursor->SetVisible(true);
+                        }
                     }
                 }
-            }
                 break;
             case MS_OPENED:
                 {
@@ -437,13 +439,12 @@ void DialogsManager::UpdateField(){
                     }
                 }
                 break;
-            case MS_HIDE_WINDOW:{
+            case MS_HIDE_WINDOW:
+                {
                     if (
                       (messages_[i]->window == NULL)
                       || (messages_[i]->window->GetCurrentAnimationName() == Ogre::BLANKSTRING)
-                    ){
-                        HideMessage(i);
-                    }
+                    ) HideMessage(i);
                 }
             break;
         }

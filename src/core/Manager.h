@@ -67,7 +67,7 @@ class Manager{
          *
          * @return The currently selected module.
          */
-        Module GetModule();
+        Module GetModule() const;
 
         /**
          * Checks the currently selected module.
@@ -76,28 +76,28 @@ class Manager{
          * @return True if the currently selected module matches the module to check, false
          * otherwise.
          */
-        bool IsModule(Module module);
+        bool IsModule(const Module module) const;
 
         /**
          * Checks if the currently selected module is the field module.
          *
          * @return True if the currently selected module is the field module, false otherwise.
          */
-        bool IsFieldModule();
+        bool IsFieldModule() const;
 
         /**
          * Checks if the currently selected module is the battle module.
          *
          * @return True if the currently selected module is the battle module, false otherwise.
          */
-        bool IsBattleModule();
+        bool IsBattleModule() const;
 
         /**
          * Checks if the currently selected module is the world module.
          *
          * @return True if the currently selected module is the world module, false otherwise.
          */
-        bool IsWorldModule();
+        bool IsWorldModule() const;
 
         /**
          * Sets the current module for the entity manager.
@@ -106,7 +106,7 @@ class Manager{
          * {@see SetFieldModule()}, {@see SetBattleModule()} and {@see SetWorldModule()} for
          * information about what changing modules implies.
          */
-        void SetModule(Module module);
+        void SetModule(const Module module);
 
         /**
          * Sets the current module to the field mode.
@@ -185,7 +185,7 @@ class Manager{
          *
          * @param[in] module The module to clear.
          */
-        void Clear(Module module);
+        void Clear(const Module module);
 
         /**
          * Clear all field information in the manager.

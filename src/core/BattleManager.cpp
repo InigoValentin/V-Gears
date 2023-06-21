@@ -22,11 +22,14 @@
 #include "core/AudioManager.h"
 #include "core/BattleManager.h"
 #include "core/CameraManager.h"
+#include "core/DialogsManager.h"
 #include "core/Enemy.h"
 #include "core/EntityManager.h"
 #include "core/ConfigVar.h"
+#include "core/InputManager.h"
 #include "core/Logger.h"
 #include "core/ScriptManager.h"
+#include "core/UiManager.h"
 #include "core/XmlFormationFile.h"
 
 /**
@@ -90,12 +93,16 @@ void BattleManager::StartBattle(const unsigned int id){
         LOG_ERROR("Started battle in BattleManager, but the manager was already in battle mode.");
         return;
     }
-    module_ = Module::BATTLE;
-    formation_id_ = id;
-    EntityManager::getSingleton().SetBattleModule();
-    CameraManager::getSingleton().SetBattleModule();
+    SetBattleModule();
+    SetFormationId(id);
     AudioManager::getSingleton().SetBattleModule();
+    CameraManager::getSingleton().SetBattleModule();
+    DialogsManager::getSingleton().SetBattleModule();
+    EntityManager::getSingleton().SetBattleModule();
+    InputManager::getSingleton().SetBattleModule();
     ScriptManager::getSingleton().SetBattleModule();
+    UiManager::getSingleton().SetBattleModule();
+
     // Load the formation XML file (name is dddd.xml)
     std::string filename = std::to_string(formation_id_);
     while (filename.length() < 4) filename = "0" + filename;
@@ -129,11 +136,15 @@ void BattleManager::EndBattle(){
     }
     SetPreviousModule();
     ClearBattle();
-    EntityManager::getSingleton().SetPreviousModule();
     CameraManager::getSingleton().EndBattleCamera();
-    CameraManager::getSingleton().SetPreviousModule();
+
     AudioManager::getSingleton().SetPreviousModule();
+    CameraManager::getSingleton().SetPreviousModule();
+    DialogsManager::getSingleton().SetPreviousModule();
+    EntityManager::getSingleton().SetPreviousModule();
+    InputManager::getSingleton().SetPreviousModule();
     ScriptManager::getSingleton().SetPreviousModule();
+    UiManager::getSingleton().SetPreviousModule();
 }
 
 std::vector<Enemy> BattleManager::GetEnemies() const{return enemies_;}

@@ -33,7 +33,7 @@ ConfigVar cv_debug_script(
  */
 template<>ScriptManager *Ogre::Singleton<ScriptManager>::msSingleton = nullptr;
 
-Ogre::String script_entity_type[] = {"SYSTEM", "ENTITY", "UI"};
+Ogre::String script_entity_type[] = {"SYSTEM", "ENTITY", "UI", "BATTLE"};
 
 /**
  * Compares the priority of two scripts.
@@ -91,14 +91,14 @@ void ScriptManager::Input(const VGears::Event& event){
         || event.param1 == OIS::KC_Y || event.param1 == OIS::KC_Z || event.param1 == OIS::KC_X
       )
     ){
+
         for (unsigned int i = 0; i < script_entity_.size(); ++ i){
             Ogre::String argument2 = "";
             if (event.type == VGears::ET_KEY_PRESS) argument2 = "Press";
-            else if (event.type == VGears::ET_KEY_REPEAT_WAIT)
-                argument2 = "Repeat";
+            else if (event.type == VGears::ET_KEY_REPEAT_WAIT) argument2 = "Repeat";
             ScriptRequest(
-              &script_entity_[i], "on_button", 100, KeyToString((OIS::KeyCode)((int)event.param1)),
-              argument2, false, false
+              &script_entity_[i], "on_button", 100,
+              KeyToString((OIS::KeyCode) ((int) event.param1)), argument2, false, false
             );
         }
     }
@@ -438,6 +438,7 @@ luabind::object ScriptManager::GetTableByEntityName(
         case ScriptManager::SYSTEM: table = table[system_table_name_]; break;
         case ScriptManager::ENTITY: table = table[entity_table_name_]; break;
         case ScriptManager::UI: table = table[ui_table_name_]; break;
+        case ScriptManager::BATTLE: table = table[battle_table_name_]; break;
     }
 
     if (luabind::type(table) != LUA_TTABLE) return luabind::object();

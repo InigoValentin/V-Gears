@@ -286,6 +286,7 @@ void EntityManager::UpdateField(){
 }
 
 void EntityManager::UpdateBattle(){
+    ScriptManager::getSingleton().Update(ScriptManager::BATTLE);
     for (unsigned int i = 0; i < battle_entity_.size(); ++ i){
         battle_entity_[i]->Update();
         battle_entity_[i]->PlayAnimationContinue(battle_entity_[i]->GetDefaultAnimationName());
@@ -404,7 +405,7 @@ void EntityManager::AddBattleEntity(
     entity->SetIndex(index);
     entity->SetVisible(visible);
     battle_entity_.push_back(entity);
-    ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
+    ScriptManager::getSingleton().AddEntity(ScriptManager::BATTLE, entity->GetName(), entity);
 }
 
 void EntityManager::ScriptAddEntity(

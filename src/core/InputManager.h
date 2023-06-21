@@ -173,8 +173,7 @@ class InputManager : public Manager, public Ogre::Singleton<InputManager>{
          * @param[in] buttons Buttons to bind to the command.
          */
         void BindCommand(
-          ConfigCmd* cmd, const Ogre::StringVector& params,
-          const ButtonList& buttons
+          ConfigCmd* cmd, const Ogre::StringVector& params, const ButtonList& buttons
         );
 
         /**
@@ -183,9 +182,7 @@ class InputManager : public Manager, public Ogre::Singleton<InputManager>{
          * @param[in] event The game event to bind.
          * @param[in] buttons Buttons to bind to the event.
          */
-        void BindGameEvent(
-          const Ogre::String& event, const ButtonList& buttons
-        );
+        void BindGameEvent(const Ogre::String& event, const ButtonList& buttons);
 
         /**
          * Activates all bindings for a button.
@@ -238,7 +235,7 @@ class InputManager : public Manager, public Ogre::Singleton<InputManager>{
         char button_text_[256];
 
         /**
-         * Indicates if a key holded down is waiting to repeat events.
+         * Indicates if a key held down is waiting to repeat events.
          *
          * @todo Verify this.
          */

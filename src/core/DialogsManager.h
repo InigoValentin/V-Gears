@@ -158,8 +158,7 @@ struct MessageData{
     std::vector<ScriptId> sync;
 
     /**
-     * Indicates if the text is 'clickable', i.e., if it requieres a keypress
-     * to advance.
+     * Indicates if the text is 'clickable', i.e., if it requieres a keypress to advance.
      */
     bool clickable;
 
@@ -365,19 +364,15 @@ class DialogsManager : public Manager, public Ogre::Singleton<DialogsManager>{
          * @param[in] name Name of the variable.
          * @param[in] value Value for the variable.
          */
-        void SetVariable(
-          const char* d_name, const char* name, const char* value
-        );
+        void SetVariable(const char* d_name, const char* name, const char* value);
 
         /**
          * Makes the dialog clickable or not.
          *
-         * A clickable dialog presents a choice for the user that must be
-         * selected with a cursor.
+         * A clickable dialog presents a choice for the user that must be selected with a cursor.
          *
          * @param[in] d_name Name of the dialog.
-         * @param[in] clickable True to make the dialog clickable, false to
-         * make it unclickable
+         * @param[in] clickable True to make the dialog clickable, false to make it unclickable
          */
         void SetClickable(const char* d_name, const bool clickable);
 
@@ -388,9 +383,7 @@ class DialogsManager : public Manager, public Ogre::Singleton<DialogsManager>{
          * @param[in] first_row First selectable line.
          * @param[in] last_row Last selectable line.
          */
-        void SetCursor(
-          const char* d_name, const int first_row, const int last_row
-        );
+        void SetCursor(const char* d_name, const int first_row, const int last_row);
 
         /**
          * Gets the cursor position in a dialog.
@@ -480,9 +473,14 @@ class DialogsManager : public Manager, public Ogre::Singleton<DialogsManager>{
         UiWidget* limit_area_;
 
         /**
-         * The list of messages.
+         * The list of messages for the field or the world map.
          */
         std::vector<MessageData*> messages_;
+
+        /**
+         * The list of battle messages.
+         */
+        std::vector<MessageData*> battle_messages_;
 
         /**
          * Indicates if the 'next' button has been pressed.
