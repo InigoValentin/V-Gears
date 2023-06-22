@@ -142,8 +142,10 @@ void BattleManager::EndBattle(){
     AudioManager::getSingleton().SetPreviousModule();
     CameraManager::getSingleton().SetPreviousModule();
     DialogsManager::getSingleton().SetPreviousModule();
-    EntityManager::getSingleton().SetPreviousModule();
+    ScriptManager::getSingleton().ClearBattle();
+    EntityManager::getSingleton().ClearBattle();
     EntityManager::getSingleton().GetBackground2D()->Show();
+    EntityManager::getSingleton().SetPreviousModule();
     InputManager::getSingleton().SetPreviousModule();
     ScriptManager::getSingleton().ClearBattle();
     ScriptManager::getSingleton().SetPreviousModule();

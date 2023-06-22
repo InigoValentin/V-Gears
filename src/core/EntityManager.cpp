@@ -346,7 +346,10 @@ void EntityManager::ClearBattle(){
         ScriptManager::getSingleton().RemoveEntity(
           ScriptManager::ENTITY, battle_entity_[i]->GetName()
         );
-        delete battle_entity_[i];
+        Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(
+          battle_entity_[i]->GetName()
+        );
+        scene_node_->removeAndDestroyChild("Model_" + battle_entity_[i]->GetName());
     }
     battle_entity_.clear();
 }
