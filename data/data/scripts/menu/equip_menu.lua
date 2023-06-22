@@ -186,9 +186,9 @@ UiContainer.EquipMenu = {
     submenu_none = function(self)
         UiContainer.current_submenu = ""
         UiContainer.populate_character_data("EquipMenu.Container.Character", Characters[self.char_id])
-        ui_manager:get_widget("EquipMenu.Container.Character.Portrait"):set_image("images/characters/" .. tostring(self.char_id) .. ".png")
+        ui_manager:get_widget("EquipMenu.Container.Character.Portrait"):set_image("characters/" .. tostring(self.char_id) .. ".png")
         -- TODO: Do something for chars 9 and 10
-        ui_manager:get_widget("EquipMenu.Container.Character.WpnIcon"):set_image("images/icons/item_weapon_" .. tostring(self.char_id) .. ".png")
+        ui_manager:get_widget("EquipMenu.Container.Character.WpnIcon"):set_image("icons/item_weapon_" .. tostring(self.char_id) .. ".png")
         ui_manager:get_widget("EquipMenu.Container.Character.WpnLbl"):set_text(Game.Items[Characters[self.char_id].weapon.id].name)
         ui_manager:get_widget("EquipMenu.Container.Character.ArmLbl"):set_text(Game.Items[Characters[self.char_id].armor.id].name)
         if Characters[self.char_id].accessory == nil then
@@ -376,9 +376,9 @@ UiContainer.EquipMenu = {
             else
                 ui_manager:get_widget("EquipMenu.Container.Slots.Slot" .. tostring(s)):set_visible(true)
                 if item.growth == 0 then
-                    ui_manager:get_widget("EquipMenu.Container.Slots.Slot" .. tostring(s)):set_image("images/icons/materia_slot_no_growth.png")
+                    ui_manager:get_widget("EquipMenu.Container.Slots.Slot" .. tostring(s)):set_image("icons/materia_slot_no_growth.png")
                 else
-                    ui_manager:get_widget("EquipMenu.Container.Slots.Slot" .. tostring(s)):set_image("images/icons/materia_slot.png")
+                    ui_manager:get_widget("EquipMenu.Container.Slots.Slot" .. tostring(s)):set_image("icons/materia_slot.png")
                 end
             end
             if s % 2 ~= 0 then

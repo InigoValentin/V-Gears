@@ -32,7 +32,7 @@ void XmlFontsFile::LoadFonts(){
     node = node->FirstChild();
     while (node != nullptr){
         if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "font"){
-            XmlFontFile font("./data/" + GetString(node, "file_name"));
+            XmlFontFile font("./data/fonts/" + GetString(node, "file_name"));
             font.LoadFont();
         }
         node = node->NextSibling();

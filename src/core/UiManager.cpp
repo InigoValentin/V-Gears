@@ -45,9 +45,9 @@ UiManager::~UiManager(){
 }
 
 void UiManager::Initialise(){
-    XmlFontsFile fonts("./data/fonts.xml");
+    XmlFontsFile fonts("./data/fonts/_fonts.xml");
     fonts.LoadFonts();
-    XmlScreensFile screens("./data/screens.xml");
+    XmlScreensFile screens("./data/screens/_screens.xml");
     screens.LoadScreens();
 }
 

@@ -64,7 +64,7 @@ DebugDraw::DebugDraw():
     pass->setDepthWriteEnabled(true);
     pass->setLightingEnabled(false);
     pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-    font_ = Ogre::FontManager::getSingleton().getByName("CourierNew");
+    font_ = Ogre::FontManager::getSingleton().getByName("CourierNew", "SYSTEM");
     if (font_ == nullptr){
         LOG_ERROR("Could not find font \"CourierNew\" for debug draw.");
         throw std::runtime_error("Font load failure");

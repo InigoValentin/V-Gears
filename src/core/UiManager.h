@@ -45,7 +45,7 @@ class UiManager :
         /**
          * Initializes the manager.
          *
-         * Loads all available fonts and screens from fonts.xml and
+         * Loads all available fonts and screens from _fonts.xml and
          * screens.xml, respectably.
          */
         void Initialise();

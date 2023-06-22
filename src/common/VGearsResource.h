@@ -63,7 +63,7 @@ namespace VGears{
              */
             virtual Ogre::DataStreamPtr openResource(){
                 // Last parameter to true to throw an exception.
-                // Change when ready.
+                // TODO: Change when ready.
                 return Ogre::ResourceGroupManager::getSingleton().openResource(
                   mName, mGroup, this, false
                 );

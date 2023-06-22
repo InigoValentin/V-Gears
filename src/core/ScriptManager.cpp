@@ -57,8 +57,9 @@ ScriptManager::ScriptManager():
     luaopen_io(lua_state_);
     InitBinds();
     InitCmd();
+    // TODO: Use the one in data/ ?
     RunFile("system/system.lua");
-    XmlScriptsFile scripts("./data/scripts.xml");
+    XmlScriptsFile scripts("./data/scripts/_scripts.xml");
     scripts.LoadScripts();
 }
 
@@ -321,7 +322,18 @@ void ScriptManager::OnResize(){}
 
 void ScriptManager::ClearField(){}
 
-void ScriptManager::ClearBattle(){}
+void ScriptManager::ClearBattle(){
+    // Remove all battle script entities.
+    // TODO: Allso remove them as node scenes.
+    for (unsigned int i = 0; i < script_entity_.size(); ++ i){
+        if (script_entity_[i].type == BATTLE){
+            while(script_entity_[i].queue.size() > 0)
+                ScriptManager::RemoveEntityTopScript(script_entity_[i]);
+            script_entity_.erase(script_entity_.begin() + i);
+            i --;
+        }
+    }
+}
 
 void ScriptManager::ClearWorld(){}
 

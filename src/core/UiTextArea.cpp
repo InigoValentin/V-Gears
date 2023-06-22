@@ -296,11 +296,11 @@ void UiTextArea::SetFont(const Ogre::String& font){
         return;
     }
     material_ = Ogre::MaterialManager::getSingleton().getByName(
-      "UiMaterials." + path_name_, "General"
+      "UiMaterials." + path_name_, "FONTS"
     );
     if (material_ == nullptr){
         material_ = Ogre::MaterialManager::getSingleton().create(
-          "UiMaterials." + path_name_, "General"
+          "UiMaterials." + path_name_, "FONTS"
         );
     }
     Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);

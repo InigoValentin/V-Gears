@@ -208,9 +208,9 @@ unsigned int BattleDataInstaller::ProcessModel(){
         );
         TexFile tex(battle_lgp_files_[next_model_to_process_]);
         std::string path = output_dir_ + "models/battle/";
-        if (info.is_player) path += "char/";
-        else if (info.is_scene) path += "scene/";
-        else path += "enemy/";
+        if (info.is_player) path += "characters/";
+        else if (info.is_scene) path += "scenes/";
+        else path += "enemies/";
         path += (id + type + "_" + info.name_normal + ".png");
         tex.SavePng(path);
         res_mgr_->declareResource(
@@ -265,11 +265,11 @@ unsigned int BattleDataInstaller::ConvertModel(){
     if (next_model_to_convert_ >= models_.size()) return models_.size();
     Model model = models_[next_model_to_convert_];
     try{
-        std::string path = "models/battle/";
+        std::string path = "";
         FF7Data::BattleModelInfo info = FF7Data::GetBattleModelInfo(model.id);
-        if (info.is_player) path += "char/";
-        else if (info.is_scene) path += "scene/";
-        else path += "enemy/";
+        if (info.is_player) path += "characters/";
+        else if (info.is_scene) path += "scenes/";
+        else path += "enemies/";
 
 
         DecompileHrc(
@@ -637,14 +637,14 @@ void BattleDataInstaller::WriteFormations(){
         xml.LinkEndChild(container.release());
         std::string file_name = std::to_string(formation.id);
         while (file_name.length() < 4) file_name = "0" + file_name;
-        file_name = "game/formation/" + file_name + ".xml";
+        file_name = "gamedata/formation/" + file_name + ".xml";
         xml.SaveFile(output_dir_ + file_name);
         formation_map_[formation.id] = file_name;
     }
 }
 
 std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){
-    std::string file_name = "game/enemy/";
+    std::string file_name = "gamedata/enemy/";
     std::string id = std::to_string(enemy.id);
     while (id.size() < 4) id = "0" + id;
     /*file_name += (id + "_");
@@ -662,7 +662,7 @@ std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){
 }
 
 std::string BattleDataInstaller::BuildAttackFileName(Attack attack){
-    std::string file_name = "game/attack/";
+    std::string file_name = "gamedata/attack/";
     std::string id = std::to_string(attack.id);
     while (id.size() < 4) id = "0" + id;
     file_name += (id + "_");
@@ -762,16 +762,18 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
     Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
     Ogre::SkeletonSerializer skeleton_serializer;
     skeleton_serializer.exportSkeleton(
-      skeleton.get(), output_dir_ + outdir + base_mesh_name + ".skeleton"
+      skeleton.get(), output_dir_ + "models/battle/" + outdir + base_mesh_name + ".skeleton"
     );
     mesh->setSkeletonName(outdir + base_mesh_name + ".skeleton");
-    mesh_serializer.exportMesh(mesh.get(), output_dir_ + outdir + mesh->getName());
+    mesh_serializer.exportMesh(
+      mesh.get(), output_dir_ + "models/battle/" + outdir + mesh->getName()
+    );
     Ogre::MaterialSerializer mat_ser;
     std::set<std::string> textures;
     Ogre::Mesh::SubMeshList sub_meshes = mesh->getSubMeshes();
     for (Ogre::SubMesh* sub_mesh : sub_meshes){
         // Change material name to avoid conflicts with field model materials.
-        sub_mesh->setMaterialName(sub_mesh->getMaterialName() + "_btl");
+        sub_mesh->setMaterialName(sub_mesh->getMaterialName());
         Ogre::MaterialPtr mat(
             Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName())
         );
@@ -803,7 +805,9 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
             materials_.push_back(sub_mesh->getMaterialName());
         }
     }
-    mat_ser.exportQueued(output_dir_ + outdir + base_mesh_name + VGears::EXT_MATERIAL);
+    mat_ser.exportQueued(
+      output_dir_ + "models/battle/" + outdir + base_mesh_name + VGears::EXT_MATERIAL
+    );
 }
 
 void BattleDataInstaller::GenerateRsdFiles(Model model, std::string path){

@@ -40,7 +40,7 @@ void XmlMapFile::LoadMap(){
             if (!name.empty()){
                 VGears::WalkmeshFileManager::getSingleton();
                 VGears::WalkmeshFilePtr walkmesh = VGears::WalkmeshFileManager::getSingleton()
-                  .load(name, "Game").staticCast<VGears::WalkmeshFile>();
+                  .load(name, "FIELDS").staticCast<VGears::WalkmeshFile>();
                 EntityManager::getSingleton().GetWalkmesh()->load(walkmesh);
             }
         }
@@ -56,7 +56,7 @@ void XmlMapFile::LoadMap(){
                 // TODO Migrate this code to a Resource and use it's group to load the background.
                 VGears::Background2DFilePtr background
                   = VGears::Background2DFileManager::getSingleton()
-                    .load(name, "Game").staticCast<VGears::Background2DFile>();
+                    .load(name, "FIELDS").staticCast<VGears::Background2DFile>();
                 EntityManager::getSingleton().GetBackground2D()->load(background);
             }
         }
@@ -116,7 +116,7 @@ void XmlMapFile::LoadMap(){
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "script"){
             Ogre::String file_name = GetString(node, "file_name");
-            if (file_name != "") ScriptManager::getSingleton().RunFile(file_name);
+            if (file_name != "") ScriptManager::getSingleton().RunFile("fields/" + file_name);
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "tracks"){
             for (TiXmlNode* track = node->FirstChild(); track; track = track->NextSibling()){

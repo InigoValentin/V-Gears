@@ -74,6 +74,21 @@ class Background2D : public Ogre::RenderQueueListener{
         void InputDebug(const VGears::Event& event);
 
         /**
+         * Hides the background.
+         *
+         * Once called, the background will not be rendered until {@see Show()} is called. If the
+         * background is already hidden, it will do nothing.
+         */
+        void Hide();
+
+        /**
+         * Shows the background.
+         *
+         * Once called, the background will start rendered until {@see Hide()} is called.
+         */
+        void Show();
+
+        /**
          * Run each frame.
          *
          * Updates animations and changes in the background.

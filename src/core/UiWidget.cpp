@@ -557,10 +557,8 @@ void UiWidget::SetColour(const float r, const float g, const float b){
 }
 
 void UiWidget::SetColours(
-  const float r1, const float g1, const float b1,
-  const float r2, const float g2, const float b2,
-  const float r3, const float g3, const float b3,
-  const float r4, const float g4, const float b4
+  const float r1, const float g1, const float b1, const float r2, const float g2, const float b2,
+  const float r3, const float g3, const float b3, const float r4, const float g4, const float b4
 ){
     colour_1_.r = r1; colour_1_.g = g1; colour_1_.b = b1;
     colour_2_.r = r2; colour_2_.g = g2; colour_2_.b = b2;

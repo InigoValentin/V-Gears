@@ -21,9 +21,8 @@
 #include <OgreSingleton.h>
 #include <OgreFont.h>
 
-class DebugDraw :
-  public Ogre::RenderQueueListener, public Ogre::Singleton<DebugDraw>
-{
+class DebugDraw : public Ogre::RenderQueueListener, public Ogre::Singleton<DebugDraw>{
+
     public:
 
         /**

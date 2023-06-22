@@ -20,7 +20,7 @@
         <widget name="Slot3" x="5%" y="66%+12" width="90%" height="30%-8" visible="true">
             <prototype name="SaveSlot" />
         </widget>
-        <sprite name="Cursor" image="images/icons/cursor.png" x="2" y="15%+12" width="24" height="17" visible="true">
+        <sprite name="Cursor" image="icons/cursor.png" x="2" y="15%+12" width="24" height="17" visible="true">
             <animation name="Position1" length="0" y="0:15%+12" />
             <animation name="Position2" length="0" y="0:48%+12" />
             <animation name="Position3" length="0" y="0:81%+12" />

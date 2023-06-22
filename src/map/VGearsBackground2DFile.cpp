@@ -24,9 +24,8 @@ namespace VGears{
 
 
     Background2DFile::Background2DFile(
-      Ogre::ResourceManager *creator, const String &name,
-      Ogre::ResourceHandle handle, const String &group, bool is_manual,
-      Ogre::ManualResourceLoader *loader
+      Ogre::ResourceManager *creator, const String &name, Ogre::ResourceHandle handle,
+      const String &group, bool is_manual, Ogre::ManualResourceLoader *loader
     ) : Resource(creator, name, handle, group, is_manual, loader){}
 
     Background2DFile::~Background2DFile(){unload();}
@@ -51,9 +50,7 @@ namespace VGears{
 
     size_t Background2DFile::calculateSize() const{return 0;}
 
-    void Background2DFile::SetTextureName(const String &texture_name){
-        texture_name_ = texture_name;
-    }
+    void Background2DFile::SetTextureName(const String &texture_name){texture_name_ = texture_name;}
 
     String Background2DFile::GetTextureName() const{ return texture_name_;}
 
@@ -65,9 +62,7 @@ namespace VGears{
 
     Ogre::Vector4 Background2DFile::GetRange() const{return range_;}
 
-    void Background2DFile::SetPosition(const Ogre::Vector3 &position){
-        position_ = position;
-    }
+    void Background2DFile::SetPosition(const Ogre::Vector3 &position){position_ = position;}
 
     Ogre::Vector3 Background2DFile::GetPosition() const{return position_;}
 
@@ -75,9 +70,7 @@ namespace VGears{
         orientation_ = orientation;
     }
 
-    Ogre::Quaternion Background2DFile::GetOrientation() const{
-        return orientation_;
-    }
+    Ogre::Quaternion Background2DFile::GetOrientation() const{return orientation_;}
 
     void Background2DFile::SetFov(const Ogre::Radian &fov){fov_ = fov;}
 

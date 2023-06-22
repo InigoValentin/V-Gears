@@ -60,9 +60,9 @@ void ScriptPrint(const char* text){
  */
 void ScriptMap(const char* text){
     EntityManager::getSingleton().Clear();
-    XmlMapsFile xml("./data/maps.xml");
+    XmlMapsFile xml("./data/fields/_fields.xml");
     Ogre::String file_name = xml.GetMapFileNameByName(text);
-    XmlMapFile xml_map("./data/" + file_name);
+    XmlMapFile xml_map("./data/fields/" + file_name);
     xml_map.LoadMap();
 }
 

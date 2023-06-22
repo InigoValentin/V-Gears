@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <iostream>
 #include <OgreHardwareBufferManager.h>
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
@@ -29,11 +30,10 @@ UiSprite::UiSprite(const Ogre::String& name, const Ogre::String& path_name, UiWi
 UiSprite::~UiSprite(){DestroyVertexBuffer();}
 
 void UiSprite::Initialise(){
+
     scene_manager_ = Ogre::Root::getSingleton().getSceneManager("Scene");
     render_system_ = Ogre::Root::getSingletonPtr()->getRenderSystem();
-    material_ = Ogre::MaterialManager::getSingleton().create(
-      "UiMaterials." + path_name_, "General"
-    );
+    material_ = Ogre::MaterialManager::getSingleton().create("UiMaterials." + path_name_, "IMAGES");
     Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
     pass->setCullingMode(Ogre::CULL_NONE);

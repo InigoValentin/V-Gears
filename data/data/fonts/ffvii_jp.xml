@@ -1,4 +1,4 @@
-﻿<font name="FFVIIFont" language="Japanese" image="fonts/ffvii_jp.png" image_size="512 256" height="16">
+﻿<font name="FFVIIFont" language="Japanese" image="ffvii_jp.png" image_size="512 256" height="16">
     <char name="バ" x="0" y="0" width="12" height="12" pre="0" post="1" />
     <char name="ば" x="12" y="0" width="12" height="12" pre="0" post="1" />
     <char name="ビ" x="24" y="0" width="12" height="12" pre="0" post="-1" />

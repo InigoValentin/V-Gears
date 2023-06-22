@@ -60,11 +60,11 @@ AudioManager::AudioManager():
     else LOG_ERROR("AudioManager failed to initialised. There's no default sound device.");
 
     // Load musics.
-    XmlMusicsFile musics("./data/musics.xml");
+    XmlMusicsFile musics("./data/audio/musics/_musics.xml");
     musics.LoadMusics();
 
     // Load sounds.
-    XmlSoundsFile sounds("./data/sounds.xml");
+    XmlSoundsFile sounds("./data/audio/sounds/_sounds.xml");
     sounds.LoadSounds();
 }
 

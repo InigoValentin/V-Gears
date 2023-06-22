@@ -17,6 +17,7 @@
 #include <OgreEntity.h>
 #include <OgreRoot.h>
 #include "core/EntityModel.h"
+#include "core/EntityManager.h"
 #include "core/Logger.h"
 #include "core/Timer.h"
 
@@ -25,8 +26,20 @@ EntityModel::EntityModel(
 ): Entity(name, node), animation_current_(nullptr)
 {
     Ogre::SceneManager* scene_manager;
+    Ogre::String res_group;
+    switch(EntityManager::getSingleton().GetModule()){
+        case Manager::BATTLE:
+            res_group = "BATTLE_MODELS";
+            break;
+        case Manager::WORLD:
+            res_group = "WORLD_MODELS";
+            break;
+        case Manager::FIELD:
+        default:
+            res_group = "FIELD_MODELS";
+    }
     scene_manager = Ogre::Root::getSingleton().getSceneManager("Scene");
-    model_ = scene_manager->createEntity(name_, file_name);
+    model_ = scene_manager->createEntity(name_, file_name, res_group);
     model_->setVisible(false);
     PlayAnimation(animation_default_, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1);
     model_node_->attachObject(model_);

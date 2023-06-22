@@ -99,6 +99,7 @@ void BattleManager::StartBattle(const unsigned int id){
     CameraManager::getSingleton().SetBattleModule();
     DialogsManager::getSingleton().SetBattleModule();
     EntityManager::getSingleton().SetBattleModule();
+    EntityManager::getSingleton().GetBackground2D()->Hide();
     InputManager::getSingleton().SetBattleModule();
     ScriptManager::getSingleton().SetBattleModule();
     UiManager::getSingleton().SetBattleModule();
@@ -106,7 +107,7 @@ void BattleManager::StartBattle(const unsigned int id){
     // Load the formation XML file (name is dddd.xml)
     std::string filename = std::to_string(formation_id_);
     while (filename.length() < 4) filename = "0" + filename;
-    filename = "./data/game/formation/" + filename + ".xml";
+    filename = "./data/gamedata/formation/" + filename + ".xml";
     // This sets the data in the battle manager singleton.
     XmlFormationFile(filename).LoadFormation();
     // TODO: Music
@@ -142,7 +143,9 @@ void BattleManager::EndBattle(){
     CameraManager::getSingleton().SetPreviousModule();
     DialogsManager::getSingleton().SetPreviousModule();
     EntityManager::getSingleton().SetPreviousModule();
+    EntityManager::getSingleton().GetBackground2D()->Show();
     InputManager::getSingleton().SetPreviousModule();
+    ScriptManager::getSingleton().ClearBattle();
     ScriptManager::getSingleton().SetPreviousModule();
     UiManager::getSingleton().SetPreviousModule();
 }
@@ -163,7 +166,7 @@ void BattleManager::AddEnemy(
     enemies_.push_back(*enemy);
     EntityManager::getSingleton().AddBattleEntity(
       enemy->GetName() + "_" + std::to_string(enemies_.size() - 1),
-      "models/battle/enemy/" + enemy->GetModel() + ".mesh", enemy->GetPos(), Ogre::Degree(0),
+      "enemies/" + enemy->GetModel() + ".mesh", enemy->GetPos(), Ogre::Degree(0),
       Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), id, visible
     );
 }
@@ -272,9 +275,8 @@ void BattleManager::LoadParty(){
     for (int i = 0; i < positions.size(); i ++){
         EntityManager::getSingleton().AddBattleEntity(
           "party_" + std::to_string(i),
-          "models/fields/entities/avfe.mesh", position, Ogre::Degree(0),
-          //Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), 100 + i, true
-          Ogre::Vector3(0.1, 0.1, 0.1), 100 + i, true
+          "enemies/at_grunt.mesh", position, Ogre::Degree(0),
+          Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), 100 + i, true
         );
 
         // Next position in Y axis
@@ -282,13 +284,6 @@ void BattleManager::LoadParty(){
 
 
     }
-
-    EntityManager::getSingleton().AddBattleEntity(
-      "center", "models/fields/entities/avfe.mesh", position, Ogre::Degree(0),
-      //Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), 100 + i, true
-      Ogre::Vector3(0.01, 0.01, 0.01), 999, true
-    );
-
 }
 
 void BattleManager::UpdateField(){}

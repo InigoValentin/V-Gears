@@ -12,7 +12,7 @@
         <sprite name="HpLineShadow" x="18" y="32" width="60" height="1" colour="0 0 0" visible="true" />
         <text_area name="Mp" x="0" y="26" text_name="CharacterDataMp" colour="0 0.9 0.9" font="FFVIIMenuFont" visible="true" />
         <text_area name="MpCurrent" x="18" y="33" text_name="CharacterDataMpCurrent" font="FFVIIMenuDigits" visible="true" />
-        <sprite name="MpSlash" image="images/icons/slash.png" x="46" y="33" width="4" height="8" visible="true" />
+        <sprite name="MpSlash" image="icons/slash.png" x="46" y="33" width="4" height="8" visible="true" />
         <text_area name="MpMax" x="50" y="33" text_name="CharacterDataMpMax" font="FFVIIMenuDigits" visible="true" />
         <sprite name="MpLine" x="18" y="41" width="60" height="1" colour="0.3 0 0" visible="true" />
         <sprite name="MpLineCurrent" x="18" y="41" width="60" height="1" colours="0 1 0.5, 0.78 0.78 0.78, 0.78 0.78 0.78, 0 1 0.5" visible="true" />

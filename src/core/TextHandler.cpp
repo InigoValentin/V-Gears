@@ -34,14 +34,14 @@ TextHandler::TextHandler(): language_(""){
 TextHandler::~TextHandler(){UnloadTexts();}
 
 void TextHandler::LoadFieldText(const std::string file_name){
-    XmlTextFile texts("./data/" + file_name);
+    XmlTextFile texts("./data/fields/" + file_name);
     texts.LoadTexts();
 }
 
 void TextHandler::SetLanguage(const Ogre::String& language){
     language_ = language;
     UnloadTexts();
-    XmlTextsFile texts("./data/texts.xml");
+    XmlTextsFile texts("./data/texts/_texts.xml");
     texts.LoadTexts();
 }
 

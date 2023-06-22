@@ -466,7 +466,7 @@ UiContainer.ItemMenu = {
             if Party[c] ~= nil then
                 self.char_position_total = self.char_position_total + 1
                 UiContainer.populate_character_data("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c), Characters[Party[c]])
-                ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c) .. ".Portrait"):set_image("images/characters/" .. tostring(Party[c]) .. ".png")
+                ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c) .. ".Portrait"):set_image("characters/" .. tostring(Party[c]) .. ".png")
             else
                 UiContainer.populate_character_data("ItemMenu.Container.ItemMenuCharacters.Character" .. tostring(c), nil)
             end
@@ -992,16 +992,16 @@ UiContainer.ItemMenu = {
                 end
                 -- Item icon
                 if type == Inventory.ITEM_TYPE.ITEM then
-                    w_icon:set_image("images/icons/item_item.png")
+                    w_icon:set_image("icons/item_item.png")
                 elseif type == Inventory.ITEM_TYPE.ARMOR then
-                    w_icon:set_image("images/icons/item_armor.png")
+                    w_icon:set_image("icons/item_armor.png")
                 elseif type == Inventory.ITEM_TYPE.ACCESSORY then
-                    w_icon:set_image("images/icons/item_accessory.png")
+                    w_icon:set_image("icons/item_accessory.png")
                 elseif type == Inventory.ITEM_TYPE.WEAPON then
                     local users = Game.Items[Inventory[inventory_index].item].users
                     for _, v in ipairs(users) do
                         if v >= 0 and v <= 8 then
-                            w_icon:set_image("images/icons/item_weapon_" .. v .. ".png")
+                            w_icon:set_image("icons/item_weapon_" .. v .. ".png")
                             break;
                         end
                     end

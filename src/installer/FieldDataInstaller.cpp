@@ -27,7 +27,7 @@
 
 float FieldDataInstaller::LINE_SCALE_FACTOR(0.0078124970964f);
 
-std::string FieldDataInstaller::FIELD_MODELS_DIR("models/fields/entities");
+std::string FieldDataInstaller::FIELD_MODELS_DIR("models/fields");
 
 std::string FieldDataInstaller::FIELD_MAPS_DIR("fields");
 
@@ -290,13 +290,13 @@ void FieldDataInstaller::Write(int field_index){
     //write_output_line_("Writing field " + FieldName(map));
     std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("map"));
     xml_element->SetAttribute("name", map);
-    xml_element->SetAttribute("file_name", FIELD_MAPS_DIR + "/" + map + "/map.xml");
+    xml_element->SetAttribute("file_name", map + "/map.xml");
     element_->LinkEndChild(xml_element.release());
 }
 
 void FieldDataInstaller::WriteEnd(){
     doc_->LinkEndChild(element_.release());
-    doc_->SaveFile(output_dir_ + "/maps.xml");
+    doc_->SaveFile(output_dir_ + "/fields/_fields.xml");
 }
 
 std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){
@@ -375,7 +375,7 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
     skeleton_serializer.exportSkeleton(
       skeleton.getPointer(), outdir + base_mesh_name + ".skeleton"
     );
-    mesh->setSkeletonName(FIELD_MODELS_DIR + "/" + base_mesh_name + ".skeleton");
+    mesh->setSkeletonName(base_mesh_name + ".skeleton");
     mesh_serializer.exportMesh(mesh.getPointer(), outdir + mesh->getName());
     Ogre::Mesh::SubMeshIterator it(mesh->getSubMeshIterator());
     Ogre::MaterialSerializer    mat_ser;
@@ -412,10 +412,7 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
                                     VGears::StringUtil::splitBase(
                                       unit->getTextureName(), base_name
                                     );
-                                    unit->setTextureName(
-                                      FIELD_MODELS_DIR + "/" + base_mesh_name
-                                      + "_" + base_name + ".png"
-                                    );
+                                    unit->setTextureName(base_mesh_name + "_" + base_name + ".png");
 
                                     tex.SavePng(
                                       output_dir_ + FIELD_MODELS_DIR + "/" + base_name + ".png", 0
@@ -556,33 +553,23 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
         std::unique_ptr<TiXmlElement> element(new TiXmlElement("map"));
         // Script.
         std::unique_ptr<TiXmlElement> xml_script_element(new TiXmlElement("script"));
-        xml_script_element->SetAttribute(
-          "file_name", FIELD_MAPS_DIR + "/" + field->getName() + "/script.lua"
-        );
+        xml_script_element->SetAttribute("file_name", field->getName() + "/script.lua");
         element->LinkEndChild(xml_script_element.release());
         // Background.
         std::unique_ptr<TiXmlElement> xml_background_2d(new TiXmlElement("background2d"));
-        xml_background_2d->SetAttribute(
-          "file_name", FIELD_MAPS_DIR + "/" + field->getName() + "/bg.xml"
-        );
+        xml_background_2d->SetAttribute("file_name", field->getName() + "/bg.xml");
         element->LinkEndChild(xml_background_2d.release());
         // Texts.
         std::unique_ptr<TiXmlElement> xml_texts(new TiXmlElement("texts"));
-        xml_texts->SetAttribute(
-          "file_name", FIELD_MAPS_DIR + "/" + field->getName() + "/text.xml"
-        );
+        xml_texts->SetAttribute("file_name", field->getName() + "/text.xml");
         element->LinkEndChild(xml_texts.release());
         // Walkmesh.
         std::unique_ptr<TiXmlElement> xml_walkmesh(new TiXmlElement("walkmesh"));
-        xml_walkmesh->SetAttribute(
-          "file_name", FIELD_MAPS_DIR + "/" + field->getName() + "/wm.xml"
-        );
+        xml_walkmesh->SetAttribute("file_name", field->getName() + "/wm.xml");
         element->LinkEndChild(xml_walkmesh.release());
         // Forward direction (angle player moves when "up" is pressed)
         std::unique_ptr<TiXmlElement> xml_forward_direction(new TiXmlElement("movement_rotation"));
-        xml_forward_direction->SetAttribute(
-          "degree", std::to_string(triggers->MovementRotation())
-        );
+        xml_forward_direction->SetAttribute("degree", std::to_string(triggers->MovementRotation()));
         element->LinkEndChild(xml_forward_direction.release());
         // Get this fields Id.
         const size_t this_field_id = GetFieldId(field->getName(), map_list_);
@@ -691,7 +678,8 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             }
             const int char_id = entity.char_id;
             if (char_id != -1){
-                const VGears::ModelListFile::ModelDescription& desc = models->GetModels().at(char_id);
+                const VGears::ModelListFile::ModelDescription& desc
+                  = models->GetModels().at(char_id);
                 auto& animations = used_models_and_anims_.ModelAnimations(desc.hrc_name);
                 for (const auto& anim : desc.animations)
                     animations.insert(used_models_and_anims_.NormalizeAnimationName(anim.name));
@@ -701,8 +689,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                 auto lower_case_hrc_name = desc.hrc_name;
                 VGears::StringUtil::toLowerCase(lower_case_hrc_name);
                 xml_entity_script->SetAttribute(
-                  "file_name",
-                  FIELD_MODELS_DIR + "/" + used_models_and_anims_.ModelMetaDataName(lower_case_hrc_name)
+                  "file_name", used_models_and_anims_.ModelMetaDataName(lower_case_hrc_name)
                 );
                 xml_entity_script->SetAttribute("index", entity.index);
                 if (desc.type == VGears::ModelListFile::PLAYER){
@@ -805,7 +792,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             const int min_y = triggers->GetCameraRange().top * BG_SCALE_UP_FACTOR;
             const int max_x = triggers->GetCameraRange().right * BG_SCALE_UP_FACTOR;
             const int max_y = triggers->GetCameraRange().bottom * BG_SCALE_UP_FACTOR;
-            bg_element->SetAttribute("image", FIELD_MAPS_DIR + "/" + field->getName() + "/tiles.png");
+            bg_element->SetAttribute("image", field->getName() + "/tiles.png");
             bg_element->SetAttribute("position", Ogre::StringConverter::toString(position));
             bg_element->SetAttribute("orientation", Ogre::StringConverter::toString(orientation));
             bg_element->SetAttribute("fov", Ogre::StringConverter::toString(fov));
@@ -871,7 +858,9 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                 //}
             }
             bg_doc.LinkEndChild(bg_element.release());
-            bg_doc.SaveFile(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/bg.xml");
+            bg_doc.SaveFile(
+              output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/bg.xml"
+            );
         }
     }
     {

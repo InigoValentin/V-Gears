@@ -239,7 +239,7 @@ void Enemy::SetCover(std::string cover){cover_ = cover;}
 void Enemy::ReadFromXml(){
     std::string filename = std::to_string(id_);
     while (filename.length() < 4) filename = "0" + filename;
-    filename = "./data/game/enemy/" + filename + ".xml";
+    filename = "./data/gamedata/enemy/" + filename + ".xml";
     XmlEnemyFile(filename).LoadEnemy(*this);
 }
 

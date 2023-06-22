@@ -62,8 +62,7 @@ int main(int argc, char *argv[]){
         Ogre::SceneManager *scene_manager(nullptr);
 
         auto timer = std::make_unique<Timer>();
-        auto particle_system_manager =
-          std::make_unique<ParticleSystemManager>();
+        auto particle_system_manager = std::make_unique<ParticleSystemManager>();
 
         // Set scene camera and viewport for other modules.
         // Create this before initialize particle because some of them use
@@ -81,16 +80,44 @@ int main(int argc, char *argv[]){
         //VGears::MapFileManager* worldManager = new VGears::MapFileManager();
 
         // Initialize resources.
-        // TODO: Use correct file location in the end, now is OK for testing
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          ".", "FileSystem"
+          "./data/system/", "FileSystem"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/wm", "FileSystem", "TEST"
+          "./data/audio/", "FileSystem", "AUDIO"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/wm/world_us.lgp",
-          VGears::LGPArchiveFactory::ARCHIVE_TYPE, "TEST"
+          "./data/fields/", "FileSystem", "FIELDS", true
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/fonts/", "FileSystem", "FONTS"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/gamedata/", "FileSystem", "GAMEDATA"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/images/", "FileSystem", "IMAGES", true
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/models/fields/", "FileSystem", "FIELD_MODELS"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/models/battle/", "FileSystem", "BATTLE_MODELS", true
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/screens/", "FileSystem", "SCREENS"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/scripts/", "FileSystem", "SCRIPTS"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/system/", "FileSystem", "SYSTEM"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/texts/", "FileSystem", "TEXTS"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/wm", "FileSystem", "WORLD_MAP"
         );
         Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -126,8 +153,7 @@ int main(int argc, char *argv[]){
 
         // Execute the configuration file to locad values.
         ConfigFile config;
-        config.Execute("./data/config.cfg");
-
+        config.Execute("./data/config/config.cfg");
 
         // Initialize UID and run it's scripts.
         ui_manager->Initialise();

@@ -1,4 +1,0 @@
-<!-- This file is to be overwritten by the installer -->
-<maps>
-    <map name="example" file_name="fields/example/map.xml" />
-</maps>

@@ -1,4 +1,4 @@
-﻿<font name="FFVIIMenuFont" image="fonts/ffvii_menu.png" image_size="128 256" height="16">
+﻿<font name="FFVIIMenuFont" image="ffvii_menu.png" image_size="128 256" height="16">
     <char name="0" x="24" y="0" width="8" height="16" pre="0" post="0" />
     <char name="1" x="32" y="0" width="8" height="16" pre="0" post="0" />
     <char name="2" x="40" y="0" width="8" height="16" pre="0" post="0" />

@@ -7,7 +7,7 @@
         </widget>
         <widget name="Character" width="100%" x="0" y="24" height="70" visible="true">
             <prototype name="Window"/>
-            <sprite name="Portrait" image="images/other/choco.png" x="10" y="12" width="42" height="48" visible="true" />
+            <sprite name="Portrait" image="other/choco.png" x="10" y="12" width="42" height="48" visible="true" />
             <widget name="Name" width="72" height="16" x="80" y="50%-8" visible="true">
                 <text_area name="Char1" x="1" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
                 <text_area name="Char2" x="11" y="0" width="8" height="16" visible="true" font="FFVIIFont" />
@@ -40,7 +40,7 @@
             <text_area name="Clear" text_name="NameMenuClear" x="15" y="100%-50" font="FFVIIFont" visible="true" />
             <text_area name="Default" text_name="NameMenuDefault" x="15" y="100%-35" font="FFVIIFont" visible="true" />
             <text_area name="Confirm" text_name="NameMenuConfirm" x="15" y="100%-20" font="FFVIIFont" visible="true" />
-            <sprite name="Cursor" image="images/icons/cursor.png" x="-10" y="100%-48" width="24" height="17" visible="true">
+            <sprite name="Cursor" image="icons/cursor.png" x="-10" y="100%-48" width="24" height="17" visible="true">
                 <animation name="Position1" length="0" y="0:100%-50" />
                 <animation name="Position2" length="0" y="0:100%-35" />
                 <animation name="Position3" length="0" y="0:100%-20" />
@@ -52,7 +52,7 @@
             <text_area name="Name" x="22" y="30" font="FFVIIFont" visible="true" colour="0 0.8 1"/>
             <text_area name="Yes" text_name="Yes" x="20" y="55" font="FFVIIFont" visible="true" />
             <text_area name="No" text_name="No" x="80" y="55" font="FFVIIFont" visible="true" />
-            <sprite name="Cursor" image="images/icons/cursor.png" x="-4" y="55" width="24" height="17" visible="true">
+            <sprite name="Cursor" image="icons/cursor.png" x="-4" y="55" width="24" height="17" visible="true">
                 <animation name="Position1" length="0" x="0:-4" />
                 <animation name="Position2" length="0" x="0:56" />
             </sprite>

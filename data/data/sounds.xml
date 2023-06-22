@@ -1,4 +1,0 @@
-<!-- This file is to be overwritten by the installer -->
-<sounds>
-    <sound file_name="audio/sound/example.ogg" name="Example" />
-</sounds>

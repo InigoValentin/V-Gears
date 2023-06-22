@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fonts>
+    <font file_name="ffvii_en.xml" />
+    <font file_name="ffvii_jp.xml" />
+    <font file_name="ffvii_menu.xml" />
+    <font file_name="ffvii_digits.xml" />
+    <font file_name="ffvii_timer.xml" />
+    <font file_name="ffvii.xml" />
+    <font file_name="ffvii.xml" />
+</fonts>

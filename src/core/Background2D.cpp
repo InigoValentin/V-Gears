@@ -50,7 +50,7 @@ Background2D::Background2D():
     scene_manager_ = Ogre::Root::getSingleton().getSceneManager("Scene");
     render_system_ = Ogre::Root::getSingletonPtr()->getRenderSystem();
     CreateVertexBuffers();
-    alpha_material_ = Ogre::MaterialManager::getSingleton().create("Background2DAlpha", "General");
+    alpha_material_ = Ogre::MaterialManager::getSingleton().create("Background2DAlpha", "FIELDS");
     Ogre::Pass* pass = alpha_material_->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
     pass->setCullingMode(Ogre::CULL_NONE);
@@ -64,7 +64,7 @@ Background2D::Background2D():
     tex->setTextureName("system/blank.png");
     tex->setNumMipmaps(-1);
     tex->setTextureFiltering(Ogre::TFO_NONE);
-    add_material = Ogre::MaterialManager::getSingleton().create("Background2DAdd", "General");
+    add_material = Ogre::MaterialManager::getSingleton().create("Background2DAdd", "FIELDS");
     pass = add_material->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
     pass->setCullingMode(Ogre::CULL_NONE);
@@ -79,7 +79,7 @@ Background2D::Background2D():
     tex->setNumMipmaps(-1);
     tex->setTextureFiltering(Ogre::TFO_NONE);
     subtract_material_ = Ogre::MaterialManager::getSingleton().create(
-      "Background2DSubtract", "General"
+      "Background2DSubtract", "FIELDS"
     );
     pass = subtract_material_->getTechnique(0)->getPass(0);
     pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
@@ -113,6 +113,10 @@ void Background2D::InputDebug(const VGears::Event& event){
         CameraManager::getSingleton().Set2DScroll(position_real_);
     }
 }
+
+void Background2D::Hide(){scene_manager_->removeRenderQueueListener(this);}
+
+void Background2D::Show(){scene_manager_->addRenderQueueListener(this);}
 
 void Background2D::Update(){
     for (unsigned int i = 0; i < animation_played_.size(); ++ i){

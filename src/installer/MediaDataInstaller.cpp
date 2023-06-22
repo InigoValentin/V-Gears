@@ -349,7 +349,7 @@ bool MediaDataInstaller::InstallSounds(){
 
     dat_.SetOffset(header.offset);
     std::ofstream out(
-      output_dir_ + "audio/sound/" + std::to_string(processed_sounds_) + ".wav",
+      output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav",
       std::ios::out | std::ios::binary
     );
 
@@ -364,18 +364,18 @@ bool MediaDataInstaller::InstallSounds(){
     // TODO: Don't use system calls! Integrate libav or something that can do the conversion
     // natively
     std::string command = (boost::format(
-      "ffmpeg -hide_banner -loglevel panic -y -i %1%audio/sound/%2%.wav %1%audio/sound/%2%.ogg"
+      "ffmpeg -hide_banner -loglevel panic -y -i %1%audio/sounds/%2%.wav %1%audio/sounds/%2%.ogg"
     ) % output_dir_ % processed_sounds_).str();
     if (!no_ffmpeg_) std::system(command.c_str());
 
     // Remove the wav file.
     if (!keep_originals_){
         std::remove(
-          (output_dir_ + "audio/sound/" + std::to_string(processed_sounds_) + ".wav").c_str()
+          (output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav").c_str()
         );
     }
 
-    sounds_.push_back("audio/sound/" + std::to_string(processed_sounds_) + ".ogg");
+    sounds_.push_back("audio/sounds/" + std::to_string(processed_sounds_) + ".ogg");
     processed_sounds_ ++;
     if (processed_sounds_ >= TOTAL_SOUNDS) return true;
     else return false;
@@ -400,7 +400,7 @@ void MediaDataInstaller::WriteSoundIndex(){
         }
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(output_dir_ + "sounds.xml");
+    xml.SaveFile(output_dir_ + "audio/sounds/_sounds.xml");
 }
 
 int MediaDataInstaller::InstallMusicsInit(){
@@ -442,21 +442,21 @@ bool MediaDataInstaller::InstallMusics(){
     File midi(input_dir_ + "data/midi/midi.lgp");
 
     std::fstream out;
-    out.open(output_dir_ + "audio/music/" + std::to_string(index) + ".mid", std::ios::out);
+    out.open(output_dir_ + "audio/musics/" + std::to_string(index) + ".mid", std::ios::out);
     midi.SetOffset(f.data_offset);
     for (int j = 0; j < f.data_size; j ++) out << midi.readU8();
     out.close();
 
     // Convert to ogg (TiMidity + FFMpeg)
     std::string command = (boost::format(
-      "timidity --quiet=3 %1%audio/music/%2%.mid -Ow -o - "
-      "| ffmpeg -hide_banner -loglevel panic -y -i - %1%audio/music/%2%.ogg"
+      "timidity --quiet=3 %1%audio/musics/%2%.mid -Ow -o - "
+      "| ffmpeg -hide_banner -loglevel panic -y -i - %1%audio/musics/%2%.ogg"
     ) % output_dir_ % index).str();
     if (!no_ffmpeg_ && !no_timidity_) std::system(command.c_str());
 
     // Remove the midi file.
     if (!keep_originals_)
-        std::remove((output_dir_ + "audio/music/" + std::to_string(index) + ".mid").c_str());
+        std::remove((output_dir_ + "audio/musics/" + std::to_string(index) + ".mid").c_str());
 
     musics_.push_back("audio/music/" + std::to_string(processed_musics_) + ".ogg");
     processed_musics_ ++;
@@ -477,7 +477,7 @@ void MediaDataInstaller::InstallHQMusics(){
         }
 
         std::string command = (boost::format(
-          "ffmpeg -hide_banner -loglevel panic -y -i %1%music/%2%.wav %3%audio/sound/%4%.ogg"
+          "ffmpeg -hide_banner -loglevel panic -y -i %1%musics/%2%.wav %3%audio/sounds/%4%.ogg"
         ) % input_dir_ % hq_music % output_dir_ % index).str();
         if (!no_ffmpeg_)  std::system(command.c_str());
     }
@@ -504,6 +504,6 @@ void MediaDataInstaller::WriteMusicsIndex(){
         }
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(output_dir_ + "musics.xml");
+    xml.SaveFile(output_dir_ + "audio/musics/_musics.xml");
 }
 

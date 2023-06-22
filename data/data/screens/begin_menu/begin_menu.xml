@@ -1,7 +1,7 @@
 <screen name="BeginMenu" script="scripts/menu/begin_menu.lua" visible="true">
     <widget name="Container" width="368" height="240" origin_x="50%" origin_y="50%" align="center" valign="middle" scale="2.61 3" visible="true">
-        <sprite name="Sword" image="images/other/begin_menu.png" x="111" y="84" width="170" height="150" visible="true" />
-        <sprite name="Cursor" image="images/icons/cursor.png" x="132" y="99" width="24" height="16" visible="true">
+        <sprite name="Sword" image="other/begin_menu.png" x="111" y="84" width="170" height="150" visible="true" />
+        <sprite name="Cursor" image="icons/cursor.png" x="132" y="99" width="24" height="16" visible="true">
             <animation name="Position1" length="0" y="0:80" />
             <animation name="Position2" length="0" y="0:92" />
             <animation name="Position3" length="0" y="0:110" />

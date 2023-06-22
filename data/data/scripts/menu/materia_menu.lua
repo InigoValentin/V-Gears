@@ -194,10 +194,10 @@ UiContainer.MateriaMenu = {
     submenu_none = function(self)
         UiContainer.current_submenu = ""
         UiContainer.populate_character_data("MateriaMenu.Container.Character", Characters[self.char_id])
-        ui_manager:get_widget("MateriaMenu.Container.Character.Portrait"):set_image("images/characters/" .. tostring(self.char_id) .. ".png")
+        ui_manager:get_widget("MateriaMenu.Container.Character.Portrait"):set_image("characters/" .. tostring(self.char_id) .. ".png")
         self.populate_equip(self)
         -- TODO: Do something for chars 9 and 10
-        ui_manager:get_widget("MateriaMenu.Container.Character.WpnIcon"):set_image("images/icons/item_weapon_" .. tostring(self.char_id) .. ".png")
+        ui_manager:get_widget("MateriaMenu.Container.Character.WpnIcon"):set_image("icons/item_weapon_" .. tostring(self.char_id) .. ".png")
         ui_manager:get_widget("MateriaMenu.Container.List.Cursor"):set_visible(false)
         --TODO: Uncomment when implemented: ui_manager:get_widget("MateriaMenu.Container.Order.Cursor"):set_visible(false)
         ui_manager:get_widget("MateriaMenu.Container.Character.Cursor"):set_visible(true)
@@ -247,14 +247,14 @@ UiContainer.MateriaMenu = {
             -- Show/hide/set materia
             if Characters[self.char_id].weapon.materia[i - 1] ~= nil then
                 local mat_type =  Game.Materia[Characters[self.char_id].weapon.materia[i - 1].id].type
-                ui_manager:get_widget("MateriaMenu.Container.Character.WeaponSlots.Mat" .. tostring(i)):set_image("images/icons/materia_" .. tostring(mat_type) .. ".png")
+                ui_manager:get_widget("MateriaMenu.Container.Character.WeaponSlots.Mat" .. tostring(i)):set_image("icons/materia_" .. tostring(mat_type) .. ".png")
                 ui_manager:get_widget("MateriaMenu.Container.Character.WeaponSlots.Mat" .. tostring(i)):set_visible(true)
             else
                 ui_manager:get_widget("MateriaMenu.Container.Character.WeaponSlots.Mat" .. tostring(i)):set_visible(false)
             end
             if Characters[self.char_id].armor.materia[i - 1] ~= nil then
                 local mat_type =  Game.Materia[Characters[self.char_id].armor.materia[i - 1].id].type
-                ui_manager:get_widget("MateriaMenu.Container.Character.ArmorSlots.Mat" .. tostring(i)):set_image("images/icons/materia_" .. tostring(mat_type) .. ".png")
+                ui_manager:get_widget("MateriaMenu.Container.Character.ArmorSlots.Mat" .. tostring(i)):set_image("icons/materia_" .. tostring(mat_type) .. ".png")
                 ui_manager:get_widget("MateriaMenu.Container.Character.ArmorSlots.Mat" .. tostring(i)):set_visible(true)
             else
                 ui_manager:get_widget("MateriaMenu.Container.Character.ArmorSlots.Mat" .. tostring(i)):set_visible(false)
@@ -295,11 +295,11 @@ UiContainer.MateriaMenu = {
         ui_manager:get_widget("MateriaMenu.Container.Details.Materia"):set_visible(false)
         for s = 1, 24 do
             if materia.skills[s] ~= nil and materia.skills[s] == true then
-                ui_manager:get_widget("MateriaMenu.Container.Details.EnemySkill.Stars.Star" .. tostring(s)):set_image("images/icons/materia_star_3.png")
+                ui_manager:get_widget("MateriaMenu.Container.Details.EnemySkill.Stars.Star" .. tostring(s)):set_image("icons/materia_star_3.png")
                 ui_manager:get_widget("MateriaMenu.Container.Details.EnemySkill.Skills.Skill" .. tostring(s)):set_text(Game.Attacks[71 + s].name)
                 ui_manager:get_widget("MateriaMenu.Container.Details.EnemySkill.Skills.Skill" .. tostring(s)):set_visible(true)
             else
-                ui_manager:get_widget("MateriaMenu.Container.Details.EnemySkill.Stars.Star" .. tostring(s)):set_image("images/icons/materia_star_empty_3.png")
+                ui_manager:get_widget("MateriaMenu.Container.Details.EnemySkill.Stars.Star" .. tostring(s)):set_image("icons/materia_star_empty_3.png")
                 ui_manager:get_widget("MateriaMenu.Container.Details.EnemySkill.Skills.Skill" .. tostring(s)):set_visible(false)
             end
         end
@@ -420,7 +420,7 @@ UiContainer.MateriaMenu = {
             ap_next = materia.levels_ap[level + 1] - ap
         end
         -- Start displaying data
-        ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Icon"):set_image("images/icons/materia_" .. tostring(materia.type) .. ".png")
+        ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Icon"):set_image("icons/materia_" .. tostring(materia.type) .. ".png")
         ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Name"):set_text(materia.name)
         for l = 1, 5 do
             if l > max_level then
@@ -428,9 +428,9 @@ UiContainer.MateriaMenu = {
                 ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Stars.Star" .. tostring(l)):set_visible(false)
             else
                 if l <= level then
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Stars.Star" .. tostring(l)):set_image("images/icons/materia_star_" .. tostring(materia.type) .. ".png")
+                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Stars.Star" .. tostring(l)):set_image("icons/materia_star_" .. tostring(materia.type) .. ".png")
                 else
-                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Stars.Star" .. tostring(l)):set_image("images/icons/materia_star_empty_" .. tostring(materia.type) .. ".png")
+                    ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Stars.Star" .. tostring(l)):set_image("icons/materia_star_empty_" .. tostring(materia.type) .. ".png")
                 end
                 ui_manager:get_widget("MateriaMenu.Container.Details.Materia.Stars.Star" .. tostring(l)):set_visible(true)
             end
@@ -635,7 +635,7 @@ UiContainer.MateriaMenu = {
             if Materia[i] ~= nil then
                 local type = Game.Materia[Materia[i].id].type
                 local name = Game.Materia[Materia[i].id].name
-                ui_manager:get_widget("MateriaMenu.Container.List.Icon" .. tostring(pos)):set_image("images/icons/materia_" .. tostring(type) .. ".png")
+                ui_manager:get_widget("MateriaMenu.Container.List.Icon" .. tostring(pos)):set_image("icons/materia_" .. tostring(type) .. ".png")
                 ui_manager:get_widget("MateriaMenu.Container.List.Icon" .. tostring(pos)):set_visible(true)
                 ui_manager:get_widget("MateriaMenu.Container.List.Name" .. tostring(pos)):set_text(name)
                 ui_manager:get_widget("MateriaMenu.Container.List.Name" .. tostring(pos)):set_visible(true)

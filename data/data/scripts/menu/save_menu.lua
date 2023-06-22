@@ -128,7 +128,7 @@ UiContainer.SaveMenu = {
                 ui_manager:get_widget(slot_id .. "LvNumber"):set_text(UiContainer.pad_value(savemap_manager:get_slot_character_level(slot, save_party[1]), 3))
                 for c = 1, 3 do
                     if save_party[c] ~= -1 and Characters[save_party[c] + 1] ~= nil then
-                        ui_manager:get_widget(slot_id .. "Party.Portrait" .. tostring(c)):set_image("images/characters/" .. tostring(save_party[c]) .. ".png")
+                        ui_manager:get_widget(slot_id .. "Party.Portrait" .. tostring(c)):set_image("characters/" .. tostring(save_party[c]) .. ".png")
                         ui_manager:get_widget(slot_id .. "Party.Portrait" .. tostring(c)):set_visible(true)
                     else
                         ui_manager:get_widget(slot_id .. "Party.Portrait" .. tostring(c)):set_visible(false)

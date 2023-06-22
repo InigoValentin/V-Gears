@@ -150,7 +150,7 @@ UiContainer.MainMenu = {
         for c = 1, 3 do
             if Party[c] ~= nil then
                 UiContainer.populate_character_data("MainMenu.Container.Characters.Character" .. tostring(c), Characters[Party[c]])
-                ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_image("images/characters/" .. tostring(Party[c]) .. ".png")
+                ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_image("characters/" .. tostring(Party[c]) .. ".png")
                 if Characters[Party[c]].back_row == 1 then
                     ui_manager:get_widget("MainMenu.Container.Characters.Character" .. tostring(c) .. ".Portrait"):set_default_animation("RowBack")
                 else

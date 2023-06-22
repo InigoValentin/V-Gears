@@ -1,4 +1,4 @@
-﻿<font name="FFVIIMenuDigits" image="fonts/ffvii_digits.png" image_size="128 8" height="8">
+﻿<font name="FFVIIMenuDigits" image="ffvii_digits.png" image_size="128 8" height="8">
     <char name="0" x="0" y="0" width="7" height="8" pre="0" post="0" />
     <char name="1" x="8" y="0" width="7" height="8" pre="0" post="0" />
     <char name="2" x="16" y="0" width="7" height="8" pre="0" post="0" />

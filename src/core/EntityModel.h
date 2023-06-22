@@ -25,7 +25,10 @@ class EntityModel : public Entity{
     public:
 
         /**
-         * Constructor.
+         * Constructor. Creates an entity model.
+         *
+         * The models will be looked for in the resource groups FIELD_MODELS, BATTLE_MODELS or
+         * WORLD_MODELS, depending on the module the {@see EntityManager} is currerntly set to.
          *
          * @param[in] name Entity name.
          * @param[in] file_name File with the model data.

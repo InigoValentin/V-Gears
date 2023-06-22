@@ -150,73 +150,73 @@ float DataInstaller::Progress(){
         case KERNEL_COMMANDS:
             write_output_line_("Extracting command data...", 2, true);
             kernel_installer_->ReadCommands();
-            kernel_installer_->WriteCommands(output_dir_ + "game/commands.lua");
+            kernel_installer_->WriteCommands(output_dir_ + "gamedata/commands.lua");
             installation_state_ = KERNEL_ATTACKS;
             return CalcProgress();
         case KERNEL_ATTACKS:
             write_output_line_("Extracting attack data...", 2, true);
             kernel_installer_->ReadAttacks();
-            kernel_installer_->WriteAttacks(output_dir_ + "game/attacks.lua");
+            kernel_installer_->WriteAttacks(output_dir_ + "gamedata/attacks.lua");
             installation_state_ = KERNEL_CHARACTERS;
             return CalcProgress();
         case KERNEL_CHARACTERS:
             write_output_line_("Extracting character data...", 2, true);
             kernel_installer_->ReadCharacters();
-            kernel_installer_->WriteCharacters(output_dir_ + "game/characters.lua");
+            kernel_installer_->WriteCharacters(output_dir_ + "gamedata/characters.lua");
             installation_state_ = KERNEL_ITEMS;
             return CalcProgress();
         case KERNEL_ITEMS:
             write_output_line_("Extracting item data...", 2, true);
             kernel_installer_->ReadItems();
-            kernel_installer_->WriteItems(output_dir_ + "game/items.lua");
+            kernel_installer_->WriteItems(output_dir_ + "gamedata/items.lua");
             installation_state_ = KERNEL_GROWTH;
             return CalcProgress();
         case KERNEL_GROWTH:
             write_output_line_("Extracting growth data...", 2, true);
             kernel_installer_->ReadGrowth();
-            kernel_installer_->WriteGrowth(output_dir_ + "game/growth.lua");
+            kernel_installer_->WriteGrowth(output_dir_ + "gamedata/growth.lua");
             installation_state_ = KERNEL_WEAPONS;
             return CalcProgress();
         case KERNEL_WEAPONS:
             write_output_line_("Extracting weapon data...", 2, true);
             kernel_installer_->ReadWeapons();
-            kernel_installer_->WriteWeapons(output_dir_ + "game/weapons.lua");
+            kernel_installer_->WriteWeapons(output_dir_ + "gamedata/weapons.lua");
             installation_state_ = KERNEL_ARMORS;
             return CalcProgress();
         case KERNEL_ARMORS:
             write_output_line_("Extracting armor data...", 2, true);
             kernel_installer_->ReadArmors();
-            kernel_installer_->WriteArmors(output_dir_ + "game/armors.lua");
+            kernel_installer_->WriteArmors(output_dir_ + "gamedata/armors.lua");
             installation_state_ = KERNEL_ACCESSORIES;
             return CalcProgress();
         case KERNEL_ACCESSORIES:
             write_output_line_("Extracting accessory data...", 2, true);
             kernel_installer_->ReadAccessories();
-            kernel_installer_->WriteAccessories(output_dir_ + "game/accessories.lua");
+            kernel_installer_->WriteAccessories(output_dir_ + "gamedata/accessories.lua");
             installation_state_ = KERNEL_MATERIA;
             return CalcProgress();
         case KERNEL_MATERIA:
             write_output_line_("Extracting materia data...", 2, true);
             kernel_installer_->ReadMateria();
-            kernel_installer_->WriteMateria(output_dir_ + "game/materia.lua");
+            kernel_installer_->WriteMateria(output_dir_ + "gamedata/materia.lua");
             installation_state_ = KERNEL_KEY_ITEMS;
             return CalcProgress();
         case KERNEL_KEY_ITEMS:
             write_output_line_("Extracting key item data...", 2, true);
             kernel_installer_->ReadKeyItems();
-            kernel_installer_->WriteKeyItems(output_dir_ + "game/key_items.lua");
+            kernel_installer_->WriteKeyItems(output_dir_ + "gamedata/key_items.lua");
             installation_state_ = KERNEL_SUMMON_NAMES;
             return CalcProgress();
         case KERNEL_SUMMON_NAMES:
             write_output_line_("Extracting summon attack names data...", 2, true);
             kernel_installer_->ReadSummonNames();
-            kernel_installer_->WriteSummonNames(output_dir_ + "game/summons.lua");
+            kernel_installer_->WriteSummonNames(output_dir_ + "gamedata/summons.lua");
             installation_state_ = KERNEL_SAVEMAP;
             return CalcProgress();
         case KERNEL_SAVEMAP:
             write_output_line_("Extracting the initial savemap...", 2, true);
             kernel_installer_->ReadInitialSaveMap();
-            kernel_installer_->WriteInitialSaveMap(output_dir_ + "game/initial_savemap.lua");
+            kernel_installer_->WriteInitialSaveMap(output_dir_ + "gamedata/initial_savemap.lua");
             installation_state_ = MEDIA_IMAGES;
             return CalcProgress();
         case MEDIA_IMAGES:
@@ -381,25 +381,33 @@ const float DataInstaller::CalcProgress(){
 }
 
 void DataInstaller::CreateDirectories(){
+    CreateDir("audio/musics");
+    CreateDir("audio/sounds");
+    CreateDir("fields");
+    CreateDir("fonts");
     CreateDir("temp");
     CreateDir("temp/char");
     CreateDir("temp/battle_models");
-    CreateDir("game");
-    CreateDir("game/enemy");
-    CreateDir("game/attack");
-    CreateDir("game/formation");
+    CreateDir("gamedata");
+    CreateDir("gamedata/enemy");
+    CreateDir("gamedata/attack");
+    CreateDir("gamedata/formation");
     CreateDir("images/icons");
     CreateDir("images/other");
     CreateDir("images/characters");
     CreateDir("images/fonts");
     CreateDir("images/reels");
     CreateDir("images/window");
-    CreateDir("models/fields/entities");
-    CreateDir("models/battle/char");
-    CreateDir("models/battle/scene");
-    CreateDir("models/battle/enemy");
-    CreateDir("audio/sound");
-    CreateDir("audio/music");
+    CreateDir("screens");
+    CreateDir("scripts");
+    CreateDir("system");
+    CreateDir("texts");
+    CreateDir("models/fields/");
+    CreateDir("models/battle/characters");
+    CreateDir("models/battle/scenes");
+    CreateDir("models/battle/enemies");
+
+
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "temp/char/", "FileSystem", "FFVII", true, true
     );
@@ -410,16 +418,16 @@ void DataInstaller::CreateDirectories(){
       output_dir_ + "models/", "FileSystem", "FFVII", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/fields/entities/", "FileSystem", "FFVIITextures", true, true
+      output_dir_ + "models/fields/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/battle/char/", "FileSystem", "FFVIITextures", true, true
+      output_dir_ + "models/battle/characters/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/battle/scene/", "FileSystem", "FFVIITextures", true, true
+      output_dir_ + "models/battle/scenes/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/battle/enemy/", "FileSystem", "FFVIITextures", true, true
+      output_dir_ + "models/battle/enemies/", "FileSystem", "FFVIITextures", true, true
     );
     fields_lgp_ = std::make_unique<ScopedLgp>(
       application_.getRoot(), input_dir_ + "data/field/flevel.lgp", "LGP", "FFVIIFields"
