@@ -3021,6 +3021,12 @@ class FF7Data{
                 info.name_normal = "cait_sith";
                 info.is_player = true;
             }
+            else if ("ry" == alphanumeric_id){
+                info.numeric_id = CHAR_ID::CID;
+                info.name = "Cid";
+                info.name_normal = "cid";
+                info.is_player = true;
+            }
             else if (
               "sf" == alphanumeric_id
               || "sg" == alphanumeric_id

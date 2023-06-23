@@ -208,7 +208,42 @@ unsigned int BattleDataInstaller::ProcessModel(){
         );
         TexFile tex(battle_lgp_files_[next_model_to_process_]);
         std::string path = output_dir_ + "models/battle/";
-        if (info.is_player) path += "characters/";
+        if (info.is_player){
+            path += "characters/";
+            // Add or update on character_data_
+            bool found = false;
+            for (auto data: character_data_){
+                if (data.id == info.numeric_id){
+                    // Check if the model already exists for this character
+                    bool model_found = false;
+                    for (auto mod: data.models){
+                        if (mod.model == info.alphanumeric_id + "_" + info.name_normal + ".mesh"){
+                            model_found = true;
+                            break;
+                        }
+                    }
+                    if (model_found) break;
+                    CharacterModel model;
+                    model.name = info.name;
+                    model.model = info.alphanumeric_id + "_" + info.name_normal + ".mesh";
+                    std::cout << "Character model update: " << std::to_string(data.id) << " " << model.name << " : " << model.model << std::endl;
+                    data.models.push_back(model);
+                    character_data_.push_back(data);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found){
+                CharacterData character_data;
+                character_data.id = info.numeric_id;
+                CharacterModel model;
+                model.name = info.name;
+                model.model = info.alphanumeric_id + "_" + info.name_normal + ".mesh";
+                std::cout << "Character model new: " << std::to_string(character_data.id) << " " << model.name << " : " << model.model << std::endl;
+                character_data.models.push_back(model);
+                character_data_.push_back(character_data);
+            }
+        }
         else if (info.is_scene) path += "scenes/";
         else path += "enemies/";
         path += (id + type + "_" + info.name_normal + ".png");
@@ -641,6 +676,24 @@ void BattleDataInstaller::WriteFormations(){
         xml.SaveFile(output_dir_ + file_name);
         formation_map_[formation.id] = file_name;
     }
+}
+
+void BattleDataInstaller::WriteCharacterData(){
+    TiXmlDocument xml;
+    std::unique_ptr<TiXmlElement> container(new TiXmlElement("characters"));
+    for (CharacterData data : character_data_){
+        std::unique_ptr<TiXmlElement> xml_character(new TiXmlElement("character"));
+        xml_character->SetAttribute("id", data.id);
+        for (CharacterModel model : data.models){
+            std::unique_ptr<TiXmlElement> xml_model(new TiXmlElement("model"));
+            xml_model->SetAttribute("name", model.name);
+            xml_model->SetAttribute("file", model.model);
+            xml_character->LinkEndChild(xml_model.release());
+        }
+        container->LinkEndChild(xml_character.release());
+    }
+    xml.LinkEndChild(container.release());
+    xml.SaveFile(output_dir_ + "gamedata/characters.xml");
 }
 
 std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){

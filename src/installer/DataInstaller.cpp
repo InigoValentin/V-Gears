@@ -134,7 +134,12 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case BATTLE_MODELS_CONVERT:
             cur_substep_ = battle_installer_->ConvertModel();
-            if (cur_substep_ >= substeps_) installation_state_ = KERNEL_PRICES;
+            if (cur_substep_ >= substeps_) installation_state_ = BATTLE_MODELS_WRITE_CHARACTERS;
+            return CalcProgress();
+        case BATTLE_MODELS_WRITE_CHARACTERS:
+            write_output_line_("Writing character data...", 2, true);
+            battle_installer_->WriteCharacterData();
+            installation_state_ = KERNEL_ITEMS;
             return CalcProgress();
         case KERNEL_PRICES:
             // Skip kernel data if option is set.

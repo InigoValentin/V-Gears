@@ -17,6 +17,9 @@
     <!-- Dialogs -->
     <prototype file_name="screens/dialog/prototypes.xml" />
     <screen file_name="screens/dialog/dialog.xml" />
+    <!-- Battle UI -->
+    <prototype file_name="screens/battle/prototypes.xml" />
+    <screen file_name="screens/battle/battle.xml" />
 
     <!-- Fade effect for map changer -->
     <screen file_name="screens/fade/fade.xml" />

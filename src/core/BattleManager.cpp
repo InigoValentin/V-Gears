@@ -19,6 +19,7 @@
 #include <OgreEntity.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
+#include "FF7Character.h"
 #include "core/AudioManager.h"
 #include "core/BattleManager.h"
 #include "core/CameraManager.h"
@@ -29,6 +30,7 @@
 #include "core/InputManager.h"
 #include "core/Logger.h"
 #include "core/ScriptManager.h"
+#include "core/TextHandler.h"
 #include "core/UiManager.h"
 #include "core/XmlFormationFile.h"
 
@@ -270,14 +272,58 @@ void BattleManager::LoadParty(){
         LOG_ERROR("Tried to load party in the BattleManager, but it's not in battle mode.");
         return;
     }
-    std::vector<int> positions {0, 1, 2};
+    std::vector<int> party = TextHandler::getSingleton().GetParty();
+    std::vector<int> positions {};
+    for (int i = 0; i < party.size(); i ++) positions.push_back(i);
     Ogre::Vector3 position = Ogre::Vector3(0, 5, 0);
     // Randomize party member positions.
     std::random_shuffle(positions.begin(), positions.end());
+
+    // TODO: Find a way to do this during the instalallation
     for (int i = 0; i < positions.size(); i ++){
+        std::string name = "";
+        std::string model = "";
+        switch (party.at(positions.at(i))){
+            case Character::CLOUD:
+                name = "party_cloud";
+                model = "characters/rt_cloud.mesh";
+                break;
+            case Character::TIFA:
+                name = "party_tifa";
+                model = "characters/ru_tifa.mesh";
+                break;
+            case Character::AERIS:
+                name = "party_aeris";
+                model = "characters/rv_aeris.mesh";
+                break;
+            case Character::BARRET:
+                name = "party_barret";
+                model = "characters/sb_barret.mesh";
+                break;
+            case Character::RED:
+                name = "party_red";
+                model = "characters/rw_red.mesh";
+                break;
+            // TODO: Cid data not installed
+            case Character::CID:
+                name = "party_cid";
+                model = "characters/TODO_cid.mesh";
+                break;
+            case Character::VINCENT:
+                name = "party_vincent";
+                model = "characters/sh_vincent.mesh";
+                break;
+            case Character::YUVI:
+                name = "party_yuvi";
+                model = "characters/rx_yuffie.mesh";
+                break;
+            case Character::KETCY:
+                name = "party_ketcy";
+                model = "characters/ry_cait_sith.mesh";
+                break;
+        }
         EntityManager::getSingleton().AddBattleEntity(
-          "party_" + std::to_string(i),
-          "enemies/at_grunt.mesh", position, Ogre::Degree(0),
+          name, model, position, Ogre::Degree(0),
           Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), 100 + i, true
         );
 

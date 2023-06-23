@@ -342,53 +342,53 @@ Inventory.sort = function(criteria)
         print("Custom order unimplemented")
     elseif criteria == Inventory.ORDER.FIELD then
         table.sort(Inventory, function (left, right)
-                                  if Game.Items[left.item].menu ~= Game.Items[right.item].menu then
-                                      return Game.Items[left.item].menu > Game.Items[right.item].menu
-                                  end
-                                  return left.item < right.item
-                              end
+            if Game.Items[left.item].menu ~= Game.Items[right.item].menu then
+                return Game.Items[left.item].menu > Game.Items[right.item].menu
+            end
+            return left.item < right.item
+        end
         )
     elseif criteria == Inventory.ORDER.BATTLE then
         table.sort(Inventory, function (left, right)
-                                  if Game.Items[left.item].battle ~= Game.Items[right.item].battle then
-                                      return Game.Items[left.item].battle > Game.Items[right.item].battle
-                                  end
-                                  return left.item < right.item
-                              end
+            if Game.Items[left.item].battle ~= Game.Items[right.item].battle then
+                return Game.Items[left.item].battle > Game.Items[right.item].battle
+            end
+            return left.item < right.item
+        end
         )
     elseif criteria == Inventory.ORDER.THROW then
         table.sort(Inventory, function (left, right)
-                                  if Game.Items[left.item].throw ~= Game.Items[right.item].throw then
-                                      return Game.Items[left.item].throw > Game.Items[right.item].throw
-                                  end
-                                  return left.item < right.item
-                              end
+            if Game.Items[left.item].throw ~= Game.Items[right.item].throw then
+                return Game.Items[left.item].throw > Game.Items[right.item].throw
+            end
+            return left.item < right.item
+        end
         )
     elseif criteria == Inventory.ORDER.TYPE then
         table.sort(Inventory, function (left, right)
-                                  return left.item < right.item
-                              end
+            return left.item < right.item
+        end
         )
     elseif criteria == Inventory.ORDER.NAME then
         table.sort(Inventory, function (left, right)
-                                  return Game.Items[left.item].name < Game.Items[right.item].name
-                              end
+            return Game.Items[left.item].name < Game.Items[right.item].name
+        end
         )
     elseif criteria == Inventory.ORDER.MOST then
         table.sort(Inventory, function (left, right)
-                                  if left.quantity ~= right.quantity then
-                                      return left.quantity > right.quantity
-                                  end
-                                  return left.item < right.item
-                              end
+            if left.quantity ~= right.quantity then
+                return left.quantity > right.quantity
+            end
+            return left.item < right.item
+        end
         )
     elseif criteria == Inventory.ORDER.LEAST then
         table.sort(Inventory, function (left, right)
-                                  if left.quantity ~= right.quantity then
-                                      return left.quantity < right.quantity
-                                  end
-                                  return left.item < right.item
-                              end
+            if left.quantity ~= right.quantity then
+                return left.quantity < right.quantity
+            end
+            return left.item < right.item
+        end
         )
     end
 end

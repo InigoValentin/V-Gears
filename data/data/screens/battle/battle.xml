@@ -1,0 +1,34 @@
+<screen name="BattleUi" script="scripts/battle/battle_ui.lua" visible="false">
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Message" x="5%" y="2%" width="90%" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Name" x="12" y="6" width="100%" height="100%" font="FFVIIFont" text_name="BattleUiDebugExit" visible="true" />
+        </widget>
+        <widget name="Help" x="0%" y="75%-24" width="100%" height="24" visible="true">
+            <prototype name="Window" />
+        </widget>
+        <widget name="Bottom" x="0%" y="75%" width="100%" height="25%" visible="true">
+            <widget name="Left" x="0%" y="0%" width="40%" height="100%" visible="true">
+                <prototype name="Window" />
+                <text_area name="LabelName" scale="0.5 0.5" x="5%" y="-2" colour="0.9 0.9 0.9" font="FFVIIMenuFont" text_name="BattleUiName" visible="true" />
+                <text_area name="LabelBarrier" scale="0.5 0.5" x="68%" y="-2" colour="0.9 0.9 0.9" font="FFVIIMenuFont" text_name="BattleUiBarrier" visible="true" />
+            </widget>
+            <widget name="Right" x="40%" y="0%" width="60%" height="100%" visible="true">
+                <prototype name="Window" />
+                <text_area name="LabelHp" scale="0.5 0.5" x="3%" y="-2" font="FFVIIMenuFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="LabelMp" scale="0.5 0.5" x="40%" y="-2" font="FFVIIMenuFont" text_name="BattleUiMp" visible="true" />
+                <text_area name="LabelLimit" scale="0.5 0.5" x="59%" y="-2" font="FFVIIMenuFont" text_name="BattleUiLimit" visible="true" />
+                <text_area name="LabelTime" scale="0.5 0.5" x="77%" y="-2" font="FFVIIMenuFont" text_name="BattleUiTime" visible="true" />
+            </widget>
+            <widget name="Character1" x="2%" y="12%" width="96%" height="30%" visible="true">
+                <prototype name="BattleCharacter" />
+            </widget>
+            <widget name="Character2" x="2%" y="42%" width="96%" height="30%" visible="true">
+                <prototype name="BattleCharacter" />
+            </widget>
+            <widget name="Character3" x="2%" y="72%" width="96%" height="30%" visible="true">
+                <prototype name="BattleCharacter" />
+            </widget>
+        </widget>
+    </widget>
+</screen>

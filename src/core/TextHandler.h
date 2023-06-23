@@ -152,6 +152,13 @@ class TextHandler : public Ogre::Singleton<TextHandler>{
          */
         void SetParty(int char_1, int char_2, int char_3);
 
+        /**
+         * Retrieves the party member IDs.
+         *
+         * @return The list of party member IDs.
+         */
+        std::vector<int> GetParty();
+
     private:
 
         /**

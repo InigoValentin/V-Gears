@@ -128,4 +128,12 @@
     <text name="CharacterDataNextLevel">Next Lv.</text>
     <text name="CharacterDataLimitLevel">Limit Lv.</text>
     <text name="CharacterDataLimitLevelNumber">3</text>
+
+    <text name="BattleUiName">NAME</text>
+    <text name="BattleUiBarrier">BARRIER</text>
+    <text name="BattleUiHp">HP</text>
+    <text name="BattleUiMp">MP</text>
+    <text name="BattleUiLimit">LIMIT</text>
+    <text name="BattleUiTime">TIME</text>
+    <text name="BattleUiDebugExit">Debug: Press 'K' to end battle.</text>
 </texts>

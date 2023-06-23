@@ -120,7 +120,12 @@ void TextHandler::SetCharacterName(int id, char* name){
 
 void TextHandler::SetParty(int char_1, int char_2, int char_3){
     current_party_[0] = char_1;
-    current_party_[2] = char_2;
-    current_party_[3] = char_3;
+    current_party_[1] = char_2;
+    current_party_[2] = char_3;
+}
+
+std::vector<int> TextHandler::GetParty(){
+    std::vector<int> party = {current_party_[0], current_party_[1], current_party_[2]};
+    return party;
 }
 

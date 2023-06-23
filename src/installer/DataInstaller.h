@@ -221,6 +221,11 @@ class DataInstaller{
             BATTLE_MODELS_CONVERT,
 
             /**
+             * Writes playable character model info.
+             */
+            BATTLE_MODELS_WRITE_CHARACTERS,
+
+            /**
              * Parses item and materia prices from ff7.exe.
              */
             KERNEL_PRICES,

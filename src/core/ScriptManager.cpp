@@ -324,7 +324,6 @@ void ScriptManager::ClearField(){}
 
 void ScriptManager::ClearBattle(){
     // Remove all battle script entities.
-    // TODO: Allso remove them as node scenes.
     for (unsigned int i = 0; i < script_entity_.size(); ++ i){
         if (script_entity_[i].type == BATTLE){
             while(script_entity_[i].queue.size() > 0)

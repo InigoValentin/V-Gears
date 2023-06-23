@@ -108,6 +108,11 @@ class BattleDataInstaller{
          */
         void WriteFormations();
 
+        /**
+         * Writes playable character data.
+         */
+        void WriteCharacterData();
+
     private:
 
         /**
@@ -154,6 +159,38 @@ class BattleDataInstaller{
                 a.clear();
             }
 
+        };
+
+        /**
+         * Models for playable characters.
+         */
+        struct CharacterModel{
+
+            /**
+             * Descriptive name for the model.
+             */
+            std::string name;
+
+            /**
+             * Model file.
+             */
+            std::string model;
+        };
+
+        /**
+         * Playable character model info.
+         */
+        struct CharacterData{
+
+            /**
+             * Character ID.
+             */
+            unsigned int id;
+
+            /**
+             * List of models for the character.
+             */
+            std::vector<CharacterModel> models;
         };
 
         /**
@@ -266,6 +303,11 @@ class BattleDataInstaller{
          * Enemy data read from the scenes;
          */
         std::vector<Enemy> enemies_;
+
+        /**
+         * List of models for playable character;
+         */
+        std::vector<CharacterData> character_data_;
 
         /**
          * Map of enemies, ID and xml file path.

@@ -96,6 +96,23 @@ Battle.logic_script = {
     end,
 }
 
+--- Starts a battle.
+--
+-- @param id Battle ID.
+Battle.start = function(id)
+    print("Starting battle " .. tostring(id))
+    battle_manager:start_battle(id)
+    script:request_end_sync(Script.UI, "BattleUi", "show", 0)
+    return 0
+end
+
+--- Ends a battle.
+Battle.finish = function()
+    print("Ending battle")
+    battle_manager:end_battle()
+    script:request_end_sync(Script.UI, "Battle", "hide", 0)
+    return 0
+end
 
 
 Battle.init = function()

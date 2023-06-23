@@ -1,0 +1,26 @@
+<prototypes>
+    <prototype name="BattleCharacter">
+        <widget name="Left" x="0%" y="0%" width="40%" height="24" visible="true">
+            <text_area name="Name" x="0%" y="0%" width="65%" font="FFVIIFont" visible="true" />
+            <sprite name="Barriers" image="icons/battle_bar_barriers.png" x="65%" y="0" width="30%" height="14" visible="true" />
+        </widget>
+        <widget name="Right" x="40%" y="0%" width="60%" height="24" visible="true">
+            <widget name="Hp" x="3%" y="0%" width="35%" height="100%" visible="true">
+                <text_area name="HpCurrent" x="0%" y="0%" colour="0.9 0.9 0.9" font="FFVIIMenuDigits" visible="true" />
+                <sprite name="HpSlash" image="icons/slash.png" x="45%" y="0" width="4" height="8" visible="true" />
+                <text_area name="HpMax" x="55%" y="0%" font="FFVIIMenuDigits" visible="true" />
+                <sprite name="HpLine" x="0" y="10" width="100%" height="2" colour="0.3 0 0" visible="true" />
+                <sprite name="HpLineCurrent" x="0" y="10" width="100%" height="2" colours="0 0.5 1, 0.78 0.78 0.78, 0.78 0.78 0.78, 0 0.5 1" visible="true" />
+                <sprite name="HpLineShadow" x="0" y="15" width="100%" height="1" colour="0 0 0" visible="true" />
+            </widget>
+            <widget name="Mp" x="40%" y="0%" width="16%" height="100%" visible="true">
+                <text_area name="MpCurrent" x="0%" y="0%" width="100%" colour="0.9 0.9 0.9" font="FFVIIMenuDigits" visible="true" />
+                <sprite name="MpLine" x="0" y="10" width="100%" height="2" colour="0.3 0 0" visible="true" />
+                <sprite name="MpLineCurrent" x="0" y="10" width="100%" height="2" colours="0 0.5 1, 0.78 0.78 0.78, 0.78 0.78 0.78, 0 0.5 1" visible="true" />
+                <sprite name="MpLineShadow" x="0" y="11" width="100%" height="1" colour="0 0 0" visible="true" />
+            </widget>
+            <sprite name="Limit" image="icons/battle_bar.png" x="60%" y="0" width="18%" height="14" visible="true" />
+            <sprite name="Atb" image="icons/battle_bar.png" x="80%" y="0" width="18%" height="14" visible="true" />
+        </widget>
+    </prototype>
+</prototypes>
