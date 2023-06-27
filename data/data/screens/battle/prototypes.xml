@@ -11,7 +11,7 @@
                 <text_area name="HpMax" x="55%" y="0%" font="FFVIIMenuDigits" visible="true" />
                 <sprite name="HpLine" x="0" y="10" width="100%" height="2" colour="0.3 0 0" visible="true" />
                 <sprite name="HpLineCurrent" x="0" y="10" width="100%" height="2" colours="0 0.5 1, 0.78 0.78 0.78, 0.78 0.78 0.78, 0 0.5 1" visible="true" />
-                <sprite name="HpLineShadow" x="0" y="15" width="100%" height="1" colour="0 0 0" visible="true" />
+                <sprite name="HpLineShadow" x="0" y="11" width="100%" height="1" colour="0 0 0" visible="true" />
             </widget>
             <widget name="Mp" x="40%" y="0%" width="16%" height="100%" visible="true">
                 <text_area name="MpCurrent" x="0%" y="0%" width="100%" colour="0.9 0.9 0.9" font="FFVIIMenuDigits" visible="true" />

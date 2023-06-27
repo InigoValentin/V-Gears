@@ -42,7 +42,9 @@ template<>BattleManager *Ogre::Singleton<BattleManager>::msSingleton = nullptr;
 ConfigVar cv_debug_battle_grid("debug_battle_grid", "Draw debug battle grid", "false");
 ConfigVar cv_debug_battle_axis("debug_battle_axis", "Draw debug battle axis", "false");
 
-const float BattleManager::MODEL_SCALE = 0.0015f;
+const float BattleManager::MODEL_SCALE = 0.002f;
+
+const float BattleManager::SCENE_SCALE = 0.0012f;
 
 BattleManager::BattleManager(){
     LOG_TRIVIAL("BattleManager created.");
@@ -171,7 +173,7 @@ void BattleManager::AddEnemy(
     EntityManager::getSingleton().AddBattleEntity(
       enemy->GetName() + "_" + std::to_string(enemies_.size() - 1),
       "enemies/" + enemy->GetModel() + ".mesh", enemy->GetPos(), Ogre::Degree(0),
-      Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), id, visible
+      Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), id, visible, false
     );
 }
 
@@ -248,7 +250,10 @@ void BattleManager::SetLocation(const int id, const Ogre::String name){
         LOG_ERROR("Tried to set a location in the BattleManager, but it's not in battle mode.");
         return;
     }
-    // TODO
+    EntityManager::getSingleton().AddBattleEntity(
+      "Background", "scenes/oi_grassland.mesh", Ogre::Vector3(0, 0, 0), Ogre::Degree(0),
+      Ogre::Vector3(SCENE_SCALE, SCENE_SCALE, SCENE_SCALE), 999, true, true
+    );
 }
 
 void BattleManager::SetArenaBattle(const bool arena){
@@ -279,7 +284,7 @@ void BattleManager::LoadParty(){
     // Randomize party member positions.
     std::random_shuffle(positions.begin(), positions.end());
 
-    // TODO: Find a way to do this during the instalallation
+    // TODO: Read this from data/gamedata/characters.xml
     for (int i = 0; i < positions.size(); i ++){
         std::string name = "";
         std::string model = "";
@@ -321,6 +326,7 @@ void BattleManager::LoadParty(){
                 name = "party_ketcy";
                 model = "characters/ry_cait_sith.mesh";
                 break;
+            default: continue;
         }
         EntityManager::getSingleton().AddBattleEntity(
           name, model, position, Ogre::Degree(0),
@@ -329,7 +335,6 @@ void BattleManager::LoadParty(){
 
         // Next position in Y axis
         position.x += ((i + 1) * (i % 2 == 0 ? 5 : -5));
-
 
     }
 }

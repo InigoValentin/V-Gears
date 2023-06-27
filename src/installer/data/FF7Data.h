@@ -2423,543 +2423,543 @@ class FF7Data{
                 info.is_enemy = true;
             }
             else if("og" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x00;
                 info.name = "Blank";
                 info.name_normal = "blank";
                 info.is_scene = true;
             }
             else if("oh" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x01;
                 info.name = "Bizarro Sephiroth Battle - Center";
-                info.name_normal = "bizarro sephiroth battle center";
+                info.name_normal = "bizarro_battle";
                 info.is_scene = true;
             }
             else if("oi" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x02;
                 info.name = "Grassland";
                 info.name_normal = "grassland";
                 info.is_scene = true;
             }
             else if("oj" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x03;
                 info.name = "Mt. Nibel";
-                info.name_normal = "mt nibel";
+                info.name_normal = "mt_nibel";
                 info.is_scene = true;
             }
             else if("ok" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x04;
                 info.name = "Forest";
                 info.name_normal = "forest";
                 info.is_scene = true;
             }
             else if("ol" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x05;
                 info.name = "Beach";
                 info.name_normal = "beach";
                 info.is_scene = true;
             }
             else if("om" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x06;
                 info.name = "Desert";
                 info.name_normal = "desert";
                 info.is_scene = true;
             }
             else if("on" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x07;
                 info.name = "Snow";
                 info.name_normal = "snow";
                 info.is_scene = true;
             }
             else if("oo" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x08;
                 info.name = "Swamp";
                 info.name_normal = "swamp";
                 info.is_scene = true;
             }
             else if("op" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x09;
                 info.name = "Sector 1 Train Station";
-                info.name_normal = "sector 1 train station";
+                info.name_normal = "sector_1_train_station";
                 info.is_scene = true;
             }
             else if("oq" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x0a;
                 info.name = "Reactor 1";
-                info.name_normal = "reactor 1";
+                info.name_normal = "reactor_1";
                 info.is_scene = true;
             }
             else if("or" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x0b;
                 info.name = "Reactor 1 Core";
-                info.name_normal = "reactor 1 core";
+                info.name_normal = "reactor_1_core";
                 info.is_scene = true;
             }
             else if("os" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x0c;
                 info.name = "Reactor 1 Entrance";
-                info.name_normal = "reactor 1 entrance";
+                info.name_normal = "reactor_1_entrance";
                 info.is_scene = true;
             }
             else if("ot" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x0d;
                 info.name = "Sector 4 Subway";
-                info.name_normal = "sector 4 subway";
+                info.name_normal = "sector_4_subway";
                 info.is_scene = true;
             }
             else if("ou" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Mythril Caves or Nibel Caves or AForest Caves";
-                info.name_normal = "mythril caves or nibel caves or aforest caves";
+                info.numeric_id = 0x0e;
+                info.name = "Nibel Caves";
+                info.name_normal = "nibel_caves";
                 info.is_scene = true;
             }
             else if("ov" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x0f;
                 info.name = "Shinra HQ";
-                info.name_normal = "shinra hq";
+                info.name_normal = "shinra_hq";
                 info.is_scene = true;
             }
             else if("ow" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x10;
                 info.name = "Midgar Raid Subway";
-                info.name_normal = "midgar raid subway";
+                info.name_normal = "midgar_raid_subway";
                 info.is_scene = true;
             }
             else if("ox" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Hojo's Lab Battle Field";
-                info.name_normal = "hojos lab battle field";
+                info.numeric_id = 0x11;
+                info.name = "Hojos Lab";
+                info.name_normal = "hojos_lab";
                 info.is_scene = true;
             }
             else if("oy" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x12;
                 info.name = "Shinra Elevators";
-                info.name_normal = "shinra elevators";
+                info.name_normal = "shinra_elevators";
                 info.is_scene = true;
             }
             else if("oz" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x13;
                 info.name = "Shinra Roof";
-                info.name_normal = "shinra roof";
+                info.name_normal = "shinra_roof";
                 info.is_scene = true;
             }
             else if("pa" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x14;
                 info.name = "Midgar Highway";
-                info.name_normal = "midgar highway";
+                info.name_normal = "midgar_highway";
                 info.is_scene = true;
             }
             else if("pb" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x15;
                 info.name = "Wutai Pagoda";
-                info.name_normal = "wutai pagoda";
+                info.name_normal = "wutai_pagoda";
                 info.is_scene = true;
             }
             else if("pc" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Church Battle Field";
-                info.name_normal = "church battle field";
+                info.numeric_id = 0x16;
+                info.name = "Church";
+                info.name_normal = "church";
                 info.is_scene = true;
             }
             else if("pd" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x17;
                 info.name = "Coral Valley";
-                info.name_normal = "coral valley";
+                info.name_normal = "coral_valley";
                 info.is_scene = true;
             }
             else if("pe" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x18;
                 info.name = "Midgar Slums";
-                info.name_normal = "midgar slums";
+                info.name_normal = "midgar_slums";
                 info.is_scene = true;
             }
             else if("pf" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Sector 4 Corridors or Junon Path";
-                info.name_normal = "sector 4 corridors or junon path";
+                info.numeric_id = 0x19;
+                info.name = "Sector 4 Corridors";
+                info.name_normal = "sector_4_corridors";
                 info.is_scene = true;
             }
             else if("pg" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Sector 4 Gantries or Midgar Underground";
-                info.name_normal = "sector 4 gantries or midgar underground";
+                info.numeric_id = 0x1a;
+                info.name = "Sector 4 Gantries";
+                info.name_normal = "sector_4_gantries";
                 info.is_scene = true;
             }
             else if("ph" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x1b;
                 info.name = "Sector 7 Support Pillar Stairway";
-                info.name_normal = "sector 7 support pillar stairway";
+                info.name_normal = "sector_7_pillar_stairway";
                 info.is_scene = true;
             }
             else if("pi" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x1c;
                 info.name = "Sector 7 Support Pillar Top";
-                info.name_normal = "sector 7 support pillar top";
+                info.name_normal = "sector_7_pillar top";
                 info.is_scene = true;
             }
             else if("pj" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x1d;
                 info.name = "Sector 8";
-                info.name_normal = "sector 8";
+                info.name_normal = "sector_8";
                 info.is_scene = true;
             }
             else if("pk" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x1e;
                 info.name = "Sewers";
                 info.name_normal = "sewers";
                 info.is_scene = true;
             }
             else if("pl" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x1f;
                 info.name = "Mythril Mines";
-                info.name_normal = "mythril mines";
+                info.name_normal = "mythril_mines";
                 info.is_scene = true;
             }
             else if("pm" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x20;
                 info.name = "Northern Crater - Floating Platforms";
-                info.name_normal = "northern crater floating platforms";
+                info.name_normal = "crater_floating_platforms";
                 info.is_scene = true;
             }
             else if("pn" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x21;
                 info.name = "Corel Mountain Path";
-                info.name_normal = "corel mountain path";
+                info.name_normal = "corel_mountain_path";
                 info.is_scene = true;
             }
             else if("po" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x22;
                 info.name = "Junon Beach";
-                info.name_normal = "junon beach";
+                info.name_normal = "junon_beach";
                 info.is_scene = true;
             }
             else if("pp" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x23;
                 info.name = "Junon Cargo Ship";
-                info.name_normal = "junon cargo ship";
+                info.name_normal = "junon_cargo_ship";
                 info.is_scene = true;
             }
             else if("pq" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x24;
                 info.name = "Corel Prison";
-                info.name_normal = "corel prison";
+                info.name_normal = "corel_prison";
                 info.is_scene = true;
             }
             else if("pr" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x25;
                 info.name = "Battle Square";
-                info.name_normal = "battle square";
+                info.name_normal = "battle_square";
                 info.is_scene = true;
             }
             else if("ps" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x26;
                 info.name = "Da Chao - Rapps Battle";
-                info.name_normal = "da chao rapps battle";
+                info.name_normal = "da_chao_rapps_battle";
                 info.is_scene = true;
             }
             else if("pt" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Cid's Backyard";
-                info.name_normal = "cids backyard";
+                info.numeric_id = 0x27;
+                info.name = "Cids Backyard";
+                info.name_normal = "cids_backyard";
                 info.is_scene = true;
             }
             else if("pu" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x28;
                 info.name = "Final Descent to Sephiroth";
-                info.name_normal = "final descent to sephiroth";
+                info.name_normal = "final_descent_to_sephiroth";
                 info.is_scene = true;
             }
             else if("pv" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x29;
                 info.name = "Reactor 5 Entrance";
-                info.name_normal = "reactor 5 entrance";
+                info.name_normal = "reactor_5_entrance";
                 info.is_scene = true;
             }
             else if("pw" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x2a;
                 info.name = "Temple of the Ancients - Escher Room";
-                info.name_normal = "temple of the ancients escher room";
+                info.name_normal = "ancients_escher_room";
                 info.is_scene = true;
             }
             else if("px" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x2b;
                 info.name = "Shinra Mansion";
-                info.name_normal = "shinra mansion";
+                info.name_normal = "shinra_mansion";
                 info.is_scene = true;
             }
             else if("py" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x2c;
                 info.name = "Junon Airship Dock";
-                info.name_normal = "junon airship dock";
+                info.name_normal = "junon_airship_dock";
                 info.is_scene = true;
             }
             else if("pz" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x2d;
                 info.name = "Whirlwind Maze";
-                info.name_normal = "whirlwind maze";
+                info.name_normal = "whirlwind_maze";
                 info.is_scene = true;
             }
             else if("qa" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x2e;
                 info.name = "Junon Underwater Reactor";
-                info.name_normal = "junon underwater reactor";
+                info.name_normal = "junon_underwater_reactor";
                 info.is_scene = true;
             }
             else if("qb" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x2f;
                 info.name = "Gongaga Reactor";
-                info.name_normal = "gongaga reactor";
+                info.name_normal = "gongaga_reactor";
                 info.is_scene = true;
             }
             else if("qc" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x30;
                 info.name = "Gelnika";
                 info.name_normal = "gelnika";
                 info.is_scene = true;
             }
             else if("qd" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x31;
                 info.name = "Train Graveyard";
-                info.name_normal = "train graveyard";
+                info.name_normal = "train_graveyard";
                 info.is_scene = true;
             }
             else if("qe" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Great Glacier Ice Caves & Gaea Cliffs - Inside";
-                info.name_normal = "great glacier ice caves and gaea cliffs inside";
+                info.numeric_id = 0x32;
+                info.name = "Great Glacier Ice Caves Gaea Cliffs Inside";
+                info.name_normal = "ice_caves";
                 info.is_scene = true;
             }
             else if("qf" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x33;
                 info.name = "Sister Ray";
-                info.name_normal = "sister ray";
+                info.name_normal = "sister_ray";
                 info.is_scene = true;
             }
             else if("qg" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x34;
                 info.name = "Sister Ray Base";
-                info.name_normal = "sister ray base";
+                info.name_normal = "sister_ray_base";
                 info.is_scene = true;
             }
             else if("qh" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x35;
                 info.name = "Forgotten City Altar";
-                info.name_normal = "forgotten city altar";
+                info.name_normal = "forgotten_city_altar";
                 info.is_scene = true;
             }
             else if("qi" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x36;
                 info.name = "Northern Crater - Initial Descent";
-                info.name_normal = "northern crater initial descent";
+                info.name_normal = "crater_descent";
                 info.is_scene = true;
             }
             else if("qj" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x37;
                 info.name = "Northern Crater - Hatchery";
-                info.name_normal = "northern crater hatchery";
+                info.name_normal = "crater_hatchery";
                 info.is_scene = true;
             }
             else if("qk" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x38;
                 info.name = "Northern Crater - Water Area";
-                info.name_normal = "northern crater water area";
+                info.name_normal = "crater_water_area";
                 info.is_scene = true;
             }
             else if("ql" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x39;
                 info.name = "Safer Battle";
-                info.name_normal = "safer battle";
+                info.name_normal = "safer_battle";
                 info.is_scene = true;
             }
             else if("qm" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x3a;
                 info.name = "Kalm Flashback - Dragon Battle";
-                info.name_normal = "kalm flashback dragon battle";
+                info.name_normal = "kalm_flashback_dragon";
                 info.is_scene = true;
             }
             else if("qn" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x3b;
                 info.name = "Junon Underwater Pipe";
-                info.name_normal = "junon underwater pipe";
+                info.name_normal = "junon_pipe";
                 info.is_scene = true;
             }
             else if("qo" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Blank";
-                info.name_normal = "blank";
+                info.numeric_id = 0x3c;
+                info.name = "Blank - 2";
+                info.name_normal = "blank_2";
                 info.is_scene = true;
             }
             else if("qp" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "qp";
-                info.name_normal = "qp";
+                info.numeric_id = 0x3d;
+                info.name = "unkonwon";
+                info.name_normal = "unknown_qp";
                 info.is_scene = true;
             }
             else if("qq" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x3d;
                 info.name = "Corel Railway - Canyon";
-                info.name_normal = "corel railway canyon";
+                info.name_normal = "railway_canyon";
                 info.is_scene = true;
             }
             else if("qr" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x3e;
                 info.name = "Whirlwind Maze - Crater";
-                info.name_normal = "whirlwind maze crater";
+                info.name_normal = "whirlwind_maze_crater";
                 info.is_scene = true;
             }
             else if("qs" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x3f;
                 info.name = "Corel Railway - Rollercoaster";
-                info.name_normal = "corel railway rollercoaster";
+                info.name_normal = "railway_rollercoaster";
                 info.is_scene = true;
             }
             else if("qt" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x40;
                 info.name = "Wooden Bridge";
-                info.name_normal = "wooden bridge";
+                info.name_normal = "wooden_bridge";
                 info.is_scene = true;
             }
             else if("qu" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x41;
                 info.name = "Da Chao";
-                info.name_normal = "da chao";
+                info.name_normal = "da_chao";
                 info.is_scene = true;
             }
             else if("qv" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x42;
                 info.name = "Fort Condor";
-                info.name_normal = "fort condor";
+                info.name_normal = "fort_condor";
                 info.is_scene = true;
             }
             else if("qw" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x44;
                 info.name = "Bizarro Battle - Right Side";
-                info.name_normal = "bizarro battle right side";
+                info.name_normal = "bizarro_battle_right";
                 info.is_scene = true;
             }
             else if("qx" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x45;
                 info.name = "Bizarro Battle - Left Side";
-                info.name_normal = "bizarro battle left side";
+                info.name_normal = "bizarro_battle_left";
                 info.is_scene = true;
             }
             else if("qy" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Jenova*SYNTHESIS Battle";
-                info.name_normal = "jenova synthesis battle";
+                info.numeric_id = 0x46;
+                info.name = "Jenova SYNTHESIS Battle";
+                info.name_normal = "jenova_synthesis";
                 info.is_scene = true;
             }
             else if("qz" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x47;
                 info.name = "Corel Train Battle";
-                info.name_normal = "corel train battle";
+                info.name_normal = "corel_train_battle";
                 info.is_scene = true;
             }
             else if("ra" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x48;
                 info.name = "Cosmo Canyon";
-                info.name_normal = "cosmo canyon";
+                info.name_normal = "cosmo_canyon";
                 info.is_scene = true;
             }
             else if("rb" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x49;
                 info.name = "Caverns of the Gi";
-                info.name_normal = "caverns of the gi";
+                info.name_normal = "caverns_of_the_gi";
                 info.is_scene = true;
             }
             else if("rc" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x4a;
                 info.name = "Nibelheim Mansion Basement";
-                info.name_normal = "nibelheim mansion basement";
+                info.name_normal = "nibelheim_mansion_basement";
                 info.is_scene = true;
             }
             else if("rd" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x4b;
                 info.name = "Temple of the Ancients - Demons Gate";
-                info.name_normal = "temple of the ancients demons gate";
+                info.name_normal = "ancients_demons_gate";
                 info.is_scene = true;
             }
             else if("re" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x4c;
                 info.name = "Temple of the Ancients - Mural Room";
-                info.name_normal = "temple of the ancients mural room";
+                info.name_normal = "ancients_mural_room";
                 info.is_scene = true;
             }
             else if("rf" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x4d;
                 info.name = "Temple of the Ancients - Clock Passage";
-                info.name_normal = "temple of the ancients clock passage";
+                info.name_normal = "ancients_clock_passage";
                 info.is_scene = true;
             }
             else if("rg" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x4e;
                 info.name = "Final Battle - Sephiroth";
-                info.name_normal = "final battle sephiroth";
+                info.name_normal = "final_battle";
                 info.is_scene = true;
             }
             else if("rh" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x4f;
                 info.name = "Jungle";
                 info.name_normal = "jungle";
                 info.is_scene = true;
             }
             else if("ri" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x50;
                 info.name = "Ultimate Weapon - Battle on Highwind";
-                info.name_normal = "ultimate weapon highwind";
+                info.name_normal = "ultimate_weapon_highwind";
                 info.is_scene = true;
             }
             else if("rj" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x51;
                 info.name = "Corel Reactor";
-                info.name_normal = "corel reactor";
+                info.name_normal = "corel_reactor";
                 info.is_scene = true;
             }
             else if("rk" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Blank";
-                info.name_normal = "blank";
+                info.numeric_id = 0x52;
+                info.name = "Unused";
+                info.name_normal = "unused";
                 info.is_scene = true;
             }
             else if("rl" == alphanumeric_id){
-                info.numeric_id = 4;
-                info.name = "Don Corneo's Mansion";
-                info.name_normal = "don corneos mansion";
+                info.numeric_id = 0x53;
+                info.name = "Don Corneos Mansion";
+                info.name_normal = "don_corneos_mansion";
                 info.is_scene = true;
             }
             else if("rm" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x54;
                 info.name = "Emerald Weapon Battle";
-                info.name_normal = "emerald weapon battle";
+                info.name_normal = "emerald_weapon_battle";
                 info.is_scene = true;
             }
             else if("rn" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x55;
                 info.name = "Reactor 5";
-                info.name_normal = "reactor 5";
+                info.name_normal = "reactor_5";
                 info.is_scene = true;
             }
             else if("ro" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x56;
                 info.name = "Shinra HQ - Escape";
-                info.name_normal = "shinra hq escape";
+                info.name_normal = "shinra_hq_escape";
                 info.is_scene = true;
             }
             else if("rp" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x57;
                 info.name = "Ultimate Weapon - Gongaga Reactor";
-                info.name_normal = "ultimate weapon gongaga reactor";
+                info.name_normal = "ultimate_weapon_gongaga";
                 info.is_scene = true;
             }
             else if("rq" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x58;
                 info.name = "Corel Prison - Dyne Battle";
-                info.name_normal = "corel prison dyne battle";
+                info.name_normal = "corel_prison_dyne";
                 info.is_scene = true;
             }
             else if("rr" == alphanumeric_id){
-                info.numeric_id = 4;
+                info.numeric_id = 0x59;
                 info.name = "Ultimate Weapon - Forest";
-                info.name_normal = "ultimate weapon forest";
+                info.name_normal = "ultimate_weapon_forest";
                 info.is_scene = true;
             }
             else if ("rs" == alphanumeric_id){

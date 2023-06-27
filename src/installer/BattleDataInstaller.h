@@ -244,6 +244,8 @@ class BattleDataInstaller{
         /**
          * Decompiles a compiled HRC file.
          *
+         * To be used for battle enemy and playable character models, since they have a
+         * well-defined bone hierarchy. For battle background models, use {@see DecompileSceneHrc}.
          * Note that this is not a general purpose HRC decompiler, it only works for files in
          * battle.lgp.
          *
@@ -253,6 +255,23 @@ class BattleDataInstaller{
          * @param[in] skeleton_name Name for the skeleton.
          */
         void DecompileHrc(File compiled, Model model, std::string path, std::string skeleton_name);
+
+        /**
+         * Decompiles a compiled HRC file.
+         *
+         * To be used only for battle background HRC files, since they don't have a defined bone
+         * hierarchy, and every bone is assumed to be a child of the previous one. For enemy and
+         * playable character models, use {@see DecompileHrc}. Note that this is not a general
+         * purpose HRC decompiler, it only works for files in battle.lgp.
+         *
+         * @param[in] compiled The compiles HRC file.
+         * @param[in] model The model.
+         * @param[in] path Path to save the decompiled file to.
+         * @param[in] skeleton_name Name for the skeleton.
+         */
+        void DecompileSceneHrc(
+          File compiled, Model model, std::string path, std::string skeleton_name
+        );
 
         /**
          * The path to the directory from which to read the PC game data.

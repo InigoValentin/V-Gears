@@ -226,7 +226,6 @@ unsigned int BattleDataInstaller::ProcessModel(){
                     CharacterModel model;
                     model.name = info.name;
                     model.model = info.alphanumeric_id + "_" + info.name_normal + ".mesh";
-                    std::cout << "Character model update: " << std::to_string(data.id) << " " << model.name << " : " << model.model << std::endl;
                     data.models.push_back(model);
                     character_data_.push_back(data);
                     found = true;
@@ -239,7 +238,6 @@ unsigned int BattleDataInstaller::ProcessModel(){
                 CharacterModel model;
                 model.name = info.name;
                 model.model = info.alphanumeric_id + "_" + info.name_normal + ".mesh";
-                std::cout << "Character model new: " << std::to_string(character_data.id) << " " << model.name << " : " << model.model << std::endl;
                 character_data.models.push_back(model);
                 character_data_.push_back(character_data);
             }
@@ -305,23 +303,32 @@ unsigned int BattleDataInstaller::ConvertModel(){
         if (info.is_player) path += "characters/";
         else if (info.is_scene) path += "scenes/";
         else path += "enemies/";
-
-
-        DecompileHrc(
-          File(output_dir_ + "temp/battle_models/" + model.hrc + "bin"),
-          model,
-          output_dir_ + "temp/battle_models/" + model.id + "_" + info.name_normal + ".hrc",
-          model.id + "_" + info.name_normal
-        );
+        if (info.is_scene){
+            DecompileSceneHrc(
+              File(output_dir_ + "temp/battle_models/" + model.hrc + "bin"), model,
+              output_dir_ + "temp/battle_models/" + model.id + "_" + info.name_normal + ".hrc",
+              model.id + "_" + info.name_normal
+            );
+        }
+        else{
+            DecompileHrc(
+              File(output_dir_ + "temp/battle_models/" + model.hrc + "bin"), model,
+              output_dir_ + "temp/battle_models/" + model.id + "_" + info.name_normal + ".hrc",
+              model.id + "_" + info.name_normal
+            );
+        }
         GenerateRsdFiles(model, output_dir_ + "temp/battle_models/");
 
-        DaFile da(File(output_dir_ + "temp/battle_models/" + model.anim));
-        std::vector<std::string> a_files = da.GenerateAFiles(
-          model.id, output_dir_ + "temp/battle_models/"
-        );
-        for (std::string file_name : a_files) model.a.push_back(file_name);
+        if ("" != model.anim){ // Skip for non-animated, ie battle backgrounds
+            DaFile da(File(output_dir_ + "temp/battle_models/" + model.anim));
+            std::vector<std::string> a_files = da.GenerateAFiles(
+              model.id, output_dir_ + "temp/battle_models/"
+            );
+            for (std::string file_name : a_files) model.a.push_back(file_name);
+        }
 
         // Reload the resources for the newly created hrc and rsd.
+        // TODO: Could this be done with res_mgr_->declareResource() ? Probably faster
         res_mgr_->removeResourceLocation(output_dir_ + "temp/battle_models/", "FFVII");
         res_mgr_->addResourceLocation(
           output_dir_ + "temp/battle_models/", "FileSystem", "FFVII", true, true
@@ -700,16 +707,6 @@ std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){
     std::string file_name = "gamedata/enemy/";
     std::string id = std::to_string(enemy.id);
     while (id.size() < 4) id = "0" + id;
-    /*file_name += (id + "_");
-    for (int n = 0; n < enemy.name.size(); n ++){
-        if (
-          (enemy.name[n] >= '0' && enemy.name[n] <= '9')
-          || (enemy.name[n] >= 'a' && enemy.name[n] <= 'z')
-          || (enemy.name[n] >= 'A' && enemy.name[n] <= 'Z')
-        ){
-            file_name += enemy.name[n];
-        }
-    }*/
     file_name += id + ".xml";
     return file_name;
 }
@@ -752,22 +749,26 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
         switch (ret){
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflateInit2 - Z_MEM_ERROR in file " << std::endl;
+                std::cout << "Warning: inflateInit2 - Z_MEM_ERROR in file "
+                  << file.GetFileName() << std::endl;
                 break;
             case Z_STREAM_ERROR:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflateInit2 - Z_STREAM_ERROR in file " << std::endl;
+                std::cout << "Warning: inflateInit2 - Z_STREAM_ERROR in file "
+                  << file.GetFileName() << std::endl;
                 break;
             default:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflateInit2 - unknown error in file " << std::endl;
+                std::cout << "Warning: inflateInit2 - unknown error in file "
+                  << file.GetFileName() << std::endl;
         }
         return NULL;
     }
     do{
         if (strm.next_out == NULL){
             inflateEnd(&strm);
-            std::cout << "Warning: strm.next_out == NULL in file " << std::endl;
+            std::cout << "Warning: strm.next_out == NULL in file "
+              << file.GetFileName() << std::endl;
             return NULL;
         }
         ret = inflate(&strm, Z_NO_FLUSH);
@@ -775,22 +776,26 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
         switch (ret){
             case Z_NEED_DICT:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflate - Z_NEED_DICT in file " << std::endl;
+                std::cout << "Warning: inflate - Z_NEED_DICT in file "
+                  << file.GetFileName() << std::endl;
                 return NULL;
             case Z_DATA_ERROR:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflate - Z_DATA_ERROR in file " << std::endl;
+                std::cout << "Warning: inflate - Z_DATA_ERROR in file "
+                  << file.GetFileName() << std::endl;
                 return NULL;
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflate - Z_MEM_ERROR in file " << std::endl;
+                std::cout << "Warning: inflate - Z_MEM_ERROR in file "
+                  << file.GetFileName() << std::endl;
                 return NULL;
         }
         if (ret != Z_STREAM_END){
             extract_buffer = static_cast<u8*>(realloc(extract_buffer, extract_size * 2));
             if (extract_buffer == NULL){
                 inflateEnd(&strm);
-                std::cout << "Warning: extract_buffer == NULL in file " << std::endl;
+                std::cout << "Warning: extract_buffer == NULL in file "
+                  << file.GetFileName() << std::endl;
                 return NULL;
             }
             strm.next_out = static_cast<u8*>(extract_buffer + extract_size);
@@ -801,7 +806,7 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
     extract_size = extract_size - strm.avail_out;
     (void)inflateEnd(&strm);
     if (ret != Z_STREAM_END){
-        std::cout << "Warning: ret != Z_STREAM_END in file " << std::endl;
+        std::cout << "Warning: ret != Z_STREAM_END in file " << file.GetFileName() << std::endl;
         return NULL;
     }
     File* out_file = new File(extract_buffer, 0, extract_size);
@@ -869,7 +874,6 @@ void BattleDataInstaller::GenerateRsdFiles(Model model, std::string path){
     for (std::string p : model.p){
         std::string base_name = p.substr(0, 4);
         std::string content = "@RSD940102\n";
-
         content += "PLY=" + base_name + ".PLY\n";
         content += "MAT=" + base_name + ".MAT\n";
         content += "GRP=" + base_name + ".GRP\n";
@@ -915,12 +919,35 @@ void BattleDataInstaller::DecompileHrc(
         if (offset == 0) decompiled += "0\n\n";
         else {
             decompiled += std::to_string(offset) + " ";
-            if (p_file_index < model.p.size()){
-                decompiled += model.p[p_file_index].substr(0, 4);
-            }
+            if (p_file_index < model.p.size()) decompiled += model.p[p_file_index].substr(0, 4);
             p_file_index ++;
             decompiled += "\n\n";
         }
+    }
+    std::ofstream out(path);
+    out << decompiled;
+    out.close();
+}
+
+void BattleDataInstaller::DecompileSceneHrc(
+  File compiled, Model model, std::string path, std::string skeleton_name
+){
+    compiled.SetOffset(0);
+    compiled.readU32LE(); // Skip 4 bytes
+    compiled.readU32LE(); // Skip 4 bytes
+    compiled.readU32LE(); // Skip 4 bytes
+    compiled.readU32LE(); // Supposed to be the number of bones, but for scenes is always 0.
+    std::sort(model.p.begin(), model.p.end());
+    std::string decompiled(":HEADER_BLOCK 2\n:SKELETON " + skeleton_name + "\n");
+    int bones = model.p.size();
+    decompiled += ":BONES " + std::to_string(bones) + "\n\n";
+    int p_file_index = 0;
+    for (int b = 0; b < bones; b ++){
+        decompiled += "bone" + std::to_string(b) + "\n";
+        if (b == 0) decompiled += "root\n";
+        else decompiled += ("bone" + std::to_string(b - 1) + "\n");
+        decompiled += "100.000000\n";
+        decompiled += "1 " + model.p[b].substr(0, 4) + "\n\n";
     }
     std::ofstream out(path);
     out << decompiled;

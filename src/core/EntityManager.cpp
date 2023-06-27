@@ -394,7 +394,8 @@ void EntityManager::AddEntity(
 
 void EntityManager::AddBattleEntity(
   const Ogre::String& name, const Ogre::String& file_name, const Ogre::Vector3& position,
-  const Ogre::Degree& rotation, const Ogre::Vector3& scale, const int index, const int visible
+  const Ogre::Degree& rotation, const Ogre::Vector3& scale, const int index, const int visible,
+  const bool is_background
 ){
     if (module_ != Module::BATTLE){
         LOG_ERROR("Tried to add battle Entity but the EntityManager is not in battle mode.");
@@ -407,6 +408,8 @@ void EntityManager::AddBattleEntity(
     entity->setScale(scale);
     entity->SetIndex(index);
     entity->SetVisible(visible);
+    // Backgrounds must be reoriented.
+    if (is_background) node->setOrientation(1, 1, 0, 0);
     battle_entity_.push_back(entity);
     ScriptManager::getSingleton().AddEntity(ScriptManager::BATTLE, entity->GetName(), entity);
 }

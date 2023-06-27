@@ -3,6 +3,9 @@ if UiContainer == nil then UiContainer = {} end
 --- The main menu.
 UiContainer.BattleUi = {
 
+    --- Indicates if the battle UI is active.
+    active = false,
+
     --- Current cursor position in the main menu (1-10).
     position = 1,
 
@@ -24,7 +27,6 @@ UiContainer.BattleUi = {
     --
     -- It does nothing.
     on_start = function(self)
-        print("BattleUi start")
         return 0
     end,
 
@@ -34,6 +36,12 @@ UiContainer.BattleUi = {
     -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
+        if self.active == false then
+            do return 0 end
+        end
+        if button == "K" then
+            Battle.finish()
+        end
         return 0
     end,
 
@@ -42,8 +50,8 @@ UiContainer.BattleUi = {
     -- Populates and updates displayed data.
     show = function(self)
         self:populate()
-        print("POPULATED")
         ui_manager:get_widget("BattleUi"):set_visible(true)
+        self.active = true;
         --local characters  = ui_manager:get_widget("MainMenu.Container.Characters")
         --local menu = ui_manager:get_widget("MainMenu.Container.Menu")
         --local menu_cursor = ui_manager:get_widget("MainMenu.Container.Menu.Cursor")
@@ -106,6 +114,7 @@ UiContainer.BattleUi = {
         --location:animation_sync()
 
         ui_manager:get_widget("BattleUi"):set_visible(false)
+        self.active = false
 
         --MenuSettings.pause_available = true
         --entity_manager:set_paused(false)
@@ -124,25 +133,17 @@ UiContainer.BattleUi = {
             return str
         end
 
-        print("POPULATING")
-
         for c = 1, 3 do
-            print("POPULATING " .. tostring(c))
             if Party[c] ~= nil then
-                print("POPULATING " .. tostring(c) .. " NOT NULL")
                 ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(c)):set_visible(true)
-                print("POPULATING " .. tostring(c) .. " NAME")
                 ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(c) .. ".Left.Name"):set_text(Characters[Party[c]].name)
-                print("POPULATING " .. tostring(c) .. " HP")
                 ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(c) .. ".Right.Hp.HpCurrent"):set_text(space_pad(Characters[Party[c]].stats.hp.current, 5))
                 ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(c) .. ".Right.Hp.HpMax"):set_text(space_pad(Characters[Party[c]].stats.hp.base, 5))
-                print("POPULATING " .. tostring(c) .. " MP")
                 ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(c) .. ".Right.Mp.MpCurrent"):set_text(space_pad(Characters[Party[c]].stats.mp.current, 5))
             else
                 ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(c)):set_visible(false)
             end
         end
-        print("POPULATING END")
         return 0
     end
 }

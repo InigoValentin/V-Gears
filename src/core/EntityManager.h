@@ -138,11 +138,13 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @param[in] scale Entity scale.
          * @param[in] index Index of the entity.
          * @param[in] visible True to make the entity visible, false otherwise.
+         * @param[in] is_background Indicates if the entity is for the battle background.
          */
         void AddBattleEntity(
           const Ogre::String& name, const Ogre::String& file_name,
           const Ogre::Vector3& position, const Ogre::Degree& rotation,
-          const Ogre::Vector3& scale, const int index, const int visible
+          const Ogre::Vector3& scale, const int index, const int visible,
+          const bool is_background = false
         );
 
         /**

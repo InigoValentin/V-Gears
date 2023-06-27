@@ -458,7 +458,7 @@ bool MediaDataInstaller::InstallMusics(){
     if (!keep_originals_)
         std::remove((output_dir_ + "audio/musics/" + std::to_string(index) + ".mid").c_str());
 
-    musics_.push_back("audio/music/" + std::to_string(processed_musics_) + ".ogg");
+    musics_.push_back("audio/musics/" + std::to_string(processed_musics_) + ".ogg");
     processed_musics_ ++;
     if (processed_musics_ == midi_.list(true, true)->size()) return true;
     else return false;
@@ -493,6 +493,42 @@ void MediaDataInstaller::WriteMusicsIndex(){
         xml_music->SetAttribute("file_name", path);
         xml_music->SetAttribute("name", id);
         xml_music->SetAttribute("loop", "0");
+        switch (id){
+            case 1:
+                xml_music->SetAttribute("default", "initial");
+                break;
+            case 6:
+                xml_music->SetAttribute("default", "battle");
+                break;
+            case 9:
+                xml_music->SetAttribute("default", "boss");
+                break;
+            case 13:
+                xml_music->SetAttribute("default", "world_map");
+                break;
+            case 43:
+                xml_music->SetAttribute("default", "chocobo_battle");
+                break;
+            case 45:
+                xml_music->SetAttribute("default", "victory");
+                break;
+            case 46:
+                xml_music->SetAttribute("default", "airship");
+                break;
+            case 50:
+                xml_music->SetAttribute("default", "chocobo_ride");
+                break;
+            case 57:
+                xml_music->SetAttribute("default", "game_over");
+                break;
+            case 70:
+                xml_music->SetAttribute("default", "world_map_danger");
+                break;
+            case 84:
+                xml_music->SetAttribute("default", "submarine");
+                break;
+
+        }
         container->LinkEndChild(xml_music.release());
         // If there is a friendly name for this sound, add another entry
         if (musics_map_.count(id) != 0){

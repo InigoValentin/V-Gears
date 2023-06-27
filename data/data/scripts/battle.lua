@@ -110,7 +110,7 @@ end
 Battle.finish = function()
     print("Ending battle")
     battle_manager:end_battle()
-    script:request_end_sync(Script.UI, "Battle", "hide", 0)
+    script:request_end_sync(Script.UI, "BattleUi", "hide", 0)
     return 0
 end
 

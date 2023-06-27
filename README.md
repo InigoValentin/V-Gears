@@ -22,6 +22,11 @@ Note that, while these are actual screenshots of V-Gears, none of the images, sp
 |**Transparencies**|**Timers**|**Choices**|
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png" alt="Transparency" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png "Transparency")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/timers.png" alt="Timers" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/timers.png "Timers")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/choices.png" alt="Choices" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/choices.png "Choices")|
 
+### Battle:
+|**Battle UI**|
+|--|
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/battle.png" alt="Battle UI" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/battle.png "Battle UI")|
+
 ### Menus:
 |**Begin**|**Main**|**Name**|
 |--|--|--|
