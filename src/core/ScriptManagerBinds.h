@@ -196,9 +196,6 @@ void ScriptManager::InitBinds(){
             "random_encounters_on",
             (float(EntityManager::*)(bool)) &EntityManager::SetRandomEncounters
           )
-          .def("start_battle", (void(EntityManager::*)(unsigned int)) &EntityManager::StartBattle)
-          // TODO: Run? Set battle flags
-          .def("battle_run", (void(EntityManager::*)(unsigned int)) &EntityManager::StartBattle)
     ];
 
     // Entity individual point commands
@@ -258,9 +255,6 @@ void ScriptManager::InitBinds(){
             "random_encounters_on",
             (float(EntityManager::*)(bool)) &EntityManager::SetRandomEncounters
           )
-          .def("start_battle", (void(EntityManager::*)(unsigned int)) &EntityManager::StartBattle)
-          // TODO: Run? Set battle flags
-          .def("battle_run", (void(EntityManager::*)(unsigned int)) &EntityManager::StartBattle)
           .def("is_key_on", (bool(EntityManager::*)(unsigned int)) &EntityManager::IsKeyOn)
           .def("is_key_off", (bool(EntityManager::*)(unsigned int)) &EntityManager::IsKeyOff)
           .def(

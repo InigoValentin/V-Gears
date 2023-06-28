@@ -98,11 +98,13 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         /**
          * Adds an entity to the manager.
          *
+         * The entity will be added to the EntityManager current module entity list.
+         *
          * @param[in] name Entity name.
          * @param[in] file_name Path to the entity model file.
-         * @param[in] position Entity position in the map.
+         * @param[in] position Entity position.
          * @param[in] direction Entity face direction.
-         * @param[in] index Index of the entity on the map.
+         * @param[in] index Index of the entity on the manager.
          */
         void AddEntity(
           const Ogre::String& name, const Ogre::String& file_name,
@@ -112,43 +114,26 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         /**
          * Adds a field entity to the manager.
          *
-         * @param[in] name Entity name.
-         * @param[in] file_name Path to the entity model file.
-         * @param[in] position Entity position in the map.
-         * @param[in] rotation Entity face direction.
-         * @param[in] scale Entity scale.
-         * @param[in] root_orientation Map orientation.
-         * @param[in] index Index of the entity on the map.
-         */
-        void AddEntity(
-          const Ogre::String& name, const Ogre::String& file_name,
-          const Ogre::Vector3& position, const Ogre::Degree& rotation,
-          const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, int index
-        );
-
-        /**
-         * Adds a battle entity to the manager.
-         *
-         * If the manager is not in the battle module, it will do nothing.
+         * The entity will be added to the EntityManager current module entity list.
          *
          * @param[in] name Entity name.
          * @param[in] file_name Path to the entity model file.
          * @param[in] position Entity position.
          * @param[in] rotation Entity face direction.
          * @param[in] scale Entity scale.
-         * @param[in] index Index of the entity.
-         * @param[in] visible True to make the entity visible, false otherwise.
-         * @param[in] is_background Indicates if the entity is for the battle background.
+         * @param[in] root_orientation Entity orientation. Unused for battle and world map entities.
+         * @param[in] index Index of the entity on the manager.
          */
-        void AddBattleEntity(
+        void AddEntity(
           const Ogre::String& name, const Ogre::String& file_name,
           const Ogre::Vector3& position, const Ogre::Degree& rotation,
-          const Ogre::Vector3& scale, const int index, const int visible,
-          const bool is_background = false
+          const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, const int index
         );
 
         /**
          * Adds an entity to the manager.
+         *
+         * Simplified version of {@see AddEntity}, to be called from Lua scripts.
          *
          * @param[in] name Entity name.
          * @param[in] file_name Path to the entity model file.
@@ -156,7 +141,7 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @param[in] y Y coordinate of the entity position in the map.
          * @param[in] z Z coordinate of the entity position in the map.
          * @param[in] direction Entity face direction.
-         * @param[in] index Index of the entity on the map.
+         * @param[in] index Index of the entity on the manager.
          */
         void ScriptAddEntity(
           const char* name, const char* file_name,
@@ -166,13 +151,13 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         /**
          * Adds an entity trigger to the manager.
          *
-         * A trigger is a line that does something when approached or crossed.
+         * A trigger is a line that does something when approached or crossed. If the Battle manager
+         * is in battle mode, nothing will be done.
          *
          * @param[in] name Entity trigger name.
          * @param[in] point1 One point of the trigger line.
          * @param[in] point2 One point of the trigger line.
-         * @param[in] enabled True to enable the trigger, false to leave it
-         * disabled.
+         * @param[in] enabled True to enable the trigger, false to leave it disabled.
          */
         void AddEntityTrigger(
           const Ogre::String& name, const Ogre::Vector3& point1,
@@ -181,6 +166,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
 
         /**
          * Adds an entity point to the manager.
+         *
+         * If the Battle manager is in battle mode, nothing will be done.
          *
          * @param[in] name Entity point name.
          * @param[in] position Entity point position.
@@ -207,6 +194,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         /**
          * Retrieves an entity by name.
          *
+         * Only entities of the current active module will be searched.
+         *
          * @param[in] name Name of the entity to retrieve.
          * @return The entity by the specified name, or nullptr if there is no one.
          */
@@ -214,6 +203,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
 
         /**
          * Retrieves an entity by it's index in the field.
+         *
+         * Only entities of the current active module will be searched.
          *
          * @param[in] id Index of the entity to retrieve.
          * @return The entity with the ID, or nullptr if there is no one.
@@ -223,6 +214,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         /**
          * Retrieves an entity by it's assigned character ID.
          *
+         * Only entities of the current active module will be searched.
+         *
          * @param[in] id Character ID of the entity to retrieve.
          * @return The entity assigned to the character, or nullptr if there is no one.
          */
@@ -230,6 +223,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
 
         /**
          * Retrieves an entity by name.
+         *
+         * Only entities of the current active module will be searched.
          *
          * @param[in] name Name of the entity to retrieve.
          * @return The entity by the specified name, or nullptr if there is no one.
@@ -240,7 +235,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * Retrieves an entity point by name.
          *
          * @param[in] name Name of the entity point to retrieve.
-         * @return The entity point by the specified name, or nullptr if there is no one.
+         * @return The entity point by the specified name, or nullptr if there is no one or the
+         * manager is in battle mode.
          */
         EntityPoint* ScriptGetEntityPoint(const char* name) const;
 
@@ -248,7 +244,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * Sets the playable entity.
          *
          * If no entities are found by name, no one will be assigned, the previous playable entity
-         * will remain so, and no warning will be issued.
+         * will remain so, and no warning will be issued. Also, if the EntityManager is in battle
+         * mode, nothing will be done.
          *
          * @param[in] name Name of the entity to make playable.
          */
@@ -257,17 +254,22 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         /**
          * Retrieves the playable entity.
          *
-         * @return The playable entity.
+         * @return The playable entity, or nullptr if it's not defined or the EntityManager is in
+         * battle mode.
          */
         Entity* ScriptGetPlayerEntity() const;
 
         /**
          * Unsets any playable entities.
+         *
+         * If the EntityManager is in battle mode, nothing will be done.
          */
         void ScriptUnsetPlayerEntity();
 
         /**
          * Locks or unlocks player control of the playable entity.
+         *
+         * If the EntityManager is in battle mode, nothing will be done.
          *
          * @param[in] lock True to lock, false to unlock.
          */
@@ -275,6 +277,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
 
         /**
          * Sets the baseline rotation for the player controlled entity.
+         *
+         * If the EntityManager is in battle mode, nothing will be done.
          *
          * @param[in] rotation Baseline rotation.
          * @todo Verify this description.
@@ -310,23 +314,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void SetEncounterRate(float rate);
 
         /**
-         * Starts a battle.
-         *
-         * @param[in] formation The enemy formation to fight.
-         * @return True if the battle victory conditions are met, false otherwise.
-         * @todo Implement
-         */
-        bool StartBattleForResult(unsigned int formation);
-
-        /**
-         * Starts a battle.
-         *
-         * @param[in] formation The enemy formation to fight.
-         * @todo Implement
-         */
-        void StartBattle(unsigned int formation);
-
-        /**
          * Checks if a key is being pressed.
          *
          * @param[in] key_code The code of the key to test.
@@ -345,10 +332,27 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         /**
          * Assigns a character to an entity.
          *
+         * Only entities of the currently active module can be assigned
+         *
          * @param[in] entity_name The entity name.
          * @param[in] char_id The character ID.
          */
         void SetEntityToCharacter(const char* entity_name, unsigned int char_id);
+
+        /**
+         * Retrieves the entity associated to the 3D background.
+         *
+         * @return The 3D background entity. nullptr if not set, of if the manager is in field mode.
+         */
+        Entity* GetBackground3D() const;
+
+        /**
+         * Sets the 3D model for the background.
+         *
+         * @param[in] name name for the background entity, for debugging purposes only.
+         * @param[in] file_name Path to the 3D model file.
+         */
+        void SetBackground3D(const Ogre::String& name, const Ogre::String& file_name);
 
     private:
 
@@ -409,6 +413,21 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         );
 
         /**
+         * Scale factor for battle background models.
+         */
+        static const float SCENE_SCALE;
+
+        /**
+         * Entity ID for battle background entity.
+         */
+        static const unsigned int BATTLE_BACKGROUND_ID;
+
+        /**
+         * Entity ID for world map background entity.
+         */
+        static const unsigned int  WORLD_MAP_BACKGROUND_ID;
+
+        /**
          * Updates the field entities in the manager.
          */
         void UpdateField() override;
@@ -424,34 +443,74 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void UpdateWorld() override;
 
         /**
+         * Adds a field entity to the manager.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] position Entity position in the map.
+         * @param[in] rotation Entity face direction.
+         * @param[in] scale Entity scale.
+         * @param[in] root_orientation Map orientation. Unused for world map entities.
+         * @param[in] index Index of the entity on the map.
+         */
+        void AddFieldOrWorldMapEntity(
+          const Ogre::String& name, const Ogre::String& file_name,
+          const Ogre::Vector3& position, const Ogre::Degree& rotation,
+          const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, const int index
+        );
+
+        /**
+         * Adds a battle entity to the manager.
+         *
+         * If the manager is not in the battle module, it will do nothing.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] position Entity position.
+         * @param[in] orientation Entity face direction.
+         * @param[in] scale Entity scale.
+         * @param[in] index Index of the entity.
+         */
+        void AddBattleEntity(
+          const Ogre::String& name, const Ogre::String& file_name,
+          const Ogre::Vector3& position, const Ogre::Degree& orientation,
+          const Ogre::Vector3& scale, const int index
+        );
+
+        /**
          * Attaches an entity to the walkmesh.
          *
          * It sets the triangle from the entity position coordinates. To account for multiple
          * triangles on different levels, it uses only the X and Y coordinates, and automatically
-         * sets the Z one to the closest triangle.
+         * sets the Z one to the closest triangle. If the manager is in battle mode, it will do
+         * nothing.
          *
          * @param[in] entity Entity to attach.
          * @return True if the entity was assigned to a walkmesh triangle, false if the entity is
-         * not in a triangle.
+         * not in a triangle or if the manager is in battle mode.
          */
         bool SetEntityOnWalkmesh(Entity* entity);
 
         /**
          * Moves an entity in the walkmesh.
          *
+         * If the manager is in battle mode, it will do nothing.
+         *
          * @param[in] entity Entity to move.
          * @param[in] speed Movement speed.
          * @return True if the movement was possible and the entity was moved, false otherwise.
+         * If the manager is in battle mode, it will always return false.
          */
         bool PerformWalkmeshMove(Entity* entity, const float speed);
 
         /**
-         * Cheks if the entity is crossing a walkmesh triangle border.
+         * Checks if the entity is crossing a walkmesh triangle border.
          *
          * @param[in] entity Entity to check.
          * @param[in] position The position. @todo document more.
          * @param[in] move_vector The move vector. @todo document more.
-         * @return True if the entity is crossing a triangle border, false otherwise.
+         * @return True if the entity is crossing a triangle border, false otherwise. If the manager
+         * is in battle mode, it will always return false.
          */
         bool WalkmeshBorderCross(
           Entity* entity, Ogre::Vector3& position, const Ogre::Vector2& move_vector
@@ -463,7 +522,7 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @param[in] entity Entity to check for collisions.
          * @param[in] position Position of the entity.
          * @return True if the entity is colliding with another, false otherwise. If the entity is
-         * not solid, always false.
+         * not solid, always false. If the manager is in battle mode, it will always return false.
          */
         bool CheckSolidCollisions(Entity* entity, Ogre::Vector3& position);
 
@@ -480,7 +539,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          *
          * If there are triggers, and the conditions are met, the appropriate trigger function will
          * be added to the queue. This must be tested every time an entity moves. If the entity is
-         * not the playable character, is not solid or is locked, it will do nothing.
+         * not the playable character, is not solid or is locked, it will do nothing. If the manager
+         * is in battle mode, it will do nothing.
          *
          * @param[in] entity Entity to check for nearby triggers.
          * @param[in] position The position of the entity.
@@ -492,7 +552,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          *
          * It checks if there are entities that can be interacted with from the players current
          * position and orientation. If there are, the most appropriate one is selected and, if it
-         * has an on_interact script, it is run.
+         * has an on_interact script, it is run. If the manager is in battle mode, it will do
+         * nothing.
          */
         void CheckEntityInteract();
 
@@ -513,12 +574,16 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         /**
          * Calculates and sets the next position during a linear movement.
          *
+         * If the manager is in battle mode, it will do nothing
+         *
          * @param[in] entity The moving entity.
          */
         void SetNextLinearStep(Entity* entity);
 
         /**
          * Calculates and sets the next position during a jump.
+         *
+         * If the manager is in battle mode, it will do nothing
          *
          * @param[in] entity The jump entity.
          */
@@ -553,6 +618,11 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * The list of battle entities.
          */
         std::vector<Entity*> battle_entity_;
+
+        /**
+         * A 3D background.
+         */
+        Entity* background_3d_;
 
         /**
          * The player controlled entity.

@@ -229,7 +229,7 @@ class DaFile{
          *
          * Stores all bone rotations for a frame.
          */
-        struct Frame {
+        struct Frame{
 
             /**
              * Number of bones in the animation frame.
@@ -251,7 +251,7 @@ class DaFile{
             /**
              * Constructor. Initializes data.
              */
-            Frame() {
+            Frame(){
                 bone_count = 0;
                 rotations = NULL;
             }
@@ -259,7 +259,7 @@ class DaFile{
             /**
              * Destructor.
              */
-            ~Frame() {
+            ~Frame(){
                 bone_count = 0;
                 delete [] rotations;
                 rotations = NULL;
@@ -267,8 +267,10 @@ class DaFile{
 
             /**
              * Sets the number of bones and initializes data arrays.
+             *
+             * @param[in] bones The number of bones.
              */
-            void SetBones(u32 bones ) {
+            void SetBones(u32 bones){
                 // Delete the old.
                 bone_count = 0;
                 delete [] rotations;
@@ -316,6 +318,7 @@ class DaFile{
          * @param[in] bytes The byte stream to read from.
          * @param[in,out] stream_bit_offset The bit at which to start reading. It will be advanced
          * by one per read bit.
+         * @param[in] bits Number of bits to read.
          * @return The read value.
          */
         int GetBitsFromStream(u8* bytes, u32 &stream_bit_offset, int bits);
@@ -326,7 +329,7 @@ class DaFile{
          * @param[in] bytes The byte stream to read from.
          * @param[in,out] stream_bit_offset The bit at which to start reading. It will be advanced
          * by one per read bit.
-         * @param How many bits to sift the read value.
+         * @param lowered_precision_bits How many bits to sift the read value.
          * @return The decoded value.
          */
         u16 GetCompressedDeltaFromStream(
@@ -336,7 +339,7 @@ class DaFile{
         /**
          * Loads the frames in an animation.
          *
-         * @param[out] Read frame data will be set here.
+         * @param[out] frame Read frame data will be set here.
          * @param[in] bones The number of bones in the animation.
          * @param[in] bit_start Bit to start reading from animation_buffer at.
          * @param[in] animation_buffer The animation data.

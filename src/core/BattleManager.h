@@ -236,8 +236,8 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         /**
          * Sets the battle layout.
          *
-         * @param[in] The battle layout. {@see LAYOUT}. When one of the unknowns is specified, the
-         * normal will be applied.
+         * @param[in] layout The battle layout. {@see LAYOUT}. When one of the unknowns is
+         * specified, the normal will be applied.
          */
         void SetLayout(const LAYOUT layout);
 

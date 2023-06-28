@@ -25,7 +25,7 @@ class TexFile{
         /**
          * Constructor.
          *
-         * @param[in,out] File with the tex data. The file data will not be modified, but it's
+         * @param[in,out] file File with the tex data. The file data will not be modified, but it's
          * offset will.
          */
         TexFile(File file);

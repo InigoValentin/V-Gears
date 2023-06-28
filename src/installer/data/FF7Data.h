@@ -3073,7 +3073,7 @@ class FF7Data{
         /**
          * Retrieves a battle model code from an enemy ID.
          *
-         * @param[in] Enemy ID.
+         * @param[in] id Enemy ID.
          * @return The code for the model for the enemy, as in the filename in the .mesh file.
          */
         static std::string GetEnemyModelFromEnemyId(const unsigned int id){

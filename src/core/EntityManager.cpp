@@ -37,6 +37,12 @@ template<>EntityManager *Ogre::Singleton<EntityManager>::msSingleton = nullptr;
 ConfigVar cv_debug_grid("debug_grid", "Draw debug grid", "false");
 ConfigVar cv_debug_axis("debug_axis", "Draw debug axis", "false");
 
+const float EntityManager::SCENE_SCALE = 0.0012f;
+
+const unsigned int EntityManager::BATTLE_BACKGROUND_ID = 1000;
+
+const unsigned int EntityManager::WORLD_MAP_BACKGROUND_ID = 1001;
+
 float EntityManager::PointElevation(
   const Ogre::Vector2& point, const Ogre::Vector3& a, const Ogre::Vector3& b, const Ogre::Vector3& c
 ){
@@ -287,6 +293,10 @@ void EntityManager::UpdateField(){
 
 void EntityManager::UpdateBattle(){
     ScriptManager::getSingleton().Update(ScriptManager::BATTLE);
+    if (background_3d_ != nullptr){
+        background_3d_->Update();
+        background_3d_->PlayAnimationContinue(background_3d_->GetDefaultAnimationName());
+    }
     for (unsigned int i = 0; i < battle_entity_.size(); ++ i){
         battle_entity_[i]->Update();
         battle_entity_[i]->PlayAnimationContinue(battle_entity_[i]->GetDefaultAnimationName());
@@ -298,18 +308,90 @@ void EntityManager::UpdateWorld(){
     // TODO: Implement
 }
 
+void EntityManager::AddFieldOrWorldMapEntity(
+  const Ogre::String& name, const Ogre::String& file_name, const Ogre::Vector3& position,
+  const Ogre::Degree& rotation, const Ogre::Vector3& scale,
+  const Ogre::Quaternion& root_orientation, const int index
+){
+    if (module_ != Module::FIELD){
+        LOG_ERROR("Tried to add field or world Entity but the EntityManager is in battle mode.");
+        return;
+    }
+    Ogre::SceneNode* node = scene_node_->createChildSceneNode("Model_" + name);
+    EntityModel* entity = new EntityModel(name, file_name, node);
+    entity->SetPosition(position);
+    entity->SetRotation(rotation);
+    entity->setScale(scale);
+    entity->SetIndex(index);
+    entity->setRootOrientation(root_orientation);
+    entity_.push_back(entity);
+    ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
+}
+
+void EntityManager::AddBattleEntity(
+  const Ogre::String& name, const Ogre::String& file_name, const Ogre::Vector3& position,
+  const Ogre::Degree& orientation, const Ogre::Vector3& scale, const int index
+){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to add battle Entity but the EntityManager is not in battle mode.");
+        return;
+    }
+    Ogre::SceneNode* node = scene_node_->createChildSceneNode("Battle_" + name);
+    EntityModel* entity = new EntityModel(name, file_name, node);
+    entity->SetPosition(position);
+    entity->SetRotation(orientation);
+    entity->setScale(scale);
+    entity->SetIndex(index);
+    entity->SetVisible(true);
+    // Backgrounds must be reoriented.
+    //if (is_background) node->setOrientation(1, 1, 0, 0);
+    battle_entity_.push_back(entity);
+    ScriptManager::getSingleton().AddEntity(ScriptManager::BATTLE, entity->GetName(), entity);
+}
+
+Entity* EntityManager::GetBackground3D() const{
+    if (IsFieldModule()){
+        LOG_WARNING("Tried to retrieve a 3D background while the EntityManager is in field mode.");
+        return nullptr;
+    }
+    return background_3d_;
+}
+
+void EntityManager::SetBackground3D(const Ogre::String& name, const Ogre::String& file_name){
+    if (IsFieldModule()){
+        LOG_ERROR("Tried to add a 3D background while the EntityManager is in field mode.");
+        return;
+    }
+    Ogre::SceneNode* node = scene_node_->createChildSceneNode("bg_" + name);
+    background_3d_ = new EntityModel(name, file_name, node);
+    background_3d_->SetPosition(Ogre::Vector3(0, 0, 0));
+    background_3d_->SetRotation(Ogre::Degree(0));
+    background_3d_->setScale(Ogre::Vector3(SCENE_SCALE, SCENE_SCALE, SCENE_SCALE));
+    background_3d_->SetIndex(IsBattleModule() ? BATTLE_BACKGROUND_ID : WORLD_MAP_BACKGROUND_ID);
+    background_3d_->SetVisible(true);
+    // Backgrounds must be reoriented.
+    node->setOrientation(1, 1, 0, 0);
+    // Probably don't need a script for the 3d background.
+    /*ScriptManager::getSingleton().AddEntity(
+      ScriptManager::BATTLE, background_3d_->GetName(), background_3d_
+    );*/
+}
+
 void EntityManager::UpdateDebug(){
     grid_->setVisible(cv_debug_grid.GetB());
     axis_->setVisible(cv_debug_axis.GetB());
-    if (module_ == Module::BATTLE)
+    if (module_ == Module::BATTLE){
+        if (background_3d_ != nullptr) background_3d_->UpdateDebug();
         for (unsigned int i = 0; i < battle_entity_.size(); ++ i) battle_entity_[i]->UpdateDebug();
+    }
     else{
         for (unsigned int i = 0; i < entity_.size(); ++ i) entity_[i]->UpdateDebug();
-        for (unsigned int i = 0; i < entity_triggers_.size(); ++ i) entity_triggers_[i]->UpdateDebug();
+        for (unsigned int i = 0; i < entity_triggers_.size(); ++ i)
+            entity_triggers_[i]->UpdateDebug();
         for (unsigned int i = 0; i < entity_points_.size(); ++ i) entity_points_[i]->UpdateDebug();
         walkmesh_.UpdateDebug();
+        background_2d_.UpdateDebug();
     }
-    background_2d_.UpdateDebug();
 }
 
 void EntityManager::OnResize(){background_2d_.OnResize();}
@@ -349,9 +431,10 @@ void EntityManager::ClearBattle(){
         Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(
           battle_entity_[i]->GetName()
         );
-        scene_node_->removeAndDestroyChild("Model_" + battle_entity_[i]->GetName());
+        scene_node_->removeAndDestroyChild("Battle_" + battle_entity_[i]->GetName());
     }
     battle_entity_.clear();
+    delete background_3d_;
 }
 
 void EntityManager::ClearWorld(){
@@ -375,43 +458,14 @@ void EntityManager::AddEntity(
 void EntityManager::AddEntity(
   const Ogre::String& name, const Ogre::String& file_name, const Ogre::Vector3& position,
   const Ogre::Degree& rotation, const Ogre::Vector3& scale,
-  const Ogre::Quaternion& root_orientation, int index
+  const Ogre::Quaternion& root_orientation, const int index
 ){
-    if (module_ != Module::FIELD){
-        LOG_ERROR("Tried to add field Entity but the EntityManager is not in field mode.");
-        return;
-    }
-    Ogre::SceneNode* node = scene_node_->createChildSceneNode("Model_" + name);
-    EntityModel* entity = new EntityModel(name, file_name, node);
-    entity->SetPosition(position);
-    entity->SetRotation(rotation);
-    entity->setScale(scale);
-    entity->SetIndex(index);
-    entity->setRootOrientation(root_orientation);
-    entity_.push_back(entity);
-    ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
-}
-
-void EntityManager::AddBattleEntity(
-  const Ogre::String& name, const Ogre::String& file_name, const Ogre::Vector3& position,
-  const Ogre::Degree& rotation, const Ogre::Vector3& scale, const int index, const int visible,
-  const bool is_background
-){
-    if (module_ != Module::BATTLE){
-        LOG_ERROR("Tried to add battle Entity but the EntityManager is not in battle mode.");
-        return;
-    }
-    Ogre::SceneNode* node = scene_node_->createChildSceneNode("Model_" + name);
-    EntityModel* entity = new EntityModel(name, file_name, node);
-    entity->SetPosition(position);
-    entity->SetRotation(rotation);
-    entity->setScale(scale);
-    entity->SetIndex(index);
-    entity->SetVisible(visible);
-    // Backgrounds must be reoriented.
-    if (is_background) node->setOrientation(1, 1, 0, 0);
-    battle_entity_.push_back(entity);
-    ScriptManager::getSingleton().AddEntity(ScriptManager::BATTLE, entity->GetName(), entity);
+    if (IsBattleModule())
+        AddBattleEntity(name, file_name, position, rotation, scale, index);
+    else
+        AddFieldOrWorldMapEntity(
+          name, file_name, position, rotation, scale, root_orientation, index
+        );
 }
 
 void EntityManager::ScriptAddEntity(
@@ -423,6 +477,10 @@ void EntityManager::AddEntityTrigger(
   const Ogre::String& name,
   const Ogre::Vector3& point1, const Ogre::Vector3& point2, const bool enabled
 ){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to add an entity trigger but the EntityManager is in battle mode.");
+        return;
+    }
     EntityTrigger* trigger = new EntityTrigger(name);
     trigger->SetPoints(point1, point2);
     trigger->SetEnabled(enabled);
@@ -433,6 +491,10 @@ void EntityManager::AddEntityTrigger(
 void EntityManager::AddEntityPoint(
   const Ogre::String& name, const Ogre::Vector3& position, const float rotation
 ){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to add an entity point but the EntityManager is in battle mode.");
+        return;
+    }
     EntityPoint* entity_point = new EntityPoint(name);
     entity_point->SetPosition(position);
     entity_point->SetRotation(rotation);
@@ -440,6 +502,7 @@ void EntityManager::AddEntityPoint(
 }
 
 void EntityManager::AddEntityScript(const Ogre::String& name){
+    // TODO: Should call to this be prevented while in battle mode?
     entity_scripts_.push_back(name);
     ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, name, nullptr);
 }
@@ -447,27 +510,47 @@ void EntityManager::AddEntityScript(const Ogre::String& name){
 void EntityManager::ScriptAddEntityScript(const char* name){AddEntityScript(name);}
 
 Entity* EntityManager::GetEntity(const Ogre::String& name) const{
-    for (unsigned int i = 0; i < entity_.size(); ++ i)
-        if (entity_[i]->GetName() == name) return entity_[i];
+    if (IsBattleModule()){
+        for (unsigned int i = 0; i < battle_entity_.size(); ++ i)
+            if (battle_entity_[i]->GetName() == name) return battle_entity_[i];
+    }
+    else{
+        for (unsigned int i = 0; i < entity_.size(); ++ i)
+            if (entity_[i]->GetName() == name) return entity_[i];
+    }
     return nullptr;
 }
 
 Entity* EntityManager::GetEntityFromIndex(const int index) const{
-    for (unsigned int i = 0; i < entity_.size(); ++ i)
-        if (entity_[i]->GetIndex() == index) return entity_[i];
+    if (IsBattleModule()){
+        if (background_3d_ != nullptr && background_3d_->GetIndex() == index)
+            return background_3d_;
+        for (unsigned int i = 0; i < battle_entity_.size(); ++ i)
+            if (battle_entity_[i]->GetIndex() == index) return battle_entity_[i];
+    }
+    else{
+        for (unsigned int i = 0; i < entity_.size(); ++ i)
+            if (entity_[i]->GetIndex() == index) return entity_[i];
+    }
     return nullptr;
 }
 
 Entity* EntityManager::GetEntityFromCharacterId(const int id) const{
-    for (unsigned int i = 0; i < entity_.size(); ++ i)
-        if (entity_[i]->IsCharacter() && entity_[i]->GetCharacterId() == id) return entity_[i];
+    if (IsBattleModule()){
+        for (unsigned int i = 0; i < battle_entity_.size(); ++ i)
+            if (battle_entity_[i]->IsCharacter() && battle_entity_[i]->GetCharacterId() == id)
+                return battle_entity_[i];
+    }
+    else{
+        for (unsigned int i = 0; i < entity_.size(); ++ i)
+            if (entity_[i]->IsCharacter() && entity_[i]->GetCharacterId() == id) return entity_[i];
+    }
     return nullptr;
 }
 
 Entity* EntityManager::ScriptGetEntity(const char* name) const{
     return GetEntity(Ogre::String(name));
 }
-
 
 EntityPoint* EntityManager::ScriptGetEntityPoint(const char* name) const{
     for (unsigned int i = 0; i < entity_points_.size(); ++ i)
@@ -476,6 +559,10 @@ EntityPoint* EntityManager::ScriptGetEntityPoint(const char* name) const{
 }
 
 void EntityManager::ScriptSetPlayerEntity(const char* name){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to set a player entity but the EntityManager is in battle mode.");
+        return;
+    }
     for (unsigned int i = 0; i < entity_.size(); ++ i){
         if (entity_[i]->GetName() == name){
             player_entity_ = entity_[i];
@@ -487,16 +574,36 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
     }
 }
 
-Entity* EntityManager::ScriptGetPlayerEntity() const{return player_entity_;}
+Entity* EntityManager::ScriptGetPlayerEntity() const{
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to set a player entity but the EntityManager is in battle mode.");
+        return nullptr;
+    }
+    return player_entity_;
+}
 
-void EntityManager::ScriptUnsetPlayerEntity(){player_entity_ = nullptr;}
+void EntityManager::ScriptUnsetPlayerEntity(){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to unset a player entity but the EntityManager is in battle mode.");
+        return;
+    }
+    player_entity_ = nullptr;
+}
 
 void EntityManager::ScriptPlayerLock(const bool lock){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to set player lock but the EntityManager is in battle mode.");
+        return;
+    }
     player_lock_ = lock;
     if (lock == true) player_move_ = Ogre::Vector3::ZERO;
 }
 
 void EntityManager::SetPlayerMoveRotation(const Ogre::Radian rotation){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to set player move rotation the EntityManager is in battle mode.");
+        return;
+    }
     player_move_rotation_ = rotation;
 }
 
@@ -510,13 +617,6 @@ void EntityManager::SetEncounterRate(float rate){
     if (rate >= 1.0f) encounter_rate_ = 1.0f;
     else if (rate <= 0.0f) encounter_rate_ = 0.0f;
     else encounter_rate_ = rate;
-}
-bool EntityManager::StartBattleForResult(unsigned int formation){
-    std::cout << "[BATTLE] Start battle for result ID " << formation << "\n";
-    return true;
-}
-void EntityManager::StartBattle(unsigned int formation){
-    std::cout << "[BATTLE] Start battle ID " << formation << "\n";
 }
 
 bool EntityManager::IsKeyOn(unsigned int key_code){
@@ -538,11 +638,33 @@ bool EntityManager::IsKeyOn(unsigned int key_code){
 bool EntityManager::IsKeyOff(unsigned int key_code){return !IsKeyOn(key_code);}
 
 void EntityManager::SetEntityToCharacter(const char* entity_name, unsigned int char_id){
-    for (unsigned int i = 0; i < entity_.size(); ++ i)
-        if (entity_[i]->GetName() == entity_name) entity_[i]->SetCharacter(char_id);
+    if (IsBattleModule()){
+        for (unsigned int i = 0; i < battle_entity_.size(); ++ i){
+            if (battle_entity_[i]->GetName() == entity_name){
+                battle_entity_[i]->SetCharacter(char_id);
+                return;
+            }
+        }
+    }
+    else{
+        for (unsigned int i = 0; i < entity_.size(); ++ i){
+            if (entity_[i]->GetName() == entity_name){
+                entity_[i]->SetCharacter(char_id);
+                return;
+            }
+        }
+    }
+    LOG_WARNING(
+      "Unabe to assigne character ID " + std::to_string(char_id) + " to entity '" + entity_name
+      + "'. No entity by that name exists."
+    );
 }
 
 bool EntityManager::SetEntityOnWalkmesh(Entity* entity){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to set entity on the walkmesh, but the EntityManager is in battle mode");
+        return false;
+    }
     Ogre::Vector3 position3 = entity->GetPosition();
     Ogre::Vector2 position2;
     position2.x = position3.x;
@@ -591,6 +713,10 @@ bool EntityManager::SetEntityOnWalkmesh(Entity* entity){
 }
 
 bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to perform a walkmesh move, but the EntityManager is in battle mode");
+        return false;
+    }
     Ogre::Vector3 start_point = entity->GetPosition();
     Ogre::Vector3 move_vector = entity->GetMovePosition() - start_point;
     Ogre::Vector2 direction(move_vector.x, move_vector.y);
@@ -843,6 +969,10 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
 bool EntityManager::WalkmeshBorderCross(
   Entity* entity, Ogre::Vector3& position, const Ogre::Vector2& move_vector
 ){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to check for walkmesh cross, but the EntityManager is in battle mode");
+        return false;
+    }
     int current_triangle = entity->GetMoveTriangleId();
     if (current_triangle == -1) return true;
     Ogre::Vector2 pos = Ogre::Vector2(position.x, position.y);
@@ -879,6 +1009,10 @@ bool EntityManager::WalkmeshBorderCross(
 }
 
 bool EntityManager::CheckSolidCollisions(Entity* entity, Ogre::Vector3& position){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to check for solid collisions, but the EntityManager is in battle mode");
+        return false;
+    }
     if (entity->IsSolid() == false) return false;
     for (size_t i = 0; i < entity_.size(); ++ i){
         if (entity_[i]->IsSolid() == false) continue;
@@ -900,6 +1034,10 @@ bool EntityManager::CheckSolidCollisions(Entity* entity, Ogre::Vector3& position
 }
 
 void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to check for triggers, but the EntityManager is in battle mode");
+        return;
+    }
     if (entity->IsSolid() == false) return;
     if (player_entity_ != entity) return;
     if (player_entity_->IsSolid() == false) return;
@@ -1033,6 +1171,12 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
 }
 
 void EntityManager::CheckEntityInteract(){
+    if (IsBattleModule()){
+        LOG_WARNING(
+          "Tried to check for entity interaction, but the EntityManager is in battle mode"
+        );
+        return;
+    }
     if (player_entity_ == NULL || player_lock_ == true || player_entity_->IsSolid() == false)
         return;
     Ogre::Degree angle_pc = player_entity_->GetRotation();
@@ -1077,6 +1221,7 @@ void EntityManager::CheckEntityInteract(){
 }
 
 void EntityManager::SetNextOffsetStep(Entity* entity){
+    // TODO: Allow this while on battle mode?
     ActionType type = entity->GetOffsetType();
     float total = entity->GetOffsetSeconds();
     float current = entity->GetOffsetCurrentSeconds();
@@ -1095,6 +1240,7 @@ void EntityManager::SetNextOffsetStep(Entity* entity){
 }
 
 void EntityManager::SetNextTurnStep(Entity* entity){
+    // TODO: Allow this while on battle mode?
     ActionType type = entity->GetTurnType();
     float total = entity->GetTurnSeconds();
     float current = entity->GetTurnCurrentSeconds();
@@ -1112,6 +1258,10 @@ void EntityManager::SetNextTurnStep(Entity* entity){
 }
 
 void EntityManager::SetNextLinearStep(Entity* entity){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to set next linear step, but the EntityManager is in battle mode");
+        return;
+    }
     bool to_end = true;
     bool is_move = false;
     Ogre::Vector3 start = entity->GetLinearStart();
@@ -1187,6 +1337,10 @@ void EntityManager::SetNextLinearStep(Entity* entity){
 }
 
 void EntityManager::SetNextJumpStep(Entity* entity){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to set next jump step, but the EntityManager is in battle mode");
+        return;
+    }
     float total = entity->GetJumpSeconds();
     float current = entity->GetJumpCurrentSeconds();
     current += Timer::getSingleton().GetGameTimeDelta();
@@ -1208,6 +1362,7 @@ void EntityManager::SetNextJumpStep(Entity* entity){
 }
 
 void EntityManager::SetNextScrollStep(){
+    // TODO: Allow this on battle mode?
     Background2D::SCROLL_TYPE type = background_2d_.GetScrollType();
     float total = background_2d_.GetScrollSeconds();
     float current = background_2d_.GetScrollCurrentSeconds();

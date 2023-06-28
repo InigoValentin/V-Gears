@@ -170,10 +170,10 @@ void BattleManager::AddEnemy(
     }
     Enemy* enemy = new Enemy(id, pos, front, visible, targeteable, active, cover);
     enemies_.push_back(*enemy);
-    EntityManager::getSingleton().AddBattleEntity(
+    EntityManager::getSingleton().AddEntity(
       enemy->GetName() + "_" + std::to_string(enemies_.size() - 1),
       "enemies/" + enemy->GetModel() + ".mesh", enemy->GetPos(), Ogre::Degree(0),
-      Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), id, visible, false
+      Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), Ogre::Quaternion::IDENTITY, id
     );
 }
 
@@ -250,10 +250,11 @@ void BattleManager::SetLocation(const int id, const Ogre::String name){
         LOG_ERROR("Tried to set a location in the BattleManager, but it's not in battle mode.");
         return;
     }
-    EntityManager::getSingleton().AddBattleEntity(
+    EntityManager::getSingleton().SetBackground3D(name, "scenes/oi_grassland.mesh");
+    /**EntityManager::getSingleton().AddBattleEntity(
       "Background", "scenes/oi_grassland.mesh", Ogre::Vector3(0, 0, 0), Ogre::Degree(0),
       Ogre::Vector3(SCENE_SCALE, SCENE_SCALE, SCENE_SCALE), 999, true, true
-    );
+    );*/
 }
 
 void BattleManager::SetArenaBattle(const bool arena){
@@ -328,9 +329,9 @@ void BattleManager::LoadParty(){
                 break;
             default: continue;
         }
-        EntityManager::getSingleton().AddBattleEntity(
+        EntityManager::getSingleton().AddEntity(
           name, model, position, Ogre::Degree(0),
-          Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), 100 + i, true
+          Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), Ogre::Quaternion::IDENTITY, 100 + i
         );
 
         // Next position in Y axis

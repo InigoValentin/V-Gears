@@ -36,7 +36,7 @@ class BattleDataInstaller{
          *
          * @param[in] input_dir Path to the directory containing the original data to parse.
          * @param[in] output_dir Path to the directory of the installation data.
-         * @param[in] res_mgt The application resource manager..
+         * @param[in] res_mgr The application resource manager..
          */
         BattleDataInstaller(
           const std::string input_dir, const std::string output_dir,
@@ -238,6 +238,9 @@ class BattleDataInstaller{
 
         /**
          * Generates all required .rsd models for a model.
+         *
+         * @param[in] model Model information.
+         * @param[in] path Output path.
          */
         void GenerateRsdFiles(Model model, std::string path);
 

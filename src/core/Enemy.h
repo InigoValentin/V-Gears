@@ -155,7 +155,7 @@ class Enemy{
          *
          * The model name must be the filename of the .mesh file, without extension.
          *
-         * @param[in] The enemy model name.
+         * @param[in] model The enemy model name.
          */
         void SetModel(const std::string model);
 
@@ -239,7 +239,7 @@ class Enemy{
         /**
          * Adds an animation for the enemy.
          *
-         * @param[in] Animation ID.
+         * @param[in] animation Animation ID.
          */
         void AddAnimation(const unsigned int animation);
 
@@ -253,14 +253,14 @@ class Enemy{
         /**
          * Adds an attack for the enemy.
          *
-         * @param[in] Attack to add.
+         * @param[in] attack Attack to add.
          */
         void AddAttack(const Attack attack);
 
         /**
          * Retrieves the enemy possible item drops.
          *
-         * @return List of items that can be droped by the enemy.
+         * @return List of items that can be dropped by the enemy.
          */
         std::vector<Item> GetDrop() const;
 
@@ -500,7 +500,7 @@ class Enemy{
          * If the new max HP is higher than the current HP, the current HP will be set to the new
          * max HP.
          *
-         * @param[in] str The strength stat.
+         * @param[in] hp_max The max HP stat.
          */
         void SetHpMax(const unsigned int hp_max);
 
@@ -534,7 +534,7 @@ class Enemy{
          * If the new max MP is higher than the current MP, the current MP will be set to the new
          * max MP.
          *
-         * @param[in] str The strength stat.
+         * @param[in] mp_max The max MP stat.
          */
         void SetMpMax(const unsigned int mp_max);
 
@@ -624,7 +624,7 @@ class Enemy{
          * {@see https://wiki.ffrtt.ru/index.php/FF7/Battle/Battle_Scenes#Binary_.22Cover_Flags.22}
          * for more info about cover flags.
          *
-         * @param[in] A string with five 0s or 1s indicating the cover flags.
+         * @param[in] cover A string with five 0s or 1s indicating the cover flags.
          */
         void SetCover(std::string cover);
 

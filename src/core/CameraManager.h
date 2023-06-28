@@ -189,7 +189,7 @@ class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
          * @param[in] z Z coordinate for the camera position.
          * @param[in] d_x X coordinate of the point the camera looks at.
          * @param[in] d_y Y coordinate of the point the camera looks at.
-         * @param[in] d_y Z coordinate of the point the camera looks at.
+         * @param[in] d_z Z coordinate of the point the camera looks at.
          */
         void ScriptSetCamera(
           const int x, const int y, const int z, const int d_x, const int d_y, const int d_z
