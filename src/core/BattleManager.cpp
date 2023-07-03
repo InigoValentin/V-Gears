@@ -42,7 +42,7 @@ template<>BattleManager *Ogre::Singleton<BattleManager>::msSingleton = nullptr;
 ConfigVar cv_debug_battle_grid("debug_battle_grid", "Draw debug battle grid", "false");
 ConfigVar cv_debug_battle_axis("debug_battle_axis", "Draw debug battle axis", "false");
 
-const float BattleManager::MODEL_SCALE = 0.002f;
+const float BattleManager::MODEL_SCALE = 0.0032f;
 
 const float BattleManager::SCENE_SCALE = 0.0012f;
 
@@ -308,12 +308,12 @@ void BattleManager::LoadParty(){
                 break;
             case Character::RED:
                 name = "party_red";
-                model = "characters/rw_red.mesh";
+                model = "characters/rw_red_xiii.mesh";
                 break;
             // TODO: Cid data not installed
             case Character::CID:
                 name = "party_cid";
-                model = "characters/TODO_cid.mesh";
+                model = "characters/rz_cid.mesh";
                 break;
             case Character::VINCENT:
                 name = "party_vincent";

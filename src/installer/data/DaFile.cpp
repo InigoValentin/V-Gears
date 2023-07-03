@@ -14,6 +14,7 @@
  */
 
 #include <iostream>
+#include <bitset>
 #include "data/DaFile.h"
 
 DaFile::DaFile(File file){
@@ -71,14 +72,19 @@ std::vector<std::string> DaFile::GenerateAFiles(std::string model_id, std::strin
             );
             */
             for (int b = 0; b < animations_[anim].frames[f].rotations.size(); b ++){
+                /*if (anim == 0 && b == 0)
+                    std::cout << "    FRAME " << f << " BONE 0: "
+                      << animations_[anim].frames[f].rotations[b].x << ", "
+                      << animations_[anim].frames[f].rotations[b].y << ", "
+                      << animations_[anim].frames[f].rotations[b].z << std::endl;*/
                 a.write(
                   reinterpret_cast<const char*>(&animations_[anim].frames[f].rotations[b].x), 4
                 );
-                a.write(
-                  reinterpret_cast<const char*>(&animations_[anim].frames[f].rotations[b].y), 4
+                a.write(reinterpret_cast<const char*>(
+                  &animations_[anim].frames[f].rotations[b].y), 4
                 );
-                a.write(
-                  reinterpret_cast<const char*>(&animations_[anim].frames[f].rotations[b].z), 4
+                a.write(reinterpret_cast<const char*>(
+                  &animations_[anim].frames[f].rotations[b].z), 4
                 );
             }
         }
@@ -108,11 +114,14 @@ void DaFile::Read(File file){
 
         // This will be the buffer to hold one frame. Only one frame will be stored at a time.
         Frame frame;
+        Frame prev_frame;
         frame.SetBones(header.bone_count);
         int bits = 0;
         for (int f = 0; f < header.frame_count; f ++){
             FrameData frm;
             bits = LoadFrames(&frame, header.bone_count, bits, animation_data);
+            // Set relative rotations to the previous frame
+
             // Reverse the Y offset (required).
             frame.position_offset.f_y = 0.0f - frame.position_offset.f_y;
             frm.position_offset.x = frame.position_offset.f_x;
@@ -131,8 +140,18 @@ void DaFile::Read(File file){
                 rotation.x = frame.rotations[b].f_x;
                 rotation.y = frame.rotations[b].f_y;
                 rotation.z = frame.rotations[b].f_z;
+                /*std::cout << "PASS " << f << ", " << b << ". prev is null? " <<
+                   (prev_frame.rotations == nullptr ? "YES" : "NO") << std::endl;
+                if (f > 0){
+                    std::cout << "    COMPENSATING START" << std::endl;
+                    rotation.x += prev_frame.rotations[b].f_x;
+                    rotation.y += prev_frame.rotations[b].f_y;
+                    rotation.z += prev_frame.rotations[b].f_z;
+                    std::cout << "    COMPENSATING END" << std::endl;
+                }*/
                 frm.rotations.push_back(rotation);
             }
+            //prev_frame = frame;
             animation.frames.push_back(frm);
 
         }
@@ -146,6 +165,7 @@ u16 DaFile::GetValueFromStream(u8* bytes, u32 &stream_bit_offset){
     /*
      * TODO #2 I think this is doing some weird things
      */
+    //std::cout << "GetValueFromStream: ";
     u16 value; // The return value;
     // The number of whole bytes already consumed in the stream.
     u32 stream_byte_offset = stream_bit_offset / 8;
@@ -163,12 +183,14 @@ u16 DaFile::GetValueFromStream(u8* bytes, u32 &stream_bit_offset){
         value = (next_stream_bytes << (stream_current_byte_bits_eaten + 1)) >> 8;
         // Update the stream offset.
         stream_bit_offset += 17;
+        //std::cout << " 17 bits: " << value << std::endl;
     }
     else{ // Seven-bit value
         // Shift the delta value into place (taking care to preserve the sign).
         value = ((short)(next_stream_bytes << (stream_current_byte_bits_eaten + 1))) >> 9;
         // Update the stream offset.
         stream_bit_offset += 8;
+        //std::cout << " 8 bits: " << value << std::endl;
     }
 
     // Return the value.
@@ -189,6 +211,7 @@ int DaFile::GetBitsFromStream(u8* bytes, u32 &stream_bit_offset, int bits){
     //std::cout << "GetBitsFromStream: " << bits << " bits from " << stream_bit_offset
     //  << ": (" << (int)bytes[byte_offset] << " " << (int)bytes[byte_offset + 1]
     //  << "):\t ";
+
     for (int b = 0; b < bits; b ++){
         u8 byte = bytes[byte_offset + (bit_offset + b) / 8];
         int bit = (byte >> ((bit_offset + 7 - b) % 8) & 0x01);
@@ -196,7 +219,6 @@ int DaFile::GetBitsFromStream(u8* bytes, u32 &stream_bit_offset, int bits){
         value += bit * (pow(2, bits - 1 - b));
         stream_bit_offset += 1;
     }
-    //std::cout << "\n";
     return value;
 }
 
@@ -210,15 +232,20 @@ u16 DaFile::GetCompressedDeltaFromStream(
         int temp;
         switch (key){
             case 0: // Return the smallest possible decrement delta (at given precision).
+                //std::cout << "  GCDFS 0: " << (-1 << lowered_precision_bits) << std::endl;
                 return (-1 << lowered_precision_bits);
             case 1: case 2: case 3: case 4: case 5: case 6:
+                bits = key;
                 // Read a corresponding number of bits from the stream.
                 temp = GetBitsFromStream(bytes, stream_bit_offset, bits);
+                //std::cout << "  GCDFS " << key << ": ";
                 // Transform the value into the full seven-bit value, using the bit length
                 // as part of the encoding scheme (see notes).
                 if (temp < 0) temp -= 1 << (bits - 1);
                 else temp += 1 << (bits - 1);
+                //std::cout << temp << " -> ";
                 // Adapt to the requested precision and return.
+                //std::cout << (temp << lowered_precision_bits) << std::endl;
                 return (temp << lowered_precision_bits);
             case 7:
                 // Read an uncompressed value from the stream (at requested precision),
@@ -226,10 +253,15 @@ u16 DaFile::GetCompressedDeltaFromStream(
                 temp = GetBitsFromStream(
                   bytes, stream_bit_offset, 12 - lowered_precision_bits
                 );
+                //std::cout << "  GCDFS 7: " << temp << " -> " << (temp << lowered_precision_bits)
+                //  << std::endl;
                 return (temp << lowered_precision_bits);
+            //default:
+                //std::cout << "  GCDFS " << key << " UNKNOWN " << std::endl;
         }
     }
     // Default/error: return zero.
+    //std::cout << "  GCDFS 0 --"<< std::endl;
     return 0;
 }
 
@@ -287,7 +319,7 @@ u32 DaFile::LoadFrames(Frame* frame, int bones, int bit_start, u8* animation_buf
         //  << frame->rotations[0].i_y << " (" <<  (int) frame->rotations[0].s_y << "), "
         //  << frame->rotations[0].i_z << " (" <<  (int) frame->rotations[0].s_z << ")\n";
 
-        for (int i = 1; i < orig_bones - 1; i++){
+        for (int i = 1; i < orig_bones - 1; i ++){
             // Now get each bone rotation (the first bone is actually the root, not part of
             // the skeleton). During the first frame, the rotations are always (12 - key).
             // bits. The values are shifted by key to align it to 12 bits.
@@ -328,23 +360,35 @@ u32 DaFile::LoadFrames(Frame* frame, int bones, int bit_start, u8* animation_buf
         frame->position_offset.f_x = static_cast<float>(frame->position_offset.s_x);
         frame->position_offset.f_y = static_cast<float>(frame->position_offset.s_y);
         frame->position_offset.f_z = static_cast<float>(frame->position_offset.s_z);
-        for (int i = 0; i < orig_bones - 1; i++){
+        for (int i = 0; i < orig_bones; i ++){
+
             // The same applies here.  Add the offsets and convert to INT form, adding
             // 0x1000 if it is less than 0.
             // When Final Fantasy VII loads these animations, it is possible for the value
             // to sneak up above the 4095 boundary through a series of positive offsets.
-            x = GetCompressedDeltaFromStream(orig_animation_buffer, orig_bit_start, key);
-            y = GetCompressedDeltaFromStream(orig_animation_buffer, orig_bit_start, key);
-            z = GetCompressedDeltaFromStream(orig_animation_buffer, orig_bit_start, key);
+
+            // TODO: This is NOT a fix. third parameter should be key, not 12 - key.
+            // The reason this looks better is because the rotations are now made so small they are
+            // imperceptible
+            x = GetCompressedDeltaFromStream(orig_animation_buffer, orig_bit_start, 12 - key);
+            y = GetCompressedDeltaFromStream(orig_animation_buffer, orig_bit_start, 12 - key);
+            z = GetCompressedDeltaFromStream(orig_animation_buffer, orig_bit_start, 12 - key);
+
             frame->rotations[i].s_x += x;
             frame->rotations[i].s_y += y;
             frame->rotations[i].s_z += z;
+            //if (i == 0)
+            //    std::cout << "    ADDED ROTATION: " << frame->rotations[i].s_x << ", "
+            //      << frame->rotations[i].s_y << ", " << frame->rotations[i].s_z << std::endl;
             frame->rotations[i].i_x = (frame->rotations[i].s_x < 0) ?
-              frame->rotations[i].s_x + 0x1000 : frame->rotations[i].s_z;
+              frame->rotations[i].s_x + 0x1000 : frame->rotations[i].s_x;
             frame->rotations[i].i_y = (frame->rotations[i].s_y < 0) ?
               frame->rotations[i].s_y + 0x1000 : frame->rotations[i].s_y;
             frame->rotations[i].i_z = (frame->rotations[i].s_z < 0) ?
               frame->rotations[i].s_z + 0x1000 : frame->rotations[i].s_z;
+            //if (i == 0)
+            //    std::cout << "    PROCESSED ROTATION: " << frame->rotations[i].i_x << ", "
+            //      << frame->rotations[i].i_y << ", " << frame->rotations[i].i_z << std::endl;
         }
     }
 

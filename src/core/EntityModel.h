@@ -60,6 +60,8 @@ class EntityModel : public Entity{
          */
         virtual bool IsVisible() const;
 
+        Ogre::Entity* GetModel();
+
         /**
          * Plays an animation of the model.
          *

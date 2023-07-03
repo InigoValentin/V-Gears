@@ -343,10 +343,32 @@ void EntityManager::AddBattleEntity(
     entity->setScale(scale);
     entity->SetIndex(index);
     entity->SetVisible(true);
-    // Backgrounds must be reoriented.
-    //if (is_background) node->setOrientation(1, 1, 0, 0);
+    // Battle models must be reoriented.
+    node->setOrientation(1, 1, 0, 0);
     battle_entity_.push_back(entity);
     ScriptManager::getSingleton().AddEntity(ScriptManager::BATTLE, entity->GetName(), entity);
+
+    /*std::cout << "BATTLE ANIMATIONS FOR " << name << std::endl;
+    const std::map<Ogre::String, Ogre::AnimationState*>& anims
+      = entity->GetModel()->getAllAnimationStates()->getAnimationStates();
+    int size = anims.size();
+    std::cout << "    " << std::to_string(size) << " TOTAL " << std::endl;
+    for (auto anim = anims.begin(); anim != anims.end(); ++ anim){
+        std::cout << "    - " << anim->first << ", " << anim->second << std::endl;
+    }*/
+
+    /* Animations have the following names:
+     *  XX_00,
+     *  XX_01,
+     *  XX_02,
+     *  ...
+     * where XX is the first two characters of file_name, without the path.
+     */
+    Ogre::String anim = file_name.substr(file_name.find_last_of("/\\") + 1).substr(0, 2) + "_00";
+    std::cout << "    Playing " << anim << std::endl;
+    entity->ScriptSetDefaultAnimation(anim.c_str());
+
+
 }
 
 Entity* EntityManager::GetBackground3D() const{
@@ -364,7 +386,7 @@ void EntityManager::SetBackground3D(const Ogre::String& name, const Ogre::String
     }
     Ogre::SceneNode* node = scene_node_->createChildSceneNode("bg_" + name);
     background_3d_ = new EntityModel(name, file_name, node);
-    background_3d_->SetPosition(Ogre::Vector3(0, 0, 0));
+    background_3d_->SetPosition(Ogre::Vector3(0, 0, -2));
     background_3d_->SetRotation(Ogre::Degree(0));
     background_3d_->setScale(Ogre::Vector3(SCENE_SCALE, SCENE_SCALE, SCENE_SCALE));
     background_3d_->SetIndex(IsBattleModule() ? BATTLE_BACKGROUND_ID : WORLD_MAP_BACKGROUND_ID);
@@ -434,7 +456,10 @@ void EntityManager::ClearBattle(){
         scene_node_->removeAndDestroyChild("Battle_" + battle_entity_[i]->GetName());
     }
     battle_entity_.clear();
-    delete background_3d_;
+    if (background_3d_ != nullptr){
+        scene_node_->removeAndDestroyChild("bg_" + background_3d_->GetName());
+        delete background_3d_;
+    }
 }
 
 void EntityManager::ClearWorld(){

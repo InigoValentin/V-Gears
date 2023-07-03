@@ -146,7 +146,10 @@ unsigned int BattleDataInstaller::ProcessModel(){
     //  - am - cz: Polygon files (.p)
     //  - da: Animations (.anim)
     std::string id = battle_lgp_file_names_[next_model_to_process_].substr(0, 2);
-    //if (id != "at"){next_model_to_process_ ++; return next_model_to_process_;} // TODO: DEBUG
+    /*if (id != "rt"){ // TODO DEBUG REMOVE
+        next_model_to_process_ ++;
+        return next_model_to_process_;
+    }*/
     std::string type = battle_lgp_file_names_[next_model_to_process_].substr(2, 2);
     FF7Data::BattleModelInfo info = FF7Data::GetBattleModelInfo(id);
     if (type == "aa"){
@@ -320,6 +323,7 @@ unsigned int BattleDataInstaller::ConvertModel(){
         GenerateRsdFiles(model, output_dir_ + "temp/battle_models/");
 
         if ("" != model.anim){ // Skip for non-animated, ie battle backgrounds
+            //std::cout << " GENERATE ANIMATIONS FOR "  << model.id << std::endl;
             DaFile da(File(output_dir_ + "temp/battle_models/" + model.anim));
             std::vector<std::string> a_files = da.GenerateAFiles(
               model.id, output_dir_ + "temp/battle_models/"
@@ -794,8 +798,8 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
             extract_buffer = static_cast<u8*>(realloc(extract_buffer, extract_size * 2));
             if (extract_buffer == NULL){
                 inflateEnd(&strm);
-                std::cout << "Warning: extract_buffer == NULL in file "
-                  << file.GetFileName() << std::endl;
+                //std::cout << "Warning: extract_buffer == NULL in file "
+                //  << file.GetFileName() << std::endl;
                 return NULL;
             }
             strm.next_out = static_cast<u8*>(extract_buffer + extract_size);

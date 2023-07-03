@@ -56,8 +56,9 @@ void EntityModel::Update(){
 
 void EntityModel::SetVisible(const bool visible){model_->setVisible(visible);}
 
-
 bool EntityModel::IsVisible() const{return model_->isVisible();}
+
+Ogre::Entity* EntityModel::GetModel(){return model_;}
 
 void EntityModel::PlayAnimation(
   const Ogre::String& animation, Entity::AnimationState state,
