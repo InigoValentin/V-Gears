@@ -199,6 +199,8 @@ void CameraManager::StartBattleCamera(
     //CameraManager::getSingleton().GetCurrentCamera()->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
     camera_->lookAt(orientation);
     camera_->roll(Ogre::Angle(90));
+    // Fix: compensate for the battle UI covered section of the screen.
+    camera_->move(Ogre::Vector3(0, 0, -4));
 
     /*Ogre::SceneNode* rootScene =
               Ogre::Root::getSingleton().getSceneManager("Scene") ->getRootSceneNode();

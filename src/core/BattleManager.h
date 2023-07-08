@@ -340,9 +340,14 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         void UpdateWorld() override;
 
         /**
-         * Scale factor for battle character and enemy models.
+         * Scale factor for battle enemy models.
          */
-        static const float MODEL_SCALE;
+        static const float ENEMY_SCALE;
+
+        /**
+         * Scale factor for battle character models.
+         */
+        static const float PARTY_SCALE;
 
         /**
          * Scale factor for battle background models.

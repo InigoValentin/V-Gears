@@ -330,21 +330,22 @@ void EntityManager::AddFieldOrWorldMapEntity(
 
 void EntityManager::AddBattleEntity(
   const Ogre::String& name, const Ogre::String& file_name, const Ogre::Vector3& position,
-  const Ogre::Degree& orientation, const Ogre::Vector3& scale, const int index
+  const Ogre::Degree& rotation, const Ogre::Vector3& scale,
+  const Ogre::Quaternion& root_orientation, const int index
 ){
     if (module_ != Module::BATTLE){
         LOG_ERROR("Tried to add battle Entity but the EntityManager is not in battle mode.");
         return;
     }
     Ogre::SceneNode* node = scene_node_->createChildSceneNode("Battle_" + name);
+    // Battle models must be reoriented.
+    node->setOrientation(root_orientation);
     EntityModel* entity = new EntityModel(name, file_name, node);
     entity->SetPosition(position);
-    entity->SetRotation(orientation);
+    entity->SetRotation(rotation);
     entity->setScale(scale);
     entity->SetIndex(index);
     entity->SetVisible(true);
-    // Battle models must be reoriented.
-    node->setOrientation(1, 1, 0, 0);
     battle_entity_.push_back(entity);
     ScriptManager::getSingleton().AddEntity(ScriptManager::BATTLE, entity->GetName(), entity);
 
@@ -365,7 +366,7 @@ void EntityManager::AddBattleEntity(
      * where XX is the first two characters of file_name, without the path.
      */
     Ogre::String anim = file_name.substr(file_name.find_last_of("/\\") + 1).substr(0, 2) + "_00";
-    std::cout << "    Playing " << anim << std::endl;
+    //std::cout << "    Playing " << anim << std::endl;
     entity->ScriptSetDefaultAnimation(anim.c_str());
 
 
@@ -486,7 +487,7 @@ void EntityManager::AddEntity(
   const Ogre::Quaternion& root_orientation, const int index
 ){
     if (IsBattleModule())
-        AddBattleEntity(name, file_name, position, rotation, scale, index);
+        AddBattleEntity(name, file_name, position, rotation, scale, root_orientation, index);
     else
         AddFieldOrWorldMapEntity(
           name, file_name, position, rotation, scale, root_orientation, index

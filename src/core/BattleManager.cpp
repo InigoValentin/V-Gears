@@ -42,7 +42,9 @@ template<>BattleManager *Ogre::Singleton<BattleManager>::msSingleton = nullptr;
 ConfigVar cv_debug_battle_grid("debug_battle_grid", "Draw debug battle grid", "false");
 ConfigVar cv_debug_battle_axis("debug_battle_axis", "Draw debug battle axis", "false");
 
-const float BattleManager::MODEL_SCALE = 0.0032f;
+const float BattleManager::ENEMY_SCALE = 0.0032f;
+
+const float BattleManager::PARTY_SCALE = 0.0039f;
 
 const float BattleManager::SCENE_SCALE = 0.0012f;
 
@@ -172,8 +174,8 @@ void BattleManager::AddEnemy(
     enemies_.push_back(*enemy);
     EntityManager::getSingleton().AddEntity(
       enemy->GetName() + "_" + std::to_string(enemies_.size() - 1),
-      "enemies/" + enemy->GetModel() + ".mesh", enemy->GetPos(), Ogre::Degree(0),
-      Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), Ogre::Quaternion::IDENTITY, id
+      "enemies/" + enemy->GetModel() + ".mesh", enemy->GetPos(), Ogre::Degree(1),
+      Ogre::Vector3(ENEMY_SCALE, ENEMY_SCALE, ENEMY_SCALE), Ogre::Quaternion(1, 1, 0, 0), id
     );
 }
 
@@ -331,7 +333,8 @@ void BattleManager::LoadParty(){
         }
         EntityManager::getSingleton().AddEntity(
           name, model, position, Ogre::Degree(0),
-          Ogre::Vector3(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE), Ogre::Quaternion::IDENTITY, 100 + i
+          Ogre::Vector3(PARTY_SCALE, PARTY_SCALE, PARTY_SCALE),
+          Ogre::Quaternion(1, 1, 0, 0), 100 + i
         );
 
         // Next position in Y axis

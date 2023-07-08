@@ -60,73 +60,84 @@ class DaFile{
     private:
 
         /**
-         * A bone rotation, with all it's values calculated.
+         * A three-coordinate value.
+         *
+         * Can be used to store bone rotations, offsets, translations... Each coordinate has short,
+         * integer and float formats.
          */
-        struct Rotation{
+        struct TriValue{
 
             /**
-             * Rotation in the X axis, in degrees.
+             * X value, short format.
              */
-            float x;
+            char16_t s_x;
 
             /**
-             * Rotation in the Y axis, in degrees.
+             * Y value, short format.
              */
-            float y;
+            char16_t s_y;
 
             /**
-             * Rotation in the Z axis, in degrees.
+             * Z value, short format
              */
-            float z;
+            char16_t s_z;
+
+            /**
+             * X value, integer format.
+             */
+            int i_x;
+
+            /**
+             * Y value, integer format.
+             */
+            int i_y;
+
+            /**
+             * Z value, integer format.
+             */
+            int i_z;
+
+            /**
+             * X value, float_format.
+             */
+            float f_x;
+
+            /**
+             * Y value, float format.
+             */
+            float f_y;
+
+            /**
+             * Z value, float format.
+             */
+            float f_z;
         };
 
         /**
-         * Processed frame data, to be written to .a files.
+         * Information for a frame.
          */
-        struct FrameData{
+        struct Frame{
 
             /**
-             * Position offset for the frame.
+             * Root offset.
              */
-            Rotation position_offset;
+            TriValue offset;
 
             /**
-             * List of bone rotations, one per bone.
+             * Root rotation.
              */
-            std::vector<Rotation> rotations;
+            TriValue rotation;
+
+            /**
+             * Each of the bone rotations.
+             */
+            std::vector<TriValue> bones;
         };
 
-        /**
-         * Processed animation data, to be written to.a files.
-         */
         struct Animation{
 
             /**
-             * Number of frames in the animation.
-             */
-            unsigned int frame_count;
-
-            /**
-             * Number of bones involved in the animation.
-             */
-            unsigned int bone_count;
-
-            /**
-             * Each frame in the animation.
-             */
-            std::vector<FrameData> frames;
-        };
-
-        /**
-         * Header for animations. 12 bytes, at the start of each animation.
-         */
-        struct AnimationHeader {
-
-            /**
-             * Number of bones + 1 in the animation.
-             *
-             * It's not always reliable, the number of bones in the skeleton is the real one. If
-             * dealing with a weapon animation, the value will always be 1.
+             * Number of bones in the animation.
              */
             u32 bone_count;
 
@@ -136,157 +147,49 @@ class DaFile{
             u32 frame_count;
 
             /**
-             * Size, in bytes, of the animation data.
-             */
-            u32 data_size;
-        };
-
-        /**
-         * Mini header for each animation. 5 bytes, immediately after each main header.
-         */
-        struct AnimationMiniHeader {
-
-            /**
-             * Number of frames in the animation.
-             *
-             * It may not match {@see AnimationHeader.frame_count}.
-             */
-            u16 frame_count;
-
-            /**
              * Size of the animation data.
-             *
-             * It should be 6 bytes less than {@see AnimationHeader.data_size}.
              */
-            u16 data_size;
+            u32 size;
 
             /**
-             * Key used for decoding bone data.
-             *
-             * It indicates how many bits are to be read to get a bone rotation. Not to be used in
-             * the first frame, which is not compressed.
-             *
-             * 0: 12 bits per bone rotation, 36 bits per bone.
-             * 2: 10 bits per bone rotation, 30 bits per bone.
-             * 4: 8 bits per bone rotation, 30 bits per bone.
+             * Key for decoding values in an animation.
              */
             u8 key;
+
+            /**
+             * List of frames in the animation.
+             */
+            std::vector<Frame> frames;
         };
 
         /**
-         * Bone rotation.
-         */
-        struct BoneRotation {
-
-            /**
-             * X axis rotation, as read from the da file.
-             */
-            u16 s_x;
-
-            /**
-             * Y axis rotation, as read from the da file.
-             */
-            u16 s_y;
-
-            /**
-             * Z axis rotation, as read from the da file.
-             */
-            u16 s_z;     // Signed short versions.   0x00
-
-            /**
-             * X axis rotation, converted to integer. Rotation between 0 and 4096.
-             */
-            int i_x;
-
-            /**
-             * Y axis rotation, converted to integer. Rotation between 0 and 4096.
-             */
-            int i_y;
-
-            /**
-             * Z axis rotation, converted to integer. Rotation between 0 and 4096.
-             */
-            int i_z;
-
-            /**
-             * X axis rotation, in degrees.
-             */
-            float f_x;
-
-            /**
-             * Y axis rotation, in degrees.
-             */
-            float f_y;
-
-            /**
-             * Z axis rotation, in degrees.
-             */
-            float f_z;
-        };
-
-        /**
-         * A frame of an animation.
+         * Extends the sign for an integer value for a specified bit length.
          *
-         * Stores all bone rotations for a frame.
+         * @param[in] val The value to extend.
+         * @param[in] len Number of bytes  to extend the value to.
          */
-        struct Frame{
+        static int ExtendSignInteger(int val, int len);
 
-            /**
-             * Number of bones in the animation frame.
-             */
-            u32 bone_count;
+        /**
+         * Extends the sign for a short value for a specified bit length.
+         *
+         * @param[in] val The value to extend.
+         * @param[in] len Number of bytes  to extend the value to.
+         */
+        static int GetSignExtendedShort(int val, int len);
 
-            /**
-             * Position offset.
-             *
-             * @todo Verify if it's the previous frame?
-             */
-            BoneRotation position_offset;
-
-            /**
-             * Bone rotations for the frame.
-             */
-            BoneRotation* rotations;
-
-            /**
-             * Constructor. Initializes data.
-             */
-            Frame(){
-                bone_count = 0;
-                rotations = NULL;
-            }
-
-            /**
-             * Destructor.
-             */
-            ~Frame(){
-                bone_count = 0;
-                delete [] rotations;
-                rotations = NULL;
-            }
-
-            /**
-             * Sets the number of bones and initializes data arrays.
-             *
-             * @param[in] bones The number of bones.
-             */
-            void SetBones(u32 bones){
-                // Delete the old.
-                bone_count = 0;
-                delete [] rotations;
-                // Create the new.
-                rotations = new BoneRotation[bones];
-                if (rotations != NULL) bone_count = bones;
-            }
-        };
 
         /**
          * Reads the Da file and extracts all the data.
          *
-         * @param[in, out] file The file to read from. The file contents will not be altered, but
-         * it's offset will be changed while reading it.
          */
-        void Read(File file);
+        void Read();
+
+        Animation ReadAnimation();
+
+        Frame ReadFirstFrame(u32 bones, u8 key);
+
+        Frame ReadFrame(u32 bones, u8 key, Frame prev);
 
         /**
          * Retrieves a value of dynamic size from the byte stream.
@@ -295,12 +198,9 @@ class DaFile{
          * data will be read and returned. It it isn't, 16 more bits of data will be read and
          * returned. In total, either 17 or 8 bits of data will be read.
          *
-         * @param[in] bytes The byte stream to read from.
-         * @param[in,out] stream_bit_offset The bit at which to start reading. For each bit read,
-         * it will be advanced by one.
          * @return The read value.
          */
-        u16 GetValueFromStream(u8* bytes, u32 &stream_bit_offset);
+        u16 GetDynamicOffsetFromStream();
 
         /**
          * Reads 2 bytes from the stream as a little endian value.
@@ -310,31 +210,39 @@ class DaFile{
          * by 16.
          * @return The read value.
          */
-        u16 ReadU16LE(u8* bytes, u32 &stream_bit_offset);
+        u16 ReadU16LE();
+
+        /**
+         * Read an arbitrary number of bits from the da contents as unsigned.
+         *
+         * @param[in] bits Number of bits.
+         * @return Unsigned value.
+         */
+        int GetBitsU(int bits);
+
+        /**
+         * Read an arbitrary number of bits from the da contents as signed.
+         *
+         * @param[in] bits Number of bits.
+         * @return Signed value.
+         */
+        int GetBitsS(int bits);
 
         /**
          * Reads an arbitrary length of bits from the stream.
          *
-         * @param[in] bytes The byte stream to read from.
-         * @param[in,out] stream_bit_offset The bit at which to start reading. It will be advanced
-         * by one per read bit.
          * @param[in] bits Number of bits to read.
          * @return The read value.
          */
-        int GetBitsFromStream(u8* bytes, u32 &stream_bit_offset, int bits);
+        int GetBitsFromStream(int bits);
 
         /**
          * Decodes a delta rotation read from the stream.
          *
-         * @param[in] bytes The byte stream to read from.
-         * @param[in,out] stream_bit_offset The bit at which to start reading. It will be advanced
-         * by one per read bit.
-         * @param lowered_precision_bits How many bits to sift the read value.
+         * @param lowered_precision_bits How many bits to sift the read value. The animation key.
          * @return The decoded value.
          */
-        u16 GetCompressedDeltaFromStream(
-          u8* bytes, u32& stream_bit_offset, int lowered_precision_bits
-        );
+        int GetCompressedDeltaFromStream(int lowered_precision_bits);
 
         /**
          * Loads the frames in an animation.
@@ -347,8 +255,23 @@ class DaFile{
         u32 LoadFrames(Frame* frame, int bones, int bit_start, u8* animation_buffer);
 
         /**
+         * The da file.
+         */
+        File da_file_;
+
+        /**
+         * Contents of the da file as a byte array.
+         */
+        u8* da_bytes_;
+
+        /**
          * List of animations.
          */
         std::vector<Animation> animations_;
+
+        /**
+         * Number of bits already read from the da file.
+         */
+        u32 bit_offset_;
 
 };

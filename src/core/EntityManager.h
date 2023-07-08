@@ -467,14 +467,15 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @param[in] name Entity name.
          * @param[in] file_name Path to the entity model file.
          * @param[in] position Entity position.
-         * @param[in] orientation Entity face direction.
+         * @param[in] rotation Entity face direction.
          * @param[in] scale Entity scale.
+         * @param[in] root_orientation The node orientation.
          * @param[in] index Index of the entity.
          */
         void AddBattleEntity(
           const Ogre::String& name, const Ogre::String& file_name,
           const Ogre::Vector3& position, const Ogre::Degree& orientation,
-          const Ogre::Vector3& scale, const int index
+          const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, const int index
         );
 
         /**
