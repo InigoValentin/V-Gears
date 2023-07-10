@@ -40,22 +40,22 @@ class Character{
             /**
              * Cloud's ID.
              */
-            CLOUD   = 0,
-
-            /**
-             * Tifa's ID.
-             */
-            TIFA = 1,
-
-            /**
-             * Aerith's ID.
-             */
-            AERIS = 2,
+            CLOUD = 0,
 
             /**
              * Barret's ID.
              */
-            BARRET = 3,
+            BARRET = 1,
+
+            /**
+             * Tifa's ID.
+             */
+            TIFA = 2,
+
+            /**
+             * Aerith's ID.
+             */
+            AERIS = 3,
 
             /**
              * Red XIII's ID.

@@ -18,6 +18,7 @@
 #include "core/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "core/Entity.h"
+#include "core/EntityManager.h"
 #include "core/Logger.h"
 
 ConfigVar cv_debug_entity("debug_entity", "Draw entity debug info", "0");
@@ -237,7 +238,9 @@ void Entity::SetRotation(const Ogre::Degree& rotation){
       = rotation.valueDegrees() - Ogre::Math::Floor(rotation.valueDegrees() / 360.0f) * 360.0f;
     if (angle < 0) angle = 360 + angle;
     Ogre::Quaternion q;
-    Ogre::Vector3 vec = Ogre::Vector3::UNIT_Z;
+    // On battle module, rotate on Y axis.
+    Ogre::Vector3 vec = EntityManager::getSingleton().IsBattleModule()
+      ? Ogre::Vector3::UNIT_Y : Ogre::Vector3::UNIT_Z;
     q.FromAngleAxis(Ogre::Radian(Ogre::Degree(angle)), vec);
     model_root_node_->setOrientation(q);
     direction_node_->setOrientation(q);
@@ -249,7 +252,9 @@ Ogre::Degree Entity::GetRotation() const{
     assert(model_root_node_);
     Ogre::Quaternion q = model_root_node_->getOrientation();
     Ogre::Degree temp;
-    Ogre::Vector3 vec = Ogre::Vector3::UNIT_Z;
+    // On battle module, rotate on Y axis.
+    Ogre::Vector3 vec = EntityManager::getSingleton().IsBattleModule()
+      ? Ogre::Vector3::UNIT_Z : Ogre::Vector3::UNIT_Z;
     q.ToAngleAxis(temp, vec);
     return temp;
 }

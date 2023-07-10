@@ -100,7 +100,6 @@ void BattleManager::StartBattle(const unsigned int id){
         return;
     }
     SetBattleModule();
-    SetFormationId(id);
     AudioManager::getSingleton().SetBattleModule();
     CameraManager::getSingleton().SetBattleModule();
     DialogsManager::getSingleton().SetBattleModule();
@@ -109,6 +108,7 @@ void BattleManager::StartBattle(const unsigned int id){
     InputManager::getSingleton().SetBattleModule();
     ScriptManager::getSingleton().SetBattleModule();
     UiManager::getSingleton().SetBattleModule();
+    SetFormationId(id);
 
     // Load the formation XML file (name is dddd.xml)
     std::string filename = std::to_string(formation_id_);
@@ -177,6 +177,9 @@ void BattleManager::AddEnemy(
       "enemies/" + enemy->GetModel() + ".mesh", enemy->GetPos(), Ogre::Degree(1),
       Ogre::Vector3(ENEMY_SCALE, ENEMY_SCALE, ENEMY_SCALE), Ogre::Quaternion(1, 1, 0, 0), id
     );
+    EntityManager::getSingleton().GetEntity(
+      enemy->GetName() + "_" + std::to_string(enemies_.size() - 1)
+    )->SetRotation(Ogre::Degree(180));
 }
 
 void BattleManager::AddCamera(

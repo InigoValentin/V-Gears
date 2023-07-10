@@ -387,7 +387,7 @@ void EntityManager::SetBackground3D(const Ogre::String& name, const Ogre::String
     }
     Ogre::SceneNode* node = scene_node_->createChildSceneNode("bg_" + name);
     background_3d_ = new EntityModel(name, file_name, node);
-    background_3d_->SetPosition(Ogre::Vector3(0, 0, -2));
+    background_3d_->SetPosition(Ogre::Vector3(0, 0, 0));
     background_3d_->SetRotation(Ogre::Degree(0));
     background_3d_->setScale(Ogre::Vector3(SCENE_SCALE, SCENE_SCALE, SCENE_SCALE));
     background_3d_->SetIndex(IsBattleModule() ? BATTLE_BACKGROUND_ID : WORLD_MAP_BACKGROUND_ID);
@@ -459,7 +459,10 @@ void EntityManager::ClearBattle(){
     battle_entity_.clear();
     if (background_3d_ != nullptr){
         scene_node_->removeAndDestroyChild("bg_" + background_3d_->GetName());
-        delete background_3d_;
+        ScriptManager::getSingleton().RemoveEntity(
+          ScriptManager::ENTITY, background_3d_->GetName()
+        );
+        background_3d_ = nullptr;
     }
 }
 

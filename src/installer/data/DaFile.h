@@ -51,13 +51,18 @@ class DaFile{
          * "/home/user/.v-gears/ac_01.a" and "/home/user/.v-gears/ac_02.a".
          *
          * @param[in] model_id ID of the model the animation belongs to, usually a two letter
-         * character. Used to generate the file name.
+         * code. Used to generate the file name.
          * @param[in] path Path to the directory where the files will be saved.
          * @return A list of the generated files. They include the path and the extension.
          */
         std::vector<std::string> GenerateAFiles(std::string model_id, std::string path);
 
     private:
+
+        /**
+         * Scale for bone offsets.
+         */
+        static const float OFFSET_SCALE;
 
         /**
          * A three-coordinate value.
@@ -124,11 +129,6 @@ class DaFile{
             TriValue offset;
 
             /**
-             * Root rotation.
-             */
-            TriValue rotation;
-
-            /**
              * Each of the bone rotations.
              */
             std::vector<TriValue> bones;
@@ -167,6 +167,7 @@ class DaFile{
          *
          * @param[in] val The value to extend.
          * @param[in] len Number of bytes  to extend the value to.
+         * @return The signed integer.
          */
         static int ExtendSignInteger(int val, int len);
 
@@ -175,45 +176,69 @@ class DaFile{
          *
          * @param[in] val The value to extend.
          * @param[in] len Number of bytes  to extend the value to.
+         * @return The signed integer.
          */
         static int GetSignExtendedShort(int val, int len);
 
-
         /**
          * Reads the Da file and extracts all the data.
-         *
          */
         void Read();
 
+        /**
+         * Reads an animation from the *da file.
+         *
+         * Requires {@see bit_offset_} to indicate the bit at which the animation begins.
+         *
+         * If the read animation is invalid (i.e. with a size less than 11 bytes), the
+         * {@see Animation.frame_count} will be 0 and the rest of the data in the animation is not
+         * to be trusted, and the animation should not be used.
+         *
+         * @return The animation read.
+         */
         Animation ReadAnimation();
 
+        /**
+         * Reads the first, uncompressed frame.
+         *
+         * Requires {@see bit_offset_} to indicate the bit at which the frame begins.
+         *
+         * @param[in] bones The number of bones involved in the animation.
+         * @param[in] key Key for decoding the animation (fifth byte in the animation second
+         * header).
+         * @return The first frame.
+         */
         Frame ReadFirstFrame(u32 bones, u8 key);
 
+        /**
+         * Reads a compressed frame.
+         *
+         * Requires {@see bit_offset_} to indicate the bit at which the frame begins.
+         *
+         * @param[in] bones The number of bones involved in the animation.
+         * @param[in] key Key for decoding the animation (fifth byte in the animation second
+         * header).
+         * @param[in] prev Previous frame.
+         * @return The first frame.
+         */
         Frame ReadFrame(u32 bones, u8 key, Frame prev);
 
         /**
-         * Retrieves a value of dynamic size from the byte stream.
+         * Retrieves a positional offset value of dynamic size from the file.
          *
-         * The first read bit will determine the length of the read data. If it's 1, 7 more bits of
-         * data will be read and returned. It it isn't, 16 more bits of data will be read and
-         * returned. In total, either 17 or 8 bits of data will be read.
+         * Requires {@see bit_offset_} to indicate the bit at which the frame begins. The first
+         * read bit will determine the length of the read data. If it's 1, 7 more bits of data will
+         * be read and returned. It it isn't, 16 more bits of data will be read and returned. In
+         * total, either 17 or 8 bits of data will be read.
          *
          * @return The read value.
          */
-        u16 GetDynamicOffsetFromStream();
-
-        /**
-         * Reads 2 bytes from the stream as a little endian value.
-         *
-         * @param[in] bytes The byte stream to read from.
-         * @param[in,out] stream_bit_offset The bit at which to start reading. It will be advanced
-         * by 16.
-         * @return The read value.
-         */
-        u16 ReadU16LE();
+        int GetDynamicOffsetFromStream();
 
         /**
          * Read an arbitrary number of bits from the da contents as unsigned.
+         *
+         * Bits will be read from {@see bit_offset_}.
          *
          * @param[in] bits Number of bits.
          * @return Unsigned value.
@@ -223,36 +248,22 @@ class DaFile{
         /**
          * Read an arbitrary number of bits from the da contents as signed.
          *
+         * Bits will be read from {@see bit_offset_}.
+         *
          * @param[in] bits Number of bits.
          * @return Signed value.
          */
         int GetBitsS(int bits);
 
         /**
-         * Reads an arbitrary length of bits from the stream.
-         *
-         * @param[in] bits Number of bits to read.
-         * @return The read value.
-         */
-        int GetBitsFromStream(int bits);
-
-        /**
          * Decodes a delta rotation read from the stream.
+         *
+         * Requires {@see bit_offset_} to indicate the bit at which the delta begins
          *
          * @param lowered_precision_bits How many bits to sift the read value. The animation key.
          * @return The decoded value.
          */
         int GetCompressedDeltaFromStream(int lowered_precision_bits);
-
-        /**
-         * Loads the frames in an animation.
-         *
-         * @param[out] frame Read frame data will be set here.
-         * @param[in] bones The number of bones in the animation.
-         * @param[in] bit_start Bit to start reading from animation_buffer at.
-         * @param[in] animation_buffer The animation data.
-         */
-        u32 LoadFrames(Frame* frame, int bones, int bit_start, u8* animation_buffer);
 
         /**
          * The da file.
