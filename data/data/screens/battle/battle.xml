@@ -31,18 +31,32 @@
             </widget>
             <widget name="Commands" x="22%" y="5%" width="60" height="95%" visible="false">
                 <prototype name="Window" />
-                <text_area name="Cmd1" x="5" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd2" x="5" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd3" x="5" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd4" x="5" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd5" x="55" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd6" x="55" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd7" x="55" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd8" x="55" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd9" x="100" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd10" x="100" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd11" x="100" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
-                <text_area name="Cmd12" x="100" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd1" x="10" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd2" x="10" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd3" x="10" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd4" x="10" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd5" x="60" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd6" x="60" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd7" x="60" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd8" x="60" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd9" x="105" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd10" x="105" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd11" x="105" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd12" x="105" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <sprite name="Cursor" image="icons/cursor.png" x="132" y="99" width="24" height="16" visible="true">
+                    <animation name="Position1" length="0" x="0:-15" y="0:0%+7" />
+                    <animation name="Position2" length="0" x="0:-15" y="0:22%+7" />
+                    <animation name="Position3" length="0" x="0:-15" y="0:44%+7" />
+                    <animation name="Position4" length="0" x="0:-15" y="0:66%+7" />
+                    <animation name="Position5" length="0" x="0:35" y="0:0%+7" />
+                    <animation name="Position6" length="0" x="0:35" y="0:22%+7" />
+                    <animation name="Position7" length="0" x="0:35" y="0:44%+7" />
+                    <animation name="Position8" length="0" x="0:35" y="0:66%+7" />
+                    <animation name="Position9" length="0" x="0:80" y="0:0%+7" />
+                    <animation name="Position10" length="0" x="0:80" y="0:22%+7" />
+                    <animation name="Position11" length="0" x="0:80" y="0:44%+7" />
+                    <animation name="Position12" length="0" x="0:80" y="0:66%+7" />
+                </sprite>
             </widget>
         </widget>
     </widget>

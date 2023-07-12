@@ -16,6 +16,24 @@ UiContainer.BattleUi = {
         return 0
     end,
 
+    --- Indicates what the current cursor is for.
+    --
+    -- Possible values are "wait" (no cursor), "command" (for command selection), "list" (for
+    -- magic, item, summon... selection), and "target" for target selection.
+    window_state = "wait", -- wait, command, list, target
+
+    --- Current position for the cursor in the command window.
+    cursor_command = 1,
+
+    --- Current position for the cursor in the list window.
+    cursor_list = 1,
+
+    --- Current position for the cursor in the target window.
+    cursor_target = 1,
+
+    --- ID of the character the cursor is for.
+    current_character_window = -1,
+
     --- Handles button events.
     --
     -- For the current submenu, handles directional keys, enter and escape events.
@@ -27,6 +45,71 @@ UiContainer.BattleUi = {
         end
         if button == "K" then
             Battle.finish()
+        end
+        if self.window_state == "command" then
+            local command_count = #self.party[self.current_character_window].command
+            if button == "Down" then
+                if self.cursor_command < 4 then
+                    -- If on the first three ones, always alow to go down to reach "Item"
+                    self.cursor_command = self.cursor_command + 1
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                elseif self.cursor_command % 4 == 0 then
+                    -- If on a multiple of 4, go to the top of the column
+                    self.cursor_command = self.cursor_command - 3
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                elseif command_count > self.cursor_command then
+                    -- Else, allow one position down only if there are more comands.
+                    self.cursor_command = self.cursor_command + 1
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                end
+            elseif button == "Up" then
+                if self.cursor_command == 1 then
+                    -- If on "Attack, always go to item
+                    self.cursor_command = 4
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                elseif self.cursor_command > 1 and self.cursor_command < 5 then
+                    -- If on the second, third, or fourth, always alwow to go down to reach "Attack" from "Item"
+                    self.cursor_command = self.cursor_command - 1
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                elseif self.cursor_command % 4 == 1 and command_count > self.cursor_command then
+                    -- If on the first row, go to the last where there is a command
+                    self.cursor_command = self.cursor_command + 3
+                    while self.cursor_command > command_count do
+                        self.cursor_command = self.cursor_command - 1
+                    end
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                else
+                    -- Else, always allow to go one up.
+                    self.cursor_command = self.cursor_command - 1
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                end
+            elseif button == "Left" then
+                if command_count > 4 then
+                    if self.cursor_command > 4 then
+                        self.cursor_command = self.cursor_command - 4
+                        ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    else
+                        local new_position = self.cursor_command + 4 * math.floor(command_count / 4)
+                        while new_position > command_count do
+                            new_position = new_position - 4
+                        end
+                        self.cursor_command = new_position
+                        ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    end
+                end
+            elseif button == "Right" then
+                if command_count > 4 then
+                    self.cursor_command = self.cursor_command + 4
+                    if self.cursor_command > command_count then
+                        self.cursor_command = self.cursor_command - 4 * math.floor(self.cursor_command / 4)
+                        if self.cursor_command < 1 then
+                            self.cursor_command = self.cursor_command + 4
+                        end
+                    end
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                end
+            -- TODO: elseif accept, skip buttons...
+            end
         end
         return 0
     end,
@@ -207,6 +290,17 @@ UiContainer.BattleUi = {
     -- Shows the command window for a character
     -- @param party_id The ID of the party member whose commands to show
     show_commands = function(self, party_id)
+        self.current_character_window = party_id
+        self.cursor_command = 1
+        -- Colour the character name
+        for c = 1, #self.party do
+            if c == party_id then
+                ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(c) .. ".Left.Name"):set_colour(1, 1, 0)
+            else
+                ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(c) .. ".Left.Name"):set_colour(1, 1, 1)
+            end
+            ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(c) .. ".Left.Name"):set_text(Characters[Party[c]].name)
+        end
         ui_manager:get_widget("BattleUi.Container.Bottom.Commands"):set_visible(true)
         -- Resize the window
         ui_manager:get_widget("BattleUi.Container.Bottom.Commands"):set_width(
@@ -220,6 +314,10 @@ UiContainer.BattleUi = {
             ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(pos)):set_text(Game.Commands[cmd].name)
             ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(pos)):set_visible(true)
         end
+        -- Set and show cursor
+        ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_visible(true)
+        ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+        self.window_state = "command"
 
     end,
 

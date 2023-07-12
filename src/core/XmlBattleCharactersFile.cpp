@@ -21,7 +21,7 @@ XmlBattleCharactersFile::XmlBattleCharactersFile(const Ogre::String& file): XmlF
     TiXmlNode* node = file_.RootElement();
     if (node == nullptr || node->ValueStr() != "characters"){
         LOG_ERROR(
-          file_.ValueStr() + " is not a valid battle scenes file! No <characters> in root."
+          file_.ValueStr() + " is not a valid battle characters file! No <characters> in root."
         );
         return;
     }

@@ -306,9 +306,9 @@ void BattleManager::LoadParty(){
 
     // TODO: Read this from data/gamedata/characters.xml
     for (int i = 0; i < positions.size(); i ++){
+        if (party.at(positions.at(i)) == - 1) continue;
         std::string name = "";
         std::string model = "";
-
 
         for (XmlBattleCharactersFile::BattleCharacter character : character_model_map_){
             if (character.id == party.at(positions.at(i))){
