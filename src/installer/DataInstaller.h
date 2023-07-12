@@ -226,6 +226,11 @@ class DataInstaller{
             BATTLE_MODELS_WRITE_CHARACTERS,
 
             /**
+             * Writtes battle scene model info.
+             */
+            BATTLE_MODELS_WRITE_SCENES,
+
+            /**
              * Parses item and materia prices from ff7.exe.
              */
             KERNEL_PRICES,

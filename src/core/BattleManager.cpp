@@ -52,6 +52,11 @@ BattleManager::BattleManager(){
     LOG_TRIVIAL("BattleManager created.");
     scene_node_ = Ogre::Root::getSingleton().getSceneManager("Scene")
       ->getRootSceneNode()->createChildSceneNode("BattleManager");
+    // Build scene model map.
+    scene_model_map_ = XmlBattleScenesFile("./data/models/battle/scenes.xml").GetScenes();
+    // Build character model map.
+    character_model_map_
+      = XmlBattleCharactersFile("./data/models/battle/characters.xml").GetCharacters();
 }
 
 BattleManager::~BattleManager(){
@@ -116,6 +121,8 @@ void BattleManager::StartBattle(const unsigned int id){
     filename = "./data/gamedata/formation/" + filename + ".xml";
     // This sets the data in the battle manager singleton.
     XmlFormationFile(filename).LoadFormation();
+
+
     // TODO: Music
     if (camera_.size() == 0)
         LOG_ERROR("Unable to start battle camera. No cameras defined in the BattleManager.");
@@ -255,11 +262,18 @@ void BattleManager::SetLocation(const int id, const Ogre::String name){
         LOG_ERROR("Tried to set a location in the BattleManager, but it's not in battle mode.");
         return;
     }
-    EntityManager::getSingleton().SetBackground3D(name, "scenes/oi_grassland.mesh");
-    /**EntityManager::getSingleton().AddBattleEntity(
-      "Background", "scenes/oi_grassland.mesh", Ogre::Vector3(0, 0, 0), Ogre::Degree(0),
-      Ogre::Vector3(SCENE_SCALE, SCENE_SCALE, SCENE_SCALE), 999, true, true
-    );*/
+    std::string model = "";
+    for (XmlBattleScenesFile::BattleScene scene : scene_model_map_){
+        if (scene.id == id){
+            model = "scenes/" + scene.model;
+            break;
+        }
+    }
+    if (model == ""){
+        LOG_ERROR("No 3D model assigned to battle location " + std::to_string(id));
+        return;
+    }
+    EntityManager::getSingleton().SetBackground3D(name, model);
 }
 
 void BattleManager::SetArenaBattle(const bool arena){
@@ -294,45 +308,21 @@ void BattleManager::LoadParty(){
     for (int i = 0; i < positions.size(); i ++){
         std::string name = "";
         std::string model = "";
-        switch (party.at(positions.at(i))){
-            case Character::CLOUD:
-                name = "party_cloud";
-                model = "characters/rt_cloud.mesh";
+
+
+        for (XmlBattleCharactersFile::BattleCharacter character : character_model_map_){
+            if (character.id == party.at(positions.at(i))){
+                model = "characters/" + character.models.at(0).model;
+                name = "party_" + character.models.at(0).name;
                 break;
-            case Character::TIFA:
-                name = "party_tifa";
-                model = "characters/ru_tifa.mesh";
-                break;
-            case Character::AERIS:
-                name = "party_aeris";
-                model = "characters/rv_aeris.mesh";
-                break;
-            case Character::BARRET:
-                name = "party_barret";
-                model = "characters/sb_barret.mesh";
-                break;
-            case Character::RED:
-                name = "party_red";
-                model = "characters/rw_red_xiii.mesh";
-                break;
-            // TODO: Cid data not installed
-            case Character::CID:
-                name = "party_cid";
-                model = "characters/rz_cid.mesh";
-                break;
-            case Character::VINCENT:
-                name = "party_vincent";
-                model = "characters/sh_vincent.mesh";
-                break;
-            case Character::YUVI:
-                name = "party_yuvi";
-                model = "characters/rx_yuffie.mesh";
-                break;
-            case Character::KETCY:
-                name = "party_ketcy";
-                model = "characters/ry_cait_sith.mesh";
-                break;
-            default: continue;
+            }
+        }
+        if (model == ""){
+            LOG_ERROR(
+              "No 3D model assigned to battle character "
+              + std::to_string(party.at(positions.at(i)))
+            );
+            return;
         }
         EntityManager::getSingleton().AddEntity(
           name, model, position, Ogre::Degree(0),

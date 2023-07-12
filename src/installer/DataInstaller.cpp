@@ -139,7 +139,12 @@ float DataInstaller::Progress(){
         case BATTLE_MODELS_WRITE_CHARACTERS:
             write_output_line_("Writing character data...", 2, true);
             battle_installer_->WriteCharacterData();
-            installation_state_ = KERNEL_ITEMS;
+            installation_state_ = BATTLE_MODELS_WRITE_SCENES;
+            return CalcProgress();
+        case BATTLE_MODELS_WRITE_SCENES:
+            write_output_line_("Writing battle scene data...", 2, true);
+            battle_installer_->WriteSceneData();
+            installation_state_ = KERNEL_PRICES;
             return CalcProgress();
         case KERNEL_PRICES:
             // Skip kernel data if option is set.

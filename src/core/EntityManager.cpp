@@ -37,7 +37,7 @@ template<>EntityManager *Ogre::Singleton<EntityManager>::msSingleton = nullptr;
 ConfigVar cv_debug_grid("debug_grid", "Draw debug grid", "false");
 ConfigVar cv_debug_axis("debug_axis", "Draw debug axis", "false");
 
-const float EntityManager::SCENE_SCALE = 0.0012f;
+const float EntityManager::SCENE_SCALE = 0.003f;
 
 const unsigned int EntityManager::BATTLE_BACKGROUND_ID = 1000;
 
@@ -458,9 +458,16 @@ void EntityManager::ClearBattle(){
     }
     battle_entity_.clear();
     if (background_3d_ != nullptr){
-        scene_node_->removeAndDestroyChild("bg_" + background_3d_->GetName());
-        ScriptManager::getSingleton().RemoveEntity(
+        Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(
+          "bg_" + background_3d_->GetName()
+        );
+        /*ScriptManager::getSingleton().RemoveEntity(
           ScriptManager::ENTITY, background_3d_->GetName()
+        );*/
+        scene_node_->getChild("bg_" + background_3d_->GetName())->removeAllChildren();
+        scene_node_->removeAndDestroyChild("bg_" + background_3d_->GetName());
+        Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(
+          background_3d_->GetName()
         );
         background_3d_ = nullptr;
     }

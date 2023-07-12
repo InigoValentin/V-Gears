@@ -135,6 +135,8 @@ set(VGEARS_SOURCE_FILES
     core/Utilites.cpp
     core/Walkmesh.cpp
     core/XmlBackground2DFile.cpp
+    core/XmlBattleCharactersFile.cpp
+    core/XmlBattleScenesFile.cpp
     core/XmlEnemyFile.cpp
     core/XmlFile.cpp
     core/XmlFontFile.cpp

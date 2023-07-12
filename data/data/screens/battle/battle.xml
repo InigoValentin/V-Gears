@@ -29,6 +29,21 @@
             <widget name="Character3" x="2%" y="72%" width="96%" height="30%" visible="true">
                 <prototype name="BattleCharacter" />
             </widget>
+            <widget name="Commands" x="22%" y="5%" width="60" height="95%" visible="false">
+                <prototype name="Window" />
+                <text_area name="Cmd1" x="5" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd2" x="5" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd3" x="5" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd4" x="5" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd5" x="55" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd6" x="55" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd7" x="55" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd8" x="55" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd9" x="100" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd10" x="100" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd11" x="100" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="Cmd12" x="100" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+            </widget>
         </widget>
     </widget>
 </screen>

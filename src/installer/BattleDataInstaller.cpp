@@ -245,7 +245,14 @@ unsigned int BattleDataInstaller::ProcessModel(){
                 character_data_.push_back(character_data);
             }
         }
-        else if (info.is_scene) path += "scenes/";
+        else if (info.is_scene){
+            SceneModel scene_data;
+            scene_data.id = info.numeric_id;
+            scene_data.model = info.alphanumeric_id + "_" + info.name_normal + ".mesh";
+            scene_data.description = info.name;
+            scene_data_.push_back(scene_data);
+            path += "scenes/";
+        }
         else path += "enemies/";
         path += (id + type + "_" + info.name_normal + ".png");
         tex.SavePng(path);
@@ -704,7 +711,21 @@ void BattleDataInstaller::WriteCharacterData(){
         container->LinkEndChild(xml_character.release());
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(output_dir_ + "gamedata/characters.xml");
+    xml.SaveFile(output_dir_ + "models/battle/characters.xml");
+}
+
+void BattleDataInstaller::WriteSceneData(){
+    TiXmlDocument xml;
+    std::unique_ptr<TiXmlElement> container(new TiXmlElement("scenes"));
+    for (SceneModel data : scene_data_){
+        std::unique_ptr<TiXmlElement> xml_scene(new TiXmlElement("scene"));
+        xml_scene->SetAttribute("id", data.id);
+        xml_scene->SetAttribute("file", data.model);
+        xml_scene->SetAttribute("description", data.description);
+        container->LinkEndChild(xml_scene.release());
+    }
+    xml.LinkEndChild(container.release());
+    xml.SaveFile(output_dir_ + "models/battle/scenes.xml");
 }
 
 std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){

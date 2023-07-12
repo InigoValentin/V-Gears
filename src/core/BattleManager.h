@@ -19,6 +19,8 @@
 #include "Enemy.h"
 #include "Event.h"
 #include "Manager.h"
+#include "core/XmlBattleCharactersFile.h"
+#include "core/XmlBattleScenesFile.h"
 
 /**
  * The battle manager.
@@ -424,6 +426,16 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          * List of enemies for the battle.
          */
         std::vector<Enemy> enemies_;
+
+        /**
+         * Map of playable character models.
+         */
+        std::vector<XmlBattleCharactersFile::BattleCharacter> character_model_map_;
+
+        /**
+         * Map of battle scene models.
+         */
+        std::vector<XmlBattleScenesFile::BattleScene> scene_model_map_;
 
         /**
          * List of party members in the battle.
