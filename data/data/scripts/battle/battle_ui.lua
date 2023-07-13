@@ -46,6 +46,7 @@ UiContainer.BattleUi = {
         if button == "K" then
             Battle.finish()
         end
+        -- Handle command cursors
         if self.window_state == "command" then
             local command_count = #self.party[self.current_character_window].command
             if button == "Down" then
@@ -53,24 +54,34 @@ UiContainer.BattleUi = {
                     -- If on the first three ones, always alow to go down to reach "Item"
                     self.cursor_command = self.cursor_command + 1
                     ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    audio_manager:play_sound("Cursor")
                 elseif self.cursor_command % 4 == 0 then
                     -- If on a multiple of 4, go to the top of the column
                     self.cursor_command = self.cursor_command - 3
                     ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    audio_manager:play_sound("Cursor")
                 elseif command_count > self.cursor_command then
-                    -- Else, allow one position down only if there are more comands.
+                    -- If there is a command below, allow one position down.
                     self.cursor_command = self.cursor_command + 1
                     ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    audio_manager:play_sound("Cursor")
+                else
+                    -- Back to the first row
+                    self.cursor_command = 4 * math.floor(self.cursor_command / 4) + 1
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    audio_manager:play_sound("Cursor")
                 end
             elseif button == "Up" then
                 if self.cursor_command == 1 then
                     -- If on "Attack, always go to item
                     self.cursor_command = 4
                     ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    audio_manager:play_sound("Cursor")
                 elseif self.cursor_command > 1 and self.cursor_command < 5 then
                     -- If on the second, third, or fourth, always alwow to go down to reach "Attack" from "Item"
                     self.cursor_command = self.cursor_command - 1
                     ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    audio_manager:play_sound("Cursor")
                 elseif self.cursor_command % 4 == 1 and command_count > self.cursor_command then
                     -- If on the first row, go to the last where there is a command
                     self.cursor_command = self.cursor_command + 3
@@ -78,16 +89,19 @@ UiContainer.BattleUi = {
                         self.cursor_command = self.cursor_command - 1
                     end
                     ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    audio_manager:play_sound("Cursor")
                 else
                     -- Else, always allow to go one up.
                     self.cursor_command = self.cursor_command - 1
                     ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    audio_manager:play_sound("Cursor")
                 end
             elseif button == "Left" then
                 if command_count > 4 then
                     if self.cursor_command > 4 then
                         self.cursor_command = self.cursor_command - 4
                         ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                        audio_manager:play_sound("Cursor")
                     else
                         local new_position = self.cursor_command + 4 * math.floor(command_count / 4)
                         while new_position > command_count do
@@ -95,6 +109,7 @@ UiContainer.BattleUi = {
                         end
                         self.cursor_command = new_position
                         ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                        audio_manager:play_sound("Cursor")
                     end
                 end
             elseif button == "Right" then
@@ -107,6 +122,7 @@ UiContainer.BattleUi = {
                         end
                     end
                     ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
+                    audio_manager:play_sound("Cursor")
                 end
             -- TODO: elseif accept, skip buttons...
             end
@@ -114,6 +130,36 @@ UiContainer.BattleUi = {
         return 0
     end,
 
+    tick = function(self)
+        --print("CALLED BattleUI:tick()")
+        if self.window_state ~= "wait" then
+            do return end
+        end
+        for i = 1, #self.party do
+            if self.party[i].dead == false then -- TODO: Or stopped
+                if self.party[i].atb < 100 then
+                    -- TODO: Consider haste/slow
+                    self.party[i].atb = self.party[i].atb + 0.01 * Characters[self.party[i].character].stats.dex.total -- TODO
+                    if self.party[i].atb >= 100 then
+                        print(Characters[self.party[i].character].name .. " ATB full")
+                        ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(i) .. ".Right.AtbFill"):set_colour(0, 1, 0)
+                        self:show_commands(i)
+                    end
+                    -- Fill ATB UI bar
+                    -- 0   -> 0%
+                    -- 100 -> 18%-6
+                    local width_percent = math.min(18, 18 * self.party[i].atb / 100)
+                    local width_fixed = math.max(-6, -6 * width_percent / 18)
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(i) .. ".Right.AtbFill"):set_width(width_percent, width_fixed)
+                end
+            end
+        end
+        --print("ENDED BattleUI:tick()")
+    end,
+
+    --- Loads party character data
+    --
+    -- Reads materia, calculates stats, computes attacks...
     load_party_members = function(self)
         for i = 1, Party.MAX do
             if Party[i] ~= nil then
@@ -122,6 +168,7 @@ UiContainer.BattleUi = {
                 --math.randomseed(('' .. os.time()):reverse())
                 -- TODO: Consider battle layouts.
                 -- TODO: Check random seed
+                self.party[i].dead = false
                 self.party[i].atb = math.random(0, 100)
                 self.party[i].command = {}
                 self.party[i].magic = {}
@@ -131,6 +178,13 @@ UiContainer.BattleUi = {
                 self.party[i].long_range = false
                 self.party[i].mega_all = false
                 self.party[i].pre_emptive = 0
+                -- Fill Limit UI bar
+                -- 0   -> 0%
+                -- 255 -> 18%-6
+                local width_percent = math.min(18, 18 * Characters[self.party[i].character].limit.bar / 255)
+                local width_fixed = math.max(-6, -6 * width_percent / 18)
+                ui_manager:get_widget("BattleUi.Container.Bottom.Character" .. tostring(i) .. ".Right.LimitFill"):set_width(width_percent, width_fixed)
+                -- Read materia
                 local w_magic = false
                 local w_item = false
                 local w_summon = false
@@ -272,16 +326,26 @@ UiContainer.BattleUi = {
         ui_manager:get_widget("BattleUi"):set_visible(true)
         self.active = true;
 
-        -- Set help window transparency
-        ui_manager:get_widget("BattleUi.Container.Help.Center"):set_alpha(0.5)
-        ui_manager:get_widget("BattleUi.Container.Message.Center"):set_alpha(0.5)
-
         -- Lopad party data
         self:load_party_members()
 
+        -- Set various transparencies
+        ui_manager:get_widget("BattleUi.Container.Help.Center"):set_alpha(0.5)
+        ui_manager:get_widget("BattleUi.Container.Message.Center"):set_alpha(0.5)
+        ui_manager:get_widget("BattleUi.Container.Message.Center"):set_alpha(0.5)
+        for i = 1, #self.party do
+            ui_manager:get_widget(
+              "BattleUi.Container.Bottom.Character" .. tostring(i) .. ".Right.AtbFill"
+            ):set_alpha(0.45)
+            ui_manager:get_widget(
+              "BattleUi.Container.Bottom.Character" .. tostring(i) .. ".Right.LimitFill"
+            ):set_alpha(0.45)
+        end
+
+
         -- DEBUG:
-        ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Center"):set_alpha(0.5)
-        self:show_commands(1)
+        --ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Center"):set_alpha(0.5)
+        --self:show_commands(1)
 
         return 0;
     end,
@@ -292,6 +356,7 @@ UiContainer.BattleUi = {
     show_commands = function(self, party_id)
         self.current_character_window = party_id
         self.cursor_command = 1
+        self.window_state = "command"
         -- Colour the character name
         for c = 1, #self.party do
             if c == party_id then

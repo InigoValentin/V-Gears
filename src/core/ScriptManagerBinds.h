@@ -840,8 +840,10 @@ void ScriptManager::InitBinds(){
           .def("set_z", (void(UiWidget::*)(const float)) &UiWidget::SetZ)
           .def("get_width", (float(UiWidget::*)()) &UiWidget::ScriptGetWidth)
           .def("set_width", (void(UiWidget::*)(const float)) &UiWidget::ScriptSetWidth)
+          .def("set_width", (void(UiWidget::*)(const float, const float)) &UiWidget::SetWidth)
           .def("get_height", (float(UiWidget::*)()) &UiWidget::ScriptGetHeight)
           .def("set_height", (void(UiWidget::*)(const float)) &UiWidget::ScriptSetHeight)
+          .def("set_height", (void(UiWidget::*)(const float, const float)) &UiWidget::SetHeight)
           .def("set_text", (void(UiWidget::*)(const char*)) &UiWidget::SetText)
           .def("set_image", (void(UiWidget::*)(const char*)) &UiWidget::SetImage)
     ];

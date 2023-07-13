@@ -15,6 +15,7 @@
 
 #include <OgreStringConverter.h>
 #include "VGearsGameState.h"
+#include "core/BattleManager.h"
 #include "core/GameFrameListener.h"
 #include "core/CameraManager.h"
 #include "core/ConfigVar.h"
@@ -93,6 +94,7 @@ bool GameFrameListener::frameStarted(const Ogre::FrameEvent& evt){
     CameraManager::getSingleton().Update();
     EntityManager::getSingleton().Update();
     DialogsManager::getSingleton().Update();
+    BattleManager::getSingleton().Update();
     return true;
 }
 

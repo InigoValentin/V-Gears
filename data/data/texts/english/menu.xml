@@ -27,6 +27,7 @@
     <text name="BeginMenu3"><colour value="0.5 0.5 0.5">DEBUG: Entity testarea</colour></text>
     <text name="BeginMenu4"><colour value="0.5 0.5 0.5">DEBUG: World map test</colour></text>
     <text name="BeginMenu5"><colour value="0.5 0.5 0.5">DEBUG: Debug Room</colour></text>
+    <text name="BeginMenu6"><colour value="0.5 0.5 0.5">DEBUG: Test Battle</colour></text>
 
     <text name="PauseMenuHeader">Paused</text>
     <text name="PauseMenuText">Are you want to quit?</text>

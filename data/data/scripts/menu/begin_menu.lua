@@ -7,7 +7,7 @@ UiContainer.BeginMenu = {
     position = 1,
 
     -- Max cursor position
-    position_total = 6,
+    position_total = 7,
 
     --- Run when the menu is created.
     --
@@ -92,6 +92,14 @@ UiContainer.BeginMenu = {
                     console("camera_free false")
                     console("debug_walkmesh false")
                     script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
+                    MenuSettings.pause_available = true
+                elseif self.position == 7 then
+                    --load_field_map_request("startmap", "")
+                    console("camera_free false")
+                    console("debug_walkmesh false")
+                    script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
+                    set_party(0, 2, 3)
+                    Battle.start(220)
                     MenuSettings.pause_available = true
                 end
             elseif button == "Down" then

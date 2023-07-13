@@ -23,9 +23,9 @@ Note that, while these are actual screenshots of V-Gears, none of the images, sp
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png" alt="Transparency" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png "Transparency")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/timers.png" alt="Timers" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/timers.png "Timers")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/choices.png" alt="Choices" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/choices.png "Choices")|
 
 ### Battle:
-|**Battle UI**|
-|--|
-|[<img src="https://v-gears.inigovalentin.com/img/screenshot/battle.png" alt="Battle UI" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/battle.png "Battle UI")|
+|**Battle UI**|**Battle Flow**|
+|--|--|
+|[<img src="https://v-gears.inigovalentin.com/img/screenshot/battle.png" alt="Battle UI" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/battle.png "Battle UI")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/battle.gif" alt="Battle Flow" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/battle.gif "Battle Flow")|
 
 ### Menus:
 |**Begin**|**Main**|**Name**|
@@ -54,7 +54,7 @@ Well, let's call it a work in progress... of a work in progress.
 |:--:|:--:|
 |A few field maps|Most field maps|
 |Some menus|Some other menus|
-|Sound (mostly)|Battles, in general.|
+|Sound (mostly)|Battle mechanics.|
 |Saving / Loading|The world map, also in general|
 |Timers|Minigames|
 | |Party switching|

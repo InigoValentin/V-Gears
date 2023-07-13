@@ -23,6 +23,7 @@
 #include "core/AudioManager.h"
 #include "core/BattleManager.h"
 #include "core/CameraManager.h"
+#include "core/Console.h"
 #include "core/DialogsManager.h"
 #include "core/Enemy.h"
 #include "core/EntityManager.h"
@@ -338,6 +339,8 @@ void BattleManager::LoadParty(){
 
 void BattleManager::UpdateField(){}
 
-void BattleManager::UpdateBattle(){}
+void BattleManager::UpdateBattle(){
+    ScriptManager::getSingleton().RunString("UiContainer.BattleUi:tick()");
+}
 
 void BattleManager::UpdateWorld(){}
