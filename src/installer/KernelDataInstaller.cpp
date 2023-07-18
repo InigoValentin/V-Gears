@@ -38,7 +38,7 @@ void KernelDataInstaller::ReadPrices(){
 
 int KernelDataInstaller::ReadCommands(){
 
-    // Empty the item list
+    // Empty the command list
     commands_.clear();
 
     File command_file = kernel_.ExtractGZip(KERNEL_COMMAND_DATA);
@@ -98,9 +98,10 @@ int KernelDataInstaller::ReadCommands(){
         }
         boost::replace_all(data.description, "\"", "'");
 
-        // Read data from the item data section.
+        // Read data from the command       m, data section.
         data.cursor_action = command_file.readU8();
         data.target_raw = command_file.readU8();
+        data.unknown = command_file.readU16LE();
         data.camera_single = command_file.readU16LE();
         data.camera_multiple = command_file.readU16LE();
 
@@ -122,8 +123,23 @@ int KernelDataInstaller::ReadCommands(){
         else data.target.all_rows = false;
         if (data.target_raw == (data.target_raw | 0x80)) data.target.random = true;
         else data.target.random = false;
+        switch (data.cursor_action){
+            case NONE: data.menu = "Battle.Menu.NONE"; break;
+            case MAGIC: data.menu = "Battle.Menu.MAGIC"; break;
+            case SUMMON: data.menu = "Battle.Menu.SUMMON"; break;
+            case ITEM: data.menu = "Battle.Menu.ITEM"; break;
+            case E_SKILL: data.menu = "Battle.Menu.E_SKILL"; break;
+            case THROW: data.menu = "Battle.Menu.THROW"; break;
+            case LIMIT: data.menu = "Battle.Menu.LIMIT"; break;
+            case TARGET: data.menu = "Battle.Menu.TARGET"; break;
+            case W_MAGIC: data.menu = "Battle.Menu.W_MAGIC"; break;
+            case W_SUMMON: data.menu = "Battle.Menu.W_SUMMON"; break;
+            case W_ITEM: data.menu = "Battle.Menu.W_ITEM"; break;
+            case COIN: data.menu = "Battle.Menu.COIN"; break;
+            default: data.menu = "Battle.Menu.NONE";
+        }
 
-        // Add to the list of items.
+        // Add to the list of commands.
         if (data.name != ""){
             command_names_[i] = data.name;
             commands_.push_back(data);
@@ -142,6 +158,7 @@ void KernelDataInstaller::WriteCommands(std::string file_name){
         file << "Game.Commands[" << command.id << "] = {\n"
           << "    name = \"" << command.name << "\",\n"
           << "    description = \"" << command.description << "\",\n"
+          << "    menu = " << command.menu << ",\n"
           << "    camera = {single = " << command.camera_single << ", "
           << "multiple = " << command.camera_multiple << "}\n}\n";
     }

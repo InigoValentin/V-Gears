@@ -29,10 +29,9 @@
     <text name="BeginMenu5"><colour value="0.5 0.5 0.5">DEBUG: Debug Room</colour></text>
     <text name="BeginMenu6"><colour value="0.5 0.5 0.5">DEBUG: Test Battle</colour></text>
 
-    <text name="PauseMenuHeader">Paused</text>
-    <text name="PauseMenuText">Are you want to quit?</text>
-    <text name="PauseMenuYes">Yes</text>
-    <text name="PauseMenuNo">No</text>
+    <text name="PauseMenuHeader"><colour value="0.7 0.7 0.7">PAUSE</colour></text>
+    <text name="PauseMenuResume">Resume</text>
+    <text name="PauseMenuQuit">Quit</text>
 
     <text name="MainMenuGil">Gil</text>
     <text name="MainMenuGilAmount">123456789</text>

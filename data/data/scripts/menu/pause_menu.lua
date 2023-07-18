@@ -1,45 +1,46 @@
 if UiContainer == nil then UiContainer = {} end
 
-
-
+--- The pause menu
 UiContainer.PauseMenu = {
+
+    --- Cursor position.
     position = 1,
+
+    --- Maximum cursor position
     position_total = 2,
 
-
-
+    --- Run on creation, does nothing.
     on_start = function( self )
         return 0
     end,
 
-
-
+    --- Handles button events.
+    --
+    -- If the game is paused, it handles the navigation in the pause menu. If the game is not
+    -- paused, it only handles the pause event
     on_button = function( self, button, event )
-        if ui_manager:get_widget( "PauseMenu" ):is_visible() == true then
+        if System:is_paused() == true then
             local menu_cursor = ui_manager:get_widget( "PauseMenu.Menu.Cursor" )
-
-            if button == "Enter" and event == "Press" then
+            if button == "P" and event == "Press" then
+                System:unpause()
+            elseif button == "Enter" and event == "Press" then
                 audio_manager:play_sound("Cursor")
                 script:request_end_sync( Script.UI, "PauseMenu", "hide", 0 )
-                if self.position == 1 then
+                if self.position == 2 then
                     script:request_end_sync( Script.UI, "BeginMenu", "show", 0 )
-                    map( "empty" )
+                    map("empty")
                     MenuSettings.pause_available = false
                 else
                     MenuSettings.available = true
                 end
-            elseif button == "Escape" and event == "Press" then
-                audio_manager:play_sound("Back")
-                script:request_end_sync( Script.UI, "PauseMenu", "hide", 0 )
-                MenuSettings.available = true
-            elseif button == "Right" then
+            elseif button == "Down" then
                 audio_manager:play_sound("Cursor")
                 self.position = self.position + 1
                 if self.position > self.position_total then
                     self.position = 1;
                 end
                 menu_cursor:set_default_animation( "Position" .. self.position )
-            elseif button == "Left" then
+            elseif button == "Up" then
                 audio_manager:play_sound("Cursor")
                 self.position = self.position - 1
                 if self.position <= 0 then
@@ -47,34 +48,22 @@ UiContainer.PauseMenu = {
                 end
                 menu_cursor:set_default_animation( "Position" .. self.position )
             end
-        elseif MenuSettings.pause_available == true then
-            if button == "Enter" and event == "Press" then
-                audio_manager:play_sound("Cursor")
-                MenuSettings.available = false
-                script:request_end_sync( Script.UI, "PauseMenu", "show", 0 )
+        elseif System:is_paused() == false then
+            if button == "P" and event == "Press" then
+                System:pause()
             end
         end
 
         return 0
     end,
 
-
-
+    --- Shows the pause menu.
     show = function( self )
-        entity_manager:set_paused( true )
-
-        ui_manager:get_widget( "PauseMenu" ):set_visible( true )
-
-        return 0;
+        ui_manager:get_widget("PauseMenu"):set_visible(true)
     end,
 
-
-
-    hide = function( self )
-        ui_manager:get_widget( "PauseMenu" ):set_visible( false )
-
-        entity_manager:set_paused( false )
-
-        return 0;
+    --- Hides the pause menu
+    hide = function(self)
+        ui_manager:get_widget("PauseMenu"):set_visible(false)
     end,
 }

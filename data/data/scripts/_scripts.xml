@@ -1,5 +1,6 @@
 <scripts>
     <script file="scripts/data.lua" />
+    <script file="scripts/battle.lua" />
     <script file="gamedata/accessories.lua" />
     <script file="gamedata/armors.lua" />
     <script file="gamedata/attacks.lua" />
@@ -19,7 +20,6 @@
     <script file="gamedata/initial_savemap.lua" />
 
     <script file="scripts/field.lua" />
-    <script file="scripts/battle.lua" />
     <script file="scripts/battle_ai.lua" />
     <script file="scripts/menu/menu_helpers.lua" />
 

@@ -2,6 +2,49 @@ MAX_INVENTORY_SLOTS = 320
 MAX_KEY_SLOTS = 50
 MAX_MATERIA_SLOTS = 200
 
+--- System related parameters and utilities
+System = {
+
+    --- Indicates if the game is paused.
+    paused = false,
+
+    --- Indicates if the menu was available when paused.
+    paused_menu_settings_available = false,
+
+    --- Pauses the game.
+    pause = function(self)
+        if MenuSettings.pause_available == false then
+            do return end
+        end
+        if self.paused == false then
+            self.paused = true
+            entity_manager:set_paused(true)
+            self.paused_menu_settings_available = MenuSettings.available
+            MenuSettings.available = false
+            audio_manager:play_sound("Cursor")
+            UiContainer.PauseMenu:show()
+        end
+    end,
+
+    --- Unpauses the game.
+    unpause = function(self)
+        if self.paused == true then
+            self.paused = false
+            entity_manager:set_paused(false)
+            MenuSettings.available = self.paused_menu_settings_available
+            audio_manager:play_sound("Cursor")
+            UiContainer.PauseMenu:hide()
+        end
+    end,
+
+    --- Checks if the game is paused.
+    --
+    -- @return True if the game is paused, false if not.
+    is_paused = function(self)
+        return self.paused
+    end
+}
+
 Timer = {
     -- TODO When the game clock is implemented, dont use FPS, call this every second.
     FPS = 250,

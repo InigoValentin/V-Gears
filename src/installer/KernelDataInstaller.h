@@ -734,6 +734,74 @@ class KernelDataInstaller{
             TOGGLE = 2
         };
 
+        /**
+         * Menus that must be shown when selecting a command.
+         */
+        enum COMMAND_MENU{
+
+            /**
+             * No menu, execute command directly, without target selection.
+             */
+            NONE = 0,
+
+            /**
+             * Show magic menu.
+             */
+            MAGIC = 1,
+
+            /**
+             * Show summon menu.
+             */
+            SUMMON = 2,
+
+            /**
+             * Show item menu.
+             */
+            ITEM = 3,
+
+            /**
+             * Show enemy skill menu.
+             */
+            E_SKILL = 4,
+
+            /**
+             * Show throw menu.
+             */
+            THROW = 5,
+
+            /**
+             * Show limit menu.
+             */
+            LIMIT = 6,
+
+            /**
+             * No menu, skip to target selection.
+             */
+            TARGET = 7,
+
+            /**
+             * Show W-Magic menu
+             */
+            W_MAGIC = 8,
+
+            /**
+             * Show W-Summon menu
+             */
+            W_SUMMON = 9,
+
+            /**
+             * Show W-Item menu
+             */
+            W_ITEM = 10,
+
+            /**
+             * Show Coin menu
+             */
+            COIN = 11,
+
+
+        };
+
         struct StatusEffect{
 
             /**
@@ -820,6 +888,13 @@ class KernelDataInstaller{
              * Derived from {@see target_raw}.
              */
             Target target;
+
+            /**
+             * Menu name
+             *
+             * Derived from {@see cursor_action}.
+             */
+            std::string menu;
 
         };
 

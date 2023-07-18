@@ -50,7 +50,7 @@ Characters[0].stats.dex.base = 11
 Characters[0].stats.dex.total = 11
 Characters[0].armor.id = 268
 Characters[0].armor.materia = {
-    [0] = {id = 62, ap = 5340},
+    [0] = {id = 62, ap = 15340},
     [2] = {id = 44, ap = 0, skills = {}}, -- E. Skill
     [3] = {id = 78, ap = 520},
     [4] = {id = 36, ap = 0},
