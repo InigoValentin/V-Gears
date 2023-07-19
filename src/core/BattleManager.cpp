@@ -190,6 +190,13 @@ void BattleManager::AddEnemy(
     )->SetRotation(Ogre::Degree(180));
 }
 
+unsigned int BattleManager::ScriptGetEnemyCount() const{return enemies_.size();}
+
+Enemy* BattleManager::ScriptGetEnemy(const unsigned int index){
+    if (index >= enemies_.size()) return nullptr;
+    return &enemies_[index];
+}
+
 void BattleManager::AddCamera(
   const unsigned int id, const Ogre::Vector3 pos, const Ogre::Vector3 dir
 ){

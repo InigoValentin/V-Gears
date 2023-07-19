@@ -111,8 +111,9 @@ int KernelDataInstaller::ReadCommands(){
         else data.target.selection_enabled = false;
         if (data.target_raw == (data.target_raw | 0x02)) data.target.default_enemy = true;
         else data.target.default_enemy = false;
-        if (data.target_raw == (data.target_raw | 0x04)) data.target.default_multiple = true;
-        else data.target.default_multiple = false;
+        // Default multiple is inverted
+        if (data.target_raw == (data.target_raw | 0x04)) data.target.default_multiple = false;
+        else data.target.default_multiple = true;
         if (data.target_raw == (data.target_raw | 0x08)) data.target.toggle_multiple = true;
         else data.target.toggle_multiple = false;
         if (data.target_raw == (data.target_raw | 0x10)) data.target.fixed_row = true;

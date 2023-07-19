@@ -58,6 +58,7 @@ Characters[0].armor.materia = {
     [6] = {id = 0, ap = 0},
     [7] = {id = 26, ap = 0},
 }
+Characters[0].weapon.materia[0] = {id = 64, ap = 15340}
 for i = 1, 24 do -- E. Skill list
     if i == 1 or i == 6 or i == 9 or i == 13 or i == 14 or i == 15 or i == 23 or i == 24 then
         Characters[0].armor.materia[2].skills[i] = true

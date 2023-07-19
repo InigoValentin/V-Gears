@@ -231,6 +231,26 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         );
 
         /**
+         * Retrieves the number of enemies in the battle.
+         *
+         * To be called from Lua scripts.
+         *
+         * @return The number of enemies in the battle formation.
+         */
+        unsigned int ScriptGetEnemyCount() const;
+
+        /**
+         * Retrieves an enemy.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] index The enemy index, 0 based. must be lower than reported by
+         * {@see ScriptGetEnemyCount}.
+         * @return The enemy at the selected indes, nullptr if it doesn't exists.
+         */
+        Enemy* ScriptGetEnemy(const unsigned int index);
+
+        /**
          * Loads enemy info from the enemy XML enemy file.
          */
         void Load();

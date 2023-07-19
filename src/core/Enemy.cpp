@@ -99,7 +99,7 @@ const std::string Enemy::GetModel() const{return model_;}
 
 void Enemy::SetModel(const std::string model){model_ = model;}
 
-const Ogre::String& Enemy::GetName() const{return name_;}
+const std::string Enemy::GetName() const{return name_;}
 
 void Enemy::SetName(const Ogre::String& name){name_ = name;}
 
@@ -216,6 +216,12 @@ Ogre::Vector3& Enemy::GetPos(){return pos_;}
 
 void Enemy::SetPos(const Ogre::Vector3 &pos){pos_ = pos;}
 
+void Enemy::ScriptGetPos() const{
+    ScriptManager::getSingleton().AddValueToStack(pos_.x);
+    ScriptManager::getSingleton().AddValueToStack(pos_.y);
+    ScriptManager::getSingleton().AddValueToStack(pos_.z);
+}
+
 bool Enemy::IsFront() const{return front_;}
 
 void Enemy::SetFront(bool front){front_ = front;}
@@ -235,6 +241,18 @@ void Enemy::SetActive(bool active){active_ = active;}
 std::string Enemy::GetCover() const{return cover_;}
 
 void Enemy::SetCover(std::string cover){cover_ = cover;}
+
+int Enemy::ScriptGetAttackCount(){return attacks_.size();}
+
+int Enemy::ScriptGetAttack(const unsigned int index){
+    if (attacks_.size() < index) return -1;
+    return attacks_[index].id;
+}
+
+int Enemy::ScriptGetCameraForAttack(const unsigned int index){
+    if (attacks_.size() < index) return -1;
+    return attacks_[index].camera;
+}
 
 void Enemy::ReadFromXml(){
     std::string filename = std::to_string(id_);

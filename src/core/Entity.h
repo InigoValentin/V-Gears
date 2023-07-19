@@ -232,9 +232,10 @@ class Entity{
         const Ogre::Vector3 GetPosition() const;
 
         /**
-         * Informs the script manager of the entity position.
+         * Retrieves the entity position.
          *
-         * @todo Im not really sure what this actually does.
+         * To be used from Lua scripts only. It doesn't return anything, but adds three values to
+         * the stack for the X, Y and Z coordinates.
          */
         void ScriptGetPosition() const;
 

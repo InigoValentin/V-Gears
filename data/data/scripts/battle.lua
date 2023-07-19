@@ -55,6 +55,40 @@ Battle.Menu = {
     COIN = 11,
 }
 
+--- Target modes
+Battle.TargetType = {
+
+    --- Single target
+    SINGLE = 0,
+
+    --- All targets in a battle side
+    GROUP = 1
+}
+
+--- Target modes
+Battle.TargetGroup = {
+
+    --- Single target
+    PARTY = 0,
+
+    --- All targets in a battle side
+    ENEMIES = 1
+}
+
+--- Action types
+Battle.ActionType = {
+
+    --- A command
+    --
+    -- An action of this type will be searched in the Commands array.
+    COMMAND = 0,
+
+    --- Anything that is not a command
+    --
+    -- -- An action of this type will be searched in the Attacks array.
+    ATTACK = 1
+}
+
 Battle.ActionDefaults = {
     [ Battle.Action.MONSTER_ACTION ] = { animation_script = "0" }
 }

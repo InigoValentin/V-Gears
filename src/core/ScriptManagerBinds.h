@@ -19,6 +19,7 @@
 #include "Console.h"
 #include "Logger.h"
 #include "CameraManager.h"
+#include "Enemy.h"
 #include "Entity.h"
 #include "EntityManager.h"
 #include "BattleManager.h"
@@ -270,7 +271,53 @@ void ScriptManager::InitBinds(){
             "start_battle", (void(BattleManager::*)(const unsigned int)) &BattleManager::StartBattle
           )
           .def("end_battle", (void(BattleManager::*)()) &BattleManager::EndBattle)
+          .def("get_enemy_count", (int(BattleManager::*)()) &BattleManager::ScriptGetEnemyCount)
+          .def(
+            "get_enemy",
+            (Enemy*(BattleManager::*)(const unsigned int)) &BattleManager::ScriptGetEnemy
+          )
     ];
+
+    // Commands for enemy handling.
+    luabind::module(lua_state_)[
+    luabind::class_<Enemy>("Enemy")
+      .def("get_id", (int(Enemy::*)()) &Enemy::GetId)
+      .def("get_name", (std::string(Enemy::*)()) &Enemy::GetName)
+      .def("get_level", (int(Enemy::*)()) &Enemy::GetLevel)
+      .def("get_ap", (int(Enemy::*)()) &Enemy::GetAp)
+      .def("get_exp", (int(Enemy::*)()) &Enemy::GetExp)
+      .def("get_money", (int(Enemy::*)()) &Enemy::GetMoney)
+      .def("get_str", (int(Enemy::*)()) &Enemy::GetStr)
+      .def("get_def", (int(Enemy::*)()) &Enemy::GetDef)
+      .def("get_mag", (int(Enemy::*)()) &Enemy::GetMag)
+      .def("get_spr", (int(Enemy::*)()) &Enemy::GetSpr)
+      .def("get_dex", (int(Enemy::*)()) &Enemy::GetDex)
+      .def("get_lck", (int(Enemy::*)()) &Enemy::GetLck)
+      .def("get_eva", (int(Enemy::*)()) &Enemy::GetEva)
+      .def("get_meva", (int(Enemy::*)()) &Enemy::GetMeva)
+      .def("get_hp", (int(Enemy::*)()) &Enemy::GetHp)
+      .def("get_hp_max", (int(Enemy::*)()) &Enemy::GetHpMax)
+      .def("get_mp", (int(Enemy::*)()) &Enemy::GetMp)
+      .def("get_mp_max", (int(Enemy::*)()) &Enemy::GetMpMax)
+      .def("get_position", (void(Enemy::*)()) &Enemy::ScriptGetPos)
+      .def("is_front", (bool(Enemy::*)()) &Enemy::IsFront)
+      .def("is_visible", (bool(Enemy::*)()) &Enemy::IsVisible)
+      .def("is_targeteable", (bool(Enemy::*)()) &Enemy::IsTargeteable)
+      .def("is_active", (bool(Enemy::*)()) &Enemy::IsActive)
+      .def("get_attack_count", (int(Enemy::*)()) &Enemy::ScriptGetAttackCount)
+      .def("get_attack", (int(Enemy::*)(const unsigned int)) &Enemy::ScriptGetAttack)
+      .def(
+        "get_camera_for_attack",
+        (int(Enemy::*)(const unsigned int)) &Enemy::ScriptGetCameraForAttack
+      )
+      // TODO: Implement cover flags.
+      // TODO: Implement immunities
+      // TODO: Implement elements
+      // TODO: Implement item drops
+      // TODO: Implement stealable items
+      // TODO: Implement manipulability status and attacks.
+      // TODO: Implement morph item
+];
 
     // Commands for the audio manager.
     luabind::module(lua_state_)[

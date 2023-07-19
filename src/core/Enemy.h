@@ -164,7 +164,7 @@ class Enemy{
          *
          * @return The enemy name.
          */
-        const Ogre::String& GetName() const;
+        const std::string GetName() const;
 
         /**
          * Sets the enemy name.
@@ -553,6 +553,14 @@ class Enemy{
         void SetPos(const Ogre::Vector3 &pos);
 
         /**
+         * Retrieves the enemy position.
+         *
+         * To be used from Lua scripts only. It doesn't return anything, but adds three values to
+         * the stack for the X, Y and Z coordinates.
+         */
+        void ScriptGetPos() const;
+
+        /**
          * Checks if the enemy is in the front row.
          *
          * @return True if the enemy is in the front row. false if not.
@@ -627,6 +635,38 @@ class Enemy{
          * @param[in] cover A string with five 0s or 1s indicating the cover flags.
          */
         void SetCover(std::string cover);
+
+        /**
+         * Retrieves the number of attacks of the enemy.
+         *
+         * To be used from Lua scripts.
+         *
+         * @return The number of attacks.
+         */
+        int ScriptGetAttackCount();
+
+        /**
+         * Retrieves an attack.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index The index of the attack to retrieve. Must be lower than reported by
+         * {@see ScriptGetAttackCount}.
+         * @return The ID of the attack in the specified index, or -1 if no such attack exists.
+         */
+        int ScriptGetAttack(const unsigned int index);
+
+        /**
+         * Retrieves the camera for an attack.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index The index of the attack to retrieve. Must be lower than reported by
+         * {@see ScriptGetAttackCount}.
+         * @return The ID of camera associated to the attack. -1 if no such attack exists or if it
+         * doesn't have an specific camera associated.
+         */
+        int ScriptGetCameraForAttack(const unsigned int index);
 
     private:
 

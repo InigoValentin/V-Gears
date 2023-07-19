@@ -58,7 +58,7 @@
                     <animation name="Position12" length="0" x="0:80" y="0:66%+7" />
                 </sprite>
             </widget>
-            <widget name="List" x="42%" y="5%" width="120" height="95%" visible="false">
+            <widget name="List" x="32%" y="5%" width="120" height="95%" visible="false">
                 <prototype name="Window" />
                 <text_area name="List1" x="10" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" visible="true" />
                 <text_area name="List2" x="10" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" visible="true" />
@@ -70,6 +70,40 @@
                     <animation name="Position3" length="0" x="0:-15" y="0:44%+7" />
                     <animation name="Position4" length="0" x="0:-15" y="0:66%+7" />
                 </sprite>
+            </widget>
+            <widget name="Target" x="42%" y="5%" width="160" height="95%" visible="false">
+                <prototype name="Window" />
+                <text_area name="L1" x="10" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="L2" x="10" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="L3" x="10" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="L4" x="10" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <sprite name="Separator" x="80" y="10%" width="1" height="80%" colour="0.1 0.1 0.1" visible="true" />
+                <text_area name="R1" x="90" y="0%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="R2" x="90" y="22%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="R3" x="90" y="44%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <text_area name="R4" x="90" y="66%+5" width="100%-5" height="25%" font="FFVIIFont" text_name="BattleUiHp" visible="true" />
+                <sprite name="Cursor" image="icons/cursor.png" x="-15" y="0%+7" width="24" height="16" visible="true">
+                    <animation name="Position1_1" length="0" x="0:-15" y="0:0%+7" />
+                    <animation name="Position1_2" length="0" x="0:-15" y="0:22%+7" />
+                    <animation name="Position1_3" length="0" x="0:-15" y="0:44%+7" />
+                    <animation name="Position1_4" length="0" x="0:-15" y="0:66%+7" />
+                    <animation name="Position2_1" length="0" x="0:65" y="0:0%+7" />
+                    <animation name="Position2_2" length="0" x="0:65" y="0:22%+7" />
+                    <animation name="Position2_3" length="0" x="0:65" y="0:44%+7" />
+                    <animation name="Position2_4" length="0" x="0:65" y="0:66%+7" />
+                </sprite>
+                <widget name="CursorAllLeft" x="0" y="0" width="100%" hieght="100%" visible="false">
+                    <sprite name="CursorAllLeft1" image="icons/cursor.png" x="-15" y="0%+7" width="24" height="16" visible="true"/>
+                    <sprite name="CursorAllLeft2" image="icons/cursor.png" x="-15" y="22%+7" width="24" height="16" visible="true"/>
+                    <sprite name="CursorAllLeft3" image="icons/cursor.png" x="-15" y="44%+7" width="24" height="16" visible="true"/>
+                    <sprite name="CursorAllLeft4" image="icons/cursor.png" x="-15" y="66%+7" width="24" height="16" visible="true"/>
+                </widget>
+                <widget name="CursorAllRight" x="0" y="0" width="100%" hieght="100%" visible="false">
+                    <sprite name="CursorAllRight1" image="icons/cursor.png" x="65" y="0%+7" width="24" height="16" visible="true"/>
+                    <sprite name="CursorAllRight2" image="icons/cursor.png" x="65" y="22%+7" width="24" height="16" visible="true"/>
+                    <sprite name="CursorAllRight3" image="icons/cursor.png" x="65" y="44%+7" width="24" height="16" visible="true"/>
+                    <sprite name="CursorAllRight4" image="icons/cursor.png" x="65" y="66%+7" width="24" height="16" visible="true"/>
+                </widget>
             </widget>
         </widget>
     </widget>
