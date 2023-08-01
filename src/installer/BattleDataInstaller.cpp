@@ -26,6 +26,7 @@
 #include "TexFile.h"
 #include "data/VGearsHRCFileManager.h"
 #include "data/VGearsAFileManager.h"
+#include "data/AbFile.h"
 #include "data/DaFile.h"
 #include "data/FF7Data.h"
 #include "common/VGearsStringUtil.h"
@@ -70,12 +71,12 @@ unsigned int BattleDataInstaller::InitializeScenes(){
     return total_scenes_;
 }
 
-unsigned int BattleDataInstaller::InitializeModels(){
+unsigned int BattleDataInstaller::InitializeBattleModels(){
     next_model_to_process_ = 0;
     next_model_to_convert_ = 0;
     battle_lgp_files_.clear();
     battle_lgp_file_names_.clear();
-    models_.clear();
+    battle_models_.clear();
     // Open battle.lgp
     File battle_lgp_file(input_dir_ + "data/battle/battle.lgp");
     // Also, open it as a LGP archive.
@@ -92,6 +93,30 @@ unsigned int BattleDataInstaller::InitializeModels(){
         }
     }
     return battle_lgp_files_.size();
+}
+
+unsigned int BattleDataInstaller::InitializeSpellModels(){
+    next_model_to_process_ = 0;
+    next_model_to_convert_ = 0;
+    battle_lgp_files_.clear();
+    battle_lgp_file_names_.clear();
+    battle_models_.clear();
+    // Open battle.lgp
+    File magic_lgp_file(input_dir_ + "data/battle/magic.lgp");
+    // Also, open it as a LGP archive.
+    VGears::LGPArchive magic_lgp(input_dir_ + "data/battle/magic.lgp", "LGP");
+    magic_lgp.open(input_dir_ + "data/battle/magic.lgp", true);
+    magic_lgp.load();
+    VGears::LGPArchive::FileList file_list = magic_lgp.GetFiles();
+    for (int i = 0; i < file_list.size(); i ++){
+        VGears::LGPArchive::FileEntry f = file_list.at(i);
+        if (f.data_offset + f.data_size <= magic_lgp_file.GetFileSize()){
+            File m_lgp_file(&magic_lgp_file, f.data_offset, f.data_size);
+            magic_lgp_files_.push_back(m_lgp_file);
+            magic_lgp_file_names_.push_back(f.file_name);
+        }
+    }
+    return magic_lgp_files_.size();
 }
 
 unsigned int BattleDataInstaller::ProcessScene(){
@@ -134,14 +159,14 @@ unsigned int BattleDataInstaller::ProcessScene(){
     return next_scene_;
 }
 
-unsigned int BattleDataInstaller::ProcessModel(){
+unsigned int BattleDataInstaller::ProcessBattleModel(){
     if (next_model_to_process_ >= battle_lgp_files_.size()) return battle_lgp_files_.size();
     // TODO: Do something with the files.
     // A little explanation. Each file has a 4 letter name, for example: 1234
     // 12 is the model identifier.
     // 34 if the type of file:
     //  - aa: Skeleton file (.hrc)
-    //  - ab: Unknown
+    //  - ab: Animation scripts
     //  - ac - al: Textures (.tex)
     //  - am - cz: Polygon files (.p)
     //  - da: Animations (.anim)
@@ -159,9 +184,9 @@ unsigned int BattleDataInstaller::ProcessModel(){
           + battle_lgp_file_names_[next_model_to_process_] + ".hrcbin"
         );
         bool found = false;
-        for (int m = 0; m < models_.size(); m ++){
-            if (models_[m].id == id){
-                models_[m].hrc = battle_lgp_file_names_[next_model_to_process_] + ".hrc";
+        for (int m = 0; m < battle_models_.size(); m ++){
+            if (battle_models_[m].id == id){
+                battle_models_[m].hrc = battle_lgp_file_names_[next_model_to_process_] + ".hrc";
                 found = true;
                 break;
             }
@@ -170,25 +195,40 @@ unsigned int BattleDataInstaller::ProcessModel(){
             Model model;
             model.id = id;
             model.hrc = battle_lgp_file_names_[next_model_to_process_] + ".hrc";
-            models_.push_back(model);
+            battle_models_.push_back(model);
         }
     }
     else if (type == "ab"){
         battle_lgp_files_[next_model_to_process_].WriteFile(
           output_dir_ + "temp/battle_models/"
-          + battle_lgp_file_names_[next_model_to_process_] + ".unknown"
+          + battle_lgp_file_names_[next_model_to_process_] + ".script"
         );
-    } // Unknown and not needed.
+        bool found = false;
+        for (int m = 0; m < battle_models_.size(); m ++){
+            if (battle_models_[m].id == id){
+                battle_models_[m].script
+                  = battle_lgp_file_names_[next_model_to_process_] + ".script";
+                found = true;
+                break;
+            }
+        }
+        if (found == false){
+            Model model;
+            model.id = id;
+            model.script = battle_lgp_file_names_[next_model_to_process_] + ".script";
+            battle_models_.push_back(model);
+        }
+    }
     else if (type == "da"){
-        // .a Animation file.
+        // .da Animation file.
         battle_lgp_files_[next_model_to_process_].WriteFile(
           output_dir_ + "temp/battle_models/"
           + battle_lgp_file_names_[next_model_to_process_] + ".anim"
         );
         bool found = false;
-        for (int m = 0; m < models_.size(); m ++){
-            if (models_[m].id == id){
-                models_[m].anim = battle_lgp_file_names_[next_model_to_process_] + ".anim";
+        for (int m = 0; m < battle_models_.size(); m ++){
+            if (battle_models_[m].id == id){
+                battle_models_[m].anim = battle_lgp_file_names_[next_model_to_process_] + ".anim";
                 found = true;
                 break;
             }
@@ -197,7 +237,7 @@ unsigned int BattleDataInstaller::ProcessModel(){
             Model model;
             model.id = id;
             model.anim = battle_lgp_file_names_[next_model_to_process_] + ".anim";
-            models_.push_back(model);
+            battle_models_.push_back(model);
         }
     }
     else if (
@@ -260,9 +300,9 @@ unsigned int BattleDataInstaller::ProcessModel(){
           id + type + "_" + info.name_normal + ".png", "Texture", "FFVIITextures"
         );
         bool found = false;
-        for (int m = 0; m < models_.size(); m ++){
-            if (models_[m].id == id){
-                models_[m].tex.push_back(id + type+ "_" + info.name_normal + ".png");
+        for (int m = 0; m < battle_models_.size(); m ++){
+            if (battle_models_[m].id == id){
+                battle_models_[m].tex.push_back(id + type+ "_" + info.name_normal + ".png");
                 found = true;
                 break;
             }
@@ -271,7 +311,7 @@ unsigned int BattleDataInstaller::ProcessModel(){
             Model model;
             model.id = id;
             model.tex.push_back(id + type + "_" + info.name_normal + ".png");
-            models_.push_back(model);
+            battle_models_.push_back(model);
         }
     }
     else{
@@ -281,9 +321,9 @@ unsigned int BattleDataInstaller::ProcessModel(){
           + battle_lgp_file_names_[next_model_to_process_] + ".p"
         );
         bool found = false;
-        for (int m = 0; m < models_.size(); m ++){
-            if (models_[m].id == id){
-                models_[m].p.push_back(battle_lgp_file_names_[next_model_to_process_] + ".p");
+        for (int m = 0; m < battle_models_.size(); m ++){
+            if (battle_models_[m].id == id){
+                battle_models_[m].p.push_back(battle_lgp_file_names_[next_model_to_process_] + ".p");
                 found = true;
                 break;
             }
@@ -292,21 +332,152 @@ unsigned int BattleDataInstaller::ProcessModel(){
             Model model;
             model.id = id;
             model.p.push_back(battle_lgp_file_names_[next_model_to_process_] + ".p");
-            models_.push_back(model);
+            battle_models_.push_back(model);
         }
     }
     next_model_to_process_ ++;
     return next_model_to_process_;
 }
 
-unsigned int BattleDataInstaller::ConvertModelsInit(){
-    next_model_to_convert_ = 0;
-    return models_.size();
+unsigned int BattleDataInstaller::ProcessSpellModel(){
+    if (next_model_to_process_ >= magic_lgp_files_.size()) return magic_lgp_files_.size();
+    // TODO: Do something with the files.
+    // A little explanation. Each file has a 4 letter name, for example: 1234
+    // 12 is the model identifier.
+    // 34 if the type of file:
+    //  - aa: Skeleton file (.hrc)
+    //  - ab: Unknown
+    //  - ac - al: Textures (.tex)
+    //  - am - cz: Polygon files (.p)
+    //  - da: Animations (.anim)
+    //std::cout << "SPELL MODEL FILE: " << magic_lgp_file_names_[next_model_to_process_] << std::endl;
+    std::string id = magic_lgp_file_names_[next_model_to_process_].substr(0, 2);
+    /*if (id != "rt"){ // TODO DEBUG REMOVE
+        next_model_to_process_ ++;
+        return next_model_to_process_;
+    }*/
+    std::string fname = magic_lgp_file_names_[next_model_to_process_];
+    FF7Data::SpellModelInfo info = FF7Data::GetSpellModelInfo(id);
+    magic_lgp_files_[next_model_to_process_].WriteFile(output_dir_ + "temp/spell_models/" + fname);
+    // Decompile skeleton files
+    if (fname.length() > 2 && fname.substr(fname.length() - 2, 2) == ".d"){
+        std::string out_name = fname.substr(0, fname.length() - 2) + ".hrc";
+        /*DecompileHrc(
+          File(output_dir_ + "temp/spell_models/" + fname), model,
+          output_dir_ + "temp/spell_models/" + out_name,
+          model.id + "_" + info.name_normal
+        );*/
+    }
+    /*if (fname.substr(fname.length() - 2, 2) == ".d"){
+        // HRC file, skeleton
+        magic_lgp_files_[next_model_to_process_].WriteFile(
+          output_dir_ + "temp/spell_models/"
+          + magic_lgp_file_names_[next_model_to_process_] + ".hrcbin"
+        );
+        bool found = false;
+        for (int m = 0; m < spell_models_.size(); m ++){
+            if (spell_models_[m].id == id){
+                spell_models_[m].hrc = magic_lgp_file_names_[next_model_to_process_] + ".hrc";
+                found = true;
+                break;
+            }
+        }
+        if (found == false){
+            Model model;
+            model.id = id;
+            model.hrc = magic_lgp_file_names_[next_model_to_process_] + ".hrc";
+            spell_models_.push_back(model);
+        }
+    }
+    else if (fname.substr(fname.length() - 4, 2) == ".a"){
+        // .a Animation file.
+        magic_lgp_files_[next_model_to_process_].WriteFile(
+          output_dir_ + "temp/spell_models/"
+          + magic_lgp_file_names_[next_model_to_process_] + ".anim"
+        );
+        bool found = false;
+        for (int m = 0; m < spell_models_.size(); m ++){
+            if (spell_models_[m].id == id){
+                spell_models_[m].anim = magic_lgp_file_names_[next_model_to_process_] + ".anim";
+                found = true;
+                break;
+            }
+        }
+        if (found == false){
+            Model model;
+            model.id = id;
+            model.anim = magic_lgp_file_names_[next_model_to_process_] + ".anim";
+            spell_models_.push_back(model);
+        }
+    }
+    else if (fname.substr(fname.length() - 4, 4) == ".tex"){
+        // .tex texture files. Save directly to their directory.
+        magic_lgp_files_[next_model_to_process_].WriteFile(
+          output_dir_ + "temp/spell_models/"
+          + magic_lgp_file_names_[next_model_to_process_] + ".tex"
+        );
+        TexFile tex(magic_lgp_files_[next_model_to_process_]);
+        std::string path = output_dir_ + "models/battle/attacks/";
+        path += (id + "_" + info.name_normal + ".png");
+        tex.SavePng(path);
+        res_mgr_->declareResource(
+          id + "_" + info.name_normal + ".png", "Texture", "FFVIITextures"
+        );
+        bool found = false;
+        for (int m = 0; m < spell_models_.size(); m ++){
+            if (spell_models_[m].id == id){
+                spell_models_[m].tex.push_back(id + "_" + info.name_normal + ".png");
+                found = true;
+                break;
+            }
+        }
+        if (found == false){
+            Model model;
+            model.id = id;
+            model.tex.push_back(id + "_" + info.name_normal + ".png");
+            spell_models_.push_back(model);
+        }
+    }
+    else if (
+      fname.substr(fname.length() - 4, 2) == ".p" || fname.substr(fname.length() - 2, 2) == ".p"
+    ){
+        // .p polygon file.
+        magic_lgp_files_[next_model_to_process_].WriteFile(
+          output_dir_ + "temp/spell_models/"
+          + magic_lgp_file_names_[next_model_to_process_] + ".p"
+        );
+        bool found = false;
+        for (int m = 0; m < spell_models_.size(); m ++){
+            if (spell_models_[m].id == id){
+                spell_models_[m].p.push_back(magic_lgp_file_names_[next_model_to_process_] + ".p");
+                found = true;
+                break;
+            }
+        }
+        if (found == false){
+            Model model;
+            model.id = id;
+            model.p.push_back(magic_lgp_file_names_[next_model_to_process_] + ".p");
+            spell_models_.push_back(model);
+        }
+    }*/
+    next_model_to_process_ ++;
+    return next_model_to_process_;
 }
 
-unsigned int BattleDataInstaller::ConvertModel(){
-    if (next_model_to_convert_ >= models_.size()) return models_.size();
-    Model model = models_[next_model_to_convert_];
+unsigned int BattleDataInstaller::ConvertBattleModelsInit(){
+    next_model_to_convert_ = 0;
+    return battle_models_.size();
+}
+
+unsigned int BattleDataInstaller::ConvertSpellModelsInit(){
+    next_model_to_convert_ = 0;
+    return spell_models_.size();
+}
+
+unsigned int BattleDataInstaller::ConvertBattleModel(){
+    if (next_model_to_convert_ >= battle_models_.size()) return battle_models_.size();
+    Model model = battle_models_[next_model_to_convert_];
     try{
         std::string path = "";
         FF7Data::BattleModelInfo info = FF7Data::GetBattleModelInfo(model.id);
@@ -330,7 +501,6 @@ unsigned int BattleDataInstaller::ConvertModel(){
         GenerateRsdFiles(model, output_dir_ + "temp/battle_models/");
 
         if ("" != model.anim){ // Skip for non-animated, ie battle backgrounds
-            //std::cout << " GENERATE ANIMATIONS FOR "  << model.id << std::endl;
             DaFile da(File(output_dir_ + "temp/battle_models/" + model.anim));
             std::vector<std::string> a_files = da.GenerateAFiles(
               model.id, output_dir_ + "temp/battle_models/"
@@ -338,11 +508,79 @@ unsigned int BattleDataInstaller::ConvertModel(){
             for (std::string file_name : a_files) model.a.push_back(file_name);
         }
 
+        if ("" != model.script){ // Skip non scripted models
+            std::cout << "AB FILE: " << model.script << std::endl;
+            AbFile ab(File(output_dir_ + "temp/battle_models/" + model.script), info.is_enemy);
+            ab.GenerateScripts(
+                model.id + "_" + info.name_normal, output_dir_ + "scripts/battle_models/"
+            );
+        }
+
         // Reload the resources for the newly created hrc and rsd.
         // TODO: Could this be done with res_mgr_->declareResource() ? Probably faster
         res_mgr_->removeResourceLocation(output_dir_ + "temp/battle_models/", "FFVII");
         res_mgr_->addResourceLocation(
           output_dir_ + "temp/battle_models/", "FileSystem", "FFVII", true, true
+        );
+
+        Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(
+          model.id + "_" + info.name_normal + ".hrc", "FFVII"
+        );
+        Ogre::String base_name;
+        VGears::StringUtil::splitBase(model.hrc, base_name);
+        auto mesh_name = model.id + "_" + info.name_normal + ".mesh";
+        Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
+        Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
+        for (std::string anim : model.a){
+            VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
+            Ogre::String a_base_name;
+            VGears::StringUtil::splitBase(anim, a_base_name);
+            VGears::AFilePtr a
+              = afl_mgr.load(a_base_name + ".a", "FFVII").staticCast<VGears::AFile>();
+            // Convert the FF7 name to a more readable name set in the meta data.
+            VGears::StringUtil::splitBase(anim, base_name);
+            a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
+        }
+        ExportMesh(path, mesh);
+    }
+    catch (const Ogre::Exception& ex){
+        std::cerr << "[ERROR] Ogre exception converting battle model "
+          << model.hrc <<": " << ex.what() << std::endl;
+    }
+    catch (const std::exception& ex){
+        std::cerr << "[ERROR] Exception converting battle model "
+          << model.hrc << ": " << ex.what() << std::endl;
+    }
+    next_model_to_convert_ ++;
+    return next_model_to_convert_;
+}
+
+unsigned int BattleDataInstaller::ConvertSpellModel(){
+    if (next_model_to_convert_ >= spell_models_.size()) return spell_models_.size();
+    Model model = spell_models_[next_model_to_convert_];
+    try{
+        std::string path = "attacks/";
+        FF7Data::SpellModelInfo info = FF7Data::GetSpellModelInfo(model.id);
+        DecompileHrc(
+          File(output_dir_ + "temp/spell_models/" + model.hrc + "bin"), model,
+          output_dir_ + "temp/spell_models/" + model.id + "_" + info.name_normal + ".hrc",
+          model.id + "_" + info.name_normal
+        );
+        GenerateRsdFiles(model, output_dir_ + "temp/spell_models/");
+
+        if ("" != model.anim){ // Skip for non-animated, ie battle backgrounds
+            DaFile da(File(output_dir_ + "temp/spell_models/" + model.anim));
+            std::vector<std::string> a_files = da.GenerateAFiles(
+              model.id, output_dir_ + "temp/spell_models/"
+            );
+            for (std::string file_name : a_files) model.a.push_back(file_name);
+        }
+
+        // Reload the resources for the newly created hrc and rsd.
+        // TODO: Could this be done with res_mgr_->declareResource() ? Probably faster
+        res_mgr_->removeResourceLocation(output_dir_ + "temp/spell_models/", "FFVII");
+        res_mgr_->addResourceLocation(
+          output_dir_ + "temp/spell_models/", "FileSystem", "FFVII", true, true
         );
 
         Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(
@@ -883,9 +1121,9 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
                 }
             }
         }
-        if (std::count(materials_.begin(), materials_.end(), sub_mesh->getMaterialName()) == 0){
+        if (std::count(battle_materials_.begin(), battle_materials_.end(), sub_mesh->getMaterialName()) == 0){
             mat_ser.queueForExport(mat);
-            materials_.push_back(sub_mesh->getMaterialName());
+            battle_materials_.push_back(sub_mesh->getMaterialName());
         }
     }
     mat_ser.exportQueued(

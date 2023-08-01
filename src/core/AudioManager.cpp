@@ -16,6 +16,8 @@
 #include <iostream>
 #include <list>
 #include <boost/thread.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include "core/AudioManager.h"
 #include "core/Event.h"
 #include "core/XmlMusicsFile.h"
@@ -215,8 +217,19 @@ AudioManager::Music* AudioManager::GetMusic(const Ogre::String& name){
 
 AudioManager::Sound* AudioManager::GetSound(const Ogre::String& name){
     boost::recursive_mutex::scoped_lock lock(update_mutex_);
-    for (auto it = sound_list_.begin(); it != sound_list_.end(); ++ it)
-        if (it->name == name) return &(*it);
+    for (auto it = sound_list_.begin(); it != sound_list_.end(); ++ it){
+        if (boost::algorithm::to_lower_copy(it->name) == boost::algorithm::to_lower_copy(name))
+            return &(*it);
+        if (it->name.find("|") != std::string::npos){
+            std::vector<std::string> names;
+            boost::split(
+              names, boost::algorithm::to_lower_copy(it->name),
+              boost::is_any_of("|"), boost::token_compress_on
+            );
+            for (int n = 0; n < names.size(); n ++)
+                if (names[n] == boost::algorithm::to_lower_copy(name)) return &(*it);
+        }
+    }
     return nullptr;
 }
 

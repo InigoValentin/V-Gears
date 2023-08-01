@@ -56,11 +56,22 @@ class BattleDataInstaller{
         unsigned int InitializeScenes();
 
         /**
-         * Prepares the installer for 3D model processing.
+         * Prepares the installer for battle 3D model processing.
          *
-         * @return The total number of models to process.
+         * Reads the contents of the battle.lgp file.
+         *
+         * @return The total number of battle models to process.
          */
-        unsigned int InitializeModels();
+        unsigned int InitializeBattleModels();
+
+        /**
+         * Prepares the installer for spell 3D model processing.
+         *
+         * Reads the contents of the magic.lgp file.
+         *
+         * @return The total number of battle models to process.
+         */
+        unsigned int InitializeSpellModels();
 
         /**
          * Processes the next battle scene.
@@ -70,28 +81,52 @@ class BattleDataInstaller{
         unsigned int ProcessScene();
 
         /**
-         * Processes the 3D model.
+         * Processes the next battle 3D model.
          *
          * Saves .hrc, .a and .p files for later conversion. .tex files are converted directly to
          * png.
          *
          * @return The total number of processed models.
          */
-        unsigned int ProcessModel();
+        unsigned int ProcessBattleModel();
 
         /**
-         * Prepres the installer for model conversion.
+         * Processes the next spell 3D model.
          *
-         * @return The total number of models to convert.
+         * Saves .hrc, .a and .p files for later conversion. .tex files are converted directly to
+         * png.
+         *
+         * @return The total number of processed models.
          */
-        unsigned int ConvertModelsInit();
+        unsigned int ProcessSpellModel();
+
+        /**
+         * Prepares the installer for battle model conversion.
+         *
+         * @return The total number of battle models to convert.
+         */
+        unsigned int ConvertBattleModelsInit();
+
+        /**
+         * Prepares the installer for spell model conversion.
+         *
+         * @return The total number of spell models to convert.
+         */
+        unsigned int ConvertSpellModelsInit();
 
         /**
          * Converts a model.
          *
          * @return The total number of converted models.
          */
-        unsigned int ConvertModel();
+        unsigned int ConvertBattleModel();
+
+        /**
+         * Converts a spell model.
+         *
+         * @return The total number of converted models.
+         */
+        unsigned int ConvertSpellModel();
 
         /**
          * Writes enemy data to files.
@@ -141,6 +176,11 @@ class BattleDataInstaller{
             std::string anim;
 
             /**
+             * Name of the "ab" scripts file.
+             */
+            std::string script;
+
+            /**
              * List of .p polygon files associated to the model
              */
             std::vector<std::string> p;
@@ -158,7 +198,7 @@ class BattleDataInstaller{
             /**
              * Constructor, initializes default values.
              */
-            Model(): id(""), hrc(""), anim(""){
+            Model(): id(""), hrc(""), anim(""), script(""){
                 p.clear();
                 tex.clear();
                 a.clear();
@@ -398,6 +438,16 @@ class BattleDataInstaller{
         std::vector<std::string> battle_lgp_file_names_;
 
         /**
+         * The files in the original magic.lgp file.
+         */
+        std::vector<File> magic_lgp_files_;
+
+        /**
+         * File names for the files in {@see magic_lgp_files_}.
+         */
+        std::vector<std::string> magic_lgp_file_names_;
+
+        /**
          * Next model to process;
          */
         unsigned int next_model_to_process_;
@@ -408,14 +458,24 @@ class BattleDataInstaller{
         unsigned int next_model_to_convert_;
 
         /**
-         * List of models files found in battle.lgp
+         * List of battle models files found in battle.lgp
          */
-        std::vector<Model> models_;
+        std::vector<Model> battle_models_;
 
         /**
-         * List of model materials;
+         * List of battle model materials;
          */
-        std::vector<std::string> materials_;
+        std::vector<std::string> battle_materials_;
+
+        /**
+         * List of spell models files found in magic.lgp
+         */
+        std::vector<Model> spell_models_;
+
+        /**
+         * List of spell model materials;
+         */
+        std::vector<std::string> spell_materials_;
 
 
 };

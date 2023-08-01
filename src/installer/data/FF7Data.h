@@ -93,7 +93,9 @@ class FF7Data{
         };
 
         /**
-         * Information about a model.
+         * Information about a battle model.
+         *
+         * Used for party characters, enemies and scenarios, but not for spells.
          */
         struct BattleModelInfo{
 
@@ -142,6 +144,37 @@ class FF7Data{
         };
 
         /**
+         * Information about a battle spell model.
+         */
+        struct SpellModelInfo{
+
+            /**
+             * A numeric ID assigned to the model.
+             */
+            int numeric_id;
+
+            /**
+             * An alphanumeric ID assigned to the model.
+             */
+            std::string alphanumeric_id;
+
+            /**
+             * A name for the model.
+             */
+            std::string name;
+
+            /**
+             * A normalized version of the name.
+             */
+            std::string name_normal;
+
+            /**
+             * Constructor. Initializes to default values.
+             */
+            SpellModelInfo(): numeric_id(-1), alphanumeric_id(""), name(""), name_normal(""){}
+        };
+
+        /**
          * Retrieves an enemy model ID from an enemy ID.
          *
          * @param[in] enemy_id Numeric enemy ID.
@@ -160,6 +193,9 @@ class FF7Data{
 
         /**
          * Retrieves information about a battle model from it's name.
+         *
+         * Can retrieve information for party character, enemy and scenario models, but not for
+         * spells models.
          *
          * The return structure has the following properties ({@see BattleModelInfo}):
          *
@@ -3450,5 +3486,57 @@ class FF7Data{
                 case 369: return "of_shinra_trooper";
             }
             return "";
+        }
+
+        /**
+         * Retrieves information about a spell model from it's name.
+         *
+         *
+         * The return structure has the following properties ({@see BattleModelInfo}):
+         *
+         * - numeric_id: A numeric ID assigned to the model. For enemies, it's a unique enemy ID.
+         * For scenes, it's a unique numeric id. For playable characters, it is the id of the
+         * character the model references, but since  a character may have many models, it's not
+         * guaranteed to be unique. There is a special case where it is -1: for the playable frog,
+         * which is related to all characters.
+         *
+         * - alphanumeric_id: A unique id assigned to the model. Two lowercase letters.
+         *
+         * - name: A descriptive name for the model. For debugging purposes only, it's not intended
+         * to ever be displayed, and it's not suitable to use in filenames.
+         *
+         * - name_normal: Simplified name, suitable to be used on filenames. Not garanteed to be
+         * unique.
+         *
+         * @param[in] model_id ID of the model. It can be two letters, or two letters preceded by
+         * "btl_". Case insensitive. If the id contains more than four letters (not counting the
+         * optional "btl_" prefix), only the first two sill be considered.
+         * @return A spell model info structure. If an invalid model ID is provided, or if the
+         * model doesn't exist, an empty structure will be returned.
+         */
+        static SpellModelInfo GetSpellModelInfo(std::string model_id){
+            SpellModelInfo info;
+            std::string alphanumeric_id = model_id;
+            std::transform(
+              alphanumeric_id.begin(), alphanumeric_id.end(), alphanumeric_id.begin(), ::tolower
+            );
+            if (alphanumeric_id.size() < 2) return info; // Empty
+            if (alphanumeric_id.size() > 4 && alphanumeric_id.substr(0, 4) == "btl_")
+                alphanumeric_id = alphanumeric_id.substr(4, alphanumeric_id.size() - 4);
+            if (alphanumeric_id.size() > 4) alphanumeric_id = alphanumeric_id.substr(0, 2);
+            info.alphanumeric_id = alphanumeric_id;
+            info.name = alphanumeric_id;
+            info.name_normal = "btl_" + alphanumeric_id;
+            if ("aa" == alphanumeric_id){
+                info.numeric_id = 0;
+                info.name = "Unused Pyramid";
+                info.name_normal = "unused_pyramid";
+            }
+            else if ("ab" == alphanumeric_id){
+                info.numeric_id = 1;
+                info.name = "Unused Pyramid";
+                info.name_normal = "unused_pyramid";
+            }
+            return info;
         }
 };

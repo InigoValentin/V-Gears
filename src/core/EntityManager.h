@@ -467,7 +467,7 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @param[in] name Entity name.
          * @param[in] file_name Path to the entity model file.
          * @param[in] position Entity position.
-         * @param[in] rotation Entity face direction.
+         * @param[in] orientation Entity face direction.
          * @param[in] scale Entity scale.
          * @param[in] root_orientation The node orientation.
          * @param[in] index Index of the entity.

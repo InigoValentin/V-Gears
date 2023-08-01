@@ -226,9 +226,29 @@ class DataInstaller{
             BATTLE_MODELS_WRITE_CHARACTERS,
 
             /**
-             * Writtes battle scene model info.
+             * Writes battle scene model info.
              */
             BATTLE_MODELS_WRITE_SCENES,
+
+            /**
+             * Initializes the battle installer for 3D spell processing.
+             */
+            SPELL_MODELS_INIT,
+
+            /**
+             * Extracts 3D spell models.
+             */
+            SPELL_MODELS_PROCESS,
+
+            /**
+             * Prepares for 3D spell model conversion.
+             */
+            SPELL_MODELS_CONVERT_INIT,
+
+            /**
+             * Converts 3D spell models.
+             */
+            SPELL_MODELS_CONVERT,
 
             /**
              * Parses item and materia prices from ff7.exe.

@@ -201,6 +201,11 @@ class MediaDataInstaller{
         std::unordered_map<int, std::string> sound_map_;
 
         /**
+         * Map for sound files with human readable descriptions.
+         */
+        std::unordered_map<int, std::string> sound_description_;
+
+        /**
          * Sound data for each entry to write to the XML file
          */
         std::vector<std::string> sounds_;

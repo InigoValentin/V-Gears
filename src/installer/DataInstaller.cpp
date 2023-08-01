@@ -39,6 +39,8 @@ DataInstaller::DataInstaller(
     // Assign weights.
     for (int i = IDLE; i < STATE_COUNT; i ++) step_weight_[i] = 1;
     step_weight_[IDLE] = 0;
+    step_weight_[BATTLE_MODELS_CONVERT] = 2;
+    step_weight_[SPELL_MODELS_CONVERT] = 2;
     step_weight_[MEDIA_IMAGES] = 3;
     step_weight_[MEDIA_SOUNDS] = 8;
     step_weight_[MEDIA_MUSICS] = 9;
@@ -109,7 +111,9 @@ float DataInstaller::Progress(){
             cur_substep_ = 0;
             substeps_ = 0;
             battle_installer_->WriteFormations();
-            installation_state_ = BATTLE_MODELS_INIT;
+            // TODO: DEBUG
+            installation_state_ = BATTLE_MODELS_INIT; // NORMAL
+            //installation_state_ = SPELL_MODELS_INIT; // SKIP BATTLE MODELS
             return CalcProgress();
         case BATTLE_MODELS_INIT:
             // Skip kernel data if option is set.
@@ -119,21 +123,21 @@ float DataInstaller::Progress(){
                 return CalcProgress();
             }
             write_output_line_("Extracting battle models...", 2, true);
-            substeps_ = battle_installer_->InitializeModels();
+            substeps_ = battle_installer_->InitializeBattleModels();
             cur_substep_ = 0;
             installation_state_ = BATTLE_MODELS_PROCESS;
             return CalcProgress();
         case BATTLE_MODELS_PROCESS:
-            cur_substep_ = battle_installer_->ProcessModel();
+            cur_substep_ = battle_installer_->ProcessBattleModel();
             if (cur_substep_ >= substeps_) installation_state_ = BATTLE_MODELS_CONVERT_INIT;
             return CalcProgress();
         case BATTLE_MODELS_CONVERT_INIT:
             cur_substep_ = 0;
-            substeps_ =  battle_installer_->ConvertModelsInit();
+            substeps_ =  battle_installer_->ConvertBattleModelsInit();
             installation_state_ = BATTLE_MODELS_CONVERT;
             return CalcProgress();
         case BATTLE_MODELS_CONVERT:
-            cur_substep_ = battle_installer_->ConvertModel();
+            cur_substep_ = battle_installer_->ConvertBattleModel();
             if (cur_substep_ >= substeps_) installation_state_ = BATTLE_MODELS_WRITE_CHARACTERS;
             return CalcProgress();
         case BATTLE_MODELS_WRITE_CHARACTERS:
@@ -144,7 +148,26 @@ float DataInstaller::Progress(){
         case BATTLE_MODELS_WRITE_SCENES:
             write_output_line_("Writing battle scene data...", 2, true);
             battle_installer_->WriteSceneData();
-            installation_state_ = KERNEL_PRICES;
+            installation_state_ = SPELL_MODELS_INIT;
+            return CalcProgress();
+        case SPELL_MODELS_INIT:
+            write_output_line_("Extracting attack models...", 2, true);
+            substeps_ = battle_installer_->InitializeSpellModels();
+            cur_substep_ = 0;
+            installation_state_ = SPELL_MODELS_PROCESS;
+            return CalcProgress();
+        case SPELL_MODELS_PROCESS:
+            cur_substep_ = battle_installer_->ProcessSpellModel();
+            if (cur_substep_ >= substeps_) installation_state_ = SPELL_MODELS_CONVERT_INIT;
+            return CalcProgress();
+        case SPELL_MODELS_CONVERT_INIT:
+            cur_substep_ = 0;
+            substeps_ =  battle_installer_->ConvertSpellModelsInit();
+            installation_state_ = SPELL_MODELS_CONVERT;
+            return CalcProgress();
+        case SPELL_MODELS_CONVERT:
+            cur_substep_ = battle_installer_->ConvertSpellModel();
+            if (cur_substep_ >= substeps_) installation_state_ = KERNEL_PRICES;
             return CalcProgress();
         case KERNEL_PRICES:
             // Skip kernel data if option is set.
@@ -398,6 +421,7 @@ void DataInstaller::CreateDirectories(){
     CreateDir("temp");
     CreateDir("temp/char");
     CreateDir("temp/battle_models");
+    CreateDir("temp/spell_models");
     CreateDir("gamedata");
     CreateDir("gamedata/enemy");
     CreateDir("gamedata/attack");
@@ -410,13 +434,14 @@ void DataInstaller::CreateDirectories(){
     CreateDir("images/window");
     CreateDir("screens");
     CreateDir("scripts");
+    CreateDir("scripts/battle_models");
     CreateDir("system");
     CreateDir("texts");
     CreateDir("models/fields/");
     CreateDir("models/battle/characters");
     CreateDir("models/battle/scenes");
     CreateDir("models/battle/enemies");
-
+    CreateDir("models/battle/attacks");
 
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "temp/char/", "FileSystem", "FFVII", true, true
@@ -438,6 +463,9 @@ void DataInstaller::CreateDirectories(){
     );
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "models/battle/enemies/", "FileSystem", "FFVIITextures", true, true
+    );
+    application_.ResMgr()->addResourceLocation(
+      output_dir_ + "models/battle/attacks/", "FileSystem", "FFVIITextures", true, true
     );
     fields_lgp_ = std::make_unique<ScopedLgp>(
       application_.getRoot(), input_dir_ + "data/field/flevel.lgp", "LGP", "FFVIIFields"

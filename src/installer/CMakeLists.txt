@@ -28,6 +28,7 @@ set(INSTALLER_SOURCE_FILES
     common/Surface.cpp
     common/TimToVram.cpp
     common/Vram.cpp
+    data/AbFile.cpp
     data/BattleSceneFile.cpp
     data/DaFile.cpp
     decompiler/CodeGenerator.cpp
