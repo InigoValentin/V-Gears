@@ -156,34 +156,53 @@ class BattleDataInstaller{
     private:
 
         /**
-         * Files to compose a model.
+         * A model.
+         *
+         * It can be a battle model or an spell model.
          */
         struct Model{
 
             /**
-             * Model identifier, two letters.
+             * Model identifier.
+             *
+             * For battle models, a two letters string. For spell models, anything.
              */
             std::string id;
 
             /**
-             * Name of the model .hrc file
+             * Name of the model .hrc file.
+             *
+             * For battle models, it will be the *aa file. For spell models, the *.d file.
              */
             std::string hrc;
 
             /**
-             * Name of the "da" animation file.
+             * Name of the animation file.
+             *
+             * For battle models, it will be the *da file. For spell models, the *.b file.
              */
             std::string anim;
-
-            /**
-             * Name of the "ab" scripts file.
-             */
-            std::string script;
 
             /**
              * List of .p polygon files associated to the model
              */
             std::vector<std::string> p;
+
+            Model(): id(""), hrc(""), anim(""){
+                p.clear();
+            }
+
+        };
+
+        /**
+         * Files to compose a battle model.
+         */
+        struct BattleModel: Model{
+
+            /**
+             * Name of the "ab" scripts file.
+             */
+            std::string script;
 
             /**
              * List of .tex texture files associated to the model
@@ -198,8 +217,7 @@ class BattleDataInstaller{
             /**
              * Constructor, initializes default values.
              */
-            Model(): id(""), hrc(""), anim(""), script(""){
-                p.clear();
+            BattleModel(): script(""){
                 tex.clear();
                 a.clear();
             }
@@ -260,6 +278,30 @@ class BattleDataInstaller{
         };
 
         /**
+         * Files to compose a spell model.
+         */
+        struct SpellModel: Model{
+
+            /**
+             * List of .a files associated to the model
+             */
+            std::vector<std::string> a;
+
+            /**
+             * List of .a files associated to the model
+             */
+            std::vector<std::string> s;
+
+            /**
+             * Constructor, initializes default values.
+             */
+            SpellModel(){
+                a.clear();
+                s.clear();
+            }
+        };
+
+        /**
          * Extract a gzipped file.
          *
          * @param[in] file Compressed file.
@@ -305,41 +347,73 @@ class BattleDataInstaller{
         /**
          * Generates all required .rsd models for a model.
          *
+         * To be used for enemy, playable character and scene models (anything in battle.lgp).
+         *
          * @param[in] model Model information.
          * @param[in] path Output path.
          */
-        void GenerateRsdFiles(Model model, std::string path);
+        void GenerateRsdFiles(BattleModel model, std::string path);
+
+        /**
+         * Generates all required .rsd models for a model.
+         *
+         * To be used for spell models (anything in magic.lgp).
+         *
+         * @param[in] model Model information.
+         * @param[in] path Output path.
+         */
+        void GenerateRsdFiles(SpellModel model, std::string path);
 
         /**
          * Decompiles a compiled HRC file.
          *
          * To be used for battle enemy and playable character models, since they have a
-         * well-defined bone hierarchy. For battle background models, use {@see DecompileSceneHrc}.
+         * well-defined bone hierarchy. For battle background models, use
+         * {@see DecompileSceneSceneHrc}, and for spell models, use {@see DecompileSpellModelHrc}.
          * Note that this is not a general purpose HRC decompiler, it only works for files in
          * battle.lgp.
          *
          * @param[in] compiled The compiles HRC file.
-         * @param[in] model The model.
+         * @param[in] model The model, it can be a battle model or an spell model.
          * @param[in] path Path to save the decompiled file to.
          * @param[in] skeleton_name Name for the skeleton.
          */
-        void DecompileHrc(File compiled, Model model, std::string path, std::string skeleton_name);
+        void DecompileBattleModelHrc(
+          File compiled, BattleModel model, std::string path, std::string skeleton_name
+        );
+
+        /**
+         * Decompiles a compiled HRC file.
+         *
+         * To be used for spell models, since they have a well-defined bone hierarchy. For battle
+         * background models, use {@see DecompileSceneSceneHrc}, and for enemy and playable
+         * character models, use {@see DecompileBattleModelHrc}. Note that this is not a general
+         * purpose HRC decompiler, it only works for files in magic.lgp.
+         *
+         * @param[in] compiled The compiles HRC file.
+         * @param[in] model The model, it can be a battle model or an spell model.
+         * @param[in] path Path to save the decompiled file to.
+         * @param[in] skeleton_name Name for the skeleton.
+         */
+        void DecompileSpellModelHrc(
+          File compiled, SpellModel model, std::string path, std::string skeleton_name
+        );
 
         /**
          * Decompiles a compiled HRC file.
          *
          * To be used only for battle background HRC files, since they don't have a defined bone
          * hierarchy, and every bone is assumed to be a child of the previous one. For enemy and
-         * playable character models, use {@see DecompileHrc}. Note that this is not a general
-         * purpose HRC decompiler, it only works for files in battle.lgp.
+         * playable character models, use {@see DecompileBattleModelHrc}. Note that this is not a
+         * general purpose HRC decompiler, it only works for files in battle.lgp.
          *
          * @param[in] compiled The compiles HRC file.
-         * @param[in] model The model.
+         * @param[in] model The model, it can be a battle model or an spell model.
          * @param[in] path Path to save the decompiled file to.
          * @param[in] skeleton_name Name for the skeleton.
          */
-        void DecompileSceneHrc(
-          File compiled, Model model, std::string path, std::string skeleton_name
+        void DecompileSceneModelHrc(
+          File compiled, BattleModel model, std::string path, std::string skeleton_name
         );
 
         /**
@@ -460,7 +534,7 @@ class BattleDataInstaller{
         /**
          * List of battle models files found in battle.lgp
          */
-        std::vector<Model> battle_models_;
+        std::vector<BattleModel> battle_models_;
 
         /**
          * List of battle model materials;
@@ -470,7 +544,7 @@ class BattleDataInstaller{
         /**
          * List of spell models files found in magic.lgp
          */
-        std::vector<Model> spell_models_;
+        std::vector<SpellModel> spell_models_;
 
         /**
          * List of spell model materials;

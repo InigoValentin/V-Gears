@@ -3520,14 +3520,10 @@ class FF7Data{
             std::transform(
               alphanumeric_id.begin(), alphanumeric_id.end(), alphanumeric_id.begin(), ::tolower
             );
-            if (alphanumeric_id.size() < 2) return info; // Empty
-            if (alphanumeric_id.size() > 4 && alphanumeric_id.substr(0, 4) == "btl_")
-                alphanumeric_id = alphanumeric_id.substr(4, alphanumeric_id.size() - 4);
-            if (alphanumeric_id.size() > 4) alphanumeric_id = alphanumeric_id.substr(0, 2);
             info.alphanumeric_id = alphanumeric_id;
             info.name = alphanumeric_id;
-            info.name_normal = "btl_" + alphanumeric_id;
-            if ("aa" == alphanumeric_id){
+            info.name_normal = alphanumeric_id;
+            /*if ("aa" == alphanumeric_id){
                 info.numeric_id = 0;
                 info.name = "Unused Pyramid";
                 info.name_normal = "unused_pyramid";
@@ -3536,7 +3532,7 @@ class FF7Data{
                 info.numeric_id = 1;
                 info.name = "Unused Pyramid";
                 info.name_normal = "unused_pyramid";
-            }
+            }*/
             return info;
         }
 };

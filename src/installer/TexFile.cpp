@@ -32,8 +32,8 @@ void TexFile::Read(File file){
     file.SetOffset(0);
     version_ = file.readU32LE();
     if (version_ != 0x00000001){
-        std::cout << "[WARNING] Tried to read an invalid TEX file to png. Version ID: "
-          << version_ << std::endl;
+        std::cout << "[WARNING] Tried to read an invalid TEX file " << file.GetFileName()
+          << " to png. Version ID: " << version_ << std::endl;
         return;
     }
     unknown_0_ = file.readU32LE();
@@ -185,6 +185,7 @@ void TexFile::SavePng(
 }
 
 void TexFile::SavePng(std::string file_name, unsigned int palette){
+    //if (invalid_) return;
     SavePng(file_name, 0, 0, width_, height_, palette);
 }
 

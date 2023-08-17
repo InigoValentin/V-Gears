@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <cstdint>
 #include <OgreStringConverter.h>
 #include "core/Assert.h"
 #include "core/ConfigVar.h"

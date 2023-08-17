@@ -45,6 +45,8 @@ class TexFile{
         /**
          * Saves a fragment of the TEX file as a PNG file.
          *
+         * If any of the read data invalidates the file, it will silently fail and do nothing.
+         *
          * @param[in] file_name Full path of the destination file.
          * @param[in] x X coordinate of the image to extract from the TEX file.
          * @param[in] y Y coordinate of the image to extract from the TEX file.
@@ -61,6 +63,8 @@ class TexFile{
         /**
          * Saves the TEX file as a PNG file.
          *
+         * If any of the read data invalidates the file, it will silently fail and do nothing.
+         *
          * @param[in] file_name Full path of the destination file.
          * @param[in] palette Index of the color palette to use. For non paletted files it's
          * ignored.
@@ -71,7 +75,8 @@ class TexFile{
          * Saves two fragments of the TEX file as a single PNG image.
          *
          * The second fragment will be at the right of the first one. They must have the same
-         * height.
+         * height. If any of the read data invalidates the file, it will silently fail and do
+         * nothing.
          *
          * @param[in] file_name Full path of the destination file.
          * @param[in] x1 X coordinate of the first image to extract from the TEX file.
