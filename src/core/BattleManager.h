@@ -251,9 +251,39 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         Enemy* ScriptGetEnemy(const unsigned int index);
 
         /**
-         * Loads enemy info from the enemy XML enemy file.
+         * Adds an attack model to the battle.
+         *
+         * @param[in] id Attack model ID.
+         * @param[in] model Model name, without path or extension.
+         * @param[in] pos Model position.
+         * @param[in] orientation Model orientation.
+         * @param[in] animation Initial animation name for the model. If empty or null, the first
+         * available animation will be used.
          */
-        void Load();
+        void AddAttackModel(
+          const unsigned int id, const std::string model, const Ogre::Vector3 pos,
+          const Ogre::Degree orientation, const std::string animation
+        );
+
+        /**
+         * Adds an attack model to the battle.
+         *
+         * Simplified version of {@see AddAttackModel}, to be used from Lua scripts.
+         *
+         * @param[in] id Attack model ID.
+         * @param[in] model Model name, without path or extension.
+         * @param[in] x Model position, X coordinate.
+         * @param[in] y Model position, Y coordinate.
+         * @param[in] z Model position, Z coordinate.
+         * @param[in] orientation Model orientation.
+         * @param[in] animation Initial animation name for the model. If empty or null, the first
+         * available animation will be used.
+         */
+        void ScriptAddAttackModel(
+          const unsigned int id, const char* model, const float x, const float y, const float z,
+          const int orientation, const char* animation
+        );
+
 
         /**
          * Sets the battle layout.
@@ -375,6 +405,11 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          * Scale factor for battle background models.
          */
         static const float SCENE_SCALE;
+
+        /**
+         * Scale factor for battle attack and spell models.
+         */
+        static const float ATTACK_SCALE;
 
         /**
          * The scene node.

@@ -45,6 +45,8 @@ ConfigVar cv_debug_battle_axis("debug_battle_axis", "Draw debug battle axis", "f
 
 const float BattleManager::ENEMY_SCALE = 0.0032f;
 
+const float BattleManager::ATTACK_SCALE = 0.0032f;
+
 const float BattleManager::PARTY_SCALE = 0.0039f;
 
 const float BattleManager::SCENE_SCALE = 0.0012f;
@@ -195,6 +197,39 @@ unsigned int BattleManager::ScriptGetEnemyCount() const{return enemies_.size();}
 Enemy* BattleManager::ScriptGetEnemy(const unsigned int index){
     if (index >= enemies_.size()) return nullptr;
     return &enemies_[index];
+}
+
+void BattleManager::AddAttackModel(
+  const unsigned int id, const std::string model, const Ogre::Vector3 pos,
+  const Ogre::Degree orientation, const std::string animation
+){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR(
+          "Tried to add an attack model to the BattleManager,"
+          + " but the manager was not in battle mode."
+        );
+        return;
+    }
+    //Enemy* enemy = new Enemy(id, pos, front, visible, targeteable, active, cover);
+    //enemies_.push_back(*enemy);
+    EntityManager::getSingleton().AddEntity(
+      model + "_" + std::to_string(id), "attacks/" + model + ".mesh", pos, orientation,
+      Ogre::Vector3(ENEMY_SCALE, ENEMY_SCALE, ENEMY_SCALE), Ogre::Quaternion(1, 1, 0, 0), id
+    );
+    EntityManager::getSingleton().GetEntity(model + "_" + std::to_string(id))
+      ->SetRotation(orientation);
+    EntityManager::getSingleton().GetEntity(model + "_" + std::to_string(id))
+      ->ScriptSetDefaultAnimation(animation.c_str());
+}
+
+void BattleManager::ScriptAddAttackModel(
+  const unsigned int id, const char* model, const float x, const float y, const float z,
+  const int orientation, const char* animation
+){
+    AddAttackModel(
+      id, std::string(model), Ogre::Vector3(x, y, z),
+      Ogre::Degree(orientation), std::string(animation)
+    );
 }
 
 void BattleManager::AddCamera(

@@ -82,7 +82,7 @@ std::string AbFile::DecompileScript(u32 offset){
                     ab_file_.readU8();
                     break;
                 case 0xAA: // Unpause camera, no parameters.
-                    line << "    unpause_macera()";
+                    line << "    unpause_camera()";
                     break;
                 case 0xAD:
                      // Set effect, four parameters:

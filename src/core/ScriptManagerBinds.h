@@ -276,6 +276,13 @@ void ScriptManager::InitBinds(){
             "get_enemy",
             (Enemy*(BattleManager::*)(const unsigned int)) &BattleManager::ScriptGetEnemy
           )
+          .def(
+            "add_attack_model",
+            (void(BattleManager::*)(
+              const unsigned int, const char*, const float,
+              const float, const float, const int, const char*
+            )) &BattleManager::ScriptAddAttackModel
+          )
     ];
 
     // Commands for enemy handling.
