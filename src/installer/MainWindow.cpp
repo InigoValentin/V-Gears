@@ -184,6 +184,8 @@ void MainWindow::on_btn_data_run_clicked(){
           "data/music/music.idx",
           "data/midi/midi.lgp",
           "data/battle/scene.bin",
+          "data/battle/battle.lgp",
+          "data/battle/magic.lgp",
           "ff7.exe"
         };
         // Ensure required files are in the input dir
@@ -225,10 +227,11 @@ void MainWindow::on_btn_data_run_clicked(){
             options.skip_fields = (Qt::Checked == main_window_->chk_no_fields->checkState());
             options.skip_field_models
               = (Qt::Checked == main_window_->chk_no_field_models->checkState());
+            options.skip_wm = (Qt::Checked == main_window_->chk_no_wm->checkState());
+            options.skip_wm_models = (Qt::Checked == main_window_->chk_no_wm_models->checkState());
             options.no_ffmpeg = (Qt::Checked == main_window_->chk_no_ffmpeg->checkState());
             options.no_timidity = (Qt::Checked == main_window_->chk_no_timidity->checkState());
             options.keep_originals = (Qt::Checked == main_window_->chk_keep_original->checkState());
-
 
             installer_created = true;
             installer_ = std::make_unique<DataInstaller>(
@@ -238,8 +241,7 @@ void MainWindow::on_btn_data_run_clicked(){
               [this](const std::string log_line, int level, bool as_progress = false){
                  main_window_->data_log->append(log_line.c_str());
                  std::cout << log_line << std::endl;
-                 if (as_progress)
-                     main_window_->label_progress->setText(log_line.c_str());
+                 if (as_progress) main_window_->label_progress->setText(log_line.c_str());
               }
             );
             OnInstallStarted();

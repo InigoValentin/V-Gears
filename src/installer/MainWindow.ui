@@ -284,6 +284,30 @@
             </layout>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QCheckBox" name="chk_no_wm">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract world map data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, world map models and data will not be extracted. Data from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is not usually very long, so there is no reason to skip it unless you have manually edited the world map data. Skipping world map data installation will also skip the installation of the world map 3D models.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Don't extract world map data</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="chk_no_wm_models">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract world map 3D models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, world map 3D models and textures will not be extracted. Models from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is not usually very long, so there is no reason to skip it unless you have manually edited the models. Skipping world map data installation will also skip the installation of world map 3D models.&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Dont't extract world 3D models</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
               <widget class="QCheckBox" name="chk_no_ffmpeg">

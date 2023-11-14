@@ -378,7 +378,7 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
     mesh->setSkeletonName(base_mesh_name + ".skeleton");
     mesh_serializer.exportMesh(mesh.getPointer(), outdir + mesh->getName());
     Ogre::Mesh::SubMeshIterator it(mesh->getSubMeshIterator());
-    Ogre::MaterialSerializer    mat_ser;
+    Ogre::MaterialSerializer mat_ser;
     size_t i(0);
     std::set<std::string> textures;
     while (it.hasMoreElements()){

@@ -17,7 +17,6 @@
 #include <OgreMeshManager.h>
 #include <OgreSkeletonManager.h>
 #include "data/VGearsHRCFile.h"
-//#include "common/FF7NameLookup.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
 #include "common/VGearsStringUtil.h"
 #include "data/VGearsHRCFileSerializer.h"
@@ -33,28 +32,24 @@ namespace VGears{
 
 
     HRCFile::HRCFile(
-      Ogre::ResourceManager *creator, const String &name,
-      Ogre::ResourceHandle handle, const String &group, bool is_manual,
-      Ogre::ManualResourceLoader *loader
+      Ogre::ResourceManager *creator, const String &name, Ogre::ResourceHandle handle,
+      const String &group, bool is_manual, Ogre::ManualResourceLoader *loader
     ) :
       Ogre::Resource(creator, name, handle, group, is_manual, loader),
        mesh_loader_(nullptr), skeleton_loader_(nullptr)
     {createParamDictionary(RESOURCE_TYPE);}
 
     HRCFile::~HRCFile(){
-        if(skeleton_loader_){
-            Ogre::SkeletonManager::getSingleton().remove(
-              skeleton_->getHandle()
-            );
+        if (skeleton_loader_){
+            Ogre::SkeletonManager::getSingleton().remove(skeleton_->getHandle());
             delete skeleton_loader_;
             skeleton_loader_ = nullptr;
         }
-        if(mesh_loader_){
+        if (mesh_loader_){
             Ogre::MeshManager::getSingleton().remove(mesh_->getHandle());
             delete mesh_loader_;
             mesh_loader_ = nullptr;
         }
-
         skeleton_.reset();
         mesh_.reset();
         unload();
@@ -63,22 +58,16 @@ namespace VGears{
     void HRCFile::loadImpl(){
         HRCFileSerializer serializer;
         Ogre::DataStreamPtr stream(
-          Ogre::ResourceGroupManager::getSingleton().openResource(
-            mName, mGroup, true, this
-          )
+          Ogre::ResourceGroupManager::getSingleton().openResource(mName, mGroup, true, this)
         );
         serializer.ImportHRCFile(stream, this);
         const String skeletonfile_name_(GetSkeletonFileName());
-        Ogre::SkeletonManager &skeleton_manager(
-          Ogre::SkeletonManager::getSingleton()
-        );
+        Ogre::SkeletonManager &skeleton_manager(Ogre::SkeletonManager::getSingleton());
         skeleton_ = skeleton_manager.getByName(skeletonfile_name_, mGroup);
         if (skeleton_ == nullptr){
             assert(skeleton_loader_ == nullptr);
             skeleton_loader_ = new HRCSkeletonLoader(*this);
-            skeleton_ = skeleton_manager.create(
-              skeletonfile_name_, mGroup, true, skeleton_loader_
-            );
+            skeleton_ = skeleton_manager.create(skeletonfile_name_, mGroup, true, skeleton_loader_);
         }
         const String meshfile_name_(GetMeshFileName());
         Ogre::LogManager::getSingleton().stream()
@@ -88,9 +77,7 @@ namespace VGears{
         if (mesh_ == nullptr){
             assert(mesh_loader_ == nullptr);
             mesh_loader_ = new HRCMeshLoader(*this);
-            mesh_ = mesh_manager.create(
-              meshfile_name_, mGroup, true, mesh_loader_
-            );
+            mesh_ = mesh_manager.create(meshfile_name_, mGroup, true, mesh_loader_);
         }
     }
 
@@ -102,27 +89,16 @@ namespace VGears{
     size_t HRCFile::CalculateSize(const Bone &bone) const{
         size_t size_rsd_names(0);
         for(
-          RSDNameList::const_iterator it(bone.rsd_names.begin());
-          it != bone.rsd_names.end();
-          ++ it
-        ){
-            size_rsd_names += it->size();
-        }
+          RSDNameList::const_iterator it(bone.rsd_names.begin()); it != bone.rsd_names.end(); ++ it
+        ){size_rsd_names += it->size();}
 
-        return
-          bone.name.size() + bone.parent.size() + sizeof(bone.length)
-            + size_rsd_names;
+        return bone.name.size() + bone.parent.size() + sizeof(bone.length) + size_rsd_names;
     }
 
     size_t HRCFile::CalculateSize() const{
         size_t size_bones(0);
-        for(
-          BoneList::const_iterator it(bones_.begin());
-          it != bones_.end();
-          ++ it
-        ){
+        for(BoneList::const_iterator it(bones_.begin()); it != bones_.end(); ++ it)
             size_bones += CalculateSize(*it);
-        }
         return skeleton_name_.size() + size_bones;
     }
 

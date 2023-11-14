@@ -74,6 +74,9 @@ float DataInstaller::Progress(){
             battle_installer_ = std::make_unique<BattleDataInstaller>(
               input_dir_, output_dir_, application_.ResMgr()
             );
+            world_installer_ = std::make_unique<WorldInstaller>(
+              input_dir_, output_dir_, options_.keep_originals
+            );
             installation_state_ = BATTLE_SCENES_INIT;
             return CalcProgress();
         case BATTLE_SCENES_INIT:
@@ -317,7 +320,7 @@ float DataInstaller::Progress(){
             // Skip fields if option is set.
             if (options_.skip_fields){
                 write_output_line_("Skipping field maps installation...", 2, true);
-                installation_state_ = CLEAN;
+                installation_state_ = WM_INIT;
                 return CalcProgress();
             }
             write_output_line_("Collecting spawn points and scale factors...", 2, true);
@@ -363,7 +366,7 @@ float DataInstaller::Progress(){
             // Skip fields if option is set.
             if (options_.skip_field_models){
                 write_output_line_("Skipping field maps installation...", 2, true);
-                installation_state_ = CLEAN;
+                installation_state_ = WM_INIT;
                 return CalcProgress();
             }
             write_output_line_("Converting field models...", 2, true);
@@ -376,6 +379,26 @@ float DataInstaller::Progress(){
             field_installer_->ConvertModels(field_model_names_[cur_substep_]);
             cur_substep_ ++;
             if (cur_substep_ == substeps_){
+                installation_state_ = WM_INIT;
+                cur_substep_ = 0;
+            }
+            return CalcProgress();
+        case WM_INIT:
+            // Skip world map if option set
+            if (options_.skip_wm){
+                write_output_line_("Skipping world map data installation...", 2, true);
+                installation_state_ = CLEAN;
+                return CalcProgress();
+            }
+            write_output_line_("Extracting world map models...", 2, true);
+            substeps_ = world_installer_->Initialize();
+            cur_substep_ = 0;
+            installation_state_ = WM_MAPS;
+            return CalcProgress();
+        case WM_MAPS:
+            if (world_installer_->ProcessMap() == false) cur_substep_ ++;
+            else{
+                // TODO: Next step: map scripts, etc
                 installation_state_ = CLEAN;
                 cur_substep_ = 0;
             }
@@ -422,6 +445,7 @@ void DataInstaller::CreateDirectories(){
     CreateDir("temp/char");
     CreateDir("temp/battle_models");
     CreateDir("temp/spell_models");
+    CreateDir("temp/wm");
     CreateDir("gamedata");
     CreateDir("gamedata/enemy");
     CreateDir("gamedata/attack");
@@ -442,6 +466,7 @@ void DataInstaller::CreateDirectories(){
     CreateDir("models/battle/scenes");
     CreateDir("models/battle/enemies");
     CreateDir("models/battle/attacks");
+    CreateDir("models/world/");
 
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "temp/char/", "FileSystem", "FFVII", true, true
@@ -466,6 +491,9 @@ void DataInstaller::CreateDirectories(){
     );
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "models/battle/attacks/", "FileSystem", "FFVIITextures", true, true
+    );
+    application_.ResMgr()->addResourceLocation(
+      output_dir_ + "models/world/", "FileSystem", "FFVIITextures", true, true
     );
     fields_lgp_ = std::make_unique<ScopedLgp>(
       application_.getRoot(), input_dir_ + "data/field/flevel.lgp", "LGP", "FFVIIFields"

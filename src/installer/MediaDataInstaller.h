@@ -111,54 +111,14 @@ class MediaDataInstaller{
          * Number of sound files to extract.
          */
         static int TOTAL_SOUNDS;
-
-        /**
-         * The standard WAV header.
-         *
-         * 78 bytes to be written to every wav file before anything else.
-         */
-        static u8 WAV_HEADER[78];
-
-        /**
-         * The structure of each audio file pointer in a sound FMT file. 74 bytes.
-         */
-        struct FmtFile{
-
-            /**
-             * Size of the wav file in the dat. 4 bytes.
-             */
-            u32 size;
-
-            /**
-             * Offset of the wav file in the dat. 4 bytes.
-             */
-            u32 offset;
-
-            /**
-             * Information for sound looping. 12 bytes.
-             */
-            u8 loop_metadata[16];
-
-            /**
-             * Microsoft WAVFORMATEX header for the wav file. 44 bytes.
-             */
-            u8 wav_header[18];
-
-            /**
-             * Samples per block. 2 bytes.
-             */
-            u16 samples_per_block;
-
-            /**
-             * Number of ADPCM coefficients (used for compression, should always be 7). 2 bytes.
-             */
-            u16 adpcm;
-
-            /**
-             * Standard Microsoft ADPCMCoefSets. 28 bytes.
-             */
-            u8 adpcm_sets[28];
-        };
+		
+		/*
+		 * Retrieves the path to the currently running executable.
+		 *
+		 * @return Path to the folder containig the current executable, or an empty string in case
+		 * of failure.
+		 */
+		std::string GetExecutablePath();
 
         /**
          * The path to the directory from which to read the PC game data.
@@ -179,16 +139,6 @@ class MediaDataInstaller{
          * The WINDOW.BIN file.
          */
         BinGZipFile window_;
-
-        /**
-         * The sounds .fmt file.
-         */
-        File fmt_;
-
-        /**
-         * The sounds .dat file.
-         */
-        File dat_;
 
         /**
          * Number of sounds already processed.
@@ -244,7 +194,5 @@ class MediaDataInstaller{
          * Flag to prevent system calls to timidity.
          */
         bool no_timidity_;
-
-
 
 };

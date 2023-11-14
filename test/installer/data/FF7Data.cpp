@@ -13,17 +13,16 @@
  * GNU General Public License for more details.
  */
 
-/**
- * This file defines the application version.
- */
+#include <boost/test/unit_test.hpp>
+#include "installer/data/FF7Data.h"
 
-#pragma once
 
-/**
- * Application version.
- */
-#define VGEARS_VERSION "0.1.17"
-#define VGEARS_VERSION_MAJOR "0"
-#define VGEARS_VERSION_MINOR "1"
-#define VGEARS_VERSION_PATCH "17"
-#define VGEARS_VERSION_SIGNATURE "V-Gears v0.1.17"
+BOOST_AUTO_TEST_CASE(TestFF7DataFile){
+    BOOST_CHECK(FF7Data::GetEnemyModelId(0) == "aa");
+    BOOST_CHECK(FF7Data::GetEnemyModelId(19) == "at");
+    BOOST_CHECK(FF7Data::GetEnemyModelId(25) == "az");
+    BOOST_CHECK(FF7Data::GetEnemyModelId(26) == "ba");
+    BOOST_CHECK(FF7Data::GetEnemyModelId(650) == "");
+    BOOST_CHECK(FF7Data::GetEnemyModelId(30000) == "");
+}
+

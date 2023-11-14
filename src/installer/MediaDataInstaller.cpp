@@ -22,21 +22,29 @@
 #include <OgreColourValue.h>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/predef/os.h>
+#include <boost/filesystem.hpp>
 #include <tinyxml.h>
 #include "MediaDataInstaller.h"
 #include "data/VGearsLGPArchive.h"
 #include "data/VGearsTexFile.h"
 #include "TexFile.h"
+#if (BOOST_OS_WINDOWS)
+#include <stdlib>
+#elif (BOOST_OS_SOLARIS)
+#include <stdlib>
+#include <limits>
+#elif (BOOST_OS_LINUX)
+#include <unistd.h>
+#include <limits.h>
+#elif (BOOST_OS_MACOS)
+#include <mach-o/dyld.h>
+#elif (BOOST_OS_BSD_FREE)
+#include <sys/types>
+#include <sys/sysctl>
+#endif
 
-int MediaDataInstaller::TOTAL_SOUNDS = 723;
-
-u8 MediaDataInstaller::WAV_HEADER[] = {
-  0x52, 0x49, 0x46, 0x46, 0x70, 0x0B, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45, 0x66, 0x6D, 0x74, 0x20,
-  0x32, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x44, 0xAC, 0x00, 0x00, 0x00, 0x54, 0x00, 0x00,
-  0x00, 0x04, 0x04, 0x00, 0x20, 0x00, 0xF4, 0x07, 0x07, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
-  0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x00, 0x40, 0x00, 0xF0, 0x00, 0x00, 0x00, 0xCC, 0x01,
-  0x30, 0xFF, 0x88, 0x01, 0x18, 0xFF, 0x64, 0x61, 0x74, 0x61, 0x2A, 0x0B, 0x00, 0x00
-};
+int MediaDataInstaller::TOTAL_SOUNDS = 750;
 
 MediaDataInstaller::MediaDataInstaller(
   const std::string input_dir, const std::string output_dir, const bool keep_originals,
@@ -45,9 +53,52 @@ MediaDataInstaller::MediaDataInstaller(
   input_dir_(input_dir), output_dir_(output_dir), keep_originals_(keep_originals),
   no_ffmpeg_(no_ffmpeg), no_timidity_(no_timidity),
   menu_(input_dir + "data/menu/menu_us.lgp", "LGP"), window_(input_dir + "data/kernel/WINDOW.BIN"),
-  fmt_(input_dir_ + "data/sound/audio.fmt"), dat_(input_dir_ + "data/sound/audio.dat"),
   midi_(input_dir + "data/midi/midi.lgp", "LGP")
 {PopulateMaps();}
+
+
+std::string MediaDataInstaller::GetExecutablePath(){
+    #if (BOOST_OS_WINDOWS)
+    char *exe_path;
+    if (_get_pgmptr(&exe_path) != 0) exe_path = "";
+    #elif (BOOST_OS_SOLARIS)
+    char exe_path[PATH_MAX];
+    if (realpath(getexecname(), exe_path) == NULL) exe_path[0] = '\0';
+    #elif (BOOST_OS_LINUX)
+    char exe_path[PATH_MAX];
+    ssize_t len = ::readlink("/proc/self/exe", exe_path, sizeof(exe_path));
+    if (len == -1 || len == sizeof(exe_path)) len = 0;
+    exe_path[len] = '\0';
+    #elif (BOOST_OS_MACOS)
+    char exe_path[PATH_MAX];
+    uint32_t len = sizeof(exe_path);
+    if (_NSGetExecutablePath(exe_path, &len) != 0){
+        exe_path[0] = '\0'; // buffer too small (!)
+    }
+    else {
+        // resolve symlinks, ., .. if possible
+        char *canonical_path = realpath(exe_path, NULL);
+        if (canonical_path != NULL){
+            strncpy(exe_path,canonical_path,len);
+            free(canonical_path);
+        }
+    }
+    #elif (BOOST_OS_BSD_FREE)
+    char exe_path[2048];
+    int mib[4];
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PATHNAME;
+    mib[3] = -1;
+    size_t len = sizeof(exe_path);
+    if (sysctl(mib, 4, exe_path, &len, NULL, 0) != 0) exe_path[0] = '\0';
+    #endif
+    return
+      strlen(exe_path) > 0
+      ? boost::filesystem::path(exe_path).remove_filename().make_preferred().string()
+      : std::string();
+}
+
 
 void MediaDataInstaller::PopulateMaps(){
     // Most data here comes from https://forums.qhimm.com/index.php?topic=15786.0
@@ -394,7 +445,7 @@ void MediaDataInstaller::PopulateMaps(){
     sound_map_[169] = "DrainingTentacles";
     sound_description_[169] = "Enemy Draining Tentacles (and similar) attacks.";
     sound_map_[170] = "Coin";
-    sound_description_[170] = "Coin sound. In fields, when somebody is paid, a coin is inserted...";
+    sound_description_[170] = "Coin sound. In fields, when somebody is paid, a coin inserted...";
     sound_map_[171] = "Impact";
     sound_description_[171] = "Some kind of impact?";
     sound_map_[172] = "";
@@ -609,7 +660,7 @@ void MediaDataInstaller::PopulateMaps(){
     sound_description_[276] = "Ruby Weapon Flame Thrower attack.";
     sound_map_[277] = "";
     sound_description_[277] = "";
-    sound_map_[278] = "BeamGun";
+    sound_map_[278] = "BeamGun2";
     sound_description_[278] = "Part of an enemy beam gun attack?";
     sound_map_[279] = "";
     sound_description_[279] = "";
@@ -1323,93 +1374,38 @@ void MediaDataInstaller::InstallSprites(){
 }
 
 int MediaDataInstaller::InstallSoundsInit(){
-    fmt_.SetOffset(0);
-    dat_.SetOffset(0);
+    // SFXDump handles the wav conversion
+    std::string command = (boost::format(
+      "%1%/sfxdump %2%data/sound/audio.fmt %2%data/sound/audio.dat %3%audio/sounds/"
+    ) % GetExecutablePath() % input_dir_ % output_dir_).str();    
+    std::system(command.c_str());
     processed_sounds_ = 0;
     return TOTAL_SOUNDS;
 }
 
 bool MediaDataInstaller::InstallSounds(){
-
-    FmtFile header;
-    header.size = fmt_.readU32LE();
-    // If size is 0, this is a bad header. There are 112 bytes of bad data, and after that,
-    // the next header.
-    if (header.size == 0){
-        for (int b = 0; b < 112; b += 4) fmt_.readU32LE();
-        processed_sounds_ ++;
-        if (processed_sounds_ >= TOTAL_SOUNDS) return true;
-        else return false;
+    if (!no_ffmpeg_){
+        std::string f_path
+          = output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav";
+        std::ifstream file(f_path);
+        if (file.is_open()){
+            file.close();
+             std::string command = (boost::format(
+              "ffmpeg -hide_banner -loglevel panic -y "
+              "-i %1%audio/sounds/%2%.wav %1%audio/sounds/%2%.ogg"
+            ) % output_dir_ % processed_sounds_).str();
+            std::system(command.c_str());
+            std::cout << "    ADD SOUND " << processed_sounds_ << ".ogg" << std::endl;
+            sounds_.push_back("audio/sounds/" + std::to_string(processed_sounds_) + ".ogg");
+            // Remove the wav file.
+            if (!keep_originals_)
+                std::remove((output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav").c_str());
+        }
+        else{
+            sounds_.push_back("audio/sounds/INVALID.ogg");
+            std::cout << "    -- ADD SOUND INVALID.ogg" << std::endl;
+        }
     }
-
-    header.offset = fmt_.readU32LE();
-    // If the offset is less than the previous one, also bad header. 34 bytes of bad data, and
-    // after that, the next header.
-    if (header.offset < dat_.GetCurrentOffset()){
-        for (int b = 0; b < 34; b += 2) fmt_.readU16LE();
-        processed_sounds_ ++;
-        if (processed_sounds_ >= TOTAL_SOUNDS) return true;
-        else return false;
-    }
-
-    // This should never happen, but just in case, never read outside the file
-    if (header.offset + header.size > dat_.GetFileSize()){
-        processed_sounds_ ++;
-        if (processed_sounds_ >= TOTAL_SOUNDS) return true;
-        else return false;
-    }
-
-    for (int l = 0; l < 16; l ++) header.loop_metadata[l] = fmt_.readU8();
-    for (int l = 0; l < 18; l ++) header.wav_header[l] = fmt_.readU8();
-    header.samples_per_block = fmt_.readU16LE();
-    header.adpcm = fmt_.readU16LE();
-    for (int l = 0; l < 28; l ++) header.adpcm_sets[l] = fmt_.readU8();
-
-    dat_.SetOffset(header.offset);
-    std::ofstream out(
-      output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav",
-      std::ios::out | std::ios::binary
-    );
-
-
-    // Write the standard wav header.
-    for (int b = 0; b < 78; b ++) out.put(WAV_HEADER[b]);
-    // Write the data from the dat file.
-    for (int b = 0; b < header.size; b ++) out.put(dat_.readU8());
-    // Set size markers
-    unsigned char bytes[4];
-    int size = out.tellp() - 8;
-    bytes[0] = (size >> 24) & 0xFF;
-    bytes[1] = (size >> 16) & 0xFF;
-    bytes[2] = (size >> 8) & 0xFF;
-    bytes[3] = size & 0xFF;
-    out.seekp(4);
-    for (int b = 0; b < 4; b ++) out.put(bytes[b]);
-    size -= 36;
-    bytes[0] = (size >> 24) & 0xFF;
-    bytes[1] = (size >> 16) & 0xFF;
-    bytes[2] = (size >> 8) & 0xFF;
-    bytes[3] = size & 0xFF;
-    out.seekp(40);
-    for (int b = 0; b < 4; b ++) out.put(bytes[b]);
-    out.close();
-
-    // Convert to OGG.
-    // TODO: Don't use system calls! Integrate libav or something that can do the conversion
-    // natively
-    std::string command = (boost::format(
-      "ffmpeg -hide_banner -loglevel panic -y -i %1%audio/sounds/%2%.wav %1%audio/sounds/%2%.ogg"
-    ) % output_dir_ % processed_sounds_).str();
-    if (!no_ffmpeg_) std::system(command.c_str());
-
-    // Remove the wav file.
-    if (!keep_originals_){
-        std::remove(
-          (output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav").c_str()
-        );
-    }
-
-    sounds_.push_back("audio/sounds/" + std::to_string(processed_sounds_) + ".ogg");
     processed_sounds_ ++;
     if (processed_sounds_ >= TOTAL_SOUNDS) return true;
     else return false;
@@ -1426,11 +1422,10 @@ void MediaDataInstaller::WriteSoundIndex(){
         xml_sound->SetAttribute("name", id);
         container->LinkEndChild(xml_sound.release());
         // If there is a friendly name for this sound, add another entry
-        if (sound_map_.count(id) != 0){
+        if (sound_map_.count(id) != 0 && sound_map_[id] != ""){
             std::unique_ptr<TiXmlElement> xml_sound_name(new TiXmlElement("sound"));
             xml_sound_name->SetAttribute("file_name", path);
             std::string name = sound_map_[id];
-            if (name == "") name = std::to_string(id);
             xml_sound_name->SetAttribute("name", name);
             xml_sound_name->SetAttribute("description", sound_description_[id]);
             container->LinkEndChild(xml_sound_name.release());

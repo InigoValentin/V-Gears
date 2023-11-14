@@ -21,24 +21,31 @@ namespace Lzs{
      * Decompresses LZS data.
      *
      * @param[in] compressed Compressed data.
-     * @return Decompressed data.
+     * @return Decompressed data. An empty vector if data is not valid lzs.
      */
     inline std::vector<unsigned char> Decompress(const std::vector<unsigned char>& compressed){
-        if (compressed.size() < 4) abort();
-        const unsigned int inpuit_buffer_size = static_cast<unsigned int>(compressed.size());
+        if (compressed.size() < 4){
+            std::cout << "Error decompressing LZS data of size " << compressed.size() << std::endl;
+            return std::vector<unsigned char>(0);
+        }
+        const unsigned int input_buffer_size = static_cast<unsigned int>(compressed.size());
         const unsigned int input_length =
           (((compressed[0] & 0xFF) << 0) |
           ((compressed[1] & 0xFF) << 8) |
           ((compressed[2] & 0xFF) << 16) |
           ((compressed[3] & 0xFF) << 24)) + 4;
-        if (input_length != inpuit_buffer_size) abort();
-        unsigned int extract_size = (inpuit_buffer_size + 255) & ~255;
+        if (input_length != input_buffer_size){
+            std::cerr << "Error decompressing LZS data of invalid size " << input_length
+              << " | " << input_buffer_size << std::endl;
+            return std::vector<unsigned char>(0);
+        }
+        unsigned int extract_size = (input_buffer_size + 255) & ~255;
         std::vector<unsigned char> extract_buffer(extract_size);
         unsigned int input_offset = 4;
         unsigned int output_offset = 0;
         unsigned char control_byte = 0;
         unsigned char control_bit = 0;
-        while (input_offset < inpuit_buffer_size){
+        while (input_offset < input_buffer_size){
             if (control_bit == 0){
                 control_byte = compressed[input_offset ++];
                 control_bit = 8;

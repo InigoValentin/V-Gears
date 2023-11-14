@@ -19,8 +19,7 @@
 /**
  * HRC file manager singleton.
  */
-template<> VGears::HRCFileManager
-  *Ogre::Singleton<VGears::HRCFileManager>::msSingleton = nullptr;
+template<> VGears::HRCFileManager *Ogre::Singleton<VGears::HRCFileManager>::msSingleton = nullptr;
 
 namespace VGears{
 
@@ -36,31 +35,21 @@ namespace VGears{
         // Low, because it will likely reference other resources.
         mLoadOrder = 30.0f;
         // this is how the ResourceManager registers with OGRE.
-        Ogre::ResourceGroupManager::getSingleton()._registerResourceManager(
-          mResourceType, this
-        );
+        Ogre::ResourceGroupManager::getSingleton()._registerResourceManager(mResourceType, this);
     }
 
     HRCFileManager::~HRCFileManager(){
-        Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(
-          mResourceType
-        );
+        Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(mResourceType);
     }
 
-    void HRCFileManager::ParseScript(
-      Ogre::DataStreamPtr &stream, const String &group_name
-    ){
-        HRCFilePtr  hrc
-          = createResource(stream->getName(), group_name).staticCast<HRCFile>();
+    void HRCFileManager::ParseScript( Ogre::DataStreamPtr &stream, const String &group_name){
+        HRCFilePtr hrc = createResource(stream->getName(), group_name).staticCast<HRCFile>();
         hrc->load();
     }
 
     Ogre::Resource* HRCFileManager::createImpl(
-      const String &name, Ogre::ResourceHandle handle, const String &group,
-      bool is_manual, Ogre::ManualResourceLoader *loader,
-      const Ogre::NameValuePairList *create_params
-    ){
-        return new HRCFile(this, name, handle, group, is_manual, loader);
-    }
+      const String &name, Ogre::ResourceHandle handle, const String &group, bool is_manual,
+      Ogre::ManualResourceLoader *loader, const Ogre::NameValuePairList *create_params
+    ){return new HRCFile(this, name, handle, group, is_manual, loader);}
 
 }

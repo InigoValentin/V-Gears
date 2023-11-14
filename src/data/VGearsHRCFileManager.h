@@ -44,11 +44,9 @@ namespace VGears{
              * Parses a HRC script and creates a skeleton.
              *
              * @param[in] stream Script content.
-             * @param[in] group_name GRoup to add the skeleton to.
+             * @param[in] group_name Group to add the skeleton to.
              */
-            virtual void ParseScript(
-              Ogre::DataStreamPtr &stream, const String &group_name
-            );
+            virtual void ParseScript(Ogre::DataStreamPtr &stream, const String &group_name);
 
             /**
              * Retrieves a singleton to the manager.
@@ -67,22 +65,18 @@ namespace VGears{
              *
              * @param[in] name The unique name of the manager.
              * @param[in] handle @todo Understand and document.
-             * @param[in] group The name of the resource group to which this
-             * resource belong.
-             * @param[in] is_manual True if the resource is manually loaded,
-             * false otherwise.
-             * @param[in] loader Pointer to a ManualResourceLoader
-             * implementation which will be called when the Resource wishes to
-             * load (should be supplied if is_manual is set to true). It can be
-             * null, but the Resource will never be able to reload if anything
-             * ever causes it to unload. Therefore provision of a proper
-             * ManualResourceLoader instance is strongly recommended.
+             * @param[in] group The name of the resource group to which this resource belong.
+             * @param[in] is_manual True if the resource is manually loaded, false otherwise.
+             * @param[in] loader Pointer to a ManualResourceLoader implementation which will be
+             * called when the Resource wishes to load (should be supplied if is_manual is set to
+             * true). It can be null, but the Resource will never be able to reload if anything
+             * ever causes it to unload. Therefore provision of a proper ManualResourceLoader
+             * instance is strongly recommended.
              * @param[in] create_params Unused.
              */
             virtual Ogre::Resource *createImpl(
-              const Ogre::String &name, Ogre::ResourceHandle handle,
-              const Ogre::String &group, bool is_manual,
-              Ogre::ManualResourceLoader *loader,
+              const Ogre::String &name, Ogre::ResourceHandle handle, const Ogre::String &group,
+              bool is_manual, Ogre::ManualResourceLoader *loader,
               const Ogre::NameValuePairList *create_params
             ) override final;
 

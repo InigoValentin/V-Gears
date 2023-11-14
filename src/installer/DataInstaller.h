@@ -23,6 +23,7 @@
 #include "KernelDataInstaller.h"
 #include "MediaDataInstaller.h"
 #include "BattleDataInstaller.h"
+#include "WorldInstaller.h"
 #include "ModelsAndAnimationsDb.h"
 
 /**
@@ -76,6 +77,16 @@ class DataInstaller{
              * Option to skip field models installation.
              */
             bool skip_field_models;
+
+            /**
+             * Option to skip world map data installation.
+             */
+            bool skip_wm;
+
+            /**
+             * Option to skip world map models installation.
+             */
+            bool skip_wm_models;
 
             /**
              * Option to keep original data after installation.
@@ -396,6 +407,16 @@ class DataInstaller{
             FIELD_CONVERT_MODELS,
 
             /**
+             * Prepares the installer for world map data installation.
+             */
+            WM_INIT,
+
+            /**
+             * Step that extracts world map meshes.
+             */
+            WM_MAPS,
+
+            /**
              * Cleans up after the installation.
              */
             CLEAN,
@@ -485,6 +506,11 @@ class DataInstaller{
          * The installer for battle data.
          */
         std::unique_ptr<BattleDataInstaller> battle_installer_;
+
+        /**
+         * The installer for world map data.
+         */
+        std::unique_ptr<WorldInstaller> world_installer_;
 
         /**
          * Function used to print text to the log output, line by line.

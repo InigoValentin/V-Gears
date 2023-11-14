@@ -8,9 +8,12 @@
 *.filters
 *.lib
 *.log
+*.xcf
 **/ogre.cfg
 **/CMakeCache.txt
 build/
+tools/
+_OLD/
 output/share
 output/include
 output/lib
@@ -19,4 +22,4 @@ doc/FFVII/RAW/
 .settings/
 .project
 .cproject
-
+v-gears-new*.png
