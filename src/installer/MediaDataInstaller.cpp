@@ -1395,15 +1395,17 @@ bool MediaDataInstaller::InstallSounds(){
               "-i %1%audio/sounds/%2%.wav %1%audio/sounds/%2%.ogg"
             ) % output_dir_ % processed_sounds_).str();
             std::system(command.c_str());
-            std::cout << "    ADD SOUND " << processed_sounds_ << ".ogg" << std::endl;
+            //std::cout << "    ADD SOUND " << processed_sounds_ << ".ogg" << std::endl;
             sounds_.push_back("audio/sounds/" + std::to_string(processed_sounds_) + ".ogg");
             // Remove the wav file.
             if (!keep_originals_)
-                std::remove((output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav").c_str());
+                std::remove((
+                  output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav"
+                ).c_str());
         }
         else{
             sounds_.push_back("audio/sounds/INVALID.ogg");
-            std::cout << "    -- ADD SOUND INVALID.ogg" << std::endl;
+            //std::cout << "    -- ADD SOUND INVALID.ogg" << std::endl;
         }
     }
     processed_sounds_ ++;

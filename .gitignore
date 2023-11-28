@@ -22,4 +22,5 @@ doc/FFVII/RAW/
 .settings/
 .project
 .cproject
+.directory
 v-gears-new*.png

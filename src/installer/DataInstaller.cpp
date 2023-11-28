@@ -466,7 +466,14 @@ void DataInstaller::CreateDirectories(){
     CreateDir("models/battle/scenes");
     CreateDir("models/battle/enemies");
     CreateDir("models/battle/attacks");
-    CreateDir("models/world/");
+    CreateDir("models/world/terrain/0");
+    CreateDir("models/world/terrain/1");
+    CreateDir("models/world/terrain/2");
+    CreateDir("models/world/buildings/");
+    CreateDir("models/world/characters/");
+    CreateDir("world/0");
+    CreateDir("world/1");
+    CreateDir("world/2");
 
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "temp/char/", "FileSystem", "FFVII", true, true

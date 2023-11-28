@@ -13,17 +13,31 @@
  * GNU General Public License for more details.
  */
 
-/**
- * This file defines the application version.
- */
-
 #pragma once
 
+#include "XmlFile.h"
+
 /**
- * Application version.
+ * Handles XML world map files.
  */
-#define VGEARS_VERSION "0.1.18"
-#define VGEARS_VERSION_MAJOR "0"
-#define VGEARS_VERSION_MINOR "1"
-#define VGEARS_VERSION_PATCH "18"
-#define VGEARS_VERSION_SIGNATURE "V-Gears v0.1.18"
+class XmlWorldMapFile : public XmlFile{
+
+    public:
+
+        /**
+         * Constructor.
+         *
+         * @param[in] file Path to the XML world map file.
+         */
+        explicit XmlWorldMapFile(const Ogre::String& file);
+
+        /**
+         * Destructor.
+         */
+        virtual ~XmlWorldMapFile();
+
+        /**
+         * Parses the file and loads the map data.
+         */
+        void LoadWorldMap();
+};

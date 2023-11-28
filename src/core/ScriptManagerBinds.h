@@ -67,6 +67,12 @@ void ScriptMap(const char* text){
     xml_map.LoadMap();
 }
 
+void ScriptWorldMap(const int map, const unsigned int x, const unsigned int y){
+    EntityManager::getSingleton().Clear();
+    XmlMapFile xml_map("./data/fields/wm" + std::to_string(map) + ".xml");
+    xml_map.LoadMap();
+}
+
 /**
  * Executes a script in the game console.
  *

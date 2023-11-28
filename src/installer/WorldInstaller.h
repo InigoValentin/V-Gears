@@ -127,7 +127,7 @@ class WorldInstaller{
         /**
          * Mesh vertex data.
          *
-         * Can also be used for nromal nada.
+         * Can also be used for normal data.
          */
         struct Vertex{
 

@@ -31,6 +31,7 @@ set(INSTALLER_SOURCE_FILES
     data/AbFile.cpp
     data/BattleSceneFile.cpp
     data/DaFile.cpp
+    data/WorldMapWalkmesh.cpp
     decompiler/CodeGenerator.cpp
     decompiler/ControlFlow.cpp
     decompiler/DecompilerException.cpp
