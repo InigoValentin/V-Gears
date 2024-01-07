@@ -134,6 +134,7 @@ set(VGEARS_SOURCE_FILES
     core/UiWidget.cpp
     core/Utilites.cpp
     core/Walkmesh.cpp
+    core/WorldMapManager.cpp
     core/XmlBackground2DFile.cpp
     core/XmlBattleCharactersFile.cpp
     core/XmlBattleScenesFile.cpp
@@ -153,6 +154,7 @@ set(VGEARS_SOURCE_FILES
     core/XmlTextFile.cpp
     core/XmlTextsFile.cpp
     core/XmlWalkmeshFile.cpp
+    core/XmlWorldMapFile.cpp
     data/VGearsAFile.cpp
     data/VGearsAFileManager.cpp
     data/VGearsAFileSerializer.cpp

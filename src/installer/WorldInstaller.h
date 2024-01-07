@@ -33,9 +33,11 @@ class WorldInstaller{
          * @param[in] input_dir Path to the directory containing the original data to parse.
          * @param[in] output_dir Path to the directory of the installation data.
          * @param[in] keep_originals True to keep original data after conversion, false to remove.
+         * @param[in] res_mgr The application resource manager.
          */
         WorldInstaller(
-          std::string input_dir, std::string output_dir, const bool keep_originals
+          const std::string input_dir, const std::string output_dir,
+          const bool keep_originals, Ogre::ResourceGroupManager* res_mgr
         );
 
         /**
@@ -49,6 +51,11 @@ class WorldInstaller{
          * @return The number of maps to process.
          */
         unsigned int Initialize();
+
+        /**
+         * Extracts and processes the models in data/wm/world_us.lgp
+         */
+        void ProcessModels();
 
         /**
          * Processes the next map to process.
@@ -95,14 +102,14 @@ class WorldInstaller{
              *
              * Shares byte with {@see function_id}, 5 bytes.
              */
-            u8 walkability;
+            int walkability;
 
             /**
              * ID of the function triggered when entering the triangle.
              *
              * Shares byte with {@see walkability}, 3 bytes.
              */
-            u8 function_id;
+            int function_id;
 
             /**
              * UV coordinates in texture for each vertex.
@@ -215,7 +222,41 @@ class WorldInstaller{
             std::vector<Block> blocks;
         };
 
+        /**
+         * Path to the world map elements models directory.
+         *
+         * Elements can be locations, playable characters, enemies, transportations... anything
+         * that it's not in itself part of the terrain.
+         */
+        static std::string ELEMENT_MODELS_DIR;
+
+        /**
+         * Path to the world map terrain models directory.
+         */
+        static std::string TERRAIN_MODELS_DIR;
+
+        /**
+         * Decompresses data compressed in LZSS or LZS formats.
+         *
+         * @param[in] compressed_data The compresed data as bytes.
+         * @return The data, decompressed, as bytes.
+         */
         std::vector<u8> DecompressLZSSData(u32* compressed_data);
+
+        /**
+         * Exports a mesh to a file.
+         *
+         * The file will have the mesh name.
+         *
+         * @param[in] outdir Path to the directory where the file will be saved.
+         * @param[in] mesh The mesh to export.
+         */
+        void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh);
+
+        /**
+         * Pointer to the application resource manager.
+         */
+        Ogre::ResourceGroupManager* res_mgr_;
 
         /**
          * Each of the original WM*.MAP in the installation disk.
@@ -241,4 +282,6 @@ class WorldInstaller{
          * Number of maps already processed.
          */
         unsigned int processed_maps_;
+
+
 };

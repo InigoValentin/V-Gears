@@ -186,6 +186,10 @@ void MainWindow::on_btn_data_run_clicked(){
           "data/battle/scene.bin",
           "data/battle/battle.lgp",
           "data/battle/magic.lgp",
+          "data/wm/WM0.MAP",
+          "data/wm/WM2.MAP",
+          "data/wm/WM3.MAP",
+          "data/wm/world_us.lgp",
           "ff7.exe"
         };
         // Ensure required files are in the input dir

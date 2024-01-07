@@ -75,7 +75,7 @@ float DataInstaller::Progress(){
               input_dir_, output_dir_, application_.ResMgr()
             );
             world_installer_ = std::make_unique<WorldInstaller>(
-              input_dir_, output_dir_, options_.keep_originals
+              input_dir_, output_dir_, options_.keep_originals, application_.ResMgr()
             );
             installation_state_ = BATTLE_SCENES_INIT;
             return CalcProgress();
@@ -390,7 +390,7 @@ float DataInstaller::Progress(){
                 installation_state_ = CLEAN;
                 return CalcProgress();
             }
-            write_output_line_("Extracting world map models...", 2, true);
+            write_output_line_("Extracting world map data...", 2, true);
             substeps_ = world_installer_->Initialize();
             cur_substep_ = 0;
             installation_state_ = WM_MAPS;
@@ -399,9 +399,15 @@ float DataInstaller::Progress(){
             if (world_installer_->ProcessMap() == false) cur_substep_ ++;
             else{
                 // TODO: Next step: map scripts, etc
-                installation_state_ = CLEAN;
+                installation_state_ = WM_MODELS;
                 cur_substep_ = 0;
             }
+            return CalcProgress();
+        case WM_MODELS:
+            if (options_.skip_wm_models)
+                write_output_line_("Skipping world map model installation...", 2, true);
+            else world_installer_->ProcessModels();
+            installation_state_ = CLEAN;
             return CalcProgress();
         case CLEAN:
             write_output_line_("Cleaning up...", 2, true);
@@ -444,6 +450,7 @@ void DataInstaller::CreateDirectories(){
     CreateDir("temp");
     CreateDir("temp/char");
     CreateDir("temp/battle_models");
+    CreateDir("temp/world_models");
     CreateDir("temp/spell_models");
     CreateDir("temp/wm");
     CreateDir("gamedata");
@@ -469,8 +476,7 @@ void DataInstaller::CreateDirectories(){
     CreateDir("models/world/terrain/0");
     CreateDir("models/world/terrain/1");
     CreateDir("models/world/terrain/2");
-    CreateDir("models/world/buildings/");
-    CreateDir("models/world/characters/");
+    CreateDir("models/world/elements/");
     CreateDir("world/0");
     CreateDir("world/1");
     CreateDir("world/2");
@@ -480,6 +486,9 @@ void DataInstaller::CreateDirectories(){
     );
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "temp/battle_models/", "FileSystem", "FFVII", true, true
+    );
+    application_.ResMgr()->addResourceLocation(
+      output_dir_ + "temp/world_models/", "FileSystem", "FFVII", true, true
     );
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "models/", "FileSystem", "FFVII", true, true

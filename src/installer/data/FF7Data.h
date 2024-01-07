@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <cctype>
+#include <string>
 #include <algorithm>
 
 /**
@@ -3534,5 +3536,47 @@ class FF7Data{
                 info.name_normal = "unused_pyramid";
             }*/
             return info;
+        }
+
+        /**
+         * Retrieves a human readable name for a world map model from it's ID.
+         *
+         * @param[in] model_id ID of the model (three characters).
+         * @return A human readable model. If no name found, the fist three characters of the
+         * provided id.
+         */
+        static std::string GetWorldMapModelName(std::string model_id){
+            std::string id = model_id;
+            if (id.size() > 3) id = id.substr(0, 3);
+            if ("aaa" == id) return "barrier";
+            else if ("aba" == id) return "buggy";
+            else if ("aia" == id) return "junon_cannon";
+            else if ("aja" == id) return "chocobo_white";
+            else if ("ata" == id) return "cid";
+            else if ("bbe" == id) return "cloud";
+            else if ("bkd" == id) return "condor";
+            else if ("ble" == id) return "ancients_key";
+            else if ("bna" == id) return "diamond_weapon";
+            else if ("bud" == id) return "emerald_weapon";
+            else if ("cec" == id) return "gelnika";
+            else if ("cfc" == id) return "gold_saucer";
+            else if ("cgd" == id) return "highwind_v1";
+            else if ("cid" == id) return "highwind_v2";
+            else if ("cmb" == id) return "sister_ray";
+            else if ("cnb" == id) return "forbidden_forest";
+            else if ("coc" == id) return "rocket";
+            else if ("cpc" == id) return "rocket_support";
+            else if ("cqc" == id) return "ruby_weapon";
+            else if ("ddd" == id) return "submarine";
+            else if ("dga" == id) return "submarine_red_sunken";
+            else if ("dic" == id) return "weird_rocks";
+            else if ("djc" == id) return "snow_flag";
+            else if ("dkc" == id) return "weird_antenna";
+            else if ("dlb" == id) return "tifa";
+            else if ("dva" == id) return "tiny_bronco";
+            else if ("dyb" == id) return "ultima_weapon";
+            else if ("eje" == id) return "underwater_reactor";
+            else if ("eke" == id) return "cargo_ship";
+            return id;
         }
 };

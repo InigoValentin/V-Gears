@@ -38,6 +38,8 @@ class XmlWorldMapFile : public XmlFile{
 
         /**
          * Parses the file and loads the map data.
+         *
+         * @param[in] current_progress Current story progress.
          */
-        void LoadWorldMap();
+        void LoadWorldMap(const unsigned int current_progress);
 };

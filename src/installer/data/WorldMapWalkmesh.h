@@ -67,25 +67,32 @@ class WorldMapWalkmesh{
                 );
 
                 /**
+                 * Retrieves the triangle ID in the walkmesh.
+                 *
+                 * @return The triangle ID.
+                 */
+                unsigned int getId() const;
+
+                /**
                  * Retrieves the coordinates of the first vertex
                  *
                  * @return Vertex coordinates (X, Y, Z).
                  */
-                Ogre::Vector3 getA();
+                Ogre::Vector3 getA() const;
 
                 /**
                  * Retrieves the coordinates of the second vertex
                  *
                  * @return Vertex coordinates (X, Y, Z).
                  */
-                Ogre::Vector3 getB();
+                Ogre::Vector3 getB() const;
 
                 /**
                  * Retrieves the coordinates of the third vertex
                  *
                  * @return Vertex coordinates (X, Y, Z).
                  */
-                Ogre::Vector3 getC();
+                Ogre::Vector3 getC() const;
 
                 /**
                  * Retrieves the triangle reached when exiting the triangle by the side between the
@@ -93,7 +100,7 @@ class WorldMapWalkmesh{
                  *
                  * @return Target triangle.
                  */
-                Target getAB();
+                Target getAB() const;
 
                 /**
                  * Retrieves the triangle reached when exiting the triangle by the side between the
@@ -101,7 +108,7 @@ class WorldMapWalkmesh{
                  *
                  * @return Target triangle.
                  */
-                Target getBC();
+                Target getBC() const;
 
                 /**
                  * Retrieves the triangle reached when exiting the triangle by the side between the
@@ -109,7 +116,21 @@ class WorldMapWalkmesh{
                  *
                  * @return Target triangle.
                  */
-                Target getCA();
+                Target getCA() const;
+
+                /**
+                 * Retrieves the triangle walkability mode.
+                 *
+                 * @return The walkability mode number.
+                 */
+                unsigned int getWalkability() const;
+
+                /**
+                 * Retrieves the event triggered upon entering the triangle.
+                 *
+                 * @return The ID of the event triggered on entering, or -1 if none.
+                 */
+                int getEvent() const;
 
                 /**
                  * Sets the triangle reached when exiting the triangle by the side between the

@@ -412,9 +412,14 @@ class DataInstaller{
             WM_INIT,
 
             /**
-             * Step that extracts world map meshes.
+             * Step that extracts world map terrain data.
              */
             WM_MAPS,
+
+            /**
+             * Step that extracts world map models.
+             */
+            WM_MODELS,
 
             /**
              * Cleans up after the installation.

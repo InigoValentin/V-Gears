@@ -17,6 +17,7 @@
 #include "core/EntityManager.h"
 #include "core/Logger.h"
 #include "core/ScriptManager.h"
+#include "core/WorldMapManager.h"
 #include "core/XmlBackground2DFile.h"
 #include "core/XmlWorldMapFile.h"
 #include "map/VGearsBackground2DFileManager.h"
@@ -27,7 +28,7 @@ XmlWorldMapFile::XmlWorldMapFile(const Ogre::String& file): XmlFile(file){}
 
 XmlWorldMapFile::~XmlWorldMapFile(){}
 
-void XmlWorldMapFile::LoadMap(){
+void XmlWorldMapFile::LoadWorldMap(const unsigned int current_progress){
     TiXmlNode* node = file_.RootElement();
     if (node == nullptr || node->ValueStr() != "world_map"){
         LOG_ERROR(file_.ValueStr() + " is not a valid fields map file! No <world_map> in root.");
@@ -56,6 +57,25 @@ void XmlWorldMapFile::LoadMap(){
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "texts"){
             TextHandler::getSingleton().LoadFieldText(GetString(node, "file_name"));
+        }
+        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "terrain"){
+            TiXmlNode* terrain_node = node->FirstChild();
+            while (terrain_node != nullptr){
+                if (terrain_node->ValueStr() == "block"){
+                    int index(GetInt(terrain_node, "index"));
+                    Ogre::String file_name(GetString(terrain_node, "file_name"));
+                    Ogre::Vector3 position(GetVector3(node, "position"));
+                    Ogre::String alt_file_name(GetString(terrain_node, "alt_file_name", ""));
+                    int alt_story_change(GetInt(terrain_node, "alt_story_change", -1));
+                    // TODO: Get current story point and determine whether to load alt models.
+                    if ("" != alt_file_name && alt_story_change > current_progress)
+                        WorldMapManager::getSingleton().AddTerrain(index, alt_file_name, position);
+                    else WorldMapManager::getSingleton().AddTerrain(index, file_name, position);
+
+
+                }
+                terrain_node = terrain_node->NextSibling();
+            }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "entity_model"){
             Ogre::String name = GetString(node, "name");
@@ -121,23 +141,4 @@ void XmlWorldMapFile::LoadMap(){
         }
         node = node->NextSibling();
     }
-}
-
-const Ogre::String XmlMapFile::GetWalkmeshFileName(){
-    TiXmlNode* node = file_.RootElement();
-    if (node == nullptr || node->ValueStr() != "map"){
-        LOG_ERROR(
-          "Field Map XML Manager: " + file_.ValueStr()
-          + " is not a valid fields map file! No <map> in root."
-        );
-        return "";
-    }
-    node = node->FirstChild();
-    while (node != nullptr){
-        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "walkmesh")
-            return GetString(node, "file_name");
-        node = node->NextSibling();
-    }
-    LOG_WARNING("Can't find field's walkmesh in " + file_.ValueStr() + ".");
-    return "";
 }
