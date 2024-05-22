@@ -393,6 +393,10 @@ float DataInstaller::Progress(){
             write_output_line_("Extracting world map data...", 2, true);
             substeps_ = world_installer_->Initialize();
             cur_substep_ = 0;
+            installation_state_ = WM_MATERIALS;
+            return CalcProgress();
+        case WM_MATERIALS:
+            world_installer_->GenerateMaterials();
             installation_state_ = WM_MAPS;
             return CalcProgress();
         case WM_MAPS:

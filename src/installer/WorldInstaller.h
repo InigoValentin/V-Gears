@@ -58,6 +58,14 @@ class WorldInstaller{
         void ProcessModels();
 
         /**
+         * Generates the materials needed for the world map.
+         *
+         * TODO: Note that this function stil doesn't use the game data, and it has a lot of
+         * hardcoded things.
+         */
+        void GenerateMaterials();
+
+        /**
          * Processes the next map to process.
          *
          * @return True if, once the map has been processed, all maps are processed. False if there
@@ -117,16 +125,16 @@ class WorldInstaller{
             UVCoord vertex_coord[3];
 
             /**
-             * Walkability info.
+             * Texture id.
              *
              * Shares bytes with {@see location_id}, 9 bytes.
              */
-            u16 texture_info;
+            u16 texture;
 
             /**
              * Location message ID.
              *
-             * Shares bytes with {@see texture_info}, 7 bytes.
+             * Shares bytes with {@see texture}, 7 bytes.
              */
             u16 location;
         };
@@ -214,12 +222,48 @@ class WorldInstaller{
          *
          * A map is defined in a WM*.MAP file. They are divided in 0xB800 byte blocks.
          */
-        struct Map {
+        struct Map{
 
             /**
              * Map blocks.
              */
             std::vector<Block> blocks;
+        };
+
+        /**
+         * World map texture.
+         */
+        struct Texture{
+
+            /**
+             * Texture ID.
+             */
+            int id;
+
+            /**
+             * Texture name.
+             */
+            std::string name;
+
+            /**
+             * Texture width.
+             */
+            int w;
+
+            /**
+             * Texture height.
+             */
+            int h;
+
+            /**
+             * U offset of the texture.
+             */
+            int u_offset;
+
+            /**
+             * V offset of the texture.
+             */
+            int v_offset;
         };
 
         /**
@@ -262,6 +306,11 @@ class WorldInstaller{
          * Each of the original WM*.MAP in the installation disk.
          */
         std::vector<File> wm_map_;
+
+        /**
+         * List with all the texture names
+         */
+        std::vector<Texture> texture_;
 
         /**
          * The path to the directory from which to read the PC game data.

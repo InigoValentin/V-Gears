@@ -51,6 +51,301 @@ unsigned int WorldInstaller::Initialize(){
     return wm_map_.size();
 }
 
+void WorldInstaller::GenerateMaterials(){
+    // First, populate the texture list with static data.
+    texture_.push_back({0, "pond", 32, 32, 0, 352});
+    texture_.push_back({1, "riv_m2", 32, 32, 128, 64});
+    texture_.push_back({2, "was_gs", 64, 64, 64, 192});
+    texture_.push_back({3, "wpcltr", 32, 128, 0, 256});
+    texture_.push_back({4, "wpcltr2", 32, 32, 160, 64});
+    texture_.push_back({5, "bzdun", 64, 64, 192, 192});
+    texture_.push_back({6, "bone", 32, 32, 224, 384});
+    texture_.push_back({7, "bone2", 32, 32, 224, 416});
+    texture_.push_back({8, "bornwd", 64, 64, 160, 320});
+    texture_.push_back({9, "bridge", 32, 64, 192, 0});
+    texture_.push_back({10, "bridge2", 32, 32, 224, 0});
+    texture_.push_back({11, "cave", 32, 32, 224, 448});
+    texture_.push_back({12, "cave2", 32, 32, 224, 320});
+    texture_.push_back({13, "cave_s", 32, 32, 160, 224});
+    texture_.push_back({14, "cdl_cl2", 64, 32, 96, 96});
+    texture_.push_back({15, "cf01", 64, 32, 192, 288});
+    texture_.push_back({16, "clf_bgs", 64, 32, 192, 384});
+    texture_.push_back({17, "clf_ggl", 64, 64, 128, 256});
+    texture_.push_back({18, "clf_ggs", 64, 32, 192, 352});
+    texture_.push_back({19, "clf_l", 64, 64, 0, 0});
+    texture_.push_back({20, "clf_ld", 64, 64, 64, 0});
+    texture_.push_back({21, "clf_lf", 64, 64, 128, 0});
+    texture_.push_back({22, "clf_lg", 32, 64, 0, 96});
+    texture_.push_back({23, "clf_lr", 32, 64, 128, 0});
+    texture_.push_back({24, "clf_lsg", 32, 64, 64, 64});
+    texture_.push_back({25, "clf_r", 32, 32, 0, 96});
+    texture_.push_back({26, "clf_s", 64, 32, 192, 0});
+    texture_.push_back({27, "clf_sd", 64, 32, 192, 32});
+    texture_.push_back({28, "clf_sf", 64, 32, 0, 64});
+    texture_.push_back({29, "clf_sg", 32, 32, 32, 96});
+    texture_.push_back({30, "clf_sg2", 32, 32, 0, 160});
+    texture_.push_back({31, "clf_sr", 32, 32, 32, 96});
+    texture_.push_back({32, "clf_ss", 32, 32, 32, 128});
+    texture_.push_back({33, "clf_ssd", 32, 32, 0, 224});
+    texture_.push_back({34, "clf_ssw", 32, 32, 224, 32});
+    texture_.push_back({35, "clf_sw", 32, 32, 192, 32});
+    texture_.push_back({36, "clf_w02", 64, 64, 128, 64});
+    texture_.push_back({37, "clf_w03", 64, 64, 192, 64});
+    texture_.push_back({38, "clf_was", 64, 32, 64, 64});
+    texture_.push_back({39, "clfeg", 32, 32, 192, 320});
+    texture_.push_back({40, "clfegd", 32, 32, 0, 320});
+    texture_.push_back({41, "clftop", 64, 32, 192, 64});
+    texture_.push_back({42, "clftop2", 32, 32, 128, 64});
+    texture_.push_back({43, "cndl_cl", 64, 32, 96, 128});
+    texture_.push_back({44, "cndlf", 64, 64, 160, 64});
+    texture_.push_back({45, "cndlf02", 64, 64, 208, 64});
+    texture_.push_back({46, "comtr", 16, 32, 144, 96});
+    texture_.push_back({47, "cosinn", 32, 32, 224, 416});
+    texture_.push_back({48, "cosinn2", 32, 32, 192, 448});
+    texture_.push_back({49, "csmk", 32, 32, 64, 64});
+    texture_.push_back({50, "csmk2", 32, 32, 96, 64});
+    texture_.push_back({51, "cstds01", 32, 32, 224, 160});
+    texture_.push_back({52, "cstds02", 64, 64, 0, 448});
+    texture_.push_back({53, "des01", 32, 32, 160, 320});
+    texture_.push_back({54, "desert", 64, 64, 128, 128});
+    texture_.push_back({55, "desor", 64, 32, 160, 64});
+    texture_.push_back({56, "ds1", 32, 32, 0, 256});
+    texture_.push_back({57, "ds_s1", 32, 32, 192, 288});
+    texture_.push_back({58, "dsee1", 32, 32, 96, 288});
+    texture_.push_back({59, "dsrt_d", 32, 32, 224, 0});
+    texture_.push_back({60, "dsrt_e", 64, 128, 64, 128});
+    texture_.push_back({61, "edes01", 32, 32, 224, 320});
+    texture_.push_back({62, "elm01", 32, 32, 160, 0});
+    texture_.push_back({63, "elm02", 32, 32, 64, 96});
+    texture_.push_back({64, "elm_gro", 64, 64, 0, 96});
+    texture_.push_back({65, "elm_r", 32, 32, 192, 0});
+    texture_.push_back({66, "elm_r2", 32, 32, 224, 0});
+    texture_.push_back({67, "fall1", 32, 32, 128, 256});
+    texture_.push_back({68, "farm01", 32, 32, 160, 32});
+    texture_.push_back({69, "farm02", 32, 32, 192, 32});
+    texture_.push_back({70, "farm_g", 32, 32, 128, 64});
+    texture_.push_back({71, "farm_r", 32, 16, 128, 48});
+    texture_.push_back({72, "fld", 64, 64, 64, 96});
+    texture_.push_back({73, "fld_02", 64, 64, 0, 64});
+    texture_.push_back({74, "fld_s", 64, 64, 0, 160});
+    texture_.push_back({75, "fld_s2", 32, 32, 224, 256});
+    texture_.push_back({76, "fld_sw", 64, 64, 128, 192});
+    texture_.push_back({77, "fld_v", 128, 128, 0, 128});
+    texture_.push_back({78, "fld_vd", 32, 64, 96, 128});
+    texture_.push_back({79, "fld_vd2", 32, 64, 192, 416});
+    texture_.push_back({80, "fvedge", 32, 64, 0, 0});
+    texture_.push_back({81, "gclf_d", 128, 64, 128, 128});
+    texture_.push_back({82, "gclf_g", 32, 64, 224, 128});
+    texture_.push_back({83, "gclfwa", 128, 64, 64, 320});
+    texture_.push_back({84, "gclfwa2", 32, 64, 160, 320});
+    texture_.push_back({85, "gclfwag", 32, 64, 32, 320});
+    texture_.push_back({86, "gg_gro", 64, 64, 64, 448});
+    texture_.push_back({87, "gg_mts", 64, 128, 0, 128});
+    texture_.push_back({88, "ggmk", 64, 64, 128, 448});
+    texture_.push_back({89, "ggmt", 128, 128, 0, 0});
+    texture_.push_back({90, "ggmt_e", 128, 32, 0, 96});
+    texture_.push_back({91, "ggmt_ed", 128, 32, 128, 96});
+    texture_.push_back({92, "ggmt_eg", 32, 32, 96, 224});
+    texture_.push_back({93, "ggmtd", 128, 128, 128, 0});
+    texture_.push_back({94, "ggs_g", 32, 32, 32, 64});
+    texture_.push_back({95, "ggshr", 32, 32, 192, 96});
+    texture_.push_back({96, "ggshrg", 32, 32, 224, 96});
+    texture_.push_back({97, "gia", 64, 32, 64, 224});
+    texture_.push_back({98, "gia2", 64, 32, 0, 224});
+    texture_.push_back({99, "gia_d", 64, 32, 128, 224});
+    texture_.push_back({100, "gia_d2", 64, 32, 64, 224});
+    texture_.push_back({101, "gia_g", 32, 32, 192, 224});
+    texture_.push_back({102, "gia_g2", 32, 32, 128, 224});
+    texture_.push_back({103, "gmt_eda", 32, 32, 0, 352});
+    texture_.push_back({104, "gonclf", 128, 64, 96, 64});
+    texture_.push_back({105, "gredge", 32, 32, 192, 192});
+    texture_.push_back({106, "hyouga", 64, 64, 192, 64});
+    texture_.push_back({107, "iceclf", 64, 32, 64, 96});
+    texture_.push_back({108, "iceclfd", 64, 32, 128, 96});
+    texture_.push_back({109, "iceclfg", 32, 32, 32, 224});
+    texture_.push_back({110, "jun", 64, 64, 192, 192});
+    texture_.push_back({111, "jun_d", 64, 64, 128, 192});
+    texture_.push_back({112, "jun_e", 64, 16, 0, 240});
+    texture_.push_back({113, "jun_gro", 64, 64, 0, 64});
+    texture_.push_back({114, "junmk", 32, 32, 0, 96});
+    texture_.push_back({115, "junn01", 32, 32, 160, 112});
+    texture_.push_back({116, "junn02", 32, 32, 192, 112});
+    texture_.push_back({117, "junn03", 32, 32, 224, 112});
+    texture_.push_back({118, "junn04", 32, 32, 64, 128});
+    texture_.push_back({119, "jutmpl01", 64, 64, 128, 192});
+    texture_.push_back({120, "lake-e", 32, 32, 96, 192});
+    texture_.push_back({121, "lake_ef", 32, 32, 128, 224});
+    texture_.push_back({122, "lake_fl", 128, 32, 160, 224});
+    texture_.push_back({123, "lostclf", 32, 64, 128, 384});
+    texture_.push_back({124, "lostmt", 128, 32, 128, 448});
+    texture_.push_back({125, "lostmtd", 128, 32, 128, 480});
+    texture_.push_back({126, "lostmts", 64, 32, 160, 384});
+    texture_.push_back({127, "lostwd_e", 32, 32, 64, 480});
+    texture_.push_back({128, "lostwod", 64, 64, 0, 448});
+    texture_.push_back({129, "lst1", 32, 32, 192, 256});
+    texture_.push_back({130, "lstwd_e2", 32, 32, 96, 480});
+    texture_.push_back({131, "mzes", 32, 32, 224, 128});
+    texture_.push_back({132, "mzmt_e", 128, 64, 128, 64});
+    texture_.push_back({133, "mzmt_ed", 128, 32, 128, 128});
+    texture_.push_back({134, "mzmt_edw", 128, 32, 128, 160});
+    texture_.push_back({135, "mzmt_ew", 128, 32, 0, 128});
+    texture_.push_back({136, "mzmt_o", 128, 32, 64, 416});
+    texture_.push_back({137, "mzmt_od", 128, 32, 64, 448});
+    texture_.push_back({138, "mzmt_s", 128, 32, 0, 192});
+    texture_.push_back({139, "mzmt_sd", 128, 32, 0, 160});
+    texture_.push_back({140, "md01", 32, 32, 96, 16});
+    texture_.push_back({141, "md02", 128, 128, 0, 0});
+    texture_.push_back({142, "md03", 16, 16, 112, 64});
+    texture_.push_back({143, "md04", 32, 32, 128, 16});
+    texture_.push_back({144, "md05", 64, 16, 96, 0});
+    texture_.push_back({145, "md06", 16, 32, 96, 48});
+    texture_.push_back({146, "md07", 16, 16, 112, 48});
+    texture_.push_back({147, "md_mt", 128, 128, 128, 0});
+    texture_.push_back({148, "md_mtd", 128, 128, 0, 0});
+    texture_.push_back({149, "md_mts", 64, 128, 64, 160});
+    texture_.push_back({150, "md_snow", 128, 32, 128, 0});
+    texture_.push_back({151, "md_snw2", 128, 32, 128, 32});
+    texture_.push_back({152, "md_snwd", 128, 64, 0, 128});
+    texture_.push_back({153, "md_snwe", 64, 64, 96, 320});
+    texture_.push_back({154, "md_snws", 64, 64, 128, 128});
+    texture_.push_back({155, "md_snwt", 128, 32, 0, 192});
+    texture_.push_back({156, "md_snww", 32, 32, 224, 224});
+    texture_.push_back({157, "md_sw_s", 128, 128, 0, 0});
+    texture_.push_back({158, "md_swd2", 32, 32, 192, 256});
+    texture_.push_back({159, "md_swnp", 128, 128, 0, 96});
+    texture_.push_back({160, "mdsrt_e", 128, 32, 128, 192});
+    texture_.push_back({161, "mdsrt_ed", 128, 32, 128, 224});
+    texture_.push_back({162, "mdsrt_eg", 32, 32, 64, 224});
+    texture_.push_back({163, "midil", 32, 32, 32, 192});
+    texture_.push_back({164, "midild", 32, 32, 224, 192});
+    texture_.push_back({165, "mt_ewg", 32, 32, 64, 96});
+    texture_.push_back({166, "mt_road", 64, 64, 192, 128});
+    texture_.push_back({167, "mt_se", 32, 32, 160, 416});
+    texture_.push_back({168, "mt_se2", 64, 64, 128, 256});
+    texture_.push_back({169, "mt_sg01", 32, 32, 0, 224});
+    texture_.push_back({170, "mt_sg02", 32, 32, 32, 224});
+    texture_.push_back({171, "mt_sg03", 32, 32, 0, 192});
+    texture_.push_back({172, "mt_sg04", 32, 32, 160, 384});
+    texture_.push_back({173, "mtcoin", 64, 64, 0, 256});
+    texture_.push_back({174, "mtwas_e", 128, 32, 0, 224});
+    texture_.push_back({175, "mtwas_ed", 128, 32, 0, 224});
+    texture_.push_back({176, "ncol_gro", 64, 64, 64, 384});
+    texture_.push_back({177, "ncole01", 32, 32, 224, 384});
+    texture_.push_back({178, "ncole02", 32, 32, 192, 416});
+    texture_.push_back({179, "nivl_gro", 64, 64, 128, 384});
+    texture_.push_back({180, "nivl_mt", 128, 64, 0, 0});
+    texture_.push_back({181, "nivl_top", 32, 32, 0, 64});
+    texture_.push_back({182, "nivlr", 32, 32, 192, 384});
+    texture_.push_back({183, "port", 32, 32, 96, 224});
+    texture_.push_back({184, "port_d", 32, 32, 160, 0});
+    texture_.push_back({185, "rzclf02", 64, 64, 128, 128});
+    texture_.push_back({186, "rct_gro", 64, 128, 0, 416});
+    texture_.push_back({187, "riv_cls", 64, 64, 64, 0});
+    texture_.push_back({188, "riv_l1", 32, 32, 96, 320});
+    texture_.push_back({189, "riv_m", 32, 32, 0, 224});
+    texture_.push_back({190, "rivr", 32, 32, 64, 224});
+    texture_.push_back({191, "rivrclf", 64, 64, 128, 192});
+    texture_.push_back({192, "rivs1", 32, 32, 128, 320});
+    texture_.push_back({193, "rivshr", 64, 64, 192, 192});
+    texture_.push_back({194, "rivssr", 64, 32, 192, 224});
+    texture_.push_back({195, "rivstrt", 32, 32, 192, 160});
+    texture_.push_back({196, "rm1", 32, 32, 32, 288});
+    texture_.push_back({197, "rocet", 32, 32, 128, 160});
+    texture_.push_back({198, "rs_ss", 32, 32, 96, 224});
+    texture_.push_back({199, "sango", 32, 32, 224, 320});
+    texture_.push_back({200, "sango2", 32, 32, 224, 352});
+    texture_.push_back({201, "sango3", 32, 32, 128, 384});
+    texture_.push_back({202, "sango4", 64, 64, 0, 384});
+    texture_.push_back({203, "sdun", 64, 64, 0, 160});
+    texture_.push_back({204, "sdun02", 64, 64, 64, 160});
+    texture_.push_back({205, "sh1", 32, 32, 32, 256});
+    texture_.push_back({206, "sh_s1", 32, 32, 224, 288});
+    texture_.push_back({207, "shedge", 32, 64, 160, 160});
+    texture_.push_back({208, "shlm_1", 32, 32, 192, 320});
+    texture_.push_back({209, "shol", 128, 128, 128, 96});
+    texture_.push_back({210, "shol_s", 64, 64, 192, 192});
+    texture_.push_back({211, "shor", 128, 128, 0, 0});
+    texture_.push_back({212, "shor_s", 64, 64, 128, 192});
+    texture_.push_back({213, "shor_s2", 32, 32, 224, 416});
+    texture_.push_back({214, "shor_v", 32, 32, 192, 0});
+    texture_.push_back({215, "silo", 32, 32, 224, 32});
+    texture_.push_back({216, "slope", 128, 32, 0, 384});
+    texture_.push_back({217, "snow_es", 32, 32, 192, 480});
+    texture_.push_back({218, "snow_es2", 32, 32, 224, 480});
+    texture_.push_back({219, "snow_es3", 32, 32, 224, 448});
+    texture_.push_back({220, "snw_mt", 128, 128, 0, 0});
+    texture_.push_back({221, "snw_mtd", 128, 128, 128, 0});
+    texture_.push_back({222, "snw_mte", 64, 32, 0, 96});
+    texture_.push_back({223, "snw_mted", 64, 32, 64, 96});
+    texture_.push_back({224, "snw_mts", 64, 128, 64, 0});
+    texture_.push_back({225, "snw_mts2", 64, 32, 128, 192});
+    texture_.push_back({226, "snwfld", 64, 64, 0, 64});
+    texture_.push_back({227, "snwfld_s", 64, 32, 128, 128});
+    texture_.push_back({228, "snwgra", 64, 64, 192, 192});
+    texture_.push_back({229, "snwhm01", 32, 32, 32, 0});
+    texture_.push_back({230, "snwhm02", 32, 32, 32, 32});
+    texture_.push_back({231, "snwods", 32, 32, 224, 192});
+    texture_.push_back({232, "snwood", 64, 64, 192, 128});
+    texture_.push_back({233, "snwtrk", 32, 64, 96, 256});
+    texture_.push_back({234, "sse_s1", 32, 32, 32, 320});
+    texture_.push_back({235, "ssee1", 32, 32, 64, 288});
+    texture_.push_back({236, "sst1", 32, 32, 224, 256});
+    texture_.push_back({237, "stown_r", 32, 32, 192, 256});
+    texture_.push_back({238, "stw_gro", 64, 64, 0, 384});
+    texture_.push_back({239, "subrg2", 32, 32, 224, 160});
+    texture_.push_back({240, "susbrg", 64, 64, 192, 96});
+    texture_.push_back({241, "sw_se", 64, 64, 0, 0});
+    texture_.push_back({242, "swclf_l", 64, 64, 64, 128});
+    texture_.push_back({243, "swclf_ld", 64, 64, 192, 128});
+    texture_.push_back({244, "swclf_lg", 32, 64, 0, 192});
+    texture_.push_back({245, "swclf_s", 64, 32, 128, 96});
+    texture_.push_back({246, "swclf_sd", 64, 32, 192, 96});
+    texture_.push_back({247, "swclf_sg", 32, 32, 32, 192});
+    texture_.push_back({248, "swclf_wg", 32, 32, 192, 192});
+    texture_.push_back({249, "swfld_s2", 64, 32, 128, 160});
+    texture_.push_back({250, "swfld_s3", 32, 32, 160, 192});
+    texture_.push_back({251, "swmd_cg", 32, 32, 128, 192});
+    texture_.push_back({252, "swmd_clf", 64, 32, 64, 192});
+    texture_.push_back({253, "swp1", 32, 32, 0, 288});
+    texture_.push_back({254, "trk", 64, 64, 128, 0});
+    texture_.push_back({255, "tyo_f", 128, 128, 128, 128});
+    texture_.push_back({256, "tyosnw", 64, 128, 64, 384});
+    texture_.push_back({257, "uf1", 32, 32, 160, 256});
+    texture_.push_back({258, "utai01", 32, 32, 32, 96});
+    texture_.push_back({259, "utai02", 32, 32, 224, 64});
+    texture_.push_back({260, "utai_gro", 64, 64, 128, 96});
+    texture_.push_back({261, "utaimt", 32, 32, 0, 128});
+    texture_.push_back({262, "utaimtd", 32, 32, 96, 96});
+    texture_.push_back({263, "utaimtg", 32, 32, 96, 128});
+    texture_.push_back({264, "wa1", 32, 32, 192, 320});
+    texture_.push_back({265, "wzs1", 32, 32, 128, 288});
+    texture_.push_back({266, "wzshr", 32, 32, 160, 32});
+    texture_.push_back({267, "wzshr2", 32, 32, 32, 128});
+    texture_.push_back({268, "wzshrs", 32, 32, 32, 160});
+    texture_.push_back({269, "was", 128, 128, 0, 96});
+    texture_.push_back({270, "was_d", 64, 32, 0, 224});
+    texture_.push_back({271, "was_g", 64, 64, 0, 192});
+    texture_.push_back({272, "was_s", 128, 128, 128, 0});
+    texture_.push_back({273, "wasfld", 64, 64, 64, 256});
+    texture_.push_back({274, "wdedge", 64, 64, 64, 160});
+    texture_.push_back({275, "we1", 32, 32, 96, 256});
+    texture_.push_back({276, "we_s1", 32, 32, 160, 288});
+    texture_.push_back({277, "wedged", 32, 64, 128, 160});
+    texture_.push_back({278, "wod-e2", 32, 32, 64, 224});
+    texture_.push_back({279, "wood", 64, 64, 192, 0});
+    texture_.push_back({280, "wood_d", 64, 64, 192, 160});
+    texture_.push_back({281, "wtrk", 32, 64, 64, 96});
+    Ogre::MaterialSerializer mSer;
+    for (Texture t : texture_){
+        Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create(t.name, "General", true);
+        Ogre::Technique* tech = mat->getTechnique(0);
+        Ogre::Pass* pass = tech->getPass(0);
+        pass->setDiffuse(0.7, 0.7, 0.7, 0.7);
+        std::cout << "SAVING MATERIAL: " << (output_dir_ + "models/world/" + t.name + ".material") << std::endl;
+        mSer.exportMaterial(mat, output_dir_ + "models/world/" + t.name + ".material");
+    }
+}
+
 void WorldInstaller::ProcessModels(){
     // Open world_us.lgp
     File world_file(input_dir_ + "data/wm/world_us.lgp");
@@ -79,7 +374,9 @@ void WorldInstaller::ProcessModels(){
                 /*res_mgr_->declareResource(
                   output_dir_ + "temp/world_models/" + file_name, "Skeleton", "FFVII"
                 );*/
+                std::cout << "1\n";
                 res_mgr_->removeResourceLocation(output_dir_ + "temp/world_models/", "FFVII");
+                std::cout << "2\n";
                 res_mgr_->addResourceLocation(
                   output_dir_ + "temp/world_models/", "FileSystem", "FFVII", true, true
                 );
@@ -89,11 +386,15 @@ void WorldInstaller::ProcessModels(){
                 // TODO: This needs work to assemble all the pieces. Similar to field models.
 
 
+                std::cout << "3\n";
                 Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(
                   file_name, "FFVII"
                 );
+                std::cout << "4\n";
                 auto mesh_name = model_name + ".mesh";
+                std::cout << "5\n";
                 Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
+                std::cout << "6\n";
                 Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
                 // TODO: a files??
                 /*for (std::string anim : model.a){
@@ -106,7 +407,9 @@ void WorldInstaller::ProcessModels(){
                     VGears::StringUtil::splitBase(anim, base_name);
                     a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
                 }*/
+                std::cout << "EXPORT MESH: " << (output_dir_ + "data/models/world/" + mesh_name) << std::endl;
                 ExportMesh(output_dir_ + "data/models/world/" + mesh_name, mesh);
+                std::cout << "    EXPORTED" << std::endl;
             }
         }
     }
@@ -201,7 +504,7 @@ bool WorldInstaller::ProcessMap(){
                 t.vertex_coord[2].u = mesh_data.readU8();
                 t.vertex_coord[2].v = mesh_data.readU8();
                 u16 texture_location = mesh_data.readU16LE();
-                t.texture_info = texture_location >> 9; // 9 bytes
+                t.texture = texture_location >> 9; // 9 bytes
                 t.location = texture_location & ((1 << 7) - 1); // 7 bytes.
                 block.mesh[m].triangles.push_back(t);
             }
@@ -256,10 +559,11 @@ bool WorldInstaller::ProcessMap(){
         //std::cout << "[MAN] Block " << b << "/" << map.blocks.size() << std::endl;
 
         std::string name = map_name + "_" + std::to_string(b);
+        std::string mat_name = texture_.at(0).name;
         Ogre::ManualObject man = Ogre::ManualObject(name);
         //man.setBoundingBox(Ogre::AxisAlignedBox({-100,-100,0}, {100,100,0})); //TODO;
           //= Ogre::Root::getSingleton().getSceneManager("Scene")->createManualObject(name);
-        man.begin(name, Ogre::RenderOperation::OT_TRIANGLE_LIST);
+        man.begin(mat_name, Ogre::RenderOperation::OT_TRIANGLE_LIST);
         for (int m = 0; m < 16; m ++){
             //std::cout << "[MAN]        Mesh " << m << " triangles: "
             //  << map.blocks[b].mesh[m].triangle_count << "\n";
@@ -282,6 +586,10 @@ bool WorldInstaller::ProcessMap(){
                 //  << (int) map.blocks[b].mesh[m].triangles[t].vertex_index[0] << ", "
                 //  << (int) map.blocks[b].mesh[m].triangles[t].vertex_index[1] << ", "
                 //  << (int) map.blocks[b].mesh[m].triangles[t].vertex_index[2] << std::endl;
+                // TODO: El index deberia incrementar por triangulo por cada material
+                man.setMaterialName(
+                  0, texture_.at(map.blocks[b].mesh[m].triangles[t].texture).name
+                );
                 man.triangle(
                   map.blocks[b].mesh[m].triangles[t].vertex_index[0],
                   map.blocks[b].mesh[m].triangles[t].vertex_index[1],

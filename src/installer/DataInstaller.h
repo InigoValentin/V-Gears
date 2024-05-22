@@ -412,6 +412,11 @@ class DataInstaller{
             WM_INIT,
 
             /**
+             * Generates the materials for the world map terrain.
+             */
+            WM_MATERIALS,
+
+            /**
              * Step that extracts world map terrain data.
              */
             WM_MAPS,
