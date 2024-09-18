@@ -1,11 +1,9 @@
 include_directories(
     luabind
-    luajit/src
     luabind/luabind
     luabind/luabind/detail
+    ${LUA_INCLUDE_DIR}
 )
-
-add_subdirectory(luajit) # LuaJIT has it's own configuration.
 
 add_subdirectory(sfxdump) # SFXDump has it's own configuration.
 

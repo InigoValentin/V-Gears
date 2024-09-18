@@ -34,6 +34,7 @@
 #include "core/GameFrameListener.h"
 #include "core/InputManager.h"
 #include "core/Logger.h"
+#include "core/Savemap.h"
 #include "core/SavemapHandler.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"

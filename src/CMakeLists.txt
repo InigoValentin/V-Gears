@@ -62,6 +62,7 @@ find_package(OpenAL REQUIRED)
 find_package(OggVorbis REQUIRED)
 find_package(TinyXML REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem thread REQUIRED QUIET)
+find_package(Lua51 REQUIRED)
 
 
 # Source files for libvgears and v-gears.
@@ -219,7 +220,6 @@ set(VGEARS_SOURCE_FILES
     #viewer/ViewerModule.cpp
 )
 
-
 # Directories for compiling libvgears and v-gears.
 include_directories(
     ${VGEARS_SOURCE_DIR}
@@ -229,8 +229,7 @@ include_directories(
     ${OGRE_INCLUDE_DIRS}
     ${OGRE_INCLUDE_DIRS}/Overlay
     ${OGRE_INCLUDE_DIRS}/Bites
-    ${CMAKE_SOURCE_DIR}/lib/luajit
-    ${CMAKE_SOURCE_DIR}/lib/luajit/src
+    ${LUA_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/lib/luabind
     ${CMAKE_SOURCE_DIR}/lib/luabind/luabind/detail
 )
@@ -290,7 +289,7 @@ if(WIN32 AND NOT (CMAKE_BUILD_TYPE MATCHES "Debug"))
 endif()
 set(VGEARS_LIBRARIES
     libluabind
-    liblua
+    ${LUA_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${OGGVORBIS_LIBRARIES}
     ${OGRE_LIBRARIES}

@@ -146,18 +146,18 @@ void Savemap::SetWindowColours(
   const unsigned int b_r_r, const unsigned int b_r_g, const unsigned int b_r_b,
   const unsigned int b_l_r, const unsigned int b_l_g, const unsigned int b_l_b
 ){
-    window_colours_[0][0] = std::min(MAX_COLOUR, t_l_r);
-    window_colours_[0][1] = std::min(MAX_COLOUR, t_l_g);
-    window_colours_[0][2] = std::min(MAX_COLOUR, t_l_b);
-    window_colours_[1][0] = std::min(MAX_COLOUR, t_r_r);
-    window_colours_[1][1] = std::min(MAX_COLOUR, t_r_g);
-    window_colours_[1][2] = std::min(MAX_COLOUR, t_r_b);
-    window_colours_[2][0] = std::min(MAX_COLOUR, b_r_r);
-    window_colours_[2][1] = std::min(MAX_COLOUR, b_r_g);
-    window_colours_[2][2] = std::min(MAX_COLOUR, b_r_b);
-    window_colours_[3][0] = std::min(MAX_COLOUR, b_l_r);
-    window_colours_[3][1] = std::min(MAX_COLOUR, b_l_g);
-    window_colours_[3][2] = std::min(MAX_COLOUR, b_l_b);
+    window_colours_[0][0] = std::min((const unsigned int) MAX_COLOUR, t_l_r);
+    window_colours_[0][1] = std::min((const unsigned int) MAX_COLOUR, t_l_g);
+    window_colours_[0][2] = std::min((const unsigned int) MAX_COLOUR, t_l_b);
+    window_colours_[1][0] = std::min((const unsigned int) MAX_COLOUR, t_r_r);
+    window_colours_[1][1] = std::min((const unsigned int) MAX_COLOUR, t_r_g);
+    window_colours_[1][2] = std::min((const unsigned int) MAX_COLOUR, t_r_b);
+    window_colours_[2][0] = std::min((const unsigned int) MAX_COLOUR, b_r_r);
+    window_colours_[2][1] = std::min((const unsigned int) MAX_COLOUR, b_r_g);
+    window_colours_[2][2] = std::min((const unsigned int) MAX_COLOUR, b_r_b);
+    window_colours_[3][0] = std::min((const unsigned int) MAX_COLOUR, b_l_r);
+    window_colours_[3][1] = std::min((const unsigned int) MAX_COLOUR, b_l_g);
+    window_colours_[3][2] = std::min((const unsigned int) MAX_COLOUR, b_l_b);
 }
 
 std::string Savemap::GetControlKey() const {return control_;}
@@ -261,8 +261,10 @@ void Savemap::SetCharacterInfo(
         characters_[id].back_row = back_row;
         characters_[id].exp = exp;
         characters_[id].exp_to_next = exp_to_next;
-        characters_[id].limit_level = std::min(limit_level, MAX_LIMIT_LEVELS);
-        characters_[id].limit_bar = std::min(limit_bar, MAX_LIMIT_BAR);
+        characters_[id].limit_level
+          = std::min((unsigned int) limit_level, (unsigned int) MAX_LIMIT_LEVELS);
+        characters_[id].limit_bar
+          = std::min((unsigned int) limit_bar, (unsigned int) MAX_LIMIT_BAR);
         characters_[id].weapon.id = weapon;
         characters_[id].armor.id = armor;
         characters_[id].accessory = std::max(accessory, -1);
