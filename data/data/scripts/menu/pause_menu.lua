@@ -21,7 +21,7 @@ UiContainer.PauseMenu = {
     on_button = function( self, button, event )
         if System:is_paused() == true then
             local menu_cursor = ui_manager:get_widget( "PauseMenu.Menu.Cursor" )
-            if button == "P" and event == "Press" then
+            if button == Config.CONTROLS.PAUSE and event == "Press" then
                 System:unpause()
             elseif button == "Enter" and event == "Press" then
                 audio_manager:play_sound("Cursor")
@@ -49,7 +49,7 @@ UiContainer.PauseMenu = {
                 menu_cursor:set_default_animation( "Position" .. self.position )
             end
         elseif System:is_paused() == false then
-            if button == "P" and event == "Press" then
+            if button == Config.CONTROLS.PAUSE and event == "Press" then
                 System:pause()
             end
         end

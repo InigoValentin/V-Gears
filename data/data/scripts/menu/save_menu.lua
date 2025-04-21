@@ -28,17 +28,17 @@ UiContainer.SaveMenu = {
     --- Handles button events.
     --
     -- For the current submenu, handles directional keys, enter and escape events.
-    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param button Pressed button string key. Config.CONTROLS.UP, Config.CONTROLS.LEFT, Config.CONTROLS.ACTION and Config.CONTROLS.CANCEL are handled.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "save" then
             if UiContainer.current_submenu == "" then
-                if button == "Escape" and event == "Press" then
+                if button == Config.CONTROLS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     script:request_end_sync(Script.UI, "SaveMenu", "hide", 0)
-                elseif button == "Enter" then
+                elseif button == Config.CONTROLS.ACTION then
                     self.action(self, self.first_visible - 1 + self.position)
-                elseif button == "Down" then
+                elseif button == Config.CONTROLS.DOWN then
                     if self.position < self.position_total and self.first_visible + self.position < self.max_slots then
                         -- Move cursor down
                         self.position = self.position + 1
@@ -51,7 +51,7 @@ UiContainer.SaveMenu = {
                     else
                         audio_manager:play_sound("Error")
                     end
-                elseif button == "Up" then
+                elseif button == Config.CONTROLS.UP then
                     if self.position > 1 then
                         -- Move cursor up
                         self.position = self.position - 1

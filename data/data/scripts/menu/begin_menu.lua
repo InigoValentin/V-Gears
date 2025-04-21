@@ -23,12 +23,12 @@ UiContainer.BeginMenu = {
     --- Handles button events.
     --
     -- Handles directional Up, Down and Enter keys.
-    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param button Pressed button string key. Config.CONTROLS.UP, Config.CONTROLS.LEFT, Config.CONTROLS.ACTION and Config.CONTROLS.CANCEL are handled.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "begin" then
             local cursor = ui_manager:get_widget("BeginMenu.Container.Cursor")
-            if button == "Enter" and event == "Press" then
+            if button == Config.CONTROLS.ACTION and event == "Press" then
                 if self.position == 1 then -- New game
                     audio_manager:play_sound("Window")
                     generate_control_key()
@@ -102,14 +102,14 @@ UiContainer.BeginMenu = {
                     Battle.start(220)
                     MenuSettings.pause_available = true
                 end
-            elseif button == "Down" then
+            elseif button == Config.CONTROLS.DOWN then
                 audio_manager:play_sound("Cursor")
                 self.position = self.position + 1
                 if self.position > self.position_total then
                     self.position = 1;
                 end
                 cursor:set_default_animation("Position" .. self.position)
-            elseif button == "Up" then
+            elseif button == Config.CONTROLS.UP then
                 audio_manager:play_sound("Cursor")
                 self.position = self.position - 1
                 if self.position <= 0 then

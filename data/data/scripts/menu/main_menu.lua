@@ -30,7 +30,7 @@ UiContainer.MainMenu = {
     --- Handles button events.
     --
     -- For the current submenu, handles directional keys, enter and escape events.
-    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param button Pressed button string key. Config.CONTROLS.UP, Config.CONTROLS.LEFT, Config.CONTROLS.ACTION and Config.CONTROLS.CANCEL are handled.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "main" then
@@ -40,10 +40,10 @@ UiContainer.MainMenu = {
             local timegil = ui_manager:get_widget("MainMenu.Container.TimeGil")
             local location = ui_manager:get_widget("MainMenu.Container.Location")
             if UiContainer.current_submenu == "" then
-                if button == "Escape" and event == "Press" then
+                if button == Config.CONTROLS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     script:request_end_sync(Script.UI, "MainMenu", "hide", 0)
-                elseif button == "Enter" and event == "Press" then
+                elseif button == Config.CONTROLS.ACTION and event == "Press" then
                     if self.position == 1 then -- Item menu
                         audio_manager:play_sound("Cursor")
                         script:request_end_sync(Script.UI, "ItemMenu", "show", 0)
@@ -63,14 +63,14 @@ UiContainer.MainMenu = {
                         UiContainer.current_submenu = "main_character"
                         ui_manager:get_widget("MainMenu.Container.Characters.Cursor"):set_visible(true)
                     end
-                elseif button == "Down" then
+                elseif button == Config.CONTROLS.DOWN then
                     audio_manager:play_sound("Cursor")
                     self.position = self.position + 1
                     if self.position > self.position_total then
                         self.position = 1;
                     end
                     menu_cursor:set_default_animation("Position" .. self.position)
-                elseif button == "Up" then
+                elseif button == Config.CONTROLS.UP then
                     audio_manager:play_sound("Cursor")
                     self.position = self.position - 1
                     if self.position <= 0 then
@@ -79,11 +79,11 @@ UiContainer.MainMenu = {
                     menu_cursor:set_default_animation("Position" .. self.position)
                 end
             elseif UiContainer.current_submenu == "main_character" then
-                if button == "Escape" and event == "Press" then
+                if button == Config.CONTROLS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     UiContainer.current_submenu = ""
                     ui_manager:get_widget("MainMenu.Container.Characters.Cursor"):set_visible(false)
-                elseif button == "Down" then
+                elseif button == Config.CONTROLS.DOWN then
                     audio_manager:play_sound("Cursor")
                     -- TODO: Skip empty character slots
                     self.character_position = self.character_position + 1
@@ -91,7 +91,7 @@ UiContainer.MainMenu = {
                         self.character_position = 1
                     end
                     ui_manager:get_widget("MainMenu.Container.Characters.Cursor"):set_default_animation("Position" .. self.character_position)
-                elseif button == "Up" then
+                elseif button == Config.CONTROLS.UP then
                     audio_manager:play_sound("Cursor")
                     -- TODO: Skip empty character slots
                     self.character_position = self.character_position - 1
@@ -99,7 +99,7 @@ UiContainer.MainMenu = {
                         self.character_position = self.character_position_total
                     end
                     ui_manager:get_widget("MainMenu.Container.Characters.Cursor"):set_default_animation("Position" .. self.character_position)
-                elseif button == "Enter" then
+                elseif button == Config.CONTROLS.ACTION then
                     -- TODO: Check for empty character.
                     audio_manager:play_sound("Cursor")
                     if self.select_character_for_menu == 2 then -- Magic menu
@@ -120,7 +120,7 @@ UiContainer.MainMenu = {
                 end
             end
         elseif ui_manager:get_widget("MainMenu"):is_visible() == false and MenuSettings.available == true then
-            if button == "Escape" and event == "Press" then
+            if button == Config.CONTROLS.CANCEL and event == "Press" then
                 audio_manager:play_sound("Back")
                 script:request_end_sync(Script.UI, "MainMenu", "show", 0)
             end

@@ -515,8 +515,9 @@ void FieldModelInstruction::ProcessLADER(CodeGenerator* code_gen, const std::str
 void FieldModelInstruction::ProcessSLIDR(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
+    // The documentation says the value should be in param_[1], but it's actually on param_[2]
     float radius = std::stof(FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetSigned(),
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned(),
       FieldCodeGenerator::ValueType::Float, scale
     ));
     code_gen->AddOutputLine((

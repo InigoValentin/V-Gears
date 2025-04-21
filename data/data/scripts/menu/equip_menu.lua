@@ -56,18 +56,18 @@ UiContainer.EquipMenu = {
     --- Handles button events.
     --
     -- For the current submenu, handles directional keys, enter and escape events.
-    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param button Pressed button string key. Config.CONTROLS.UP, Config.CONTROLS.LEFT, Config.CONTROLS.ACTION and Config.CONTROLS.CANCEL are handled.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "equip" then
             if UiContainer.current_submenu == "" then
                 -- TODO: Handle L1/R1 (change character)
                 -- TODO: Handle square: Materia menu
-                if button == "Escape" and event == "Press" then
+                if button == Config.CONTROLS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     UiContainer.current_menu = "main"
                     script:request_end_sync(Script.UI, "EquipMenu", "hide", 0)
-                elseif button == "Down" then
+                elseif button == Config.CONTROLS.DOWN then
                     audio_manager:play_sound("Cursor")
                     self.equip_position = self.equip_position + 1
                     if self.equip_position > self.equip_position_total then
@@ -75,7 +75,7 @@ UiContainer.EquipMenu = {
                     end
                     ui_manager:get_widget("EquipMenu.Container.Character.Cursor"):set_default_animation("Position" .. self.equip_position)
                     self.populate_details(self, false)
-                elseif button == "Up" then
+                elseif button == Config.CONTROLS.UP then
                     audio_manager:play_sound("Cursor")
                     self.equip_position = self.equip_position - 1
                     if self.equip_position < 1 then
@@ -83,7 +83,7 @@ UiContainer.EquipMenu = {
                     end
                     ui_manager:get_widget("EquipMenu.Container.Character.Cursor"):set_default_animation("Position" .. self.equip_position)
                     self.populate_details(self, false)
-                elseif button == "Enter" then
+                elseif button == Config.CONTROLS.ACTION then
                     if self.equip_position == 1 then
                         self.selecting_slot = Inventory.ITEM_TYPE.WEAPON
                     elseif self.equip_position == 2 then
@@ -105,10 +105,10 @@ UiContainer.EquipMenu = {
                 elseif self.selecting_slot == Inventory.ITEM_TYPE.ACCESSORY then
                     list = self.avail_accessories
                 end
-                if button == "Escape" and event == "Press" then
+                if button == Config.CONTROLS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     self.submenu_none(self)
-                elseif button == "Down" then
+                elseif button == Config.CONTROLS.DOWN then
                     audio_manager:play_sound("Cursor")
                     -- Move one position down only if there is a next item
                     if #(list) <= self.list_item_selected + 1 then
@@ -127,7 +127,7 @@ UiContainer.EquipMenu = {
                     end
                     self.populate_details(self, true)
                     self.calculate_stat_diffs(self)
-                elseif button == "Up" then
+                elseif button == Config.CONTROLS.UP then
                     audio_manager:play_sound("Cursor")
                     -- Move one position up only if not in the first.
                     if self.list_item_selected <= 1 then
@@ -146,7 +146,7 @@ UiContainer.EquipMenu = {
                     end
                     self.populate_details(self, true)
                     self.calculate_stat_diffs(self)
-                elseif button == "Enter" and event == "Press" then
+                elseif button == Config.CONTROLS.ACTION and event == "Press" then
                     -- Equip the seleced item
                     local item_id = nil
                     if self.selecting_slot == Inventory.ITEM_TYPE.WEAPON then

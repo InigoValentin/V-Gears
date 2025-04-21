@@ -10,3 +10,4 @@ _*
 *.dmp
 *.swp
 .tags
+CMakeFiles/

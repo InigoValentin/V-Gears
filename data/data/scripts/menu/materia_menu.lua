@@ -40,18 +40,18 @@ UiContainer.MateriaMenu = {
     --- Handles button events.
     --
     -- For the current submenu, handles directional keys, enter and escape events.
-    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param button Pressed button string key. Config.CONTROLS.UP, Config.CONTROLS.LEFT, Config.CONTROLS.ACTION and Config.CONTROLS.CANCEL are handled.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "materia" then
             if UiContainer.current_submenu == "" then
                 -- TODO: Handle L1/R1 (change character)
                 -- TODO: Handle square: Materia menu
-                if button == "Escape" and event == "Press" then
+                if button == Config.CONTROLS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     UiContainer.current_menu = "main"
                     script:request_end_sync(Script.UI, "MateriaMenu", "hide", 0)
-                elseif button == "Down" then
+                elseif button == Config.CONTROLS.DOWN then
                     audio_manager:play_sound("Cursor")
                     self.header_position_row = self.header_position_row + 1
                     if self.header_position_row > self.header_position_row_total then
@@ -59,7 +59,7 @@ UiContainer.MateriaMenu = {
                     end
                     ui_manager:get_widget("MateriaMenu.Container.Character.Cursor"):set_default_animation("Position" .. self.header_position_row .. "-" .. self.header_position)
                     self.populate_details(self, false)
-                elseif button == "Up" then
+                elseif button == Config.CONTROLS.UP then
                     audio_manager:play_sound("Cursor")
                     self.header_position_row = self.header_position_row - 1
                     if self.header_position_row < 1 then
@@ -67,7 +67,7 @@ UiContainer.MateriaMenu = {
                     end
                     ui_manager:get_widget("MateriaMenu.Container.Character.Cursor"):set_default_animation("Position" .. self.header_position_row .. "-" .. self.header_position)
                     self.populate_details(self, false)
-                elseif button == "Right" then
+                elseif button == Config.CONTROLS.RIGHT then
                     audio_manager:play_sound("Cursor")
                     self.header_position = self.header_position + 1
                     if self.header_position > self.header_position_total then
@@ -75,7 +75,7 @@ UiContainer.MateriaMenu = {
                     end
                     ui_manager:get_widget("MateriaMenu.Container.Character.Cursor"):set_default_animation("Position" .. self.header_position_row .. "-" .. self.header_position)
                     self.populate_details(self, false)
-                elseif button == "Left" then
+                elseif button == Config.CONTROLS.LEFT then
                     audio_manager:play_sound("Cursor")
                     self.header_position = self.header_position - 1
                     if self.header_position < 1 then
@@ -83,7 +83,7 @@ UiContainer.MateriaMenu = {
                     end
                     ui_manager:get_widget("MateriaMenu.Container.Character.Cursor"):set_default_animation("Position" .. self.header_position_row .. "-" .. self.header_position)
                     self.populate_details(self, false)
-                elseif button == "Enter" then
+                elseif button == Config.CONTROLS.ACTION then
                     if self.header_position_row == 1 and self.header_position == 1 then
                         -- TODO: Command menu
                     elseif self.header_position_row == 2 and self.header_position == 1 then
@@ -105,7 +105,7 @@ UiContainer.MateriaMenu = {
                     return 0
                 end
             elseif UiContainer.current_submenu == "list" then
-                if button == "Down" then
+                if button == Config.CONTROLS.DOWN then
                     if self.list_first_visible + self.list_position > self.list_size then
                         -- At the very end, do nothing
                         audio_manager:play_sound("Error")
@@ -123,7 +123,7 @@ UiContainer.MateriaMenu = {
                     ui_manager:get_widget("MateriaMenu.Container.List.Cursor"):set_default_animation("Position" .. self.list_position)
                     -- Show details
                     self.populate_details(self, true)
-                elseif button == "Up" then
+                elseif button == Config.CONTROLS.UP then
                     if self.list_first_visible == 1 and self.list_position == 1 then
                         -- At the very begining, do nothing
                         audio_manager:play_sound("Error")
@@ -141,7 +141,7 @@ UiContainer.MateriaMenu = {
                     ui_manager:get_widget("MateriaMenu.Container.List.Cursor"):set_default_animation("Position" .. self.list_position)
                     -- Show details
                     self.populate_details(self, true)
-                elseif button == "PGDN" then -- TODO: Also, the bind to R1
+                elseif button == Config.CONTROLS.PGDN then -- TODO: Also, the bind to R1
                     if self.list_first_visible + self.list_position_total < self.list_size - self.list_position_total then
                         audio_manager:play_sound("Cursor")
                         self.list_first_visible = self.list_first_visible + self.list_position_total
@@ -150,7 +150,7 @@ UiContainer.MateriaMenu = {
                     else
                         audio_manager:play_sound("Error")
                     end
-                elseif button == "PGUP" then -- TODO: Also, the bind to L1
+                elseif button == Config.CONTROLS.PGUP then -- TODO: Also, the bind to L1
                     if self.list_first_visible - self.list_position_total > 1 then
                         audio_manager:play_sound("Cursor")
                         self.list_first_visible = self.list_first_visible - self.list_position_total
@@ -159,10 +159,10 @@ UiContainer.MateriaMenu = {
                     else
                         audio_manager:play_sound("Error")
                     end
-                elseif button == "Escape" and event == "Press" then
+                elseif button == Config.CONTROLS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     self.submenu_none(self)
-                elseif button == "Enter" then
+                elseif button == Config.CONTROLS.ACTION then
                     -- TODO: Replace for "Equip materia" sound.
                     audio_manager:play_sound("Cursor")
                     self.equip_materia(self)

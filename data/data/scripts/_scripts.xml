@@ -1,4 +1,5 @@
 <scripts>
+    <script file="scripts/config.lua" />
     <script file="scripts/data.lua" />
     <script file="scripts/battle.lua" />
     <script file="gamedata/accessories.lua" />

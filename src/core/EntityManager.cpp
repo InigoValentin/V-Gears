@@ -664,6 +664,7 @@ bool EntityManager::IsKeyOn(unsigned int key_code){
     // Translate keycodes to game key codes.
     // For example 32 is standard for "Enter", but in game is "Circle/Action".
     // TODO: Finish this list.
+    // TOOD: Get values from config.lua
     switch (key_code){
         case 32: code = OIS::KC_SPACE; break;
     }
