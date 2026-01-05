@@ -13,6 +13,7 @@
 #include "core/XmlWalkmeshFile.h"
 #include "core/XmlMapsFile.h"
 #include "core/XmlMapFile.h"
+#include "core/EntityManager.h"
 
 
 
@@ -151,7 +152,7 @@ ViewerModule::~ViewerModule()
 void
 ViewerModule::Input( const VGears::Event& event )
 {
-    if (event.type == ET_KEY_PRESS && event.param1 == OIS::KC_DOWN)
+    if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_DOWN)
     {
         bool change = false;
         if (m_Entity != nullptr)
@@ -181,7 +182,7 @@ ViewerModule::Input( const VGears::Event& event )
             }
         }
     }
-    else if (event.type == ET_KEY_PRESS && event.param1 == OIS::KC_UP)
+    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_UP)
     {
         bool change = false;
         if (m_Entity != nullptr && m_Entity->getAllAnimationStates() != nullptr)
@@ -331,8 +332,8 @@ ViewerModule::SetWalkmeshToLoad( const Ogre::String& name )
     if( walkmeshfile_name_ != "" )
     {
         XmlWalkmeshFile walkmesh_file( "./data/" + walkmeshfile_name_ );
-        m_Walkmesh = new Walkmesh();
-        walkmesh_file.Load( m_Walkmesh );
+        walkmesh_file.Load();
+        m_Walkmesh = EntityManager::getSingleton().GetWalkmesh();
         //m_SceneNode->attachObject( m_Walkmesh );
         //m_Walkmesh->setVisible( true );
     }

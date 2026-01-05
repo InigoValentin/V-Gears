@@ -288,7 +288,7 @@ class BattleDataInstaller{
             std::vector<std::string> a;
 
             /**
-             * List of .a files associated to the model
+             * List of .s files associated to the model
              */
             std::vector<std::string> s;
 

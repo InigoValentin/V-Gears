@@ -7,6 +7,26 @@ If you are runind Debian (or derivates), you can install the required dependenci
 apt install g++ cmake libqt5widgets5 qtbase5-dev zlib1g-dev libogre-1.12-dev libois-dev libvorbis-dev libboost-dev libboost-program-options-dev libboost-test-dev libboost-filesystem-dev libboost-thread-dev lua5.2 liblua5.2-dev libluabind-dev luajit libopenal-dev libtinyxml-dev
 ```
 
+## Deterministic fallbacks
+
+The CMake scripts include an option `USE_DETERMINISTIC_FALLBACKS` (default `ON`).
+- When `ON`, CMake will attempt pragmatic fallbacks to find libraries when
+	`find_package`/pkg-config do not succeed (SONAME `find_library` passes,
+	appending common `/usr/lib` paths, or injecting generic `-lboost_*` flags).
+- When `OFF`, CMake will not perform these fallbacks; instead require proper
+	dev packages or explicit hints (recommended for CI and packaging).
+
+Disable fallbacks example:
+
+```bash
+cmake .. -DUSE_DETERMINISTIC_FALLBACKS=OFF -DCMAKE_BUILD_TYPE=Release
+```
+
+If you see warnings about missing Boost or OgreBites, prefer installing the
+appropriate `-dev` packages listed above, or point CMake at your OGRE/Boost
+installation with `-DOGRE_ROOT=...` and `-DBoost_DIR=...`/`-DBoost_LIBRARY_DIRS`.
+
+
 ## Build using CMake
 
 From the project directory, run these commands:

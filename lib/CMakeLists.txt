@@ -1,15 +1,27 @@
-include_directories(
-    luabind
-    luajit/src
-    luabind/luabind
-    luabind/luabind/detail
+add_subdirectory(luajit) # LuaJIT has its own configuration.
+
+add_subdirectory(sfxdump) # SFXDump has its own configuration.
+
+# Collect luabind sources and headers explicitly and create a modern target.
+file(GLOB_RECURSE LUABIND_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    "luabind/src/*.cpp"
+    "luabind/src/*.c"
+)
+file(GLOB_RECURSE LUABIND_HEADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    "luabind/luabind/*.h"
+    "luabind/luabind/*.hpp"
+    "luabind/luabind/detail/*.h"
+    "luabind/luabind/detail/*.hpp"
 )
 
-add_subdirectory(luajit) # LuaJIT has it's own configuration.
+add_library(libluabind STATIC ${LUABIND_SRC_FILES} ${LUABIND_HEADER_FILES})
 
-add_subdirectory(sfxdump) # SFXDump has it's own configuration.
+target_include_directories(libluabind
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/luabind
+        ${CMAKE_CURRENT_SOURCE_DIR}/luajit/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/luabind/luabind
+        ${CMAKE_CURRENT_SOURCE_DIR}/luabind/luabind/detail
+)
 
-aux_source_directory(luabind/luabind LUABIND_HEADER_FILES)
-aux_source_directory(luabind/luabind/details LUABIND_HEADER_DETAILS_FILES)
-aux_source_directory(luabind/src LUABIND_SRC_FILES)
-add_library(libluabind STATIC ${LUABIND_SRC_FILES} ${LUABIND_HEADER_FILES} ${LUABIND_HEADER_DETAILS_FILES})
+set_target_properties(libluabind PROPERTIES FOLDER "lib")

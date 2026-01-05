@@ -1,64 +1,50 @@
+# Minimum required CMake and project declaration
 cmake_minimum_required(VERSION 3.0)
+# Enable both C and CXX languages so C and C++ toolchains are configured.
+project(V-Gears VERSION 0.1.18 LANGUAGES C CXX)
 
+# Provide a central common include for project-wide policies and defaults.
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
+include(ProjectCommon)
 
-# Build verbosity: on / off.
-set(CMAKE_VERBOSE_MAKEFILE off)
-
-
-# C++ Standard.
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-
-# Add cotire
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake")
-include(cotire)
-
-# Project Information.
-project(V-Gears)
-set(CMAKE_PACKAGE_ICON v-gears.png)
-set(VGEARS_VERSION_MAJOR 0)
-set(VGEARS_VERSION_MINOR 1)
-set(VGEARS_VERSION_PATCH 18)
-set(VGEARS_VERSION ${VGEARS_VERSION_MAJOR}.${VGEARS_VERSION_MINOR}.${VGEARS_VERSION_PATCH})
-
-
-# Project options.
+# Configure CMake options
+option(USE_COTIRE "Enable cotire precompiled header support" ON)
 option(BUILD_INSTALLER "Build the V-Gears-Installer" TRUE)
 option(BUILD_TESTS "Build the unit tests" FALSE)
-option(MULTITHREADING "Enable multithreading" FALSE)
+option(MULTITHREADING "Enable multithreading" TRUE)
 
-
-# Generate version header.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Version.h) 
-
-
-# Hanle build type
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
-    # CMake defaults to leaving CMAKE_BUILD_TYPE empty. This screws up
-    # differentiation between debug and release builds.
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None (CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel." FORCE)
+# Optional hint for Qt configuration dirs. Setting this early helps subprojects
+# (like `src`) locate Qt via config-mode packages when installs are in
+# distro-specific locations. Example: -DQT_DIR_HINT=/usr/lib/x86_64-linux-gnu/cmake
+set(QT_DIR_HINT "" CACHE PATH "Optional hint for Qt CMake config directory (parent of Qt5/Qt6)")
+if(QT_DIR_HINT)
+    list(APPEND CMAKE_PREFIX_PATH "${QT_DIR_HINT}")
+    if(EXISTS "${QT_DIR_HINT}/Qt5")
+        set(Qt5_DIR "${QT_DIR_HINT}/Qt5" CACHE PATH "Qt5 dir from hint" FORCE)
+    elseif(EXISTS "${QT_DIR_HINT}/Qt5Core")
+        set(Qt5_DIR "${QT_DIR_HINT}/Qt5Core" CACHE PATH "Qt5 dir from hint" FORCE)
+    endif()
+    if(EXISTS "${QT_DIR_HINT}/Qt6")
+        set(Qt6_DIR "${QT_DIR_HINT}/Qt6" CACHE PATH "Qt6 dir from hint" FORCE)
+    endif()
 endif()
 
+# Optionally enable cotire (precompiled header/speedup).
+if(USE_COTIRE)
+    include(cotire OPTIONAL RESULT_VARIABLE COTIRE_INCLUDE_RESULT)
+    if(NOT COTIRE_INCLUDE_RESULT)
+        message(WARNING "cotire requested but cotire.cmake not found in CMake modules; skipping")
+    endif()
+endif()
+set(CMAKE_PACKAGE_ICON v-gears.png)
 
-#Output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug)
+# Generate version header into the build tree so source tree is not modified.
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Version.h.in ${CMAKE_BINARY_DIR}/generated/Version.h @ONLY)
+include_directories(${CMAKE_BINARY_DIR}/generated)
 
-# Enable Visual Studio solution "folders".
-SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
-
-
-# Global configurations.
-set(CMAKE_DEBUG_POSTFIX "_d")
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_CURRENT_SOURCE_DIR
-        "${VGEARS_SOURCE_DIR}/data" CACHE PATH "V-Gears install prefix" FORCE
-    )
+# Default build type when none is supplied by the caller.
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build" FORCE)
 endif()
 
 # First, build external libraries (luabind and luajit).
@@ -71,6 +57,5 @@ add_subdirectory(src)
 if(BUILD_TESTS)
     add_subdirectory(test)
 endif()
-
 
 # TODO: Generate Installer (.msi, .deb, .appImage...)

@@ -16,7 +16,6 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-#include <Qt>
 #include <QtCore/QProcess>
 #include <QtWidgets/QFileDialog>
 #include <QtCore/QDir>

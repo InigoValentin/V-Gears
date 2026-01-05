@@ -135,10 +135,25 @@ target_link_libraries(v-gears-installer
     Qt5::Core
     ${OIS_LIBRARIES}
     ${TinyXML_LIBRARIES}
-    ${Boost_LIBRARIES}
+    ${BOOST_LINK_LIBS}
     ${OGRE_LIBRARIES}
     ${ZLIB_LIBRARIES}
 )
+
+# If OgreBites was found by the top-level CMake as a deterministic fallback
+# it may be present in OGRE_LIBRARIES already; ensure it's visible here too.
+if(NOT OGRE_LIBRARIES MATCHES ".*OgreBites.*")
+    if(EXISTS "/usr/lib/x86_64-linux-gnu/libOgreBites.so")
+        list(APPEND OGRE_LIBRARIES "/usr/lib/x86_64-linux-gnu/libOgreBites.so")
+        message(STATUS "Installer CMake: appended deterministic OgreBites path for linker: /usr/lib/x86_64-linux-gnu/libOgreBites.so")
+    endif()
+endif()
+
+# Ensure any newly appended OGRE libraries are linked into the installer target
+if(OGRE_LIBRARIES)
+    message(STATUS "Installer linking additional OGRE libraries: ${OGRE_LIBRARIES}")
+    target_link_libraries(v-gears-installer ${OGRE_LIBRARIES})
+endif()
 
 
 # Install v-gears-installer.
