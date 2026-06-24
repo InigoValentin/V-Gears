@@ -24,3 +24,4 @@ doc/FFVII/RAW/
 .cproject
 .directory
 v-gears-new*.png
+/.vscode/c_cpp_properties.json

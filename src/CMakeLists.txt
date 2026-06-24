@@ -10,9 +10,9 @@ if(NOT DEFINED OGRE_ROOT)
     )
     foreach(_cand IN LISTS _OGRE_CANDIDATES)
         if(EXISTS "${_cand}")
-            # If the candidate points to an include directory like /usr/include/OGRE,
-            # set OGRE_ROOT to the system root (two directories up) so later
-            # searches for modules/libraries can succeed.
+            # If the candidate points to an include directory like
+            # /usr/include/OGRE,set OGRE_ROOT to the system root (two
+            # directories up) so later searches for modules/libraries find it.
             if(_cand MATCHES "/include/OGRE$" OR _cand MATCHES ".*/OGRE$")
                 get_filename_component(_p "${_cand}" DIRECTORY)
                 get_filename_component(_p2 "${_p}" DIRECTORY)
@@ -28,12 +28,12 @@ endif()
 
 
 
-# Explicitly search for other common libraries if their CMake find modules failed
+# Explicitly search for other common libraries if CMake find modules failed.
 if(NOT OIS_LIBRARIES)
     find_library(_ois_lib NAMES OIS OIS-1.3.0 libOIS-1.3.0 libOIS HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
     if(_ois_lib)
         set(OIS_LIBRARIES ${_ois_lib})
-        message(STATUS "Fallback: Found OIS library: ${_ois_lib}")
+        message(STATUS "Found OIS library: ${_ois_lib}")
     endif()
 endif()
 
@@ -49,7 +49,7 @@ if(NOT TinyXML_LIBRARIES)
     find_library(_tinyxml_lib NAMES tinyxml libtinyxml TinyXML TiXml libtinyxml2 tinyxml2 libtinyxml2 HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
     if(_tinyxml_lib)
         set(TinyXML_LIBRARIES ${_tinyxml_lib})
-        message(STATUS "Fallback: Found TinyXML library: ${_tinyxml_lib}")
+        message(STATUS "Found TinyXML library: ${_tinyxml_lib}")
     endif()
 endif()
 
@@ -77,7 +77,7 @@ if(NOT OGGVORBIS_LIBRARIES)
     endif()
     if(_ov)
         set(OGGVORBIS_LIBRARIES ${_ov})
-        message(STATUS "Fallback: Found Ogg/Vorbis libraries: ${_ov}")
+        message(STATUS "Found Ogg/Vorbis libraries: ${_ov}")
     endif()
 endif()
 
@@ -86,7 +86,7 @@ foreach(_comp IN ITEMS OgreOverlay OgreBites OgreRTShaderSystem OgreProperty Ogr
     find_library(_comp_lib NAMES ${_comp} lib${_comp} ${_comp}.so HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib ${OGRE_ROOT}/lib)
     if(_comp_lib)
         list(APPEND OGRE_LIBRARIES ${_comp_lib})
-        message(STATUS "Fallback: Found OGRE component ${_comp}: ${_comp_lib}")
+        message(STATUS "Found OGRE component ${_comp}: ${_comp_lib}")
     endif()
 endforeach()
 
@@ -103,7 +103,7 @@ if(PKG_CONFIG_FOUND)
                 set(OGRE_ROOT "${_ogre_pkgs.prefix}")
             endif()
             message(STATUS "Found OGRE via pkg-config, OGRE_ROOT=${OGRE_ROOT}")
-            # If pkg-config gives us a prefix, try to set CMake module path accordingly
+            # If pkg-config gives a prefix, try to set CMake module path.
             set(_candidate_cm_path "${_ogre_pkgs.prefix}/CMake")
             if(EXISTS "${_candidate_cm_path}")
                 set(OGRE_CMAKE_MODULE_PATH "${_candidate_cm_path}")
@@ -114,17 +114,18 @@ if(PKG_CONFIG_FOUND)
                 endif()
             endif()
         endif()
-        # Export include dirs and libraries from pkg-config for later target usage
-            set(OGRE_INCLUDE_DIRS ${_ogre_pkgs_INCLUDE_DIRS})
-            # Convert pkg-config library flags (e.g. "-L.. -lOgreMain -lOgreBites")
-            # into a CMake list so target_link_libraries handles them correctly.
-            string(REPLACE " " ";" _pkg_libs_list "${_ogre_pkgs_LIBRARIES}")
-            list(APPEND OGRE_LIBRARIES ${_pkg_libs_list})
+        # Export include dirs and libraries from pkg-config for later usage
+        set(OGRE_INCLUDE_DIRS ${_ogre_pkgs_INCLUDE_DIRS})
+        # Convert pkg-config library flags (e.g. "-L.. -lOgreMain -lOgreBites")
+        # into a CMake list so target_link_libraries handles them correctly.
+        string(REPLACE " " ";" _pkg_libs_list "${_ogre_pkgs_LIBRARIES}")
+        list(APPEND OGRE_LIBRARIES ${_pkg_libs_list})
         set(OGRE_PKG_FOUND TRUE)
     endif()
 endif()
 
-# If we still don't have OGRE_ROOT, try locating Ogre headers or the OgreMain library directly
+# If OGRE_ROOT is not still yet, try locating Ogre headers or the OgreMain
+# library directly
 if(NOT DEFINED OGRE_ROOT)
     find_path(_ogre_header Ogre.h HINTS /usr/include/OGRE /usr/include /usr/local/include)
     if(_ogre_header)
@@ -143,6 +144,8 @@ if(NOT DEFINED OGRE_ROOT)
     endif()
 endif()
 
+# If OGRE_ROOT is not still yet, try locating Ogre headers or the OgreMain
+# library directly
 if(NOT DEFINED OGRE_ROOT)
     find_library(_ogre_lib OgreMain HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
     if(_ogre_lib)
@@ -171,7 +174,8 @@ find_path(OGRE_CMAKE_MODULE_PATH FindOGRE.cmake
     "${CMAKE_CURRENT_SOURCE_DIR}/OgreSDK/CMake"
 )
 if(NOT OGRE_CMAKE_MODULE_PATH)
-    # Try additional conventional locations using OGRE_ROOT if set by user or auto-detection
+    # Try additional conventional locations using OGRE_ROOT if set by user or
+    # auto-detection
     if(DEFINED OGRE_ROOT)
         find_path(OGRE_CMAKE_MODULE_PATH FindOGRE.cmake HINTS "${OGRE_ROOT}/CMake" "${OGRE_ROOT}/cmake")
     endif()
@@ -187,19 +191,22 @@ endif()
 if (WIN32)
     set(Boost_USE_STATIC_LIBS TRUE)
 else()
-    # Statically linking boost to a dynamic Ogre build doesn't work on Linux 64bit.
+    # Statically linking boost to a dynamic Ogre build doesn't work on Linux
+    # 64bit.
     set(Boost_USE_STATIC_LIBS ${OGRE_STATIC})
 endif ()
 if (MINGW)
-    # Ensure OgreBites is linked (provides WindowEventUtilities and related symbols)
+    # Ensure OgreBites is linked (provides WindowEventUtilities and related
+    # symbols).
     find_library(_ogrebites_lib OgreBites HINTS ${OGRE_ROOT} /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
     if(_ogrebites_lib)
-    # This is probably a bug in CMake: the boost find module tries to look for boost libraries with
-    # name libboost_*, but CMake already prefixes library search names with "lib". This is the
-    # workaround.
+    # This is probably a bug in CMake: the boost find module tries to look for
+    # boost libraries with name libboost_*, but CMake already prefixes library
+    # search names with "lib". This is the workaround.
     set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES} "")
 endif ()
-# Components that need linking (NB does not include header-only components like bind).
+# Components that need linking (NB does not include header-only components like
+# bind).
 set(OGRE_BOOST_COMPONENTS thread date_time)
 find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
 if (NOT Boost_FOUND)
@@ -210,6 +217,7 @@ if(Boost_FOUND AND Boost_VERSION GREATER 104900)
     set(OGRE_BOOST_COMPONENTS thread date_time system chrono)
     find_package(Boost COMPONENTS ${OGRE_BOOST_COMPONENTS} QUIET)
 endif()
+
 # Set up referencing of Boost.
 if (NOT APPLE)
     add_definitions(-DBOOST_ALL_NO_LIB)
@@ -218,7 +226,7 @@ if (Boost_LIBRARIES STREQUAL "")
     message(STATUS "Boost_LIBRARIES is not set yet; will attempt robust fallbacks later")
 endif()
 
-message(STATUS "DEBUG: entering Boost detection; BOOST_COMPONENTS=${BOOST_COMPONENTS} BOOST_LINK_LIBS=${BOOST_LINK_LIBS}")
+#message(STATUS "DEBUG: entering Boost detection; BOOST_COMPONENTS=${BOOST_COMPONENTS} BOOST_LINK_LIBS=${BOOST_LINK_LIBS}")
 
 
 # Find packages required for V-Gears.
@@ -228,10 +236,11 @@ message(STATUS "DEBUG: entering Boost detection; BOOST_COMPONENTS=${BOOST_COMPON
 find_package(PkgConfig QUIET)
 if(NOT DEFINED OGRE_PKG_FOUND)
     if(PKG_CONFIG_FOUND)
-        # we already attempted pkg-config above; if that set OGRE_PKG_FOUND use it
+        # pkg-config already attempted above; if OGRE_PKG_FOUND is set, use it.
         if(DEFINED _ogre_pkgs_FOUND AND _ogre_pkgs_FOUND)
             set(OGRE_PKG_FOUND TRUE)
-            # OGRE_INCLUDE_DIRS/OGRE_LIBRARIES were set earlier when _ogre_pkgs was found
+            # OGRE_INCLUDE_DIRS/OGRE_LIBRARIES were set earlier when
+            # _ogre_pkgs was found.
         endif()
     endif()
 endif()
@@ -254,9 +263,11 @@ if(OGRE_PKG_FOUND)
     if(_extra_ogre_libs)
         list(APPEND OGRE_LIBRARIES ${_extra_ogre_libs})
     endif()
-    # Debug: show final OGRE libraries that will be linked
-    message(STATUS "Final OGRE_LIBRARIES: ${OGRE_LIBRARIES}")
+    # Display final OGRE libraries that will be linked
+    message(STATUS "Using OGRE_LIBRARIES: ${OGRE_LIBRARIES}")
 endif()
+
+# Find OIS.
 find_package(OIS QUIET)
 if(NOT OIS_FOUND)
     find_library(_ois_lib NAMES OIS libOIS ois HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
@@ -268,6 +279,7 @@ if(NOT OIS_FOUND)
     endif()
 endif()
 
+# Find OpenAL.
 find_package(OpenAL QUIET)
 if(NOT OPENAL_FOUND AND PKG_CONFIG_FOUND)
     pkg_check_modules(_openal_pkgs QUIET openal)
@@ -285,9 +297,9 @@ if(NOT OPENAL_FOUND AND NOT OPENAL_LIBRARY)
     endif()
 endif()
 
+# Find OggVorbis.
 find_package(OggVorbis QUIET)
 if(NOT OGGVORBIS_FOUND)
-    # Try to find vorbisfile/ogg libs directly
     find_library(_vorbisfile_lib NAMES vorbisfile libvorbisfile HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
     find_library(_vorbis_lib NAMES vorbis libvorbis HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
     find_library(_ogg_lib NAMES ogg libogg HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
@@ -310,8 +322,7 @@ if(NOT OGGVORBIS_FOUND)
 endif()
 
 # If the installer is requested, ensure Qt is available. If Qt is missing,
-# disable the installer to avoid compilation failures (useful for developers
-# who don't want to install Qt dev packages).
+# disable the installer to avoid compilation failures.
 if(BUILD_INSTALLER)
     # Optional user-provided hint: allow passing a single path that contains
     # the Qt CMake config directories (e.g. '/usr/lib/x86_64-linux-gnu/cmake').
@@ -331,9 +342,9 @@ if(BUILD_INSTALLER)
     find_package(Qt5 COMPONENTS Core Widgets Gui QUIET)
     # Debugging: print detected Qt5 variables/targets when present
     if(TARGET Qt5::Core)
-        message(STATUS "DEBUG: Qt5 imported target Qt5::Core is available")
+        message(STATUS "Qt5 imported: target Qt5::Core is available")
     endif()
-    message(STATUS "DEBUG: Qt5Core_FOUND=${Qt5Core_FOUND} Qt5Widgets_FOUND=${Qt5Widgets_FOUND} Qt5Gui_FOUND=${Qt5Gui_FOUND}")
+    message(STATUS "Qt5Core_FOUND=${Qt5Core_FOUND} Qt5Widgets_FOUND=${Qt5Widgets_FOUND} Qt5Gui_FOUND=${Qt5Gui_FOUND}")
     # Some distro setups place Qt config files in nonstandard cmake dirs that
     # CMake may not probe. If the normal find_package didn't create imported
     # targets or set FOUND variables, probe common Qt config locations and
@@ -433,9 +444,9 @@ if(BUILD_INSTALLER)
     endif()
 endif()
 
+# Find TinyXML
 find_package(TinyXML QUIET)
 if(NOT TinyXML_FOUND)
-    # try to locate tinyxml library directly
     find_library(_tinyxml_lib NAMES tinyxml libtinyxml TiXml TiXmlDocument HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib)
     if(_tinyxml_lib)
         set(TinyXML_LIBRARIES ${_tinyxml_lib})
@@ -480,9 +491,9 @@ if(NOT BOOST_LINK_LIBS)
         if(_found_libs)
             # Prefer the first (usually the SONAME symlink), but append all found to be safe
             list(APPEND BOOST_LINK_LIBS ${_found_libs})
-            message(STATUS "Fallback: found boost ${_comp}: ${_found_libs}")
+            message(STATUS "Found boost ${_comp}: ${_found_libs}")
         else()
-            message(STATUS "Fallback: boost ${_comp} not found in standard lib dirs")
+            message(STATUS "Not found: boost ${_comp} not found in standard lib dirs")
         endif()
     endforeach()
     if(NOT BOOST_LINK_LIBS)
@@ -514,8 +525,19 @@ endif()
 # using common Boost library names so the system linker searches standard paths.
 if(NOT BOOST_LINK_LIBS)
     if(USE_DETERMINISTIC_FALLBACKS)
-        set(BOOST_LINK_LIBS -lboost_program_options -lboost_filesystem -lboost_thread -lboost_system -lboost_chrono)
-        message(STATUS "Fallback: using generic -l flags for Boost: ${BOOST_LINK_LIBS}")
+        find_library(_boost_system_lib
+            NAMES boost_system libboost_system
+            HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib
+            PATH_SUFFIXES . lib lib64
+        )
+        set(_generic_boost_flags -lboost_program_options -lboost_filesystem -lboost_thread -lboost_chrono)
+        if(_boost_system_lib)
+            list(APPEND _generic_boost_flags ${_boost_system_lib})
+        else()
+            message(STATUS "Boost.System library not found; omitting boost_system from generic Boost flags.")
+        endif()
+        set(BOOST_LINK_LIBS ${_generic_boost_flags})
+        message(STATUS "Using generic Boost flags: ${BOOST_LINK_LIBS}")
     else()
         message(WARNING "Boost libraries not found and USE_DETERMINISTIC_FALLBACKS is OFF. Install libboost-*-dev packages or provide Boost hints (Boost_DIR/Boost_INCLUDE_DIR).")
     endif()
@@ -530,7 +552,8 @@ if(NOT DEFINED VGEARS_SOURCE_DIR)
     set(VGEARS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
-# Ensure OgreBites (WindowEventUtilities) is explicitly found and linked when available
+# Ensure OgreBites (WindowEventUtilities) is explicitly found and linked when
+# available.
 if(NOT OGRE_LIBRARIES)
     set(OGRE_LIBRARIES)
 endif()
@@ -545,7 +568,8 @@ else()
     message(STATUS "OgreBites not found by explicit search; OgreBites symbols may be unresolved.")
 endif()
 
-# As a last-resort deterministic fallback, append the system path if the file exists.
+# As a last-resort deterministic fallback, append the system path if the file
+# exists.
 if(NOT OGRE_LIBRARIES MATCHES ".*OgreBites.*")
     if(USE_DETERMINISTIC_FALLBACKS)
         if(EXISTS "/usr/lib/x86_64-linux-gnu/libOgreBites.so")
@@ -712,13 +736,7 @@ set(VGEARS_SOURCE_FILES
     modules/worldmap/WorldmapModule.cpp
     #viewer/ViewerModule.cpp
 )
-
-
-    message(STATUS "Final OGRE_LIBRARIES: ${OGRE_LIBRARIES}")
-    endif()
-# NOTE: include directories and compile definitions are attached to targets
-# later with `target_include_directories` and `target_compile_definitions`.
-
+endif()
 
 # Compiler options.
 if(APPLE) # Apple specific options
@@ -736,7 +754,9 @@ if(WIN32) # Check usage and remove if uneccessary
     -Wl,--add-stdcall-alias
     )
 endif()
-if (MSVC) # Build cpp files on all cores, up virtual mem for PCH's as cotire really makes the compiler scream
+if (MSVC)
+    # Build cpp files on all cores, up virtual mem for PCH's as cotire really
+    # makes the compiler scream.
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Zm193")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
@@ -778,51 +798,53 @@ foreach(_qinc IN LISTS _qt_global_candidates)
         break()
     endif()
 endforeach()
-        # Ensure UI headers generated by uic are available before compiling
-        # libvgears. Some build order setups (unity/PCH/cotire) may attempt to
-        # compile sources that include generated `ui_*.h` before uic runs, so add
-        # an explicit custom command/target to generate the header.
-        set(_ui_src "${CMAKE_CURRENT_SOURCE_DIR}/installer/MainWindow.ui")
-        # Place generated headers under the build tree parallel to the source dir
-        # CMAKE_CURRENT_BINARY_DIR is <build>/src so append 'installer' (not 'src/installer')
-        set(_ui_out "${CMAKE_CURRENT_BINARY_DIR}/installer/ui_MainWindow.h")
-        find_program(QT_UIC_EXECUTABLE NAMES uic uic-qt5 PATHS /usr/lib/qt5/bin /usr/bin /usr/local/bin)
-        if(QT_UIC_EXECUTABLE AND EXISTS "${_ui_src}")
-            add_custom_command(
-                OUTPUT "${_ui_out}"
-                COMMAND ${QT_UIC_EXECUTABLE} -o "${_ui_out}" "${_ui_src}"
-                DEPENDS "${_ui_src}"
-                COMMENT "Generating ui_MainWindow.h via uic"
-                VERBATIM
-            )
-            add_custom_target(generate_ui_files DEPENDS "${_ui_out}")
-            set(_GENERATED_UI_TARGET generate_ui_files)
-        endif()
+# Ensure UI headers generated by uic are available before compiling
+# libvgears. Some build order setups (unity/PCH/cotire) may attempt to
+# compile sources that include generated `ui_*.h` before uic runs, so add
+# an explicit custom command/target to generate the header.
+set(_ui_src "${CMAKE_CURRENT_SOURCE_DIR}/installer/MainWindow.ui")
+# Place generated headers under the build tree parallel to the source dir
+# CMAKE_CURRENT_BINARY_DIR is <build>/src so append 'installer' (not
+# 'src/installer').
+set(_ui_out "${CMAKE_CURRENT_BINARY_DIR}/installer/ui_MainWindow.h")
+find_program(QT_UIC_EXECUTABLE NAMES uic uic-qt5 PATHS /usr/lib/qt5/bin /usr/bin /usr/local/bin)
+if(QT_UIC_EXECUTABLE AND EXISTS "${_ui_src}")
+    add_custom_command(
+        OUTPUT "${_ui_out}"
+        COMMAND ${QT_UIC_EXECUTABLE} -o "${_ui_out}" "${_ui_src}"
+        DEPENDS "${_ui_src}"
+        COMMENT "Generating ui_MainWindow.h via uic"
+        VERBATIM
+    )
+    add_custom_target(generate_ui_files DEPENDS "${_ui_out}")
+    set(_GENERATED_UI_TARGET generate_ui_files)
+endif()
 
-        # Exclude unit tests under installer/decompiler/test from the main
-        # library to avoid pulling test-only dependencies (gtest/gmock).
-        set(_test_removed_count 0)
-        foreach(_f IN LISTS VGEARS_SOURCE_FILES)
-            if(_f MATCHES "installer/decompiler/test/")
-                list(REMOVE_ITEM VGEARS_SOURCE_FILES ${_f})
-                math(EXPR _test_removed_count "${_test_removed_count} + 1")
-            endif()
-        endforeach()
-        if(_test_removed_count GREATER 0)
-            message(STATUS "Removed ${_test_removed_count} decompiler test source(s) from libvgears")
-        endif()
+# Exclude unit tests under installer/decompiler/test from the main
+# library to avoid pulling test-only dependencies (gtest/gmock).
+set(_test_removed_count 0)
+foreach(_f IN LISTS VGEARS_SOURCE_FILES)
+    if(_f MATCHES "installer/decompiler/test/")
+        list(REMOVE_ITEM VGEARS_SOURCE_FILES ${_f})
+        math(EXPR _test_removed_count "${_test_removed_count} + 1")
+    endif()
+endforeach()
+if(_test_removed_count GREATER 0)
+    message(STATUS "Removed ${_test_removed_count} decompiler test source(s) from libvgears")
+endif()
 
-        add_library(libvgears STATIC ${VGEARS_SOURCE_FILES})
-            # Ensure generated ui headers are created before compiling libvgears
-        if(DEFINED _GENERATED_UI_TARGET)
-            add_dependencies(libvgears ${_GENERATED_UI_TARGET})
-            # Generated ui headers live in <build>/src/installer
-            target_include_directories(libvgears PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/installer")
-        endif()
-        # Ensure platform macro for scummsys.h selection on Unix
-        if(UNIX)
-            target_compile_definitions(libvgears PRIVATE POSIX)
-        endif()
+add_library(libvgears STATIC ${VGEARS_SOURCE_FILES})
+# Ensure generated ui headers are created before compiling libvgears
+if(DEFINED _GENERATED_UI_TARGET)
+    add_dependencies(libvgears ${_GENERATED_UI_TARGET})
+    # Generated ui headers live in <build>/src/installer
+    target_include_directories(libvgears PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/installer")
+endif()
+
+# Ensure platform macro for scummsys.h selection on Unix
+if(UNIX)
+    target_compile_definitions(libvgears PRIVATE POSIX)
+endif()
 if(USE_COTIRE)
     cotire(libvgears)
 endif()
@@ -851,10 +873,10 @@ if(NOT MSVC)
     target_compile_options(libvgears PRIVATE -fPIC)
 endif()
 
-# If Qt link libraries were detected (imported targets or fallback libs),
-# link them to libvgears so imported-target include directories are
-# propagated to installer/source compilation. This ensures Qt headers are
-# available when compiling installer sources into the static lib.
+# If Qt link libraries were detected (imported targets or fallback libs), link
+# them to libvgears so imported-target include directories are propagated to
+# installer/source compilation. This ensures Qt headers are available when
+# compiling installer sources into the static lib.
 if(QT_LINK_LIBS)
     message(STATUS "Linking libvgears with Qt libraries: ${QT_LINK_LIBS}")
     target_link_libraries(libvgears PUBLIC ${QT_LINK_LIBS})
@@ -882,6 +904,15 @@ endif()
 
 
 # Generate v-gears executable
+# Ensure installer sources are not compiled into the main executable; the
+# installer is built separately under `src/installer`. Remove any installer
+# sources from the source list used for the `v-gears` executable.
+foreach(_f IN LISTS VGEARS_SOURCE_FILES)
+    if(_f MATCHES "^installer/")
+        list(REMOVE_ITEM VGEARS_SOURCE_FILES ${_f})
+    endif()
+endforeach()
+
 add_executable(v-gears ${VGEARS_SOURCE_FILES})
 SET_PROPERTY(TARGET v-gears PROPERTY FOLDER "build/v-gears")
 set(CPACK_PACKAGE_EXECUTABLES v-gears "v-gears")
@@ -904,22 +935,30 @@ set(VGEARS_LIBRARIES
     ${OGRE_LIBRARIES}
 )
 
-# Ensure we have something for Boost; if BOOST_LINK_LIBS is empty, inject generic
-# `-lboost_*` flags directly so the system linker will attempt to resolve them from
-# standard library search paths.
+# Ensure we have something for Boost; if BOOST_LINK_LIBS is empty, inject
+# generic `-lboost_*` flags directly so the system linker will attempt to
+# resolve them from standard library search paths.
 if(NOT BOOST_LINK_LIBS)
     if(USE_DETERMINISTIC_FALLBACKS)
-        set(_generic_boost_flags -lboost_program_options -lboost_filesystem -lboost_thread -lboost_system -lboost_chrono)
+        find_library(_boost_system_lib
+            NAMES boost_system libboost_system
+            HINTS /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib
+            PATH_SUFFIXES . lib lib64
+        )
+        set(_generic_boost_flags -lboost_program_options -lboost_filesystem -lboost_thread -lboost_chrono)
+        if(_boost_system_lib)
+            list(APPEND _generic_boost_flags -lboost_system)
+        endif()
+        set(BOOST_LINK_LIBS ${_generic_boost_flags})
         message(STATUS "Injecting generic Boost -l flags into link list: ${_generic_boost_flags}")
-        list(APPEND BOOST_LINK_LIBS ${_generic_boost_flags})
     else()
         message(WARNING "Boost not found and deterministic fallbacks disabled; build may fail. Install libboost-*-dev or provide Boost hints.")
     endif()
 endif()
 
-# `BOOST_LINK_LIBS` should have been computed earlier (imported targets, find_package,
-# or the robust per-component fallback). Append whatever was found into the final
-# link list for the executable.
+# `BOOST_LINK_LIBS` should have been computed earlier (imported targets,
+# find_package, or the robust per-component fallback). Append whatever was found
+# into the final link list for the executable.
 list(APPEND VGEARS_LIBRARIES ${BOOST_LINK_LIBS} ${OIS_LIBRARIES} ${TinyXML_LIBRARIES})
 if(QT_LINK_LIBS)
     list(APPEND VGEARS_LIBRARIES ${QT_LINK_LIBS})
@@ -939,9 +978,9 @@ if(MULTITHREADING)
     )
 endif()
 message(STATUS "Final VGEARS_LIBRARIES list: ${VGEARS_LIBRARIES}")
-# If OgreBites SONAME exists on the system but wasn't picked up earlier,
-# append it directly to the final link list so WindowEventUtilities symbols
-# are resolved at link time.
+# If OgreBites SONAME exists on the system but wasn't picked up earlier, append
+# it directly to the final link list so WindowEventUtilities symbols are
+#resolved at link time.
 if(USE_DETERMINISTIC_FALLBACKS)
     if(EXISTS "/usr/lib/x86_64-linux-gnu/libOgreBites.so")
         list(FIND VGEARS_LIBRARIES "/usr/lib/x86_64-linux-gnu/libOgreBites.so" _found_bites)
@@ -951,7 +990,8 @@ if(USE_DETERMINISTIC_FALLBACKS)
         endif()
     endif()
 else()
-    # When deterministic fallbacks are disabled, warn if OgreBites is likely missing.
+    # When deterministic fallbacks are disabled, warn if OgreBites is likely
+    # missing.
     if(NOT OGRE_LIBRARIES MATCHES ".*OgreBites.*")
         message(WARNING "OgreBites not present in OGRE_LIBRARIES and deterministic fallbacks are disabled. Link errors may occur if OGRE dev packages are not installed.")
     endif()
@@ -964,6 +1004,8 @@ target_include_directories(v-gears
     PRIVATE
         ${VGEARS_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/installer
+        ${CMAKE_CURRENT_BINARY_DIR}/installer
         ${Boost_INCLUDE_DIR}
         ${OIS_INCLUDE_DIRS}
         ${OGRE_INCLUDE_DIRS}
@@ -975,6 +1017,19 @@ target_include_directories(v-gears
         ${CMAKE_SOURCE_DIR}/lib/luabind/luabind/detail
     ${QT_INCLUDE_DIRS}
 )
+
+# If UI files are generated by the uic custom target, make sure the executable
+# depends on it and can see the generated headers.
+if(DEFINED _GENERATED_UI_TARGET)
+    add_dependencies(v-gears ${_GENERATED_UI_TARGET})
+    target_include_directories(v-gears PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/installer")
+endif()
+
+# Ensure platform macro for scummsys.h selection on Unix when building the main
+# executable as well (same as done for libvgears).
+if(UNIX)
+    target_compile_definitions(v-gears PRIVATE POSIX)
+endif()
 target_compile_definitions(v-gears PRIVATE TIXML_USE_STL)
 if(NOT MSVC)
     target_compile_options(v-gears PRIVATE -fPIC)
@@ -982,6 +1037,7 @@ endif()
 
 
 # Install v-gears.
+# TODO: Fix routes for installation
 if(WIN32 OR APPLE)
     install(TARGETS v-gears DESTINATION .)
 else()
@@ -989,10 +1045,9 @@ else()
 endif()
 
 
-
-# If installer build is enabled, ensure Qt includes/links are available for
-# the `installer` subdirectory. Do this before adding the subdirectory so
-# its targets inherit the settings.
+# If installer build is enabled, ensure Qt includes/links are available for the
+# `installer` subdirectory. Do this before adding the subdirectory so its
+# targets inherit the settings.
 if(BUILD_INSTALLER)
     # If pragmatic detection earlier set `QT_INCLUDE_DIRS`, expose them as
     # global include dirs so installer targets find headers.

@@ -16,7 +16,7 @@ project ( luajit C ASM)
 
 set( CMAKE_VERBOSE_MAKEFILE on )
 
-cmake_minimum_required ( VERSION 3.0 )
+cmake_minimum_required ( VERSION 3.5 )
 include ( cmake/dist.cmake )
 include ( lua )
 

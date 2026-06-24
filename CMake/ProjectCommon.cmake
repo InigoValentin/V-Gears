@@ -1,4 +1,3 @@
-## ProjectCommon.cmake
 # Centralized CMake settings used across the V-Gears project.
 
 # Build verbosity default (can be overridden by caller)
@@ -20,8 +19,7 @@ if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX "_d")
 endif()
 
-# Multi-config generators should use generator expressions; for single-config
-# generators provide per-configuration output folders as a convenience.
+# Set output directories for binaries and libraries
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/lib)
@@ -33,7 +31,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin_debug/lib)
 # Enable folders in IDEs like Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Make sure our custom CMake modules are discoverable (already appended by top-level)
+# Make custom CMake modules discoverable
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 
 # Create directory for generated headers
@@ -41,5 +39,3 @@ file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/generated")
 
 ## Helper: install default GNUInstallDirs if not available
 include(GNUInstallDirs OPTIONAL)
-
-# Policy: prefer modern targets if project transitions to target-based linking.

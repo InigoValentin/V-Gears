@@ -1,7 +1,7 @@
 # Minimum required CMake and project declaration
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 # Enable both C and CXX languages so C and C++ toolchains are configured.
-project(V-Gears VERSION 0.1.18 LANGUAGES C CXX)
+project(V-Gears VERSION 0.1.19 LANGUAGES C CXX)
 
 # Provide a central common include for project-wide policies and defaults.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
@@ -13,9 +13,9 @@ option(BUILD_INSTALLER "Build the V-Gears-Installer" TRUE)
 option(BUILD_TESTS "Build the unit tests" FALSE)
 option(MULTITHREADING "Enable multithreading" TRUE)
 
-# Optional hint for Qt configuration dirs. Setting this early helps subprojects
-# (like `src`) locate Qt via config-mode packages when installs are in
-# distro-specific locations. Example: -DQT_DIR_HINT=/usr/lib/x86_64-linux-gnu/cmake
+# Hint for Qt configuration dirs. Setting this early helps subprojects locate
+# Qt via config-mode packages when installs are in distro-specific locations.
+# Example: -DQT_DIR_HINT=/usr/lib/x86_64-linux-gnu/cmake
 set(QT_DIR_HINT "" CACHE PATH "Optional hint for Qt CMake config directory (parent of Qt5/Qt6)")
 if(QT_DIR_HINT)
     list(APPEND CMAKE_PREFIX_PATH "${QT_DIR_HINT}")

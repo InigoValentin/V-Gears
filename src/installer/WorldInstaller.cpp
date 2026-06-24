@@ -729,7 +729,7 @@ void WorldInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &m
                                         output_dir_ + ELEMENT_MODELS_DIR + "/" + base_name + ".png",
                                         output_dir_ + ELEMENT_MODELS_DIR + "/"
                                         + base_mesh_name + "_" + base_name + ".png",
-                                      boost::filesystem::copy_option::overwrite_if_exists
+                                      boost::filesystem::copy_options::overwrite_existing
                                     );
                                     textures.insert(unit->getTextureName());
                                 }
