@@ -279,8 +279,10 @@ const char* AudioManager::ALCError(const ALCdevice* device){
 
 AudioManager::Player::Player(boost::recursive_mutex* mutex):
   loop_(-1.0), vorbis_info_(nullptr), vorbis_section_(0),
-  stream_finished_(false), update_mutex_(mutex)
-{buffer_ = new char[1024 * 96];}
+  stream_finished_(false), update_mutex_(mutex), source_(0), file_()
+{
+    buffer_ = new char[1024 * 96];
+}
 
 AudioManager::Player::~Player(){Stop();}
 
@@ -369,7 +371,7 @@ void AudioManager::Player::SetLoop(const float loop){
 
 void AudioManager::Player::Update(){
     // Try to fill processed buffers
-    int processed;
+    int processed = 0;
     alGetSourcei(source_, AL_BUFFERS_PROCESSED, &processed);
     for(int i = 0; i < processed; ++i){
         // Try to fill buffer
@@ -398,11 +400,11 @@ void AudioManager::Player::Update(){
 
     // Manage source state
     alGetSourcei(source_, AL_BUFFERS_PROCESSED, &processed);
-    int queued;
+    int queued = 0;
     alGetSourcei(source_, AL_BUFFERS_QUEUED, &queued);
     if (stream_finished_ && processed == queued) Stop();
     else{
-        ALenum source_state;
+        ALenum source_state = AL_NONE;
         alGetSourcei(source_, AL_SOURCE_STATE, &source_state);
         if (source_state == AL_STOPPED) alSourcePlay(source_);
     }
@@ -444,7 +446,7 @@ ALsizei AudioManager::Player::FillBuffer(){
 
 float AudioManager::Player::GetPosition(){
     boost::recursive_mutex::scoped_lock lock(*update_mutex_);
-    int play_offset;
+    int play_offset = 0;
     alGetSourcei(source_, AL_SAMPLE_OFFSET, &play_offset);
     return (
       ov_pcm_tell(&vorbis_file_)

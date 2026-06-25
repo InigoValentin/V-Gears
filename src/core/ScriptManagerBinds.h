@@ -32,6 +32,11 @@
 #include "XmlMapsFile.h"
 #include "DialogsManager.h"
 #include "TextHandler.h"
+#include <luabind/detail/class_registry.hpp>
+#include <luabind/typeid.hpp>
+
+// Global guard for luabind registrations (defined in ScriptManagerBinds.cpp)
+extern bool g_luabind_binds_registered;
 
 
 /*
@@ -86,8 +91,24 @@ void ScriptConsole(const char* text){
 }
 
 void ScriptManager::InitBinds(){
+  if (g_luabind_binds_registered) return;
 
-    // Global functions.
+  // If luabind has already registered any class in this Lua state (for
+  // example a plugin performed bindings earlier), skip the whole binds
+  // registration to avoid the "register a class twice" assertion.
+  luabind::detail::class_registry* registry = luabind::detail::class_registry::get_registry(lua_state_);
+  if (registry) {
+    if (!registry->get_classes().empty()){
+      std::cerr << "[ScriptManager] InitBinds() skipped: luabind registry already contains classes" << std::endl;
+      g_luabind_binds_registered = true;
+      return;
+    }
+  }
+
+  g_luabind_binds_registered = true;
+
+  std::cerr << "[ScriptManager] InitBinds() starting registration" << std::endl;
+  // Global functions.
     luabind::module(lua_state_)[
         luabind::def("print", (void(*)(const char*)) &ScriptPrint),
         luabind::def("map", (void(*)(const char*)) &ScriptMap),
@@ -101,7 +122,6 @@ void ScriptManager::InitBinds(){
             "set_position",
             (void(Entity::*)(const float, const float, const float)) &Entity::ScriptSetPosition
           )
-          // Internally returns 3 values:
           .def("get_position", (void(Entity::*)()) &Entity::ScriptGetPosition)
           .def("set_rotation", (void(Entity::*)(const float)) &Entity::ScriptSetRotation)
           .def("get_rotation", (float(Entity::*)()) &Entity::ScriptGetRotation)

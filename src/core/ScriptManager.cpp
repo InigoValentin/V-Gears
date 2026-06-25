@@ -33,6 +33,11 @@ ConfigVar cv_debug_script(
  */
 template<>ScriptManager *Ogre::Singleton<ScriptManager>::msSingleton = nullptr;
 
+/**
+ * Global guard used by ScriptManagerBinds to prevent multiple luabind class registrations.
+ */
+bool g_luabind_binds_registered = false;
+
 Ogre::String script_entity_type[] = {"SYSTEM", "ENTITY", "UI", "BATTLE"};
 
 /**

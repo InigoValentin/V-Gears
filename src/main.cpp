@@ -56,6 +56,9 @@
 int main(int argc, char *argv[]){
     try{
         VGears::Application app(argc, argv);
+        // Re-finalize singleton registration after object construction is complete
+        // to avoid UBSAN vptr initialization warnings during base class constructor
+        VGears::Application::FinalizeSingletonRegistration(&app);
         if (!app.initOgre()) return 0;
         Ogre::Root *root(app.getRoot());
         Ogre::RenderWindow *window(app.getRenderWindow());

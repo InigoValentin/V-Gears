@@ -93,6 +93,19 @@ namespace VGears{
              */
             Ogre::ResourceGroupManager* ResMgr() {return res_mgr_;}
 
+            /**
+             * Re-finalizes singleton registration after full object construction.
+             * 
+             * Call this method immediately after constructing the Application
+             * to ensure the singleton pointer is properly registered after the
+             * object's vptr is fully initialized (avoids UBSAN vptr warnings).
+             * 
+             * @param[in] instance Pointer to the Application instance.
+             */
+            static void FinalizeSingletonRegistration(Application* instance) {
+                msSingleton = instance;
+            }
+
         protected:
 
             /**

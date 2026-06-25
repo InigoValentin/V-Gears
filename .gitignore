@@ -12,6 +12,7 @@
 **/ogre.cfg
 **/CMakeCache.txt
 build/
+build-*/
 tools/
 _OLD/
 output/share

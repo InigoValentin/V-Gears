@@ -26,11 +26,14 @@
 #include "DataInstaller.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include "Release.h"
 
 /**
  * Indicates if an installer has already been created.
  */
 static bool installer_created = false;
+
+Release release;
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), main_window_(new Ui::MainWindow){
     main_window_->setupUi(this);
@@ -133,10 +136,31 @@ void MainWindow::on_btn_vgears_run_clicked(){
 }
 
 void MainWindow::on_btn_data_src_clicked(){
-    QString temp = QFileDialog::getExistingDirectory(
-      this, tr("Location of extracted original game data"), QDir::homePath()
+    const QString filter = tr("ISO images (*.iso)");
+    QString temp = QFileDialog::getOpenFileName(
+      this,
+      tr("Select ISO image"),
+      settings_->value("DataDir").toString(),
+      filter
     );
-    main_window_->line_data_src->setText(temp);
+    std::cout << "Selected ISO: " << temp.toStdString() << std::endl;
+    if (!temp.isNull()){
+        main_window_->line_data_src->setText(temp);
+        release = Release(temp.toStdString());
+        main_window_->isoData->setText(QString::fromStdString(release.getId()));
+        if (!release.isValid()){
+            main_window_->isoError->setStyleSheet("QLabel { color : red; }");
+            main_window_->isoError->setText(QString::fromStdString(release.getErrorMessage()));
+        }
+        else if (!release.isSupported()){
+            main_window_->isoError->setStyleSheet("QLabel { color : orange; }");
+            main_window_->isoError->setText(QString::fromStdString(release.getWarningMessage()));
+        }
+        else{
+            main_window_->isoError->setStyleSheet("QLabel { color : green; }");
+            main_window_->isoError->setText(tr("ISO is valid and supported."));
+        }
+    }
 }
 
 void MainWindow::on_line_data_dst_editingFinished(){

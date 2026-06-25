@@ -22,6 +22,21 @@
 #include "core/XmlFile.h"
 #include "common/TypeDefine.h"
 
+constexpr unsigned int Savemap::MAX_CHARACTERS;
+constexpr unsigned int Savemap::MAX_ITEM_SLOTS;
+constexpr unsigned int Savemap::MAX_KEY_ITEM_SLOTS;
+constexpr unsigned int Savemap::MAX_MATERIA_SLOTS;
+constexpr unsigned int Savemap::MAX_STASH_SLOTS;
+constexpr unsigned int Savemap::MAX_EQUIP_SLOTS;
+constexpr unsigned int Savemap::MAX_ENEMY_SKILLS;
+constexpr unsigned int Savemap::MAX_LIMIT_LEVELS;
+constexpr unsigned int Savemap::MAX_LIMIT_TECHNIQUES;
+constexpr unsigned int Savemap::MAX_LIMIT_BAR;
+constexpr unsigned int Savemap::MAX_PARTY_MEMBERS;
+constexpr unsigned int Savemap::BANK_COUNT;
+constexpr unsigned int Savemap::BANK_ADDRESS_COUNT;
+constexpr unsigned int Savemap::MAX_COLOUR;
+
 Savemap::Savemap():
   empty_(true), control_(""), money_(0), seconds_(0), countdown_(0), slot_(-1)
 {

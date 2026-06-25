@@ -13,6 +13,7 @@ set(INSTALLER_SOURCE_FILES
     FieldTextWriter.cpp
     KernelDataInstaller.cpp
     MainWindow.cpp
+    Release.cpp
     MediaDataInstaller.cpp
     ModelsAndAnimationsDb.cpp
     ScopedLgp.cpp
@@ -133,6 +134,7 @@ target_link_libraries(v-gears-installer
     libvgears
     Qt5::Widgets
     Qt5::Core
+    archive
     ${OIS_LIBRARIES}
     ${TinyXML_LIBRARIES}
     ${BOOST_LINK_LIBS}

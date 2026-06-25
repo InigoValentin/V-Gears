@@ -780,42 +780,42 @@ class Savemap{
                 /**
                  * Strength stat.
                  */
-                static const unsigned int STR = 0;
+                static constexpr unsigned int STR = 0;
 
                 /**
                  * Vtatlity stat.
                  */
-                static const unsigned int VIT = 1;
+                static constexpr unsigned int VIT = 1;
 
                 /**
                  * Magic stat.
                  */
-                static const unsigned int MAG = 2;
+                static constexpr unsigned int MAG = 2;
 
                 /**
                  * Spirit stat.
                  */
-                static const unsigned int SPR = 3;
+                static constexpr unsigned int SPR = 3;
 
                 /**
                  * Dexterity stat.
                  */
-                static const unsigned int DEX = 4;
+                static constexpr unsigned int DEX = 4;
 
                 /**
                  * Luck stat.
                  */
-                static const unsigned int LCK = 5;
+                static constexpr unsigned int LCK = 5;
 
                 /**
                  * HP stat.
                  */
-                static const unsigned int HP = 6;
+                static constexpr unsigned int HP = 6;
 
                 /**
                  * MP stat.
                  */
-                static const unsigned int MP = 7;
+                static constexpr unsigned int MP = 7;
         };
 
         /**
@@ -828,22 +828,22 @@ class Savemap{
                 /**
                  * Top left window corner.
                  */
-                static const unsigned int T_L = 0;
+                static constexpr unsigned int T_L = 0;
 
                 /**
                  * Top right window corner.
                  */
-                static const unsigned int T_R = 1;
+                static constexpr unsigned int T_R = 1;
 
                 /**
                  * Bottom right window corner.
                  */
-                static const unsigned int B_R = 2;
+                static constexpr unsigned int B_R = 2;
 
                 /**
                  * Bottom left window corner.
                  */
-                static const unsigned int B_L = 3;
+                static constexpr unsigned int B_L = 3;
         };
 
         /**
@@ -856,17 +856,17 @@ class Savemap{
                 /**
                  * Red colour.
                  */
-                static const unsigned int R = 0;
+                static constexpr unsigned int R = 0;
 
                 /**
                  * Green colour.
                  */
-                static const unsigned int G = 1;
+                static constexpr unsigned int G = 1;
 
                 /**
                  * Blue colour.
                  */
-                static const unsigned int B = 2;
+                static constexpr unsigned int B = 2;
         };
 
     private:
@@ -874,72 +874,72 @@ class Savemap{
         /**
          * Maximum number of characters.
          */
-        static const unsigned int MAX_CHARACTERS = 11;
+        static constexpr unsigned int MAX_CHARACTERS = 11;
 
         /**
          * Maximum number of inventory slots.
          */
-        static const unsigned int MAX_ITEM_SLOTS = 500;
+        static constexpr unsigned int MAX_ITEM_SLOTS = 500;
 
         /**
          * Maximum number of inventory slots for key items.
          */
-        static const unsigned int MAX_KEY_ITEM_SLOTS = 100;
+        static constexpr unsigned int MAX_KEY_ITEM_SLOTS = 100;
 
         /**
          * Maximum number of materia slots.
          */
-        static const unsigned int MAX_MATERIA_SLOTS = 500;
+        static constexpr unsigned int MAX_MATERIA_SLOTS = 500;
 
         /**
          * Maximum number of materia slots in the stash.
          */
-        static const unsigned int MAX_STASH_SLOTS = 500;
+        static constexpr unsigned int MAX_STASH_SLOTS = 500;
 
         /**
          * Maximum number of materia slots in a weapon or armor.
          */
-        static const unsigned int MAX_EQUIP_SLOTS = 10;
+        static constexpr unsigned int MAX_EQUIP_SLOTS = 10;
 
         /**
          * Maximum number of skills in an Enemy Skill materia.
          */
-        static const unsigned int MAX_ENEMY_SKILLS = 32;
+        static constexpr unsigned int MAX_ENEMY_SKILLS = 32;
 
         /**
          * Maximum limit level.
          */
-        static const unsigned int MAX_LIMIT_LEVELS = 4;
+        static constexpr unsigned int MAX_LIMIT_LEVELS = 4;
 
         /**
          * Maximum limit techniques per level.
          */
-        static const unsigned int MAX_LIMIT_TECHNIQUES = 4;
+        static constexpr unsigned int MAX_LIMIT_TECHNIQUES = 4;
 
         /**
          * Level at which the limit level is full.
          */
-        static const unsigned int MAX_LIMIT_BAR = 254;
+        static constexpr unsigned int MAX_LIMIT_BAR = 254;
 
         /**
          * Maximum number of party member.
          */
-        static const unsigned int MAX_PARTY_MEMBERS = 3;
+        static constexpr unsigned int MAX_PARTY_MEMBERS = 3;
 
         /**
          * Number of data banks.
          */
-        static const unsigned int BANK_COUNT = 16;
+        static constexpr unsigned int BANK_COUNT = 16;
 
         /**
          * Number of addresses in each data bank.
          */
-        static const unsigned int BANK_ADDRESS_COUNT = 256;
+        static constexpr unsigned int BANK_ADDRESS_COUNT = 256;
 
         /**
          * MAx colour component value.
          */
-        static const unsigned int MAX_COLOUR = 254;
+        static constexpr unsigned int MAX_COLOUR = 254;
 
 
         /**

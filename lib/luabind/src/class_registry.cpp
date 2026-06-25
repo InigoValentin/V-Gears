@@ -147,9 +147,11 @@ namespace luabind { namespace detail {
 
     void class_registry::add_class(type_id const& info, class_rep* crep)
     {
-        // class is already registered
-        assert((m_classes.find(info) == m_classes.end()) 
-            && "you are trying to register a class twice");
+        // If the class is already registered, don't abort — a plugin or other
+        // component may attempt to register bindings for the same C++ type.
+        if (m_classes.find(info) != m_classes.end()){
+            return;
+        }
         m_classes[info] = crep;
     }
 
