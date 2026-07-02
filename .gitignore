@@ -26,3 +26,4 @@ doc/FFVII/RAW/
 .directory
 v-gears-new*.png
 /.vscode/c_cpp_properties.json
+src/installer/MainWindow.ui.autosave

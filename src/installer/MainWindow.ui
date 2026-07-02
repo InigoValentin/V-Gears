@@ -100,7 +100,7 @@
           <item>
            <widget class="QLabel" name="isoData">
             <property name="text">
-             <string>ISO Info: </string>
+             <string/>
             </property>
             <property name="margin">
              <number>0</number>
@@ -110,7 +110,7 @@
           <item>
            <widget class="QLabel" name="isoError">
             <property name="text">
-             <string>Message</string>
+             <string/>
             </property>
            </widget>
           </item>

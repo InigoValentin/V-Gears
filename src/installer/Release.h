@@ -74,6 +74,8 @@ struct Release{
          * The disk for which the release is intended.
          */
         enum Disk{
+            /** The release is for the install disk (PC only). */
+            DISK_INSTALL,
             /** The release is for disk 1. */
             DISK_1,
             /** The release is for disk 2. */
@@ -103,90 +105,128 @@ struct Release{
          */
         ~Release();
 
+        std::string getIsoPath() const { return iso_path; }
+
         /**
          * Gets the human readable ID of the release.
          *
          * @return The ID of the release.
          */
-        std::string getId();
+        std::string const getId();
 
         /**
          * Gets the platform for which the release is intended.
          *
          * @return The platform of the release.
          */
-        Platform getPlatform();
+        Platform const getPlatform();
 
         /**
          * Gets the region for which the release is intended.
          *
          * @return The region of the release.
          */
-        Region getRegion();
+        Region const getRegion();
 
         /**
          * Gets the language for which the release is intended.
          *
          * @return The language of the release.
          */
-        Language getLanguage();
+        Language const getLanguage();
 
         /**
          * Gets the disk for which the release is intended.
          *
          * @return The disk of the release.
          */
-        Disk getDisk();
+        Disk const getDisk();
 
         /**
          * Checks if the release is a valid Final Fantasy VII release.
          *
          * @return True if the release is valid, false otherwise.
          */
-        bool isValid();
+        bool const isValid();
 
         /**
          * Gets the error message for the release.
          *
          * @return The error message.
          */
-        std::string getErrorMessage();
+        std::string const getErrorMessage();
 
         /**
          * Checks if the release is supported and tested in V-Gears.
          *
          * @return True if the release is supported, false otherwise.
          */
-        bool isSupported();
+        bool const isSupported();
 
         /**
          * Gets a warning in case the release is not fully supported.
          *
          * @return The warning message.
          */
-        std::string getWarningMessage();
+        std::string const getWarningMessage();
+
+        /**
+         * Gets the path where the content has been extracted.
+         * 
+         * @return The path to the extracted content, null if the content has
+         * not been extracted yet.
+         */
+        std::string const getContentPath();
+
+        /**
+         * Extracts the ISO file to the specified output path. The files will
+         * be extracted to the "original_data" subdirectory of the output path.
+         *
+         * @param installation_path The v-gears installation directory.
+         * @return True if the extraction was successful, false otherwise.
+         */
+        bool extractIso(std::string installation_path);
 
     private:
 
-        /** A human readable ID of the release. */
+        /**
+         * The path to the ISO file.
+         */
+        std::string iso_path;
+
+        /**
+         * A human readable ID of the release.
+         */
         std::string id;
 
-        /** The platform for which the release is intended. */
+        /**
+         * The platform for which the release is intended.
+         */
         Platform platform;
 
-        /** The region for which the release is intended. */
+        /**
+         * The region for which the release is intended.
+         */
         Region region;
 
-        /** The language for which the release is intended. */
+        /**
+         * The language for which the release is intended.
+         */
         Language language;
 
-        /** The disk for which the release is intended. */
+        /**
+         * The disk for which the release is intended.
+         */
         Disk disk;
 
-        /** Whether the release is valid. */
+        /**
+         * Whether the release is valid.
+         */
         bool valid;
 
-        /** Whether the release is supported. */
+        /**
+         * Whether the release is supported.
+         */
         bool supported;
 
         /**
@@ -198,4 +238,9 @@ struct Release{
          * The warning message for the release. Empty if no warning.
          */
         std::string warning_message;
+
+        /**
+         * The path where the content has been extracted.
+         */
+        std::string content_path;
 };

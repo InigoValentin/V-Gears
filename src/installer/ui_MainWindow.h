@@ -126,7 +126,7 @@ public:
         label_4->setObjectName(QString::fromUtf8("label_4"));
         label_4->setMinimumSize(QSize(200, 0));
         label_4->setMaximumSize(QSize(200, 50));
-        label_4->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
+        label_4->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
 
         isoLocator->addWidget(label_4);
 
@@ -162,8 +162,10 @@ public:
         isoInfo = new QVBoxLayout();
         isoInfo->setSpacing(6);
         isoInfo->setObjectName(QString::fromUtf8("isoInfo"));
+        isoInfo->setContentsMargins(30, -1, -1, -1);
         isoData = new QLabel(tab_installer);
         isoData->setObjectName(QString::fromUtf8("isoData"));
+        isoData->setMargin(0);
 
         isoInfo->addWidget(isoData);
 
@@ -182,7 +184,7 @@ public:
         label_3->setObjectName(QString::fromUtf8("label_3"));
         label_3->setMinimumSize(QSize(200, 0));
         label_3->setMaximumSize(QSize(200, 50));
-        label_3->setAlignment(Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter);
+        label_3->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
 
         output->addWidget(label_3);
 
@@ -492,16 +494,16 @@ public:
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "VGears Installer", nullptr));
         actionExit->setText(QCoreApplication::translate("MainWindow", "Exit", nullptr));
-        label_4->setText(QCoreApplication::translate("MainWindow", "Original FFVII extracted data:", nullptr));
+        label_4->setText(QCoreApplication::translate("MainWindow", "Final Fantasy VII ISO file: ", nullptr));
         btn_data_src->setText(QCoreApplication::translate("MainWindow", "...", nullptr));
 #if QT_CONFIG(tooltip)
         help_data_src->setToolTip(QCoreApplication::translate("MainWindow", "\n"
-"              <html><head/><body><b>Path to the extracted FFVII (PC version) data.</b><br><br>It must contain (at least) the folders 'kernel' and 'field'.</body></html>\n"
+"              <html><head/><body><b>Select a Final Fantasy VII ISO file.</b><br><br>It must contain (at least) the folders 'kernel' and 'field'.</body></html>\n"
 "             ", nullptr));
 #endif // QT_CONFIG(tooltip)
         help_data_src->setText(QString());
-        isoData->setText(QCoreApplication::translate("MainWindow", "ISO Info: ", nullptr));
-        isoError->setText(QCoreApplication::translate("MainWindow", "Message", nullptr));
+        isoData->setText(QString());
+        isoError->setText(QString());
         label_3->setText(QCoreApplication::translate("MainWindow", "VGears installation directory:", nullptr));
         btn_data_dst->setText(QCoreApplication::translate("MainWindow", "...", nullptr));
 #if QT_CONFIG(tooltip)

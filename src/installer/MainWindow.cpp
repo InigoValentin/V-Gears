@@ -182,20 +182,39 @@ void MainWindow::on_btn_data_run_clicked(){
         QMessageBox::critical(
           this, tr("Input error"),
           tr(
-            "The installation needs the original game data.\n\n"
-            "Select a directory with the extracted data from Final Fantasy VII "
-            "(PC version, install disk)."
+            "The installation needs a Final Fantasy VII ISO image.\n\n"
+            "Select the ISO from the PC install disk."
           )
+        );
+    }
+    if (release.isValid() == false){
+        QMessageBox::critical(
+          this, tr("Input error"),
+          tr(
+            "The selected ISO is not a valid Final Fantasy VII game."
+            "\n\nSelect a valid ISO image of Final Fantasy VII.")
         );
     }
     else if (main_window_->line_data_dst->text().isEmpty())
         QMessageBox::critical(this, tr("Output error"), tr("No output path provided"));
     else{
-        // Normalize the paths so its in / format separators.
-        QString input = QDir::fromNativeSeparators(main_window_->line_data_src->text());
-        if (!input.endsWith("/")) input += "/";
+      // Normalize the output path and extract to original_data.
         QString output = QDir::fromNativeSeparators(main_window_->line_data_dst->text());
         if (!output.endsWith("/")) output += "/";
+
+        bool extraction_success = release.extractIso(output.toStdString());
+        if (!extraction_success) {
+            QMessageBox::critical(this, tr("Extraction error"), tr("Failed to extract ISO file."));
+            return;
+        }
+
+      QString input = QDir::fromNativeSeparators(QString::fromStdString(release.getContentPath()));
+      if (input.isEmpty()) {
+        QMessageBox::critical(this, tr("Extraction error"), tr("Extracted data path is invalid."));
+        return;
+      }
+      if (!input.endsWith("/")) input += "/";
+
         // TODO: Enumerate files or find some better way to do this.
         const std::vector<std::string> required_files = {
           "data/field/char.lgp",
@@ -215,6 +234,7 @@ void MainWindow::on_btn_data_run_clicked(){
           "data/wm/world_us.lgp",
           "ff7.exe"
         };
+
         // Ensure required files are in the input dir
         for (auto& file : required_files){
             QString full_path = input + QString::fromStdString(file);
