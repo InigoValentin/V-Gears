@@ -26,14 +26,11 @@
 #include "DataInstaller.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "Release.h"
 
 /**
  * Indicates if an installer has already been created.
  */
 static bool installer_created = false;
-
-Release release;
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), main_window_(new Ui::MainWindow){
     main_window_->setupUi(this);
@@ -146,15 +143,15 @@ void MainWindow::on_btn_data_src_clicked(){
     std::cout << "Selected ISO: " << temp.toStdString() << std::endl;
     if (!temp.isNull()){
         main_window_->line_data_src->setText(temp);
-        release = Release(temp.toStdString());
-        main_window_->isoData->setText(QString::fromStdString(release.getId()));
-        if (!release.isValid()){
+        disk_image_ = DiskImage(temp.toStdString());
+        main_window_->isoData->setText(QString::fromStdString(disk_image_.getId()));
+        if (!disk_image_.isValid()){
             main_window_->isoError->setStyleSheet("QLabel { color : red; }");
-            main_window_->isoError->setText(QString::fromStdString(release.getErrorMessage()));
+            main_window_->isoError->setText(QString::fromStdString(disk_image_.getErrorMessage()));
         }
-        else if (!release.isSupported()){
+        else if (!disk_image_.isSupported()){
             main_window_->isoError->setStyleSheet("QLabel { color : orange; }");
-            main_window_->isoError->setText(QString::fromStdString(release.getWarningMessage()));
+            main_window_->isoError->setText(QString::fromStdString(disk_image_.getWarningMessage()));
         }
         else{
             main_window_->isoError->setStyleSheet("QLabel { color : green; }");
@@ -187,7 +184,7 @@ void MainWindow::on_btn_data_run_clicked(){
           )
         );
     }
-    if (release.isValid() == false){
+    if (disk_image_.isValid() == false){
         QMessageBox::critical(
           this, tr("Input error"),
           tr(
@@ -202,13 +199,13 @@ void MainWindow::on_btn_data_run_clicked(){
         QString output = QDir::fromNativeSeparators(main_window_->line_data_dst->text());
         if (!output.endsWith("/")) output += "/";
 
-        bool extraction_success = release.extractIso(output.toStdString());
+        bool extraction_success = disk_image_.extractImage(output.toStdString());
         if (!extraction_success) {
             QMessageBox::critical(this, tr("Extraction error"), tr("Failed to extract ISO file."));
             return;
         }
 
-      QString input = QDir::fromNativeSeparators(QString::fromStdString(release.getContentPath()));
+      QString input = QDir::fromNativeSeparators(QString::fromStdString(disk_image_.getContentPath()));
       if (input.isEmpty()) {
         QMessageBox::critical(this, tr("Extraction error"), tr("Extracted data path is invalid."));
         return;
@@ -237,8 +234,9 @@ void MainWindow::on_btn_data_run_clicked(){
 
         // Ensure required files are in the input dir
         for (auto& file : required_files){
-            QString full_path = input + QString::fromStdString(file);
-            if (!QFile::exists(full_path)){
+            std::cout << "Checking for required file: " << file << std::endl;
+            const auto matched_file = disk_image_.fileExists(file);
+            if (!matched_file){
                 QMessageBox::critical(
                   this, tr("Missing input file"),
                   tr(
@@ -248,6 +246,7 @@ void MainWindow::on_btn_data_run_clicked(){
                 );
                 return;
             }
+            std::cout << "Matched required file to: " << *matched_file << std::endl;
         }
         if (installer_created){
             // Due to the use of singletons, the installer can't be re-run.
@@ -282,7 +281,7 @@ void MainWindow::on_btn_data_run_clicked(){
 
             installer_created = true;
             installer_ = std::make_unique<DataInstaller>(
-              QDir::toNativeSeparators(input).toStdString(),
+              disk_image_,
               QDir::toNativeSeparators(output).toStdString(),
               options,
               [this](const std::string log_line, int level, bool as_progress = false){

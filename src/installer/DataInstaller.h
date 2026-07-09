@@ -19,6 +19,7 @@
 #include <vector>
 #include <iostream>
 #include "common/VGearsApplication.h"
+#include "DiskImage.h"
 #include "FieldDataInstaller.h"
 #include "KernelDataInstaller.h"
 #include "MediaDataInstaller.h"
@@ -115,13 +116,13 @@ class DataInstaller{
         /**
          * Installer constructor
          *
-         * @param[in] input_dir Path to the directory containing the original data to parse.
+         * @param[in] disk_image Disk image containing the original data to parse.
          * @param[in] output_dir Path to the directory to write generated data to.
          * @param[in] options Adavanced options for the installer.
          * @param[in] write_output_line Pointer to function to write output.
          */
         DataInstaller(
-          const std::string input_dir, const std::string output_dir, AdvancedOptions options,
+          const DiskImage& disk_image, const std::string output_dir, AdvancedOptions options,
           std::function<void(std::string, int, bool)> write_output_line
         );
 
@@ -470,9 +471,9 @@ class DataInstaller{
         std::vector<std::string> field_model_names_;
 
         /**
-         * The path to the directory from which to read the PC game data.
+         * The disk image from which to read the PC game data.
          */
-        std::string input_dir_;
+        DiskImage disk_image_;
 
         /**
          * The path to the directory where to save the V-Gears data.

@@ -25,6 +25,7 @@
 #include <boost/predef/os.h>
 #include <boost/filesystem.hpp>
 #include <tinyxml.h>
+#include "DiskImage.h"
 #include "MediaDataInstaller.h"
 #include "data/VGearsLGPArchive.h"
 #include "data/VGearsTexFile.h"
@@ -47,14 +48,21 @@
 int MediaDataInstaller::TOTAL_SOUNDS = 750;
 
 MediaDataInstaller::MediaDataInstaller(
-  const std::string input_dir, const std::string output_dir, const bool keep_originals,
+  const DiskImage& disk_image, const std::string output_dir, const bool keep_originals,
   const bool no_ffmpeg, const bool no_timidity
 ):
-  input_dir_(input_dir), output_dir_(output_dir), keep_originals_(keep_originals),
+    disk_image_(disk_image), output_dir_(output_dir),
+    keep_originals_(keep_originals),
   no_ffmpeg_(no_ffmpeg), no_timidity_(no_timidity),
-  menu_(input_dir + "data/menu/menu_us.lgp", "LGP"), window_(input_dir + "data/kernel/WINDOW.BIN"),
-  midi_(input_dir + "data/midi/midi.lgp", "LGP")
-{PopulateMaps();}
+    
+    window_(*disk_image_.fileExists("data/kernel/WINDOW.BIN")),
+    processed_sounds_(0),
+    menu_(VGears::LGPArchive(*disk_image_.fileExists("data/menu/menu_us.lgp"), "LGP")),
+    midi_(VGears::LGPArchive(*disk_image_.fileExists("data/midi/midi.lgp"), "LGP")),
+    processed_musics_(0)
+{
+        PopulateMaps();
+}
 
 
 std::string MediaDataInstaller::GetExecutablePath(){
@@ -1134,10 +1142,10 @@ MediaDataInstaller::~MediaDataInstaller(){}
 
 void MediaDataInstaller::InstallSprites(){
     // Actually open the lgp as a file for reading
-    File menu(input_dir_ + "data/menu/menu_us.lgp");
+    File menu(*disk_image_.fileExists("data/menu/menu_us.lgp"));
 
     // Also, open it as a LGP archive.
-    menu_.open(input_dir_ + "data/menu/menu_us.lgp", true);
+    menu_.open(*disk_image_.fileExists("data/menu/menu_us.lgp"), true);
     menu_.load();
 
 
@@ -1377,7 +1385,7 @@ int MediaDataInstaller::InstallSoundsInit(){
     // SFXDump handles the wav conversion
     std::string command = (boost::format(
       "%1%/sfxdump %2%data/sound/audio.fmt %2%data/sound/audio.dat %3%audio/sounds/"
-    ) % GetExecutablePath() % input_dir_ % output_dir_).str();    
+    ) % GetExecutablePath() % disk_image_.getContentPath() % output_dir_).str();    
     std::system(command.c_str());
     processed_sounds_ = 0;
     return TOTAL_SOUNDS;
@@ -1385,6 +1393,7 @@ int MediaDataInstaller::InstallSoundsInit(){
 
 bool MediaDataInstaller::InstallSounds(){
     if (!no_ffmpeg_){
+        // TODO: check for ffmpeg executable and warn if not found.
         std::string f_path
           = output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav";
         std::ifstream file(f_path);
@@ -1439,7 +1448,7 @@ void MediaDataInstaller::WriteSoundIndex(){
 
 int MediaDataInstaller::InstallMusicsInit(){
     // Read the music index file.
-    std::ifstream music_idx(input_dir_ + "data/music/music.idx");
+    std::ifstream music_idx(*disk_image_.fileExists("data/music/music.idx"));
     int i = 0;
     std::string name;
     if (music_idx.is_open()){
@@ -1473,7 +1482,7 @@ bool MediaDataInstaller::InstallMusics(){
         }
     }
 
-    File midi(input_dir_ + "data/midi/midi.lgp");
+    File midi(*disk_image_.fileExists("data/midi/midi.lgp"));
 
     std::fstream out;
     out.open(output_dir_ + "audio/musics/" + std::to_string(index) + ".mid", std::ios::out);
@@ -1482,6 +1491,7 @@ bool MediaDataInstaller::InstallMusics(){
     out.close();
 
     // Convert to ogg (TiMidity + FFMpeg)
+    // TODO: Chek for ffmpeg and timidity executables and warn if not found.
     std::string command = (boost::format(
       "timidity --quiet=3 %1%audio/musics/%2%.mid -Ow -o - "
       "| ffmpeg -hide_banner -loglevel panic -y -i - %1%audio/musics/%2%.ogg"
@@ -1512,7 +1522,7 @@ void MediaDataInstaller::InstallHQMusics(){
 
         std::string command = (boost::format(
           "ffmpeg -hide_banner -loglevel panic -y -i %1%musics/%2%.wav %3%audio/sounds/%4%.ogg"
-        ) % input_dir_ % hq_music % output_dir_ % index).str();
+        ) % disk_image_.getContentPath() % hq_music % output_dir_ % index).str();
         if (!no_ffmpeg_)  std::system(command.c_str());
     }
 }

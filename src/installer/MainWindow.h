@@ -18,6 +18,7 @@
 #include <QtWidgets/QMainWindow> // IVV fix path #include <QMainWindow>
 #include <QtCore/QSettings>
 #include <memory>
+#include "DiskImage.h"
 
 namespace Ui {
     class MainWindow;
@@ -171,4 +172,9 @@ class MainWindow : public QMainWindow{
          * The installer.
          */
         std::unique_ptr<class DataInstaller> installer_;
+
+        /**
+         * The selected disk image.
+         */
+        DiskImage disk_image_;
 };

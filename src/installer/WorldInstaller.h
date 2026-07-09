@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <common/TypeDefine.h>
+#include "DiskImage.h"
 #include "common/File.h"
 
 /**
@@ -30,13 +31,13 @@ class WorldInstaller{
         /**
          * Constructor.
          *
-         * @param[in] input_dir Path to the directory containing the original data to parse.
+         * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory of the installation data.
          * @param[in] keep_originals True to keep original data after conversion, false to remove.
          * @param[in] res_mgr The application resource manager.
          */
         WorldInstaller(
-          const std::string input_dir, const std::string output_dir,
+          const DiskImage& disk_image, const std::string output_dir,
           const bool keep_originals, Ogre::ResourceGroupManager* res_mgr
         );
 
@@ -313,9 +314,9 @@ class WorldInstaller{
         std::vector<Texture> texture_;
 
         /**
-         * The path to the directory from which to read the PC game data.
+         * The disk image to extract the PC game data from.
          */
-        std::string input_dir_;
+        DiskImage disk_image_;
 
         /**
          * The path to the directory where to save the V-Gears data.

@@ -17,12 +17,13 @@
 #include <tinyxml.h>
 #include <fstream>
 #include <iostream>
+#include "DiskImage.h"
 #include "KernelDataInstaller.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
 #include <boost/algorithm/string/replace.hpp>
 
-KernelDataInstaller::KernelDataInstaller(std::string path):
-  kernel_(path + "data/kernel/KERNEL.BIN"), exe_path_(path + "ff7.exe"){
+KernelDataInstaller::KernelDataInstaller(DiskImage& disk_image):
+  kernel_(*disk_image.fileExists("data/kernel/KERNEL.BIN")), exe_path_(*disk_image.fileExists("ff7.exe")){
     for (int i = 0; i < 416; i ++) prices_[i] = 50;
 }
 

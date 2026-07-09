@@ -16,6 +16,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include <QtCore/QDir>
+#include "DiskImage.h"
 #include "FieldDataInstaller.h"
 #include "TexFile.h"
 #include "common/File.h"
@@ -207,8 +208,8 @@ void FieldDataInstaller::CollectSpawnPoints(
     }
 }
 
-FieldDataInstaller::FieldDataInstaller(const std::string input_dir, const std::string output_dir):
-  input_dir_(input_dir), output_dir_(output_dir)
+FieldDataInstaller::FieldDataInstaller(const DiskImage& disk_image, const std::string output_dir):
+  disk_image_(disk_image), output_dir_(output_dir)
 {}
 
 FieldDataInstaller::~FieldDataInstaller(){}
@@ -303,11 +304,11 @@ std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){
     std::vector<std::string> models;
 
     // Open char_lgp as a lgp archive
-    VGears::LGPArchive char_lgp(input_dir_ + "data/field/char.lgp", "LGP");
-    char_lgp.open(input_dir_ + "data/field/char.lgp", true);
+    VGears::LGPArchive char_lgp(*disk_image_.fileExists("data/field/char.lgp"), "LGP");
+    char_lgp.open(*disk_image_.fileExists("data/field/char.lgp"), true);
     char_lgp.load();
     // Also, open it as a file for reading
-    File char_file(input_dir_ + "data/field/char.lgp");
+    File char_file(*disk_image_.fileExists("data/field/char.lgp"));
 
     //Ogre::StringVectorPtr file_list = char_lgp.list(true, true);
     field_model_file_list_ = char_lgp.list(true, true);

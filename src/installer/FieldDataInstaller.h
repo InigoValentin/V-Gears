@@ -20,6 +20,7 @@
 #include <OgreMesh.h>
 #include <tinyxml.h>
 #include "data/VGearsFLevelFile.h"
+#include "DiskImage.h"
 #include "ScopedLgp.h"
 #include "SpawnPointDb.h"
 #include "ModelsAndAnimationsDb.h"
@@ -324,12 +325,11 @@ class FieldDataInstaller{
         /**
          * Installer constructor
          *
-         * @param[in] input_dir Path to the directory containing the original
-         * data to parse.
+         * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory to write generated data
          * to.
          */
-        FieldDataInstaller(const std::string input_dir, const std::string output_dir);
+        FieldDataInstaller(const DiskImage& disk_image, const std::string output_dir);
 
         /**
          * Installer destructor.
@@ -571,7 +571,7 @@ class FieldDataInstaller{
         /**
          * The path to the directory from which to read the PC game data.
          */
-        std::string input_dir_;
+        DiskImage disk_image_;
 
         /**
          * The path to the directory where to save the V-Gears data.

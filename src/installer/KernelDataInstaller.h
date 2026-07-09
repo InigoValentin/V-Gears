@@ -17,6 +17,7 @@
 
 #include "common/BinGZipFile.h"
 #include "common/TypeDefine.h"
+#include "DiskImage.h"
 #include "Characters.h"
 #include "SaveMap.h"
 
@@ -27,9 +28,9 @@ class KernelDataInstaller{
         /**
          * Constructor.
          *
-         * @param[in] path Path selected in the installation as source directory.
+         * @param[in] disk_image Disk image to extract the data from.
          */
-        KernelDataInstaller(std::string path);
+        KernelDataInstaller(DiskImage& disk_image);
 
         /**
          * Destructor.

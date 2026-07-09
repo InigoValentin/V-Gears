@@ -16,11 +16,12 @@
 #include <QtCore/QDir>
 #include <boost/filesystem.hpp>
 #include "DataInstaller.h"
+#include "DiskImage.h"
 
 float DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
 
 DataInstaller::DataInstaller(
-  const std::string input_dir, const std::string output_dir, AdvancedOptions options,
+  const DiskImage& disk_image, const std::string output_dir, AdvancedOptions options,
   std::function<void(std::string, int, bool)> write_output_line
 )
 #ifdef _DEBUG
@@ -28,7 +29,7 @@ DataInstaller::DataInstaller(
 #else
   : application_("plugins.cfg", "resources.cfg", "install.log"),
 #endif
-  input_dir_(input_dir), output_dir_(output_dir),
+  disk_image_(disk_image), output_dir_(output_dir),
   options_(options), write_output_line_(write_output_line)
 {
     if (!application_.initOgre(true)) throw std::runtime_error("Ogre init failure");
@@ -63,22 +64,22 @@ float DataInstaller::Progress(){
             CreateDirectories();
             installation_state_ = INITIALIZE;
             return CalcProgress();
-        case INITIALIZE:
+        case INITIALIZE:{
             write_output_line_("Initializing installers...", 2, true);
-            kernel_installer_ = std::make_unique<KernelDataInstaller>(input_dir_);
+            const auto input_dir = disk_image_.getContentPath();
+            if (input_dir.empty()) throw std::runtime_error("Input data directory is empty");
+            kernel_installer_ = std::make_unique<KernelDataInstaller>(disk_image_);
             media_installer_ = std::make_unique<MediaDataInstaller>(
-              input_dir_, output_dir_, options_.keep_originals,
-              options_.no_ffmpeg, options_.no_timidity
+              disk_image_, output_dir_, options_.keep_originals, options_.no_ffmpeg, options_.no_timidity
             );
-            field_installer_ = std::make_unique<FieldDataInstaller>(input_dir_, output_dir_);
-            battle_installer_ = std::make_unique<BattleDataInstaller>(
-              input_dir_, output_dir_, application_.ResMgr()
-            );
+            field_installer_ = std::make_unique<FieldDataInstaller>(disk_image_, output_dir_);
+            battle_installer_ = std::make_unique<BattleDataInstaller>(disk_image_, output_dir_, application_.ResMgr());
             world_installer_ = std::make_unique<WorldInstaller>(
-              input_dir_, output_dir_, options_.keep_originals, application_.ResMgr()
+              disk_image_, output_dir_, options_.keep_originals, application_.ResMgr()
             );
             installation_state_ = BATTLE_SCENES_INIT;
             return CalcProgress();
+        }
         case BATTLE_SCENES_INIT:
             // Skip kernel data if option is set.
             if (options_.skip_battle_data){
@@ -515,8 +516,12 @@ void DataInstaller::CreateDirectories(){
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "models/world/", "FileSystem", "FFVIITextures", true, true
     );
+    const auto fields_lgp_path = disk_image_.fileExists("data/field/flevel.lgp");
+    if (!fields_lgp_path){
+            throw std::runtime_error("Missing required file: data/field/flevel.lgp");
+    }
     fields_lgp_ = std::make_unique<ScopedLgp>(
-      application_.getRoot(), input_dir_ + "data/field/flevel.lgp", "LGP", "FFVIIFields"
+            application_.getRoot(), *fields_lgp_path, "LGP", "FFVIIFields"
     );
 }
 

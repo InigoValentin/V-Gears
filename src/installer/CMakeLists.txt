@@ -9,11 +9,11 @@ set(INSTALLER_SOURCE_FILES
     main.cpp
     BattleDataInstaller.cpp
     DataInstaller.cpp
+    DiskImage.cpp
     FieldDataInstaller.cpp
     FieldTextWriter.cpp
     KernelDataInstaller.cpp
     MainWindow.cpp
-    Release.cpp
     MediaDataInstaller.cpp
     ModelsAndAnimationsDb.cpp
     ScopedLgp.cpp

@@ -33,10 +33,10 @@
 #include "common/FinalFantasy7/FF7NameLookup.h"
 
 BattleDataInstaller::BattleDataInstaller(
-  const std::string input_dir, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr
+  const DiskImage& disk_image, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr
 ):
-  input_dir_(input_dir), output_dir_(output_dir),
-  scene_bin_(input_dir + "data/battle/scene.bin"), total_scenes_(0), next_scene_(0),
+  disk_image_(disk_image), output_dir_(output_dir),
+  scene_bin_(*const_cast<DiskImage&>(disk_image).fileExists("data/battle/scene.bin")), total_scenes_(0), next_scene_(0),
   res_mgr_(res_mgr)
 {}
 
@@ -78,10 +78,10 @@ unsigned int BattleDataInstaller::InitializeBattleModels(){
     battle_lgp_file_names_.clear();
     battle_models_.clear();
     // Open battle.lgp
-    File battle_lgp_file(input_dir_ + "data/battle/battle.lgp");
+    File battle_lgp_file(*disk_image_.fileExists("data/battle/battle.lgp"));
     // Also, open it as a LGP archive.
-    VGears::LGPArchive battle_lgp(input_dir_ + "data/battle/battle.lgp", "LGP");
-    battle_lgp.open(input_dir_ + "data/battle/battle.lgp", true);
+    VGears::LGPArchive battle_lgp(*disk_image_.fileExists("data/battle/battle.lgp"), "LGP");
+    battle_lgp.open(*disk_image_.fileExists("data/battle/battle.lgp"), true);
     battle_lgp.load();
     VGears::LGPArchive::FileList file_list = battle_lgp.GetFiles();
     for (int i = 0; i < file_list.size(); i ++){
@@ -102,10 +102,10 @@ unsigned int BattleDataInstaller::InitializeSpellModels(){
     battle_lgp_file_names_.clear();
     battle_models_.clear();
     // Open battle.lgp
-    File magic_lgp_file(input_dir_ + "data/battle/magic.lgp");
+    File magic_lgp_file(*disk_image_.fileExists("data/battle/magic.lgp"));
     // Also, open it as a LGP archive.
-    VGears::LGPArchive magic_lgp(input_dir_ + "data/battle/magic.lgp", "LGP");
-    magic_lgp.open(input_dir_ + "data/battle/magic.lgp", true);
+    VGears::LGPArchive magic_lgp(*disk_image_.fileExists("data/battle/magic.lgp"), "LGP");
+    magic_lgp.open(*disk_image_.fileExists("data/battle/magic.lgp"), true);
     magic_lgp.load();
     VGears::LGPArchive::FileList file_list = magic_lgp.GetFiles();
     for (int i = 0; i < file_list.size(); i ++){

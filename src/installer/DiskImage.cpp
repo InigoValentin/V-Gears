@@ -19,45 +19,48 @@
 #include <regex>
 #include <archive.h>
 #include <archive_entry.h>
-#include "Release.h"
+#include "DiskImage.h"
 #include <QtCore/qstring.h>
 #include <QtCore/qdir.h>
+#include <QtCore/qdiriterator.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qglobal.h>
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 #include <cstdio>
 #include <fstream>
 #include <regex>
+#include <functional>
 #include <stdexcept>
 #include <sys/stat.h>
 #include <vector>
 
-Release::Release(){
-    id = "Unknown ISO file";
+DiskImage::DiskImage(){
+    id = "Unknown image file";
     platform = PLATFORM_UNKNOWN;
     region = REGION_UNKNOWN;
     language = LANGUAGE_UNKNOWN;
     disk = DISK_UNKNOWN;
     valid = false;
     supported = false;
-    error_message = "The selected file is not a valid Final Fantasy VII ISO file.";
+    error_message = "The selected file is not a valid Final Fantasy VII image file.";
     warning_message = "";
+    is_extracted = false;
 };
 
-Release::Release(std::string iso_path) : Release() {
+DiskImage::DiskImage(std::string path) : DiskImage() {
     struct archive* a = archive_read_new();
     struct archive_entry* entry;
     archive_read_support_format_iso9660(a);
     archive_read_support_format_all(a);
     archive_read_support_filter_all(a);
 
-    if (archive_read_open_filename(a, iso_path.c_str(), 2048) != ARCHIVE_OK) {
+    if (archive_read_open_filename(a, path.c_str(), 2048) != ARCHIVE_OK) {
         const char* archive_error = archive_error_string(a);
         const std::string open_error = archive_error ? archive_error : "Unknown archive error";
-        // Error reading iso
-        std::cerr << "Failed to read ISO file: " << open_error << std::endl;
-        error_message = "Failed to read ISO file: " + open_error;
+        // Error reading image
+        error_message = "Failed to read image file: " + open_error;
         archive_read_free(a);
         return;
     }
@@ -69,7 +72,7 @@ Release::Release(std::string iso_path) : Release() {
     };
 
     // Normalize a path from the ISO9660 filesystem, removing version suffixes and trailing dots.
-    auto normalize_iso_path = [&](std::string value) {
+    auto normalize_path = [&](std::string value) {
         std::replace(value.begin(), value.end(), '\\', '/');
         while (
           !value.empty()
@@ -112,7 +115,7 @@ Release::Release(std::string iso_path) : Release() {
           normalized == "FF7CONFIG.EXE" || normalized == "FF7CONFI.EXE"
           || normalized == "FF7CON~1.EXE" || normalized == "FF7INST.EXE"
         ) {
-            this->iso_path = iso_path;
+            this->path = path;
             id = "Final Fantasy VII (PC, 1998, USA) Install Disk";
             platform = PLATFORM_PC;
             region = REGION_NORTH_AMERICA;
@@ -125,7 +128,7 @@ Release::Release(std::string iso_path) : Release() {
             return true;
         }
         if (normalized == "FF7/MOVIES/BIKE.AVI") {
-            this->iso_path = iso_path;
+            this->path = path;
             id = "Final Fantasy VII (PC, 1998, USA) Disk 1";
             platform = PLATFORM_PC;
             region = REGION_NORTH_AMERICA;
@@ -138,7 +141,7 @@ Release::Release(std::string iso_path) : Release() {
             return true;
         }
         if (normalized == "FF7/MOVIES/BIGLIGHT.AVI") {
-            this->iso_path = iso_path;
+            this->path = path;
             id = "Final Fantasy VII (PC, 1998, USA) Disk 2";
             platform = PLATFORM_PC;
             region = REGION_NORTH_AMERICA;
@@ -151,7 +154,7 @@ Release::Release(std::string iso_path) : Release() {
             return true;
         }
         if (normalized == "FF7/MOVIES/ENDING1.AVI") {
-            this->iso_path = iso_path;
+            this->path = path;
             id = "Final Fantasy VII (PC, 1998, USA) Disk 3";
             platform = PLATFORM_PC;
             region = REGION_NORTH_AMERICA;
@@ -170,10 +173,8 @@ Release::Release(std::string iso_path) : Release() {
     int r = ARCHIVE_OK;
     bool saw_header = false;
     while (true) {
-        std::cout << "Reading next header from ISO..." << std::endl;
         r = archive_read_next_header(a, &entry);
         if (r == ARCHIVE_EOF) {
-            std::cout << "Reached end of ISO archive." << std::endl;
             break;
         }
         if (r != ARCHIVE_OK && r != ARCHIVE_WARN) {
@@ -187,36 +188,31 @@ Release::Release(std::string iso_path) : Release() {
         saw_header = true;
 
         std::string path = archive_entry_pathname(entry);
-        std::cout << "Found file in ISO: " << path << std::endl;
 
         // Look for know files in the PC release disks.
-        const std::string normalized = normalize_iso_path(path);
+        const std::string normalized = normalize_path(path);
         if (apply_pc_release_from_path(normalized)) {
             pc_marker_found = true;
             break;
         }
-        std::cout << "Finished checking PC releases." << std::endl;
 
-        // If we haven't found the PC install marker, look for SYSTEM.CNF
+        // If the PC install marker hasn't been found, look for SYSTEM.CNF
         // to determine if it's a PSX release and extract the game ID.
         std::string upper_path = to_upper(path);
         if (
           upper_path == "SYSTEM.CNF" || upper_path == "/SYSTEM.CNF"
           || upper_path.find("SYSTEM.CNF;") != std::string::npos
         ) {
-            std::cout << "SYSTEM.CNF FOUND." << std::endl;
             size_t size = archive_entry_size(entry);
             if (size > 0) {
                 std::vector<char> buffer(size);
                 la_ssize_t bytes_read = archive_read_data(a, buffer.data(), size);
                 if (bytes_read > 0) {
                     std::string cnf_content(buffer.begin(), buffer.begin() + bytes_read);
-                    std::cout << "SYSTEM.CNF content:\n" << cnf_content << std::endl;
                     std::regex code_regex(R"(([A-Z]{4})_(\d{3})\.(\d{2}))");
                     std::smatch match;
                     if (std::regex_search(cnf_content, match, code_regex)) {
                         game_id = match[1].str() + "-" + match[2].str() + match[3].str();
-                        std::cout << "Detected game ID from SYSTEM.CNF: " << game_id << std::endl;
                         if (game_id == "SCUS-94163") {
                             id = "Final Fantasy VII (USA) Disc 1";
                             platform = PLATFORM_PS1;
@@ -446,7 +442,7 @@ Release::Release(std::string iso_path) : Release() {
                             "Use the PC release instead.";
                         }
                         else {
-                            id = "Unknown Release";
+                            id = "Unknown DiskImage";
                             platform = PLATFORM_UNKNOWN;
                             region = REGION_UNKNOWN;
                             language = LANGUAGE_UNKNOWN;
@@ -463,65 +459,105 @@ Release::Release(std::string iso_path) : Release() {
     }
 
     if (!saw_header && r == ARCHIVE_EOF) {
-        std::cout << "No entries found by libarchive, trying isoinfo listing..." << std::endl;
-
-        auto escape_shell = [](const std::string& value) {
-            std::string out;
-            for (char c : value) {
-                if (c == '"' || c == '\\') {
-                    out.push_back('\\');
-                }
-                out.push_back(c);
-            }
-            return out;
+        //std::cout << "libarchive returned no entries, falling back to direct ISO9660 parsing..." << std::endl;
+        auto read_le32 = [](const uint8_t* bytes) -> uint32_t {
+            return static_cast<uint32_t>(bytes[0])
+                | (static_cast<uint32_t>(bytes[1]) << 8)
+                | (static_cast<uint32_t>(bytes[2]) << 16)
+                | (static_cast<uint32_t>(bytes[3]) << 24);
         };
 
-        const std::string escaped_iso_path = escape_shell(iso_path);
-        const std::vector<std::string> list_cmds = {
-            "isoinfo -J -f -i \"" + escaped_iso_path + "\" 2>/dev/null",
-            "isoinfo -R -J -f -i \"" + escaped_iso_path + "\" 2>/dev/null",
-            "isoinfo -R -f -i \"" + escaped_iso_path + "\" 2>/dev/null",
-            "isoinfo -f -i \"" + escaped_iso_path + "\" 2>/dev/null"
-        };
+        std::ifstream file(path, std::ios::binary);
+        if (file) {
+            const std::size_t sector_size = 2048;
 
-        char buffer[4096];
-        for (const auto& list_cmd : list_cmds) {
-            FILE* list_pipe = popen(list_cmd.c_str(), "r");
-            if (!list_pipe) {
-                continue;
-            }
+            auto read_bytes = [&](std::streamoff offset, std::size_t size) {
+                std::vector<uint8_t> bytes(size);
+                file.seekg(offset, std::ios::beg);
+                file.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(size));
+                const std::size_t bytes_read = static_cast<std::size_t>(file.gcount());
+                bytes.resize(bytes_read);
+                return bytes;
+            };
 
-            while (fgets(buffer, sizeof(buffer), list_pipe)) {
-                std::string line(buffer);
-                while (!line.empty() && (line.back() == '\n' || line.back() == '\r')) {
-                    line.pop_back();
-                }
-                if (line.empty()) {
-                    continue;
-                }
-                if (apply_pc_release_from_path(normalize_iso_path(line))) {
-                    pc_marker_found = true;
-                    break;
-                }
-            }
+            const std::vector<uint8_t> pvd = read_bytes(static_cast<std::streamoff>(16) * sector_size, sector_size);
+            const bool pvd_valid =
+                pvd.size() == sector_size
+                && pvd[0] == 1
+                && pvd[1] == 'C' && pvd[2] == 'D'
+                && pvd[3] == '0' && pvd[4] == '0' && pvd[5] == '1';
 
-            pclose(list_pipe);
-            if (pc_marker_found) {
-                break;
+            if (pvd_valid) {
+                const uint32_t root_lba = read_le32(&pvd[156 + 2]);
+                const uint32_t root_size = read_le32(&pvd[156 + 10]);
+
+                std::function<void(uint32_t, uint32_t, const std::string&)> walk_directory;
+                walk_directory = [&](uint32_t extent_lba, uint32_t extent_size, const std::string& prefix) {
+                    if (pc_marker_found || extent_size == 0) {
+                        return;
+                    }
+
+                    const std::vector<uint8_t> dir_data = read_bytes(
+                        static_cast<std::streamoff>(extent_lba) * sector_size,
+                        extent_size
+                    );
+
+                    std::size_t offset = 0;
+                    while (offset < dir_data.size()) {
+                        const uint8_t record_size = dir_data[offset];
+                        if (record_size == 0) {
+                            offset = ((offset / sector_size) + 1) * sector_size;
+                            continue;
+                        }
+                        if (offset + record_size > dir_data.size() || offset + 33 > dir_data.size()) {
+                            break;
+                        }
+
+                        const uint32_t entry_lba = read_le32(&dir_data[offset + 2]);
+                        const uint32_t entry_size = read_le32(&dir_data[offset + 10]);
+                        const uint8_t entry_flags = dir_data[offset + 25];
+                        const uint8_t entry_name_len = dir_data[offset + 32];
+
+                        if (entry_name_len > 0 && offset + 33 + entry_name_len <= dir_data.size()) {
+                            const bool is_dot_entry =
+                                entry_name_len == 1
+                                && (dir_data[offset + 33] == 0x00 || dir_data[offset + 33] == 0x01);
+
+                            if (!is_dot_entry) {
+                                const std::string raw_name(
+                                    reinterpret_cast<const char*>(&dir_data[offset + 33]),
+                                    reinterpret_cast<const char*>(&dir_data[offset + 33 + entry_name_len])
+                                );
+                                const std::string normalized_name = normalize_path(raw_name);
+                                const std::string full_path
+                                  = prefix.empty() ? normalized_name : prefix + "/" + normalized_name;
+                                if (apply_pc_release_from_path(full_path)) {
+                                    pc_marker_found = true;
+                                    return;
+                                }
+                                if ((entry_flags & 0x02) != 0) {
+                                    walk_directory(entry_lba, entry_size, full_path);
+                                    if (pc_marker_found) {
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        offset += record_size;
+                    }
+                };
+                walk_directory(root_lba, root_size, "");
             }
         }
     }
-
-    std::cout << "Finished checking releases." << std::endl;
-
     archive_read_close(a);
     archive_read_free(a);
     return;
 };
 
-Release::~Release(){};
+DiskImage::~DiskImage(){};
 
-bool Release::extractIso(std::string installation_path){
+bool DiskImage::extractImage(std::string installation_path){
     struct archive* a;
     struct archive* ext;
     struct archive_entry* entry;
@@ -562,14 +598,16 @@ bool Release::extractIso(std::string installation_path){
         }
     }
 
-    // Open the ISO file
-    if ((r = archive_read_open_filename(a, iso_path.c_str(), 10240))) {
-        std::cerr << "Error: Could not open ISO file: " << archive_error_string(a) << std::endl;
+    // Open the image file
+    if ((r = archive_read_open_filename(a, path.c_str(), 10240))) {
+        std::cerr << "Error: Could not open image file: " << archive_error_string(a) << std::endl;
         return false;
     }
 
     // Read through the archive entries
+    bool saw_header = false;
     while ((r = archive_read_next_header(a, &entry)) == ARCHIVE_OK || r == ARCHIVE_WARN) {
+        saw_header = true;
         if (r == ARCHIVE_WARN) {
             std::cerr << "archive_read_next_header warning during extraction: " << archive_error_string(a) << std::endl;
         }
@@ -594,7 +632,7 @@ bool Release::extractIso(std::string installation_path){
             std::cerr << "Warning (Header): " << archive_error_string(ext) << std::endl;
         }
         else if (archive_entry_size(entry) > 0) {
-            // Copy data from the ISO to the disk
+            // Copy data from the image to the disk
             const void* buff;
             size_t size;
             la_int64_t offset;
@@ -615,6 +653,177 @@ bool Release::extractIso(std::string installation_path){
         }
         archive_write_finish_entry(ext);
     }
+
+    if (!saw_header && r == ARCHIVE_EOF) {
+        archive_read_close(a);
+        archive_read_free(a);
+        archive_write_close(ext);
+        archive_write_free(ext);
+
+        auto read_le32 = [](const uint8_t* bytes) -> uint32_t {
+            return static_cast<uint32_t>(bytes[0])
+                | (static_cast<uint32_t>(bytes[1]) << 8)
+                | (static_cast<uint32_t>(bytes[2]) << 16)
+                | (static_cast<uint32_t>(bytes[3]) << 24);
+        };
+
+        auto normalize_image_name = [](std::string value) {
+            std::replace(value.begin(), value.end(), '\\', '/');
+            std::size_t semi = value.find(';');
+            if (semi != std::string::npos) {
+                bool version_suffix = true;
+                for (std::size_t i = semi + 1; i < value.size(); ++i) {
+                    if (!std::isdigit(static_cast<unsigned char>(value[i]))) {
+                        version_suffix = false;
+                        break;
+                    }
+                }
+                if (version_suffix) {
+                    value = value.substr(0, semi);
+                }
+            }
+            while (!value.empty() && value.back() == '.') {
+                value.pop_back();
+            }
+            return value;
+        };
+
+        std::ifstream image_file(path, std::ios::binary);
+        if (!image_file) {
+            error_message = "Failed to open image file for direct ISO9660 extraction.";
+            return false;
+        }
+
+        const std::size_t sector_size = 2048;
+        bool extraction_ok = true;
+
+        auto read_bytes = [&](std::streamoff offset, std::size_t size) {
+            std::vector<uint8_t> bytes(size);
+            image_file.seekg(offset, std::ios::beg);
+            image_file.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(size));
+            const std::size_t bytes_read = static_cast<std::size_t>(image_file.gcount());
+            bytes.resize(bytes_read);
+            return bytes;
+        };
+
+        const std::vector<uint8_t> pvd = read_bytes(static_cast<std::streamoff>(16) * sector_size, sector_size);
+        const bool pvd_valid =
+            pvd.size() == sector_size
+            && pvd[0] == 1
+            && pvd[1] == 'C' && pvd[2] == 'D'
+            && pvd[3] == '0' && pvd[4] == '0' && pvd[5] == '1';
+
+        if (!pvd_valid) {
+            error_message = "Direct ISO9660 fallback failed: invalid primary volume descriptor.";
+            return false;
+        }
+
+        const uint32_t root_lba = read_le32(&pvd[156 + 2]);
+        const uint32_t root_size = read_le32(&pvd[156 + 10]);
+
+        std::function<void(uint32_t, uint32_t, const std::string&)> extract_directory;
+        extract_directory = [&](uint32_t extent_lba, uint32_t extent_size, const std::string& prefix) {
+            if (!extraction_ok || extent_size == 0) {
+                return;
+            }
+
+            const std::vector<uint8_t> dir_data = read_bytes(
+                static_cast<std::streamoff>(extent_lba) * sector_size,
+                extent_size
+            );
+            if (dir_data.empty() && extent_size > 0) {
+                extraction_ok = false;
+                return;
+            }
+
+            std::size_t offset = 0;
+            while (offset < dir_data.size()) {
+                const uint8_t record_size = dir_data[offset];
+                if (record_size == 0) {
+                    offset = ((offset / sector_size) + 1) * sector_size;
+                    continue;
+                }
+                if (offset + record_size > dir_data.size() || offset + 33 > dir_data.size()) {
+                    break;
+                }
+
+                const uint32_t entry_lba = read_le32(&dir_data[offset + 2]);
+                const uint32_t entry_size = read_le32(&dir_data[offset + 10]);
+                const uint8_t entry_flags = dir_data[offset + 25];
+                const uint8_t entry_name_len = dir_data[offset + 32];
+
+                if (entry_name_len > 0 && offset + 33 + entry_name_len <= dir_data.size()) {
+                    const bool is_dot_entry =
+                        entry_name_len == 1
+                        && (dir_data[offset + 33] == 0x00 || dir_data[offset + 33] == 0x01);
+                    if (!is_dot_entry) {
+                        std::string raw_name(
+                            reinterpret_cast<const char*>(&dir_data[offset + 33]),
+                            reinterpret_cast<const char*>(&dir_data[offset + 33 + entry_name_len])
+                        );
+                        raw_name = normalize_image_name(raw_name);
+                        const std::string relative_path = prefix.empty() ? raw_name : prefix + "/" + raw_name;
+                        const std::string absolute_path = data_dir + "/" + relative_path;
+
+                        if ((entry_flags & 0x02) != 0) {
+                            QDir mkdir_dir;
+                            if (!mkdir_dir.mkpath(QString::fromStdString(absolute_path))) {
+                                extraction_ok = false;
+                                return;
+                            }
+                            extract_directory(entry_lba, entry_size, relative_path);
+                            if (!extraction_ok) {
+                                return;
+                            }
+                        }
+                        else {
+                            QString abs_qpath = QString::fromStdString(absolute_path);
+                            QString abs_parent = QFileInfo(abs_qpath).absolutePath();
+                            QDir parent_dir(abs_parent);
+                            if (!parent_dir.exists() && !parent_dir.mkpath(".")) {
+                                extraction_ok = false;
+                                return;
+                            }
+
+                            std::ofstream out_file(absolute_path, std::ios::binary);
+                            if (!out_file) {
+                                extraction_ok = false;
+                                return;
+                            }
+
+                            const std::streamoff file_offset = static_cast<std::streamoff>(entry_lba) * sector_size;
+                            image_file.seekg(file_offset, std::ios::beg);
+                            std::vector<char> chunk(64 * 1024);
+                            uint32_t remaining = entry_size;
+                            while (remaining > 0) {
+                                const std::size_t to_read = std::min<std::size_t>(chunk.size(), remaining);
+                                image_file.read(chunk.data(), static_cast<std::streamsize>(to_read));
+                                const std::streamsize got = image_file.gcount();
+                                if (got <= 0) {
+                                    extraction_ok = false;
+                                    return;
+                                }
+                                out_file.write(chunk.data(), got);
+                                remaining -= static_cast<uint32_t>(got);
+                            }
+                        }
+                    }
+                }
+                offset += record_size;
+            }
+        };
+
+        extract_directory(root_lba, root_size, "");
+        if (!extraction_ok) {
+            error_message = "Direct ISO9660 fallback failed while extracting files.";
+            return false;
+        }
+
+        content_path = data_dir;
+        is_extracted = true;
+        return true;
+    }
+
     if (r != ARCHIVE_EOF && r != ARCHIVE_OK && r != ARCHIVE_WARN) {
         std::cerr << "archive_read_next_header error during extraction: " << archive_error_string(a) << " (code=" << r << ")" << std::endl;
         // continue cleanup and return failure
@@ -632,45 +841,163 @@ bool Release::extractIso(std::string installation_path){
     archive_write_free(ext);
 
     content_path = data_dir;
+    is_extracted = true;
     return true;
 }
 
-const std::string Release::getId(){
+std::unique_ptr<std::string> DiskImage::fileExists(std::string file_path) {
+    if (!is_extracted) {
+        std::cerr << "Error: Attempted to check for file existence before extracting the disk image." << std::endl;
+        return nullptr;
+    }
+    auto normalize_segment = [](QString segment) {
+        segment = segment.trimmed();
+        while (!segment.isEmpty() && (segment.endsWith('.') || segment.endsWith(' '))) {
+            segment.chop(1);
+        }
+        int semi = segment.indexOf(';');
+        if (semi >= 0) {
+            bool numeric_suffix = true;
+            for (int i = semi + 1; i < segment.size(); ++i) {
+                if (!segment.at(i).isDigit()) {
+                    numeric_suffix = false;
+                    break;
+                }
+            }
+            if (numeric_suffix) {
+                segment = segment.left(semi);
+            }
+        }
+        return segment.toUpper();
+    };
+    auto split_segments = [&](const QString& path) {
+        QString normalized = path;
+        normalized.replace('\\', '/');
+        while (normalized.startsWith('/')) {
+            normalized.remove(0, 1);
+        }
+        normalized = QDir::cleanPath(normalized);
+        QStringList parts = normalized.split('/', Qt::SkipEmptyParts);
+        QStringList out;
+        for (const QString& part : parts) {
+            if (part == ".") {
+                continue;
+            }
+            out.push_back(normalize_segment(part));
+        }
+        return out;
+    };
+    auto split_base_ext = [](const QString& name) {
+        const int dot = name.lastIndexOf('.');
+        if (dot <= 0 || dot == name.size() - 1) {
+            return qMakePair(name, QString());
+        }
+        return qMakePair(name.left(dot), name.mid(dot + 1));
+    };
+    auto segment_matches = [&](const QString& requested, const QString& actual) {
+        if (requested == actual) {
+            return true;
+        }
+
+        const auto req = split_base_ext(requested);
+        const auto act = split_base_ext(actual);
+        if (req.second != act.second) {
+            return false;
+        }
+
+        QString req_base = req.first;
+        QString act_base = act.first;
+
+        const int req_tilde = req_base.indexOf('~');
+        const int act_tilde = act_base.indexOf('~');
+        if (req_tilde >= 0) {
+            req_base = req_base.left(req_tilde);
+        }
+        if (act_tilde >= 0) {
+            act_base = act_base.left(act_tilde);
+        }
+
+        if (req_base.isEmpty() || act_base.isEmpty()) {
+            return false;
+        }
+
+        return req_base.startsWith(act_base) || act_base.startsWith(req_base);
+    };
+    const QString base_dir = QDir::cleanPath(QString::fromStdString(content_path).replace('\\', '/'));
+    const QString requested_path = QString::fromStdString(file_path);
+    const QString direct_candidate = QDir(base_dir).filePath(requested_path);
+    QFileInfo direct_file(direct_candidate);
+    if (direct_file.exists() && direct_file.isFile()) {
+        return std::make_unique<std::string>(direct_file.absoluteFilePath().toStdString());
+    }
+    const QStringList requested_segments = split_segments(requested_path);
+    if (requested_segments.isEmpty()) {
+        return nullptr;
+    }
+    QDirIterator it(base_dir, QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        const QString file_full_path = it.next();
+        const QString relative_path = QDir(base_dir).relativeFilePath(file_full_path);
+        const QStringList actual_segments = split_segments(relative_path);
+        if (actual_segments.size() < requested_segments.size()) {
+            continue;
+        }
+
+        bool all_segments_match = true;
+        const int offset = actual_segments.size() - requested_segments.size();
+        for (int i = 0; i < requested_segments.size(); ++i) {
+            if (!segment_matches(requested_segments[i], actual_segments[offset + i])) {
+                all_segments_match = false;
+                break;
+            }
+        }
+        if (all_segments_match) {
+            return std::make_unique<std::string>(QFileInfo(file_full_path).absoluteFilePath().toStdString());
+        }
+    }
+    return nullptr;
+}
+
+const std::string DiskImage::getPath(){
+    return path;
+}
+
+const std::string DiskImage::getId(){
     return id;
 };
 
-const Release::Platform Release::getPlatform(){
+const DiskImage::Platform DiskImage::getPlatform(){
     return platform;
 };
 
-const Release::Region Release::getRegion(){
+const DiskImage::Region DiskImage::getRegion(){
     return region;
 };
 
-const Release::Language Release::getLanguage(){
+const DiskImage::Language DiskImage::getLanguage(){
     return language;
 };
 
-const Release::Disk Release::getDisk(){
+const DiskImage::Disk DiskImage::getDisk(){
     return disk;
 };
 
-const bool Release::isValid(){
+const bool DiskImage::isValid(){
     return valid;
 };
 
-const bool Release::isSupported(){
+const bool DiskImage::isSupported(){
     return supported;
 };
 
-const std::string Release::getErrorMessage(){
+const std::string DiskImage::getErrorMessage(){
     return error_message;
 };
 
-const std::string Release::getWarningMessage(){
+const std::string DiskImage::getWarningMessage(){
     return warning_message;
 };
 
-std::string const Release::getContentPath() {
+std::string const DiskImage::getContentPath() {
     return content_path;
 }

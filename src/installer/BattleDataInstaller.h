@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "DiskImage.h"
 #include "common/BinGZipFile.h"
 #include "common/TypeDefine.h"
 #include "data/BattleSceneFile.h"
@@ -34,13 +35,12 @@ class BattleDataInstaller{
         /**
          * Constructor
          *
-         * @param[in] input_dir Path to the directory containing the original data to parse.
+         * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory of the installation data.
          * @param[in] res_mgr The application resource manager..
          */
         BattleDataInstaller(
-          const std::string input_dir, const std::string output_dir,
-          Ogre::ResourceGroupManager* res_mgr
+          const DiskImage& disk_image, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr
         );
 
         /**
@@ -417,9 +417,9 @@ class BattleDataInstaller{
         );
 
         /**
-         * The path to the directory from which to read the PC game data.
+         * The disk image to extract the data from.
          */
-        std::string input_dir_;
+        DiskImage disk_image_;
 
         /**
          * The path to the directory where to save the V-Gears data.
