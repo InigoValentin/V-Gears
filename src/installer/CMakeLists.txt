@@ -110,6 +110,8 @@ set(v-gears-installer_UIS MainWindow.ui)
 QT5_WRAP_UI(UIS ${v-gears-installer_UIS})
 set(v-gears-installer_MOCS MainWindow.h)
 QT5_WRAP_CPP(MOCS ${v-gears-installer_MOCS})
+set(v-gears-installer_RESOURCES installer_resources.qrc)
+qt5_add_resources(RCC_SOURCES ${v-gears-installer_RESOURCES})
 
 
 # Compiler options.
@@ -119,7 +121,7 @@ endif()
 
 
 # Generate v-gears-installer executable.
-add_executable (v-gears-installer ${INSTALLER_SOURCE_FILES} ${UIS} ${MOCS})
+add_executable (v-gears-installer ${INSTALLER_SOURCE_FILES} ${UIS} ${MOCS} ${RCC_SOURCES})
 SET_PROPERTY(TARGET v-gears-installer PROPERTY FOLDER "build/v-gears-installer")
 if (APPLE)
     target_link_libraries(v-gears-installer "-framework CoreFoundation -framework Cocoa -framework IOKit")

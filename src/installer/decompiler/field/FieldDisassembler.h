@@ -724,7 +724,7 @@ class FieldDisassembler : public Disassembler{
         template<typename T> void ParseOpcode(
           int opcode, std::string name, T instruction, int stack_change, const char* argument_format
         ){
-            uint32 full_opcode = (full_opcode << 8) + opcode;
+                        const uint32 full_opcode = static_cast<uint32>(opcode);
             this->insts_.push_back(instruction);
             this->insts_.back()->SetOpcode(full_opcode);
             this->insts_.back()->SetAddress(this->address_);

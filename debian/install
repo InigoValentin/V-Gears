@@ -1,4 +1,6 @@
 v-gears.desktop /usr/share/applications
 v-gears.png /usr/share/pixmaps
+v-gears-installer.desktop /usr/share/applications
+v-gears-installer.png /usr/share/pixmaps
 v-gears-launcher /usr/bin
 output/resources.cfg /usr/share/v-gears

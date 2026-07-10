@@ -14,6 +14,7 @@
  */
 
 #include <QtWidgets/QApplication>
+#include <QtGui/QIcon>
 
 #include "MainWindow.h"
 
@@ -25,8 +26,18 @@
  * @return The application return code. 0 is OK.
  */
 int main(int argc, char *argv[]){
+    QApplication::setApplicationName(QStringLiteral("v-gears-installer"));
+    QApplication::setApplicationDisplayName(QStringLiteral("V-Gears Installer"));
     QApplication application(argc, argv);
+    QApplication::setDesktopFileName(QStringLiteral("v-gears-installer"));
+    const QIcon installerIcon(QStringLiteral(":/icons/v-gears-installer.png"));
+    if (!installerIcon.isNull()) {
+        application.setWindowIcon(installerIcon);
+    }
     MainWindow window;
+    if (!installerIcon.isNull()) {
+        window.setWindowIcon(installerIcon);
+    }
     window.show();
     return application.exec();
 }

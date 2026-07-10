@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="v-gears-installer.png">../../v-gears-installer.png</file>
+    </qresource>
+</RCC>

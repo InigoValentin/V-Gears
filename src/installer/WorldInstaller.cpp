@@ -23,6 +23,7 @@
 #include "WorldInstaller.h"
 #include "TexFile.h"
 #include "common/Lzs.h"
+#include "common/FinalFantasy7/FF7NameLookup.h"
 #include "common/VGearsStringUtil.h"
 #include "data/VGearsLGPArchive.h"
 #include "data/WorldMapWalkmesh.h"
@@ -341,7 +342,6 @@ void WorldInstaller::GenerateMaterials(){
         Ogre::Technique* tech = mat->getTechnique(0);
         Ogre::Pass* pass = tech->getPass(0);
         pass->setDiffuse(0.7, 0.7, 0.7, 0.7);
-        std::cout << "SAVING MATERIAL: " << (output_dir_ + "models/world/" + t.name + ".material") << std::endl;
         mSer.exportMaterial(mat, output_dir_ + "models/world/" + t.name + ".material");
     }
 }
@@ -349,74 +349,60 @@ void WorldInstaller::GenerateMaterials(){
 void WorldInstaller::ProcessModels(){
     // Open world_us.lgp
     File world_file(*disk_image_.fileExists("data/wm/world_us.lgp"));
+    boost::filesystem::create_directories(output_dir_ + "temp/world_models/");
+    boost::filesystem::create_directories(output_dir_ + "data/models/world/");
     VGears::LGPArchive world_lgp(*disk_image_.fileExists("data/wm/world_us.lgp"), "LGP");
     world_lgp.open(*disk_image_.fileExists("data/wm/world_us.lgp"), true);
     world_lgp.load();
     VGears::LGPArchive::FileList file_list = world_lgp.GetFiles();
+    std::vector<std::string> hrc_file_names;
+
+    // First pass: extract all files so HRC sidecar dependencies (.rsd, .p, .tex) exist.
     for (int i = 0; i < file_list.size(); i ++){
         VGears::LGPArchive::FileEntry f = file_list.at(i);
         if (f.data_offset + f.data_size <= world_file.GetFileSize()){
             File w_lgp_file(&world_file, f.data_offset, f.data_size);
             std::string file_name = f.file_name;
+            VGears::StringUtil::toLowerCase(file_name);
             w_lgp_file.WriteFile(output_dir_ + "temp/world_models/" + file_name);
-            if (file_name.substr(4, 3) == "hrc"){
-
-                std::string id = file_name.substr(0, 3);
-                std::string model_name = FF7Data::GetWorldMapModelName(id);
-                std::cout << "CONVERTING WORLD MODEL: " << file_name << " " << i
-                  << "/" << file_list.size() << std::endl;
-
-
-
-                // TODO: Can this be done with declare resource?
-                // TODO: If not, do aloop to save all the hrc files, then call this once, then
-                // another loop to process them.
-                /*res_mgr_->declareResource(
-                  output_dir_ + "temp/world_models/" + file_name, "Skeleton", "FFVII"
-                );*/
-                std::cout << "1\n";
-                res_mgr_->removeResourceLocation(output_dir_ + "temp/world_models/", "FFVII");
-                std::cout << "2\n";
-                res_mgr_->addResourceLocation(
-                  output_dir_ + "temp/world_models/", "FileSystem", "FFVII", true, true
-                );
-
-
-
-                // TODO: This needs work to assemble all the pieces. Similar to field models.
-
-
-                std::cout << "3\n";
-                Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(
-                  file_name, "FFVII"
-                );
-                std::cout << "4\n";
-                auto mesh_name = model_name + ".mesh";
-                std::cout << "5\n";
-                Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
-                std::cout << "6\n";
-                Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
-                // TODO: a files??
-                /*for (std::string anim : model.a){
-                    VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
-                    Ogre::String a_base_name;
-                    VGears::StringUtil::splitBase(anim, a_base_name);
-                    VGears::AFilePtr a
-                      = afl_mgr.load(a_base_name + ".a", "FFVII").staticCast<VGears::AFile>();
-                    // Convert the FF7 name to a more readable name set in the meta data.
-                    VGears::StringUtil::splitBase(anim, base_name);
-                    a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
-                }*/
-                std::cout << "EXPORT MESH: " << (output_dir_ + "data/models/world/" + mesh_name) << std::endl;
-                ExportMesh(output_dir_ + "data/models/world/" + mesh_name, mesh);
-                std::cout << "    EXPORTED" << std::endl;
-            }
+            if (file_name.size() >= 7 && file_name.substr(4, 3) == "hrc") hrc_file_names.push_back(file_name);
         }
+    }
+
+    // Second pass: convert HRC models once all dependencies are available on disk.
+    for (int i = 0; i < hrc_file_names.size(); i ++){
+        const std::string& file_name = hrc_file_names.at(i);
+
+        // TODO: Can this be done with declare resource?
+        // TODO: If not, do aloop to save all the hrc files, then call this once, then
+        // another loop to process them.
+        res_mgr_->declareResource(output_dir_ + "temp/world_models/" + file_name, "Skeleton", "FFVII");
+        res_mgr_->removeResourceLocation(output_dir_ + "temp/world_models/", "FFVII");
+        res_mgr_->addResourceLocation(output_dir_ + "temp/world_models/", "FileSystem", "FFVII", true, true);
+
+        // TODO: This needs work to assemble all the pieces. Similar to field models.
+        Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(file_name, "FFVII");
+        Ogre::String hrc_base_name;
+        VGears::StringUtil::splitBase(file_name, hrc_base_name);
+        auto mesh_name = VGears::NameLookup::model(hrc_base_name) + ".mesh";
+        Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
+        Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
+        // TODO: a files??
+        /*for (std::string anim : model.a){
+            VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
+            Ogre::String a_base_name;
+            VGears::StringUtil::splitBase(anim, a_base_name);
+            VGears::AFilePtr a
+              = afl_mgr.load(a_base_name + ".a", "FFVII").staticCast<VGears::AFile>();
+            // Convert the FF7 name to a more readable name set in the meta data.
+            VGears::StringUtil::splitBase(anim, base_name);
+            a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
+        }*/
+        ExportMesh(output_dir_ + "data/models/world/", mesh);
     }
 }
 
 bool WorldInstaller::ProcessMap(){
-    //std::cout << "[WI] Processing map " << processed_maps_ << "/" << wm_map_.size() << std::endl;
     if (processed_maps_ >= wm_map_.size()) return true;
     // Initialize the xml file.
     TiXmlDocument doc;
@@ -439,7 +425,7 @@ bool WorldInstaller::ProcessMap(){
     xml->LinkEndChild(xml_walkmesh.release());
     // Terrain (don't close yet).
     std::unique_ptr<TiXmlElement> xml_terrain(new TiXmlElement("terrain"));
-
+    
     // Initialize the walkmesh data.
     WorldMapWalkmesh walkmesh(processed_maps_, processed_maps_ == 0 ? true : false);
 
@@ -463,8 +449,7 @@ bool WorldInstaller::ProcessMap(){
             u32 mesh_size = wm_map_[processed_maps_].readU32LE();
             // Add size to lzss
             wm_map_[processed_maps_].SetOffset(mesh_offset);
-            for (int d = 0; d < 4; d ++)
-                lzss.push_back(wm_map_[processed_maps_].readU8());
+            for (int d = 0; d < 4; d ++) lzss.push_back(wm_map_[processed_maps_].readU8());
             for (int d = 0; d < mesh_size ; d ++) lzss.push_back(wm_map_[processed_maps_].readU8());
             // Extract the lzss file.
             std::vector<unsigned char> data = Lzs::Decompress(lzss);
@@ -478,8 +463,7 @@ bool WorldInstaller::ProcessMap(){
                 if (processed_maps_ >= wm_map_.size()) return true;
                 else return false;
             }
-            for (int d = 0; d <= data.size(); d ++)
-                dat.write((char *) &data[d], sizeof(unsigned char));
+            for (int d = 0; d < data.size(); d ++) dat.write((char *) &data[d], sizeof(unsigned char));
             dat.close();
 
             // Open and read the decompressed file.
@@ -587,9 +571,7 @@ bool WorldInstaller::ProcessMap(){
                 //  << (int) map.blocks[b].mesh[m].triangles[t].vertex_index[1] << ", "
                 //  << (int) map.blocks[b].mesh[m].triangles[t].vertex_index[2] << std::endl;
                 // TODO: El index deberia incrementar por triangulo por cada material
-                man.setMaterialName(
-                  0, texture_.at(map.blocks[b].mesh[m].triangles[t].texture).name
-                );
+                man.setMaterialName(0, texture_.at(map.blocks[b].mesh[m].triangles[t].texture).name);
                 man.triangle(
                   map.blocks[b].mesh[m].triangles[t].vertex_index[0],
                   map.blocks[b].mesh[m].triangles[t].vertex_index[1],
@@ -604,8 +586,7 @@ bool WorldInstaller::ProcessMap(){
         //  << std::endl;
         mesh_serializer.exportMesh(
           mesh.getPointer(),
-          output_dir_ + TERRAIN_MODELS_DIR + "/" + std::to_string(processed_maps_)
-            + "/" + mesh->getName() + ".mesh"
+          output_dir_ + TERRAIN_MODELS_DIR + "/" + std::to_string(processed_maps_) + "/" + mesh->getName() + ".mesh"
         );
         // WM0 is te main worldmap, its shape changes according to the history progress, it has
         // 68 blocks but only 63 are used at a time
@@ -613,12 +594,9 @@ bool WorldInstaller::ProcessMap(){
             std::unique_ptr<TiXmlElement> xml_block(new TiXmlElement("block"));
             xml_block->SetAttribute("index", std::to_string(b));
             xml_block->SetAttribute(
-              "file_name",
-              "terrain/" + std::to_string(processed_maps_) + "/" + mesh->getName() + ".mesh"
+              "file_name", "terrain/" + std::to_string(processed_maps_) + "/" + mesh->getName() + ".mesh"
             );
-            xml_block->SetAttribute(
-              "position", std::to_string(wm_offset_x) + " " + std::to_string(wm_offset_y) + " 0"
-            );
+            xml_block->SetAttribute("position", std::to_string(wm_offset_x) + " " + std::to_string(wm_offset_y) + " 0");
             if (processed_maps_ == 0){
                 // TODO: Correct history points for each block.
                 switch (b){
@@ -657,8 +635,7 @@ bool WorldInstaller::ProcessMap(){
     doc.LinkEndChild(xml.release());
     // TODO: Add models, entities...
     doc.SaveFile(
-      output_dir_ + "/world/" + std::to_string(processed_maps_)
-      + "/world" + std::to_string(processed_maps_) + ".xml"
+      output_dir_ + "/world/" + std::to_string(processed_maps_) + "/world" + std::to_string(processed_maps_) + ".xml"
     );
     // Generate the walkmesh xml file
     walkmesh.generate(output_dir_ + "/world/" + std::to_string(processed_maps_) + "/wm.xml");
@@ -671,26 +648,33 @@ bool WorldInstaller::ProcessMap(){
 
 void WorldInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
 
+    if (mesh.isNull()){
+        std::cerr << "[ERROR] ExportMesh called with null mesh." << std::endl;
+        return;
+    }
+
+  boost::filesystem::create_directories(outdir);
+
     // TODO: Share function with pc model exporter
     VGears::String base_mesh_name;
     VGears::StringUtil::splitFull(mesh->getName(), base_mesh_name);
     Ogre::MeshSerializer mesh_serializer;
     Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
-    Ogre::SkeletonSerializer skeleton_serializer;
-    skeleton_serializer.exportSkeleton(
-      skeleton.getPointer(), outdir + base_mesh_name + ".skeleton"
-    );
-    mesh->setSkeletonName(base_mesh_name + ".skeleton");
+    if (!skeleton.isNull()){
+        Ogre::SkeletonSerializer skeleton_serializer;
+        skeleton_serializer.exportSkeleton(skeleton.getPointer(), outdir + base_mesh_name + ".skeleton");
+        mesh->setSkeletonName(base_mesh_name + ".skeleton");
+    }
     mesh_serializer.exportMesh(mesh.getPointer(), outdir + mesh->getName());
     Ogre::Mesh::SubMeshIterator it(mesh->getSubMeshIterator());
     Ogre::MaterialSerializer mat_ser;
     size_t i(0);
     std::set<std::string> textures;
+    std::set<std::string> queued_materials;
+    bool has_queued_materials = false;
     while (it.hasMoreElements()){
         Ogre::SubMesh *sub_mesh(it.getNext());
-        Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(
-          sub_mesh->getMaterialName())
-        );
+        Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName()));
         if (mat != nullptr){
             for (size_t techs = 0; techs < mat->getNumTechniques(); techs ++){
                 Ogre::Technique* tech = mat->getTechnique(techs);
@@ -703,57 +687,51 @@ void WorldInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &m
                               texture_unit_num < pass->getNumTextureUnitStates();
                               texture_unit_num ++
                             ){
-                                Ogre::TextureUnitState* unit
-                                  = pass->getTextureUnitState(texture_unit_num);
+                                Ogre::TextureUnitState* unit = pass->getTextureUnitState(texture_unit_num);
                                 if (unit && unit->getTextureName().empty() == false){
-                                    // Convert the texture from .tex to .png.
-                                    TexFile tex(
-                                      output_dir_ + "temp/wm/" + unit->getTextureName()
-                                    );
+                                    try{
+                                        // Convert the texture from .tex to .png.
+                                        TexFile tex(output_dir_ + "temp/world_models/" + unit->getTextureName());
 
-                                    // Ensure the output material script references png files
-                                    // rather than tex files.
-                                    Ogre::String base_name;
-                                    VGears::StringUtil::splitBase(
-                                      unit->getTextureName(), base_name
-                                    );
-                                    unit->setTextureName(base_mesh_name + "_" + base_name + ".png");
+                                        // Ensure the output material script references png files
+                                        // rather than tex files.
+                                        Ogre::String base_name;
+                                        VGears::StringUtil::splitBase(unit->getTextureName(), base_name);
+                                        unit->setTextureName(base_mesh_name + "_" + base_name + ".png");
 
-                                    tex.SavePng(
-                                      output_dir_ + ELEMENT_MODELS_DIR + "/" + base_name + ".png", 0
-                                    );
-                                    // Copy subtexture (xxxx.png) to model_xxxx.png
-                                    // TODO: obtain the "data" folder
-                                    // programatically.
-                                    boost::filesystem::copy_file(
-                                        output_dir_ + ELEMENT_MODELS_DIR + "/" + base_name + ".png",
-                                        output_dir_ + ELEMENT_MODELS_DIR + "/"
-                                        + base_mesh_name + "_" + base_name + ".png",
-                                      boost::filesystem::copy_options::overwrite_existing
-                                    );
-                                    textures.insert(unit->getTextureName());
+                                        const auto plain_png = outdir + base_name + ".png";
+                                        const auto model_png = outdir + base_mesh_name + "_" + base_name + ".png";
+                                        tex.SavePng(plain_png, 0);
+                                        boost::filesystem::copy_file(
+                                          plain_png, model_png, boost::filesystem::copy_options::overwrite_existing
+                                        );
+                                        textures.insert(unit->getTextureName());
+                                    }
+                                    catch (const std::exception& ex){
+                                        std::cerr << "[ERROR] Texture export failed for "
+                                          << unit->getTextureName() << ": " << ex.what() << std::endl;
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-            // TODO: Check what to do with materials
-            /**
-            if (std::count(materials_.begin(), materials_.end(), sub_mesh->getMaterialName()) == 0){
+            // Queue each material once. Exporting with an empty queue throws in Ogre.
+            if (queued_materials.insert(sub_mesh->getMaterialName()).second){
                 mat_ser.queueForExport(mat);
-                materials_.push_back(sub_mesh->getMaterialName());
-            }*/
+                has_queued_materials = true;
+            }
 
         }
         ++ i;
     }
-    mat_ser.exportQueued(outdir + base_mesh_name + VGears::EXT_MATERIAL);
+    if (has_queued_materials) mat_ser.exportQueued(outdir + base_mesh_name + VGears::EXT_MATERIAL);
     for (auto& texture_name : textures){
         std::string tex_name = texture_name.c_str();
         try{
-            Ogre::TexturePtr texture_ptr
-              = Ogre::TextureManager::getSingleton().load(tex_name, "FFVIITextures" /*"FFVII"*/);
+            Ogre::TexturePtr texture_ptr = Ogre::TextureManager::getSingleton().load(tex_name, "FFVIITextures");
+            //Ogre::TexturePtr texture_ptr = Ogre::TextureManager::getSingleton().load(tex_name, "FFVII");
             Ogre::Image image;
             texture_ptr->convertToImage(image);
             Ogre::String base_name;

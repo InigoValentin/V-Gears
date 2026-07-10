@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <iostream>
 #include <set>
+#include <stdexcept>
 #include <boost/format.hpp>
 #include "decompiler/ControlFlow.h"
 
@@ -62,6 +63,7 @@
 #define GET_EDGE(edge) (boost::get(boost::edge_attribute, graph_, edge))
 
 ControlFlow::ControlFlow(InstVec& insts, Engine& engine): insts_(insts),engine_(engine){
+    if (insts_.empty()) return;
 
     // Automatically add a function if we're not supposed to look for more functions
     // and no functions are defined.
@@ -87,7 +89,6 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine): insts_(insts),engine_(
         prev = GET(cur);
     }
     // Add regular edges.
-    FuncMap::iterator fn;
     GraphVertex last ={};
     bool add_edge = false;
     prev = NULL;
@@ -107,7 +108,17 @@ ControlFlow::ControlFlow(InstVec& insts, Engine& engine): insts_(insts),engine_(
     // Add jump edges.
     for (InstIterator it = insts.begin(); it != insts.end(); ++ it){
         if ((*it)->IsJump()){
-            GraphEdge e = boost::add_edge(Find(it), Find((*it)->GetDestAddress()), graph_).first;
+            const uint32 src_addr = (*it)->GetAddress();
+            const uint32 dest_addr = (*it)->GetDestAddress();
+            auto src_it = addr_map_.find(src_addr);
+            auto dest_it = addr_map_.find(dest_addr);
+            if (src_it == addr_map_.end() || dest_it == addr_map_.end()){
+                std::cerr << "Invalid jump edge in control-flow graph: source " << boost::format("0x%08x") % src_addr
+                  << " -> destination " << boost::format("0x%08x") % dest_addr << " (opcode "
+                  << boost::format("0x%02x") % (*it)->GetOpcode() << ")" << std::endl;
+                continue;
+            }
+            GraphEdge e = boost::add_edge(src_it->second, dest_it->second, graph_).first;
             PUT_EDGE(e, true);
         }
     }
@@ -122,8 +133,9 @@ GraphVertex ControlFlow::Find(ConstInstIterator it){return addr_map_[(*it)->GetA
 GraphVertex ControlFlow::Find(uint32 address){
     std::map<uint32, GraphVertex>::iterator it = addr_map_.find(address);
     if (it == addr_map_.end()){
-        std::cerr << "Request for instruction at unknown address "
-          << boost::format("0x%08x") % address << std::endl;
+        throw std::runtime_error(
+            (boost::format("Request for instruction at unknown address 0x%08x") % address).str()
+        );
     }
     return it->second;
 }
@@ -195,11 +207,7 @@ void ControlFlow::CreateGroups(){
         return;
     }
 
-    for (
-      FuncMap::iterator fn = engine_.functions.begin();
-      fn != engine_.functions.end();
-      ++ fn
-    ){
+    for (FuncMap::iterator fn = engine_.functions.begin(); fn != engine_.functions.end(); ++ fn){
         SetStackLevel(fn->second.vertex, 0);
     }
     ConstInstIterator cur_inst, next_inst;
@@ -366,11 +374,7 @@ void ControlFlow::DetectBreak(){
     for (VertexIterator v = vertex_range.first; v != vertex_range.second; ++ v){
         GroupPtr gr = GET(*v);
         // Undetermined block with unconditional jump...
-        if (
-          gr->type == GROUP_TYPE_NORMAL
-          && ((*gr->end)->IsUncondJump())
-          && out_degree(*v, graph_) == 1
-        ){
+        if (gr->type == GROUP_TYPE_NORMAL && ((*gr->end)->IsUncondJump()) && out_degree(*v, graph_) == 1){
             OutEdgeIterator oe = boost::out_edges(*v, graph_).first;
             GraphVertex target = boost::target(*oe, graph_);
             GroupPtr target_gr = GET(target);
@@ -397,11 +401,7 @@ void ControlFlow::DetectContinue(){
     for (VertexIterator v = vertex_range.first; v != vertex_range.second; ++ v){
         GroupPtr gr = GET(*v);
         // Undetermined block with unconditional jump...
-        if (
-          gr->type == GROUP_TYPE_NORMAL
-          && ((*gr->end)->IsUncondJump())
-          && out_degree(*v, graph_) == 1
-        ){
+        if ( gr->type == GROUP_TYPE_NORMAL && ((*gr->end)->IsUncondJump()) && out_degree(*v, graph_) == 1){
             OutEdgeIterator oe = boost::out_edges(*v, graph_).first;
             GraphVertex target = boost::target(*oe, graph_);
             GroupPtr target_gr = GET(target);
@@ -415,24 +415,18 @@ void ControlFlow::DetectContinue(){
                 bool after_jump_jargets = true;
                 for (OutEdgeIterator toe = toer.first; toe != toer.second; ++ toe){
                     // ...it is targeting a while condition which jumps to the next sequential group
-                    if (
-                      target_gr->type == GROUP_TYPE_WHILE
-                      && GET(boost::target(*toe, graph_)) == gr->next
-                    ){
+                    if (target_gr->type == GROUP_TYPE_WHILE && GET(boost::target(*toe, graph_)) == gr->next){
                         is_continue = false;
                     }
                     // ...or the instruction is placed after all jump targets from condition.
-                    if (
-                      (*GET(boost::target(*toe, graph_))->start)->GetAddress()
-                        > (*gr->start)->GetAddress()
-                    ){
+                    if ((*GET(boost::target(*toe, graph_))->start)->GetAddress() > (*gr->start)->GetAddress()){
                         after_jump_jargets = false;
                     }
                 }
                 if (after_jump_jargets) is_continue = false;
-
-                if (is_continue && ValidateBreakOrContinue(gr, target_gr))
+                if (is_continue && ValidateBreakOrContinue(gr, target_gr)){
                     gr->type = GROUP_TYPE_CONTINUE;
+                }
             }
         }
     }
@@ -450,9 +444,7 @@ bool ControlFlow::ValidateBreakOrContinue(GroupPtr group, GroupPtr condition_gro
         to = group;
         from = condition_group->next;
     }
-    GROUP_TYPE ogt = (
-      condition_group->type == GROUP_TYPE_DO_WHILE ? GROUP_TYPE_WHILE : GROUP_TYPE_DO_WHILE
-    );
+    GROUP_TYPE ogt = (condition_group->type == GROUP_TYPE_DO_WHILE ? GROUP_TYPE_WHILE : GROUP_TYPE_DO_WHILE);
     // Verify that destination deals with innermost while/do-while.
     for (cursor = from; cursor->next != NULL && cursor != to; cursor = cursor->next){
         if (cursor->type == condition_group->type){
@@ -474,9 +466,7 @@ bool ControlFlow::ValidateBreakOrContinue(GroupPtr group, GroupPtr condition_gro
                 }
                 InEdgeRange ier_validate = boost::in_edges(v_validate, graph_);
                 for (
-                  InEdgeIterator ie_validate = ier_validate.first;
-                  ie_validate != ier_validate.second;
-                  ++ ie_validate
+                  InEdgeIterator ie_validate = ier_validate.first; ie_validate != ier_validate.second; ++ ie_validate
                 ){
                     GroupPtr ig_validate = GET(boost::source(*ie_validate, graph_));
                     // All loops of other type going into range must be placed within range.
@@ -501,8 +491,9 @@ void ControlFlow::DetectIf(){
     for (VertexIterator v = vr.first; v != vr.second; ++v){
         GroupPtr gr = GET(*v);
         // If: Undetermined block with conditional jump.
-        if (gr->type == GROUP_TYPE_NORMAL && ((*gr->end)->IsCondJump()))
+        if (gr->type == GROUP_TYPE_NORMAL && ((*gr->end)->IsCondJump())){
             gr->type = GROUP_TYPE_IF;
+        }
     }
 }
 
@@ -527,16 +518,11 @@ void ControlFlow::DetectElse(){
             // Else: Jump target of if immediately preceded by an unconditional jump...
             if (!(*target_gr->prev->end)->IsUncondJump()) continue;
             // ...which is not a break or a continue...
-            if (
-              target_gr->prev->type == GROUP_TYPE_CONTINUE
-              || target_gr->prev->type == GROUP_TYPE_BREAK
-            ){
+            if (target_gr->prev->type == GROUP_TYPE_CONTINUE || target_gr->prev->type == GROUP_TYPE_BREAK){
                 continue;
             }
             // ...to later in the code.
-            OutEdgeIterator toe = boost::out_edges(
-              Find((*target_gr->prev->start)->GetAddress()), graph_
-            ).first;
+            OutEdgeIterator toe = boost::out_edges(Find((*target_gr->prev->start)->GetAddress()), graph_).first;
             GroupPtr target_target_gr = GET(boost::target(*toe, graph_));
             if ((*target_target_gr->start)->GetAddress() > (*target_gr->end)->GetAddress()){
                 if (ValidateElseBlock(gr, target_gr, target_target_gr)){
@@ -550,11 +536,7 @@ void ControlFlow::DetectElse(){
 
 bool ControlFlow::ValidateElseBlock(GroupPtr if_group, GroupPtr start, GroupPtr end){
     for (GroupPtr cursor = start; cursor != end; cursor = cursor->next){
-        if (
-          cursor->type == GROUP_TYPE_IF
-          || cursor->type == GROUP_TYPE_WHILE
-          || cursor->type == GROUP_TYPE_DO_WHILE
-        ){
+        if (cursor->type == GROUP_TYPE_IF || cursor->type == GROUP_TYPE_WHILE || cursor->type == GROUP_TYPE_DO_WHILE){
             // Validate outgoing edges of conditions.
             OutEdgeRange oer = boost::out_edges(Find(cursor->start), graph_);
             for (OutEdgeIterator oe = oer.first; oe != oer.second; ++ oe){
@@ -570,12 +552,10 @@ bool ControlFlow::ValidateElseBlock(GroupPtr if_group, GroupPtr start, GroupPtr 
             }
         }
         // If previous group ends an else, that else must start inside the range.
-        for (
-          ElseEndIterator it = cursor->prev->end_else.begin();
-          it != cursor->prev->end_else.end();
-          ++ it
-        ){
-            if ((*(*it)->start)->GetAddress() < (*start->start)->GetAddress()) return false;
+        for (ElseEndIterator it = cursor->prev->end_else.begin(); it != cursor->prev->end_else.end(); ++ it){
+            if ((*(*it)->start)->GetAddress() < (*start->start)->GetAddress()){
+                return false;
+            }
         }
         // Unless group is a simple unconditional jump...
         if ((*cursor->start)->IsUncondJump()) continue;
@@ -586,8 +566,7 @@ bool ControlFlow::ValidateElseBlock(GroupPtr if_group, GroupPtr start, GroupPtr 
             GroupPtr source_gr = GET(source);
             // Edges going to conditions...
             if (
-              source_gr->type == GROUP_TYPE_IF
-              || source_gr->type == GROUP_TYPE_WHILE
+              source_gr->type == GROUP_TYPE_IF || source_gr->type == GROUP_TYPE_WHILE
               || source_gr->type == GROUP_TYPE_DO_WHILE
             ){
                 // ...must not come from outside the range [start, end]...

@@ -280,8 +280,7 @@ float DataInstaller::Progress(){
             cur_substep_ = 0;
             return CalcProgress();
         case MEDIA_SOUNDS:
-            if (media_installer_->InstallSounds() == true)
-                installation_state_ = MEDIA_SOUNDS_INDEX;
+            if (media_installer_->InstallSounds() == true) installation_state_ = MEDIA_SOUNDS_INDEX;
             else cur_substep_ ++;
             return CalcProgress();
         case MEDIA_SOUNDS_INDEX:
@@ -302,8 +301,7 @@ float DataInstaller::Progress(){
             cur_substep_ = 0;
             return CalcProgress();
         case MEDIA_MUSICS:
-            if (media_installer_->InstallMusics() == true)
-                installation_state_ = MEDIA_MUSICS_HQ;
+            if (media_installer_->InstallMusics() == true) installation_state_ = MEDIA_MUSICS_HQ;
             else cur_substep_ ++;
             return CalcProgress();
         case MEDIA_MUSICS_HQ:
@@ -409,8 +407,7 @@ float DataInstaller::Progress(){
             }
             return CalcProgress();
         case WM_MODELS:
-            if (options_.skip_wm_models)
-                write_output_line_("Skipping world map model installation...", 2, true);
+            if (options_.skip_wm_models) write_output_line_("Skipping world map model installation...", 2, true);
             else world_installer_->ProcessModels();
             installation_state_ = CLEAN;
             return CalcProgress();

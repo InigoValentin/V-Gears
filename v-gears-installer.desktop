@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=V-Gears Installer
+GenericName=V-Gears Installer
+Comment=Install V-Gears game data
+Exec=v-gears-installer
+Icon=v-gears-installer
+StartupWMClass=v-gears-installer
+Terminal=false
+StartupNotify=true
+Categories=Game;Utility;
