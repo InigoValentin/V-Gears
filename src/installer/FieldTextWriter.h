@@ -43,9 +43,7 @@ class FieldTextWriter{
          * @param[in] field_name The field of the text.
          * @param[in] english True if the language to write is english.
          */
-        void Write(
-          const std::vector<u8>& script_section_buffer, std::string field_name, bool english = true
-        );
+        void Write(const std::vector<u8>& script_section_buffer, std::string field_name, bool english = true);
 
         /**
          * Finalizes the text file.

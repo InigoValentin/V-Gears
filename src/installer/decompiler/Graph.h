@@ -139,9 +139,7 @@ namespace boost {
              * @param[out] out The stream to output to.
              * @param[in] v The vertex or edge to output the attribute for.
              */
-            template <class VertexOrEdge> void operator()(
-              std::ostream& out, const VertexOrEdge& v
-            ) const {
+            template <class VertexOrEdge> void operator()(std::ostream& out, const VertexOrEdge& v) const {
                 out << "[arrowhead=\"" << get(name, v) << "\"]";
             }
 

@@ -136,9 +136,7 @@ void TexFile::SavePng(
   unsigned int palette
 ){
     if (version_ != 0x00000001){
-        std::cout
-          << "[WARNING] Tried to convert an invalid TEX file to png. Version ID: "
-          << version_ << std::endl;
+        std::cout << "[WARNING] Tried to convert an invalid TEX file to png. Version ID: " << version_ << std::endl;
         return;
     }
     // TODO: Warn if wrong palette index.
@@ -194,9 +192,7 @@ void TexFile::SavePng(
   unsigned int w1, unsigned int w2, unsigned int h, unsigned int palette
 ){
     if (version_ != 0x00000001){
-        std::cout
-          << "[WARNING] Tried to convert an invalid TEX file to png. Version ID: "
-          << version_ << std::endl;
+        std::cout << "[WARNING] Tried to convert an invalid TEX file to png. Version ID: " << version_ << std::endl;
         return;
     }
     // TODO: Warn if wrong palette index.

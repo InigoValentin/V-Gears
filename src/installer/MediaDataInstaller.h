@@ -16,6 +16,7 @@
 #pragma once
 
 #include <unordered_map>
+#include "DiskImage.h"
 #include "data/VGearsLGPArchive.h"
 #include "common/BinGZipFile.h"
 #include "TexFile.h"
@@ -31,14 +32,14 @@ class MediaDataInstaller{
         /**
          * Constructor
          *
-         * @param[in] input_dir Path to the directory containing the original data to parse.
+         * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory of the installation data.
          * @param[in] keep_originals True to keep original data after conversion, false to remove.
          * @param[in] no_ffmpeg True to prevent system calls to ffmpeg command, false to allow.
          * @param[in] no_timidity True to prevent system calls to timidity command, false to allow.
          */
         MediaDataInstaller(
-          const std::string input_dir, const std::string output_dir, const bool keep_originals,
+          const DiskImage& disk_image, const std::string output_dir, const bool keep_originals,
           const bool no_ffmpeg, const bool no_timidity
         );
 
@@ -105,6 +106,18 @@ class MediaDataInstaller{
          */
         void WriteMusicsIndex();
 
+        /**
+         * Prepares the installer for the video extraction.
+         *
+         * @return The total number of videos to process.
+         */
+        int InstallVideosInit();
+
+        /**
+         * Copies the FMV videos.
+         */
+        void InstallVideos();
+
     private:
 
         /**
@@ -121,9 +134,9 @@ class MediaDataInstaller{
 		std::string GetExecutablePath();
 
         /**
-         * The path to the directory from which to read the PC game data.
+         * The disk image to read the original data from.
          */
-        std::string input_dir_;
+        DiskImage disk_image_;
 
         /**
          * The path to the directory where to save the V-Gears data.
@@ -161,6 +174,11 @@ class MediaDataInstaller{
         std::vector<std::string> sounds_;
 
         /**
+         * Video files to copy
+         */
+        std::vector<std::string> videos_;
+
+        /**
          * The midi.lgp file.
          */
         VGears::LGPArchive midi_;
@@ -169,6 +187,11 @@ class MediaDataInstaller{
          * Number of music tracks already processed.
          */
         int processed_musics_;
+
+        /**
+         * Number of video files already processed.
+         */
+        int processed_videos_;
 
         /**
          * Map for music files with descriptive names.
@@ -186,13 +209,13 @@ class MediaDataInstaller{
         bool keep_originals_;
 
         /**
-         * Flag to prevent system calls to ffmpeg.
+         * Flag to enable system calls to ffmpeg.
          */
-        bool no_ffmpeg_;
+        bool ffmpeg_;
 
         /**
-         * Flag to prevent system calls to timidity.
+         * Flag to enable system calls to timidity.
          */
-        bool no_timidity_;
+        bool timidity_;
 
 };

@@ -23,11 +23,9 @@ using namespace VGears;
 
 FontFile::FontFile(File* file): File(file){}
 
-FontFile::FontFile(File* file, const u32& offset, const u32& length):
-  File(file, offset, length){}
+FontFile::FontFile(File* file, const u32& offset, const u32& length): File(file, offset, length){}
 
-FontFile::FontFile(u8* buffer, const u32& offset, const u32& length):
-  File(buffer, offset, length){}
+FontFile::FontFile(u8* buffer, const u32& offset, const u32& length): File(buffer, offset, length){}
 
 FontFile::~FontFile(void){}
 
@@ -80,9 +78,7 @@ Surface* FontFile::GetSurface(void){
                 color.g = (((data >> i) & 0x01) == 1) ? 0 : 255;
                 color.b = (((data >> i) & 0x01) == 1) ? 0 : 255;
                 color.a = 255;
-                memcpy(
-                  glyth->pixels.data() + 64 * y + j, &color, sizeof(ClutColor)
-                );
+                memcpy(glyth->pixels.data() + 64 * y + j, &color, sizeof(ClutColor));
                 j += 4;
             }
             data = (y < 11) ? GetU8(0xE + chars * 22 + y * 2 + 1) : 0;
@@ -92,9 +88,7 @@ Surface* FontFile::GetSurface(void){
                 color.g = (((data >> i) & 0x01) == 1) ? 0 : 255;
                 color.b = (((data >> i) & 0x01) == 1) ? 0 : 255;
                 color.a = 255;
-                memcpy(
-                  glyth->pixels.data() + 64 * y + j, &color, sizeof(ClutColor)
-                );
+                memcpy(glyth->pixels.data() + 64 * y + j, &color, sizeof(ClutColor));
                 j += 4;
             }
         }
@@ -110,30 +104,24 @@ Surface* FontFile::GetSurface(void){
     Ogre::TexturePtr ptex;
     Ogre::HardwarePixelBufferSharedPtr buffer;
     ptex = Ogre::TextureManager::getSingleton().createManual(
-      "DynaTex", "General", Ogre::TEX_TYPE_2D,
-      ret->width, ret->height, 0, Ogre::PF_R8G8B8A8, Ogre::TU_STATIC
+      "DynaTex", "General", Ogre::TEX_TYPE_2D, ret->width, ret->height, 0, Ogre::PF_R8G8B8A8, Ogre::TU_STATIC
     );
     buffer = ptex->getBuffer(0, 0);
     buffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
     const Ogre::PixelBox& pb = buffer->getCurrentLock();
     for (auto y = 0; y < ret->height; ++ y){
-        // IVV type cast
-        auto* data = static_cast<unsigned int*> (
-          reinterpret_cast<unsigned int *>(pb.data) + y * pb.rowPitch
-        );
+        // Type cast
+        auto* data = static_cast<unsigned int*> (reinterpret_cast<unsigned int *>(pb.data) + y * pb.rowPitch);
         for (auto x = 0; x < ret->width; ++ x){
-            auto clut
-              = ret->pixels[y * ret->width * 4 + x * 4 + 3]
-                | (ret->pixels[y * ret->width * 4 + x * 4 + 2] << 8)
-                | (ret->pixels[y * ret->width * 4 + x * 4 + 1] << 16)
-                | (ret->pixels[y * ret->width * 4 + x * 4 + 0] << 24);
+            auto clut = ret->pixels[y * ret->width * 4 + x * 4 + 3]
+              | (ret->pixels[y * ret->width * 4 + x * 4 + 2] << 8)
+              | (ret->pixels[y * ret->width * 4 + x * 4 + 1] << 16)
+              | (ret->pixels[y * ret->width * 4 + x * 4 + 0] << 24);
             data[x] = clut;
         }
     }
     Ogre::Image image;
-    image.loadDynamicImage(
-      (Ogre::uchar*) pb.data, ret->width, ret->height, Ogre::PF_R8G8B8A8
-    );
+    image.loadDynamicImage((Ogre::uchar*) pb.data, ret->width, ret->height, Ogre::PF_R8G8B8A8);
     image.save("font.png");
     buffer->unlock();
     Ogre::TextureManager::getSingleton().remove("DynaTex");

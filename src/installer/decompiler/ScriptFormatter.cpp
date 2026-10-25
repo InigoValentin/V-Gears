@@ -17,20 +17,16 @@
 
 std::string ScriptFormatter::GetFriendlyVarName(unsigned int bank, unsigned int addr){return "";}
 
-std::string ScriptFormatter::GetFriendlyEntityName(const std::string& entity_name){
-    return entity_name;
-}
+std::string ScriptFormatter::GetFriendlyEntityName(const std::string& entity_name){return entity_name;}
 
-std::string ScriptFormatter::GetFriendlyAnimationName(int animation_id, int id){
-    return std::to_string(animation_id);
-}
+std::string ScriptFormatter::GetFriendlyAnimationName(int animation_id, int id){return std::to_string(animation_id);}
 
 std::string ScriptFormatter::GetFriendlyCharName(int char_id){return std::to_string(char_id);}
 
-std::string ScriptFormatter::GetFriendlyFunctionName(
-  const std::string& entity_name, const std::string& function_name
-){return function_name;}
+std::string ScriptFormatter::GetFriendlyFunctionName(const std::string& entity_name, const std::string& function_name){
+    return function_name;
+}
 
-std::string ScriptFormatter::GetFunctionComment(
-  const std::string& entity_name, const std::string& function_name
-){return "";}
+std::string ScriptFormatter::GetFunctionComment(const std::string& entity_name, const std::string& function_name){
+    return "";
+}

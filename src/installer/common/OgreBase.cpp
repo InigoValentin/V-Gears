@@ -92,9 +92,7 @@ void InitializeOgreBase(const Ogre::String& name){
     window = root->createRenderWindow("VGearsWindow", 800, 600, false, &misc);
     // Initialize resources in the current launch directory.
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation("./", "FileSystem", "General");
-    Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-      "./exported", "FileSystem", "General"
-    );
+    Ogre::ResourceGroupManager::getSingleton().addResourceLocation("./exported", "FileSystem", "General");
     Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
     Ogre::SceneManager* scene_manager;
     Ogre::Viewport* viewport;
@@ -114,9 +112,7 @@ void InitializeOgreBase(const Ogre::String& name){
     camera->getParentSceneNode()->lookAt(Ogre::Vector3(0, 0, 0), Ogre::Node::TS_LOCAL);
     viewport = window->addViewport(camera);
     viewport->setBackgroundColour(Ogre::ColourValue(0.0f, 0.4f, 0.0f));
-    camera->setAspectRatio(
-      Ogre::Real(viewport->getActualWidth()) / Ogre::Real(viewport->getActualHeight())
-    );
+    camera->setAspectRatio(Ogre::Real(viewport->getActualWidth()) / Ogre::Real(viewport->getActualHeight()));
     LOGGER = new Logger("game.log");
 }
 

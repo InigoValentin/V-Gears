@@ -67,15 +67,9 @@ std::vector<std::string> DaFile::GenerateAFiles(std::string model_id, std::strin
             a.write(reinterpret_cast<const char*>(&animations_[anim].frames[f].offset.f_z), 4);
             // Bones.
             for (int b = 1; b < animations_[anim].frames[f].bones.size(); b ++){
-                a.write(
-                  reinterpret_cast<const char*>(&animations_[anim].frames[f].bones[b].f_x), 4
-                );
-                a.write(
-                  reinterpret_cast<const char*>(&animations_[anim].frames[f].bones[b].f_y), 4
-                );
-                a.write(
-                  reinterpret_cast<const char*>(&animations_[anim].frames[f].bones[b].f_z), 4
-                );
+                a.write(reinterpret_cast<const char*>(&animations_[anim].frames[f].bones[b].f_x), 4);
+                a.write(reinterpret_cast<const char*>(&animations_[anim].frames[f].bones[b].f_y), 4);
+                a.write(reinterpret_cast<const char*>(&animations_[anim].frames[f].bones[b].f_z), 4);
             }
         }
         a.close();

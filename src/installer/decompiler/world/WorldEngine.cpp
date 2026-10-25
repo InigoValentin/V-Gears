@@ -30,9 +30,7 @@
 
 WorldEngine::BankValue::BankValue(std::string name) : VarValue(name){}
 
-WorldEngine::WorldEngine(int script_number) : script_number_(script_number){
-    SetOutputStackEffect(true);
-}
+WorldEngine::WorldEngine(int script_number) : script_number_(script_number){SetOutputStackEffect(true);}
 
 std::unique_ptr<Disassembler> WorldEngine::GetDisassembler(InstVec &insts){
     return std::make_unique<WorldDisassembler>(this, insts, script_number_);

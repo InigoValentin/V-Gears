@@ -67,9 +67,7 @@ class CodeGenerator {
          * @param[in] bin_order Order of arguments for binary operators.
          * @param[in] call_order Order of arguments for function calls.
          */
-        CodeGenerator(
-          Engine *engine, std::ostream &output, ARGUMENT_ORDER bin_order, ARGUMENT_ORDER call_order
-        );
+        CodeGenerator(Engine *engine, std::ostream &output, ARGUMENT_ORDER bin_order, ARGUMENT_ORDER call_order);
 
         /**
          * Destructor.
@@ -113,9 +111,7 @@ class CodeGenerator {
          * @param[in] indent_after Whether or not to add an indentation level
          * after the line. Defaults to false.
          */
-        virtual void AddOutputLine(
-          std::string line, bool unindent_before = false, bool indent_after = false
-        );
+        virtual void AddOutputLine(std::string line, bool unindent_before = false, bool indent_after = false);
 
         /**
          * Writes a comment line indicating an unimplemented opcode.

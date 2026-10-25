@@ -73,9 +73,7 @@ class ScriptFormatter{
          * @return Friendly name assigned to the entity, or
          * function_name if there is none.
          */
-        virtual std::string GetFriendlyFunctionName(
-          const std::string& entity_name, const std::string& function_name
-        );
+        virtual std::string GetFriendlyFunctionName(const std::string& entity_name, const std::string& function_name);
 
         /**
          * Retrieves the header comment for a function in an entity.
@@ -85,7 +83,5 @@ class ScriptFormatter{
          * @return The function comment. An empty string if the entity or
          * the function don't exist.
          */
-        virtual std::string GetFunctionComment(
-          const std::string& entity_name, const std::string& function_name
-        );
+        virtual std::string GetFunctionComment(const std::string& entity_name, const std::string& function_name);
 };

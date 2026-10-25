@@ -27,8 +27,7 @@ unsigned int AbFile::GenerateScripts(std::string model_id, std::string path) con
     std::string file_name = path + model_id + ".lua";
     std::fstream file(file_name, std::ios::out);
     if (!file.is_open()){
-        std::cerr << "Unable to open file " << file_name
-          << " for animation script generation." << std::endl;
+        std::cerr << "Unable to open file " << file_name  << " for animation script generation." << std::endl;
         return 0;
     }
     file << model_id << " = {}" << std::endl << std::endl;
@@ -69,9 +68,7 @@ std::string AbFile::DecompileScript(u32 offset){
         }
         total_opcodes ++;
         u8 opcode = ab_file_.readU8();
-        if (opcode >= 0x00 && opcode <= 0x8D){
-            line << "    play_animation(" << static_cast<int>(opcode) << ")";
-        }
+        if (opcode >= 0x00 && opcode <= 0x8D) line << "    play_animation(" << static_cast<int>(opcode) << ")";
         else{
             switch (opcode){
                 case 0x91: // Play effect, one 1 byte parameter.
@@ -90,13 +87,12 @@ std::string AbFile::DecompileScript(u32 offset){
                      //   distance (2 bytes), distance from the joint.
                      //   start (1 byte), effect start.
                      //   end (1 byte), effect end.
-                    line << "    set_effect(" << static_cast<int>(ab_file_.readU8()) << ", "
-                      << ab_file_.readU16LE() << ", " << static_cast<int>(ab_file_.readU8()) << ", "
+                    line << "    set_effect(" << static_cast<int>(ab_file_.readU8()) << ", " << ab_file_.readU16LE()
+                      << ", " << static_cast<int>(ab_file_.readU8()) << ", "
                       << static_cast<int>(ab_file_.readU8()) << ")";
                     break;
                 case 0xB6: // Pause camera and finish animation. One byte parameter, animation ID.
-                    line << "    pause_camera_finish_animation("
-                      << static_cast<int>(ab_file_.readU8()) << ")";
+                    line << "    pause_camera_finish_animation(" << static_cast<int>(ab_file_.readU8()) << ")";
                     break;
                 case 0xB9: // Set camera. One byte parameter, camera ID.
                     line << "    set_camera(" << static_cast<int>(ab_file_.readU8()) << ")";
@@ -129,9 +125,7 @@ std::string AbFile::DecompileScript(u32 offset){
                         line << "    ::jump::";
                         label_set = true;
                     }
-                    else{
-                        line << "    -- Invalid jump label";
-                    }
+                    else line << "    -- Invalid jump label";
                     break;
                 case 0xCA:
                      // Jump to label set by 0xC9 (::jump::) if nothing is being loaded in the
@@ -151,16 +145,15 @@ std::string AbFile::DecompileScript(u32 offset){
                      //   distance (2 byte), unknown.
                      //   unknown (2 bytes), unknown.
                      //   steps (1 byte), number of steps.
-                    line << "    move_to_target(" << ab_file_.readU16LE() << ", "
-                      << ab_file_.readU16LE() << ", " << static_cast<int>(ab_file_.readU8()) << ")";
+                    line << "    move_to_target(" << ab_file_.readU16LE() << ", " << ab_file_.readU16LE() << ", "
+                      << static_cast<int>(ab_file_.readU8()) << ")";
                     break;
                 case 0xD8:
                     // Play sound using attacker settings after waiting given number of frames.
                     // Two parameters:
                     //   wait (1 byte), frames to wait before the sound.
                     //   sound (2 bytes), sound ID.
-                    line << "    play_sound_for_attacker("
-                      << static_cast<int>(ab_file_.readU8()) << ", "
+                    line << "    play_sound_for_attacker(" << static_cast<int>(ab_file_.readU8()) << ", "
                       << ab_file_.readU16LE() <<  ")";
                     break;
                 case 0xE5:

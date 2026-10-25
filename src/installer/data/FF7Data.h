@@ -180,8 +180,8 @@ class FF7Data{
          * Retrieves an enemy model ID from an enemy ID.
          *
          * @param[in] enemy_id Numeric enemy ID.
-         * @return Enemy alphanumeric ID. Two-lowercase letters. If an invalid ID is provided, an
-         * empty string will be returned.
+         * @return Enemy alphanumeric ID. Two-lowercase letters. If an invalid
+         * ID is provided, an empty string will be returned.
          */
         static std::string GetEnemyModelId(const unsigned int enemy_id){
             if (enemy_id > 25 * 26) return "";
@@ -196,24 +196,28 @@ class FF7Data{
         /**
          * Retrieves information about a battle model from it's name.
          *
-         * Can retrieve information for party character, enemy and scenario models, but not for
-         * spells models.
+         * Can retrieve information for party character, enemy and scenario
+         * models, but not for spells models.
          *
-         * The return structure has the following properties ({@see BattleModelInfo}):
+         * The return structure has the following properties
+         * ({@see BattleModelInfo}):
          *
-         * - numeric_id: A numeric ID assigned to the model. For enemies, it's a unique enemy ID.
-         * For scenes, it's a unique numeric id. For playable characters, it is the id of the
-         * character the model references, but since  a character may have many models, it's not
-         * guaranteed to be unique. There is a special case where it is -1: for the playable frog,
-         * which is related to all characters.
+         * - numeric_id: A numeric ID assigned to the model. For enemies, it's a
+         * unique enemy ID. For scenes, it's a unique numeric id. For playable
+         * characters, it is the id of the character the model references, but
+         * since a character may have many models, it's not guaranteed to be
+         * unique. There is a special case where it is -1: for the playable
+         * frog, which is related to all characters.
          *
-         * - alphanumeric_id: A unique id assigned to the model. Two lowercase letters.
+         * - alphanumeric_id: A unique id assigned to the model. Two lowercase
+         * letters.
          *
-         * - name: A descriptive name for the model. For debugging purposes only, it's not intended
-         * to ever be displayed, and it's not suitable to use in filenames.
+         * - name: A descriptive name for the model. For debugging purposes
+         * only, it's not intended to ever be displayed, and it's not suitable
+         * to use in filenames.
          *
-         * - name_normal: Simplified name, suitable to be used on filenames. Not garanteed to be
-         * unique.
+         * - name_normal: Simplified name, suitable to be used on filenames.
+         * Not garanteed to be unique.
          *
          * - is_enemy: Indicates if the models is a battle enemy.
          *
@@ -221,18 +225,18 @@ class FF7Data{
          *
          * - is_scene: Indicates if the models is a battle scenario.
          *
-         * @param[in] model_id ID of the model. It can be two letters, or two letters preceded by
-         * "btl_". Case insensitive. If the id contains more than four letters (not counting the
-         * optional "btl_" prefix), only the first two sill be considered.
-         * @return A battle model info structure. If an invvalid model ID is provided, or if the
-         * model doesn't exist, an empty structure will be returned.
+         * @param[in] model_id ID of the model. It can be two letters, or two
+         * letters preceded by "btl_". Case insensitive. If the id contains more
+         * than four letters (not counting the optional "btl_" prefix), only the
+         * first two sill be considered.
+         * @return A battle model info structure. If an invvalid model ID is
+         * provided, or if the model doesn't exist, an empty structure will be
+         * returned.
          */
         static BattleModelInfo GetBattleModelInfo(std::string model_id){
             BattleModelInfo info;
             std::string alphanumeric_id = model_id;
-            std::transform(
-              alphanumeric_id.begin(), alphanumeric_id.end(), alphanumeric_id.begin(), ::tolower
-            );
+            std::transform(alphanumeric_id.begin(), alphanumeric_id.end(), alphanumeric_id.begin(), ::tolower);
             if (alphanumeric_id.size() < 2) return info; // Empty
             if (alphanumeric_id.size() > 4 && alphanumeric_id.substr(0, 4) == "btl_")
                 alphanumeric_id = alphanumeric_id.substr(4, alphanumeric_id.size() - 4);
@@ -3019,10 +3023,7 @@ class FF7Data{
                 info.is_player = true;
             }
             else if (
-              "sb" == alphanumeric_id
-              || "sc" == alphanumeric_id
-              || "sd" == alphanumeric_id
-              || "se" == alphanumeric_id
+              "sb" == alphanumeric_id || "sc" == alphanumeric_id || "sd" == alphanumeric_id || "se" == alphanumeric_id
             ){
                 info.numeric_id = CHAR_ID::BARRET;
                 info.name = "Barret";
@@ -3065,11 +3066,7 @@ class FF7Data{
                 info.name_normal = "cid";
                 info.is_player = true;
             }
-            else if (
-              "sf" == alphanumeric_id
-              || "sg" == alphanumeric_id
-              || "sh" == alphanumeric_id
-            ){
+            else if ("sf" == alphanumeric_id || "sg" == alphanumeric_id || "sh" == alphanumeric_id){
                 info.numeric_id = CHAR_ID::VINCENT;
                 info.name = "Vincent";
                 info.name_normal = "vincent";
@@ -3494,34 +3491,38 @@ class FF7Data{
          * Retrieves information about a spell model from it's name.
          *
          *
-         * The return structure has the following properties ({@see BattleModelInfo}):
+         * The return structure has the following properties
+         * ({@see BattleModelInfo}):
          *
-         * - numeric_id: A numeric ID assigned to the model. For enemies, it's a unique enemy ID.
-         * For scenes, it's a unique numeric id. For playable characters, it is the id of the
-         * character the model references, but since  a character may have many models, it's not
-         * guaranteed to be unique. There is a special case where it is -1: for the playable frog,
-         * which is related to all characters.
+         * - numeric_id: A numeric ID assigned to the model. For enemies,
+         * it's a unique enemy ID. For scenes, it's a unique numeric id. For
+         * playable characters, it is the id of the character the model
+         * references, but since  a character may have many models, it's not
+         * guaranteed to be unique. There is a special case where it is -1: for
+         * the playable frog, which is related to all characters.
          *
-         * - alphanumeric_id: A unique id assigned to the model. Two lowercase letters.
+         * - alphanumeric_id: A unique id assigned to the model. Two lowercase
+         * letters.
          *
-         * - name: A descriptive name for the model. For debugging purposes only, it's not intended
-         * to ever be displayed, and it's not suitable to use in filenames.
+         * - name: A descriptive name for the model. For debugging purposes
+         * only, it's not intended to ever be displayed, and it's not suitable
+         * to use in filenames.
          *
-         * - name_normal: Simplified name, suitable to be used on filenames. Not garanteed to be
-         * unique.
+         * - name_normal: Simplified name, suitable to be used on filenames. Not
+         * guaranteed to be unique.
          *
-         * @param[in] model_id ID of the model. It can be two letters, or two letters preceded by
-         * "btl_". Case insensitive. If the id contains more than four letters (not counting the
-         * optional "btl_" prefix), only the first two sill be considered.
-         * @return A spell model info structure. If an invalid model ID is provided, or if the
-         * model doesn't exist, an empty structure will be returned.
+         * @param[in] model_id ID of the model. It can be two letters, or two
+         * letters preceded by "btl_". Case insensitive. If the id contains more
+         * than four letters (not counting the optional "btl_" prefix), only the
+         * first two sill be considered.
+         * @return A spell model info structure. If an invalid model ID is
+         * provided, or if the model doesn't exist, an empty structure will be
+         * returned.
          */
         static SpellModelInfo GetSpellModelInfo(std::string model_id){
             SpellModelInfo info;
             std::string alphanumeric_id = model_id;
-            std::transform(
-              alphanumeric_id.begin(), alphanumeric_id.end(), alphanumeric_id.begin(), ::tolower
-            );
+            std::transform(alphanumeric_id.begin(), alphanumeric_id.end(), alphanumeric_id.begin(), ::tolower);
             info.alphanumeric_id = alphanumeric_id;
             info.name = alphanumeric_id;
             info.name_normal = alphanumeric_id;

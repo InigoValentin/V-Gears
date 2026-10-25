@@ -84,8 +84,8 @@ struct SaveMap{
         /**
          * Materia AP. 3 bytes, not four.
          *
-         * For Enemy Skill materia, ap is not the actual AP, but each byte set indicates a learned
-         * skill.
+         * For Enemy Skill materia, ap is not the actual AP, but each byte set
+         * indicates a learned skill.
          */
         u32 ap;
 
@@ -127,9 +127,10 @@ struct SaveMap{
         /**
          * The item bytes, as read from KERNEL.BIN in the save map.
          *
-         * The first 7 bits are the item quantity. The 9 last bits are the index. All the other
-         * members can be derived from this. Indexex 0-127 are items, 128-255 are weapons, 256-287
-         * are weapons and 288-319 are accessories.
+         * The first 7 bits are the item quantity. The 9 last bits are the
+         * index. All the other members can be derived from this. Indexex 0-127
+         * are items, 128-255 are weapons, 256-287 are armors and 288-319 are
+         * accessories.
          */
         u16 item_raw;
 
@@ -178,8 +179,9 @@ struct SaveMap{
         /**
          * Character identifier 1 byte.
          *
-         * It's not the standard character ID. Used only for Cait Sith and Vincent, to distinguish
-         * them from Young Cloud and Sephiroth. V-Gears mostly ignores this.
+         * It's not the standard character ID. Used only for Cait Sith and
+         * Vincent, to distinguish them from Young Cloud and Sephiroth. V-Gears
+         * mostly ignores this.
          */
         u8 identifier;
 
@@ -450,7 +452,8 @@ struct SaveMap{
         u16 mask;
 
         /**
-         * Character seelction with the mask applied. Selected character IDs are true.
+         * Character seelction with the mask applied. Selected character IDs are
+         * true.
          */
         bool character[9];
     };
@@ -576,7 +579,8 @@ struct SaveMap{
          * Magic order: Attack restore indirect (0x0C)
          * Magic order: Indirect restore attack (0x10)
          * Magic order: Indirect attack restore (0x14)
-         * Extra battle window displaying information: Inactive (0x00); Active (0x40)
+         * Extra battle window displaying information:
+         *   Inactive (0x00); Active (0x40)
          */
         u8 mask_2;
 
@@ -641,7 +645,8 @@ struct SaveMap{
     /**
      * Inventory list. 320 x 2 bytes,
      *
-     * It includes items, unequipped weapons, unequipped armor and unequipped accessories.
+     * It includes items, unequipped weapons, unequipped armor and unequipped
+     * accessories.
      */
     Item inventory[320];
 
@@ -712,7 +717,8 @@ struct SaveMap{
     /**
      * Saving location. 2 bytes.
      *
-     * @todo Does this indicte the current field? The coordinates in a field? If so, 2 nybbles?
+     * @todo Does this indicte the current field? The coordinates in a field? If
+     * so, 2 nybbles?
      */
     u16 location;
 

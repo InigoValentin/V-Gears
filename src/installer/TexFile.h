@@ -25,8 +25,8 @@ class TexFile{
         /**
          * Constructor.
          *
-         * @param[in,out] file File with the tex data. The file data will not be modified, but it's
-         * offset will.
+         * @param[in,out] file File with the tex data. The file data will not be
+         * modified, but it's offset will.
          */
         TexFile(File file);
 
@@ -45,15 +45,16 @@ class TexFile{
         /**
          * Saves a fragment of the TEX file as a PNG file.
          *
-         * If any of the read data invalidates the file, it will silently fail and do nothing.
+         * If any of the read data invalidates the file, it will silently fail
+         * and do nothing.
          *
          * @param[in] file_name Full path of the destination file.
          * @param[in] x X coordinate of the image to extract from the TEX file.
          * @param[in] y Y coordinate of the image to extract from the TEX file.
          * @param[in] w Width of the image to extract from the TEX file.
          * @param[in] h Height of the image to extract from the TEX file.
-         * @param[in] palette Index of the color palette to use. For non paletted files it's
-         * ignored.
+         * @param[in] palette Index of the color palette to use. For non
+         * paletted files it's ignored.
          */
         void SavePng(
           std::string file_name, unsigned int x, unsigned int y, unsigned int w, unsigned int h,
@@ -63,31 +64,36 @@ class TexFile{
         /**
          * Saves the TEX file as a PNG file.
          *
-         * If any of the read data invalidates the file, it will silently fail and do nothing.
+         * If any of the read data invalidates the file, it will silently fail
+         * and do nothing.
          *
          * @param[in] file_name Full path of the destination file.
-         * @param[in] palette Index of the color palette to use. For non paletted files it's
-         * ignored.
+         * @param[in] palette Index of the color palette to use. For non
+         * paletted files it's ignored.
          */
         void SavePng(std::string file_name, unsigned int palette = 0);
 
         /**
          * Saves two fragments of the TEX file as a single PNG image.
          *
-         * The second fragment will be at the right of the first one. They must have the same
-         * height. If any of the read data invalidates the file, it will silently fail and do
-         * nothing.
+         * The second fragment will be at the right of the first one. They must
+         * have the same height. If any of the read data invalidates the file,
+         * it will silently fail and do nothing.
          *
          * @param[in] file_name Full path of the destination file.
-         * @param[in] x1 X coordinate of the first image to extract from the TEX file.
-         * @param[in] x2 X coordinate of the second image to extract from the TEX file.
-         * @param[in] y1 Y coordinate of the first image to extract from the TEX file.
-         * @param[in] y2 Y coordinate of the first image to extract from the TEX file.
+         * @param[in] x1 X coordinate of the first image to extract from the TEX
+         * file.
+         * @param[in] x2 X coordinate of the second image to extract from the
+         * TEX file.
+         * @param[in] y1 Y coordinate of the first image to extract from the TEX
+         * file.
+         * @param[in] y2 Y coordinate of the first image to extract from the TEX
+         * file.
          * @param[in] w1 Width of the first image to extract from the TEX file.
          * @param[in] w2 Width of the second image to extract from the TEX file.
          * @param[in] h Height of the images to extract from the TEX file.
-         * @param[in] palette Index of the color palette to use. For non paletted files it's
-         * ignored.
+         * @param[in] palette Index of the color palette to use. For non
+         * paletted files it's ignored. 
          */
         void SavePng(
           std::string file_name, unsigned int x1, unsigned int x2, unsigned int y1, unsigned int y2,
@@ -395,8 +401,9 @@ class TexFile{
         /**
          * Alpha reference value. 4 bytes.
          *
-         * Only applies to paltted images, if the alpha value sampled from the palee is 0xFE, this
-         * value should be replaced with the reference alpha.
+         * Only applies to paltted images, if the alpha value sampled from the
+         * palette is 0xFE, this value should be replaced with the reference
+         * alpha.
          */
         u32 ref_alpha_;
 
@@ -470,10 +477,11 @@ class TexFile{
         std::vector<Ogre::ColourValue> pixel_colour_;
 
         /**
-         * Pixel data for paletted images. {@see width} * {@see height} * {@see bytes_per pixels}.
-         *
-         * In paletted images, every byte is a color reference in the palette. For non-paletted
-         * images, a pixel format section.
+         * Pixel data for paletted images.
+         * 
+         * {@see width} * {@see height} * {@see bytes_per pixels}.
+         * In paletted images, every byte is a color reference in the palette.
+         * For non-paletted images, a pixel format section.
          */
         std::vector<u8> pixel_ref_;
 

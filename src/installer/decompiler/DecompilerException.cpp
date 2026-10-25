@@ -22,17 +22,13 @@ UnknownOpcodeParameterException::UnknownOpcodeParameterException(std::string par
 
 const char* UnknownOpcodeParameterException::what() const noexcept{return what_.c_str();}
 
-UnknownConditionalOperatorException::UnknownConditionalOperatorException(
-  unsigned int address, unsigned int op
-){
-    what_ = "Unknown conditional operator: " + std::to_string(op)
-      + " at address " + std::to_string(address);
+UnknownConditionalOperatorException::UnknownConditionalOperatorException(unsigned int address, unsigned int op){
+    what_ = "Unknown conditional operator: " + std::to_string(op) + " at address " + std::to_string(address);
 }
 
 const char* UnknownConditionalOperatorException::what() const noexcept{return what_.c_str();}
 
-UnknownOpcodeException::UnknownOpcodeException(uint32 address, uint32 opcode):
-  address_(address), opcode_(opcode){}
+UnknownOpcodeException::UnknownOpcodeException(uint32 address, uint32 opcode): address_(address), opcode_(opcode){}
 
 const char* UnknownOpcodeException::what() const noexcept{
     sprintf(buffer_, "Unknown %s (address: 0x%08x, opcode: 0x%04x)", Type(), address_, opcode_);
@@ -42,8 +38,7 @@ const char* UnknownOpcodeException::what() const noexcept{
 const char*  UnknownOpcodeException::Type() const{return "Opcode";}
 
 UnknownJumpTypeException::UnknownJumpTypeException(unsigned int address, unsigned int opcode){
-    what_ = "Unknown jump type: " + std::to_string(opcode)
-      + " at address " + std::to_string(address);
+    what_ = "Unknown jump type: " + std::to_string(opcode) + " at address " + std::to_string(address);
 }
 
 const char* UnknownJumpTypeException::what() const noexcept{return what_.c_str();}

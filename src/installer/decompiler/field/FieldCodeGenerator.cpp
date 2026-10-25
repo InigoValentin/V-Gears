@@ -86,20 +86,14 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
     auto instruction = insts.begin();
     
     std::vector<std::pair<Function&, InstVec>> functions_with_bodies;
-    for (
-      auto function = engine_->functions.begin(); function != engine_->functions.end(); ++ function
-    ){
+    for (auto function = engine_->functions.begin(); function != engine_->functions.end(); ++ function){
         InstVec body;
         for (size_t i = 0; i < function->second.num_instructions; ++ i, ++ instruction)
             body.push_back(*instruction);
         functions_with_bodies.push_back(std::pair<Function&, InstVec> {function->second, body});
     }
 
-    for (
-      auto function = functions_with_bodies.begin();
-      function != functions_with_bodies.end();
-      ++ function
-    ){
+    for (auto function = functions_with_bodies.begin(); function != functions_with_bodies.end(); ++ function){
 
         OnBeforeStartFunction(function->first);
         auto signature = ConstructFuncSignature(function->first);
@@ -108,11 +102,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
         
         // Generate labels for jump instruction targets.
         std::unordered_map<uint32, InstVec> labels;
-        for (
-          auto instruction = function->second.begin();
-          instruction != function->second.end();
-          ++ instruction
-        ){
+        for (auto instruction = function->second.begin(); instruction != function->second.end(); ++ instruction){
             if ((*instruction)->IsCondJump() || (*instruction)->IsUncondJump()){
                 auto targetAddr = (*instruction)->GetDestAddress();
                 auto label = labels.find(targetAddr);
@@ -127,11 +117,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
         // address of the next function) and the 'end' are not written to the Lua script. Keep
         // track of how many are needed and add them at the end of the function.
         int ends_needed = 0;
-        for (
-          auto instruction = function->second.begin();
-          instruction != function->second.end();
-          ++ instruction
-        ){
+        for (auto instruction = function->second.begin(); instruction != function->second.end(); ++ instruction){
             auto label = labels.find((*instruction)->GetAddress());
             if (label != labels.end()){
                 bool needs_label = false;
@@ -145,8 +131,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                     else needs_label = true;
                 }
                 if (needs_new_line) AddOutputLine("");
-                if (needs_label)
-                    AddOutputLine((boost::format("::label_0x%1$X::") % label->first).str());
+                if (needs_label) AddOutputLine((boost::format("::label_0x%1$X::") % label->first).str());
             }
             ValueStack stack;
             (*instruction)->ProcessInst(function->first, stack, engine_, this);
@@ -156,9 +141,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
             //}
             if ((*instruction)->IsCondJump()){
                 ends_needed ++;
-                AddOutputLine(
-                  (boost::format("if (%s) then") % stack.Pop()->GetString()).str(), false, true
-                );
+                AddOutputLine((boost::format("if (%s) then") % stack.Pop()->GetString()).str(), false, true);
                 // If the next instruction is the last in the function, mark the next pass to
                 // add an 'end' after the instruction to close the if.
                 //if ((*(instruction + 1))->GetAddress() == (*(function->second.back())).GetAddress())
@@ -168,64 +151,47 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                 // If destination address is outside the functions, turn goto into a return.
                 if ((*instruction)->GetDestAddress() > function->first.end_addr){
                     AddOutputLine(
-                      "-- Overflowed jump to "
-                      + (boost::format("0x%1$X") % (*instruction)->GetDestAddress()).str()
-                      + " (last address in function is "
-                      + (boost::format("0x%1$X)") % function->first.end_addr).str()
+                      "-- Overflowed jump to " + (boost::format("0x%1$X") % (*instruction)->GetDestAddress()).str()
+                      + " (last address in function is " + (boost::format("0x%1$X)") % function->first.end_addr).str()
                     );
                     AddOutputLine("do return 0 end");
                 }
                 // Prevent backward jumps in the on_start script.
                 else if (
-                  "on_start" == function->first.name
-                  && (*instruction)->GetDestAddress() <= (*instruction)->GetAddress()
+                  "on_start" == function->first.name && (*instruction)->GetDestAddress() <= (*instruction)->GetAddress()
                 ){
                     AddOutputLine("-- No infinite loops in the on_start script.");
-                    AddOutputLine((
-                      boost::format("-- goto label_0x%1$X") % (*instruction)->GetDestAddress()
-                    ).str());
+                    AddOutputLine((boost::format("-- goto label_0x%1$X") % (*instruction)->GetDestAddress()).str());
                 }
-                else{
-                    AddOutputLine(
-                      (boost::format("goto label_0x%1$X") % (*instruction)->GetDestAddress()).str()
-                    );
-                }
+                else AddOutputLine((boost::format("goto label_0x%1$X") % (*instruction)->GetDestAddress()).str());
             }
             // Else, already output'd.
         }
         for(; ends_needed > 0; ends_needed --) AddOutputLine("end -- clean-up", true, false);
         // Add missing return:
-        if (
-          "return 0" != lines_.at(lines_.size() - 1).line
-          && "do return 0 end" != lines_.at(lines_.size() - 1).line
-        ){
+        if ("return 0" != lines_.at(lines_.size() - 1).line && "do return 0 end" != lines_.at(lines_.size() - 1).line)
             AddOutputLine("do return 0 end", false, false);
-        }
         OnEndFunction(function->first);
     }
 
     for (auto i = lines_.begin(); i != lines_.end(); ++i){
-        if (i->unindent_before && indent_level_ > 0){
-            indent_level_ --;
-        }
+        if (i->unindent_before && indent_level_ > 0) indent_level_ --;
         output_ << IndentString(i->line) << std::endl;
         if (i->indent_after) indent_level_++;
     }
 }
 
-void FieldCodeGenerator::AddOutputLine(
-  std::string line, bool unindent_before, bool indent_after
-){lines_.push_back(CodeLine(line, unindent_before, indent_after));}
+void FieldCodeGenerator::AddOutputLine(std::string line, bool unindent_before, bool indent_after){
+    lines_.push_back(CodeLine(line, unindent_before, indent_after));
+}
 
-float FieldCodeGenerator::GetScaleFactor() const
-{return static_cast<FieldEngine*>(engine_)->GetScaleFactor();}
+float FieldCodeGenerator::GetScaleFactor() const{return static_cast<FieldEngine*>(engine_)->GetScaleFactor();}
 
 void FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
     FunctionMetaData meta_data(function.metadata);
     if (meta_data.IsStart()){
         AddOutputLine("EntityContainer[\"" + meta_data.GetEntityName() + "\"] = {", false, true);
-        if (meta_data.GetCharacterId() != -1)
-            AddOutputLine(meta_data.GetEntityName() + " = nil,\n");
+        if (meta_data.GetCharacterId() != -1) AddOutputLine(meta_data.GetEntityName() + " = nil,\n");
     }
     const auto comment = formatter_.GetFunctionComment(meta_data.GetEntityName(), function.name);
     if (!comment.empty()) AddOutputLine("-- " + comment);
@@ -241,10 +207,7 @@ void FieldCodeGenerator::OnStartFunction(const Function& func){
         AddOutputLine("background2d:autoscroll_to_entity(entity_manager:get_entity(\"Cloud\"))\n");
     }
     // For lines, exit if they are off.
-    if (
-      func.name == "on_approach" || func.name == "on_cross"
-      || func.name == "on_near" || func.name == "on_leave"
-    ){
+    if (func.name == "on_approach" || func.name == "on_cross" || func.name == "on_near" || func.name == "on_leave"){
         AddOutputLine("if self.on ~= nill and self.on == false then", false, true);
         AddOutputLine("return 0");
         AddOutputLine("end", true, false);
@@ -272,8 +235,7 @@ void FieldCodeGenerator::OnEndFunction(const Function& function){
 std::string FieldCodeGenerator::ConstructFuncSignature(const Function &function){
     // Generate name
     FunctionMetaData meta_data(function.metadata);
-    return formatter_.GetFriendlyFunctionName(meta_data.GetEntityName(), function.name)
-      + " = function(self)";
+    return formatter_.GetFriendlyFunctionName(meta_data.GetEntityName(), function.name) + " = function(self)";
 }
 
 bool FieldCodeGenerator::OutputOnlyRequiredLabels() const{return true;}
@@ -285,8 +247,7 @@ const std::string FieldCodeGenerator::FormatInstructionNotImplemented(
 ){
     return (
       boost::format(
-        "-- log:log(\"In entity \\\"%1%\\\", address 0x%2$08x: "
-        "instruction 0x%3$04x not implemented\")"
+        "-- log:log(\"In entity \\\"%1%\\\", address 0x%2$08x: instruction 0x%3$04x not implemented\")"
       ) % entity % address % opcode
     ).str();
 }
@@ -303,16 +264,11 @@ const std::string FieldCodeGenerator::FormatInstructionNotImplemented(
     }
     return(
       boost::format(
-        "-- log:log(\"In entity \\\"%1%\\\", address 0x%2$08x: "
-        "instruction %3%(%4%) not implemented\")"
+        "-- log:log(\"In entity \\\"%1%\\\", address 0x%2$08x: instruction %3%(%4%) not implemented\")"
         ) % entity % address % instruction.GetName() % parameterList.str()
       ).str();
 }
 
-const std::string FieldCodeGenerator::FormatBool(uint32 value){
-    return value == 0 ? "false" : "true";
-}
+const std::string FieldCodeGenerator::FormatBool(uint32 value){return value == 0 ? "false" : "true";}
 
-const std::string FieldCodeGenerator::FormatInvertedBool(uint32 value){
-    return value == 0 ? "true" : "false";
-}
+const std::string FieldCodeGenerator::FormatInvertedBool(uint32 value){return value == 0 ? "true" : "false";}

@@ -77,9 +77,7 @@ void Disassembler::ReadParams(InstPtr inst, const char *types){
     }
 }
 
-void Disassembler::ReadParams(
-  InstPtr inst, const char *types, const std::vector<std::string>& params
-){
+void Disassembler::ReadParams(InstPtr inst, const char *types, const std::vector<std::string>& params){
     while (*types){
         std::string type(types, 1);
         if (type == "N") address_ ++;

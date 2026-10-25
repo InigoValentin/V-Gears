@@ -113,8 +113,7 @@ std::ostream &AddressValue::Print(std::ostream &output) const{
     return output << boost::format("0x%X") % val_;
 }
 
-RelAddressValue::RelAddressValue(uint32 base_addr, int32 offset):
-  IntValue(offset, true), base_addr_(base_addr){};
+RelAddressValue::RelAddressValue(uint32 base_addr, int32 offset): IntValue(offset, true), base_addr_(base_addr){};
 
 bool RelAddressValue::IsAddress(){return true;}
 
@@ -135,9 +134,7 @@ std::ostream &DupValue::Print(std::ostream &output) const{return output << "temp
 
 StringValue::StringValue(std::string str): str_(str){}
 
-std::ostream &StringValue::Print(std::ostream& output) const{
-    return output << "\"" << str_ << "\"";
-}
+std::ostream &StringValue::Print(std::ostream& output) const{return output << "\"" << str_ << "\"";}
 
 UnquotedStringValue::UnquotedStringValue(std::string str): StringValue(str){}
 
@@ -147,13 +144,11 @@ VarValue::VarValue(std::string name): name_(name){}
 
 std::ostream &VarValue::Print(std::ostream& output) const{return output << name_;}
 
-ArrayValue::ArrayValue(const std::string& name, const ValueList& indexes):
-  VarValue(name), indexes_(indexes){}
+ArrayValue::ArrayValue(const std::string& name, const ValueList& indexes): VarValue(name), indexes_(indexes){}
 
 std::ostream &ArrayValue::Print(std::ostream &output) const {
     output << name_;
-    for (ValueList::const_iterator i = indexes_.begin(); i != indexes_.end(); ++ i)
-        output << "[" << *i << "]";
+    for (ValueList::const_iterator i = indexes_.begin(); i != indexes_.end(); ++ i) output << "[" << *i << "]";
     return output;
 }
 

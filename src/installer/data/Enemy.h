@@ -90,8 +90,8 @@ struct Enemy{
         /**
          * Immunity rate.
          *
-         * 0 or lower means no immunity, 1 or higher completely immune. Values between 0 and 1
-         * indicate resistance.
+         * 0 or lower means no immunity, 1 or higher completely immune. Values
+         * between 0 and 1 indicate resistance.
          */
         float rate;
     };
@@ -199,8 +199,8 @@ struct Enemy{
     /**
      * List of attacks that can be used while manipulated.
      *
-     * The first one is also the one used in berserkr. If empty, it means the enemy can't be
-     * manipulated or berserkd.
+     * The first one is also the one used in berserkr. If empty, it means the
+     * enemy can't be manipulated or berserkd.
      */
     std::vector<u16> manipulate_attacks;
 

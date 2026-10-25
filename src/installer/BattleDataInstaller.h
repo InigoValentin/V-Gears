@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "DiskImage.h"
 #include "common/BinGZipFile.h"
 #include "common/TypeDefine.h"
 #include "data/BattleSceneFile.h"
@@ -34,13 +35,12 @@ class BattleDataInstaller{
         /**
          * Constructor
          *
-         * @param[in] input_dir Path to the directory containing the original data to parse.
+         * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory of the installation data.
          * @param[in] res_mgr The application resource manager..
          */
         BattleDataInstaller(
-          const std::string input_dir, const std::string output_dir,
-          Ogre::ResourceGroupManager* res_mgr
+          const DiskImage& disk_image, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr
         );
 
         /**
@@ -83,8 +83,8 @@ class BattleDataInstaller{
         /**
          * Processes the next battle 3D model.
          *
-         * Saves .hrc, .a and .p files for later conversion. .tex files are converted directly to
-         * png.
+         * Saves .hrc, .a and .p files for later conversion. .tex files are
+         * converted directly to png.
          *
          * @return The total number of processed models.
          */
@@ -93,8 +93,8 @@ class BattleDataInstaller{
         /**
          * Processes the next spell 3D model.
          *
-         * Saves .hrc, .a and .p files for later conversion. .tex files are converted directly to
-         * png.
+         * Saves .hrc, .a and .p files for later conversion. .tex files are
+         * converted directly to png.
          *
          * @return The total number of processed models.
          */
@@ -165,21 +165,24 @@ class BattleDataInstaller{
             /**
              * Model identifier.
              *
-             * For battle models, a two letters string. For spell models, anything.
+             * For battle models, a two letters string. For spell models,
+             * anything.
              */
             std::string id;
 
             /**
              * Name of the model .hrc file.
              *
-             * For battle models, it will be the *aa file. For spell models, the *.d file.
+             * For battle models, it will be the *aa file. For spell models,
+             * the *.d file.
              */
             std::string hrc;
 
             /**
              * Name of the animation file.
              *
-             * For battle models, it will be the *da file. For spell models, the *.b file.
+             * For battle models, it will be the *da file. For spell models,
+             * the *.b file.
              */
             std::string anim;
 
@@ -305,17 +308,17 @@ class BattleDataInstaller{
          * Extract a gzipped file.
          *
          * @param[in] file Compressed file.
-         * @return Uncompressed file. NULL if errors were encountered (they will be logged to
-         * console).
+         * @return Uncompressed file. NULL if errors were encountered (they will
+         * be logged to console).
          */
         File* ExtractGZipScene(File file);
 
         /**
          * Constructs a file name for the XML file to save an enemy to.
          *
-         * The filename will be "dame/enemy/[ID]_[NAME].xml" where [ID] is the enemy ID, padded
-         * with '0' to a length of 4, and [NAME] is the enemy name using only alphanumeric
-         * characters.
+         * The filename will be "dame/enemy/[ID]_[NAME].xml" where [ID] is the
+         * enemy ID, padded with '0' to a length of 4, and [NAME] is the enemy
+         * name using only alphanumeric characters.
          *
          * @param[in] enemy The enemy to be saved.
          * @return The name for the enemy file.
@@ -325,9 +328,9 @@ class BattleDataInstaller{
         /**
          * Constructs a file name for the XML file to save an attack to.
          *
-         * The filename will be "dame/attack/[ID]_[NAME].xml" where [ID] is the attack ID, padded
-         * with '0' to a length of 4, and [NAME] is the attack name using only alphanumeric
-         * characters.
+         * The filename will be "dame/attack/[ID]_[NAME].xml" where [ID] is the
+         * attack ID, padded with '0' to a length of 4, and [NAME] is the attack
+         * name using only alphanumeric characters.
          *
          * @param[in] attack The attack to be saved.
          * @return The name for the attack file.
@@ -347,7 +350,8 @@ class BattleDataInstaller{
         /**
          * Generates all required .rsd models for a model.
          *
-         * To be used for enemy, playable character and scene models (anything in battle.lgp).
+         * To be used for enemy, playable character and scene models (anything
+         * in battle.lgp).
          *
          * @param[in] model Model information.
          * @param[in] path Output path.
@@ -367,59 +371,55 @@ class BattleDataInstaller{
         /**
          * Decompiles a compiled HRC file.
          *
-         * To be used for battle enemy and playable character models, since they have a
-         * well-defined bone hierarchy. For battle background models, use
-         * {@see DecompileSceneSceneHrc}, and for spell models, use {@see DecompileSpellModelHrc}.
-         * Note that this is not a general purpose HRC decompiler, it only works for files in
-         * battle.lgp.
+         * To be used for battle enemy and playable character models, since they
+         * have a well-defined bone hierarchy. For battle background models, use
+         * {@see DecompileSceneSceneHrc}, and for spell models, use
+         * {@see DecompileSpellModelHrc}. Note that this is not a general
+         * purpose HRC decompiler, it only works for files in battle.lgp.
          *
          * @param[in] compiled The compiles HRC file.
-         * @param[in] model The model, it can be a battle model or an spell model.
+         * @param[in] model The model, can be a battle model or an spell model.
          * @param[in] path Path to save the decompiled file to.
          * @param[in] skeleton_name Name for the skeleton.
          */
-        void DecompileBattleModelHrc(
-          File compiled, BattleModel model, std::string path, std::string skeleton_name
-        );
+        void DecompileBattleModelHrc(File compiled, BattleModel model, std::string path, std::string skeleton_name);
 
         /**
          * Decompiles a compiled HRC file.
          *
-         * To be used for spell models, since they have a well-defined bone hierarchy. For battle
-         * background models, use {@see DecompileSceneSceneHrc}, and for enemy and playable
-         * character models, use {@see DecompileBattleModelHrc}. Note that this is not a general
-         * purpose HRC decompiler, it only works for files in magic.lgp.
+         * To be used for spell models, since they have a well-defined bone
+         * hierarchy. For battle background models, use
+         * {@see DecompileSceneSceneHrc}, and for enemy and playable character
+         * models, use {@see DecompileBattleModelHrc}. Note that this is not a
+         * general purpose HRC decompiler, it only works for files in magic.lgp.
          *
          * @param[in] compiled The compiles HRC file.
-         * @param[in] model The model, it can be a battle model or an spell model.
+         * @param[in] model The model, can be a battle model or an spell model.
          * @param[in] path Path to save the decompiled file to.
          * @param[in] skeleton_name Name for the skeleton.
          */
-        void DecompileSpellModelHrc(
-          File compiled, SpellModel model, std::string path, std::string skeleton_name
-        );
+        void DecompileSpellModelHrc(File compiled, SpellModel model, std::string path, std::string skeleton_name);
 
         /**
          * Decompiles a compiled HRC file.
          *
-         * To be used only for battle background HRC files, since they don't have a defined bone
-         * hierarchy, and every bone is assumed to be a child of the previous one. For enemy and
-         * playable character models, use {@see DecompileBattleModelHrc}. Note that this is not a
-         * general purpose HRC decompiler, it only works for files in battle.lgp.
+         * To be used only for battle background HRC files, since they don't
+         * have a defined bone hierarchy, and every bone is assumed to be a
+         * child of the previous one. For enemy and playable character models,
+         * use {@see DecompileBattleModelHrc}. Note that this is not a general
+         * purpose HRC decompiler, it only works for files in battle.lgp.
          *
          * @param[in] compiled The compiles HRC file.
-         * @param[in] model The model, it can be a battle model or an spell model.
+         * @param[in] model The model, can be a battle model or an spell model.
          * @param[in] path Path to save the decompiled file to.
          * @param[in] skeleton_name Name for the skeleton.
          */
-        void DecompileSceneModelHrc(
-          File compiled, BattleModel model, std::string path, std::string skeleton_name
-        );
+        void DecompileSceneModelHrc(File compiled, BattleModel model, std::string path, std::string skeleton_name);
 
         /**
-         * The path to the directory from which to read the PC game data.
+         * The disk image to extract the data from.
          */
-        std::string input_dir_;
+        DiskImage disk_image_;
 
         /**
          * The path to the directory where to save the V-Gears data.
