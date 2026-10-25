@@ -57,6 +57,4 @@ inline void intrusive_ptr_add_ref(RefCounted *ptr){++ (ptr->ref_count_);}
  *
  * @param[in] ptr Pointer to de-reference.
  */
-inline void intrusive_ptr_release(RefCounted *ptr){
-    if (-- (ptr->ref_count_) == 0) delete ptr;
-}
+inline void intrusive_ptr_release(RefCounted *ptr){if (-- (ptr->ref_count_) == 0) delete ptr;}

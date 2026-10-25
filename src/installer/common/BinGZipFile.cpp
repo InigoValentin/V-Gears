@@ -59,21 +59,15 @@ File* BinGZipFile::ExtractGZip(u32 file_index){
         switch (ret){
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
-                LOGGER->Log(
-                  "Warning: inflateInit2 - Z_MEM_ERROR in file " + file_name_
-                );
+                LOGGER->Log("Warning: inflateInit2 - Z_MEM_ERROR in file " + file_name_);
                 break;
             case Z_STREAM_ERROR:
                 inflateEnd(&strm);
-                LOGGER->Log(
-                  "Warning: inflateInit2 - Z_STREAM_ERROR in file " + file_name_
-                );
+                LOGGER->Log("Warning: inflateInit2 - Z_STREAM_ERROR in file " + file_name_);
                 break;
             default:
                 inflateEnd(&strm);
-                LOGGER->Log(
-                  "Warning: inflateInit2 - unknown error in file " + file_name_
-                );
+                LOGGER->Log("Warning: inflateInit2 - unknown error in file " + file_name_);
         }
         return NULL;
     }
@@ -88,21 +82,15 @@ File* BinGZipFile::ExtractGZip(u32 file_index){
         switch (ret){
             case Z_NEED_DICT:
                 inflateEnd(&strm);
-                LOGGER->Log(
-                  "Warning: inflate - Z_NEED_DICT in file " + file_name_
-                );
+                LOGGER->Log("Warning: inflate - Z_NEED_DICT in file " + file_name_);
                 return NULL;
             case Z_DATA_ERROR:
                 inflateEnd(&strm);
-                LOGGER->Log(
-                  "Warning: inflate - Z_DATA_ERROR in file " + file_name_
-                );
+                LOGGER->Log("Warning: inflate - Z_DATA_ERROR in file " + file_name_);
                 return NULL;
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
-                LOGGER->Log(
-                  "Warning: inflate - Z_MEM_ERROR in file " + file_name_
-                );
+                LOGGER->Log("Warning: inflate - Z_MEM_ERROR in file " + file_name_);
                 return NULL;
         }
 
@@ -110,9 +98,7 @@ File* BinGZipFile::ExtractGZip(u32 file_index){
             extract_buffer = static_cast<u8*>(realloc(extract_buffer, extract_size * 2));
             if (extract_buffer == NULL){
                 inflateEnd(&strm);
-                LOGGER->Log(
-                  "Warning: extract_buffer == NULL in file " + file_name_
-                );
+                LOGGER->Log("Warning: extract_buffer == NULL in file " + file_name_);
                 return NULL;
             }
             strm.next_out = static_cast<u8*>(extract_buffer + extract_size);
@@ -140,11 +126,7 @@ void BinGZipFile::InnerGetNumberOfFiles(){
         if (temp == 0xFFFF) temp = 0; // Hack to deal with scene.bin
         pointer += 6;
         // Condition for GZip header.
-        if (
-          GetU32LE(pointer) == 0x00088B1F && GetU32LE(pointer + 4) == 0x00000000
-        ){
-            ++ file_count_;
-        }
+        if (GetU32LE(pointer) == 0x00088B1F && GetU32LE(pointer + 4) == 0x00000000) ++ file_count_;
         pointer += temp;
     }
 
@@ -163,9 +145,7 @@ u32 BinGZipFile::InnerGetFileOffset(u32 file_index){
         u16 temp = GetU16LE(pointer);
         pointer += 6;
         // Condition for GZip header
-        if (
-          GetU32LE(pointer) == 0x00088B1F && GetU32LE(pointer + 4) == 0x00000000
-        ){
+        if (GetU32LE(pointer) == 0x00088B1F && GetU32LE(pointer + 4) == 0x00000000){
             if (file_index == current_file) return pointer;
         }
         ++ current_file;

@@ -454,64 +454,70 @@ class KernelDataInstaller{
             /**
              * The target can be selected.
              *
-             * If the target of the attack is selectable, at least between some subset of possible
-             * targets, this must be true.
+             * If the target of the attack is selectable, at least between some
+             * subset of possible targets, this must be true.
              */
             bool selection_enabled;
 
             /**
              * The default target is an enemy.
              *
-             * When true, the cursor starts in an enemy row. When false, it starts in the ally row.
-             * It may or may not be possible to change it.
+             * When true, the cursor starts in an enemy row. When false, it
+             * starts in the ally row. It may or may not be possible to change
+             * it.
              */
             bool default_enemy;
 
             /**
              * The default target is a group.
              *
-             * When true, the cursor starts will all the members of a row selected. When false, it
-             * starts with only one target selected. It may or may not be possible to change it.
+             * When true, the cursor starts will all the members of a row
+             * selected. When false, it starts with only one target selected. It
+             * may or may not be possible to change it.
              */
             bool default_multiple;
 
             /**
              * The selection can change between groups and individuals.
              *
-             * When true, the target can be changed between groups and individuals When false,
-             * only {@see default_multiple} determines if the target is an individual or a group.
+             * When true, the target can be changed between groups and
+             * individuals. When false, only {@see default_multiple} determines
+             * if the target is an individual or a group.
              */
             bool toggle_multiple;
 
             /**
              * The target group can be changed.
              *
-             * When true, the target cannot be changed between enemies and allies. In this case
-             * {@see default_enemy} will determine the group that can be targeted.
+             * When true, the target cannot be changed between enemies and
+             * allies. In this case {@see default_enemy} will determine the
+             * group that can be targeted.
              */
             bool fixed_row;
 
             /**
              * The command is short ranged.
              *
-             * When true, if the target or the caster is not in the front of their row, the target
-             * will take half damage. Also, when true, an enemy covered by another enemy can't be
-             * targeted.
+             * When true, if the target or the caster is not in the front of
+             * their row, the target will take half damage. Also, when true, an
+             * enemy covered by another enemy can't be targeted.
              */
             bool short_range;
 
             /**
              * Targets all, enemies and allies.
              *
-             * When true, all allies and enemies are targets, and the selection can't be changed.
+             * When true, all allies and enemies are targets, and the selection
+             * can't be changed.
              */
             bool all_rows;
 
             /**
              * The target is random.
              *
-             * When multiple targets are selected, one will be selected at random to be the
-             * receiving target. Cursor will cycle among all viable targets.
+             * When multiple targets are selected, one will be selected at
+             * random to be the receiving target. Cursor will cycle among all
+             * viable targets.
              */
             bool random;
 
@@ -729,8 +735,8 @@ class KernelDataInstaller{
             /**
              * Toggles status changes.
              *
-             * If the target doesn't have the status change, inflict it. If the target already has
-             * the status change, cure it.
+             * If the target doesn't have the status change, inflict it. If the
+             * target already has the status change, cure it.
              */
             TOGGLE = 2
         };
@@ -825,9 +831,10 @@ class KernelDataInstaller{
         /**
          * Data for each command.
          *
-         * As found in KERNEL.BIN, file 0, in order, up to camera_multiple. Members after
-         * camera_multiple are not found literally in KERNEL.BIN, but are derived from other
-         * members or found in other files of the kernel (text files).
+         * As found in KERNEL.BIN, file 0, in order, up to camera_multiple.
+         * Members after camera_multiple are not found literally in KERNEL.BIN,
+         * but are derived from other members or found in other files of the
+         * kernel (text files).
          */
         struct CommandData{
 
@@ -851,7 +858,8 @@ class KernelDataInstaller{
             /**
              * Camera movement ID for single target. 2 bytes.
              *
-             * Determines the camera movement when the command is executed over a single target.
+             * Determines the camera movement when the command is executed over
+             * a single target.
              */
             u16 camera_single;
 
@@ -865,21 +873,22 @@ class KernelDataInstaller{
             /**
              * Command ID.
              *
-             * Not actually in the item file data, it's the order at which it appears.
+             * Not actually in the item file data, it's the order at which it
+             * appears.
              */
             int id;
 
             /**
              * Command name.
              *
-             * Not found in the same file as the rest of the data, but on file 17.
+             * Not in the same file as the rest of the data, but on file 17.
              */
             std::string name;
 
             /**
              * Command description.
              *
-             * Not found in the same file as the rest of the data, but on file 9.
+             * Not in the same file as the rest of the data, but on file 9.
              */
             std::string description;
 
@@ -902,9 +911,9 @@ class KernelDataInstaller{
         /**
          * Data for each attack.
          *
-         * As found in KERNEL.BIN, file 1, in order, up to camera_multiple. Members after
-         * special_raw are not found literally in KERNEL.BIN, but are derived from other
-         * members.
+         * As found in KERNEL.BIN, file 1, in order, up to camera_multiple.
+         * Members after special_raw are not found literally in KERNEL.BIN, but
+         * are derived from other members.
          */
         struct AttackData{
 
@@ -932,29 +941,27 @@ class KernelDataInstaller{
 
             /**
              * MP cost. 2 bytes.
-             *
-             * Determines the camera movement when the command is executed over a single target.
              */
             u16 mp;
 
             /**
              * Impact sound. 2 bytes.
-             *
-             * Determines the camera movement when the command is executed over multiple targets.
              */
             u16 sound;
 
             /**
              * Camera movement ID for single target. 2 bytes.
              *
-             * Determines the camera movement when the command is executed over a single target.
+             * Determines the camera movement when the command is executed over
+             * a single target.
              */
             u16 camera_single;
 
             /**
              * Camera movement ID for multiple target. 2 bytes.
              *
-             * Determines the camera movement when the command is executed over multiple targets.
+             * Determines the camera movement when the command is executed over
+             * multiple targets.
              */
             u16 camera_multiple;
 
@@ -975,11 +982,13 @@ class KernelDataInstaller{
             /**
              * Damage formula. 1 byte.
              *
-             * This byte is divided into two nybbles (four bits). Upper nybble determines what
-             * considerations are made in calculating damage such as physical/magical, allowing
-             * criticals, how to calculate accuracy, etc. There are also three sets of known
-             * formulae that are paired with the upper nybble values. These are selected in the
-             * Lower Nybble and determine how to calculate pre-defense damage
+             * This byte is divided into two nybbles (four bits). Upper nybble
+             * determines what considerations are made in calculating damage
+             * such as physical/magical, allowing criticals, how to calculate
+             * accuracy, etc. There are also three sets of known formulae that
+             * are paired with the upper nybble values. These are selected in
+             * the Lower Nybble and determine how to calculate pre-defense
+             * damage.
              */
             u8 damage_raw;
 
@@ -993,7 +1002,7 @@ class KernelDataInstaller{
             /**
              * The restore type.
              *
-             * See {@see restore_type} and {@see RESTORE_TYPE} for more information.
+             * See {@see restore_type} and {@see RESTORE_TYPE}.
              */
             u8 condition_raw;
 
@@ -1021,9 +1030,10 @@ class KernelDataInstaller{
             /**
              * Information about what status can be inflicted or cured. 4 bytes.
              *
-             * The first six bits are the chance of inflicting/curing (out of 63). If the seventh
-             * bit is set, the status is cured instead of inflicted. If the eighth bit is set, then
-             * the status is toggled (cured if present, inflicted if not present).
+             * The first six bits are the chance of inflicting/curing (out of
+             * 63). If the seventh bit is set, the status is cured instead of
+             * inflicted. If the eighth bit is set, then the status is toggled
+             * (cured if present, inflicted if not present).
              */
             u32 status_raw;
 
@@ -1043,21 +1053,21 @@ class KernelDataInstaller{
             /**
              * Attack ID.
              *
-             * Not actually in the item file data, it's the order at which it appears.
+             * Not in the item file data, it's the order at which it appears.
              */
             int id;
 
             /**
              * Attack name.
              *
-             * Not found in the same file as the rest of the data, but on file 18.
+             * Not in the same file as the rest of the data, but on file 18.
              */
             std::string name;
 
             /**
              * Attack description.
              *
-             * Not found in the same file as the rest of the data, but on file 10.
+             * Not in the same file as the rest of the data, but on file 10.
              */
             std::string description;
 
@@ -1108,9 +1118,9 @@ class KernelDataInstaller{
         /**
          * Data for each items
          *
-         * As found in KERNEL.BIN, file 4, in order, up to special. Members after special are not
-         * found literally in KERNEL.BIN, but are derived from other members or found in other
-         * files of the kernel (text files).
+         * As found in KERNEL.BIN, file 4, in order, up to special. Members
+         * after special are not found literally in KERNEL.BIN, but are derived
+         * from other members or found in other files (text files).
          */
         struct ItemData{
 
@@ -1134,8 +1144,8 @@ class KernelDataInstaller{
             /**
              * Item restrictions. 2 bytes.
              *
-             * Contains bits indicating if the item is {@see selleable}, {@see useable_battle} and
-             * {@see useable_menu}.
+             * Contains bits indicating if the item is {@see selleable},
+             * {@see useable_battle} and {@see useable_menu}.
              */
             u16 restrict_raw;
 
@@ -1156,11 +1166,13 @@ class KernelDataInstaller{
             /**
              * Damage formula. 1 byte.
              *
-             * This byte is divided into two nybbles (four bits). Upper nybble determines what
-             * considerations are made in calculating damage such as physical/magical, allowing
-             * criticals, how to calculate accuracy, etc. There are also three sets of known
-             * formulae that are paired with the upper nybble values. These are selected in the
-             * Lower Nybble and determine how to calculate pre-defense damage
+             * This byte is divided into two nybbles (four bits). Upper nybble
+             * determines what considerations are made in calculating damage
+             * such as physical/magical, allowing criticals, how to calculate
+             * accuracy, etc. There are also three sets of known formulae that
+             * are paired with the upper nybble values. These are selected in
+             * the Lower Nybble and determine how to calculate pre-defense
+             * damage.
              */
             u8 damage_raw;
 
@@ -1174,7 +1186,7 @@ class KernelDataInstaller{
             /**
              * The restore type.
              *
-             * See {@see restore_type} and {@see RESTORE_TYPE} for more information.
+             * See {@see restore_type} and {@see RESTORE_TYPE}.
              */
             u8 condition_raw;
 
@@ -1202,9 +1214,10 @@ class KernelDataInstaller{
             /**
              * Information about what status can be inflicted or cured. 4 bytes.
              *
-             * The first six bits are the chance of inflicting/curing (out of 63). If the seventh
-             * bit is set, the status is cured instead of inflicted. If the eighth bit is set, then
-             * the status is toggled (cured if present, inflicted if not present).
+             * The first six bits are the chance of inflicting/curing (out of
+             * 63). If the seventh bit is set, the status is cured instead of
+             * inflicted. If the eighth bit is set, then the status is toggled
+             * (cured if present, inflicted if not present).
              */
             u32 status_raw;
 
@@ -1224,21 +1237,21 @@ class KernelDataInstaller{
             /**
              * Item ID.
              *
-             * Not actually in the item file data, it's the order at which it appears.
+             * Not in the item file data, it's the order at which it appears.
              */
             int id;
 
             /**
              * Item name.
              *
-             * Not found in the same file as the rest of the data, but on file 19.
+             * Not in the same file as the rest of the data, but on file 19.
              */
             std::string name;
 
             /**
              * Item description.
              *
-             * Not found in the same file as the rest of the data, but on file 11.
+             * Not in the same file as the rest of the data, but on file 11.
              */
             std::string description;
 
@@ -1320,9 +1333,9 @@ class KernelDataInstaller{
             /**
              * A linked slot.
              *
-             * If the slot is in an even position, it's linked to the one in the right. If it's in
-             * an odd position, it;s linked to the one in the Left. Remember that slot positions
-             * are 0-index.
+             * If the slot is in an even position, it's linked to the one in the
+             * right. If it's in an odd position, it's linked to the one in the
+             * left. Remember that slot positions are 0-index.
              */
             SLOT_LINKED = 1
         };
@@ -1346,9 +1359,9 @@ class KernelDataInstaller{
         /**
          * Data for each weapon
          *
-         * As found in KERNEL.BIN, file 5, in order, up to special. Members after special are not
-         * found literally in KERNEL.BIN, but are derived from other members or found in other
-         * files of the kernel (text files).
+         * As found in KERNEL.BIN, file 5, in order, up to special. Members
+         * after special are not found literally in KERNEL.BIN, but are derived
+         * from other members or found in other kernel files (text files).
          */
         struct WeaponData{
 
@@ -1367,11 +1380,13 @@ class KernelDataInstaller{
             /**
              * Damage formula. 1 byte.
              *
-             * This byte is divided into two nybbles (four bits). Upper nybble determines what
-             * considerations are made in calculating damage such as physical/magical, allowing
-             * criticals, how to calculate accuracy, etc. There are also three sets of known
-             * formulae that are paired with the upper nybble values. These are selected in the
-             * Lower Nybble and determine how to calculate pre-defense damage
+             * This byte is divided into two nybbles (four bits). Upper nybble
+             * determines what considerations are made in calculating damage
+             * such as physical/magical, allowing criticals, how to calculate
+             * accuracy, etc. There are also three sets of known formulae that
+             * are paired with the upper nybble values. These are selected in
+             * the Lower Nybble and determine how to calculate pre-defense
+             * damage.
              */
             u8 damage_raw;
 
@@ -1410,9 +1425,10 @@ class KernelDataInstaller{
             /**
              * Weapon battle model. 1 byte.
              *
-             * This byte is divided into two nybbles (four bits). Upper nybble determines the
-             * attack animation modifier, and it's only used for Barret and Vincent. The lower
-             * nybble is actually the index of the weapon model.
+             * This byte is divided into two nybbles (four bits). Upper nybble
+             * determines the attack animation modifier, and it's only used for
+             * Barret and Vincent. The lower nybble is actually the index of the
+             * weapon model.
              */
             u8 model_raw;
 
@@ -1431,15 +1447,16 @@ class KernelDataInstaller{
             /**
              * Camera movement ID. 2 bytes.
              *
-             * Used for both single and multiple targeted attacks with this weapon. Always 0xFFFF.
+             * Used for both single and multiple targeted attacks with this
+             * weapon. Always 0xFFFF.
              */
             u16 camera;
 
             /**
              * Characters that can equip the weapon. 2 bytes.
              *
-             * Contains bits indicating the characters that can equip the weapon {@see character}
-             * for more info.
+             * Contains bits indicating the characters that can equip the weapon
+             * {@see character} for more info.
              */
             u16 equip_raw;
 
@@ -1507,29 +1524,31 @@ class KernelDataInstaller{
             /**
              * Weapon restrictions. 2 bytes.
              *
-             * Contains bits indicating if the item is {@see selleable}, {@see useable_battle} and
-             * {@see useable_menu}and {@see throwable}.
+             * Contains bits indicating if the item is {@see selleable},
+             * {@see useable_battle} and {@see useable_menu} and
+             * {@see throwable}.
              */
             u16 restrict_raw;
 
             /**
              * Weapon ID.
              *
-             * Not actually in the item file data, it's the order at which it appears.
+             * Not actually in the item file data, it's the order at which it
+             * appears.
              */
             int id;
 
             /**
              * Weapon name.
              *
-             * Not found in the same file as the rest of the data, but on file 20.
+             * Not in the same file as the rest of the data, but on file 20.
              */
             std::string name;
 
             /**
              * Weapon description.
              *
-             * Not found in the same file as the rest of the data, but on file 12.
+             * Not in the same file as the rest of the data, but on file 12.
              */
             std::string description;
 
@@ -1585,7 +1604,8 @@ class KernelDataInstaller{
             /**
              * Attack animation ID.
              *
-             * It's the upper nybble in {@see model_raw}. It's only used for Barret and Vincent.
+             * It's the upper nybble in {@see model_raw}. It's only used for
+             * Barret and Vincent.
              */
             u8 animation_index;
 
@@ -1629,9 +1649,10 @@ class KernelDataInstaller{
         /**
          * Data for each armor
          *
-         * As found in KERNEL.BIN, file 6, in order, up to unknown_3. Members after unknown_3 are
-         * not found literally in KERNEL.BIN, but are derived from other members or found in other
-         * files of the kernel (text files).
+         * As found in KERNEL.BIN, file 6, in order, up to unknown_3. Members
+         * after unknown_3 are not found literally in KERNEL.BIN, but are
+         * derived from other members or found in other kernel files (text
+         * files).
          */
         struct ArmorData{
 
@@ -1696,8 +1717,8 @@ class KernelDataInstaller{
             /**
              * Characters that can equip the armor. 2 bytes.
              *
-             * Contains bits indicating the characters that can equip the armor {@see character}
-             * for more info.
+             * Contains bits indicating the characters that can equip the armor
+             * {@see character} for more info.
              */
             u16 equip_raw;
 
@@ -1728,8 +1749,9 @@ class KernelDataInstaller{
             /**
              * Weapon restrictions. 2 bytes.
              *
-             * Contains bits indicating if the item is {@see selleable}, {@see useable_battle} and
-             * {@see useable_menu}and {@see throwable}.
+             * Contains bits indicating if the item is {@see selleable},
+             * {@see useable_battle} and {@see useable_menu} and
+             * {@see throwable}.
              */
             u16 restrict_raw;
 
@@ -1741,21 +1763,21 @@ class KernelDataInstaller{
             /**
              * Armor ID.
              *
-             * Not actually in the item file data, it's the order at which it appears.
+             * Not in the item file data, it's the order at which it appears.
              */
             int id;
 
             /**
              * Armor name.
              *
-             * Not found in the same file as the rest of the data, but on file 20.
+             * Not in the same file as the rest of the data, but on file 20.
              */
             std::string name;
 
             /**
              * Armor description.
              *
-             * Not found in the same file as the rest of the data, but on file 12.
+             * Not in the same file as the rest of the data, but on file 12.
              */
             std::string description;
 
@@ -1813,9 +1835,10 @@ class KernelDataInstaller{
         /**
          * Data for each accessory
          *
-         * As found in KERNEL.BIN, file 7, in order, up to unknown_3. Members after unknown_3 are
-         * not found literally in KERNEL.BIN, but are derived from other members or found in other
-         * files of the kernel (text files).
+         * As found in KERNEL.BIN, file 7, in order, up to unknown_3. Members
+         * after unknown_3 are not found literally in KERNEL.BIN, but are not
+         * found literally in KERNEL.BIN, but are derived from other members or
+         * found in other files of the kernel (text files).
          */
         struct AccessoryData{
 
@@ -1873,7 +1896,8 @@ class KernelDataInstaller{
             /**
              * Characters that can equip the armor. 2 bytes.
              *
-             * Contains bits indicating the characters that can equip the armor {@see character}
+             * Contains bits indicating the characters that can equip the armor
+             * {@see character} for more info. 
              * for more info.
              */
             u16 equip_raw;
@@ -1881,29 +1905,30 @@ class KernelDataInstaller{
             /**
              * Weapon restrictions. 2 bytes.
              *
-             * Contains bits indicating if the item is {@see selleable}, {@see useable_battle} and
-             * {@see useable_menu}and {@see throwable}.
+             * Contains bits indicating if the item is {@see selleable},
+             * {@see useable_battle} and {@see useable_menu} and
+             * {@see throwable}.
              */
             u16 restrict_raw;
 
             /**
              * Accessory ID.
              *
-             * Not actually in the item file data, it's the order at which it appears.
+             * Not in the item file data, it's the order at which itappears.
              */
             int id;
 
             /**
              * Accessory name.
              *
-             * Not found in the same file as the rest of the data, but on file 20.
+             * Not in the same file as the rest of the data, but on file 20.
              */
             std::string name;
 
             /**
              * Accessory description.
              *
-             * Not found in the same file as the rest of the data, but on file 12.
+             * Not in the same file as the rest of the data, but on file 12.
              */
             std::string description;
 
@@ -2045,9 +2070,10 @@ class KernelDataInstaller{
         /**
          * Data for each materia.
          *
-         * As found in KERNEL.BIN, file 8, in order, up to attributes. Members after attributes are
-         * not found literally in KERNEL.BIN, but are derived from other members or found in other
-         * files of the kernel (text files).
+         * As found in KERNEL.BIN, file 8, in order, up to attributes. Members
+         * after attributes are not found literally in KERNEL.BIN, but are
+         * derived from other members or found in other files of the kernel
+         * (text files).
          */
         struct MateriaData{
 
@@ -2076,8 +2102,8 @@ class KernelDataInstaller{
             /**
              * Materia type. 1 byte.
              *
-             * 2 nybbles. The upper one is the subtype, and it's ignored in V-Gears. The lower one
-             * the actual type.
+             * 2 nybbles. The upper one is the subtype, and it's ignored in
+             * V-Gears. The lower one the is actual type.
              */
             u8 type_raw;
 
@@ -2091,21 +2117,21 @@ class KernelDataInstaller{
             /**
              * Accessory ID.
              *
-             * Not actually in the item file data, it's the order at which it appears.
+             * Not in the item file data, it's the order at which it appears.
              */
             int id;
 
             /**
              * Accessory name.
              *
-             * Not found in the same file as the rest of the data, but on file 20.
+             * Not in the same file as the rest of the data, but on file 20.
              */
             std::string name;
 
             /**
              * Accessory description.
              *
-             * Not found in the same file as the rest of the data, but on file 12.
+             * Not in the same file as the rest of the data, but on file 12.
              */
             std::string description;
 
@@ -2154,7 +2180,8 @@ class KernelDataInstaller{
             /**
              * Number of times per battle an attack can be used, per level.
              *
-             * -1 means infinite times. Derived from {@see type_raw} and {@see attribute}.
+             * -1 means infinite times. Derived from {@see type_raw} and
+             * {@see attribute}.
              */
             int attack_times[6];
 
@@ -2168,8 +2195,8 @@ class KernelDataInstaller{
             /**
              * Parameter for the ability, varies per level.
              *
-             * It can be the number of times the ability can be executed, or the chance to
-             * activate...
+             * It can be the number of times the ability can be executed, or the
+             * chance to activate...
              */
             int ability_parameters[5];
         };
@@ -2177,15 +2204,15 @@ class KernelDataInstaller{
         /**
          * Data for each key item.
          *
-         * There is no data file about key items in KERNEL.BIN, there are only names (file 24) and
-         * descriptions (file 16)
+         * There is no data file about key items in KERNEL.BIN, there are only
+         * names (file 24) and descriptions (file 16)
          */
         struct KeyItemData{
 
             /**
              * Key item ID.
              *
-             * Not actually in KERNEL.BIN, it;s the order at which they appear.
+             * Not in KERNEL.BIN, it's the order at which they appear.
              */
             int id;
 
@@ -2203,7 +2230,8 @@ class KernelDataInstaller{
         /**
          * List of summon names.
          *
-         * There is no data file about key items in KERNEL.BIN, there are only names (file 26).
+         * There is no data file about key items in KERNEL.BIN, there are only
+         * names (file 26).
          */
         struct SummonNameData{
 
@@ -2223,10 +2251,11 @@ class KernelDataInstaller{
         /**
          * Character data.
          *
-         * Contains information about a character. Contained in the file 3 of the kernel, one
-         * entry for each character. Each section is 56 bytes long. The character ID is not
-         * actually in the data, but it's the order at which they appear. The character name is
-         * also not in the dataand  it must be filled manually.
+         * Contains information about a character. Contained in the file 3 of
+         * the kernel, one entry for each character. Each section is 56 bytes
+         * long. The character ID is not actually in the data, but it's the
+         * order at which they appear. The character name is also not in the
+         * data and it must be filled manually.
          */
         struct CharacterData{
 
@@ -2425,7 +2454,8 @@ class KernelDataInstaller{
         /**
          * Types of stat curves.
          *
-         * Althought any of them can be used for any stat, this is their intended use.
+         * Althought any of them can be used for any stat, this is their
+         * intended use.
          */
         enum STAT_CURVE_TYPE{
 
@@ -2445,7 +2475,8 @@ class KernelDataInstaller{
             CURVE_MP,
 
             /**
-             * Experience curve. Base must be ignored when calculating. Gradient is quadratic.
+             * Experience curve. Base must be ignored when calculating. Gradient
+             * is quadratic.
              */
             CURVE_EXP
 
@@ -2483,9 +2514,10 @@ class KernelDataInstaller{
         /**
          * Battle data.
          *
-         * Contains several pieces of data related to character growth. Contained in the file 3 of
-         * the kernel, after the character data (starts at offset 0x01F8). The kernel contains more
-         * data, but it's not needed for V-Gears (random table, scene lookup...)
+         * Contains several pieces of data related to character growth.
+         * Contained in the file 3 of the kernel, after the character data
+         * (starts at offset 0x01F8). The kernel contains more data, but it's
+         * not needed for V-Gears (random table, scene lookup...)
          */
         struct GrowthData{
 
@@ -2516,7 +2548,8 @@ class KernelDataInstaller{
          * Retrieves the 3-letter name of a basic stat from it's id.
          *
          * @param[in] id The stat ID.
-         * @return Stat name abbreviation. If the stat ID is unknown, "stat" will be returned.
+         * @return Stat name abbreviation. If the stat ID is unknown, "stat"
+         * will be returned.
          */
         std::string GetBasicStatName(int id);
 

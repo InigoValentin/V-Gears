@@ -39,8 +39,7 @@ void Vram::Save(const Ogre::String& file){
     u32* data = static_cast<u32*>((unsigned int *) pb.data);
     for (int i = 0, size = width_ * height_ / 2; i < size; ++ i){
         u16 col = (vram_[i * 2 + 1] << 8) | vram_[i * 2 + 0];
-        data[i]
-          = (((col & 0x1f) * 255 / 31) << 0x18)
+        data[i] = (((col & 0x1f) * 255 / 31) << 0x18)
           | ((((col >>  5) & 0x1f) * 255 / 31) << 0x10)
           | ((((col >> 10) & 0x1f) * 255 / 31) << 0x8)
           | 0xff;

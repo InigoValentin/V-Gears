@@ -33,7 +33,8 @@ class WorldInstaller{
          *
          * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory of the installation data.
-         * @param[in] keep_originals True to keep original data after conversion, false to remove.
+         * @param[in] keep_originals True to keep original data after
+         * conversion, false to remove.
          * @param[in] res_mgr The application resource manager.
          */
         WorldInstaller(
@@ -61,16 +62,16 @@ class WorldInstaller{
         /**
          * Generates the materials needed for the world map.
          *
-         * TODO: Note that this function stil doesn't use the game data, and it has a lot of
-         * hardcoded things.
+         * @todo Note that this function stil doesn't use the game data, and it
+         * has a lot of hardcoded things.
          */
         void GenerateMaterials();
 
         /**
          * Processes the next map to process.
          *
-         * @return True if, once the map has been processed, all maps are processed. False if there
-         * are more maps to process.
+         * @return True if, once the map has been processed, all maps are
+         * processed. False if there are more maps to process.
          */
         bool ProcessMap();
 
@@ -221,7 +222,7 @@ class WorldInstaller{
         /**
          * A map.
          *
-         * A map is defined in a WM*.MAP file. They are divided in 0xB800 byte blocks.
+         * A map is defined in a WM*.MAP file. Divided in 0xB800 byte blocks.
          */
         struct Map{
 
@@ -270,8 +271,9 @@ class WorldInstaller{
         /**
          * Path to the world map elements models directory.
          *
-         * Elements can be locations, playable characters, enemies, transportations... anything
-         * that it's not in itself part of the terrain.
+         * Elements can be locations, playable characters, enemies,
+         * transportations... anything that it's not in itself part of the
+         * terrain.
          */
         static std::string ELEMENT_MODELS_DIR;
 

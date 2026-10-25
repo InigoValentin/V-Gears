@@ -48,8 +48,7 @@ void LoadTimFileToVram(File* file, int tim_offset, Vram* vram){
     LOGGER->Log(
       "ImageVramPositionX (" + HexToString(image_vram_position_x, 4, '0') + ") ImageVramPositionY ("
       + HexToString(image_vram_position_y, 4, '0') + ") ImageWidth ("
-      + HexToString(image_width, 4, '0') + ") ImageHeight (" +  HexToString(image_height, 4, '0')
-      + ")\n"
+      + HexToString(image_width, 4, '0') + ") ImageHeight (" +  HexToString(image_height, 4, '0') + ")\n"
     );
     for (int y = 0; y < image_height; ++ y){
         for (int x = 0; x < image_width; ++ x){

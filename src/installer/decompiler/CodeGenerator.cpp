@@ -25,9 +25,8 @@
 #define GET(vertex)    (boost::get(boost::vertex_name, graph_, vertex))
 #define GET_EDGE(edge) (boost::get(boost::edge_attribute, graph_, edge))
 
-CodeGenerator::CodeGenerator(
-  Engine *engine, std::ostream &output, ARGUMENT_ORDER bin_order, ARGUMENT_ORDER call_order
-): output_(output), bin_order_(bin_order), call_order_(call_order)
+CodeGenerator::CodeGenerator(Engine *engine, std::ostream &output, ARGUMENT_ORDER bin_order, ARGUMENT_ORDER call_order):
+  output_(output), bin_order_(bin_order), call_order_(call_order)
 {
     engine_ = engine;
     indent_level_ = 0;
@@ -53,9 +52,7 @@ void CodeGenerator::WriteFunctionCall(
             case 'b': func_call += params[param_index]->GetUnsigned() ? "true" : "false"; break;
             case 'n': func_call += std::to_string(params[param_index]->GetUnsigned()); break;
             case 'f':
-                func_call += std::to_string(
-                  static_cast<float>(params[param_index]->GetUnsigned()) / 30.0f
-                );
+                func_call += std::to_string(static_cast<float>(params[param_index]->GetUnsigned()) / 30.0f);
                 break;
             case '_': skip_argument = true; break;// Ignore param
             default: throw std::runtime_error("Unknown param type");
@@ -131,9 +128,7 @@ void CodeGenerator::ProcessUncondJumpInst(Function& function, InstVec& insts, co
                 bool print_jump = true;
                 OutEdgeRange jump_targets = boost::out_edges(cur_vertex_, graph_);
                 for (
-                  OutEdgeIterator target = jump_targets.first;
-                  target != jump_targets.second && print_jump;
-                  ++ target
+                  OutEdgeIterator target = jump_targets.first; target != jump_targets.second && print_jump; ++ target
                 ){
                     Group* next = cur_group_->next;
                     if (next){
@@ -151,20 +146,16 @@ void CodeGenerator::ProcessUncondJumpInst(Function& function, InstVec& insts, co
                           boost::target(*target, graph_), graph_
                         );
                         for (
-                          OutEdgeIterator target_it = target_range.first;
-                          target_it != target_range.second;
-                          ++ target_it
+                          OutEdgeIterator target_it = target_range.first; target_it != target_range.second; ++ target_it
                         ){
                             // Don't output jump to while loop that has jump to next vertex.
-                            if (boost::target(*target_it, graph_) == next->vertex)
-                                print_jump = false;
+                            if (boost::target(*target_it, graph_) == next->vertex) print_jump = false;
                         }
                         if (print_jump){
                             // Check if this instruction is the last instruction in the function
                             // and its an uncond jump.
                             if (
-                              cur_group_->type == GROUP_TYPE_DO_WHILE
-                              && inst->GetAddress() == function.end_addr
+                              cur_group_->type == GROUP_TYPE_DO_WHILE && inst->GetAddress() == function.end_addr
                               && inst->IsUncondJump()
                             ){
                                 print_jump = false;
@@ -203,12 +194,8 @@ void CodeGenerator::ProcessCondJumpInst(const InstPtr inst){
                 bool coalesce_else = false;
                 for (OutEdgeIterator oe = oer.first; oe != oer.second; ++ oe){
                     GroupPtr oGr = GET(boost::target(*oe, graph_))->prev;
-                    if (
-                      std::find(oGr->end_else.begin(), oGr->end_else.end(), cur_group_.get())
-                      != oGr->end_else.end()
-                    ){
+                    if (std::find(oGr->end_else.begin(), oGr->end_else.end(), cur_group_.get()) != oGr->end_else.end())
                         coalesce_else = true;
-                    }
                 }
                 if (coalesce_else){
                     cur_group_->code.clear();
@@ -221,15 +208,13 @@ void CodeGenerator::ProcessCondJumpInst(const InstPtr inst){
             AddOutputLine(s.str(), cur_group_->coalesced_else, true);
             break;
         case GROUP_TYPE_WHILE:
-            s << target_lang_->WhileHeader(true) << stack_.Pop()->Negate()
-              << target_lang_->WhileHeader(false) << " "
+            s << target_lang_->WhileHeader(true) << stack_.Pop()->Negate() << target_lang_->WhileHeader(false) << " "
               << target_lang_->StartBlock(LuaLanguage::BEGIN_WHILE);
             AddOutputLine(s.str(), false, true);
             break;
         case GROUP_TYPE_DO_WHILE:
             s << target_lang_->EndBlock(LuaLanguage::END_WHILE) <<  " "
-              << target_lang_->WhileHeader(true) << stack_.Pop()
-              << target_lang_->WhileHeader(false);
+              << target_lang_->WhileHeader(true) << stack_.Pop() << target_lang_->WhileHeader(false);
             AddOutputLine(s.str(), true, false);
             break;
         default:
@@ -257,11 +242,7 @@ typedef std::pair<GraphVertex, ValueStack> DFSEntry;
 
 void CodeGenerator::GeneratePass(InstVec& insts, const Graph& graph){
     graph_ = graph;
-    for (
-      FuncMap::iterator fn = engine_->functions.begin();
-      fn != engine_->functions.end();
-      ++ fn
-    ){
+    for (FuncMap::iterator fn = engine_->functions.begin(); fn != engine_->functions.end(); ++ fn){
         while (!stack_.IsEmpty()) stack_.Pop();
         GraphVertex entry_point = fn->second.vertex;
         std::string func_signature = ConstructFuncSignature(fn->second);
@@ -338,15 +319,13 @@ void CodeGenerator::Process(Function& function, InstVec& insts, GraphVertex vert
     for (InEdgeIterator ie = ier.first; ie != ier.second; ++ ie){
         GraphVertex in = boost::source(*ie, graph_);
         GroupPtr in_group = GET(in);
-        if (!boost::get(boost::edge_attribute, graph_, *ie).is_jump || in_group->stack_level == -1)
-            continue;
+        if (!boost::get(boost::edge_attribute, graph_, *ie).is_jump || in_group->stack_level == -1) continue;
         switch (in_group->type){
             case GROUP_TYPE_DO_WHILE:
                 AddOutputLine(target_lang_->DoLoopHeader(), false, true);
                 break;
             case GROUP_TYPE_IF:
-                if (!cur_group_->start_else)
-                    AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_IF), true, false);
+                if (!cur_group_->start_else) AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_IF), true, false);
                 break;
             case GROUP_TYPE_WHILE:
                 AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_WHILE), true, false);
@@ -365,11 +344,7 @@ void CodeGenerator::Process(Function& function, InstVec& insts, GraphVertex vert
         ProcessInst(function, insts, *it);
     } while (it++ != cur_group_->end);
     // Add else end if necessary
-    for (
-      ElseEndIterator else_it = cur_group_->end_else.begin();
-      else_it != cur_group_->end_else.end();
-      ++ else_it
-    ){
+    for (ElseEndIterator else_it = cur_group_->end_else.begin(); else_it != cur_group_->end_else.end(); ++ else_it){
         if (!(*else_it)->coalesced_else)
             AddOutputLine(target_lang_->EndBlock(LuaLanguage::END_OF_IF_ELSE_CHAIN), true, false);
     }

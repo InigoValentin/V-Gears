@@ -20,8 +20,7 @@
 namespace VGears{
 
     Utility::Utility(int argc, char *argv[]) :
-      Application(argc, argv), frame_listener_(NULL), scene_manager_(NULL),
-      camera_(NULL), viewport_(NULL)
+      Application(argc, argv), frame_listener_(NULL), scene_manager_(NULL), amera_(NULL), viewport_(NULL)
     {}
 
     Utility::~Utility(){}
@@ -47,9 +46,7 @@ namespace VGears{
         Ogre::RenderWindow *window(getRenderWindow());
         viewport_ = window->addViewport(camera_);
         viewport_->setBackgroundColour(Ogre::ColourValue(0.0f, 0.4f, 0.0f));
-        camera_->setAspectRatio(
-          Ogre::Real(viewport_->getActualWidth()) / Ogre::Real(viewport_->getActualHeight())
-        );
+        camera_->setAspectRatio(Ogre::Real(viewport_->getActualWidth()) / Ogre::Real(viewport_->getActualHeight()));
         frame_listener_ = new DisplayFrameListener(window);
         frame_listener_->setCamera(camera_);
         root->addFrameListener(frame_listener_);
@@ -63,8 +60,7 @@ namespace VGears{
 
     std::string Utility::DecodeString(const u8* bytes, const unsigned int size){
         std::string decoded("");
-        for (int i = 0; i < size; i ++)
-            if (bytes[i] > 0x00 && bytes[i] < 0XFF) decoded += ENGLISH_CHARS[bytes[i]];
+        for (int i = 0; i < size; i ++) if (bytes[i] > 0x00 && bytes[i] < 0XFF) decoded += ENGLISH_CHARS[bytes[i]];
         boost::algorithm::trim(decoded);
         return decoded;
     }

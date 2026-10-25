@@ -56,9 +56,7 @@ class Engine {
          * @param[out] output Stream to output the code to.
          * @return Pointer to a CodeGenerator for the engine.
          */
-        virtual std::unique_ptr<CodeGenerator> GetCodeGenerator(
-          const InstVec& insts, std::ostream &output
-        ) = 0;
+        virtual std::unique_ptr<CodeGenerator> GetCodeGenerator(const InstVec& insts, std::ostream &output) = 0;
 
         /**
          * Post-processing step after CFG analysis.

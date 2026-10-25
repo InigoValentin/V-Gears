@@ -46,9 +46,7 @@ u8 FieldTextWriter::GetU8(u32 offset){
     return data_[offset];
 }
 
-void FieldTextWriter::Write(
-  const std::vector<u8>& script_section_buffer, std::string field_name, bool english
-){
+void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::string field_name, bool english){
     data_ = script_section_buffer;
     // Get sector 1 offset (scripts and dialog).
     u32 offset_to_sector = 0; // Our buffer IS the start of scripts and dialog.
@@ -76,9 +74,7 @@ void FieldTextWriter::Write(
             i * 0x02 // *2 because each char is 2 bytes
           );
         AddText(dialog);
-        logger_->Log(
-          "<dialog name=\"" + field_name + "_" + std::to_string(i) + "\">"
-        );
+        logger_->Log("<dialog name=\"" + field_name + "_" + std::to_string(i) + "\">");
         tag_open_ = true;
         // Some maps have unclosed color tags.
         // Use this counter to close them at the end.
@@ -176,9 +172,7 @@ void FieldTextWriter::Write(
                 AddText(dialog);
                 logger_->Log("<image sprite=\"ButtonCross\" />");
             }
-            else if (
-              (temp == 0xFA || temp == 0xFB || temp == 0xFC || temp == 0xFD) && english == false
-            ){
+            else if ((temp == 0xFA || temp == 0xFB || temp == 0xFC || temp == 0xFD) && english == false){
                 ++ offset;
                 unsigned char temp2 = GetU8(offset);
                 if (temp == 0xFA){

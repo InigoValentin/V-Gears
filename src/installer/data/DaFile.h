@@ -22,8 +22,9 @@
 /**
  * Represents a compiled animations file.
  *
- * Da files are bundled into battle.lgp. They contain information about a skeleton animation. They
- * are heavily compressed, and involve a lot of bit reading to decompile.
+ * Da files are bundled into battle.lgp. They contain information about a
+ * skeleton animation. They are heavily compressed, and involve a lot of bit
+ * reading to decompile.
  */
 class DaFile{
 
@@ -34,26 +35,29 @@ class DaFile{
          *
          * Reads the file.
          *
-         * @param[in, out] file The file to read from. The file contents will not be altered, but
-         * it's offset will be changed while reading it.
+         * @param[in, out] file The file to read from. The file contents will
+         * not be altered, but it's offset will be changed while reading it.
          */
         DaFile(File file);
 
         /**
          * Generates .a files from the da file.
          *
-         * A file will be generated for each animation in the da file. See {@see VGearsAFile.h} for
-         * more info about .a files. Files will be created in the specified path, and will be named
-         * like the model id, followed by an underscore, followed a two-digit animation index
-         * (starting from 0) followed by the ".a extension". For example, if path is
-         * "/home/user/.v-gears", the model id is "ac", and the da file contains three animations,
-         * the following files will be generated: "/home/user/.v-gears/ac_00.a",
-         * "/home/user/.v-gears/ac_01.a" and "/home/user/.v-gears/ac_02.a".
+         * A file will be generated for each animation in the da file. See
+         * {@see VGearsAFile.h} for  more info about .a files. Files will be
+         * created in the specified path, and will be named like the model id,
+         * followed by an underscore, followed a two-digit animation index
+         * (starting from 0) followed by the ".a extension". For example, if
+         * path is "/home/user/.v-gears", the model id is "ac", and the da file
+         * contains three animations, the following files will be generated:
+         * "/home/user/.v-gears/ac_00.a", "/home/user/.v-gears/ac_01.a" and
+         * "/home/user/.v-gears/ac_02.a".
          *
-         * @param[in] model_id ID of the model the animation belongs to, usually a two letter
-         * code. Used to generate the file name.
+         * @param[in] model_id ID of the model the animation belongs to, usually
+         * a two letter code. Used to generate the file name.
          * @param[in] path Path to the directory where the files will be saved.
-         * @return A list of the generated files. They include the path and the extension.
+         * @return A list of the generated files. They include the path and the
+         * extension.
          */
         std::vector<std::string> GenerateAFiles(std::string model_id, std::string path);
 
@@ -67,8 +71,8 @@ class DaFile{
         /**
          * A three-coordinate value.
          *
-         * Can be used to store bone rotations, offsets, translations... Each coordinate has short,
-         * integer and float formats.
+         * Can be used to store bone rotations, offsets, translations... Each
+         * coordinate has short, integer and float formats.
          */
         struct TriValue{
 
@@ -188,11 +192,13 @@ class DaFile{
         /**
          * Reads an animation from the *da file.
          *
-         * Requires {@see bit_offset_} to indicate the bit at which the animation begins.
+         * Requires {@see bit_offset_} to indicate the bit at which the
+         * animation begins.
          *
-         * If the read animation is invalid (i.e. with a size less than 11 bytes), the
-         * {@see Animation.frame_count} will be 0 and the rest of the data in the animation is not
-         * to be trusted, and the animation should not be used.
+         * If the read animation is invalid (i.e. with a size less than 11
+         * bytes), the {@see Animation.frame_count} will be 0 and the rest of
+         * the data in the animation is not to be trusted, and the animation
+         * should not be used.
          *
          * @return The animation read.
          */
@@ -201,11 +207,12 @@ class DaFile{
         /**
          * Reads the first, uncompressed frame.
          *
-         * Requires {@see bit_offset_} to indicate the bit at which the frame begins.
+         * Requires {@see bit_offset_} to indicate the bit at which the frame
+         * begins.
          *
          * @param[in] bones The number of bones involved in the animation.
-         * @param[in] key Key for decoding the animation (fifth byte in the animation second
-         * header).
+         * @param[in] key Key for decoding the animation (fifth byte in the
+         * animation second header).
          * @return The first frame.
          */
         Frame ReadFirstFrame(u32 bones, u8 key);
@@ -213,11 +220,12 @@ class DaFile{
         /**
          * Reads a compressed frame.
          *
-         * Requires {@see bit_offset_} to indicate the bit at which the frame begins.
+         * Requires {@see bit_offset_} to indicate the bit at which the frame
+         * begins.
          *
          * @param[in] bones The number of bones involved in the animation.
-         * @param[in] key Key for decoding the animation (fifth byte in the animation second
-         * header).
+         * @param[in] key Key for decoding the animation (fifth byte in the
+         * animation second header).
          * @param[in] prev Previous frame.
          * @return The first frame.
          */
@@ -226,10 +234,11 @@ class DaFile{
         /**
          * Retrieves a positional offset value of dynamic size from the file.
          *
-         * Requires {@see bit_offset_} to indicate the bit at which the frame begins. The first
-         * read bit will determine the length of the read data. If it's 1, 7 more bits of data will
-         * be read and returned. It it isn't, 16 more bits of data will be read and returned. In
-         * total, either 17 or 8 bits of data will be read.
+         * Requires {@see bit_offset_} to indicate the bit at which the frame
+         * begins. The first read bit will determine the length of the read
+         * data. If it's 1, 7 more bits of data will be read and returned. It it
+         * isn't, 16 more bits of data will be read and returned. In total,
+         * either 17 or 8 bits of data will be read.
          *
          * @return The read value.
          */
@@ -258,9 +267,11 @@ class DaFile{
         /**
          * Decodes a delta rotation read from the stream.
          *
-         * Requires {@see bit_offset_} to indicate the bit at which the delta begins
+         * Requires {@see bit_offset_} to indicate the bit at which the delta
+         * begins
          *
-         * @param lowered_precision_bits How many bits to sift the read value. The animation key.
+         * @param lowered_precision_bits How many bits to sift the read value.
+         * The animation key.
          * @return The decoded value.
          */
         int GetCompressedDeltaFromStream(int lowered_precision_bits);

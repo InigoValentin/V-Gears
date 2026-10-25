@@ -40,54 +40,69 @@ class DataInstaller{
         struct AdvancedOptions{
 
             /**
-             * Option to skip battle scenes installation.
+             * Option to install battle scenes.
              */
-            bool skip_battle_data;
+            bool battle_data;
 
             /**
-             * Option to skip battle models installation.
+             * Option to install battle models.
              */
-            bool skip_battle_models;
+            bool battle_models;
 
             /**
-             * Option to skip kernel data installation.
+             * Option to install kernel data.
              */
-            bool skip_kernel;
+            bool kernel;
 
             /**
-             * Option to skip image installation.
+             * Option to install images.
              */
-            bool skip_images;
+            bool images;
 
             /**
-             * Option to skip sound effects installation.
+             * Option to install sound effects.
              */
-            bool skip_sounds;
+            bool sounds;
 
             /**
-             * Option to skip music tracks installation.
+             * Option to install music tracks.
              */
-            bool skip_music;
+            bool music;
 
             /**
-             * Option to skip field maps installation.
+             * Option to install FMV videos.
              */
-            bool skip_fields;
+            bool videos;
 
             /**
-             * Option to skip field models installation.
+             * Option to enable calls to the ffmpeg executable.
              */
-            bool skip_field_models;
+            bool ffmpeg;
 
             /**
-             * Option to skip world map data installation.
+             * Option to enable calls to the timidity executable
              */
-            bool skip_wm;
+            bool timidity;
 
             /**
-             * Option to skip world map models installation.
+             * Option to install field maps.
              */
-            bool skip_wm_models;
+            bool fields;
+
+            /**
+             * Option to install field models.
+             */
+            bool field_models;
+
+            /**
+             * Option to install world map data.
+             */
+            bool wm;
+
+            /**
+             * Option to install world map models.
+             */
+            bool wm_models;
 
             /**
              * Option to keep original data after installation.
@@ -95,30 +110,26 @@ class DataInstaller{
             bool keep_originals;
 
             /**
-             * Option to avoid calls to the ffmpeg executable.
+             * Option to perform a clean installation.
              */
-            bool no_ffmpeg;
+            bool clean_install;
 
-            /**
-             * Option to avoid calls to the timidity executable
-             */
-            bool no_timidity;
         };
 
         /**
          * The scale factor for line point coordinates.
          *
-         * When a LINE opcode is found in the game scripts, the line points X and Y coordinates
-         * must be scaled down by this factor.
+         * When a LINE opcode is found in the game scripts, the line points X
+         * and Y coordinates must be scaled down by this factor.
          */
         static float LINE_SCALE_FACTOR;
 
         /**
          * Installer constructor
          *
-         * @param[in] disk_image Disk image containing the original data to parse.
-         * @param[in] output_dir Path to the directory to write generated data to.
-         * @param[in] options Adavanced options for the installer.
+         * @param[in] disk_image Disk image with the original data to parse.
+         * @param[in] output_dir Path to the directory to write generated data.
+         * @param[in] options Advanced options for the installer.
          * @param[in] write_output_line Pointer to function to write output.
          */
         DataInstaller(
@@ -150,7 +161,8 @@ class DataInstaller{
         /**
          * Creates a directory in the outputh path.
          *
-         * @param[in] dir Path of the directory to create, relative to the output path.
+         * @param[in] dir Path of the directory to create, relative to the
+         * output path.
          * @throws std::runtime_error If the directory can't be created.
          */
         void CreateDir(const std::string& dir);
@@ -368,6 +380,11 @@ class DataInstaller{
             MEDIA_MUSICS_INDEX,
 
             /**
+             * Copies the FMV videos.
+             */
+            MEDIA_VIDEOS,
+
+            /**
              * Initializer for {@see SPAWN_POINTS_AND_SCALE_FACTORS}.
              */
             FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT,
@@ -528,8 +545,8 @@ class DataInstaller{
          *
          * @param[in] msg the message to write.
          * @param[in] level Log level for the message.
-         * @param[in] as_progress If true, the text will also be set as the current text behind the
-         * progress bar.
+         * @param[in] as_progress If true, the text will also be set as the
+         * current text behind the progress bar.
          */
         std::function<void(std::string msg, int level, bool progress)> write_output_line_;
 

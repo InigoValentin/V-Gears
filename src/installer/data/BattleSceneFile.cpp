@@ -147,8 +147,7 @@ void BattleSceneFile::Read(File file){
         scene_.attack_data[a].special = file.readU16LE();
     }
     for (int a = 0; a < 32; a ++) scene_.attack_ids[a] = file.readU16LE();
-    for (int a = 0; a < 32; a ++)
-        for (int b = 0; b < 32; b ++) scene_.attack_names[a][b] = file.readU8();
+    for (int a = 0; a < 32; a ++) for (int b = 0; b < 32; b ++) scene_.attack_names[a][b] = file.readU8();
     // TODO: Keep reading for AI scripts.
 
     // All the data is read, now format it.
@@ -189,10 +188,7 @@ void BattleSceneFile::Read(File file){
                 enemy.animations.push_back(scene_.enemy_data[e].animation_index[a]);
         }
         for (int l = 0; l < 8; l ++){
-            if (
-              scene_.enemy_data[e].elements[l] != 0xFF
-              && scene_.enemy_data[e].element_rates[l] != 0xFF
-            ){
+            if (scene_.enemy_data[e].elements[l] != 0xFF && scene_.enemy_data[e].element_rates[l] != 0xFF ){
                 Enemy::Element element;
                 element.id = scene_.enemy_data[e].elements[l];
                 switch (scene_.enemy_data[e].element_rates[l]){
@@ -428,8 +424,6 @@ void BattleSceneFile::Read(File file){
         }
         if (scene_.enemy_data[e].morph != 0xFFFF) enemy.morph = scene_.enemy_data[e].morph;
 
-        //std::cout << "ENEMY " << enemy.id << ": " << enemy.name << "\n";
-
         enemies_.push_back(enemy);
     }
 
@@ -452,33 +446,22 @@ void BattleSceneFile::Read(File file){
         attack.damage.accuracy = scene_.attack_data[a].accuracy / 255.0f;
         if (scene_.attack_data[a].impact_effect != 0xFF)
             attack.animation.impact_effect = scene_.attack_data[a].impact_effect;
-        if (scene_.attack_data[a].hurt_anim != 0xFF)
-            attack.animation.hurt_anim = scene_.attack_data[a].hurt_anim;
+        if (scene_.attack_data[a].hurt_anim != 0xFF) attack.animation.hurt_anim = scene_.attack_data[a].hurt_anim;
         attack.mp = scene_.attack_data[a].mp;
-        if (scene_.attack_data[a].sound != 0xFFFF)
-            attack.animation.sound = scene_.attack_data[a].sound;
+        if (scene_.attack_data[a].sound != 0xFFFF) attack.animation.sound = scene_.attack_data[a].sound;
         if (scene_.attack_data[a].camera_single != 0xFFFF)
             attack.animation.camera_single = scene_.attack_data[a].camera_single;
         if (scene_.attack_data[a].camera_multiple != 0xFFFF)
             attack.animation.camera_multiple = scene_.attack_data[a].camera_multiple;
-        attack.target.selection_enabled
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x01));
-        attack.target.default_enemy
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x02));
-        attack.target.default_multiple
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x04));
-        attack.target.toggle_multiple
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x08));
-        attack.target.fixed_row
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x10));
-        attack.target.short_range
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x20));
-        attack.target.all_rows
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x40));
-        attack.target.random
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x80));
-        if (scene_.attack_data[a].effect != 0xFFFF)
-            attack.animation.effect = scene_.attack_data[a].effect;
+        attack.target.selection_enabled = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x01));
+        attack.target.default_enemy = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x02));
+        attack.target.default_multiple = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x04));
+        attack.target.toggle_multiple = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x08));
+        attack.target.fixed_row = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x10));
+        attack.target.short_range = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x20));
+        attack.target.all_rows = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x40));
+        attack.target.random = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x80));
+        if (scene_.attack_data[a].effect != 0xFFFF) attack.animation.effect = scene_.attack_data[a].effect;
         attack.damage.formula = scene_.attack_data[a].damage >> 4;
         attack.damage.modifier = scene_.attack_data[a].damage & 15;
         attack.damage.power = scene_.attack_data[a].power;
@@ -490,16 +473,10 @@ void BattleSceneFile::Read(File file){
         }
         int status_chance_raw = 63 - (scene_.attack_data[a].status_change ^ 63); // Out of 63;
         int status_mode;
-        if (
-          scene_.attack_data[a].status_change == (scene_.attack_data[a].status_change | 0x00000080)
-        ){
+        if (scene_.attack_data[a].status_change == (scene_.attack_data[a].status_change | 0x00000080))
             status_mode = GameData::STATUS_EFFECT_MODE::TOGGLE;
-        }
-        else if (
-          scene_.attack_data[a].status_change == (scene_.attack_data[a].status_change | 0x00000040)
-        ){
+        else if (scene_.attack_data[a].status_change == (scene_.attack_data[a].status_change | 0x00000040))
             status_mode = GameData::STATUS_EFFECT_MODE::TOGGLE;
-        }
         else status_mode = GameData::STATUS_EFFECT_MODE::TOGGLE;
         if (scene_.attack_data[a].status != 0xFFFFFFFF){
             float status_chance = status_chance_raw / 63.0f;
@@ -730,10 +707,8 @@ void BattleSceneFile::Read(File file){
         }
         if (scene_.attack_data[a].element >= 0 && scene_.attack_data[a].element <= 0x0F)
             attack.elements.push_back(scene_.attack_data[a].element);
-        attack.damage.damage_mp
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0001));
-        attack.damage.affected_by_darkness
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0004));
+        attack.damage.damage_mp = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0001));
+        attack.damage.affected_by_darkness = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0004));
         if ((scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0010))){
             if (attack.damage.damage_mp) attack.damage.drain_mp = true;
             else attack.damage.drain_hp = true;
@@ -744,14 +719,10 @@ void BattleSceneFile::Read(File file){
         }
         attack.damage.ignore_status_defense
           = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0080));
-        attack.target.only_for_dead
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0100));
-        attack.reflectable
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0200));
-        attack.target.no_re_target
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0800));
-        attack.damage.critical
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x2000));
+        attack.target.only_for_dead = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0100));
+        attack.reflectable = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0200));
+        attack.target.no_re_target = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0800));
+        attack.damage.critical = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x2000));
 
         // TODO: Parse scene_.attack_data[a].additional_effects with
         // scene_.attack_data[a].additional_effects_mod for special attack modifiers (23 total).
@@ -764,8 +735,7 @@ void BattleSceneFile::Read(File file){
     // Formations
     for (int f = 0; f < 4; f ++){
         Formation formation;
-        if (scene_.setup[f].next_battle != 0xFFFF)
-            formation.next_formation = scene_.setup[f].next_battle;
+        if (scene_.setup[f].next_battle != 0xFFFF) formation.next_formation = scene_.setup[f].next_battle;
         formation.escape_counter = (scene_.setup[f].escape_counter / 64.0f);
         // TODO: What is flag 0x01? Multilimb enemies?
         formation.escapable = (scene_.setup[f].flags == scene_.setup[f].flags | 0x02);
@@ -796,33 +766,24 @@ void BattleSceneFile::Read(File file){
                 enemy.z = scene_.formation[f][e].z;
                 enemy.row = scene_.formation[f][e].row;
                 enemy.cover[0] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x01)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x01) ? '1' : '0'
                 );
                 enemy.cover[1] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x02)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x02) ? '1' : '0'
                 );
                 enemy.cover[2] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x04)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x04) ? '1' : '0'
                 );
                 enemy.cover[3] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x08)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x08) ? '1' : '0'
                 );
                 enemy.cover[4] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x10)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x10) ? '1' : '0'
                 );
-                enemy.visible
-                  = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x01);
-                enemy.direction
-                  = ((scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x02) ? 1 : 0);
-                enemy.targeteable
-                  = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x08);
-                enemy.main_script_active
-                  = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x10);
+                enemy.visible = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x01);
+                enemy.direction = ((scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x02) ? 1 : 0);
+                enemy.targeteable = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x08);
+                enemy.main_script_active = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x10);
                 formation.enemies.push_back(enemy);
             }
         }
@@ -842,9 +803,7 @@ void BattleSceneFile::Read(File file){
             formation.initial_camera_position = scene_.setup[f].camera;
         for (int a = 0; a < 4; a ++){
             if (scene_.setup[f].next_arena_candidates[a] != 999){
-                formation.next_arena_formation_candidates.push_back(
-                  scene_.setup[f].next_arena_candidates[a]
-                );
+                formation.next_arena_formation_candidates.push_back(scene_.setup[f].next_arena_candidates[a]);
                 formation.is_arena_battle = true;
             }
         }

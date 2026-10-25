@@ -31,13 +31,9 @@ int main(int argc, char *argv[]){
     QApplication application(argc, argv);
     QApplication::setDesktopFileName(QStringLiteral("v-gears-installer"));
     const QIcon installerIcon(QStringLiteral(":/icons/v-gears-installer.png"));
-    if (!installerIcon.isNull()) {
-        application.setWindowIcon(installerIcon);
-    }
+    if (!installerIcon.isNull()) application.setWindowIcon(installerIcon);
     MainWindow window;
-    if (!installerIcon.isNull()) {
-        window.setWindowIcon(installerIcon);
-    }
+    if (!installerIcon.isNull()) window.setWindowIcon(installerIcon);
     window.show();
     return application.exec();
 }

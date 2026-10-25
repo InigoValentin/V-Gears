@@ -52,8 +52,7 @@
  * TURNW
  */
 
-FieldEngine::Entity::Entity(const std::string& name, size_t index):
-  name_(name), index_(index), is_line_(false){}
+FieldEngine::Entity::Entity(const std::string& name, size_t index): name_(name), index_(index), is_line_(false){}
 
 std::string FieldEngine::Entity::GetName() const{return name_;}
 
@@ -65,13 +64,9 @@ std::string FieldEngine::Entity::FunctionByIndex(size_t index) const{
     return it->second;
 }
 
-void FieldEngine::Entity::AddFunction(const std::string& name, size_t index){
-    functions_[index] = name;
-}
+void FieldEngine::Entity::AddFunction(const std::string& name, size_t index){functions_[index] = name;}
 
-void FieldEngine::Entity::MarkAsLine(
-  bool line, std::vector<float> point_a, std::vector<float> point_b
-){
+void FieldEngine::Entity::MarkAsLine(bool line, std::vector<float> point_a, std::vector<float> point_b){
     is_line_ = line;
     point_a_.clear();
     point_b_.clear();
@@ -118,9 +113,7 @@ std::unique_ptr<Disassembler> FieldEngine::GetDisassembler(InstVec &insts){
     return std::move(ret);
 }
 
-std::unique_ptr<CodeGenerator> FieldEngine::GetCodeGenerator(
-  const InstVec& insts, std::ostream &output
-){
+std::unique_ptr<CodeGenerator> FieldEngine::GetCodeGenerator(const InstVec& insts, std::ostream &output){
     // The broken version:
     //return std::make_unique<FieldCodeGenerator>(this, insts, output);
     // The not-as-nice-but-at-least-it-works version:
@@ -200,8 +193,7 @@ std::vector<FieldDecompiler::Line> FieldEngine::GetLineList() const{
 }
 
 void FieldEngine::AddEntityFunction(
-  const std::string& entity_name, size_t entity_index,
-  const std::string& func_name, size_t func_index
+  const std::string& entity_name, size_t entity_index, const std::string& func_name, size_t func_index
 ){
     auto it = entity_index_map_.find(entity_index);
     if (it != std::end(entity_index_map_)) (*it).second.AddFunction(func_name, func_index);
@@ -216,9 +208,7 @@ void FieldEngine::MarkEntityAsLine(
   size_t entity_index, bool line, std::vector<float> point_a, std::vector<float> point_b
 ){
     auto it = entity_index_map_.find(entity_index);
-    if (it != std::end(entity_index_map_)){
-        (*it).second.MarkAsLine(line, point_a, point_b);
-    }
+    if (it != std::end(entity_index_map_)) (*it).second.MarkAsLine(line, point_a, point_b);
 }
 
 bool FieldEngine::EntityIsLine(size_t entity_index){

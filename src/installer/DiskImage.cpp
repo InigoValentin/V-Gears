@@ -845,7 +845,7 @@ bool DiskImage::extractImage(std::string installation_path){
     return true;
 }
 
-std::unique_ptr<std::string> DiskImage::fileExists(std::string file_path) {
+std::unique_ptr<std::string> DiskImage::filePath(std::string file_path) {
     if (!is_extracted) {
         std::cerr << "Error: Attempted to check for file existence before extracting the disk image." << std::endl;
         return nullptr;

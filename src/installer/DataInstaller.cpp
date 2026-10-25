@@ -70,7 +70,7 @@ float DataInstaller::Progress(){
             if (input_dir.empty()) throw std::runtime_error("Input data directory is empty");
             kernel_installer_ = std::make_unique<KernelDataInstaller>(disk_image_);
             media_installer_ = std::make_unique<MediaDataInstaller>(
-              disk_image_, output_dir_, options_.keep_originals, options_.no_ffmpeg, options_.no_timidity
+              disk_image_, output_dir_, options_.keep_originals, options_.ffmpeg, options_.timidity
             );
             field_installer_ = std::make_unique<FieldDataInstaller>(disk_image_, output_dir_);
             battle_installer_ = std::make_unique<BattleDataInstaller>(disk_image_, output_dir_, application_.ResMgr());
@@ -82,7 +82,7 @@ float DataInstaller::Progress(){
         }
         case BATTLE_SCENES_INIT:
             // Skip kernel data if option is set.
-            if (options_.skip_battle_data){
+            if (!options_.battle_data){
                 write_output_line_("Skipping battle data installation...", 2, true);
                 installation_state_ = BATTLE_MODELS_INIT;
                 return CalcProgress();
@@ -121,7 +121,7 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case BATTLE_MODELS_INIT:
             // Skip kernel data if option is set.
-            if (options_.skip_battle_models){
+            if (!options_.battle_models){
                 write_output_line_("Skipping battle models installation...", 2, true);
                 installation_state_ = KERNEL_PRICES;
                 return CalcProgress();
@@ -175,7 +175,7 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case KERNEL_PRICES:
             // Skip kernel data if option is set.
-            if (options_.skip_kernel){
+            if (!options_.kernel){
                 write_output_line_("Skipping kernel data installation...", 2, true);
                 installation_state_ = MEDIA_SOUNDS_INIT;
                 return CalcProgress();
@@ -258,7 +258,7 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case MEDIA_IMAGES:
             // Skip images if option is set.
-            if (options_.skip_images){
+            if (!options_.images){
                 write_output_line_("Skipping images installation...", 2, true);
                 installation_state_ = MEDIA_SOUNDS_INIT;
                 return CalcProgress();
@@ -269,7 +269,7 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case MEDIA_SOUNDS_INIT:
             // Skip sounds if option is set.
-            if (options_.skip_sounds){
+            if (!options_.sounds){
                 write_output_line_("Skipping sound effects installation...", 2, true);
                 installation_state_ = MEDIA_MUSICS_INIT;
                 return CalcProgress();
@@ -290,7 +290,7 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case MEDIA_MUSICS_INIT:
             // Skip music if option is set.
-            if (options_.skip_music){
+            if (!options_.music){
                 write_output_line_("Skipping music tracks installation...", 2, true);
                 installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
                 return CalcProgress();
@@ -315,9 +315,20 @@ float DataInstaller::Progress(){
             media_installer_->WriteMusicsIndex();
             installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
             return CalcProgress();
+        case MEDIA_VIDEOS:
+            // Skip videos if option is set.
+            if (!options_.videos){
+                write_output_line_("Skipping video installation...", 2, true);
+                installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
+                return CalcProgress();
+            }
+            write_output_line_("Extracting videos...", 2, true);
+            media_installer_->InstallVideos();
+            installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
+            return CalcProgress();
         case FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT:
             // Skip fields if option is set.
-            if (options_.skip_fields){
+            if (!options_.fields){
                 write_output_line_("Skipping field maps installation...", 2, true);
                 installation_state_ = WM_INIT;
                 return CalcProgress();
@@ -363,7 +374,7 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case FIELD_CONVERT_MODELS_INIT:
             // Skip fields if option is set.
-            if (options_.skip_field_models){
+            if (!options_.field_models){
                 write_output_line_("Skipping field maps installation...", 2, true);
                 installation_state_ = WM_INIT;
                 return CalcProgress();
@@ -384,7 +395,7 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case WM_INIT:
             // Skip world map if option set
-            if (options_.skip_wm){
+            if (!options_.wm){
                 write_output_line_("Skipping world map data installation...", 2, true);
                 installation_state_ = CLEAN;
                 return CalcProgress();
@@ -407,7 +418,7 @@ float DataInstaller::Progress(){
             }
             return CalcProgress();
         case WM_MODELS:
-            if (options_.skip_wm_models) write_output_line_("Skipping world map model installation...", 2, true);
+            if (!options_.wm_models) write_output_line_("Skipping world map model installation...", 2, true);
             else world_installer_->ProcessModels();
             installation_state_ = CLEAN;
             return CalcProgress();
@@ -435,9 +446,7 @@ const float DataInstaller::CalcProgress(){
         if (installation_state_ > i) weight_done += step_weight_[i];
     }
 
-    if (substeps_ > 0 && cur_substep_ < substeps_){
-        weight_substeps = (cur_substep_ * weight) / substeps_;
-    }
+    if (substeps_ > 0 && cur_substep_ < substeps_) weight_substeps = (cur_substep_ * weight) / substeps_;
 
     float progress = 100 * (weight_done + weight_substeps) / weight_total;
     if (progress >= 100.0f) progress = 99.9f;
@@ -483,18 +492,10 @@ void DataInstaller::CreateDirectories(){
     CreateDir("world/1");
     CreateDir("world/2");
 
-    application_.ResMgr()->addResourceLocation(
-      output_dir_ + "temp/char/", "FileSystem", "FFVII", true, true
-    );
-    application_.ResMgr()->addResourceLocation(
-      output_dir_ + "temp/battle_models/", "FileSystem", "FFVII", true, true
-    );
-    application_.ResMgr()->addResourceLocation(
-      output_dir_ + "temp/world_models/", "FileSystem", "FFVII", true, true
-    );
-    application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/", "FileSystem", "FFVII", true, true
-    );
+    application_.ResMgr()->addResourceLocation(output_dir_ + "temp/char/", "FileSystem", "FFVII", true, true);
+    application_.ResMgr()->addResourceLocation(output_dir_ + "temp/battle_models/", "FileSystem", "FFVII", true, true);
+    application_.ResMgr()->addResourceLocation(output_dir_ + "temp/world_models/", "FileSystem", "FFVII", true, true);
+    application_.ResMgr()->addResourceLocation(output_dir_ + "models/", "FileSystem", "FFVII", true, true);
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "models/fields/", "FileSystem", "FFVIITextures", true, true
     );
@@ -513,13 +514,9 @@ void DataInstaller::CreateDirectories(){
     application_.ResMgr()->addResourceLocation(
       output_dir_ + "models/world/", "FileSystem", "FFVIITextures", true, true
     );
-    const auto fields_lgp_path = disk_image_.fileExists("data/field/flevel.lgp");
-    if (!fields_lgp_path){
-            throw std::runtime_error("Missing required file: data/field/flevel.lgp");
-    }
-    fields_lgp_ = std::make_unique<ScopedLgp>(
-            application_.getRoot(), *fields_lgp_path, "LGP", "FFVIIFields"
-    );
+    const auto fields_lgp_path = disk_image_.filePath("data/field/flevel.lgp");
+    if (!fields_lgp_path) throw std::runtime_error("Missing required file: data/field/flevel.lgp");
+    fields_lgp_ = std::make_unique<ScopedLgp>(application_.getRoot(), *fields_lgp_path, "LGP", "FFVIIFields");
 }
 
 void DataInstaller::CleanInstall(){boost::filesystem::remove_all(output_dir_ + "data/temp/");}

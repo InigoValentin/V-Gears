@@ -23,7 +23,8 @@
 #include <boost/algorithm/string/replace.hpp>
 
 KernelDataInstaller::KernelDataInstaller(DiskImage& disk_image):
-  kernel_(*disk_image.fileExists("data/kernel/KERNEL.BIN")), exe_path_(*disk_image.fileExists("ff7.exe")){
+  kernel_(*disk_image.filePath("data/kernel/KERNEL.BIN")), exe_path_(*disk_image.filePath("ff7.exe")
+){
     for (int i = 0; i < 416; i ++) prices_[i] = 50;
 }
 
@@ -87,9 +88,7 @@ int KernelDataInstaller::ReadCommands(){
                     u8 comp_offset = command_desc_file.GetU8(desc_offset + 1) & 63;
 
                     for (int c = 0; c < comp_size; c ++){
-                        data.description += ENGLISH_CHARS[
-                          command_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
-                        ];
+                        data.description += ENGLISH_CHARS[command_desc_file.GetU8(desc_offset - 1 - comp_offset + c)];
                     }
                     desc_offset ++;
                 }
@@ -269,10 +268,8 @@ int KernelDataInstaller::ReadAttacks(){
         data.damage_formula = data.damage_raw >> 4; // Upper nybble.
         data.damage_modifier = data.damage_raw & 15; // Lower nybble.
         data.status.chance = 63 - (data.status_change_raw ^ 63); // Out of 63;
-        if (data.status_change_raw == (data.status_change_raw | 0x00000080))
-            data.status.mode = TOGGLE;
-        else if (data.status_change_raw == (data.status_change_raw | 0x00000040))
-            data.status.mode = CURE;
+        if (data.status_change_raw == (data.status_change_raw | 0x00000080)) data.status.mode = TOGGLE;
+        else if (data.status_change_raw == (data.status_change_raw | 0x00000040)) data.status.mode = CURE;
         else data.status.mode = INFLICT;
         switch (data.condition_raw){
             case 0: data.restore_type = RESTORE_HP; break;
@@ -285,70 +282,38 @@ int KernelDataInstaller::ReadAttacks(){
         if (data.status.chance <= 64){
             // TODO: Im fairly sure that this can be done with a single-line loop...
             // ... but I don't know how
-            if (data.status_raw == (data.status_raw | 0x00000001))
-                data.status.status.push_back(DEATH);
-            if (data.status_raw == (data.status_raw | 0x00000002))
-                data.status.status.push_back(NEAR_DEATH);
-            if (data.status_raw == (data.status_raw | 0x00000004))
-                data.status.status.push_back(SLEEP);
-            if (data.status_raw == (data.status_raw | 0x00000008))
-                data.status.status.push_back(POISONED);
-            if (data.status_raw == (data.status_raw | 0x00000010))
-                data.status.status.push_back(SADNESS);
-            if (data.status_raw == (data.status_raw | 0x00000020))
-                data.status.status.push_back(FURY);
-            if (data.status_raw == (data.status_raw | 0x00000040))
-                data.status.status.push_back(CONFU);
-            if (data.status_raw == (data.status_raw | 0x00000080))
-                data.status.status.push_back(SILENCE);
-            if (data.status_raw == (data.status_raw | 0x00000100))
-                data.status.status.push_back(HASTE);
-            if (data.status_raw == (data.status_raw | 0x00000200))
-                data.status.status.push_back(SLOW);
-            if (data.status_raw == (data.status_raw | 0x00000400))
-                data.status.status.push_back(STOP);
-            if (data.status_raw == (data.status_raw | 0x00000800))
-                data.status.status.push_back(FROG);
-            if (data.status_raw == (data.status_raw | 0x00001000))
-                data.status.status.push_back(SMALL);
-            if (data.status_raw == (data.status_raw | 0x00002000))
-                data.status.status.push_back(SLOW_NUMB);
-            if (data.status_raw == (data.status_raw | 0x00004000))
-                data.status.status.push_back(PETRIFY);
-            if (data.status_raw == (data.status_raw | 0x00008000))
-                data.status.status.push_back(REGEN);
-            if (data.status_raw == (data.status_raw | 0x00010000))
-                data.status.status.push_back(BARRIER);
-            if (data.status_raw == (data.status_raw | 0x00020000))
-                data.status.status.push_back(M_BARRIER);
-            if (data.status_raw == (data.status_raw | 0x00040000))
-                data.status.status.push_back(REFLECT);
-            if (data.status_raw == (data.status_raw | 0x00080000))
-                data.status.status.push_back(DUAL);
-            if (data.status_raw == (data.status_raw | 0x00100000))
-                data.status.status.push_back(SHIELD);
-            if (data.status_raw == (data.status_raw | 0x00200000))
-                data.status.status.push_back(D_SENTENCE);
-            if (data.status_raw == (data.status_raw | 0x00400000))
-                data.status.status.push_back(MANIPULATE);
-            if (data.status_raw == (data.status_raw | 0x00800000))
-                data.status.status.push_back(BERSERK);
-            if (data.status_raw == (data.status_raw | 0x01000000))
-                data.status.status.push_back(PEERLESS);
-            if (data.status_raw == (data.status_raw | 0x02000000))
-                data.status.status.push_back(PARALYSIS);
-            if (data.status_raw == (data.status_raw | 0x04000000))
-                data.status.status.push_back(DARKNESS);
-            if (data.status_raw == (data.status_raw | 0x08000000))
-                data.status.status.push_back(DUAL_DRAIN);
-            if (data.status_raw == (data.status_raw | 0x10000000))
-                data.status.status.push_back(DEATH_FORCE);
-            if (data.status_raw == (data.status_raw | 0x20000000))
-                data.status.status.push_back(RESIST);
-            if (data.status_raw == (data.status_raw | 0x40000000))
-                data.status.status.push_back(LUCKY_GIRL);
-            if (data.status_raw == (data.status_raw | 0x80000000))
-                data.status.status.push_back(IMPRISONED);
+            if (data.status_raw == (data.status_raw | 0x00000001)) data.status.status.push_back(DEATH);
+            if (data.status_raw == (data.status_raw | 0x00000002)) data.status.status.push_back(NEAR_DEATH);
+            if (data.status_raw == (data.status_raw | 0x00000004)) data.status.status.push_back(SLEEP);
+            if (data.status_raw == (data.status_raw | 0x00000008)) data.status.status.push_back(POISONED);
+            if (data.status_raw == (data.status_raw | 0x00000010)) data.status.status.push_back(SADNESS);
+            if (data.status_raw == (data.status_raw | 0x00000020)) data.status.status.push_back(FURY);
+            if (data.status_raw == (data.status_raw | 0x00000040)) data.status.status.push_back(CONFU);
+            if (data.status_raw == (data.status_raw | 0x00000080)) data.status.status.push_back(SILENCE);
+            if (data.status_raw == (data.status_raw | 0x00000100)) data.status.status.push_back(HASTE);
+            if (data.status_raw == (data.status_raw | 0x00000200)) data.status.status.push_back(SLOW);
+            if (data.status_raw == (data.status_raw | 0x00000400)) data.status.status.push_back(STOP);
+            if (data.status_raw == (data.status_raw | 0x00000800)) data.status.status.push_back(FROG);
+            if (data.status_raw == (data.status_raw | 0x00001000)) data.status.status.push_back(SMALL);
+            if (data.status_raw == (data.status_raw | 0x00002000)) data.status.status.push_back(SLOW_NUMB);
+            if (data.status_raw == (data.status_raw | 0x00004000)) data.status.status.push_back(PETRIFY);
+            if (data.status_raw == (data.status_raw | 0x00008000)) data.status.status.push_back(REGEN);
+            if (data.status_raw == (data.status_raw | 0x00010000)) data.status.status.push_back(BARRIER);
+            if (data.status_raw == (data.status_raw | 0x00020000)) data.status.status.push_back(M_BARRIER);
+            if (data.status_raw == (data.status_raw | 0x00040000)) data.status.status.push_back(REFLECT);
+            if (data.status_raw == (data.status_raw | 0x00080000)) data.status.status.push_back(DUAL);
+            if (data.status_raw == (data.status_raw | 0x00100000)) data.status.status.push_back(SHIELD);
+            if (data.status_raw == (data.status_raw | 0x00200000)) data.status.status.push_back(D_SENTENCE);
+            if (data.status_raw == (data.status_raw | 0x00400000)) data.status.status.push_back(MANIPULATE);
+            if (data.status_raw == (data.status_raw | 0x00800000)) data.status.status.push_back(BERSERK);
+            if (data.status_raw == (data.status_raw | 0x01000000)) data.status.status.push_back(PEERLESS);
+            if (data.status_raw == (data.status_raw | 0x02000000)) data.status.status.push_back(PARALYSIS);
+            if (data.status_raw == (data.status_raw | 0x04000000)) data.status.status.push_back(DARKNESS);
+            if (data.status_raw == (data.status_raw | 0x08000000)) data.status.status.push_back(DUAL_DRAIN);
+            if (data.status_raw == (data.status_raw | 0x10000000)) data.status.status.push_back(DEATH_FORCE);
+            if (data.status_raw == (data.status_raw | 0x20000000)) data.status.status.push_back(RESIST);
+            if (data.status_raw == (data.status_raw | 0x40000000)) data.status.status.push_back(LUCKY_GIRL);
+            if (data.status_raw == (data.status_raw | 0x80000000)) data.status.status.push_back(IMPRISONED);
         }
         // Get elements
         if (data.element_raw == (data.element_raw | 0x0001)) data.elements.push_back(FIRE);
@@ -370,7 +335,6 @@ int KernelDataInstaller::ReadAttacks(){
         // In KERNEL.BIN, Non elemental item actually have all elements marked.
         // If that happens, clear them all.
         if (data.elements.size() == 16) data.elements.clear();
-
 
         // Add to the list of items.
         attacks_.push_back(data);
@@ -605,20 +569,16 @@ void KernelDataInstaller::WriteGrowth(std::string file_name){
     file.open(file_name, std::ios::out);
     if (!file) return;
     file << "Game.Growth.bonus.primary = {";
-    for (int i = 0; i < 12; i ++)
-        file << "[" << i << "] = " << static_cast<int>(growth_.bonus_stat[i]) << ", ";
+    for (int i = 0; i < 12; i ++) file << "[" << i << "] = " << static_cast<int>(growth_.bonus_stat[i]) << ", ";
     file << "}\nGame.Growth.bonus.hp = {";
-    for (int i = 0; i < 12; i ++)
-        file << "[" << i << "] = " << static_cast<int>(growth_.bonus_hp[i]) << ", ";
+    for (int i = 0; i < 12; i ++) file << "[" << i << "] = " << static_cast<int>(growth_.bonus_hp[i]) << ", ";
     file << "}\nGame.Growth.bonus.mp = {";
-    for (int i = 0; i < 12; i ++)
-        file << "[" << i << "] = " << static_cast<int>(growth_.bonus_mp[i]) << ", ";
+    for (int i = 0; i < 12; i ++) file << "[" << i << "] = " << static_cast<int>(growth_.bonus_mp[i]) << ", ";
     file << "}\n";
     for (int i = 0; i < 64; i ++){
         file << "Game.Growth.curves[" << i << "] = {\n";
         for (int j = 0; j < 8; j ++){
-            file << "    [" << j << "] = {gradient = "
-              << static_cast<int>(growth_.curves[i].gradient[j])
+            file << "    [" << j << "] = {gradient = " << static_cast<int>(growth_.curves[i].gradient[j])
               << ", base = " << static_cast<int>(growth_.curves[i].gradient[j]) << "},\n";
         }
         file << "}\n";
@@ -675,9 +635,7 @@ int KernelDataInstaller::ReadItems(){
                     u8 comp_offset = items_desc_file.GetU8(desc_offset + 1) & 63;
 
                     for (int c = 0; c < comp_size; c ++){
-                        data.description += ENGLISH_CHARS[
-                          items_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
-                        ];
+                        data.description += ENGLISH_CHARS[items_desc_file.GetU8(desc_offset - 1 - comp_offset + c)];
                     }
                     desc_offset ++;
                 }
@@ -732,10 +690,8 @@ int KernelDataInstaller::ReadItems(){
         data.damage_formula = data.damage_raw >> 4; // Upper nybble.
         data.damage_modifier = data.damage_raw & 15; // Lower nybble.
         data.status.chance = 63 - (data.status_change_raw ^ 63); // Out of 63;
-        if (data.status_change_raw == (data.status_change_raw | 0x00000080))
-            data.status.mode = TOGGLE;
-        else if (data.status_change_raw == (data.status_change_raw | 0x00000040))
-            data.status.mode = CURE;
+        if (data.status_change_raw == (data.status_change_raw | 0x00000080)) data.status.mode = TOGGLE;
+        else if (data.status_change_raw == (data.status_change_raw | 0x00000040)) data.status.mode = CURE;
         else data.status.mode = INFLICT;
         switch (data.condition_raw){
             case 0: data.restore_type = RESTORE_HP; break;
@@ -750,70 +706,38 @@ int KernelDataInstaller::ReadItems(){
         if (data.status.chance <= 64){
             // TODO: Im fairly sure that this can be done with a single-line loop...
             // ... but I don't know how
-            if (data.status_raw == (data.status_raw | 0x00000001))
-                data.status.status.push_back(DEATH);
-            if (data.status_raw == (data.status_raw | 0x00000002))
-                data.status.status.push_back(NEAR_DEATH);
-            if (data.status_raw == (data.status_raw | 0x00000004))
-                data.status.status.push_back(SLEEP);
-            if (data.status_raw == (data.status_raw | 0x00000008))
-                data.status.status.push_back(POISONED);
-            if (data.status_raw == (data.status_raw | 0x00000010))
-                data.status.status.push_back(SADNESS);
-            if (data.status_raw == (data.status_raw | 0x00000020))
-                data.status.status.push_back(FURY);
-            if (data.status_raw == (data.status_raw | 0x00000040))
-                data.status.status.push_back(CONFU);
-            if (data.status_raw == (data.status_raw | 0x00000080))
-                data.status.status.push_back(SILENCE);
-            if (data.status_raw == (data.status_raw | 0x00000100))
-                data.status.status.push_back(HASTE);
-            if (data.status_raw == (data.status_raw | 0x00000200))
-                data.status.status.push_back(SLOW);
-            if (data.status_raw == (data.status_raw | 0x00000400))
-                data.status.status.push_back(STOP);
-            if (data.status_raw == (data.status_raw | 0x00000800))
-                data.status.status.push_back(FROG);
-            if (data.status_raw == (data.status_raw | 0x00001000))
-                data.status.status.push_back(SMALL);
-            if (data.status_raw == (data.status_raw | 0x00002000))
-                data.status.status.push_back(SLOW_NUMB);
-            if (data.status_raw == (data.status_raw | 0x00004000))
-                data.status.status.push_back(PETRIFY);
-            if (data.status_raw == (data.status_raw | 0x00008000))
-                data.status.status.push_back(REGEN);
-            if (data.status_raw == (data.status_raw | 0x00010000))
-                data.status.status.push_back(BARRIER);
-            if (data.status_raw == (data.status_raw | 0x00020000))
-                data.status.status.push_back(M_BARRIER);
-            if (data.status_raw == (data.status_raw | 0x00040000))
-                data.status.status.push_back(REFLECT);
-            if (data.status_raw == (data.status_raw | 0x00080000))
-                data.status.status.push_back(DUAL);
-            if (data.status_raw == (data.status_raw | 0x00100000))
-                data.status.status.push_back(SHIELD);
-            if (data.status_raw == (data.status_raw | 0x00200000))
-                data.status.status.push_back(D_SENTENCE);
-            if (data.status_raw == (data.status_raw | 0x00400000))
-                data.status.status.push_back(MANIPULATE);
-            if (data.status_raw == (data.status_raw | 0x00800000))
-                data.status.status.push_back(BERSERK);
-            if (data.status_raw == (data.status_raw | 0x01000000))
-                data.status.status.push_back(PEERLESS);
-            if (data.status_raw == (data.status_raw | 0x02000000))
-                data.status.status.push_back(PARALYSIS);
-            if (data.status_raw == (data.status_raw | 0x04000000))
-                data.status.status.push_back(DARKNESS);
-            if (data.status_raw == (data.status_raw | 0x08000000))
-                data.status.status.push_back(DUAL_DRAIN);
-            if (data.status_raw == (data.status_raw | 0x10000000))
-                data.status.status.push_back(DEATH_FORCE);
-            if (data.status_raw == (data.status_raw | 0x20000000))
-                data.status.status.push_back(RESIST);
-            if (data.status_raw == (data.status_raw | 0x40000000))
-                data.status.status.push_back(LUCKY_GIRL);
-            if (data.status_raw == (data.status_raw | 0x80000000))
-                data.status.status.push_back(IMPRISONED);
+            if (data.status_raw == (data.status_raw | 0x00000001)) data.status.status.push_back(DEATH);
+            if (data.status_raw == (data.status_raw | 0x00000002)) data.status.status.push_back(NEAR_DEATH);
+            if (data.status_raw == (data.status_raw | 0x00000004)) data.status.status.push_back(SLEEP);
+            if (data.status_raw == (data.status_raw | 0x00000008)) data.status.status.push_back(POISONED);
+            if (data.status_raw == (data.status_raw | 0x00000010)) data.status.status.push_back(SADNESS);
+            if (data.status_raw == (data.status_raw | 0x00000020)) data.status.status.push_back(FURY);
+            if (data.status_raw == (data.status_raw | 0x00000040)) data.status.status.push_back(CONFU);
+            if (data.status_raw == (data.status_raw | 0x00000080)) data.status.status.push_back(SILENCE);
+            if (data.status_raw == (data.status_raw | 0x00000100)) data.status.status.push_back(HASTE);
+            if (data.status_raw == (data.status_raw | 0x00000200)) data.status.status.push_back(SLOW);
+            if (data.status_raw == (data.status_raw | 0x00000400)) data.status.status.push_back(STOP);
+            if (data.status_raw == (data.status_raw | 0x00000800)) data.status.status.push_back(FROG);
+            if (data.status_raw == (data.status_raw | 0x00001000)) data.status.status.push_back(SMALL);
+            if (data.status_raw == (data.status_raw | 0x00002000)) data.status.status.push_back(SLOW_NUMB);
+            if (data.status_raw == (data.status_raw | 0x00004000)) data.status.status.push_back(PETRIFY);
+            if (data.status_raw == (data.status_raw | 0x00008000)) data.status.status.push_back(REGEN);
+            if (data.status_raw == (data.status_raw | 0x00010000)) data.status.status.push_back(BARRIER);
+            if (data.status_raw == (data.status_raw | 0x00020000)) data.status.status.push_back(M_BARRIER);
+            if (data.status_raw == (data.status_raw | 0x00040000)) data.status.status.push_back(REFLECT);
+            if (data.status_raw == (data.status_raw | 0x00080000)) data.status.status.push_back(DUAL);
+            if (data.status_raw == (data.status_raw | 0x00100000)) data.status.status.push_back(SHIELD);
+            if (data.status_raw == (data.status_raw | 0x00200000)) data.status.status.push_back(D_SENTENCE);
+            if (data.status_raw == (data.status_raw | 0x00400000)) data.status.status.push_back(MANIPULATE);
+            if (data.status_raw == (data.status_raw | 0x00800000)) data.status.status.push_back(BERSERK);
+            if (data.status_raw == (data.status_raw | 0x01000000)) data.status.status.push_back(PEERLESS);
+            if (data.status_raw == (data.status_raw | 0x02000000)) data.status.status.push_back(PARALYSIS);
+            if (data.status_raw == (data.status_raw | 0x04000000)) data.status.status.push_back(DARKNESS);
+            if (data.status_raw == (data.status_raw | 0x08000000)) data.status.status.push_back(DUAL_DRAIN);
+            if (data.status_raw == (data.status_raw | 0x10000000)) data.status.status.push_back(DEATH_FORCE);
+            if (data.status_raw == (data.status_raw | 0x20000000)) data.status.status.push_back(RESIST);
+            if (data.status_raw == (data.status_raw | 0x40000000)) data.status.status.push_back(LUCKY_GIRL);
+            if (data.status_raw == (data.status_raw | 0x80000000)) data.status.status.push_back(IMPRISONED);
         }
 
         // Get elements
@@ -938,9 +862,7 @@ int KernelDataInstaller::ReadWeapons(){
                     u8 comp_offset = weapons_desc_file.GetU8(desc_offset + 1) & 63;
 
                     for (int c = 0; c < comp_size; c ++){
-                        data.description += ENGLISH_CHARS[
-                          weapons_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
-                        ];
+                        data.description += ENGLISH_CHARS[weapons_desc_file.GetU8(desc_offset - 1 - comp_offset + c)];
                     }
                     desc_offset ++;
                 }
@@ -1029,15 +951,10 @@ int KernelDataInstaller::ReadWeapons(){
             }
         }
         for (int s = 0; s < 8; s ++){
-            if (data.slots_raw[s] == 1 || data.slots_raw[s] == 5){
-                data.materia_slots.push_back(SLOT_UNLINKED);
-            }
+            if (data.slots_raw[s] == 1 || data.slots_raw[s] == 5) data.materia_slots.push_back(SLOT_UNLINKED);
             else if (
-              data.slots_raw[s] == 2 || data.slots_raw[s] == 3
-              || data.slots_raw[s] == 6 || data.slots_raw[s] == 7
-            ){
-                data.materia_slots.push_back(SLOT_LINKED);
-            }
+              data.slots_raw[s] == 2 || data.slots_raw[s] == 3 || data.slots_raw[s] == 6 || data.slots_raw[s] == 7
+            ) data.materia_slots.push_back(SLOT_LINKED);
         }
         if (data.element_raw == (data.element_raw | 0x0001)) data.elements.push_back(FIRE);
         if (data.element_raw == (data.element_raw | 0x0002)) data.elements.push_back(ICE);
@@ -1167,9 +1084,7 @@ int KernelDataInstaller::ReadArmors(){
                     u8 comp_offset = armor_desc_file.GetU8(desc_offset + 1) & 63;
 
                     for (int c = 0; c < comp_size; c ++){
-                        data.description += ENGLISH_CHARS[
-                          armor_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
-                        ];
+                        data.description += ENGLISH_CHARS[armor_desc_file.GetU8(desc_offset - 1 - comp_offset + c)];
                     }
                     desc_offset ++;
                 }
@@ -1232,11 +1147,8 @@ int KernelDataInstaller::ReadArmors(){
                 data.materia_slots.push_back(SLOT_UNLINKED);
             }
             else if (
-              data.slots_raw[i] == 2 || data.slots_raw[i] == 3
-              || data.slots_raw[i] == 6 || data.slots_raw[i] == 7
-            ){
-                data.materia_slots.push_back(SLOT_LINKED);
-            }
+              data.slots_raw[i] == 2 || data.slots_raw[i] == 3 || data.slots_raw[i] == 6 || data.slots_raw[i] == 7
+            ) data.materia_slots.push_back(SLOT_LINKED);
         }
         // In KERNEL.BIN, items with no elemental defense actually do have all elements marked,
         // with mode 255. If, that's the case, consider that there are no elements.
@@ -1250,8 +1162,7 @@ int KernelDataInstaller::ReadArmors(){
             if (data.element_raw == (data.element_raw | 0x0040)) data.elements.push_back(WATER);
             if (data.element_raw == (data.element_raw | 0x0080)) data.elements.push_back(WIND);
             if (data.element_raw == (data.element_raw | 0x0100)) data.elements.push_back(HOLY);
-            if (data.element_raw == (data.element_raw | 0x0200))
-                data.elements.push_back(RESTORATIVE);
+            if (data.element_raw == (data.element_raw | 0x0200)) data.elements.push_back(RESTORATIVE);
             if (data.element_raw == (data.element_raw | 0x0400)) data.elements.push_back(CUT);
             if (data.element_raw == (data.element_raw | 0x0800)) data.elements.push_back(HIT);
             if (data.element_raw == (data.element_raw | 0x1000)) data.elements.push_back(PUNCH);
@@ -1366,9 +1277,7 @@ int KernelDataInstaller::ReadAccessories(){
                     u8 comp_offset = accessory_desc_file.GetU8(desc_offset + 1) & 63;
 
                     for (int c = 0; c < comp_size; c ++){
-                        data.description += ENGLISH_CHARS[
-                          accessory_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
-                        ];
+                        data.description += ENGLISH_CHARS[accessory_desc_file.GetU8(desc_offset - 1 - comp_offset + c)];
                     }
                     desc_offset ++;
                 }
@@ -1460,8 +1369,7 @@ int KernelDataInstaller::ReadAccessories(){
             if (data.element_raw == (data.element_raw | 0x0040)) data.elements.push_back(WATER);
             if (data.element_raw == (data.element_raw | 0x0080)) data.elements.push_back(WIND);
             if (data.element_raw == (data.element_raw | 0x0100)) data.elements.push_back(HOLY);
-            if (data.element_raw == (data.element_raw | 0x0200))
-                data.elements.push_back(RESTORATIVE);
+            if (data.element_raw == (data.element_raw | 0x0200)) data.elements.push_back(RESTORATIVE);
             if (data.element_raw == (data.element_raw | 0x0400)) data.elements.push_back(CUT);
             if (data.element_raw == (data.element_raw | 0x0800)) data.elements.push_back(HIT);
             if (data.element_raw == (data.element_raw | 0x1000)) data.elements.push_back(PUNCH);
@@ -1568,9 +1476,7 @@ int KernelDataInstaller::ReadMateria(){
                     u8 comp_offset = materia_desc_file.GetU8(desc_offset + 1) & 63;
 
                     for (int c = 0; c < comp_size; c ++){
-                        data.description += ENGLISH_CHARS[
-                          materia_desc_file.GetU8(desc_offset - 1 - comp_offset + c)
-                        ];
+                        data.description += ENGLISH_CHARS[materia_desc_file.GetU8(desc_offset - 1 - comp_offset + c)];
                     }
                     desc_offset ++;
                 }
@@ -1994,12 +1900,9 @@ void KernelDataInstaller::WriteMateria(std::string file_name){
                     switch (materia.attribute[0]){
                         case 0x00: file << "Materia.ABILITY.MONEY_PLUS,\n"; break;
                         case 0x01: // Enemy Away / Enemy lure / Chocobo lure
-                            if (materia.id == 7)
-                                file << "Materia.ABILITY.ENCOUNTER_DOWN,\n";
-                            else if (materia.id == 8)
-                                file << "Materia.ABILITY.ENCOUNTER_UP,\n";
-                            else if (materia.id == 9)
-                                file << "Materia.ABILITY.ENCOUNTER_CHOCOBO,\n";
+                            if (materia.id == 7) file << "Materia.ABILITY.ENCOUNTER_DOWN,\n";
+                            else if (materia.id == 8) file << "Materia.ABILITY.ENCOUNTER_UP,\n";
+                            else if (materia.id == 9) file << "Materia.ABILITY.ENCOUNTER_CHOCOBO,\n";
                             else file << "nil,\n";
                             break;
                         case 0x03: file << "Materia.ABILITY.PREEMPTIVE,\n"; break;
@@ -2072,9 +1975,7 @@ int KernelDataInstaller::ReadKeyItems(){
                     u8 comp_offset = key_items_desc_file.GetU8(desc_offset + 1) & 63;
 
                     for (int i = 0; i < comp_size; i ++){
-                        data.description += ENGLISH_CHARS[
-                          key_items_desc_file.GetU8(desc_offset - 1 - comp_offset + i)
-                        ];
+                        data.description += ENGLISH_CHARS[key_items_desc_file.GetU8(desc_offset - 1 - comp_offset + i)];
                     }
                     desc_offset ++;
                 }
@@ -2103,8 +2004,7 @@ void KernelDataInstaller::WriteKeyItems(std::string file_name){
     if (!file) return;
     for (KeyItemData key_item : key_items_){
         file << "Game.Key_Items[" << key_item.id << "] = {\n"
-          << "    name = \"" << key_item.name << "\",\n"
-          << "    description = \"" << key_item.description << "\"\n}\n";
+          << "    name = \"" << key_item.name << "\",\n description = \"" << key_item.description << "\"\n}\n";
     }
     file.close();
 }
@@ -2189,8 +2089,7 @@ void KernelDataInstaller::ReadInitialSaveMap(){
             savemap_.characters[i].name_raw[i] = savemap_file.readU8();
             if (name_end == false){
                 if (savemap_.characters[i].name_raw[i] != 0XFF){
-                    savemap_.characters[i].name
-                      += ENGLISH_CHARS[savemap_.characters[i].name_raw[i]];
+                    savemap_.characters[i].name += ENGLISH_CHARS[savemap_.characters[i].name_raw[i]];
                 }
                 else name_end = true;
             }
@@ -2250,17 +2149,13 @@ void KernelDataInstaller::ReadInitialSaveMap(){
             savemap_.characters[i].weapon_materia[m].id = savemap_file.readU8();
             // TODO: Identify Enemy Skill, do special treatment
             savemap_.characters[i].weapon_materia[m].ap // WARNING: AP has only three bytes.
-              = savemap_file.readU8()
-              + (savemap_file.readU8() << 8)
-              + (savemap_file.readU8() << 16);
+              = savemap_file.readU8() + (savemap_file.readU8() << 8) + (savemap_file.readU8() << 16);
         }
         for (int m = 0; m < 8; m ++){
             savemap_.characters[i].armor_materia[m].id = savemap_file.readU8();
             // TODO: Identify Enemy Skill, do special treatment
             savemap_.characters[i].armor_materia[m].ap // WARNING: AP has only three bytes.
-              = savemap_file.readU8()
-              + (savemap_file.readU8() << 8)
-              + (savemap_file.readU8() << 16);
+              = savemap_file.readU8() + (savemap_file.readU8() << 8) + (savemap_file.readU8() << 16);
         }
         savemap_.characters[i].exp_to_next = savemap_file.readU32LE();
     }

@@ -37,18 +37,16 @@ std::string WorldInstaller::TERRAIN_MODELS_DIR("models/world/terrain");
 WorldInstaller::WorldInstaller(
   const DiskImage& disk_image, const std::string output_dir,
   const bool keep_originals, Ogre::ResourceGroupManager* res_mgr
-):
-  disk_image_(disk_image), output_dir_(output_dir), keep_originals_(keep_originals), res_mgr_(res_mgr)
-{}
+): disk_image_(disk_image), output_dir_(output_dir), keep_originals_(keep_originals), res_mgr_(res_mgr) {}
 
 WorldInstaller::~WorldInstaller(){}
 
 unsigned int WorldInstaller::Initialize(){
     if (wm_map_.size() > 0) wm_map_.clear();
     processed_maps_ = 0;
-    wm_map_.push_back(File(*disk_image_.fileExists("data/wm/WM0.MAP")));
-    wm_map_.push_back(File(*disk_image_.fileExists("data/wm/WM2.MAP")));
-    wm_map_.push_back(File(*disk_image_.fileExists("data/wm/WM3.MAP")));
+    wm_map_.push_back(File(*disk_image_.filePath("data/wm/WM0.MAP")));
+    wm_map_.push_back(File(*disk_image_.filePath("data/wm/WM2.MAP")));
+    wm_map_.push_back(File(*disk_image_.filePath("data/wm/WM3.MAP")));
     return wm_map_.size();
 }
 
@@ -348,11 +346,11 @@ void WorldInstaller::GenerateMaterials(){
 
 void WorldInstaller::ProcessModels(){
     // Open world_us.lgp
-    File world_file(*disk_image_.fileExists("data/wm/world_us.lgp"));
+    File world_file(*disk_image_.filePath("data/wm/world_us.lgp"));
     boost::filesystem::create_directories(output_dir_ + "temp/world_models/");
     boost::filesystem::create_directories(output_dir_ + "data/models/world/");
-    VGears::LGPArchive world_lgp(*disk_image_.fileExists("data/wm/world_us.lgp"), "LGP");
-    world_lgp.open(*disk_image_.fileExists("data/wm/world_us.lgp"), true);
+    VGears::LGPArchive world_lgp(*disk_image_.filePath("data/wm/world_us.lgp"), "LGP");
+    world_lgp.open(*disk_image_.filePath("data/wm/world_us.lgp"), true);
     world_lgp.load();
     VGears::LGPArchive::FileList file_list = world_lgp.GetFiles();
     std::vector<std::string> hrc_file_names;
@@ -647,13 +645,11 @@ bool WorldInstaller::ProcessMap(){
 }
 
 void WorldInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
-
     if (mesh.isNull()){
         std::cerr << "[ERROR] ExportMesh called with null mesh." << std::endl;
         return;
     }
-
-  boost::filesystem::create_directories(outdir);
+    boost::filesystem::create_directories(outdir);
 
     // TODO: Share function with pc model exporter
     VGears::String base_mesh_name;

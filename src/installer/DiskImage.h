@@ -97,7 +97,7 @@ struct DiskImage{
         /**
          * Constructs a new disk image from an ISO path.
          *
-         * @param path The path to the ISO file.
+         * @param[in] path The path to the ISO file.
          */
         DiskImage(std::string path);
 
@@ -189,21 +189,25 @@ struct DiskImage{
          * will be extracted to the "original_data" subdirectory of the output
          * path.
          *
-         * @param installation_path The v-gears installation directory.
+         * @param[in] installation_path The v-gears installation directory.
          * @return True if the extraction was successful, false otherwise.
          */
         bool extractImage(std::string installation_path);
 
         /**
          * Finds a file in the extracted content of the disk image.
-         *
-         * @param file_path The relative path to the file within the extracted
+         * 
+         * It handles differnt name cases and differnt path separators. It also
+         * handles the case where the file is in a subdirectory of the extracted
          * content.
+         *
+         * @param[in] file_path The relative path to the file within the
+         * extracted content.
          * @return A pointer to the full path of the matched file, or nullptr
          * if no matching file exists. If the image has not been extracted yet,
          * this function will always return nullptr.
          */
-        std::unique_ptr<std::string> fileExists(std::string file_path);
+        std::unique_ptr<std::string> filePath(std::string file_path);
 
     private:
 

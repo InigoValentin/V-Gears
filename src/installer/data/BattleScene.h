@@ -20,6 +20,4 @@
 #include "common/TypeDefine.h"
 #include "data/GameData.h"
 
-struct BattleScene{
-
-};
+struct BattleScene{};

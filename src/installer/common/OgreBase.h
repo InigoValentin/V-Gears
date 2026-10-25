@@ -71,8 +71,7 @@ class DisplayFrameListener :
          * @param[in] win The render window. Used to determine input context.
          */
         DisplayFrameListener(Ogre::RenderWindow* win):
-          window_(win), input_manager_(0), keyboard_(0),
-          mouse_(0), mouse_rotate_(false), exit_(false)
+          window_(win), input_manager_(0), keyboard_(0),mouse_(0), mouse_rotate_(false), exit_(false)
         {
 
             using namespace OIS;
@@ -84,13 +83,9 @@ class DisplayFrameListener :
             window_hnd_str << window_hnd;
             pl.insert(std::make_pair(std::string("WINDOW"), window_hnd_str.str()));
             input_manager_ = InputManager::createInputSystem(pl);
-            keyboard_ = static_cast<Keyboard*>(
-              input_manager_->createInputObject(OIS::OISKeyboard, true)
-            );
+            keyboard_ = static_cast<Keyboard*>(input_manager_->createInputObject(OIS::OISKeyboard, true));
             keyboard_->setEventCallback(this);
-            mouse_ = static_cast<OIS::Mouse*>(
-              input_manager_->createInputObject(OIS::OISMouse, true)
-            );
+            mouse_ = static_cast<OIS::Mouse*>(input_manager_->createInputObject(OIS::OISMouse, true));
             mouse_->setEventCallback(this);
             //Register as a Window listener.
             Ogre::WindowEventUtilities::addWindowEventListener(window_, this);
@@ -99,7 +94,7 @@ class DisplayFrameListener :
             info_text->setCaption("");
             info_text->setMetricsMode(Ogre::GMM_PIXELS);
             info_text->setPosition(5, 5);
-           // info_text->setFontName("BlueHighway");
+            // info_text->setFontName("BlueHighway");
             info_text->setCharHeight(18);
             info_overlay = Ogre::OverlayManager::getSingleton().create("DebugOverlay");
             info_overlay->setZOrder(1);
@@ -148,9 +143,7 @@ class DisplayFrameListener :
                         Ogre::AnimationState* state = animations.getNext();
                         if (state->getEnabled() == true){
                             state->addTime(evt.timeSinceLastFrame);
-                            info_text->setCaption(
-                              entities[i]->getName() + ": " + state->getAnimationName()
-                            );
+                            info_text->setCaption(entities[i]->getName() + ": " + state->getAnimationName());
                         }
                     }
                     break;
@@ -158,27 +151,19 @@ class DisplayFrameListener :
             }
             if (keyboard_->isKeyDown(OIS::KC_A)){
                 assert(camera_);
-                camera_->getParentSceneNode()->translate(
-                  Ogre::Vector3(-0.005f, 0.0f, 0.0f), Ogre::Node::TS_LOCAL
-                );
+                camera_->getParentSceneNode()->translate(Ogre::Vector3(-0.005f, 0.0f, 0.0f), Ogre::Node::TS_LOCAL);
             }
             if (keyboard_->isKeyDown(OIS::KC_D)){
                 assert(camera_);
-                camera_->getParentSceneNode()->translate(
-                  Ogre::Vector3(0.005f, 0.0f, 0.0f), Ogre::Node::TS_LOCAL
-                );
+                camera_->getParentSceneNode()->translate(Ogre::Vector3(0.005f, 0.0f, 0.0f), Ogre::Node::TS_LOCAL);
             }
             if (keyboard_->isKeyDown(OIS::KC_W)){
                 assert(camera_);
-                camera_->getParentSceneNode()->translate(
-                  Ogre::Vector3(0.0f, 0.0f, -0.005f), Ogre::Node::TS_LOCAL
-                );
+                camera_->getParentSceneNode()->translate(Ogre::Vector3(0.0f, 0.0f, -0.005f), Ogre::Node::TS_LOCAL);
             }
             if (keyboard_->isKeyDown(OIS::KC_S)){
                 assert(camera_);
-                camera_->getParentSceneNode()->translate(
-                  Ogre::Vector3(0.0f, 0.0f,  0.005f), Ogre::Node::TS_LOCAL
-                );
+                camera_->getParentSceneNode()->translate(Ogre::Vector3(0.0f, 0.0f,  0.005f), Ogre::Node::TS_LOCAL);
             }
             if (mouse_rotate_ == true){
                 assert(camera_);
@@ -236,8 +221,7 @@ class DisplayFrameListener :
                         for (unsigned int i = 0; i < entities.size(); ++ i){
                             if (entities[i]->isVisible() == true){
                                 Ogre::AnimationStateIterator animations
-                                  = entities[i]->getAllAnimationStates()
-                                    ->getAnimationStateIterator();
+                                  = entities[i]->getAllAnimationStates()->getAnimationStateIterator();
                                 Ogre::AnimationState* old_state;
                                 Ogre::AnimationState* new_state = animations.getNext();
                                 while (animations.hasMoreElements() == true){
@@ -268,10 +252,7 @@ class DisplayFrameListener :
                                     state->setLoop(true);
                                     break;
                                 }
-                                if (
-                                  state->getEnabled() == true
-                                  && animations.hasMoreElements() != false
-                                ){
+                                if (state->getEnabled() == true && animations.hasMoreElements() != false){
                                     state->setEnabled(false);
                                     state->setLoop(false);
                                     change = true;

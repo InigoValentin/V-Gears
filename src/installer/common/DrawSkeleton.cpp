@@ -61,8 +61,7 @@ void DrawSkeleton(const Skeleton& skeleton, const Ogre::MeshPtr& mesh){
     sub_mesh->indexData = new Ogre::IndexData();
     sub_mesh->indexData->indexStart = 0;
     sub_mesh->indexData->indexCount = sub_mesh->vertexData->vertexCount;
-    sub_mesh->indexData->indexBuffer
-      = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(
+    sub_mesh->indexData->indexBuffer = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(
         Ogre::HardwareIndexBuffer::IT_16BIT,
         sub_mesh->indexData->indexCount,
         Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY
@@ -85,16 +84,14 @@ void DrawSkeleton(const Skeleton& skeleton, const Ogre::MeshPtr& mesh){
 
     // 2nd buffer.
     decl->addElement(COLOUR_BINDING, 0, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
-    Ogre::HardwareVertexBufferSharedPtr vbuf1
-      = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+    Ogre::HardwareVertexBufferSharedPtr vbuf1 = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
         decl->getVertexSize(COLOUR_BINDING),
         sub_mesh->vertexData->vertexCount,
-        Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+        Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY
+    );
     // Set vertex buffer binding so buffer 1 is bound to our colour buffer.
     bind->setBinding(COLOUR_BINDING, vbuf1);
-    position = static_cast<float*> (
-      vbuf0->lock(Ogre::HardwareBuffer::HBL_DISCARD)
-    );
+    position = static_cast<float*> (vbuf0->lock(Ogre::HardwareBuffer::HBL_DISCARD));
     std::vector<Ogre::RGBA> colours(sub_mesh->vertexData->vertexCount);
     DrawBone(skeleton, -1, colours.data());
     vbuf0->unlock();
@@ -116,8 +113,7 @@ void DrawBone(const Skeleton& skeleton, int parent_index, Ogre::RGBA* colours){
             *position ++ = 0;
             Ogre::ColourValue colour1 = Ogre::ColourValue(1, 0, 0);
             Ogre::ColourValue colour2 = Ogre::ColourValue(1, 1, 0);
-            Ogre::RenderSystem* rs
-              = Ogre::Root::getSingleton().getRenderSystem();
+            Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
             colours[cur_index] = colour1.getAsBYTE();
             colours[cur_index + 1] = colour2.getAsBYTE();
             index_data[cur_index + 0] = cur_index + 0;

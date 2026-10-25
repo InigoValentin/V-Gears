@@ -132,8 +132,7 @@ typedef std::vector< TexForGen > VectorTexForGen;
  * @param[in] textures @todo It's used to get some coordinates, but for what?
  */
 void CreateTexture(
-  Vram* vram, const MeshData& mesh_data,
-  const Ogre::String& texture_file_name, const VectorTexForGen& textures
+  Vram* vram, const MeshData& mesh_data, const Ogre::String& texture_file_name, const VectorTexForGen& textures
 );
 
 /**
@@ -146,9 +145,8 @@ void CreateTexture(
  * @param[in] fragment_program @todo Understand and document. Can be empty.
  */
 void CreateMaterial(
-  const Ogre::String& material_name, const Ogre::String& material_file_name,
-  const Ogre::String& texture_name, const Ogre::String& vertex_program,
-  const Ogre::String& fragment_program
+  const Ogre::String& material_name, const Ogre::String& material_file_name, const Ogre::String& texture_name,
+  const Ogre::String& vertex_program, const Ogre::String& fragment_program
 );
 
 /**
@@ -167,9 +165,8 @@ void CreateMaterial(
  * @todo What's the difference between start_x/start_y and texture_x/texture_y?
  */
 void CreateTextureFromVram(
-  const Ogre::PixelBox& pixel_box, Vram* vram, const int start_x, const int start_y,
-  const int clut_x, const int clut_y, const int texture_x, const int texture_y,
-  const BPP bpp, const bool transparency
+  const Ogre::PixelBox& pixel_box, Vram* vram, const int start_x, const int start_y, const int clut_x,
+  const int clut_y, const int texture_x, const int texture_y, const BPP bpp, const bool transparency
 );
 
 /**
@@ -181,9 +178,7 @@ void CreateTextureFromVram(
  * @param[in] logger Custom logger to print info about the process. It can be
  * NULL, but then nothing will be printed.
  */
-void AddTexture(
-  TexForGen& texture, const MeshData& data, VectorTexForGen& textures, Logger* logger
-);
+void AddTexture(TexForGen& texture, const MeshData& data, VectorTexForGen& textures, Logger* logger);
 
 /**
  * Adds or removes a transparency to a colour.

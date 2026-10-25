@@ -238,9 +238,8 @@ void FieldDataInstaller::CollectSpawnAndScaleFactors(int field_index){
     //if (IsAFieldFile(resource_name) && !WillCrash(resource_name)){
     // TODO: DEBUG: Only testing fields.
     if (IsAFieldFile(resource_name) && IsTestField(resource_name) && !WillCrash(resource_name)){
-        VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton().load(
-          resource_name, "FFVIIFields"
-        ).staticCast<VGears::FLevelFile>();
+        VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton().load(resource_name, "FFVIIFields")
+          .staticCast<VGears::FLevelFile>();
         CollectSpawnPoints(field, map_list_, spawn_points_);
         CollectFieldScaleFactors(field, scale_factors_, map_list_);
     }
@@ -260,9 +259,8 @@ void FieldDataInstaller::Convert(int field_index){
         if (IsTestField(resource_name) && !WillCrash(resource_name)){
             //write_output_line_("Converting field " + resource_name);
             CreateDir(FIELD_MAPS_DIR + "/" + resource_name);
-            VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton().load(
-                resource_name, "FFVIIFields"
-              ).staticCast<VGears::FLevelFile>();
+            VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton()
+              .load(resource_name, "FFVIIFields").staticCast<VGears::FLevelFile>();
             PcFieldToVGearsField(field);
         }
         else{
@@ -301,11 +299,11 @@ std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){
     std::vector<std::string> models;
 
     // Open char_lgp as a lgp archive
-    VGears::LGPArchive char_lgp(*disk_image_.fileExists("data/field/char.lgp"), "LGP");
-    char_lgp.open(*disk_image_.fileExists("data/field/char.lgp"), true);
+    VGears::LGPArchive char_lgp(*disk_image_.filePath("data/field/char.lgp"), "LGP");
+    char_lgp.open(*disk_image_.filePath("data/field/char.lgp"), true);
     char_lgp.load();
     // Also, open it as a file for reading
-    File char_file(*disk_image_.fileExists("data/field/char.lgp"));
+    File char_file(*disk_image_.filePath("data/field/char.lgp"));
 
     //Ogre::StringVectorPtr file_list = char_lgp.list(true, true);
     field_model_file_list_ = char_lgp.list(true, true);
@@ -373,9 +371,7 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
     std::set<std::string> textures;
     while (it.hasMoreElements()){
         Ogre::SubMesh *sub_mesh(it.getNext());
-        Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(
-          sub_mesh->getMaterialName())
-        );
+        Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName()));
         if (mat != nullptr){
             for (size_t techs = 0; techs < mat->getNumTechniques(); techs ++){
                 Ogre::Technique* tech = mat->getTechnique(techs);
@@ -638,8 +634,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             }
             const int char_id = entity.char_id;
             if (char_id != -1){
-                const VGears::ModelListFile::ModelDescription& desc
-                  = models->GetModels().at(char_id);
+                const VGears::ModelListFile::ModelDescription& desc = models->GetModels().at(char_id);
                 auto& animations = used_models_and_anims_.ModelAnimations(desc.hrc_name);
                 for (const auto& anim : desc.animations){
                     animations.insert(used_models_and_anims_.NormalizeAnimationName(anim.name));

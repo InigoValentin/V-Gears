@@ -34,24 +34,25 @@ class AbFile{
          *
          * Reads the file.
          *
-         * @param[in, out] file The file to read from. The file contents will not be altered, but
-         * it's offset will be changed while reading it.
-         * @param[in] enemy Indicates if the animation is for an enemy. Enemies have a different
-         * number of animations than characters or backgrounds.
+         * @param[in, out] file The file to read from. The file contents will
+         * not be altered, but it's offset will be changed while reading it.
+         * @param[in] enemy Indicates if the animation is for an enemy. Enemies
+         * have a different number of animations than characters or backgrounds.
          */
         AbFile(File file, bool enemy);
 
         /**
          * Generates script files from the ba file.
          *
-         * A file will be generated with every script in the *ab file. The file will be created in
-         * the specified path, and will be named like the model id, followed by the ".lua"
-         * extension. For example, if path is "/home/user/.v-gears", the model id is "rt", the file
-         * name will be: "/home/user/.v-gears/rt.lua". Each script will be named "script" + index
-         * (script1(), script2() ... script44() ...)
+         * A file will be generated with every script in the *ab file. The file
+         * will be created in the specified path, and will be named like the
+         * model id, followed by the ".lua" extension. For example, if path is
+         * "/home/user/.v-gears", the model id is "rt", the file name will be:
+         * "/home/user/.v-gears/rt.lua". Each script will be named
+         * "script" + index (script1(), script2() ... script44() ...)
          *
-         * @param[in] model_id ID of the model the animation belongs to, usually a two letter
-         * code. Used to generate the file name.
+         * @param[in] model_id ID of the model the animation belongs to, usually
+         * a two letter code. Used to generate the file name.
          * @param[in] path Path to the directory where the files will be saved.
          * @return The number of scripts written to the file.
          */
