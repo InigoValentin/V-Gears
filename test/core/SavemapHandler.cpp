@@ -14,13 +14,13 @@
  */
 
 #include <boost/test/unit_test.hpp>
-#include "core/SavemapManager.h"
+#include "core/SavemapHandler.h"
 
 #pragma message("Unimplemented test file: " __FILE__)
 
-BOOST_AUTO_TEST_CASE(TestSavemapManager){
+BOOST_AUTO_TEST_CASE(TestSavemapHandler){
     // TODO
-    BOOST_WARN_MESSAGE(false, "Unimplemented test file: SavemapManager");
+    BOOST_WARN_MESSAGE(false, "Unimplemented test file: SavemapHandler");
     BOOST_CHECK(0 == 0);
 }
 

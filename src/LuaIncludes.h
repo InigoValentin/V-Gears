@@ -19,23 +19,20 @@
 
 #pragma once
 
+#include <limits>
+
 #ifdef __APPLE__
-// Something in the Apple headers seems to #define nil as __NULL 
-// this then causes a build error in luabind:
-// luabind/nil.hpp:36:40: error: expected unqualified-id
-// extern LUABIND_API detail::nil_type nil;
+// Something in the Apple headers seems to #define nil as __NULL,
+// which breaks the sol2 binding headers.
 #undef nil
 
 // Causes a build error, usually an ICE on g++
 #undef check
 #endif
 
-#include <luabind/luabind.hpp>
-#include <luabind/yield_policy.hpp>
-
-extern "C"{
-    #include "lua.h"
-    #include <lualib.h>
-    #include <lauxlib.h>
-}
+// sol2 v2.20.6 single header. It includes <lua.hpp> itself, so the Lua
+// headers (lua.h, lualib.h, lauxlib.h) are always available after this.
+// Note: on LuaJIT, sol.hpp bundles a compat53 shim that exposes the 5.2-style
+// lua_resume(L, from, nargs) signature.
+#include <sol.hpp>
 

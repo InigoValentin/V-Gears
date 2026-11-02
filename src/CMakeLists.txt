@@ -862,10 +862,9 @@ target_include_directories(libvgears
         ${OGRE_INCLUDE_DIRS}
         ${OGRE_INCLUDE_DIRS}/Overlay
         ${OGRE_INCLUDE_DIRS}/Bites
+        ${CMAKE_SOURCE_DIR}/lib/sol2
         ${CMAKE_SOURCE_DIR}/lib/luajit
         ${CMAKE_SOURCE_DIR}/lib/luajit/src
-        ${CMAKE_SOURCE_DIR}/lib/luabind
-        ${CMAKE_SOURCE_DIR}/lib/luabind/luabind/detail
         ${QT_INCLUDE_DIRS}
 )
 target_compile_definitions(libvgears PUBLIC TIXML_USE_STL)
@@ -928,7 +927,6 @@ if(WIN32 AND NOT (CMAKE_BUILD_TYPE MATCHES "Debug"))
     endif()
 endif()
 set(VGEARS_LIBRARIES
-    libluabind
     liblua
     ${OPENAL_LIBRARY}
     ${OGGVORBIS_LIBRARIES}
@@ -1011,10 +1009,9 @@ target_include_directories(v-gears
         ${OGRE_INCLUDE_DIRS}
         ${OGRE_INCLUDE_DIRS}/Overlay
         ${OGRE_INCLUDE_DIRS}/Bites
+        ${CMAKE_SOURCE_DIR}/lib/sol2
         ${CMAKE_SOURCE_DIR}/lib/luajit
         ${CMAKE_SOURCE_DIR}/lib/luajit/src
-        ${CMAKE_SOURCE_DIR}/lib/luabind
-        ${CMAKE_SOURCE_DIR}/lib/luabind/luabind/detail
     ${QT_INCLUDE_DIRS}
 )
 

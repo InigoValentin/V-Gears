@@ -93,10 +93,10 @@ set(SOURCE_FILES
     core/Background2DAnimation.cpp
     core/CameraManager.cpp
     core/ConfigCmd.cpp
-    core/ConfigCmdManager.cpp
+    core/ConfigCmdHandler.cpp
     core/ConfigFile.cpp
     core/ConfigVar.cpp
-    core/ConfigVarManager.cpp
+    core/ConfigVarHandler.cpp
     core/Console.cpp
     core/DebugDraw.cpp
     core/DialogsManager.cpp
@@ -110,9 +110,9 @@ set(SOURCE_FILES
     core/GameFrameListener.cpp
     core/InputManager.cpp
     core/Savemap.cpp
-    core/SavemapManager.cpp
+    core/SavemapHandler.cpp
     core/ScriptManager.cpp
-    core/TextManager.cpp
+    core/TextHandler.cpp
     core/Timer.cpp
     core/UiAnimation.cpp
     core/UiFont.cpp
@@ -249,10 +249,23 @@ set(SOURCE_FILES
 # Generate tests
 add_executable(v-gears-tests ${SOURCE_FILES})
 SET_PROPERTY(TARGET v-gears-tests PROPERTY FOLDER "build/v-gears-test")
+
+# Qt imported targets are directory-scoped: the ones created in src/ are not
+# visible here. Look them up again in this scope, and fall back to plain
+# linker flags when the config package is unavailable.
+if(NOT TARGET Qt5::Widgets)
+    find_package(Qt5 COMPONENTS Core Widgets QUIET)
+endif()
+if(TARGET Qt5::Widgets)
+    set(_test_qt_libs Qt5::Widgets Qt5::Core)
+else()
+    set(_test_qt_libs -lQt5Widgets -lQt5Core)
+endif()
+
 target_link_libraries(v-gears-tests
     libvgears
-    Qt5::Widgets
-    Qt5::Core
+    liblua
+    ${_test_qt_libs}
     ${OIS_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${OGGVORBIS_LIBRARIES}

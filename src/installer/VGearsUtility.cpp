@@ -20,7 +20,7 @@
 namespace VGears{
 
     Utility::Utility(int argc, char *argv[]) :
-      Application(argc, argv), frame_listener_(NULL), scene_manager_(NULL), amera_(NULL), viewport_(NULL)
+      Application(argc, argv), frame_listener_(NULL), scene_manager_(NULL), camera_(NULL), viewport_(NULL)
     {}
 
     Utility::~Utility(){}

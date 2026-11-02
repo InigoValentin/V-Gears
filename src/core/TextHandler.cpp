@@ -113,7 +113,7 @@ std::string TextHandler::GetPartyCharacterName(int position){
     else return std::string("UNKNOWN_PARTY_POS_" + position);
 }
 
-void TextHandler::SetCharacterName(int id, char* name){
+void TextHandler::SetCharacterName(int id, const char* name){
     if (id >= 0 && id < 11) character_names_[id] = std::string(name);
     else LOG_WARNING("Not setting character name for character ID " + std::to_string(id) + ".");
 }

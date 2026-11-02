@@ -47,7 +47,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build" FORCE)
 endif()
 
-# First, build external libraries (luabind and luajit).
+# First, build external libraries (sol2 is header-only, only luajit and
+# sfxdump need building).
 add_subdirectory(lib)
 
 # Build v-gears (and, if requested, the installer).
@@ -55,6 +56,7 @@ add_subdirectory(src)
 
 # If requested, build tests
 if(BUILD_TESTS)
+    enable_testing()
     add_subdirectory(test)
 endif()
 

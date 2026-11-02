@@ -33,11 +33,6 @@ ConfigVar cv_debug_script(
  */
 template<>ScriptManager *Ogre::Singleton<ScriptManager>::msSingleton = nullptr;
 
-/**
- * Global guard used by ScriptManagerBinds to prevent multiple luabind class registrations.
- */
-bool g_luabind_binds_registered = false;
-
 Ogre::String script_entity_type[] = {"SYSTEM", "ENTITY", "UI", "BATTLE"};
 
 /**
@@ -54,7 +49,7 @@ ScriptManager::ScriptManager():
   system_table_name_("System"), entity_table_name_("EntityContainer"), ui_table_name_("UiContainer")
 {
     lua_state_ = lua_open();
-    luabind::open(lua_state_);
+    sol::register_main_thread(lua_state_);
     luaopen_base(lua_state_);
     luaopen_string(lua_state_);
     luaopen_table(lua_state_);
@@ -195,35 +190,46 @@ void ScriptManager::Update(const ScriptManager::Type type){
                             ContinueScriptExecution(script_entity_[i].queue[0].paused_script_start);
                             script_entity_[i].queue[0].paused_script_start.entity = "";
                         }
-                        luabind::object table = GetTableByEntityName(
+                        sol::object table = GetTableByEntityName(
                           type, current_script_id_.entity,
                           script_entity_[i].queue[0].state
                         );
+                        sol::object function;
+                        if (table.get_type() == sol::type::table)
+                            function = table.as<sol::table>()[current_script_id_.function];
                         if (
-                          table.is_valid()
-                          && luabind::type(table) == LUA_TTABLE
-                          && luabind::type(table[current_script_id_.function]) == LUA_TFUNCTION
+                          table.get_type() == sol::type::table
+                          && function.get_type() == sol::type::function
                         ){
                             int ret = 0;
-                            try{
-                                ret = luabind::resume_function<int>(
-                                  table[current_script_id_.function], table,
-                                  script_entity_[i].queue[0].argument1.c_str(),
-                                  script_entity_[i].queue[0].argument2.c_str()
-                                );
+                            lua_State* thread = script_entity_[i].queue[0].state;
+                            sol::coroutine coroutine(thread, sol::function(function));
+                            auto result = coroutine(
+                              table, script_entity_[i].queue[0].argument1,
+                              script_entity_[i].queue[0].argument2
+                            );
+                            if (result.valid()){
+                                // The coroutine yields with the bound function
+                                // return value on top of the thread stack; a
+                                // completed script leaves its return value there.
+                                if (lua_gettop(thread) > 0 && lua_isnumber(thread, -1))
+                                    ret = static_cast<int>(lua_tointeger(thread, -1));
+                                lua_settop(thread, 0);
                             }
-                            catch (luabind::error& e){
+                            else{
+                                sol::error error = result;
                                 std::string msg = "LUA error in entity " + script_entity_[i].name
                                   + " (" + current_script_id_.entity + ") " + " in function "
                                   + script_entity_[i].queue[0].function + " ("
                                   + current_script_id_.function + ")";
-                                if (lua_tostring(script_entity_[i].queue[0].state, -1) != NULL){
+                                if (lua_tostring(thread, -1) != nullptr){
                                     msg = msg + ". Details: " + std::string(
-                                      lua_tostring(script_entity_[i].queue[0].state, -1)
+                                      lua_tostring(thread, -1)
                                     );
                                 }
-                                msg = msg + ". Exception: " + e.what();
+                                msg = msg + ". Exception: " + error.what();
                                 LOG_ERROR(msg);
+                                lua_settop(thread, 0);
                             }
 
                             if (ret == 0){
@@ -267,14 +273,21 @@ void ScriptManager::Update(const ScriptManager::Type type){
                         );
 
                         int ret = 0;
-                        try{
-                            ret = luabind::resume<int>(script_entity_[i].queue[0].state);
+                        lua_State* thread = script_entity_[i].queue[0].state;
+                        // sol.hpp bundles a compat53 shim: on LuaJIT this maps
+                        // to the native 2-argument lua_resume.
+                        int status = lua_resume(thread, nullptr, 0);
+                        if (status == LUA_YIELD || status == 0){
+                            if (lua_gettop(thread) > 0 && lua_isnumber(thread, -1))
+                                ret = static_cast<int>(lua_tointeger(thread, -1));
+                            lua_settop(thread, 0);
                         }
-                        catch(luabind::error& e){
-                            luabind::object error_msg(luabind::from_stack(e.state(), -1));
+                        else{
+                            const char* error = lua_tostring(thread, -1);
                             LOG_WARNING(
-                              Ogre::String(luabind::object_cast<std::string >(error_msg))
+                              Ogre::String(error != nullptr ? error : "unknown lua error")
                             );
+                            lua_settop(thread, 0);
                         }
 
                         if (ret == 0){ // Finished.
@@ -375,18 +388,19 @@ void ScriptManager::AddEntity(
         }
     }
 
-    luabind::object table = GetTableByEntityName(type, entity_name, lua_state_);
+    sol::object table = GetTableByEntityName(type, entity_name, lua_state_);
 
-    if (table.is_valid() && luabind::type(table) == LUA_TTABLE){
+    if (table.get_type() == sol::type::table){
         ScriptEntity script_entity;
         script_entity.name = entity_name;
         script_entity.type = type;
 
         // Initialize entity field for model entity.
-        if (entity != nullptr) table["entity"] = boost::ref(*entity);
+        if (entity != nullptr) table.as<sol::table>()["entity"] = entity;
 
         // Check the "on_start" script
-        if (luabind::type(table["on_start"]) == LUA_TFUNCTION){
+        sol::object on_start = table.as<sol::table>()["on_start"];
+        if (on_start.get_type() == sol::type::function){
             QueueScript script;
             script.function = "on_start";
             script.priority = 1;
@@ -401,7 +415,8 @@ void ScriptManager::AddEntity(
         }
 
         // Check the "on_update" script.
-        if (luabind::type(table["on_update"]) == LUA_TFUNCTION){
+        sol::object on_update = table.as<sol::table>()["on_update"];
+        if (on_update.get_type() == sol::type::function){
             QueueScript script;
             script.function = "on_update";
             script.priority = 999;
@@ -443,25 +458,30 @@ void ScriptManager::RemoveEntityTopScript(ScriptEntity& entity){
     }
 }
 
-luabind::object ScriptManager::GetTableByEntityName(
+sol::object ScriptManager::GetTableByEntityName(
   const ScriptManager::Type type, const Ogre::String& name, lua_State* state
 ) const{
     // Get the real table by name
     Ogre::StringVector table_path = StringTokenise(name, ".");
-    luabind::object table = luabind::globals(state);
+    sol::state_view lua(state);
+    sol::object table = lua.globals();
 
     switch(type){
-        case ScriptManager::SYSTEM: table = table[system_table_name_]; break;
-        case ScriptManager::ENTITY: table = table[entity_table_name_]; break;
-        case ScriptManager::UI: table = table[ui_table_name_]; break;
-        case ScriptManager::BATTLE: table = table[battle_table_name_]; break;
+        case ScriptManager::SYSTEM:
+          table = table.as<sol::table>()[system_table_name_]; break;
+        case ScriptManager::ENTITY:
+          table = table.as<sol::table>()[entity_table_name_]; break;
+        case ScriptManager::UI:
+          table = table.as<sol::table>()[ui_table_name_]; break;
+        case ScriptManager::BATTLE:
+          table = table.as<sol::table>()[battle_table_name_]; break;
     }
 
-    if (luabind::type(table) != LUA_TTABLE) return luabind::object();
+    if (table.get_type() != sol::type::table) return sol::make_object(state, sol::nil);
 
     for (unsigned int i = 0; i < table_path.size(); ++ i){
-        table = table[table_path[i]];
-        if (luabind::type(table) != LUA_TTABLE) return luabind::object();
+        table = table.as<sol::table>()[table_path[i]];
+        if (table.get_type() != sol::type::table) return sol::make_object(state, sol::nil);
     }
     return table;
 }
@@ -610,12 +630,12 @@ bool ScriptManager::ScriptRequest(
   ScriptEntity* script_entity, const Ogre::String& function, const int priority,
   const Ogre::String& argument1, const Ogre::String& argument2, bool start_sync, bool end_sync
 ){
-    luabind::object table
+    sol::object table
       = GetTableByEntityName(script_entity->type, script_entity->name, lua_state_);
-    if (
-      table.is_valid() && luabind::type(table) == LUA_TTABLE
-      && luabind::type(table[function]) == LUA_TFUNCTION
-    ){
+    sol::object table_function;
+    if (table.get_type() == sol::type::table)
+        table_function = table.as<sol::table>()[function];
+    if (table_function.get_type() == sol::type::function){
         QueueScript script;
         script.function = function;
         script.argument1 = argument1;
