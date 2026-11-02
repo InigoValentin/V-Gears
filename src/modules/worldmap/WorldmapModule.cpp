@@ -15,21 +15,26 @@
 
 #include "WorldmapModule.h"
 
+#include <algorithm>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
 #include <OgreRoot.h>
+#include <OgreException.h>
 #include <OgreHardwarePixelBuffer.h>
-#include <OgreEntity.h>
 #include <OgreLogManager.h>
 #include <OgreTextureManager.h>
 #include <OgreMaterialManager.h>
-#include <OgreTechnique.h>
+#include <OgreResourceGroupManager.h>
+#include "data/VGearsTexFile.h"
 #include "data/worldmap/WorldmapFile.h"
 #include "data/worldmap/WorldmapFileManager.h"
 #include "data/worldmap/WorldmapFileSerializer.h"
 #include "core/CameraManager.h"
-#include "data/worldmap/TxzFile.h"
-#include "data/worldmap/TxzFileSerializer.h"
 
 /**
  * World map module singleton.
@@ -364,80 +369,38 @@ namespace VGears {
         {281, "wtrk", 32, 64, 64, 96}
     };
 
-    static const char* WORLD_RESOURCE_GROUP = "FFVII_World";
+    static const char* WORLD_MAP_RESOURCE_GROUP = "WORLD_MAP";
 
     /**
-     * Creates a reference texture.
+     * Loads and parses the installed WM0 map.
      *
-     * @param[out] s The texture will be loaded here.
-     * @todo Understand and document properly.
+     * @return The map blocks.
      */
-    static void CreateReferenceTextureFileInstance(VGears::TxzFileSerializer& s){
-
+    static std::vector<VGears::WorldmapFileSerializer::Block> LoadWorldMap(){
         /**
-         * A test file.
-         */
-        class TestFile : public VGears::TxzFile{
-
-            public:
-
-                /**
-                 * Constructor.
-                 *
-                 * Generates a null TXZ file.
-                 */
-                TestFile() : VGears::TxzFile(nullptr, "", 0, "") {}
-        };
-
-        // TODO: Get correct path
-        // TODO: What is this file? Where does it come from?
-        const char* file_name = "data/wm/wm0.txz";
-        std::ifstream ifs(file_name, std::ifstream::binary);
-        Ogre::DataStreamPtr stream(OGRE_NEW Ogre::FileStreamDataStream(&ifs, false));
-        // Ogre::LogManager log;
-        TestFile f;
-        s.Import(stream, f);
-    }
-
-    /**
-     * Creates a reference file.
-     *
-     * @param[in,out] callBack The callBack function.
-     * @todo Understand and document properly.
-     */
-    static void CreateReferenceFileInstance(
-      std::function<void(Ogre::DataStreamPtr& stream, VGears::WorldmapFile& file)> callBack
-    ){
-        /**
-         * A test file.
+       * The serializer retains its parsed blocks; the resource argument is
+       * currently unused by the MAP serializer.
          */
         class TestFile : public VGears::WorldmapFile{
 
             public:
 
-                /**
-                 * Constructor.
-                 *
-                 * Generates a null WM file.
-                 */
                 TestFile() : VGears::WorldmapFile(nullptr, "", 0, "") {}
         };
-        const char* file_name = "data/wm/WM0.MAP";
-        std::ifstream ifs(file_name, std::ifstream::binary);
-        if (!ifs.is_open()){
-            LogManager::getSingleton().logMessage("ERROR: Failed to open data/wm/WM0.MAP");
-            return;
-        }
-        {
-            // BOOST_REQUIRE(ifs.is_open());
-            Ogre::DataStreamPtr stream(OGRE_NEW Ogre::FileStreamDataStream(&ifs, false));
-            // BOOST_REQUIRE(stream->isReadable());
-            //Ogre::LogManager log;
-            TestFile f;
-            // log.createLog("Default Log", true, true, true);
-            callBack(stream, f);
-            // log.destroyLog("Default Log");
-        }
+
+        Ogre::DataStreamPtr stream
+          = Ogre::ResourceGroupManager::getSingleton().openResource(
+              "WM0.MAP", WORLD_MAP_RESOURCE_GROUP, nullptr, true
+            );
+        TestFile file;
+        VGears::WorldmapFileSerializer serializer;
+        serializer.ImportWorldmapFile(stream, file);
+
+        Ogre::LogManager::getSingleton().logMessage(
+          "Loaded WM0.MAP with " + std::to_string(serializer.blocks.size())
+            + " blocks."
+        );
+        return serializer.blocks;
     }
 
     /**
@@ -452,43 +415,6 @@ namespace VGears {
     }
 
     /**
-     * Tests something.
-     *
-     * @param[in] data The test data.
-     * @todo Understand and document properly.
-     */
-    void Test(const std::vector<std::vector<TxzFileSerializer::Rgba>>& data){
-        //Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().load(
-        //  "clf_l.png.png",
-        //  Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
-        //);
-
-        // World resource group
-        Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual(
-          "BackgroundTex", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-          Ogre::TEX_TYPE_2D, 640, 256, 0, Ogre::PF_B8G8R8, Ogre:: TU_DYNAMIC
-        );
-        Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
-          "BackgroundMat", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
-        );
-        material->getTechnique(0)->getPass(0)->createTextureUnitState("BackgroundTex");
-        //material->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_COLOUR);
-        Ogre::HardwarePixelBufferSharedPtr pixel_buffer = texture->getBuffer();
-        pixel_buffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
-        const Ogre::PixelBox& pixelBox = pixel_buffer->getCurrentLock();
-        Ogre::uint8* dest = static_cast<Ogre::uint8*>(pixelBox.data);
-        for (size_t i = 0; i < 256; i ++){
-           for(size_t j = 0; j < 640; j ++){
-              *dest ++ = data[i][j].b;
-              *dest ++ = data[i][j].g;
-              *dest ++ = data[i][j].r;
-              *dest ++ = 0;
-           }
-        }
-        pixel_buffer->unlock();
-    }
-
-    /**
      * Converts a coordinate to a texture U component coordinate.
      *
      * @param[in] coord The coordinate to convert.
@@ -496,7 +422,7 @@ namespace VGears {
      * @return Texture coordinate U component.
      * @todo Understand and document properly.
      */
-    float ToTextureCoordU(uint8 coord, uint16 id){
+    static float ToTextureCoordU(uint8 coord, uint16 id){
         return (float(coord) - float(textures[id].u)) / float(textures[id].width);
         //return (float(textures[id].u) + float(coord)) / 256.0f;
     }
@@ -509,48 +435,60 @@ namespace VGears {
      * @return Texture coordinate V component.
      * @todo Understand and document properly.
      */
-    float ToTextureCoordV(uint8 coord, uint16 id){
+    static float ToTextureCoordV(uint8 coord, uint16 id){
         return (float(coord) - float(textures[id].v)) / float(textures[id].height);
         //return (float(textures[id].v) + float(coord)) / 640.0f;
     }
 
-    /**
-     * The list of loaded textures.
-     */
-    std::vector<TexturePtr> loaded_textures;
+    struct ImageDataDeleter{
 
-    /**
-     * The list of materials.
-     */
-    std::vector<MaterialPtr> materials;
+      void operator()(Ogre::ImageCodec::ImageData* image_data) const{
+        OGRE_DELETE image_data;
+      }
+    };
 
-    /**
-     * Map of texture IDs.
-     */
-    std::map<int, ManualObject*> texture_ids;
+    static TexturePtr LoadWorldMapTexture(uint16 texture_id){
+        const std::string texture_name
+          = std::string(textures[texture_id].name) + ".tex";
+        Ogre::DataStreamPtr stream
+          = ResourceGroupManager::getSingleton().openResource(
+              texture_name, WORLD_MAP_RESOURCE_GROUP, nullptr, true
+            );
+        VGears::TexFile tex_file;
+        tex_file.Read(stream);
 
-    /**
-     * Loads the map textures.
-     */
-    static void LoadTextures(){
-        if (loaded_textures.empty()){
-            for (int i = 0; i < sizeof(textures) / sizeof(textures[0]); i ++){
-                std::string texture_name = std::string(textures[i].name) + ".tex";
-                ResourceGroupManager::getSingleton().declareResource(
-                  texture_name.c_str(), "Texture", "TEST"
-                );
-                TexturePtr tmp = Ogre::TextureManager::getSingleton().load(
-                  texture_name.c_str(), "TEST", TEX_TYPE_2D, 1, 1.0f
-                );
-                loaded_textures.emplace_back(tmp);
-                Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
-                  textures[i].name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
-                );
-                material->getTechnique(0)->getPass(0)->createTextureUnitState(texture_name.c_str());
-                material->getTechnique(0)->getPass(0)->setTextureFiltering(TFO_NONE);
-                materials.emplace_back(material);
-            }
+        Ogre::MemoryDataStreamPtr pixel_data(tex_file.GetPixelData());
+        std::unique_ptr<Ogre::ImageCodec::ImageData, ImageDataDeleter> image_data(
+          tex_file.GetImageData()
+        );
+        TexturePtr texture = Ogre::TextureManager::getSingleton().createManual(
+          std::string("WorldMapTex_") + textures[texture_id].name,
+          ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D,
+          image_data->width, image_data->height, 0, image_data->format, TU_STATIC
+        );
+        texture->getBuffer()->blitFromMemory(Ogre::PixelBox(
+          image_data->width, image_data->height, 1, image_data->format,
+          pixel_data->getPtr()
+        ));
+        return texture;
+    }
+
+    static MaterialPtr LoadTextureMaterial(uint16 texture_id){
+        TexturePtr texture = LoadWorldMapTexture(texture_id);
+        const std::string material_name
+          = std::string("WorldMap_") + textures[texture_id].name;
+        MaterialPtr material
+          = Ogre::MaterialManager::getSingleton().getByName(material_name);
+        if (material.isNull()){
+            material = Ogre::MaterialManager::getSingleton().create(
+              material_name, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
+            );
+            Pass* pass = material->getTechnique(0)->getPass(0);
+            pass->createTextureUnitState(texture->getName());
+            pass->setTextureFiltering(TFO_NONE);
+            pass->setLightingEnabled(false);
         }
+        return material;
     }
 
     /**
@@ -558,117 +496,126 @@ namespace VGears {
      *
      * @param[in] scene_manager The scene manager.
      */
-    void CreateTestMap(SceneManager* scene_manager){
-        std::vector<VGears::WorldmapFileSerializer::Block> blocks;
-        CreateReferenceFileInstance([&](Ogre::DataStreamPtr& stream, VGears::WorldmapFile& file){
-            VGears::WorldmapFileSerializer s;
-            s.ImportWorldmapFile(stream, file);
-            blocks = s.blocks;
-        });
+    void CreateWorldMap(SceneManager* scene_manager){
+        const std::vector<VGears::WorldmapFileSerializer::Block> blocks
+          = LoadWorldMap();
+        const size_t texture_count = sizeof(textures) / sizeof(textures[0]);
+        const size_t base_block_count = std::min(blocks.size(), size_t(63));
+        const float space = From16BitFixedPoint(8182);
+        std::map<uint16, ManualObject*> texture_objects;
+        std::set<uint16> unavailable_texture_ids;
+        unsigned int manual_index = 0;
 
-        if (blocks.empty()) return; // Load failed
-        /*
-        // TODO: Get PSX textures working
-        VGears::TxzFileSerializer s;
-        createReferenceTextureFileInstance(s);
+        for (size_t block_index = 0; block_index < base_block_count; ++block_index){
+            const VGears::WorldmapFileSerializer::Block& block = blocks[block_index];
+            const size_t map_x = block_index % 9;
+            const size_t map_y = block_index / 9;
+            for (size_t mesh_index = 0; mesh_index < block.meshes.size(); ++mesh_index){
+                const VGears::WorldmapFileSerializer::BlockPart& part
+                  = block.meshes[mesh_index];
+                const size_t mesh_x = mesh_index % 4;
+                const size_t mesh_y = mesh_index / 4;
+                const float pos_x = (mesh_x * space) + (map_x * space * 4);
+                const float pos_z = (mesh_y * space) + (map_y * space * 4);
 
-        std::vector<std::vector<TxzFileSerializer::rgba>> data
-          = s.GetWorldmapTexture(19);
-        test(data);
-        */
-        LoadTextures();
-        int c = 0;
-        const auto SPACE = From16BitFixedPoint(8182);
-        size_t block_count = blocks.size();
-        int map_x = 0;
-        int map_y = 0;
-        for (unsigned int k = 0; k < block_count; k ++){
-            // 7x9 size.
-            VGears::WorldmapFileSerializer::Block& block = blocks[k];
-            int block_x = 0;
-            int block_y = 0;
-            for (size_t i = 0; i < block.meshes.size(); i ++){
-                VGears::WorldmapFileSerializer::BlockPart& part = block.meshes[i];
-                for (size_t j = 0; j < part.triangles.size(); j ++){
-                    VGears::WorldmapFileSerializer::BlockTriangle& tri
-                      = part.triangles.at(j);
-                    ManualObject* manual = nullptr;
-                    auto it = texture_ids.find(tri.TextureInfo);
-                    if (it == texture_ids.end()){
-                        manual = scene_manager->createManualObject(
-                          ("zzz_manual" + std::to_string(c++)).c_str()
-                        );
-                        manual->begin(
-                          textures[tri.TextureInfo].name, RenderOperation::OT_TRIANGLE_LIST
-                        );
-                        manual->setDebugDisplayEnabled(true);
-                        manual->setDynamic(false);
-                        texture_ids[tri.TextureInfo] = manual;
+                for (const VGears::WorldmapFileSerializer::BlockTriangle& triangle
+                  : part.triangles){
+                    if (unavailable_texture_ids.find(triangle.TextureInfo)
+                      != unavailable_texture_ids.end()){
+                        continue;
                     }
-                    else manual = it->second;
-                    const float pos_x = (block_x * SPACE) + (map_x * SPACE * 4);
-                    const float pos_y = (block_y * SPACE) + (map_y * SPACE * 4);
+                    if (triangle.TextureInfo >= texture_count){
+                        if (unavailable_texture_ids.insert(triangle.TextureInfo).second){
+                            LogManager::getSingleton().logMessage(
+                              "Skipping world-map texture ID "
+                                + std::to_string(triangle.TextureInfo)
+                                + ": no PC texture mapping is available."
+                            );
+                        }
+                        continue;
+                    }
 
-                    // v1
-                    VGears::WorldmapFileSerializer::Vertex v1
-                      = part.vertices.at(tri.vertex_2_index);
+                    ManualObject* manual = nullptr;
+                    auto object = texture_objects.find(triangle.TextureInfo);
+                    if (object == texture_objects.end()){
+                        MaterialPtr material;
+                        try{
+                            material = LoadTextureMaterial(triangle.TextureInfo);
+                        }
+                        catch (const Ogre::Exception& exception){
+                            unavailable_texture_ids.insert(triangle.TextureInfo);
+                            LogManager::getSingleton().logMessage(
+                              "Failed to load world-map texture "
+                                + std::string(textures[triangle.TextureInfo].name)
+                                + ": " + exception.getDescription()
+                            );
+                            continue;
+                        }
+
+                        manual = scene_manager->createManualObject(
+                          "world_map_surface_" + std::to_string(++manual_index)
+                        );
+                        manual->begin(material->getName(), RenderOperation::OT_TRIANGLE_LIST);
+                        manual->setDebugDisplayEnabled(false);
+                        manual->setDynamic(false);
+                        texture_objects[triangle.TextureInfo] = manual;
+                    }
+                    else manual = object->second;
+
+                    const VGears::WorldmapFileSerializer::Vertex& vertex_2
+                      = part.vertices.at(triangle.vertex_2_index);
                     manual->position(
-                      From16BitFixedPoint(v1.x) + pos_x,
-                      From16BitFixedPoint(v1.y),
-                      From16BitFixedPoint(v1.z) + pos_y);
+                      From16BitFixedPoint(vertex_2.x) + pos_x,
+                      From16BitFixedPoint(vertex_2.y),
+                      From16BitFixedPoint(vertex_2.z) + pos_z
+                    );
                     manual->textureCoord(
-                      ToTextureCoordU(tri.vertex_2_u, tri.TextureInfo),
-                      ToTextureCoordV(tri.vertex_2_v, tri.TextureInfo)
+                      ToTextureCoordU(triangle.vertex_2_u, triangle.TextureInfo),
+                      ToTextureCoordV(triangle.vertex_2_v, triangle.TextureInfo)
                     );
 
-                    // v2
-                    v1 = part.vertices.at(tri.vertex_1_index);
+                    const VGears::WorldmapFileSerializer::Vertex& vertex_1
+                      = part.vertices.at(triangle.vertex_1_index);
                     manual->position(
-                      From16BitFixedPoint(v1.x) + pos_x,
-                      From16BitFixedPoint(v1.y),
-                      From16BitFixedPoint(v1.z) + pos_y
+                      From16BitFixedPoint(vertex_1.x) + pos_x,
+                      From16BitFixedPoint(vertex_1.y),
+                      From16BitFixedPoint(vertex_1.z) + pos_z
                     );
                     manual->textureCoord(
-                      ToTextureCoordU(tri.vertex_1_u, tri.TextureInfo),
-                      ToTextureCoordV(tri.vertex_1_v, tri.TextureInfo)
+                      ToTextureCoordU(triangle.vertex_1_u, triangle.TextureInfo),
+                      ToTextureCoordV(triangle.vertex_1_v, triangle.TextureInfo)
                     );
 
-                    // v3
-                    v1 = part.vertices.at(tri.vertex_0_index);
+                    const VGears::WorldmapFileSerializer::Vertex& vertex_0
+                      = part.vertices.at(triangle.vertex_0_index);
                     manual->position(
-                      From16BitFixedPoint(v1.x) + pos_x,
-                      From16BitFixedPoint(v1.y),
-                      From16BitFixedPoint(v1.z) + pos_y
+                      From16BitFixedPoint(vertex_0.x) + pos_x,
+                      From16BitFixedPoint(vertex_0.y),
+                      From16BitFixedPoint(vertex_0.z) + pos_z
                     );
                     manual->textureCoord(
-                      ToTextureCoordU(tri.vertex_0_u, tri.TextureInfo),
-                      ToTextureCoordV(tri.vertex_0_v, tri.TextureInfo)
+                      ToTextureCoordU(triangle.vertex_0_u, triangle.TextureInfo),
+                      ToTextureCoordV(triangle.vertex_0_v, triangle.TextureInfo)
                     );
-
-                }
-                block_x ++;
-                if (block_x >= 4){
-                    block_x = 0;
-                    block_y++;
                 }
             }
-            map_x ++;
-            if (map_x >= 9){
-                map_x = 0;
-                map_y++;
-            }
         }
-        for (auto& it : texture_ids){
-            it.second->end();
-            SceneNode* node = scene_manager->getRootSceneNode()->createChildSceneNode();
-            node->attachObject(it.second);
-            node->setPosition(0, 0, 0);
+
+        for (const auto& texture_object : texture_objects){
+            texture_object.second->end();
+            scene_manager->getRootSceneNode()->createChildSceneNode()
+              ->attachObject(texture_object.second);
         }
+
+        const float map_center_x = space * 18.0f;
+        const float map_center_z = space * 14.0f;
+        Ogre::Camera* camera = CameraManager::getSingleton().GetCurrentCamera();
+        camera->setPosition(Ogre::Vector3(map_center_x, 80.0f, map_center_z + 90.0f));
+        camera->lookAt(Ogre::Vector3(map_center_x, 0.0f, map_center_z));
     }
 
     void WorldmapModule::Init(){
-        CreateTestMap(Root::getSingleton().getSceneManager("Scene"));
-        CameraManager::getSingleton().EnableWireFrame(true);
+        CreateWorldMap(Root::getSingleton().getSceneManager("Scene"));
     }
 
 } // namespace VGears

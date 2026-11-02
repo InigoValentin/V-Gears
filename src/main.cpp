@@ -122,6 +122,9 @@ int main(int argc, char *argv[]){
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
           "./data/wm", "FileSystem", "WORLD_MAP"
         );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./temp/world_models", "FileSystem", "WORLD_MAP"
+        );
         Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
         // Initialize it before console because it may use it
