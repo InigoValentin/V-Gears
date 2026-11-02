@@ -13,9 +13,10 @@ V-Gears is a free, cross-platform reimplementation of the Final Fantasy VII engi
 - `src/common/` — application base class and file utilities shared by all targets.
 - `src/core/` — engine runtime: audio, console, entities, walkmesh, UI, particles, savemap, `ScriptManager` (Lua bindings via sol2 and system LuaJIT).
 - `src/data/` — FF7 binary format parsers (LGP, LZS, HRC, TEX, field files, worldmap TXZ...). Most formats follow a triplet: `*File` (data), `*FileSerializer` (read/write), `*FileManager` (Ogre resource loading).
-- `src/installer/` — Qt data installer (`v-gears-installer`); includes the script `decompiler/` that converts field/world scripts into Lua.
+- `src/installer/` — Qt data installer (`v-gears-installer`); includes the script `decompiler/` that converts field/world scripts into Lua and the SfxDump audio converter.
 - `src/map/`, `src/modules/`, `src/viewer/` — field map code, game modules (e.g. worldmap), and the model viewer.
-- `lib/` — bundled third-party code (sol2 single header, sfxdump). Do not restyle, modernize, or refactor these. LuaJIT is a system dependency.
+- `src/third_party/sol/` — vendored sol2 single header. Do not restyle, modernize, or refactor it.
+- LuaJIT is a system dependency.
 - `test/` — Boost.Test suite mirroring `src/` paths; sources are listed manually in `test/CMakeLists.txt`.
 - `data/` — runtime configuration only (Ogre plugins/resources cfgs). Not game data.
 - `doc/` — all guides; `doc/code/FFVII/` documents the original binary formats.

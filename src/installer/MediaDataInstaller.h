@@ -125,14 +125,6 @@ class MediaDataInstaller{
          */
         static int TOTAL_SOUNDS;
 		
-		/*
-		 * Retrieves the path to the currently running executable.
-		 *
-		 * @return Path to the folder containig the current executable, or an empty string in case
-		 * of failure.
-		 */
-		std::string GetExecutablePath();
-
         /**
          * The disk image to read the original data from.
          */

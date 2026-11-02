@@ -22,28 +22,14 @@
 #include <OgreColourValue.h>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/predef/os.h>
 #include <boost/filesystem.hpp>
 #include <tinyxml.h>
 #include "DiskImage.h"
 #include "MediaDataInstaller.h"
+#include "SfxDump.h"
 #include "data/VGearsLGPArchive.h"
 #include "data/VGearsTexFile.h"
 #include "TexFile.h"
-#if (BOOST_OS_WINDOWS)
-#include <stdlib>
-#elif (BOOST_OS_SOLARIS)
-#include <stdlib>
-#include <limits>
-#elif (BOOST_OS_LINUX)
-#include <unistd.h>
-#include <limits.h>
-#elif (BOOST_OS_MACOS)
-#include <mach-o/dyld.h>
-#elif (BOOST_OS_BSD_FREE)
-#include <sys/types>
-#include <sys/sysctl>
-#endif
 
 int MediaDataInstaller::TOTAL_SOUNDS = 750;
 
@@ -61,46 +47,6 @@ MediaDataInstaller::MediaDataInstaller(
     processed_videos_(0)
 {
     PopulateMaps();
-}
-
-
-std::string MediaDataInstaller::GetExecutablePath(){
-    #if (BOOST_OS_WINDOWS)
-    char *exe_path;
-    if (_get_pgmptr(&exe_path) != 0) exe_path = "";
-    #elif (BOOST_OS_SOLARIS)
-    char exe_path[PATH_MAX];
-    if (realpath(getexecname(), exe_path) == NULL) exe_path[0] = '\0';
-    #elif (BOOST_OS_LINUX)
-    char exe_path[PATH_MAX];
-    ssize_t len = ::readlink("/proc/self/exe", exe_path, sizeof(exe_path));
-    if (len == -1 || len == sizeof(exe_path)) len = 0;
-    exe_path[len] = '\0';
-    #elif (BOOST_OS_MACOS)
-    char exe_path[PATH_MAX];
-    uint32_t len = sizeof(exe_path);
-    if (_NSGetExecutablePath(exe_path, &len) != 0) exe_path[0] = '\0'; // buffer too small (!)
-    else {
-        // resolve symlinks, ., .. if possible
-        char *canonical_path = realpath(exe_path, NULL);
-        if (canonical_path != NULL){
-            strncpy(exe_path,canonical_path,len);
-            free(canonical_path);
-        }
-    }
-    #elif (BOOST_OS_BSD_FREE)
-    char exe_path[2048];
-    int mib[4];
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PATHNAME;
-    mib[3] = -1;
-    size_t len = sizeof(exe_path);
-    if (sysctl(mib, 4, exe_path, &len, NULL, 0) != 0) exe_path[0] = '\0';
-    #endif
-    return
-      strlen(exe_path) > 0
-      ? boost::filesystem::path(exe_path).remove_filename().make_preferred().string() : std::string();
 }
 
 
@@ -1369,11 +1315,23 @@ void MediaDataInstaller::InstallSprites(){
 }
 
 int MediaDataInstaller::InstallSoundsInit(){
-    // SFXDump handles the wav conversion
-    std::string command = (boost::format(
-      "%1%/sfxdump %2%data/sound/audio.fmt %2%data/sound/audio.dat %3%audio/sounds/"
-    ) % GetExecutablePath() % disk_image_.getContentPath() % output_dir_).str();    
-    std::system(command.c_str());
+    std::unique_ptr<std::string> fmt_path = disk_image_.filePath("data/sound/audio.fmt");
+    std::unique_ptr<std::string> data_path = disk_image_.filePath("data/sound/audio.dat");
+    std::string sound_dir =
+      (boost::filesystem::path(output_dir_) / "audio" / "sounds").string();
+
+    if (!fmt_path){
+        std::cerr << "MediaDataInstaller: could not find data/sound/audio.fmt in the selected game data."
+                  << std::endl;
+    }
+    else if (!data_path){
+        std::cerr << "MediaDataInstaller: could not find data/sound/audio.dat in the selected game data."
+                  << std::endl;
+    }
+    else if (SfxDumpConvert(fmt_path->c_str(), data_path->c_str(), sound_dir.c_str()) != 0){
+        std::cerr << "MediaDataInstaller: failed to convert FFVII sound effects."
+                  << std::endl;
+    }
     processed_sounds_ = 0;
     return TOTAL_SOUNDS;
 }
@@ -1389,7 +1347,7 @@ bool MediaDataInstaller::InstallSounds(){
               "ffmpeg -hide_banner -loglevel panic -y  -i %1%audio/sounds/%2%.wav %1%audio/sounds/%2%.ogg"
             ) % output_dir_ % processed_sounds_).str();
             std::system(command.c_str());
-            //std::cout << "    ADD SOUND " << processed_sounds_ << ".ogg" << std::endl;
+            std::cout << "    ADD SOUND " << processed_sounds_ << ".ogg" << std::endl;
             sounds_.push_back("audio/sounds/" + std::to_string(processed_sounds_) + ".ogg");
             // Remove the wav file.
             if (!keep_originals_)
@@ -1397,7 +1355,7 @@ bool MediaDataInstaller::InstallSounds(){
         }
         else{
             sounds_.push_back("audio/sounds/INVALID.ogg");
-            //std::cout << "    -- ADD SOUND INVALID.ogg" << std::endl;
+            std::cout << "    -- ADD SOUND INVALID.ogg" << std::endl;
         }
     }
     processed_sounds_ ++;

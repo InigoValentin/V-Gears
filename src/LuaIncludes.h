@@ -34,5 +34,5 @@
 // headers (lua.h, lualib.h, lauxlib.h) are always available after this.
 // Note: on LuaJIT, sol.hpp bundles a compat53 shim that exposes the 5.2-style
 // lua_resume(L, from, nargs) signature.
-#include <sol.hpp>
+#include <third_party/sol/sol.hpp>
 

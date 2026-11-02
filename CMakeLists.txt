@@ -47,7 +47,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build" FORCE)
 endif()
 
-# LuaJIT is a system dependency. sol2 is header-only; sfxdump remains bundled.
+# LuaJIT is a system dependency; sol2 is header-only.
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
     pkg_check_modules(LUAJIT QUIET luajit)
@@ -73,9 +73,6 @@ else()
     set(VGEARS_LUAJIT_INCLUDE_DIRS ${VGEARS_LUAJIT_INCLUDE_DIR})
     set(VGEARS_LUAJIT_LIBRARIES ${VGEARS_LUAJIT_LIBRARY})
 endif()
-
-# Build remaining bundled external libraries.
-add_subdirectory(lib)
 
 # Build v-gears (and, if requested, the installer).
 add_subdirectory(src)

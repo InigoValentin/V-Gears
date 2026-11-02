@@ -834,6 +834,7 @@ if(_test_removed_count GREATER 0)
 endif()
 
 add_library(libvgears STATIC ${VGEARS_SOURCE_FILES})
+target_sources(libvgears PRIVATE installer/SfxDump.c)
 # Ensure generated ui headers are created before compiling libvgears
 if(DEFINED _GENERATED_UI_TARGET)
     add_dependencies(libvgears ${_GENERATED_UI_TARGET})
@@ -862,7 +863,6 @@ target_include_directories(libvgears
         ${OGRE_INCLUDE_DIRS}
         ${OGRE_INCLUDE_DIRS}/Overlay
         ${OGRE_INCLUDE_DIRS}/Bites
-        ${CMAKE_SOURCE_DIR}/lib/sol2
         ${VGEARS_LUAJIT_INCLUDE_DIRS}
         ${QT_INCLUDE_DIRS}
 )
@@ -1009,7 +1009,6 @@ target_include_directories(v-gears
         ${OGRE_INCLUDE_DIRS}
         ${OGRE_INCLUDE_DIRS}/Overlay
         ${OGRE_INCLUDE_DIRS}/Bites
-        ${CMAKE_SOURCE_DIR}/lib/sol2
         ${VGEARS_LUAJIT_INCLUDE_DIRS}
     ${QT_INCLUDE_DIRS}
 )

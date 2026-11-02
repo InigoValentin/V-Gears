@@ -1,5 +1,5 @@
 # Find packages required to compile tests.
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+find_package(Boost COMPONENTS filesystem unit_test_framework REQUIRED)
 
 
 # Compiler options.
@@ -163,6 +163,7 @@ set(SOURCE_FILES
     installer/MediaDataInstaller.cpp
     installer/ModelsAndAnimationsDb.cpp
     installer/ScopedLgp.cpp
+    installer/SfxDump.cpp
     installer/TexFile.cpp
     installer/VGearsUtility.cpp
     installer/WorldInstaller.cpp
@@ -270,6 +271,7 @@ target_link_libraries(v-gears-tests
     ${OGGVORBIS_LIBRARIES}
     ${TinyXML_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${BOOST_LINK_LIBS}
     ${OGRE_LIBRARIES}
     ${ZLIB_LIBRARIES}
 )
