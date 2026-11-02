@@ -11,11 +11,11 @@ V-Gears is a free, cross-platform reimplementation of the Final Fantasy VII engi
 ## Architecture
 
 - `src/common/` — application base class and file utilities shared by all targets.
-- `src/core/` — engine runtime: audio, console, entities, walkmesh, UI, particles, savemap, `ScriptManager` (Lua bindings via luabind/LuaJIT).
+- `src/core/` — engine runtime: audio, console, entities, walkmesh, UI, particles, savemap, `ScriptManager` (Lua bindings via sol2 and system LuaJIT).
 - `src/data/` — FF7 binary format parsers (LGP, LZS, HRC, TEX, field files, worldmap TXZ...). Most formats follow a triplet: `*File` (data), `*FileSerializer` (read/write), `*FileManager` (Ogre resource loading).
 - `src/installer/` — Qt data installer (`v-gears-installer`); includes the script `decompiler/` that converts field/world scripts into Lua.
 - `src/map/`, `src/modules/`, `src/viewer/` — field map code, game modules (e.g. worldmap), and the model viewer.
-- `lib/` — bundled third-party code (luabind, luajit, sfxdump). Do not restyle, modernize, or refactor these.
+- `lib/` — bundled third-party code (sol2 single header, sfxdump). Do not restyle, modernize, or refactor these. LuaJIT is a system dependency.
 - `test/` — Boost.Test suite mirroring `src/` paths; sources are listed manually in `test/CMakeLists.txt`.
 - `data/` — runtime configuration only (Ogre plugins/resources cfgs). Not game data.
 - `doc/` — all guides; `doc/code/FFVII/` documents the original binary formats.
@@ -51,7 +51,6 @@ Follow [doc/STYLE.md](../doc/STYLE.md) (C++) and [doc/STYLE-LUA.md](../doc/STYLE
 
 Verified working recipe — keep these quirks intact:
 
-1. Pre-build luajit without sanitizers (host build tools break under ASAN): `cmake -S . -B build-normal -DCMAKE_BUILD_TYPE=Release && cmake --build build-normal --target liblua -j6`, then copy its generated headers into the ASAN build dir.
-2. Configure `build-asan` with `-DCMAKE_C_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer -g'` (same for CXX flags, plus `-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined'`).
-3. Build with `ASAN_OPTIONS=detect_leaks=0` (luajit host tools have benign leaks).
-4. Run with a UBSAN suppression for `vptr:*/OgreSingleton.h` — a false positive inherent to OGRE's singleton pattern, not a real bug.
+1. Configure `build-asan` with `-DCMAKE_C_FLAGS='-fsanitize=address,undefined -fno-omit-frame-pointer -g'` (same for CXX flags, plus `-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined'`). System LuaJIT is used as an uninstrumented dependency.
+2. Build the project normally with the sanitizer flags enabled.
+3. Run with a UBSAN suppression for `vptr:*/OgreSingleton.h` — a false positive inherent to OGRE's singleton pattern, not a real bug.

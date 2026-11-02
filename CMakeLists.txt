@@ -47,8 +47,34 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build" FORCE)
 endif()
 
-# First, build external libraries (sol2 is header-only, only luajit and
-# sfxdump need building).
+# LuaJIT is a system dependency. sol2 is header-only; sfxdump remains bundled.
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(LUAJIT QUIET luajit)
+endif()
+
+if(LUAJIT_FOUND)
+    set(VGEARS_LUAJIT_INCLUDE_DIRS ${LUAJIT_INCLUDE_DIRS})
+    set(VGEARS_LUAJIT_LIBRARIES ${LUAJIT_LINK_LIBRARIES})
+else()
+    find_path(VGEARS_LUAJIT_INCLUDE_DIR
+        NAMES lua.hpp
+        PATH_SUFFIXES luajit-2.1 luajit-2.0 luajit-5.1
+    )
+    find_library(VGEARS_LUAJIT_LIBRARY
+        NAMES luajit-5.1 luajit-2.1 luajit
+    )
+    if(NOT VGEARS_LUAJIT_INCLUDE_DIR OR NOT VGEARS_LUAJIT_LIBRARY)
+        message(FATAL_ERROR
+            "LuaJIT development files were not found. Install libluajit-5.1-dev "
+            "or set VGEARS_LUAJIT_INCLUDE_DIR and VGEARS_LUAJIT_LIBRARY."
+        )
+    endif()
+    set(VGEARS_LUAJIT_INCLUDE_DIRS ${VGEARS_LUAJIT_INCLUDE_DIR})
+    set(VGEARS_LUAJIT_LIBRARIES ${VGEARS_LUAJIT_LIBRARY})
+endif()
+
+# Build remaining bundled external libraries.
 add_subdirectory(lib)
 
 # Build v-gears (and, if requested, the installer).

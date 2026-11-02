@@ -264,7 +264,6 @@ endif()
 
 target_link_libraries(v-gears-tests
     libvgears
-    liblua
     ${_test_qt_libs}
     ${OIS_LIBRARIES}
     ${OPENAL_LIBRARY}

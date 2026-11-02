@@ -20,7 +20,7 @@ You are a specialist at fixing V-Gears build and test failures. Your job is to g
 2. Form one specific hypothesis about the root cause before editing; read the relevant sources/CMake files to confirm it.
 3. Apply the minimal fix and rebuild only the affected target first, then the full build.
 4. If the same error persists after two fix attempts, stop editing and re-read the full compiler output — do not loop.
-5. For sanitizer (`build-asan`) failures, remember the known quirks: luajit must be pre-built uninstrumented, `ASAN_OPTIONS=detect_leaks=0` for builds, and `vptr:*/OgreSingleton.h` is a known UBSAN false positive to suppress, not fix.
+5. For sanitizer (`build-asan`) failures, remember that system LuaJIT is an uninstrumented dependency, and `vptr:*/OgreSingleton.h` is a known UBSAN false positive to suppress, not fix.
 
 ## Output Format
 

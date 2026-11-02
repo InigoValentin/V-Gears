@@ -863,10 +863,10 @@ target_include_directories(libvgears
         ${OGRE_INCLUDE_DIRS}/Overlay
         ${OGRE_INCLUDE_DIRS}/Bites
         ${CMAKE_SOURCE_DIR}/lib/sol2
-        ${CMAKE_SOURCE_DIR}/lib/luajit
-        ${CMAKE_SOURCE_DIR}/lib/luajit/src
+        ${VGEARS_LUAJIT_INCLUDE_DIRS}
         ${QT_INCLUDE_DIRS}
 )
+    target_link_libraries(libvgears PUBLIC ${VGEARS_LUAJIT_LIBRARIES})
 target_compile_definitions(libvgears PUBLIC TIXML_USE_STL)
 if(NOT MSVC)
     target_compile_options(libvgears PRIVATE -fPIC)
@@ -927,7 +927,7 @@ if(WIN32 AND NOT (CMAKE_BUILD_TYPE MATCHES "Debug"))
     endif()
 endif()
 set(VGEARS_LIBRARIES
-    liblua
+    ${VGEARS_LUAJIT_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${OGGVORBIS_LIBRARIES}
     ${OGRE_LIBRARIES}
@@ -1010,8 +1010,7 @@ target_include_directories(v-gears
         ${OGRE_INCLUDE_DIRS}/Overlay
         ${OGRE_INCLUDE_DIRS}/Bites
         ${CMAKE_SOURCE_DIR}/lib/sol2
-        ${CMAKE_SOURCE_DIR}/lib/luajit
-        ${CMAKE_SOURCE_DIR}/lib/luajit/src
+        ${VGEARS_LUAJIT_INCLUDE_DIRS}
     ${QT_INCLUDE_DIRS}
 )
 
