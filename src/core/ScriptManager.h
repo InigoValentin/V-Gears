@@ -300,10 +300,10 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
          * @param[in] type Type of script.
          * @param[in] name Script name.
          * @param[in] state Initial script state.
-         * @return The table.
+         * @return The table, or a nil reference if it doesn't exist.
          * @todo Understand and document.
          */
-        luabind::object GetTableByEntityName(
+        sol::object GetTableByEntityName(
           const ScriptManager::Type type, const Ogre::String& name, lua_State* state
         ) const;
 

@@ -141,7 +141,7 @@ class TextHandler : public Ogre::Singleton<TextHandler>{
          * @param[in] id Character ID.
          * @param[in] name Character name.
          */
-        void SetCharacterName(int id, char* name);
+        void SetCharacterName(int id, const char* name);
 
         /**
          * Sets the party member IDs.
