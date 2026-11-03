@@ -225,6 +225,15 @@ class Entity{
         void ScriptSetPosition(const float x, const float y, const float z);
 
         /**
+         * Moves the entity by the specified position offset.
+         *
+         * @param[in] x X coordinate offset.
+         * @param[in] y Y coordinate offset.
+         * @param[in] z Z coordinate offset.
+         */
+        void ScriptMoveBy(const float x, const float y, const float z);
+
+        /**
          * Retrieves the entity position.
          *
          * @return The entity position.
@@ -319,6 +328,20 @@ class Entity{
          * @return The entity's height.
          */
         float GetHeight() const;
+
+        /**
+         * Sets the entity collision height and updates its debug proxies.
+         *
+         * @param[in] height Height in map units.
+         */
+        void SetHeight(const float height);
+
+        /**
+         * Sets the orientation of the debug collision proxies.
+         *
+         * @param[in] orientation Proxy orientation relative to the entity.
+         */
+        void SetCollisionDebugOrientation(const Ogre::Quaternion& orientation);
 
         /**
          * Sets the entity's solid radius.

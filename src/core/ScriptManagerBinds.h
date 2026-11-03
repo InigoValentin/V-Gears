@@ -110,7 +110,9 @@ void ScriptManager::InitBinds(){
     lua.new_usertype<Entity>(
       "Entity",
       "set_position", &Entity::ScriptSetPosition,
+      "move_by", &Entity::ScriptMoveBy,
       "get_position", &Entity::ScriptGetPosition,
+      "get_name", &Entity::GetName,
       "set_rotation", &Entity::ScriptSetRotation,
       "get_rotation", &Entity::ScriptGetRotation,
       "set_solid_radius", &Entity::SetSolidRadius,

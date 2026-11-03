@@ -24,6 +24,8 @@
 #include "Manager.h"
 #include "Walkmesh.h"
 
+class EntityModel;
+
 /**
  * The entity manager.
  */
@@ -89,6 +91,17 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         Walkmesh* GetWalkmesh();
 
         /**
+         * Checks a proposed world-map position against managed solid entities.
+         *
+         * @param[in] moving_entity Entity being moved.
+         * @param[in] position Proposed base position in world-map coordinates.
+         * @return True if the entity would overlap another solid entity.
+         */
+        bool IsWorldPositionBlocked(
+          const Entity* moving_entity, const Ogre::Vector3& position
+        ) const;
+
+        /**
          * Retrieves the 2D background.
          *
          * @return The 2D background.
@@ -128,6 +141,23 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
           const Ogre::String& name, const Ogre::String& file_name,
           const Ogre::Vector3& position, const Ogre::Degree& rotation,
           const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, const int index
+        );
+
+        /**
+         * Adds a managed world-map entity using an explicit resource group.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Mesh resource name.
+         * @param[in] position Initial position.
+         * @param[in] rotation Initial rotation.
+         * @param[in] scale Initial scale.
+         * @param[in] resource_group Ogre resource group containing the mesh.
+         * @return The managed entity, or nullptr if the manager is not in world mode.
+         */
+        EntityModel* AddWorldMapEntity(
+          const Ogre::String& name, const Ogre::String& file_name,
+          const Ogre::Vector3& position, const Ogre::Degree& rotation,
+          const Ogre::Vector3& scale, const Ogre::String& resource_group
         );
 
         /**

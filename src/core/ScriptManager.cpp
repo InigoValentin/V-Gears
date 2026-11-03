@@ -630,6 +630,8 @@ bool ScriptManager::ScriptRequest(
   ScriptEntity* script_entity, const Ogre::String& function, const int priority,
   const Ogre::String& argument1, const Ogre::String& argument2, bool start_sync, bool end_sync
 ){
+    if (script_entity == nullptr) return false;
+
     sol::object table
       = GetTableByEntityName(script_entity->type, script_entity->name, lua_state_);
     sol::object table_function;

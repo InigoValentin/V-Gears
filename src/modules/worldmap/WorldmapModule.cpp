@@ -2,6 +2,13 @@
  * Copyright (C) 2022 The V-Gears Team
  *
  * This file is part of V-Gears
+  static bool IsJunonTexture(uint16 texture_id){
+    const size_t texture_count = sizeof(textures) / sizeof(textures[0]);
+    if (texture_id >= texture_count) return false;
+    const std::string texture_name = textures[texture_id].name;
+    return texture_name.compare(0, 3, "jun") == 0
+      || texture_name == "jutmpl01";
+  }
  *
  * V-Gears is free software: you can redistribute it and/or modify it under
  * terms of the GNU General Public License as published by the Free Software
@@ -18,9 +25,11 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <limits>
 #include <set>
 #include <string>
 #include <vector>
+#include <OgreEntity.h>
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
 #include <OgreRoot.h>
@@ -31,6 +40,9 @@
 #include <OgreMaterialManager.h>
 #include <OgreResourceGroupManager.h>
 #include "data/VGearsTexFile.h"
+#include "core/InputManager.h"
+#include "core/EntityManager.h"
+#include "core/EntityModel.h"
 #include "data/worldmap/WorldmapFile.h"
 #include "data/worldmap/WorldmapFileManager.h"
 #include "data/worldmap/WorldmapFileSerializer.h"
@@ -371,6 +383,35 @@ namespace VGears {
 
     static const char* WORLD_MAP_RESOURCE_GROUP = "WORLD_MAP";
 
+    static bool IsFootWalkable(uint8 walkability_type){
+      using WalkType = VGears::WorldmapFileSerializer::TriangleWalkMapTypes;
+      switch (walkability_type){
+        case WalkType::GRASS:
+        case WalkType::FOREST:
+        case WalkType::SWAMP:
+        case WalkType::DESERT:
+        case WalkType::WASTELAND:
+        case WalkType::SNOW:
+        case WalkType::RIVERSIDE:
+        case WalkType::CLIFF:
+        case WalkType::COREL_BRIDGE:
+        case WalkType::WUTAI_BRIDGE:
+        case WalkType::HILL_SIDE:
+        case WalkType::BEACH:
+        case WalkType::CANYON:
+        case WalkType::MOUNTAIN_PASS:
+        case WalkType::GOLD_SAUCER_DESERT:
+        case WalkType::JUNGLE:
+        case WalkType::NORTHERND_CAVE:
+        case WalkType::GOLD_SAUCER_DESERT_BORDER:
+        case WalkType::BRIDGE_HEAD:
+        case WalkType::BACK_ENTRANCE:
+          return true;
+        default:
+          return false;
+      }
+    }
+
     /**
      * Loads and parses the installed WM0 map.
      *
@@ -491,12 +532,30 @@ namespace VGears {
         return material;
     }
 
-    /**
-     * Creates a test map.
-     *
-     * @param[in] scene_manager The scene manager.
-     */
-    void CreateWorldMap(SceneManager* scene_manager){
+    WorldmapModule::WorldmapModule():
+      scene_manager_(nullptr),
+      world_map_node_(nullptr),
+      player_entity_(nullptr),
+      highwind_entity_(nullptr),
+      buggy_entity_(nullptr),
+      chocobo_entity_(nullptr),
+      submarine_entity_(nullptr),
+      current_vehicle_(VehicleType::ON_FOOT),
+      player_height_offset_(0),
+      initialized_(false)
+    {}
+
+    WorldmapModule::~WorldmapModule(){
+      if (initialized_) Root::getSingleton().removeFrameListener(this);
+      if (scene_manager_ != nullptr && world_map_node_ != nullptr){
+        scene_manager_->getRootSceneNode()->removeAndDestroyChild("WorldMapTerrain");
+      }
+    }
+
+    void WorldmapModule::CreateWorldMap(SceneManager* scene_manager){
+      scene_manager_ = scene_manager;
+      world_map_node_ = scene_manager_->getRootSceneNode()
+        ->createChildSceneNode("WorldMapTerrain");
         const std::vector<VGears::WorldmapFileSerializer::Block> blocks
           = LoadWorldMap();
         const size_t texture_count = sizeof(textures) / sizeof(textures[0]);
@@ -520,6 +579,31 @@ namespace VGears {
 
                 for (const VGears::WorldmapFileSerializer::BlockTriangle& triangle
                   : part.triangles){
+                    const VGears::WorldmapFileSerializer::Vertex& vertex_0
+                      = part.vertices.at(triangle.vertex_0_index);
+                    const VGears::WorldmapFileSerializer::Vertex& vertex_1
+                      = part.vertices.at(triangle.vertex_1_index);
+                    const VGears::WorldmapFileSerializer::Vertex& vertex_2
+                      = part.vertices.at(triangle.vertex_2_index);
+                    TerrainTriangle terrain_triangle;
+                    terrain_triangle.vertices[0] = Ogre::Vector3(
+                      From16BitFixedPoint(vertex_0.x) + pos_x,
+                      From16BitFixedPoint(vertex_0.y),
+                      From16BitFixedPoint(vertex_0.z) + pos_z
+                    );
+                    terrain_triangle.vertices[1] = Ogre::Vector3(
+                      From16BitFixedPoint(vertex_1.x) + pos_x,
+                      From16BitFixedPoint(vertex_1.y),
+                      From16BitFixedPoint(vertex_1.z) + pos_z
+                    );
+                    terrain_triangle.vertices[2] = Ogre::Vector3(
+                      From16BitFixedPoint(vertex_2.x) + pos_x,
+                      From16BitFixedPoint(vertex_2.y),
+                      From16BitFixedPoint(vertex_2.z) + pos_z
+                    );
+                    terrain_triangle.walkability_type = triangle.walkability_info_;
+                    terrain_triangles_.push_back(terrain_triangle);
+
                     if (unavailable_texture_ids.find(triangle.TextureInfo)
                       != unavailable_texture_ids.end()){
                         continue;
@@ -562,36 +646,30 @@ namespace VGears {
                     }
                     else manual = object->second;
 
-                    const VGears::WorldmapFileSerializer::Vertex& vertex_2
-                      = part.vertices.at(triangle.vertex_2_index);
                     manual->position(
-                      From16BitFixedPoint(vertex_2.x) + pos_x,
-                      From16BitFixedPoint(vertex_2.y),
-                      From16BitFixedPoint(vertex_2.z) + pos_z
+                      terrain_triangle.vertices[2].x,
+                      terrain_triangle.vertices[2].y,
+                      terrain_triangle.vertices[2].z
                     );
                     manual->textureCoord(
                       ToTextureCoordU(triangle.vertex_2_u, triangle.TextureInfo),
                       ToTextureCoordV(triangle.vertex_2_v, triangle.TextureInfo)
                     );
 
-                    const VGears::WorldmapFileSerializer::Vertex& vertex_1
-                      = part.vertices.at(triangle.vertex_1_index);
                     manual->position(
-                      From16BitFixedPoint(vertex_1.x) + pos_x,
-                      From16BitFixedPoint(vertex_1.y),
-                      From16BitFixedPoint(vertex_1.z) + pos_z
+                      terrain_triangle.vertices[1].x,
+                      terrain_triangle.vertices[1].y,
+                      terrain_triangle.vertices[1].z
                     );
                     manual->textureCoord(
                       ToTextureCoordU(triangle.vertex_1_u, triangle.TextureInfo),
                       ToTextureCoordV(triangle.vertex_1_v, triangle.TextureInfo)
                     );
 
-                    const VGears::WorldmapFileSerializer::Vertex& vertex_0
-                      = part.vertices.at(triangle.vertex_0_index);
                     manual->position(
-                      From16BitFixedPoint(vertex_0.x) + pos_x,
-                      From16BitFixedPoint(vertex_0.y),
-                      From16BitFixedPoint(vertex_0.z) + pos_z
+                      terrain_triangle.vertices[0].x,
+                      terrain_triangle.vertices[0].y,
+                      terrain_triangle.vertices[0].z
                     );
                     manual->textureCoord(
                       ToTextureCoordU(triangle.vertex_0_u, triangle.TextureInfo),
@@ -603,8 +681,7 @@ namespace VGears {
 
         for (const auto& texture_object : texture_objects){
             texture_object.second->end();
-            scene_manager->getRootSceneNode()->createChildSceneNode()
-              ->attachObject(texture_object.second);
+            world_map_node_->attachObject(texture_object.second);
         }
 
         const float map_center_x = space * 18.0f;
@@ -614,8 +691,331 @@ namespace VGears {
         camera->lookAt(Ogre::Vector3(map_center_x, 0.0f, map_center_z));
     }
 
+    void WorldmapModule::CreatePlayer(){
+        const Ogre::Vector3 requested_spawn(42.0f, 0.0f, 36.5f);
+        Ogre::Vector3 spawn_position;
+        if (!FindWalkableSurface(requested_spawn, spawn_position, true)){
+            LogManager::getSingleton().logMessage(
+              "WM0 has no GRASS surface at Cloud's requested spawn (42, 36.5)."
+            );
+            return;
+        }
+
+        LogManager::getSingleton().logMessage(
+          "Spawning Cloud at "
+            + Ogre::StringConverter::toString(spawn_position.x) + ", "
+            + Ogre::StringConverter::toString(spawn_position.z)
+        );
+
+        player_entity_ = EntityManager::getSingleton().AddWorldMapEntity(
+          "WorldMapCloud", "cloud.mesh", spawn_position, Ogre::Degree(0),
+          Ogre::Vector3::UNIT_SCALE, "FIELD_MODELS"
+        );
+        if (player_entity_ == nullptr) return;
+
+        const Ogre::AxisAlignedBox& bounds = player_entity_->GetModel()->getBoundingBox();
+        const Ogre::Vector3 model_size = bounds.getSize();
+        const Ogre::Real model_height = model_size.y;
+        if (model_height > 0){
+            const Ogre::Real scale = From16BitFixedPoint(8182) * 0.45f * 0.25f * 0.25f
+              / model_height;
+            player_entity_->setScale(Ogre::Vector3::UNIT_SCALE * scale);
+            player_entity_->SetHeight(model_height * scale);
+            player_entity_->SetSolidRadius(
+              std::max(model_size.x, model_size.z) * scale * 0.5f
+            );
+            player_entity_->SetCollisionDebugOrientation(
+              Ogre::Quaternion(Ogre::Degree(-90), Ogre::Vector3::UNIT_X)
+            );
+            player_height_offset_ = -bounds.getMinimum().y * scale;
+            spawn_position.y += player_height_offset_;
+            player_entity_->SetPosition(spawn_position);
+            Ogre::AnimationStateSet* animations
+              = player_entity_->GetModel()->getAllAnimationStates();
+            if (animations == nullptr || !animations->hasAnimationState("Walk")){
+                LogManager::getSingleton().logMessage(
+                  "Cloud model has no Walk animation state."
+                );
+            }
+            EntityManager::getSingleton().ScriptSetPlayerEntity("WorldMapCloud");
+            player_entity_->PlayAnimationContinue("Idle");
+            CreateCompanionModels();
+            UpdateCamera(0, true);
+        }
+    }
+
+    void WorldmapModule::AddWorldModel(
+      const Ogre::String& name, const Ogre::String& mesh_name,
+      const Ogre::Vector3& desired_position, Ogre::Real target_size,
+      const Ogre::Quaternion& orientation, Ogre::Real collision_radius_scale,
+      bool talkable
+    ){
+        Ogre::Vector3 surface_position;
+        if (!FindWalkableSurface(desired_position, surface_position, false, false)){
+            LogManager::getSingleton().logMessage(
+              "No terrain surface found for world-map model '" + name + "'."
+            );
+            return;
+        }
+
+        EntityModel* entity = nullptr;
+        try{
+            entity = EntityManager::getSingleton().AddWorldMapEntity(
+              "WorldMap" + name, mesh_name, surface_position,
+              Ogre::Degree(0), Ogre::Vector3::UNIT_SCALE, "WORLD_MODELS"
+            );
+        }
+        catch (const Ogre::Exception& exception){
+            LogManager::getSingleton().logMessage(
+              "Failed to load world-map model '" + mesh_name + "': "
+                + exception.getDescription()
+            );
+            return;
+        }
+        if (entity == nullptr) return;
+
+        const Ogre::Vector3 bounds_size = entity->GetModel()->getBoundingBox().getSize();
+        const Ogre::Real largest_dimension = std::max(
+          bounds_size.x, std::max(bounds_size.y, bounds_size.z)
+        );
+        if (largest_dimension <= 0){
+            LogManager::getSingleton().logMessage(
+              "World-map model '" + mesh_name + "' has empty bounds."
+            );
+            return;
+        }
+
+        const Ogre::Real model_scale = target_size / largest_dimension;
+        const Ogre::Vector3 oriented_x = orientation * Ogre::Vector3::UNIT_X;
+        const Ogre::Vector3 oriented_y = orientation * Ogre::Vector3::UNIT_Y;
+        const Ogre::Vector3 oriented_z = orientation * Ogre::Vector3::UNIT_Z;
+        const Ogre::Real world_width =
+          Ogre::Math::Abs(oriented_x.x) * bounds_size.x
+          + Ogre::Math::Abs(oriented_y.x) * bounds_size.y
+          + Ogre::Math::Abs(oriented_z.x) * bounds_size.z;
+        const Ogre::Real world_height =
+          Ogre::Math::Abs(oriented_x.y) * bounds_size.x
+          + Ogre::Math::Abs(oriented_y.y) * bounds_size.y
+          + Ogre::Math::Abs(oriented_z.y) * bounds_size.z;
+        const Ogre::Real world_depth =
+          Ogre::Math::Abs(oriented_x.z) * bounds_size.x
+          + Ogre::Math::Abs(oriented_y.z) * bounds_size.y
+          + Ogre::Math::Abs(oriented_z.z) * bounds_size.z;
+        entity->setRootOrientation(orientation);
+        entity->setScale(Ogre::Vector3::UNIT_SCALE * model_scale);
+        entity->SetSolid(true);
+        entity->SetHeight(world_height * model_scale);
+        entity->SetSolidRadius(
+          std::max(world_width, world_depth) * model_scale * 0.5f
+            * collision_radius_scale
+        );
+        entity->SetTalkable(talkable);
+        if (talkable) entity->SetTalkRadius(entity->GetSolidRadius());
+        entity->SetCollisionDebugOrientation(
+          Ogre::Quaternion(Ogre::Degree(-90), Ogre::Vector3::UNIT_X)
+        );
+        LogManager::getSingleton().logMessage(
+          "Placed world-map model '" + name + "' at "
+            + Ogre::StringConverter::toString(surface_position.x) + ", "
+            + Ogre::StringConverter::toString(surface_position.z)
+        );
+    }
+
+    void WorldmapModule::CreateCompanionModels(){
+        // These models and their spawn points are now hardcoded, they mmust be
+        // loaded according to the story point and save game data.
+        const Ogre::Real space = From16BitFixedPoint(8182);
+        AddWorldModel(
+          "Chocobo", "aja.mesh",
+          Ogre::Vector3(42.5f, 0.0f, 37.5f),
+          space * 0.14f,
+          Ogre::Quaternion(Ogre::Degree(-90), Ogre::Vector3::UNIT_X), 1.0f, true
+        );
+        AddWorldModel(
+          "Highwind", "cgd.mesh",
+          Ogre::Vector3(43.0f, 0.0f, 36.5f),
+          space * 0.25f,
+          Ogre::Quaternion(Ogre::Degree(-90), Ogre::Vector3::UNIT_X), 0.5f, true
+        );
+        AddWorldModel(
+          "Buggy", "aba.mesh",
+          Ogre::Vector3(42.0f, 0.0f, 36.0f),
+          space * 0.3f, Ogre::Quaternion::IDENTITY, 0.5f, true
+        );
+        AddWorldModel(
+          "Submarine", "ddd.mesh",
+          Ogre::Vector3(41.5f, 0.0f, 36.5f),
+          space * 0.1125f, Ogre::Quaternion::IDENTITY, 1.0f, true
+        );
+        AddWorldModel(
+          "TinyBronco", "dva.mesh",
+          Ogre::Vector3(42.0f, 0.0f, 37.37f),
+          space * 0.15f, Ogre::Quaternion::IDENTITY, 0.75f, true
+        );
+        highwind_entity_ = static_cast<EntityModel*>(
+          EntityManager::getSingleton().GetEntity("WorldMapHighwind")
+        );
+        buggy_entity_ = static_cast<EntityModel*>(
+          EntityManager::getSingleton().GetEntity("WorldMapBuggy")
+        );
+        chocobo_entity_ = static_cast<EntityModel*>(
+          EntityManager::getSingleton().GetEntity("WorldMapChocobo")
+        );
+        submarine_entity_ = static_cast<EntityModel*>(
+          EntityManager::getSingleton().GetEntity("WorldMapSubmarine")
+        );
+    }
+
+    bool WorldmapModule::FindWalkableSurface(
+      const Ogre::Vector3& position, Ogre::Vector3& surface, bool grass_only,
+      bool require_foot_walkable
+    ) const{
+        bool found = false;
+        Ogre::Real closest_height_distance = std::numeric_limits<Ogre::Real>::max();
+        for (const TerrainTriangle& triangle : terrain_triangles_){
+            if (grass_only
+              && triangle.walkability_type != VGears::WorldmapFileSerializer::GRASS){
+                continue;
+            }
+            const Ogre::Vector3& a = triangle.vertices[0];
+            const Ogre::Vector3& b = triangle.vertices[1];
+            const Ogre::Vector3& c = triangle.vertices[2];
+            const Ogre::Real denominator
+              = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+            if (Ogre::Math::Abs(denominator) < 1e-6f) continue;
+
+            const Ogre::Real weight_a
+              = ((b.z - c.z) * (position.x - c.x)
+                + (c.x - b.x) * (position.z - c.z)) / denominator;
+            const Ogre::Real weight_b
+              = ((c.z - a.z) * (position.x - c.x)
+                + (a.x - c.x) * (position.z - c.z)) / denominator;
+            const Ogre::Real weight_c = 1.0f - weight_a - weight_b;
+            if (weight_a < -1e-4f || weight_b < -1e-4f || weight_c < -1e-4f){
+                continue;
+            }
+
+            const Ogre::Real height
+              = weight_a * a.y + weight_b * b.y + weight_c * c.y;
+            const Ogre::Real height_distance = Ogre::Math::Abs(height - position.y);
+            if (height_distance >= closest_height_distance) continue;
+            closest_height_distance = height_distance;
+            found = !require_foot_walkable
+              || IsFootWalkable(triangle.walkability_type);
+            surface = Ogre::Vector3(position.x, height, position.z);
+        }
+        return found;
+    }
+
+    WorldmapModule::VehicleType WorldmapModule::GetCurrentVehicle() const{
+      return current_vehicle_;
+    }
+
+    bool WorldmapModule::frameStarted(const Ogre::FrameEvent& event){
+      if (!initialized_ || player_entity_ == nullptr) return true;
+
+        ::Entity* active_entity = EntityManager::getSingleton().ScriptGetPlayerEntity();
+      if (active_entity == player_entity_){
+        current_vehicle_ = VehicleType::ON_FOOT;
+      }
+      else if (active_entity == chocobo_entity_){
+        current_vehicle_ = VehicleType::CHOCOBO;
+      }
+      else if (active_entity == buggy_entity_){
+        current_vehicle_ = VehicleType::BUGGY;
+      }
+      else if (active_entity == highwind_entity_){
+        current_vehicle_ = VehicleType::HIGHWIND;
+      }
+      else if (active_entity == submarine_entity_){
+        current_vehicle_ = VehicleType::SUBMARINE;
+      }
+      else{
+        return true;
+      }
+
+        const bool highwind_active = active_entity == highwind_entity_;
+      const bool vehicle_active = current_vehicle_ != VehicleType::ON_FOOT;
+      EntityModel* active_model = active_entity == player_entity_ ? player_entity_
+        : (current_vehicle_ == VehicleType::CHOCOBO ? chocobo_entity_
+        : (current_vehicle_ == VehicleType::BUGGY ? buggy_entity_
+          : (highwind_active ? highwind_entity_ : submarine_entity_)));
+
+        Ogre::Vector3 movement = Ogre::Vector3::ZERO;
+        if (InputManager::getSingleton().IsButtonPressed(OIS::KC_LEFT)) movement.x -= 1.0f;
+        if (InputManager::getSingleton().IsButtonPressed(OIS::KC_RIGHT)) movement.x += 1.0f;
+        if (InputManager::getSingleton().IsButtonPressed(OIS::KC_UP)) movement.z -= 1.0f;
+        if (InputManager::getSingleton().IsButtonPressed(OIS::KC_DOWN)) movement.z += 1.0f;
+        bool is_walking = false;
+        if (!movement.isZeroLength()){
+          movement.normalise();
+            const Ogre::Vector3 current_position = active_entity->GetPosition();
+          const Ogre::Real speed = From16BitFixedPoint(8182) * 0.45f
+            * (vehicle_active ? 2.0f : 1.0f);
+          Ogre::Vector3 requested_position = current_position
+            + movement * speed * event.timeSinceLastFrame;
+          Ogre::Vector3 surface;
+          if (FindWalkableSurface(requested_position, surface, false, !highwind_active)){
+                if (highwind_active){
+                    Ogre::Vector3 current_surface;
+                    if (FindWalkableSurface(current_position, current_surface, false, false)){
+                        surface.y += current_position.y - current_surface.y;
+                    }
+                }
+                else if (active_entity == player_entity_){
+                  surface.y += player_height_offset_;
+                }
+                if (!EntityManager::getSingleton().IsWorldPositionBlocked(
+                  active_entity, surface
+                )){
+                    active_entity->SetPosition(surface);
+                    const Ogre::Vector3 model_forward(0.0f, 0.0f, 1.0f);
+                    const Ogre::Vector3 move_direction(movement.x, 0.0f, movement.z);
+                    const Ogre::Quaternion heading
+                      = model_forward.getRotationTo(move_direction, Ogre::Vector3::UNIT_Y);
+                    active_model->GetModel()->getParentSceneNode()
+                      ->getParentSceneNode()->setOrientation(heading);
+                    is_walking = true;
+                }
+          }
+        }
+
+        if (!vehicle_active){
+            player_entity_->PlayAnimationContinue(is_walking ? "Walk" : "Idle");
+        }
+
+        UpdateCamera(event.timeSinceLastFrame, false);
+        return true;
+    }
+
+      void WorldmapModule::UpdateCamera(Ogre::Real delta_time, bool snap_to_player){
+        ::Entity* active_entity = EntityManager::getSingleton().ScriptGetPlayerEntity();
+        if (active_entity == nullptr) return;
+        const Ogre::Vector3 target
+          = active_entity->GetPosition() + Ogre::Vector3(0, active_entity->GetHeight() * 0.5f, 0);
+        const Ogre::Vector3 camera_offset(0.0f, 1.5f, 2.25f);
+        Ogre::Camera* camera = CameraManager::getSingleton().GetCurrentCamera();
+        const Ogre::Vector3 desired_position = target + camera_offset;
+        if (snap_to_player){
+          camera->setPosition(desired_position);
+        }
+        else{
+          const Ogre::Real follow_amount = std::min(1.0f, delta_time * 8.0f);
+          camera->setPosition(
+            camera->getPosition()
+            + (desired_position - camera->getPosition()) * follow_amount
+          );
+        }
+        camera->lookAt(target);
+      }
+
     void WorldmapModule::Init(){
+        if (initialized_) return;
+      EntityManager::getSingleton().SetWorldModule(); // Ensure the world module is set
         CreateWorldMap(Root::getSingleton().getSceneManager("Scene"));
+        CreatePlayer();
+        initialized_ = true;
+        Root::getSingleton().addFrameListener(this);
     }
 
 } // namespace VGears
