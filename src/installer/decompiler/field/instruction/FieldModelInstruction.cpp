@@ -18,11 +18,26 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <boost/format.hpp>
 #include "decompiler/field/instruction/FieldModelInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
+
+static bool TryParseFloat(const std::string& value, float& parsed_value){
+  size_t parsed_length = 0;
+  try{
+    parsed_value = std::stof(value, &parsed_length);
+    return parsed_length == value.size();
+  }
+  catch (const std::invalid_argument&){
+    return false;
+  }
+  catch (const std::out_of_range&){
+    return false;
+  }
+}
 
 void FieldModelInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
@@ -153,6 +168,18 @@ void FieldModelInstruction::ProcessJOIN(CodeGenerator* code_gen){
 }
 
 void FieldModelInstruction::ProcessSPLIT(CodeGenerator* code_gen){
+  const std::vector<ValuePtr> parameters = GetParams();
+  if (parameters.size() != 13){
+    code_gen->WriteTodo("FieldModelInstruction", "SPLIT with malformed parameters");
+    return;
+  }
+  for (const ValuePtr& parameter : parameters){
+    if (parameter == nullptr || !parameter->IsInteger()){
+      code_gen->WriteTodo("FieldModelInstruction", "SPLIT with invalid parameter");
+      return;
+    }
+  }
+
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     const auto& ax = FieldCodeGenerator::FormatValueOrVariable(
@@ -434,14 +461,18 @@ void FieldModelInstruction::ProcessCC(CodeGenerator* code_gen, const FieldEngine
 void FieldModelInstruction::ProcessJUMP(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    float x = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    const std::string x_value = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned(),
       FieldCodeGenerator::ValueType::Float, scale
-    ));
-    float y = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    );
+    const std::string y_value = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetSigned(),
       FieldCodeGenerator::ValueType::Float, scale
-    ));
+    );
+    float x = 0;
+    float y = 0;
+    const bool literal_coordinates
+      = TryParseFloat(x_value, x) && TryParseFloat(y_value, y);
     int i = atoi(FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[2]->GetUnsigned(), params_[6]->GetSigned()
     ).c_str());
@@ -456,10 +487,18 @@ void FieldModelInstruction::ProcessJUMP(CodeGenerator* code_gen, const std::stri
     if (steps > 5) steps = 5;
     // TODO: Z hardcoded as -1, handled in Entity::ScriptJumpToPosition.
     // TODO: Hardcoded 0.5 in seconds. Calculate using distance.
-    code_gen->AddOutputLine((
-      boost::format("self.%1%:jump_to_position(%2%, %3%, -1, 0.5, %4%) -- %5% steps.")
-      % entity % x % y % i % steps
-    ).str());
+    if (literal_coordinates){
+        code_gen->AddOutputLine((
+          boost::format("self.%1%:jump_to_position(%2%, %3%, -1, 0.5, %4%) -- %5% steps.")
+          % entity % x % y % i % steps
+        ).str());
+    }
+    else{
+        code_gen->AddOutputLine(
+          "self." + entity + ":jump_to_position(" + x_value + ", " + y_value
+            + ", -1, 0.5, " + std::to_string(i) + ")"
+        );
+    }
     code_gen->AddOutputLine((boost::format("self.%1%:jump_sync()") % entity).str());
 }
 
@@ -516,14 +555,22 @@ void FieldModelInstruction::ProcessSLIDR(CodeGenerator* code_gen, const std::str
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     // The documentation says the value should be in param_[1], but it's actually on param_[2]
-    float radius = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    const std::string radius_value = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned(),
       FieldCodeGenerator::ValueType::Float, scale
-    ));
-    code_gen->AddOutputLine((
-      boost::format("self.%1%:set_solid_radius(%2%)")
-      % entity % radius
-    ).str());
+    );
+    float radius = 0;
+    if (TryParseFloat(radius_value, radius)){
+        code_gen->AddOutputLine((
+          boost::format("self.%1%:set_solid_radius(%2%)")
+          % entity % radius
+        ).str());
+    }
+    else{
+        code_gen->AddOutputLine(
+          "self." + entity + ":set_solid_radius(" + radius_value + ")"
+        );
+    }
 }
 
 void FieldModelInstruction::ProcessSOLID(CodeGenerator* code_gen, const std::string& entity){
@@ -536,26 +583,41 @@ void FieldModelInstruction::ProcessSOLID(CodeGenerator* code_gen, const std::str
 void FieldModelInstruction::ProcessOFST(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    float x = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    const std::string x_value = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[5]->GetSigned(),
       FieldCodeGenerator::ValueType::Float, scale
-    ));
-    float y = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    );
+    const std::string y_value = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(),params_[6]->GetSigned(),
       FieldCodeGenerator::ValueType::Float, scale
-    ));
-    float z = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    );
+    const std::string z_value = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[2]->GetUnsigned(), params_[7]->GetSigned(),
       FieldCodeGenerator::ValueType::Float, scale
-    ));
-    float speed = std::stof(FieldCodeGenerator::FormatValueOrVariable(
+    );
+    const std::string speed_value = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[3]->GetUnsigned(), params_[8]->GetUnsigned()
-    ));
-    // Speed needs to be scaled down by the frame rate.
-    speed /= 30.0f;
-    code_gen->AddOutputLine((
-      boost::format("self.%1%:offset_to_position(%2%, %3%, %4%, %5%, %6%)")
-      % entity % x % y % z
-      % (params_[4]->GetUnsigned() ? "Entity.SMOOTH" : "Entity.LINEAR")% speed
-    ).str());
+    );
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    float speed = 0;
+    const bool literal_values
+      = TryParseFloat(x_value, x) && TryParseFloat(y_value, y)
+        && TryParseFloat(z_value, z) && TryParseFloat(speed_value, speed);
+    const std::string move_type
+      = params_[4]->GetUnsigned() ? "Entity.SMOOTH" : "Entity.LINEAR";
+    if (literal_values){
+        speed /= 30.0f;
+        code_gen->AddOutputLine((
+          boost::format("self.%1%:offset_to_position(%2%, %3%, %4%, %5%, %6%)")
+          % entity % x % y % z % move_type % speed
+        ).str());
+    }
+    else{
+        code_gen->AddOutputLine(
+          "self." + entity + ":offset_to_position(" + x_value + ", " + y_value
+            + ", " + z_value + ", " + move_type + ", (" + speed_value + ") / 30.0)"
+        );
+    }
 }

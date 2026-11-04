@@ -43,6 +43,8 @@
 #include "core/InputManager.h"
 #include "core/EntityManager.h"
 #include "core/EntityModel.h"
+#include "core/DialogsManager.h"
+#include "core/ScriptManager.h"
 #include "data/worldmap/WorldmapFile.h"
 #include "data/worldmap/WorldmapFileManager.h"
 #include "data/worldmap/WorldmapFileSerializer.h"
@@ -412,6 +414,52 @@ namespace VGears {
       }
     }
 
+    static const std::map<Ogre::String, uint8>& GetWorldMapTerrainTypes(){
+      using WalkType = VGears::WorldmapFileSerializer::TriangleWalkMapTypes;
+      static const std::map<Ogre::String, uint8> terrain_types = {
+        {"GRASS", static_cast<uint8>(WalkType::GRASS)},
+        {"FOREST", static_cast<uint8>(WalkType::FOREST)},
+        {"MOUNTAIN", static_cast<uint8>(WalkType::MOUNTAIN)},
+        {"SEA_DEEP_WATER", static_cast<uint8>(WalkType::SEA_DEEP_WATER)},
+        {"RIVER_CROSSING", static_cast<uint8>(WalkType::RIVER_CROSSING)},
+        {"RIVER", static_cast<uint8>(WalkType::RIVER)},
+        {"WATER", static_cast<uint8>(WalkType::WATER)},
+        {"SWAMP", static_cast<uint8>(WalkType::SWAMP)},
+        {"DESERT", static_cast<uint8>(WalkType::DESERT)},
+        {"WASTELAND", static_cast<uint8>(WalkType::WASTELAND)},
+        {"SNOW", static_cast<uint8>(WalkType::SNOW)},
+        {"RIVERSIDE", static_cast<uint8>(WalkType::RIVERSIDE)},
+        {"CLIFF", static_cast<uint8>(WalkType::CLIFF)},
+        {"COREL_BRIDGE", static_cast<uint8>(WalkType::COREL_BRIDGE)},
+        {"WUTAI_BRIDGE", static_cast<uint8>(WalkType::WUTAI_BRIDGE)},
+        {"UNUSED_1", static_cast<uint8>(WalkType::UNUSED_1)},
+        {"HILL_SIDE", static_cast<uint8>(WalkType::HILL_SIDE)},
+        {"BEACH", static_cast<uint8>(WalkType::BEACH)},
+        {"SUBMARINE_PEN", static_cast<uint8>(WalkType::SUBMARINE_PEN)},
+        {"CANYON", static_cast<uint8>(WalkType::CANYON)},
+        {"MOUNTAIN_PASS", static_cast<uint8>(WalkType::MOUNTAIN_PASS)},
+        {"UNKNOWN_1", static_cast<uint8>(WalkType::UNKNOWN_1)},
+        {"WATERFALL", static_cast<uint8>(WalkType::WATERFALL)},
+        {"UNUSED_2", static_cast<uint8>(WalkType::UNUSED_2)},
+        {"GOLD_SAUCER_DESERT", static_cast<uint8>(WalkType::GOLD_SAUCER_DESERT)},
+        {"JUNGLE", static_cast<uint8>(WalkType::JUNGLE)},
+        {"SEA", static_cast<uint8>(WalkType::SEA)},
+        {"NORTHERND_CAVE", static_cast<uint8>(WalkType::NORTHERND_CAVE)},
+        {"GOLD_SAUCER_DESERT_BORDER", static_cast<uint8>(WalkType::GOLD_SAUCER_DESERT_BORDER)},
+        {"BRIDGE_HEAD", static_cast<uint8>(WalkType::BRIDGE_HEAD)},
+        {"BACK_ENTRANCE", static_cast<uint8>(WalkType::BACK_ENTRANCE)},
+        {"UNUSED_3", static_cast<uint8>(WalkType::UNUSED_3)}
+      };
+      return terrain_types;
+    }
+
+      static Ogre::String GetWorldMapTerrainName(const uint8 walkability_type){
+        for (const auto& terrain : GetWorldMapTerrainTypes()){
+          if (terrain.second == walkability_type) return terrain.first;
+        }
+        return "";
+      }
+
     /**
      * Loads and parses the installed WM0 map.
      *
@@ -540,13 +588,18 @@ namespace VGears {
       buggy_entity_(nullptr),
       chocobo_entity_(nullptr),
       submarine_entity_(nullptr),
+      tiny_bronco_entity_(nullptr),
       current_vehicle_(VehicleType::ON_FOOT),
       player_height_offset_(0),
-      initialized_(false)
+      active_function_mesh_index_(-1),
+      active_function_id_(-1),
+      initialized_(false),
+      frame_listener_attached_(false),
+      cancel_was_pressed_(false)
     {}
 
     WorldmapModule::~WorldmapModule(){
-      if (initialized_) Root::getSingleton().removeFrameListener(this);
+      if (frame_listener_attached_) Root::getSingleton().removeFrameListener(this);
       if (scene_manager_ != nullptr && world_map_node_ != nullptr){
         scene_manager_->getRootSceneNode()->removeAndDestroyChild("WorldMapTerrain");
       }
@@ -602,6 +655,9 @@ namespace VGears {
                       From16BitFixedPoint(vertex_2.z) + pos_z
                     );
                     terrain_triangle.walkability_type = triangle.walkability_info_;
+                    terrain_triangle.function_id = triangle.function_id;
+                    terrain_triangle.mesh_x = static_cast<int>(map_x * 4 + mesh_x);
+                    terrain_triangle.mesh_y = static_cast<int>(map_y * 4 + mesh_y);
                     terrain_triangles_.push_back(terrain_triangle);
 
                     if (unavailable_texture_ids.find(triangle.TextureInfo)
@@ -864,15 +920,19 @@ namespace VGears {
         submarine_entity_ = static_cast<EntityModel*>(
           EntityManager::getSingleton().GetEntity("WorldMapSubmarine")
         );
+        tiny_bronco_entity_ = static_cast<EntityModel*>(
+          EntityManager::getSingleton().GetEntity("WorldMapTinyBronco")
+        );
     }
 
     bool WorldmapModule::FindWalkableSurface(
       const Ogre::Vector3& position, Ogre::Vector3& surface, bool grass_only,
-      bool require_foot_walkable
+      bool require_walkable, uint8* walkability_type, size_t* triangle_index
     ) const{
         bool found = false;
         Ogre::Real closest_height_distance = std::numeric_limits<Ogre::Real>::max();
-        for (const TerrainTriangle& triangle : terrain_triangles_){
+        for (size_t i = 0; i < terrain_triangles_.size(); ++i){
+            const TerrainTriangle& triangle = terrain_triangles_[i];
             if (grass_only
               && triangle.walkability_type != VGears::WorldmapFileSerializer::GRASS){
                 continue;
@@ -900,9 +960,10 @@ namespace VGears {
             const Ogre::Real height_distance = Ogre::Math::Abs(height - position.y);
             if (height_distance >= closest_height_distance) continue;
             closest_height_distance = height_distance;
-            found = !require_foot_walkable
-              || IsFootWalkable(triangle.walkability_type);
+            found = !require_walkable || IsActiveTerrainAllowed(triangle.walkability_type);
             surface = Ogre::Vector3(position.x, height, position.z);
+            if (walkability_type != nullptr) *walkability_type = triangle.walkability_type;
+            if (triangle_index != nullptr) *triangle_index = i;
         }
         return found;
     }
@@ -910,6 +971,125 @@ namespace VGears {
     WorldmapModule::VehicleType WorldmapModule::GetCurrentVehicle() const{
       return current_vehicle_;
     }
+
+    void WorldmapModule::ClearVehicleTerrains(){
+        active_vehicle_terrain_types_.clear();
+    }
+
+    void WorldmapModule::AddVehicleTerrain(const char* terrain_name){
+        if (terrain_name == nullptr) return;
+        const auto terrain = GetWorldMapTerrainTypes().find(terrain_name);
+        if (terrain == GetWorldMapTerrainTypes().end()){
+            LogManager::getSingleton().logMessage(
+              "Unknown world-map vehicle terrain '" + Ogre::String(terrain_name) + "'."
+            );
+            return;
+        }
+        if (std::find(
+              active_vehicle_terrain_types_.begin(), active_vehicle_terrain_types_.end(),
+              terrain->second
+            ) == active_vehicle_terrain_types_.end()){
+            active_vehicle_terrain_types_.push_back(terrain->second);
+        }
+    }
+
+    bool WorldmapModule::IsActiveTerrainAllowed(uint8 walkability_type) const{
+        if (current_vehicle_ == VehicleType::ON_FOOT){
+            return IsFootWalkable(walkability_type);
+        }
+        return std::find(
+          active_vehicle_terrain_types_.begin(), active_vehicle_terrain_types_.end(),
+          walkability_type
+        ) != active_vehicle_terrain_types_.end();
+    }
+
+    void WorldmapModule::TriggerTriangleFunction(const TerrainTriangle& triangle){
+        ScriptEntity* world_map_script
+          = ScriptManager::getSingleton().GetScriptEntityByName(
+              ScriptManager::SYSTEM, "WorldMap"
+            );
+        if (world_map_script == nullptr) return;
+
+        const int mesh_index = triangle.mesh_y * 36 + triangle.mesh_x;
+        ScriptManager::getSingleton().ScriptRequest(
+          world_map_script, "on_triangle_enter", 1,
+          std::to_string(mesh_index), std::to_string(triangle.function_id - 3), false, false
+        );
+    }
+
+      Ogre::String WorldmapModule::GetTerrainTypeUnderEntity(const char* entity_name) const{
+        if (entity_name == nullptr) return "";
+        const ::Entity* entity = EntityManager::getSingleton().GetEntity(entity_name);
+        if (entity == nullptr) return "";
+
+        Ogre::Vector3 surface;
+        uint8 walkability_type = 0;
+        if (!FindWalkableSurface(entity->GetPosition(), surface, false, false, &walkability_type)){
+          return "";
+        }
+        return GetWorldMapTerrainName(walkability_type);
+      }
+
+      int WorldmapModule::GetTerrainTriangleUnderEntity(const char* entity_name) const{
+        if (entity_name == nullptr) return -1;
+        const ::Entity* entity = EntityManager::getSingleton().GetEntity(entity_name);
+        if (entity == nullptr) return -1;
+
+        Ogre::Vector3 surface;
+        size_t triangle_index = 0;
+        if (!FindWalkableSurface(entity->GetPosition(), surface, false, false, nullptr, &triangle_index)){
+          return -1;
+        }
+        return static_cast<int>(triangle_index);
+      }
+
+      bool WorldmapModule::UnboardVehicle(const char* vehicle_name){
+        if (vehicle_name == nullptr) return false;
+
+        EntityManager& entity_manager = EntityManager::getSingleton();
+        ::Entity* player_entity = entity_manager.ScriptGetPlayerEntity();
+        ::Entity* vehicle_entity = entity_manager.GetEntity(vehicle_name);
+        if (
+          player_entity == nullptr || vehicle_entity == nullptr
+          || player_entity != vehicle_entity || player_entity == player_entity_
+        ){
+          return false;
+        }
+
+        const Ogre::Vector3 vehicle_position = vehicle_entity->GetPosition();
+        const Ogre::Real unboard_distance
+          = vehicle_entity->GetSolidRadius() + player_entity_->GetSolidRadius() + 0.1f;
+        const Ogre::Real diagonal_distance = unboard_distance * 0.70710678f;
+        const Ogre::Vector3 directions[] = {
+          Ogre::Vector3(1, 0, 0), Ogre::Vector3(-1, 0, 0),
+          Ogre::Vector3(0, 0, 1), Ogre::Vector3(0, 0, -1),
+          Ogre::Vector3(1, 0, 1), Ogre::Vector3(-1, 0, 1),
+          Ogre::Vector3(1, 0, -1), Ogre::Vector3(-1, 0, -1)
+        };
+
+        for (size_t i = 0; i < sizeof(directions) / sizeof(directions[0]); ++i){
+          const Ogre::Real distance = i < 4 ? unboard_distance : diagonal_distance;
+          const Ogre::Vector3 requested_position
+            = vehicle_position + directions[i] * distance;
+          Ogre::Vector3 surface;
+          uint8 walkability_type = 0;
+          if (!FindWalkableSurface(
+              requested_position, surface, false, false, &walkability_type
+            ) || !IsFootWalkable(walkability_type)){
+            continue;
+          }
+          surface.y += player_height_offset_;
+          if (entity_manager.IsWorldPositionBlocked(player_entity_, surface)) continue;
+
+          player_entity_->SetPosition(surface);
+          vehicle_entity->SetTalkable(true);
+          entity_manager.ScriptSetPlayerEntity("WorldMapCloud");
+          ClearVehicleTerrains();
+          current_vehicle_ = VehicleType::ON_FOOT;
+          return true;
+        }
+        return false;
+      }
 
     bool WorldmapModule::frameStarted(const Ogre::FrameEvent& event){
       if (!initialized_ || player_entity_ == nullptr) return true;
@@ -930,16 +1110,29 @@ namespace VGears {
       else if (active_entity == submarine_entity_){
         current_vehicle_ = VehicleType::SUBMARINE;
       }
+      else if (active_entity == tiny_bronco_entity_){
+        current_vehicle_ = VehicleType::TINY_BRONCO;
+      }
       else{
         return true;
       }
 
         const bool highwind_active = active_entity == highwind_entity_;
       const bool vehicle_active = current_vehicle_ != VehicleType::ON_FOOT;
+        const bool cancel_pressed
+          = InputManager::getSingleton().IsButtonPressed(OIS::KC_ESCAPE);
+        if (vehicle_active && cancel_pressed && !cancel_was_pressed_){
+            ScriptManager::getSingleton().ScriptRequest(
+              ScriptManager::ENTITY, active_entity->GetName().c_str(), "unboard", 0
+            );
+        }
+        cancel_was_pressed_ = cancel_pressed;
       EntityModel* active_model = active_entity == player_entity_ ? player_entity_
         : (current_vehicle_ == VehicleType::CHOCOBO ? chocobo_entity_
         : (current_vehicle_ == VehicleType::BUGGY ? buggy_entity_
-          : (highwind_active ? highwind_entity_ : submarine_entity_)));
+          : (highwind_active ? highwind_entity_
+            : (current_vehicle_ == VehicleType::SUBMARINE
+              ? submarine_entity_ : tiny_bronco_entity_))));
 
         Ogre::Vector3 movement = Ogre::Vector3::ZERO;
         if (InputManager::getSingleton().IsButtonPressed(OIS::KC_LEFT)) movement.x -= 1.0f;
@@ -955,7 +1148,9 @@ namespace VGears {
           Ogre::Vector3 requested_position = current_position
             + movement * speed * event.timeSinceLastFrame;
           Ogre::Vector3 surface;
-          if (FindWalkableSurface(requested_position, surface, false, !highwind_active)){
+          size_t triangle_index = 0;
+          if (FindWalkableSurface(requested_position, surface, false, true, nullptr,
+              &triangle_index)){
                 if (highwind_active){
                     Ogre::Vector3 current_surface;
                     if (FindWalkableSurface(current_position, current_surface, false, false)){
@@ -969,6 +1164,20 @@ namespace VGears {
                   active_entity, surface
                 )){
                     active_entity->SetPosition(surface);
+                    const TerrainTriangle& triangle = terrain_triangles_[triangle_index];
+                    const int mesh_index = triangle.mesh_y * 36 + triangle.mesh_x;
+                    if (triangle.function_id >= 3){
+                        if (mesh_index != active_function_mesh_index_
+                          || triangle.function_id != active_function_id_){
+                            TriggerTriangleFunction(triangle);
+                        }
+                        active_function_mesh_index_ = mesh_index;
+                        active_function_id_ = triangle.function_id;
+                    }
+                    else{
+                        active_function_mesh_index_ = -1;
+                        active_function_id_ = -1;
+                    }
                     const Ogre::Vector3 model_forward(0.0f, 0.0f, 1.0f);
                     const Ogre::Vector3 move_direction(movement.x, 0.0f, movement.z);
                     const Ogre::Quaternion heading
@@ -1010,12 +1219,46 @@ namespace VGears {
       }
 
     void WorldmapModule::Init(){
-        if (initialized_) return;
-      EntityManager::getSingleton().SetWorldModule(); // Ensure the world module is set
+      if (initialized_){
+        if (frame_listener_attached_) return;
+        EntityManager::getSingleton().SetWorldModule();
+        DialogsManager::getSingleton().SetWorldModule();
+        world_map_node_->setVisible(true);
+        CreatePlayer();
+        Root::getSingleton().addFrameListener(this);
+        frame_listener_attached_ = true;
+        return;
+      }
+      EntityManager::getSingleton().SetWorldModule();
+        DialogsManager::getSingleton().SetWorldModule();
         CreateWorldMap(Root::getSingleton().getSceneManager("Scene"));
+        if (ResourceGroupManager::getSingleton().resourceExists(
+              "SCRIPTS", "worldmap/wm0.lua"
+            )){
+            ScriptManager::getSingleton().RunFile("scripts/worldmap/wm0.lua");
+        }
         CreatePlayer();
         initialized_ = true;
         Root::getSingleton().addFrameListener(this);
+      frame_listener_attached_ = true;
+    }
+
+    void WorldmapModule::Suspend(){
+      if (!frame_listener_attached_) return;
+      Root::getSingleton().removeFrameListener(this);
+      frame_listener_attached_ = false;
+      if (world_map_node_ != nullptr) world_map_node_->setVisible(false);
+      player_entity_ = nullptr;
+      highwind_entity_ = nullptr;
+      buggy_entity_ = nullptr;
+      chocobo_entity_ = nullptr;
+      submarine_entity_ = nullptr;
+      tiny_bronco_entity_ = nullptr;
+      current_vehicle_ = VehicleType::ON_FOOT;
+      active_vehicle_terrain_types_.clear();
+      active_function_mesh_index_ = -1;
+      active_function_id_ = -1;
+      cancel_was_pressed_ = false;
     }
 
 } // namespace VGears

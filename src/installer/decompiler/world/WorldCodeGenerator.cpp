@@ -20,8 +20,13 @@ WorldCodeGenerator::WorldCodeGenerator(Engine *engine, std::ostream &output)
 : CodeGenerator(engine, output, FIFO_ARGUMENT_ORDER, LIFO_ARGUMENT_ORDER){}
 
 std::string WorldCodeGenerator::ConstructFuncSignature(const Function& function){
-    // TODO: Implement.
-    return function.name + " = function(self)";
+    return "System.WorldMap." + function.name + " = function(self)";
+}
+
+bool WorldCodeGenerator::OutputOnlyRequiredLabels() const{return true;}
+
+void WorldCodeGenerator::OnEndFunction(const Function&){
+    AddOutputLine("end", true, false);
 }
 
 const InstPtr WorldCodeGenerator::FindFirstCall(){

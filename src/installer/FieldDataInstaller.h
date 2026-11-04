@@ -314,6 +314,10 @@ class FieldDataInstaller{
          */
         ~FieldDataInstaller();
 
+        const MapList& GetMapList() const{return map_list_;}
+        const FieldScaleFactorMap& GetFieldScaleFactors() const{return scale_factors_;}
+        const MapList& GetConvertedMapList() const{return converted_map_list_;}
+
         /**
          * Initializer for {@see CollectionFieldSpawnAndScaleFactors}.
          *
@@ -475,7 +479,7 @@ class FieldDataInstaller{
          * @param[out] spawn_points Spawn points will be added sequentially to
          * the end of this map.
          */
-        static void CollectSpawnPoints(
+        static bool CollectSpawnPoints(
           VGears::FLevelFilePtr& field, const std::vector<std::string>& field_id_to_name_lookup,
           FieldSpawnPointsMap& spawn_points
         );
@@ -596,6 +600,8 @@ class FieldDataInstaller{
          * The list of maps.
          */
         std::vector<std::string> map_list_;
+
+        std::vector<std::string> failed_fields_;
 
         /**
          * Map of the collected spawn points.

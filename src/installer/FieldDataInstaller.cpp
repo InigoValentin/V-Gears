@@ -14,6 +14,7 @@
  */
 
 #include <string>
+#include <algorithm>
 #include <boost/filesystem.hpp>
 #include <QtCore/QDir>
 #include "DiskImage.h"
@@ -156,7 +157,7 @@ void FieldDataInstaller::CollectFieldScaleFactors(
       = FieldDecompiler::ScaleFactor(field->GetRawScript());
 }
 
-void FieldDataInstaller::CollectSpawnPoints(
+bool FieldDataInstaller::CollectSpawnPoints(
   VGears::FLevelFilePtr& field, const std::vector<std::string>& field_id_to_name_lookup,
   FieldSpawnPointsMap& spawn_points
 ){
@@ -176,9 +177,15 @@ void FieldDataInstaller::CollectSpawnPoints(
         );
     }
     catch (const ::DecompilerException& ex){
-        std::cerr << "CollectSpawnPoints: DecompilerException: " << ex.what() << std::endl;
+        std::cerr << "CollectSpawnPoints: decompiler failed for " << field->getName()
+          << ": " << ex.what() << std::endl;
+                return false;
     }
     const VGears::TriggersFilePtr& triggers = field->GetTriggers();
+    if (triggers.isNull()){
+        std::cerr << "CollectSpawnPoints: missing trigger data for " << field->getName() << std::endl;
+        return false;
+    }
     const auto& gateways = triggers->GetGateways();
     for (size_t i = 0; i < gateways.size(); i ++){
         const VGears::TriggersFile::Gateway& gateway = gateways[i];
@@ -206,6 +213,7 @@ void FieldDataInstaller::CollectSpawnPoints(
             }
         }
     }
+    return true;
 }
 
 FieldDataInstaller::FieldDataInstaller(const DiskImage& disk_image, const std::string output_dir):
@@ -235,13 +243,21 @@ void FieldDataInstaller::CollectSpawnAndScaleFactors(int field_index){
     }
     auto resource_name = (*flevel_file_list_)[field_index];
     // Exclude things that are not fields.
-    //if (IsAFieldFile(resource_name) && !WillCrash(resource_name)){
-    // TODO: DEBUG: Only testing fields.
-    if (IsAFieldFile(resource_name) && IsTestField(resource_name) && !WillCrash(resource_name)){
-        VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton().load(resource_name, "FFVIIFields")
-          .staticCast<VGears::FLevelFile>();
-        CollectSpawnPoints(field, map_list_, spawn_points_);
-        CollectFieldScaleFactors(field, scale_factors_, map_list_);
+    if (IsAFieldFile(resource_name) && !WillCrash(resource_name)){
+                try{
+                        VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton()
+                            .load(resource_name, "FFVIIFields").staticCast<VGears::FLevelFile>();
+                        if (!CollectSpawnPoints(field, map_list_, spawn_points_)){
+                                failed_fields_.push_back(resource_name);
+                                return;
+                        }
+                        CollectFieldScaleFactors(field, scale_factors_, map_list_);
+                }
+                catch (const std::exception& exception){
+                        failed_fields_.push_back(resource_name);
+                        std::cerr << "CollectSpawnAndScaleFactors: skipped " << resource_name
+                            << " after error: " << exception.what() << std::endl;
+                }
     }
 }
 
@@ -254,9 +270,12 @@ void FieldDataInstaller::Convert(int field_index){
     auto resource_name = (*flevel_file_list_)[field_index];
     // Exclude things that are not fields.
     if (IsAFieldFile(resource_name)){
-        //if (/*IsTestField(resource_name) &&*/ !WillCrash(resource_name)){
-        // TODO: DEBUG: Only test fields
-        if (IsTestField(resource_name) && !WillCrash(resource_name)){
+                if (std::find(failed_fields_.begin(), failed_fields_.end(), resource_name)
+                    != failed_fields_.end()){
+                        std::cerr << "[ERROR] Skip field: " << resource_name
+                            << " because its scripts or scale factor could not be collected." << std::endl;
+                }
+                else if (!WillCrash(resource_name)){
             //write_output_line_("Converting field " + resource_name);
             CreateDir(FIELD_MAPS_DIR + "/" + resource_name);
             VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton()
@@ -264,8 +283,8 @@ void FieldDataInstaller::Convert(int field_index){
             PcFieldToVGearsField(field);
         }
         else{
-            //write_output_line_("[ERROR] Skip field " + resource_name + " due to crash or hang issue.");
-            std::cerr << "[ERROR] Skip field: " << resource_name << " due to crash or hang issue." << std::endl;
+                        std::cerr << "[ERROR] Skip field: " << resource_name
+                            << " due to a known crash or hang issue." << std::endl;
         }
     }
 }
@@ -630,7 +649,8 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
         for (FieldDecompiler::FieldEntity entity : decompiled.entities){
             // If the entity has been added as a line, skip.
             if (line_entities.size() > 0){
-                if (*std::find(line_entities.begin(), line_entities.end(), entity.name) == entity.name) continue;
+                                if (std::find(line_entities.begin(), line_entities.end(), entity.name)
+                                    != line_entities.end()) continue;
             }
             const int char_id = entity.char_id;
             if (char_id != -1){

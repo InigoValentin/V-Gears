@@ -14,6 +14,7 @@
  */
 
 #include <boost/format.hpp>
+#include <stdexcept>
 #include "decompiler/world/WorldDisassembler.h"
 #include "decompiler/world/WorldEngine.h"
 #include "decompiler/world/instruction/WorldBinaryEqualStackInstruction.h"
@@ -27,8 +28,8 @@
 #include "decompiler/world/instruction/WorldSubStackInstruction.h"
 #include "decompiler/world/instruction/WorldUncondJumpInstruction.h"
 
-WorldDisassembler::WorldDisassembler(WorldEngine*, InstVec &insts, int script_number):
-  Disassembler(insts), script_number_(script_number){}
+WorldDisassembler::WorldDisassembler(WorldEngine* engine, InstVec &insts, int script_number):
+    Disassembler(insts), engine_(engine), script_number_(script_number){}
 
 WorldDisassembler::~WorldDisassembler(){}
 
@@ -76,17 +77,24 @@ void WorldDisassembler::DoDisassemble(){
         tmp.instruction_pointer = this->stream_->ReadU16();
         world_data.emplace_back(tmp);
     }
-    int i = this->script_number_;
-    for (int i = 1; i < 2; i ++){ //for (int i = 1; i < 2; i ++){
-        WorldScriptData data = world_data[i];
-        this->stream_->Seek((256 * sizeof(int)) + (data.instruction_pointer*sizeof(uint16)));
+    if (script_number_ < 0 || script_number_ >= static_cast<int>(world_data.size())){
+        throw std::out_of_range("World-map script index is outside the call table.");
+    }
+    const WorldScriptData& data = world_data[script_number_];
+    if (data.type == 0 && data.instruction_pointer == 0) return;
+
+        const unsigned int code_offset = static_cast<unsigned int>(
+          256 * sizeof(uint32) + data.instruction_pointer * sizeof(uint16)
+        );
+        if (code_offset >= stream_->GetSize()) return;
+        this->stream_->Seek(code_offset);
         this->address_ = this->stream_->GetPosition();
         bool end = false;
-        for (;;){ //    while (this->_f.pos() != (int)this->_f.size())
+        for (;;){
+            if (end) break;
             uint32 full_opcode = 0;
             uint16 opcode = this->stream_->ReadU16();
             std::string opcode_prefix;
-            if (end) break;
             if (opcode == 0x203) end = true;
             if (opcode >= 0x204 && opcode < 0x300)
                 ParseOpcode(opcode, "reset stack", new WorldKernelCallInstruction(), 0, "");
@@ -406,6 +414,12 @@ void WorldDisassembler::DoDisassemble(){
             this->address_ += 2;
         }
         for (auto& instruction : this->insts_) instruction->SetAddress(instruction->GetAddress() / 2);
-    }
+        if (!insts_.empty()){
+            const uint32 start_address = insts_.front()->GetAddress();
+            const uint32 end_address = insts_.back()->GetAddress();
+            Function function(start_address, end_address);
+            function.name = "world_function_" + std::to_string(script_number_);
+            engine_->functions[start_address] = function;
+        }
 }
 

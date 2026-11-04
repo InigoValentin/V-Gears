@@ -184,7 +184,7 @@ namespace VGears {
                     triangle.vertex_2_index = decompressed[data_offset++];
                     const uint8 walkmap_and_function = decompressed[data_offset++];
                     triangle.walkability_info_ = walkmap_and_function & 0x1F;
-                    triangle.unknown = (walkmap_and_function >> 5) & 0x07;
+                    triangle.function_id = (walkmap_and_function >> 5) & 0x07;
                     triangle.vertex_0_u = decompressed[data_offset++];
                     triangle.vertex_0_v = decompressed[data_offset++];
                     triangle.vertex_1_u = decompressed[data_offset++];

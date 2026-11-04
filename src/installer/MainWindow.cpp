@@ -25,7 +25,7 @@
 #include <QtWidgets/QCheckBox>
 #include "DataInstaller.h"
 #include "MainWindow.h"
-#include "ui_MainWindow.h"
+#include <ui_MainWindow.h>
 
 /**
  * Indicates if an installer has already been created.

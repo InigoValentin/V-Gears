@@ -320,10 +320,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Don't extract sound.&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;If checked, game sound efects will not be extracted.&lt;br/&gt;&lt;br/&gt;Sound extraction can take a few minutes, and it's ok to skip this step if it has already been installed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract sound effects.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Checked extracts sound effects; uncheck to reuse an existing installation. This can take a few minutes.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Don't extract sounds</string>
+            <property name="text">
+             <string>Extract sound effects</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -351,10 +351,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Don't extract music.&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;If checked, game music tracks will not be extracted.&lt;br/&gt;&lt;br/&gt;Music extraction can take a few minutes, and it's ok to skip this step if it has already been installed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract music tracks.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Checked extracts music; uncheck to reuse an existing installation. This can take a few minutes.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Don't extract music</string>
+            <property name="text">
+             <string>Extract music tracks</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -479,10 +479,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract world map data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, world map models and data will not be extracted. Data from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is not usually very long, so there is no reason to skip it unless you have manually edited the world map data. Skipping world map data installation will also skip the installation of the world map 3D models.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract world map data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs world map terrain and scripts. Uncheck to keep the existing world map data.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Don't extract world map data</string>
+            <property name="text">
+             <string>Extract world map data</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -513,10 +513,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't use the ffmpeg command.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, sound effects and background music will not be available to V-Gears.&lt;br&gt;&lt;br&gt;Sound effects and music indexes will still be built, but you will need to provide your own ogg files.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Use FFmpeg for media conversion.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked enables FFmpeg to convert audio and video assets.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Prevent FFmpeg calls</string>
+            <property name="text">
+             <string>Use FFmpeg for media conversion</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -544,10 +544,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract images.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, images will not be extracted. This includes window decorations, menus icons, character portraits... It doesn' include backgrounds or textures. Images from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is usually quite fast, so there is no reason to skip it unless you have manually edited the images.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract images.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs UI images such as window decorations, menu icons, and character portraits.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Don't extract images</string>
+            <property name="text">
+             <string>Extract images</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -575,10 +575,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract battle data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, battle data such as enemies, attacks or enemy formations will not be extracted. Data from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is usually quite fast, so there is no reason to skip it unless you have manually changed data.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract battle data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs battle data such as enemies, attacks, and enemy formations.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Don't extract battle data</string>
+            <property name="text">
+             <string>Extract battle data</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -606,10 +606,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract world map 3D models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, world map 3D models and textures will not be extracted. Models from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is not usually very long, so there is no reason to skip it unless you have manually edited the models. Skipping world map data installation will also skip the installation of world map 3D models.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract world map 3D models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked converts and installs world map models and textures. Requires world map data.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Dont't extract world 3D models</string>
+            <property name="text">
+             <string>Extract world map 3D models</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -637,10 +637,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't use the timidity command.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, background music will not be available to V-Gears.&lt;br&gt;&lt;br&gt;Music indexes will still be built, but you will need to provide your own ogg tracks.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Use TiMidity for MIDI conversion.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked enables TiMidity when converting MIDI music.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Prevent TiMidity calls</string>
+            <property name="text">
+             <string>Use TiMidity for MIDI conversion</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -674,7 +674,7 @@
             <string>Preserve original data</string>
            </property>
            <property name="checked">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
           </widget>
           <widget class="QCheckBox" name="chk_fields">
@@ -699,10 +699,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract field maps.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, map fields will not be extracted. Field maps from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is not usually very long, so there is no reason to skip it unless you have manually edited the fields. Skipping field map installation will also skip the installation of field 3D models.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract field maps.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked converts and installs field maps and scripts. Required for world-map city entrances.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Don't extract field maps</string>
+            <property name="text">
+             <string>Extract field maps</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -730,10 +730,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract kernel data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, game data such as items, materia, character information or initial savemap will not be extracted. Data from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is usually quite fast, so there is no reason to skip it unless you have manually changed data.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract game data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs kernel data such as items, materia, and character information.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Don't extract kernel data</string>
+            <property name="text">
+             <string>Extract game data</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -761,10 +761,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract field 3D models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, field 3D models and textures will not be extracted. Models from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is not usually very long, so there is no reason to skip it unless you have manually edited the models. Skipping field map installation will also skip the installation of field 3D models.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract field 3D models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked converts and installs field models and textures. Requires field maps.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Dont't extract field 3D models</string>
+            <property name="text">
+             <string>Extract field 3D models</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -792,10 +792,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract videos.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, FMV videos will not be extracted. Videos from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;Installing videos can take a few minutes, and it's OK to skip this step if they are already installed.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract videos.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs FMV videos. This can take a few minutes.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Don't extract videos</string>
+            <property name="text">
+             <string>Extract videos</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -829,10 +829,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't extract battle models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;If checked, battle 3D models will not be extracted. This includes models for players, enemies, attacks, battle scenarios... Models from previous installations will not be deleted.&lt;br&gt;&lt;br&gt;This installation step is usually quite fast, so there is no reason to skip it unless you have manually edited the models.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract battle models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked converts and installs player, enemy, attack, and battle scene models.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="text">
-            <string>Don't extract battle models</string>
+            <property name="text">
+             <string>Extract battle models</string>
            </property>
            <property name="checked">
             <bool>true</bool>

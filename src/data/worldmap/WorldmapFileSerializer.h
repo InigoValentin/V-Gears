@@ -139,13 +139,12 @@ namespace VGears {
                 uint8 walkability_info_;
 
                 /**
-                 * Mesh function ID.
+                 * Packed mesh function value.
                  *
                  * Only 3 bits are valid.
-                 *
-                 * Values 0-2 mean no script is attached to this triangle.
+                 * Values 0-2 mean no script; values 3-7 map to function IDs 0-4.
                  */
-                uint8 unknown;
+                uint8 function_id;
 
                 /**
                  * First side vector U component.

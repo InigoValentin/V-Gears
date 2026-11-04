@@ -866,6 +866,9 @@ target_include_directories(libvgears
         ${VGEARS_LUAJIT_INCLUDE_DIRS}
         ${QT_INCLUDE_DIRS}
 )
+if(DEFINED _GENERATED_UI_TARGET)
+    target_include_directories(libvgears BEFORE PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/installer")
+endif()
     target_link_libraries(libvgears PUBLIC ${VGEARS_LUAJIT_LIBRARIES})
 target_compile_definitions(libvgears PUBLIC TIXML_USE_STL)
 if(NOT MSVC)

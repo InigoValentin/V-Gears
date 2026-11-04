@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(TestMapFileSerializerReadsPackedTriangleFields){
         const VGears::WorldmapFileSerializer::BlockTriangle& triangle
             = part.triangles[0];
         BOOST_CHECK_EQUAL(triangle.walkability_info_, 5);
-        BOOST_CHECK_EQUAL(triangle.unknown, 5);
+                BOOST_CHECK_EQUAL(triangle.function_id, 5);
         BOOST_CHECK_EQUAL(triangle.vertex_0_u, 10);
         BOOST_CHECK_EQUAL(triangle.vertex_0_v, 20);
         BOOST_CHECK_EQUAL(triangle.vertex_1_u, 30);

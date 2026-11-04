@@ -281,6 +281,10 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          */
         void ScriptSetPlayerEntity(const char* name);
 
+        void ScriptPlacePlayerAtFieldEntry(
+          const float x, const float y, const int triangle_id, const float direction
+        );
+
         /**
          * Retrieves the playable entity.
          *

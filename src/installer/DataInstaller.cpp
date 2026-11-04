@@ -412,7 +412,16 @@ float DataInstaller::Progress(){
         case WM_MAPS:
             if (world_installer_->ProcessMap() == false) cur_substep_ ++;
             else{
-                // TODO: Next step: map scripts, etc
+                std::string script_error;
+                                if (world_installer_->GenerateScripts(
+                                        field_installer_->GetMapList(), field_installer_->GetFieldScaleFactors(),
+                                        field_installer_->GetConvertedMapList(), script_error
+                                    )){
+                    write_output_line_("Generated WM0 world-map script.", 2, true);
+                }
+                else{
+                    write_output_line_("Could not generate WM0 world-map script: " + script_error, 2, true);
+                }
                 installation_state_ = WM_MODELS;
                 cur_substep_ = 0;
             }

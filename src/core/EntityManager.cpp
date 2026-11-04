@@ -684,6 +684,25 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
     }
 }
 
+void EntityManager::ScriptPlacePlayerAtFieldEntry(
+    const float x, const float y, const int triangle_id, const float direction
+){
+        if (player_entity_ == nullptr || walkmesh_.GetNumberOfTriangles() <= 0) return;
+
+        int safe_triangle_id = triangle_id;
+        if (safe_triangle_id < 0 || safe_triangle_id >= walkmesh_.GetNumberOfTriangles()){
+                LOG_WARNING("World-map field entry has an invalid walkmesh triangle; using triangle 0.");
+                safe_triangle_id = 0;
+        }
+
+        player_entity_->SetPosition(Ogre::Vector3(
+            x, y, walkmesh_.GetA(static_cast<unsigned int>(safe_triangle_id)).z
+        ));
+        player_entity_->SetRotation(Ogre::Degree(direction));
+        player_entity_->SetMoveTriangleId(safe_triangle_id);
+        player_entity_->SetState(Entity::WALKMESH);
+}
+
 Entity* EntityManager::ScriptGetPlayerEntity() const{
     if (IsBattleModule()){
         LOG_WARNING("Tried to set a player entity but the EntityManager is in battle mode.");

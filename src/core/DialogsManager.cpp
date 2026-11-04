@@ -169,6 +169,30 @@ void DialogsManager::SetText(const char* d_name, const char* text){
     }
 }
 
+bool DialogsManager::ShowScriptMessage(const char* text){
+    if (text == nullptr || limit_area_ == nullptr) return false;
+
+    int message_id = -1;
+    for (size_t i = 0; i < messages_.size(); ++i){
+        if (messages_[i]->widget->GetName() == "Timer") continue;
+        if (messages_[i]->state == MS_CLOSED){
+            message_id = static_cast<int>(i);
+            break;
+        }
+    }
+    if (message_id < 0) return false;
+
+    MessageData* data = messages_[message_id];
+    data->clickable = true;
+    data->closeable = true;
+    data->show_cursor = false;
+    data->show_window = true;
+    data->auto_close = false;
+    ShowMessage(message_id, 16, 176, 288, 56);
+    data->text_area->SetText(text);
+    return true;
+}
+
 void DialogsManager::SetNumeric(const char* d_name, const bool numeric, const bool timer){
     int id = GetMessageId(d_name);
     if (id == -1){
@@ -490,4 +514,4 @@ void DialogsManager::UpdateField(){
 
 void DialogsManager::UpdateBattle(){}
 
-void DialogsManager::UpdateWorld(){}
+void DialogsManager::UpdateWorld(){UpdateField();}

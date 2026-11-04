@@ -20,6 +20,7 @@
 #include "core/Entity.h"
 #include "core/EntityManager.h"
 #include "core/Logger.h"
+#include "modules/worldmap/WorldmapModule.h"
 
 ConfigVar cv_debug_entity("debug_entity", "Draw entity debug info", "0");
 
@@ -141,10 +142,35 @@ void Entity::UpdateDebug(){
         if (debug > 1){
             Ogre::String move_state_string[] = {"NONE", "WALKMESH", "LINEAR", "JUMP"};
             DEBUG_DRAW.Text(entity_pos, 0, 24, Ogre::StringConverter::toString(entity_pos));
-            DEBUG_DRAW.Text(
-              entity_pos, 0, 36, "Triangle: " + Ogre::StringConverter::toString(move_triangle_id_)
-            );
+            if (EntityManager::getSingleton().IsWorldModule()){
+                const int triangle_index
+                  = VGears::WorldmapModule::getSingleton().GetTerrainTriangleUnderEntity(
+                    name_.c_str()
+                  );
+                DEBUG_DRAW.Text(
+                  entity_pos, 0, 36,
+                  "World map triangle: "
+                    + (triangle_index < 0 ? Ogre::String("UNKNOWN")
+                      : Ogre::StringConverter::toString(triangle_index))
+                );
+            }
+            else{
+                DEBUG_DRAW.Text(
+                  entity_pos, 0, 36,
+                  "Triangle: " + Ogre::StringConverter::toString(move_triangle_id_)
+                );
+            }
             DEBUG_DRAW.Text(entity_pos, 0, 48, "Move state: " + move_state_string[state_]);
+            if (EntityManager::getSingleton().IsWorldModule()){
+                const Ogre::String terrain_name
+                  = VGears::WorldmapModule::getSingleton().GetTerrainTypeUnderEntity(
+                    name_.c_str()
+                  );
+                DEBUG_DRAW.Text(
+                  entity_pos, 0, 60,
+                  "Terrain: " + (terrain_name.empty() ? Ogre::String("UNKNOWN") : terrain_name)
+                );
+            }
             switch(state_){
                 case Entity::WALKMESH:
                     DEBUG_DRAW.Line3d(entity_pos, move_position_);
