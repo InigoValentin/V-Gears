@@ -23,12 +23,12 @@ if UiContainer == nil then UiContainer = {} end
         --- Handles button events.
         --
         -- Handles directional Up, Down and Enter keys.
-        -- @param button Pressed button string key. Config.CONTROLS.UP, Config.CONTROLS.LEFT, Config.CONTROLS.ACTION and Config.CONTROLS.CANCEL are handled.
+        -- @param button Pressed direction or action name.
         -- @param event Trigger event. Normally, "Press".
         on_button = function(self, button, event)
         if UiContainer.current_menu == "begin" then
             local cursor = ui_manager:get_widget("BeginMenu.Container.Cursor")
-            if button == Config.CONTROLS.ACTION and event == "Press" then
+            if button == Config.ACTIONS.CONFIRM and event == "Press" then
                 if self.position == 1 then -- New game
                     audio_manager:play_sound("Window")
                     generate_control_key()

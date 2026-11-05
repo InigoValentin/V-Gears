@@ -219,6 +219,7 @@ void InputManager::AddGameEvents(const int button, const VGears::EventType type)
     for (unsigned int i = 0; i < binds_to_activate.size(); ++ i){
         VGears::Event event;
         event.type = type;
+        event.param1 = button;
         event.event = bind_game_events_[binds_to_activate[i]].event;
         event_queue_.push_back(event);
     }

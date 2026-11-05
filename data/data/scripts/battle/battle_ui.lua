@@ -165,7 +165,7 @@ UiContainer.BattleUi = {
                     cursor:set_default_animation("Position" .. tostring(self.cursor_command))
                     audio_manager:play_sound("Cursor")
                 end
-            elseif button == "Escape" then
+            elseif button == Config.ACTIONS.CANCEL then
                 -- Push the current character to the end of the command queue, and show the first.
                 local new_queue = {}
                 for i = 1, #self.command_queue do
@@ -175,7 +175,7 @@ UiContainer.BattleUi = {
                 self.command_queue = new_queue
                 audio_manager:play_sound("Cursor")
                 self:show_commands(self.command_queue[1])
-            elseif button == "Enter" then
+            elseif button == Config.ACTIONS.CONFIRM then
                 -- Check if a menu must be shown
                 local cmd = Game.Commands[self.party[self.current_character_window].command[self.cursor_command]]
                 if cmd.menu == Battle.Menu.NONE then print("DIRECT COMMAND")
@@ -193,7 +193,7 @@ UiContainer.BattleUi = {
             end
             -- TODO: Rest of cases
             local cursor = ui_manager:get_widget("BattleUi.Container.Bottom.List.Cursor")
-            if button == "LCtrl" then
+            if button == Config.ACTIONS.CANCEL then
                 audio_manager:play_sound("Cursor")
                 self:close_list()
             elseif button == "Down" then
@@ -222,12 +222,12 @@ UiContainer.BattleUi = {
                     self.first_list = self.first_list - 1
                     self:repopulate_list()
                 end
-            elseif button == "Enter" then
+            elseif button == Config.ACTIONS.CONFIRM then
                 audio_manager:play_sound("Cursor")
                 self:select_target()
             end
         elseif self.window_state == "target" then
-            if button == "LCtrl" then
+            if button == Config.ACTIONS.CANCEL then
                 audio_manager:play_sound("Cursor")
                 self:close_target()
             elseif button == "Up" then
@@ -396,7 +396,7 @@ UiContainer.BattleUi = {
                     elseif prev_mode == Battle.TargetType.SINGLE then self.target_type = Battle.TargetType.GROUP
                     end
                 end
-            elseif button == "Enter" then
+            elseif button == Config.ACTIONS.CONFIRM then
                 -- Determine target type and target index
                 if self.target_options.fixed_row == 1 then
                     if self.target_options.default_enemy == 1 then

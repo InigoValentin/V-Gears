@@ -61,6 +61,7 @@ struct QueueScript{
       function(""),
       argument1(""),
       argument2(""),
+      argument3(""),
       priority(0),
       state(NULL),
       seconds_to_wait(0),
@@ -82,6 +83,11 @@ struct QueueScript{
      * Second function argument.
      */
     Ogre::String argument2;
+
+    /**
+     * Third function argument.
+     */
+    Ogre::String argument3;
 
     /**
      * Function priority.
@@ -400,12 +406,15 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
          * @param[in] argument2 Second argument for the script.
          * @param[in] start_sync If true, the script will be started synchronously.
          * @param[in] end_sync @todo Understand and document.
+         * @param[in] argument3 Third argument for the script.
+         * @param[in] allow_duplicate If true, queue this call even if the same function is queued.
          * @return True on success, false on error (i.e. if the entity or the script don't exist)
          */
         bool ScriptRequest(
           ScriptEntity* script_entity, const Ogre::String& function,
           const int priority, const Ogre::String& argument1,
-          const Ogre::String& argument2, bool start_sync, bool end_sync
+          const Ogre::String& argument2, bool start_sync, bool end_sync,
+          const Ogre::String& argument3 = "", bool allow_duplicate = false
         );
 
         /**

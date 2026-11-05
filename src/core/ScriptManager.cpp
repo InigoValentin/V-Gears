@@ -67,6 +67,24 @@ ScriptManager::~ScriptManager(){lua_close(lua_state_);}
 
 void ScriptManager::Input(const VGears::Event& event){
     if (
+      event.event != ""
+      && (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+    ){
+        Ogre::String argument2 = "";
+        if (event.type == VGears::ET_KEY_PRESS) argument2 = "Press";
+        else if (event.type == VGears::ET_KEY_REPEAT_WAIT) argument2 = "Repeat";
+        const Ogre::String source_key = KeyToString(
+          static_cast<OIS::KeyCode>(event.param1)
+        );
+        for (unsigned int i = 0; i < script_entity_.size(); ++ i){
+            ScriptRequest(
+              &script_entity_[i], "on_button", 100,
+              event.event, argument2, false, false, source_key, true
+            );
+        }
+        return;
+    }
+    if (
       (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
       && (
         // TODO: Do this the other way: block keys NOT TO pass to scripts.
@@ -206,7 +224,8 @@ void ScriptManager::Update(const ScriptManager::Type type){
                             sol::coroutine coroutine(thread, sol::function(function));
                             auto result = coroutine(
                               table, script_entity_[i].queue[0].argument1,
-                              script_entity_[i].queue[0].argument2
+                              script_entity_[i].queue[0].argument2,
+                              script_entity_[i].queue[0].argument3
                             );
                             if (result.valid()){
                                 // The coroutine yields with the bound function
@@ -628,7 +647,8 @@ int ScriptManager::ScriptRequestEndSync(
 
 bool ScriptManager::ScriptRequest(
   ScriptEntity* script_entity, const Ogre::String& function, const int priority,
-  const Ogre::String& argument1, const Ogre::String& argument2, bool start_sync, bool end_sync
+  const Ogre::String& argument1, const Ogre::String& argument2, bool start_sync,
+  bool end_sync, const Ogre::String& argument3, bool allow_duplicate
 ){
     if (script_entity == nullptr) return false;
 
@@ -642,6 +662,7 @@ bool ScriptManager::ScriptRequest(
         script.function = function;
         script.argument1 = argument1;
         script.argument2 = argument2;
+        script.argument3 = argument3;
         script.priority = priority;
         script.state = lua_newthread(lua_state_);
         // The thread must not be garbage collected,
@@ -655,10 +676,12 @@ bool ScriptManager::ScriptRequest(
         if (end_sync == true) script.paused_script_end = GetCurrentScriptId();
 
         // If the script is already running, don't queue it.
-        for (int i = 0; i < script_entity->queue.size(); i ++){
+        if (allow_duplicate == false){
+          for (int i = 0; i < script_entity->queue.size(); i ++){
              if (script_entity->queue[i].function == function){
-                 script_entity->resort = true;
-                 return true;
+               script_entity->resort = true;
+               return true;
+            }
             }
         }
 

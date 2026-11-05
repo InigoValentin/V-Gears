@@ -145,7 +145,7 @@ void EntityManager::Input(const VGears::Event& event){
         else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_up")
             player_move_.y = 1;
         if (event.type == VGears::ET_KEY_REPEAT && event.event == "run") player_run_ = true;
-        if (event.type == VGears::ET_KEY_PRESS && event.event == "interact"){
+        if (event.type == VGears::ET_KEY_PRESS && event.event == "CONFIRM"){
             CheckEntityInteract();
             for (unsigned int i = 0; i < entity_triggers_.size(); ++ i){
                 if (

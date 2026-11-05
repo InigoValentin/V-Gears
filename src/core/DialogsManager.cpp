@@ -88,8 +88,8 @@ void DialogsManager::Initialise(){
 }
 
 void DialogsManager::Input(const VGears::Event& input){
-    if (input.type == VGears::ET_KEY_PRESS && input.event == "message_ok") next_pressed_ = true;
-    else if (input.type == VGears::ET_KEY_REPEAT && input.event == "message_ok")
+    if (input.type == VGears::ET_KEY_PRESS && input.event == "CONFIRM") next_pressed_ = true;
+    else if (input.type == VGears::ET_KEY_REPEAT && input.event == "CONFIRM")
         next_repeated_ = true;
     else if (input.type == VGears::ET_KEY_PRESS && input.event == "message_up") up_pressed_ = true;
     else if (input.type == VGears::ET_KEY_PRESS && input.event == "message_down")

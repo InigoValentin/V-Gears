@@ -56,14 +56,14 @@ UiContainer.EquipMenu = {
     --- Handles button events.
     --
     -- For the current submenu, handles directional keys, enter and escape events.
-    -- @param button Pressed button string key. Config.CONTROLS.UP, Config.CONTROLS.LEFT, Config.CONTROLS.ACTION and Config.CONTROLS.CANCEL are handled.
+    -- @param button Pressed direction or action name.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "equip" then
             if UiContainer.current_submenu == "" then
                 -- TODO: Handle L1/R1 (change character)
                 -- TODO: Handle square: Materia menu
-                if button == Config.CONTROLS.CANCEL and event == "Press" then
+                if button == Config.ACTIONS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     UiContainer.current_menu = "main"
                     script:request_end_sync(Script.UI, "EquipMenu", "hide", 0)
@@ -83,7 +83,7 @@ UiContainer.EquipMenu = {
                     end
                     ui_manager:get_widget("EquipMenu.Container.Character.Cursor"):set_default_animation("Position" .. self.equip_position)
                     self.populate_details(self, false)
-                elseif button == Config.CONTROLS.ACTION then
+                elseif button == Config.ACTIONS.CONFIRM then
                     if self.equip_position == 1 then
                         self.selecting_slot = Inventory.ITEM_TYPE.WEAPON
                     elseif self.equip_position == 2 then
@@ -105,7 +105,7 @@ UiContainer.EquipMenu = {
                 elseif self.selecting_slot == Inventory.ITEM_TYPE.ACCESSORY then
                     list = self.avail_accessories
                 end
-                if button == Config.CONTROLS.CANCEL and event == "Press" then
+                if button == Config.ACTIONS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     self.submenu_none(self)
                 elseif button == Config.CONTROLS.DOWN then
@@ -146,7 +146,7 @@ UiContainer.EquipMenu = {
                     end
                     self.populate_details(self, true)
                     self.calculate_stat_diffs(self)
-                elseif button == Config.CONTROLS.ACTION and event == "Press" then
+                elseif button == Config.ACTIONS.CONFIRM and event == "Press" then
                     -- Equip the seleced item
                     local item_id = nil
                     if self.selecting_slot == Inventory.ITEM_TYPE.WEAPON then

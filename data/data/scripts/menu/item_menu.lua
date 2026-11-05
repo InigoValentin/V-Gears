@@ -81,12 +81,12 @@ UiContainer.ItemMenu = {
     --- Handles button events.
     --
     -- For the current submenu, handles directional keys, enter and escape events.
-    -- @param button Pressed button string key. Config.CONTROLS.UP, Config.CONTROLS.LEFT, Config.CONTROLS.ACTION and Config.CONTROLS.CANCEL are handled.
+    -- @param button Pressed direction or action name.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if UiContainer.current_menu == "item" then
             if UiContainer.current_submenu == "bar_selection" then
-                if button == Config.CONTROLS.CANCEL and event == "Press" then
+                if button == Config.ACTIONS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     UiContainer.current_menu = "main"
                     script:request_end_sync(Script.UI, "ItemMenu", "hide", 0)
@@ -116,7 +116,7 @@ UiContainer.ItemMenu = {
                     else
                         ui_manager:get_widget("ItemMenu.Container.KeyItems"):set_visible(false)
                     end
-                elseif button == Config.CONTROLS.ACTION then
+                elseif button == Config.ACTIONS.CONFIRM then
                     if self.bar_position == 1 then
                         self.submenu_items(self)
                     elseif self.bar_position == 2 then
@@ -131,7 +131,7 @@ UiContainer.ItemMenu = {
                     return 0
                 end
             elseif UiContainer.current_submenu == "order_selection" then
-                if button == Config.CONTROLS.CANCEL and event == "Press" then
+                if button == Config.ACTIONS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     self.submenu_bar(self)
                 elseif button == Config.CONTROLS.DOWN then
@@ -148,7 +148,7 @@ UiContainer.ItemMenu = {
                         self.order_cursor_position = self.order_cursor_position_total
                     end
                     ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_default_animation("Position" .. self.order_cursor_position)
-                elseif button == Config.CONTROLS.ACTION then
+                elseif button == Config.ACTIONS.CONFIRM then
                     audio_manager:play_sound("Cursor")
                     if self.order_cursor_position == 1 then
                         Inventory.sort(Inventory.ORDER.CUSTOM)
@@ -219,7 +219,7 @@ UiContainer.ItemMenu = {
                     else
                         desc_label:set_text("")
                     end
-                elseif button == Config.CONTROLS.PGDN then -- TODO: Also, the bind to R1
+                elseif button == Config.ACTIONS.R1 then
                     if self.first_item_in_window + self.item_cursor_position_total < self.inventory_size - self.item_cursor_position_total then
                         audio_manager:play_sound("Cursor")
                         self.item_cursor_item_selected = self.item_cursor_item_selected + self.item_cursor_position_total
@@ -233,7 +233,7 @@ UiContainer.ItemMenu = {
                     else
                         audio_manager:play_sound("Error")
                     end
-                elseif button == Config.CONTROLS.PGUP then -- TODO: Also, the bind to L1
+                elseif button == Config.ACTIONS.L1 then
                     if self.first_item_in_window - self.item_cursor_position_total > 1 then
                         audio_manager:play_sound("Cursor")
                         self.item_cursor_item_selected = self.item_cursor_item_selected - self.item_cursor_position_total
@@ -247,12 +247,12 @@ UiContainer.ItemMenu = {
                     else
                         audio_manager:play_sound("Error")
                     end
-                elseif button == Config.CONTROLS.CANCEL and event == "Press" then
+                elseif button == Config.ACTIONS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
                     self.submenu_bar(self)
                     UiContainer.current_submenu = "bar_selection"
                     ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
-                elseif button == Config.CONTROLS.ACTION then
+                elseif button == Config.ACTIONS.CONFIRM then
                     if Game.Items[Inventory[self.item_cursor_item_selected].item].menu == 1 then
                         audio_manager:play_sound("Cursor")
                         self.item_in_use = Inventory[self.item_cursor_item_selected].item
@@ -290,10 +290,10 @@ UiContainer.ItemMenu = {
                         end
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Cursor"):set_default_animation("Position" .. self.char_position)
                     end
-                elseif button == Config.CONTROLS.CANCEL then
+                elseif button == Config.ACTIONS.CANCEL then
                     audio_manager:play_sound("Back")
                     self.submenu_items(self)
-                elseif button == Config.CONTROLS.ACTION then
+                elseif button == Config.ACTIONS.CONFIRM then
                     local use_result = false
                     if self.item_in_use_party == true then
                         use_result = self.use_item(self, self.item_in_use, nil)
@@ -415,7 +415,7 @@ UiContainer.ItemMenu = {
                     else
                         ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
                     end
-                elseif button == Config.CONTROLS.PGDN then -- TODO: Also, the bind to R1
+                elseif button == Config.ACTIONS.R1 then
                     if self.first_key_item_row_in_window + self.key_items_cursor_y_position_total < self.key_items_total_rows - self.key_items_cursor_y_position_total then
                         audio_manager:play_sound("Cursor")
                         self.first_key_item_row_in_window = self.first_key_item_row_in_window + self.key_items_cursor_y_position_total
@@ -430,7 +430,7 @@ UiContainer.ItemMenu = {
                     else
                         audio_manager:play_sound("Error")
                     end
-                elseif button == Config.CONTROLS.PGUP then -- TODO: Also, the bind to L1
+                elseif button == Config.ACTIONS.L1 then
                     if self.first_key_item_row_in_window + self.key_items_cursor_y_position_total > 1 then
                         audio_manager:play_sound("Cursor")
                         self.first_key_item_row_in_window = self.first_key_item_row_in_window - self.key_items_cursor_y_position_total
@@ -445,7 +445,7 @@ UiContainer.ItemMenu = {
                     else
                         audio_manager:play_sound("Cursor")
                     end
-                elseif button == Config.CONTROLS.CANCEL then
+                elseif button == Config.ACTIONS.CANCEL then
                     audio_manager:play_sound("Back")
                     self.submenu_bar(self)
                 end
