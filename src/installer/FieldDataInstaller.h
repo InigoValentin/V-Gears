@@ -307,7 +307,10 @@ class FieldDataInstaller{
          * @param[in] output_dir Path to the directory to write generated data
          * to.
          */
-        FieldDataInstaller(const DiskImage& disk_image, const std::string output_dir);
+        FieldDataInstaller(
+          const DiskImage& disk_image, const std::string output_dir,
+          std::function<void(std::string)> log_output_line
+        );
 
         /**
          * Installer destructor.

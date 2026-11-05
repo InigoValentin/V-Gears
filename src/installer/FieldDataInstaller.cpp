@@ -216,8 +216,12 @@ bool FieldDataInstaller::CollectSpawnPoints(
     return true;
 }
 
-FieldDataInstaller::FieldDataInstaller(const DiskImage& disk_image, const std::string output_dir):
-  disk_image_(disk_image), output_dir_(output_dir)
+FieldDataInstaller::FieldDataInstaller(
+    const DiskImage& disk_image, const std::string output_dir,
+    std::function<void(std::string)> log_output_line
+):
+    disk_image_(disk_image), output_dir_(output_dir),
+    write_output_line_(log_output_line)
 {}
 
 FieldDataInstaller::~FieldDataInstaller(){}

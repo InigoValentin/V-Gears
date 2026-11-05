@@ -1232,11 +1232,7 @@ namespace VGears {
       EntityManager::getSingleton().SetWorldModule();
         DialogsManager::getSingleton().SetWorldModule();
         CreateWorldMap(Root::getSingleton().getSceneManager("Scene"));
-        if (ResourceGroupManager::getSingleton().resourceExists(
-              "SCRIPTS", "worldmap/wm0.lua"
-            )){
-            ScriptManager::getSingleton().RunFile("scripts/worldmap/wm0.lua");
-        }
+        ScriptManager::getSingleton().RunFile("scripts/worldmap/wm0.lua");
         CreatePlayer();
         initialized_ = true;
         Root::getSingleton().addFrameListener(this);

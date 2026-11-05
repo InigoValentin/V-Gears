@@ -148,7 +148,7 @@ end
 EntityContainer["WorldMapBuggy"] = extend_vehicle(
     "WorldMapBuggy",
     {
-        "GRASS", "FOREST", "SWAMP", "DESERT", "WASTELAND", "SNOW", "RIVERSIDE", "CLIFF",
+        "GRASS", "FOREST", "SWAMP", "DESERT", "WASTELAND", "SNOW", "RIVERSIDE",
         "COREL_BRIDGE", "WUTAI_BRIDGE", "HILL_SIDE", "BEACH", "RIVER_CROSSING", "CANYON",
         "MOUNTAIN_PASS", "GOLD_SAUCER_DESERT", "JUNGLE", "GOLD_SAUCER_DESERT_BORDER",
         "BRIDGE_HEAD", "BACK_ENTRANCE",
@@ -285,7 +285,7 @@ end
 EntityContainer["WorldMapTinyBronco"] = extend_vehicle(
     "WorldMapTinyBronco",
     {
-        "RIVERSIDE", "CLIFF", "BEACH", "RIVER_CROSSING", "RIVER", "WATER",
+        "RIVERSIDE", "BEACH", "RIVER_CROSSING", "RIVER", "WATER",
     },
     0,
     {"BEACH", "RIVERSIDE"}

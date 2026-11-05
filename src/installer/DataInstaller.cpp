@@ -72,7 +72,11 @@ float DataInstaller::Progress(){
             media_installer_ = std::make_unique<MediaDataInstaller>(
               disk_image_, output_dir_, options_.keep_originals, options_.ffmpeg, options_.timidity
             );
-            field_installer_ = std::make_unique<FieldDataInstaller>(disk_image_, output_dir_);
+                        field_installer_ = std::make_unique<FieldDataInstaller>(
+                            disk_image_, output_dir_, [this](std::string log_message){
+                                    write_output_line_(log_message, 2, true);
+                            }
+                        );
             battle_installer_ = std::make_unique<BattleDataInstaller>(disk_image_, output_dir_, application_.ResMgr());
             world_installer_ = std::make_unique<WorldInstaller>(
               disk_image_, output_dir_, options_.keep_originals, application_.ResMgr()
@@ -417,10 +421,10 @@ float DataInstaller::Progress(){
                                         field_installer_->GetMapList(), field_installer_->GetFieldScaleFactors(),
                                         field_installer_->GetConvertedMapList(), script_error
                                     )){
-                    write_output_line_("Generated WM0 world-map script.", 2, true);
+                    write_output_line_("Generated world-map scripts.", 2, true);
                 }
                 else{
-                    write_output_line_("Could not generate WM0 world-map script: " + script_error, 2, true);
+                    write_output_line_("Could not generate world-map scripts: " + script_error, 2, true);
                 }
                 installation_state_ = WM_MODELS;
                 cur_substep_ = 0;

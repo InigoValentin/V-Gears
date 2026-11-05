@@ -672,52 +672,72 @@ bool WorldInstaller::GenerateScripts(
     archive.open(*archive_path, true);
     archive.load();
     const VGears::LGPArchive::FileList& archive_entries = archive.GetFiles();
-    const VGears::LGPArchive::FileEntry* event_entry = nullptr;
+    std::vector<const VGears::LGPArchive::FileEntry*> event_entries;
     const VGears::LGPArchive::FileEntry* field_table_entry = nullptr;
+    bool has_wm0 = false;
     for (const VGears::LGPArchive::FileEntry& entry : archive_entries){
-        if (entry.file_name == "wm0.ev" || entry.file_name == "WM0.EV"){
-            event_entry = &entry;
+        std::string lower_name = entry.file_name;
+        VGears::StringUtil::toLowerCase(lower_name);
+        if (
+          lower_name.size() > 5 && lower_name.compare(0, 2, "wm") == 0
+          && lower_name.compare(lower_name.size() - 3, 3, ".ev") == 0
+        ){
+            const std::string map_number
+              = lower_name.substr(2, lower_name.size() - 5);
+            if (!map_number.empty() && std::all_of(
+                  map_number.begin(), map_number.end(), [](char character){
+                      return character >= '0' && character <= '9';
+                  }
+                )){
+                event_entries.push_back(&entry);
+                if (lower_name == "wm0.ev") has_wm0 = true;
+            }
         }
-        else if (entry.file_name == "field.tbl" || entry.file_name == "FIELD.TBL")
+        else if (lower_name == "field.tbl"){
             field_table_entry = &entry;
-    }
-    if (event_entry == nullptr || field_table_entry == nullptr){
-        error_message = "WM0.EV or FIELD.TBL was not found inside WORLD_US.LGP.";
-        return false;
-    }
-
-    File event_file(&archive_file, event_entry->data_offset, event_entry->data_size);
-    std::vector<u8> event_data(event_entry->data_size);
-    if (event_data.empty()){
-        error_message = "WM0.EV inside WORLD_US.LGP is empty.";
-        return false;
-    }
-    event_file.GetFileBuffer(event_data.data(), 0, event_entry->data_size);
-
-        File field_table_file(
-            &archive_file, field_table_entry->data_offset, field_table_entry->data_size
-        );
-        std::vector<u8> field_table_data(field_table_entry->data_size);
-        if (field_table_data.size() != 64 * 24){
-                error_message = "FIELD.TBL has an unexpected size.";
-                return false;
         }
-        field_table_file.GetFileBuffer(
-            field_table_data.data(), 0, field_table_entry->data_size
-        );
+    }
+    if (event_entries.empty() || !has_wm0 || field_table_entry == nullptr){
+        error_message = "WM0.EV, other world event files, or FIELD.TBL were not found inside WORLD_US.LGP.";
+        return false;
+    }
+
+    File field_table_file(
+      &archive_file, field_table_entry->data_offset, field_table_entry->data_size
+    );
+    std::vector<u8> field_table_data(field_table_entry->data_size);
+    if (field_table_data.size() != 64 * 24){
+        error_message = "FIELD.TBL has an unexpected size.";
+        return false;
+    }
+    field_table_file.GetFileBuffer(
+      field_table_data.data(), 0, field_table_entry->data_size
+    );
 
     const std::string script_directory = output_dir_ + "/scripts/worldmap";
     boost::filesystem::create_directories(script_directory);
-    std::ofstream script_file(script_directory + "/wm0.lua");
-    if (!script_file){
-        error_message = "Cannot create script output in " + script_directory + ".";
-        return false;
-    }
-    script_file << "-- Decompiled from the user's WM0.EV data.\n\n";
+    for (const VGears::LGPArchive::FileEntry* event_entry : event_entries){
+        File event_file(&archive_file, event_entry->data_offset, event_entry->data_size);
+        std::vector<u8> event_data(event_entry->data_size);
+        if (event_data.empty()){
+            error_message = event_entry->file_name + " inside WORLD_US.LGP is empty.";
+            return false;
+        }
+        event_file.GetFileBuffer(event_data.data(), 0, event_entry->data_size);
 
-    std::vector<bool> generated_functions(256, false);
-    unsigned int generated_function_count = 0;
-    for (int script_index = 0; script_index < 256; ++script_index){
+        std::string map_file_name = event_entry->file_name;
+        VGears::StringUtil::toLowerCase(map_file_name);
+        const std::string map_name = map_file_name.substr(0, map_file_name.size() - 3);
+        std::ofstream script_file(script_directory + "/" + map_name + ".lua");
+        if (!script_file){
+            error_message = "Cannot create script output in " + script_directory + ".";
+            return false;
+        }
+        script_file << "-- Decompiled from the user's " << event_entry->file_name << " data.\n\n";
+
+        std::vector<bool> generated_functions(256, false);
+        unsigned int generated_function_count = 0;
+        for (int script_index = 0; script_index < 256; ++script_index){
         try{
             WorldEngine engine(script_index);
             InstVec instructions;
@@ -744,13 +764,14 @@ bool WorldInstaller::GenerateScripts(
             script_file << "-- world function " << script_index
               << " failed: " << exception.what() << ".\n";
         }
-    }
+        }
 
-        script_file << "-- WM0 mesh-function call-table mapping.\n";
+        script_file << "-- " << map_name << " mesh-function call-table mapping.\n";
         for (size_t function_index = 0; function_index < generated_functions.size(); ++function_index){
                 if (!generated_functions[function_index]) continue;
 
                 const size_t type_offset = function_index * 4;
+            if (type_offset + 1 >= event_data.size()) continue;
                 const uint16 function_type = static_cast<uint16>(event_data[type_offset])
                     | static_cast<uint16>(event_data[type_offset + 1] << 8);
                 if ((function_type >> 14) != 2) continue;
@@ -804,14 +825,15 @@ bool WorldInstaller::GenerateScripts(
                             << direction_degrees << "}\n";
                 }
         }
-    script_file.flush();
-    if (!script_file){
-        error_message = "Failed while writing " + script_directory + "/wm0.lua.";
-        return false;
-    }
-    if (generated_function_count == 0){
-        error_message = "No WM0.EV functions could be decompiled.";
-        return false;
+        script_file.flush();
+        if (!script_file){
+            error_message = "Failed while writing " + script_directory + "/" + map_name + ".lua.";
+            return false;
+        }
+        if (generated_function_count == 0){
+            error_message = "No functions in " + event_entry->file_name + " could be decompiled.";
+            return false;
+        }
     }
     return true;
 }
