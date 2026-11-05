@@ -101,6 +101,7 @@ Ogre::Degree EntityManager::GetDirectionToPoint(
 }
 
 EntityManager::EntityManager():
+    background_3d_(nullptr),
   player_entity_(nullptr),
   player_move_(Ogre::Vector3::ZERO),
   player_move_rotation_(0),
@@ -305,7 +306,12 @@ void EntityManager::UpdateBattle(){
 }
 
 void EntityManager::UpdateWorld(){
-    // TODO: Implement
+    ScriptManager::getSingleton().Update(ScriptManager::ENTITY);
+    for (Entity* entity : entity_){
+        entity->Update();
+    }
+    player_move_ = Ogre::Vector3::ZERO;
+    player_run_ = false;
 }
 
 void EntityManager::AddFieldOrWorldMapEntity(
@@ -326,6 +332,31 @@ void EntityManager::AddFieldOrWorldMapEntity(
     entity->setRootOrientation(root_orientation);
     entity_.push_back(entity);
     ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
+}
+
+EntityModel* EntityManager::AddWorldMapEntity(
+  const Ogre::String& name, const Ogre::String& file_name,
+  const Ogre::Vector3& position, const Ogre::Degree& rotation,
+  const Ogre::Vector3& scale, const Ogre::String& resource_group
+){
+    if (!IsWorldModule()){
+        LOG_ERROR("Tried to add a world-map entity outside world-map mode.");
+        return nullptr;
+    }
+    if (GetEntity(name) != nullptr){
+        LOG_ERROR("Tried to add duplicate world-map entity '" + name + "'.");
+        return nullptr;
+    }
+
+    Ogre::SceneNode* node = scene_node_->createChildSceneNode("Model_" + name);
+    EntityModel* entity = new EntityModel(name, file_name, node, resource_group);
+    entity->SetPosition(position);
+    entity->SetRotation(rotation);
+    entity->setScale(scale);
+    entity->SetVisible(true);
+    entity_.push_back(entity);
+    ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
+    return entity;
 }
 
 void EntityManager::AddBattleEntity(
@@ -474,10 +505,53 @@ void EntityManager::ClearBattle(){
 }
 
 void EntityManager::ClearWorld(){
-    // TODO implement
+    walkmesh_.Clear();
+    for (Entity* entity : entity_){
+        ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, entity->GetName());
+        delete entity;
+    }
+    entity_.clear();
+    player_entity_ = nullptr;
+    player_move_ = Ogre::Vector3::ZERO;
+    player_move_rotation_ = 0;
+    player_lock_ = false;
+    player_run_ = false;
+    for (EntityTrigger* trigger : entity_triggers_){
+        ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, trigger->GetName());
+        delete trigger;
+    }
+    entity_triggers_.clear();
+    for (EntityPoint* point : entity_points_) delete point;
+    entity_points_.clear();
+    for (const Ogre::String& script : entity_scripts_){
+        ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, script);
+    }
+    entity_scripts_.clear();
+    scene_node_->removeAndDestroyAllChildren();
 }
 
 Walkmesh* EntityManager::GetWalkmesh(){return &walkmesh_;}
+
+bool EntityManager::IsWorldPositionBlocked(
+    const Entity* moving_entity, const Ogre::Vector3& position
+) const{
+        if (!IsWorldModule() || moving_entity == nullptr) return false;
+
+        for (const Entity* other : entity_){
+                if (other == moving_entity || !other->IsSolid()) continue;
+
+                const Ogre::Vector3 other_position = other->GetPosition();
+                const Ogre::Real dx = position.x - other_position.x;
+                const Ogre::Real dz = position.z - other_position.z;
+                const Ogre::Real radius = moving_entity->GetSolidRadius() + other->GetSolidRadius();
+                if (dx * dx + dz * dz >= radius * radius) continue;
+
+                const Ogre::Real moving_top = position.y + moving_entity->GetHeight();
+                const Ogre::Real other_top = other_position.y + other->GetHeight();
+                if (position.y < other_top && other_position.y < moving_top) return true;
+        }
+        return false;
+}
 
 Background2D* EntityManager::GetBackground2D(){return &background_2d_;}
 
@@ -608,6 +682,25 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
             entity_[i]->SetTalkable(false);
         }
     }
+}
+
+void EntityManager::ScriptPlacePlayerAtFieldEntry(
+    const float x, const float y, const int triangle_id, const float direction
+){
+        if (player_entity_ == nullptr || walkmesh_.GetNumberOfTriangles() <= 0) return;
+
+        int safe_triangle_id = triangle_id;
+        if (safe_triangle_id < 0 || safe_triangle_id >= walkmesh_.GetNumberOfTriangles()){
+                LOG_WARNING("World-map field entry has an invalid walkmesh triangle; using triangle 0.");
+                safe_triangle_id = 0;
+        }
+
+        player_entity_->SetPosition(Ogre::Vector3(
+            x, y, walkmesh_.GetA(static_cast<unsigned int>(safe_triangle_id)).z
+        ));
+        player_entity_->SetRotation(Ogre::Degree(direction));
+        player_entity_->SetMoveTriangleId(safe_triangle_id);
+        player_entity_->SetState(Entity::WALKMESH);
 }
 
 Entity* EntityManager::ScriptGetPlayerEntity() const{
@@ -1219,6 +1312,7 @@ void EntityManager::CheckEntityInteract(){
     Ogre::Degree angle_pc = player_entity_->GetRotation();
     Entity* entity_to_interact = NULL;
     Ogre::Degree less_angle(90);
+    Ogre::Real nearest_worldmap_distance = -1.0f;
     for (unsigned int i = 0; i < entity_.size(); ++ i){
         if (entity_[i]->IsTalkable() == false) continue;
         if (entity_[i] == player_entity_) continue;
@@ -1226,6 +1320,26 @@ void EntityManager::CheckEntityInteract(){
         float interact_range =  entity_[i]->GetTalkRadius();
         Ogre::Vector3 pos2 = player_entity_->GetPosition();
         float solid_range = player_entity_->GetSolidRadius();
+                if (IsWorldModule()){
+                        const Ogre::Real target_bottom = pos1.y;
+                        const Ogre::Real player_bottom = pos2.y;
+                                                const Ogre::Real talk_range
+                                                    = interact_range + solid_range + 0.05f;
+                        const Ogre::Real distance
+                            = (pos1.x - pos2.x) * (pos1.x - pos2.x)
+                                + (pos1.z - pos2.z) * (pos1.z - pos2.z);
+                        const bool height_overlap
+                            = player_bottom <= target_bottom + entity_[i]->GetHeight()
+                                && player_bottom + player_entity_->GetHeight() >= target_bottom;
+                        if (
+                                height_overlap && distance <= talk_range * talk_range
+                                && (nearest_worldmap_distance < 0 || distance < nearest_worldmap_distance)
+                        ){
+                                entity_to_interact = entity_[i];
+                                nearest_worldmap_distance = distance;
+                        }
+                        continue;
+                }
         int height = (pos1.z < pos2.z) ? entity_[i]->GetHeight() : player_entity_->GetHeight();
         if (((pos1.z - pos2.z + height) < (height * 2)) && ((pos1.z - pos2.z + height) >= 0)){
             interact_range = (interact_range + solid_range) * (interact_range + solid_range);

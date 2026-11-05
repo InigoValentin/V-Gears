@@ -105,6 +105,9 @@ int main(int argc, char *argv[]){
           "./data/models/fields/", "FileSystem", "FIELD_MODELS"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./data/models/world/", "FileSystem", "WORLD_MODELS", true
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
           "./data/models/battle/", "FileSystem", "BATTLE_MODELS", true
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
@@ -121,6 +124,9 @@ int main(int argc, char *argv[]){
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
           "./data/wm", "FileSystem", "WORLD_MAP"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./temp/world_models", "FileSystem", "WORLD_MAP"
         );
         Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 

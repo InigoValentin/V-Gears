@@ -14,7 +14,9 @@
  */
 
 #include <iostream>
+#include <algorithm>
 #include <fstream>
+#include <sstream>
 #include <tinyxml.h>
 #include <OgreRoot.h>
 #include <OgreMesh.h>
@@ -29,6 +31,9 @@
 #include "data/WorldMapWalkmesh.h"
 #include "data/VGearsHRCFileManager.h"
 #include "data/FF7Data.h"
+#include "decompiler/ControlFlow.h"
+#include "decompiler/DecompilerException.h"
+#include "decompiler/world/WorldEngine.h"
 
 std::string WorldInstaller::ELEMENT_MODELS_DIR("models/world/element");
 
@@ -642,6 +647,195 @@ bool WorldInstaller::ProcessMap(){
     processed_maps_ ++;
     if (processed_maps_ >= wm_map_.size()) return true;
     else return false;
+}
+
+bool WorldInstaller::GenerateScripts(
+    const std::vector<std::string>& field_names,
+    const std::map<u16, float>& field_scale_factors,
+    const std::vector<std::string>& converted_fields,
+    std::string& error_message
+){
+    error_message.clear();
+        if (field_names.empty() || converted_fields.empty()){
+                error_message = "Field maps were not installed; enable field map extraction.";
+                return false;
+        }
+    std::unique_ptr<std::string> archive_path
+      = disk_image_.filePath("data/wm/world_us.lgp");
+    if (!archive_path){
+        error_message = "WORLD_US.LGP was not found on the game disc.";
+        return false;
+    }
+
+    File archive_file(*archive_path);
+    VGears::LGPArchive archive(*archive_path, "LGP");
+    archive.open(*archive_path, true);
+    archive.load();
+    const VGears::LGPArchive::FileList& archive_entries = archive.GetFiles();
+    std::vector<const VGears::LGPArchive::FileEntry*> event_entries;
+    const VGears::LGPArchive::FileEntry* field_table_entry = nullptr;
+    bool has_wm0 = false;
+    for (const VGears::LGPArchive::FileEntry& entry : archive_entries){
+        std::string lower_name = entry.file_name;
+        VGears::StringUtil::toLowerCase(lower_name);
+        if (
+          lower_name.size() > 5 && lower_name.compare(0, 2, "wm") == 0
+          && lower_name.compare(lower_name.size() - 3, 3, ".ev") == 0
+        ){
+            const std::string map_number
+              = lower_name.substr(2, lower_name.size() - 5);
+            if (!map_number.empty() && std::all_of(
+                  map_number.begin(), map_number.end(), [](char character){
+                      return character >= '0' && character <= '9';
+                  }
+                )){
+                event_entries.push_back(&entry);
+                if (lower_name == "wm0.ev") has_wm0 = true;
+            }
+        }
+        else if (lower_name == "field.tbl"){
+            field_table_entry = &entry;
+        }
+    }
+    if (event_entries.empty() || !has_wm0 || field_table_entry == nullptr){
+        error_message = "WM0.EV, other world event files, or FIELD.TBL were not found inside WORLD_US.LGP.";
+        return false;
+    }
+
+    File field_table_file(
+      &archive_file, field_table_entry->data_offset, field_table_entry->data_size
+    );
+    std::vector<u8> field_table_data(field_table_entry->data_size);
+    if (field_table_data.size() != 64 * 24){
+        error_message = "FIELD.TBL has an unexpected size.";
+        return false;
+    }
+    field_table_file.GetFileBuffer(
+      field_table_data.data(), 0, field_table_entry->data_size
+    );
+
+    const std::string script_directory = output_dir_ + "/scripts/worldmap";
+    boost::filesystem::create_directories(script_directory);
+    for (const VGears::LGPArchive::FileEntry* event_entry : event_entries){
+        File event_file(&archive_file, event_entry->data_offset, event_entry->data_size);
+        std::vector<u8> event_data(event_entry->data_size);
+        if (event_data.empty()){
+            error_message = event_entry->file_name + " inside WORLD_US.LGP is empty.";
+            return false;
+        }
+        event_file.GetFileBuffer(event_data.data(), 0, event_entry->data_size);
+
+        std::string map_file_name = event_entry->file_name;
+        VGears::StringUtil::toLowerCase(map_file_name);
+        const std::string map_name = map_file_name.substr(0, map_file_name.size() - 3);
+        std::ofstream script_file(script_directory + "/" + map_name + ".lua");
+        if (!script_file){
+            error_message = "Cannot create script output in " + script_directory + ".";
+            return false;
+        }
+        script_file << "-- Decompiled from the user's " << event_entry->file_name << " data.\n\n";
+
+        std::vector<bool> generated_functions(256, false);
+        unsigned int generated_function_count = 0;
+        for (int script_index = 0; script_index < 256; ++script_index){
+        try{
+            WorldEngine engine(script_index);
+            InstVec instructions;
+            std::unique_ptr<Disassembler> disassembler = engine.GetDisassembler(instructions);
+            disassembler->Open(event_data);
+            disassembler->Disassemble();
+            if (instructions.empty()) continue;
+
+            ControlFlow control_flow(instructions, engine);
+            control_flow.CreateGroups();
+            std::ostringstream generated_script;
+            std::unique_ptr<CodeGenerator> code_generator
+              = engine.GetCodeGenerator(instructions, generated_script);
+            code_generator->Generate(instructions, control_flow.GetGraph());
+            script_file << generated_script.str() << "\n";
+            generated_functions[script_index] = true;
+            ++generated_function_count;
+        }
+        catch (const DecompilerException&){
+            script_file << "-- world function " << script_index
+              << " could not be decompiled.\n";
+        }
+        catch (const std::exception& exception){
+            script_file << "-- world function " << script_index
+              << " failed: " << exception.what() << ".\n";
+        }
+        }
+
+        script_file << "-- " << map_name << " mesh-function call-table mapping.\n";
+        for (size_t function_index = 0; function_index < generated_functions.size(); ++function_index){
+                if (!generated_functions[function_index]) continue;
+
+                const size_t type_offset = function_index * 4;
+            if (type_offset + 1 >= event_data.size()) continue;
+                const uint16 function_type = static_cast<uint16>(event_data[type_offset])
+                    | static_cast<uint16>(event_data[type_offset + 1] << 8);
+                if ((function_type >> 14) != 2) continue;
+
+                const uint16 mesh_index = (function_type >> 4) & 0x03FF;
+                const uint8 mesh_function_id = function_type & 0x0F;
+                if (mesh_index >= 36 * 28 || mesh_function_id > 4) continue;
+
+                script_file << "System.WorldMap.triangle_functions[" << mesh_index << "]"
+                    << " = System.WorldMap.triangle_functions[" << mesh_index << "] or {}\n"
+                    << "System.WorldMap.triangle_functions[" << mesh_index << "]["
+                    << static_cast<unsigned int>(mesh_function_id) << "] = " << function_index << "\n";
+        }
+
+        script_file << "System.WorldMap.field_table = {}\n";
+        for (size_t record_index = 0; record_index < 64; ++record_index){
+                for (size_t scenario = 0; scenario < 2; ++scenario){
+                        const size_t offset = record_index * 24 + scenario * 12;
+                        const uint16 raw_x = static_cast<uint16>(field_table_data[offset])
+                            | (static_cast<uint16>(field_table_data[offset + 1]) << 8);
+                        const uint16 raw_y = static_cast<uint16>(field_table_data[offset + 2])
+                            | (static_cast<uint16>(field_table_data[offset + 3]) << 8);
+                        const uint16 raw_triangle = static_cast<uint16>(field_table_data[offset + 4])
+                            | (static_cast<uint16>(field_table_data[offset + 5]) << 8);
+                        const uint16 field_id = static_cast<uint16>(field_table_data[offset + 6])
+                            | (static_cast<uint16>(field_table_data[offset + 7]) << 8);
+                        if (field_id >= field_names.size()) continue;
+                        const std::string& field_name = field_names[field_id];
+                        if (std::find(converted_fields.begin(), converted_fields.end(), field_name)
+                            == converted_fields.end()){
+                                continue;
+                        }
+                        const auto scale_factor = field_scale_factors.find(field_id);
+                        if (scale_factor == field_scale_factors.end() || scale_factor->second <= 0){
+                                continue;
+                        }
+
+                        const float downscale = 128.0f * scale_factor->second;
+                        const float x = static_cast<int16>(raw_x) / downscale;
+                        const float y = static_cast<int16>(raw_y) / downscale;
+                        const int16 triangle = static_cast<int16>(raw_triangle);
+                        const uint8 direction = field_table_data[offset + 8];
+                        const float direction_degrees
+                            = 360.0f * static_cast<float>(direction) / 255.0f;
+                        const size_t table_id = record_index + 1;
+                        script_file << "System.WorldMap.field_table[" << table_id << "]"
+                            << " = System.WorldMap.field_table[" << table_id << "] or {}\n"
+                            << "System.WorldMap.field_table[" << table_id << "][" << scenario << "] = {"
+                            << "field = \"" << field_name << "\", x = " << x << ", y = " << y
+                            << ", triangle = " << triangle << ", direction = "
+                            << direction_degrees << "}\n";
+                }
+        }
+        script_file.flush();
+        if (!script_file){
+            error_message = "Failed while writing " + script_directory + "/" + map_name + ".lua.";
+            return false;
+        }
+        if (generated_function_count == 0){
+            error_message = "No functions in " + event_entry->file_name + " could be decompiled.";
+            return false;
+        }
+    }
+    return true;
 }
 
 void WorldInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){

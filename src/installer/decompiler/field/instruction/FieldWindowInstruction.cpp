@@ -18,11 +18,26 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <boost/format.hpp>
 #include "decompiler/field/instruction/FieldWindowInstruction.h"
 #include "decompiler/field/FieldEngine.h"
 #include "decompiler/field/FieldCodeGenerator.h"
 #include "decompiler/field/FieldDisassembler.h"
+
+static bool TryParseInteger(const std::string& value, int& parsed_value){
+  size_t parsed_length = 0;
+  try{
+    parsed_value = std::stoi(value, &parsed_length);
+    return parsed_length == value.size();
+  }
+  catch (const std::invalid_argument&){
+    return false;
+  }
+  catch (const std::out_of_range&){
+    return false;
+  }
+}
 
 void FieldWindowInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
@@ -115,14 +130,22 @@ void FieldWindowInstruction::ProcessWINDOW(CodeGenerator* code_gen){
 
 void FieldWindowInstruction::ProcessMENU(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    int menu_id = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+    const std::string menu_id_value = FieldCodeGenerator::FormatValueOrVariable(
         cg->GetFormatter(), params_[1]->GetUnsigned(), params_[2]->GetSigned(),
         FieldCodeGenerator::ValueType::Integer
-      ));
-    int param = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+      );
+    const std::string param_value = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetSigned(),
       FieldCodeGenerator::ValueType::Integer
-    ));
+    );
+    int menu_id = 0;
+    int param = 0;
+    if (!TryParseInteger(menu_id_value, menu_id) || !TryParseInteger(param_value, param)){
+        code_gen->AddOutputLine(
+          "dispatch_menu(" + menu_id_value + ", " + param_value + ")"
+        );
+        return;
+    }
     switch(menu_id){
         case 0x05: // Ending credits.
             code_gen->AddOutputLine("ending_credits()");
@@ -176,21 +199,21 @@ void FieldWindowInstruction::ProcessMENU(CodeGenerator* code_gen){
 
 void FieldWindowInstruction::ProcessSTTIM(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    int h = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+    const std::string hours = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned(),
       FieldCodeGenerator::ValueType::Integer
-    ));
-    int m = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+    );
+    const std::string minutes = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetSigned(),
       FieldCodeGenerator::ValueType::Integer
-    ));
-    int s = std::stoi(FieldCodeGenerator::FormatValueOrVariable(
+    );
+    const std::string seconds = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[3]->GetUnsigned(), params_[6]->GetSigned(),
       FieldCodeGenerator::ValueType::Integer
-    ));
-    code_gen->AddOutputLine((
-      boost::format("Timer.set(%1%) -- %2%:%3%:%4%") % (3600 * h + 60 * m + s) % h % m % s
-    ).str());
+    );
+    code_gen->AddOutputLine(
+      "Timer.set(3600 * (" + hours + ") + 60 * (" + minutes + ") + (" + seconds + "))"
+    );
 }
 
 void FieldWindowInstruction::ProcessMESSAGE(

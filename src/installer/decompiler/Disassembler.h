@@ -48,6 +48,8 @@ class Disassembler{
          */
         virtual void Open(const char *filename);
 
+        void Open(std::vector<unsigned char> data);
+
         /**
          * Request disassembled instructions.
          */

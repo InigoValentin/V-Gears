@@ -58,6 +58,9 @@ class WorldCodeGenerator : public CodeGenerator{
 
     protected:
 
+        bool OutputOnlyRequiredLabels() const override;
+        void OnEndFunction(const Function& function) override;
+
         /**
          * Constructs the function signature.
          *

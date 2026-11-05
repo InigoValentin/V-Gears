@@ -14,6 +14,7 @@
  */
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <stdexcept>
 #include "FieldCodeGenerator.h"
 #include "FieldEngine.h"
 
@@ -68,12 +69,24 @@ void FunctionMetaData::ParseEnd(const std::string& item, std::deque<std::string>
 }
 
 void FunctionMetaData::ParseCharId(const std::string& item, std::deque<std::string>& strs){
-    if (!item.empty()) character_id_ = std::stoi(item);
-    if (!strs.empty()){
-        auto tmp = strs.front();
-        strs.pop_front();
-        ParseEntity(tmp, strs);
+    size_t parsed_length = 0;
+    try{
+        const int parsed_character_id = std::stoi(item, &parsed_length);
+        if (parsed_length == item.size()){
+            character_id_ = parsed_character_id;
+            if (!strs.empty()){
+                auto tmp = strs.front();
+                strs.pop_front();
+                ParseEntity(tmp, strs);
+            }
+            return;
+        }
     }
+    catch (const std::invalid_argument&){
+    }
+    catch (const std::out_of_range&){
+    }
+    ParseEntity(item, strs);
 }
 
 void FunctionMetaData::ParseEntity(const std::string& item, std::deque<std::string>& strs){

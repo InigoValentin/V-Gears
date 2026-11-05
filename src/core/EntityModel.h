@@ -36,7 +36,7 @@ class EntityModel : public Entity{
          */
         EntityModel(
           const Ogre::String& name, const Ogre::String file_name,
-          Ogre::SceneNode* node
+          Ogre::SceneNode* node, const Ogre::String& resource_group = ""
         );
         virtual ~EntityModel();
 

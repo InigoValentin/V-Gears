@@ -21,6 +21,8 @@
     <script file="gamedata/initial_savemap.lua" />
 
     <script file="scripts/field.lua" />
+    <script file="scripts/worldmap/triangle_triggers.lua" />
+    <script file="scripts/worldmap/vehicles.lua" />
     <script file="scripts/battle_ai.lua" />
     <script file="scripts/menu/menu_helpers.lua" />
 
@@ -28,4 +30,5 @@
     <script file="scripts/debug_data.lua" />
 
     <system_script name="MapChanger" />
+    <system_script name="WorldMap" />
 </scripts>

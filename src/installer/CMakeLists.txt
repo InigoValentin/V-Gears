@@ -108,6 +108,7 @@ include_directories (
 # Generate QT UIs.
 set(v-gears-installer_UIS MainWindow.ui)
 QT5_WRAP_UI(UIS ${v-gears-installer_UIS})
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 set(v-gears-installer_MOCS MainWindow.h)
 QT5_WRAP_CPP(MOCS ${v-gears-installer_MOCS})
 set(v-gears-installer_RESOURCES installer_resources.qrc)

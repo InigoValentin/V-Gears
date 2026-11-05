@@ -36,8 +36,8 @@ namespace VGears {
                 /**
                  * Offset in this block of the compressed data.
                  *
-                 * At the compressed data offset we have another uint32 which
-                 * is the size of the uncompressed data.
+                 * At the compressed data offset there is a uint32 containing
+                 * the size of the compressed LZS payload.
                  */
                 uint32 compressed_data_offsets[16];
             };
@@ -139,13 +139,12 @@ namespace VGears {
                 uint8 walkability_info_;
 
                 /**
-                 * Unknown data.
+                 * Packed mesh function value.
                  *
                  * Only 3 bits are valid.
-                 *
-                 * @todo Find out what this is for.
+                 * Values 0-2 mean no script; values 3-7 map to function IDs 0-4.
                  */
-                uint8 unknown;
+                uint8 function_id;
 
                 /**
                  * First side vector U component.
@@ -445,7 +444,7 @@ namespace VGears {
              * Imports and parses a map file.
              *
              * @param[in] stream Map file contents.
-             * @param[in] dest Unused
+             * @param[in] dest Resource parameter retained for API compatibility.
              */
             void ImportWorldmapFile(Ogre::DataStreamPtr& stream, WorldmapFile& dest);
 

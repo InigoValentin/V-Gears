@@ -22,21 +22,24 @@
 #include "core/Timer.h"
 
 EntityModel::EntityModel(
-  const Ogre::String& name, const Ogre::String file_name, Ogre::SceneNode* node
+  const Ogre::String& name, const Ogre::String file_name, Ogre::SceneNode* node,
+  const Ogre::String& resource_group
 ): Entity(name, node), animation_current_(nullptr)
 {
     Ogre::SceneManager* scene_manager;
-    Ogre::String res_group;
+  Ogre::String res_group = resource_group;
+  if (res_group.empty()){
     switch(EntityManager::getSingleton().GetModule()){
-        case Manager::BATTLE:
-            res_group = "BATTLE_MODELS";
-            break;
-        case Manager::WORLD:
-            res_group = "WORLD_MODELS";
-            break;
-        case Manager::FIELD:
-        default:
-            res_group = "FIELD_MODELS";
+      case Manager::BATTLE:
+        res_group = "BATTLE_MODELS";
+        break;
+      case Manager::WORLD:
+        res_group = "WORLD_MODELS";
+        break;
+      case Manager::FIELD:
+      default:
+        res_group = "FIELD_MODELS";
+    }
     }
     scene_manager = Ogre::Root::getSingleton().getSceneManager("Scene");
     model_ = scene_manager->createEntity(name_, file_name, res_group);

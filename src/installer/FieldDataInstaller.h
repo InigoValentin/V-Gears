@@ -307,12 +307,19 @@ class FieldDataInstaller{
          * @param[in] output_dir Path to the directory to write generated data
          * to.
          */
-        FieldDataInstaller(const DiskImage& disk_image, const std::string output_dir);
+        FieldDataInstaller(
+          const DiskImage& disk_image, const std::string output_dir,
+          std::function<void(std::string)> log_output_line
+        );
 
         /**
          * Installer destructor.
          */
         ~FieldDataInstaller();
+
+        const MapList& GetMapList() const{return map_list_;}
+        const FieldScaleFactorMap& GetFieldScaleFactors() const{return scale_factors_;}
+        const MapList& GetConvertedMapList() const{return converted_map_list_;}
 
         /**
          * Initializer for {@see CollectionFieldSpawnAndScaleFactors}.
@@ -475,7 +482,7 @@ class FieldDataInstaller{
          * @param[out] spawn_points Spawn points will be added sequentially to
          * the end of this map.
          */
-        static void CollectSpawnPoints(
+        static bool CollectSpawnPoints(
           VGears::FLevelFilePtr& field, const std::vector<std::string>& field_id_to_name_lookup,
           FieldSpawnPointsMap& spawn_points
         );
@@ -596,6 +603,8 @@ class FieldDataInstaller{
          * The list of maps.
          */
         std::vector<std::string> map_list_;
+
+        std::vector<std::string> failed_fields_;
 
         /**
          * Map of the collected spawn points.

@@ -16,6 +16,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 #include <vector>
 #include <common/TypeDefine.h>
 #include "DiskImage.h"
@@ -74,6 +75,13 @@ class WorldInstaller{
          * processed. False if there are more maps to process.
          */
         bool ProcessMap();
+
+                bool GenerateScripts(
+                    const std::vector<std::string>& field_names,
+                    const std::map<u16, float>& field_scale_factors,
+                    const std::vector<std::string>& converted_fields,
+                    std::string& error_message
+                );
 
         //void ReadMapFile(std::string file_name);
 

@@ -48,6 +48,14 @@ void WorldSubStackInstruction::ProcessInst(
         case 0x51: op = "<<"; break;
         default:op = "unknown_operation";
     }
-    std::string value = stack.Pop()->GetString() + " " + op + " " + stack.Pop()->GetString();
+    std::string value;
+    if (opcode_ == 0x51){
+        const std::string left = stack.Pop()->GetString();
+        const std::string right = stack.Pop()->GetString();
+        value = "((" + left + ") * (2 ^ " + right + "))";
+    }
+    else{
+        value = stack.Pop()->GetString() + " " + op + " " + stack.Pop()->GetString();
+    }
     stack.Push(new VarValue(value));
 }

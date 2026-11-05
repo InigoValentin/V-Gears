@@ -311,6 +311,14 @@ class DialogsManager : public Manager, public Ogre::Singleton<DialogsManager>{
         void SetText(const char* d_name, const char* text);
 
         /**
+         * Shows literal script text in the first available dialog slot.
+         *
+         * @param[in] text Message text to display.
+         * @return True if a dialog slot was available and shown.
+         */
+        bool ShowScriptMessage(const char* text);
+
+        /**
          * Sets or unsets a dialog window as numeric
          *
          * @param[in] d_name Name of the dialog.

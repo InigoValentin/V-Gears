@@ -52,6 +52,8 @@ void ScriptPrint(const char* text){
  * @param[in] text The new map name.
  */
 void ScriptMap(const char* text){
+  VGears::WorldmapModule::getSingleton().Suspend();
+  EntityManager::getSingleton().SetFieldModule();
     EntityManager::getSingleton().Clear();
     XmlMapsFile xml("./data/fields/_fields.xml");
     Ogre::String file_name = xml.GetMapFileNameByName(text);
@@ -110,7 +112,9 @@ void ScriptManager::InitBinds(){
     lua.new_usertype<Entity>(
       "Entity",
       "set_position", &Entity::ScriptSetPosition,
+      "move_by", &Entity::ScriptMoveBy,
       "get_position", &Entity::ScriptGetPosition,
+      "get_name", &Entity::GetName,
       "set_rotation", &Entity::ScriptSetRotation,
       "get_rotation", &Entity::ScriptGetRotation,
       "set_solid_radius", &Entity::SetSolidRadius,
@@ -188,6 +192,7 @@ void ScriptManager::InitBinds(){
       "get_entity_from_character_id", &EntityManager::GetEntityFromCharacterId,
       "get_entity_point", &EntityManager::ScriptGetEntityPoint,
       "set_player_entity", &EntityManager::ScriptSetPlayerEntity,
+      "place_player_at_field_entry", &EntityManager::ScriptPlacePlayerAtFieldEntry,
       "get_player_entity", &EntityManager::ScriptGetPlayerEntity,
       "unset_player_entity", &EntityManager::ScriptUnsetPlayerEntity,
       "player_lock", &EntityManager::ScriptPlayerLock,
@@ -389,6 +394,7 @@ void ScriptManager::InitBinds(){
       "update_timer", &DialogsManager::UpdateTimer,
       "set_mode", &DialogsManager::SetMode,
       "dialog_set_text", &DialogsManager::SetText,
+      "show_message", &DialogsManager::ShowScriptMessage,
       "dialog_close", &DialogsManager::Hide,
       "set_variable", &DialogsManager::SetVariable,
       "set_clickable", &DialogsManager::SetClickable,
@@ -468,7 +474,13 @@ void ScriptManager::InitBinds(){
     // Commands to initiate modules
     lua.new_usertype<VGears::WorldmapModule>(
       "world_map_module",
-      "init", &VGears::WorldmapModule::Init
+      "init", &VGears::WorldmapModule::Init,
+      "suspend", &VGears::WorldmapModule::Suspend,
+      "clear_vehicle_terrains", &VGears::WorldmapModule::ClearVehicleTerrains,
+      "add_vehicle_terrain", &VGears::WorldmapModule::AddVehicleTerrain,
+      "get_terrain_type_under_entity", &VGears::WorldmapModule::GetTerrainTypeUnderEntity,
+      "get_terrain_triangle_under_entity", &VGears::WorldmapModule::GetTerrainTriangleUnderEntity,
+      "unboard_vehicle", &VGears::WorldmapModule::UnboardVehicle
     );
 
     // Register all command handlers

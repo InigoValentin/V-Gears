@@ -14,6 +14,44 @@ load_field_map_request = function(map_name, point_name)
     end
 end
 
+dispatch_menu = function(menu_id, parameter)
+    menu_id = tonumber(menu_id)
+    parameter = tonumber(parameter)
+    if not menu_id or not parameter then
+        return
+    end
+
+    if menu_id == 5 then
+        ending_credits()
+    elseif menu_id == 6 then
+        if parameter == 64 then
+            name_chocobo()
+        else
+            name_character(parameter)
+        end
+    elseif menu_id == 7 then
+        if parameter == 1 then
+            Party.split_teams(3)
+        elseif parameter == 2 then
+            Party.split_teams(2)
+        else
+            Party.choose_party()
+        end
+    elseif menu_id == 8 then
+        open_shop(parameter)
+    elseif menu_id == 9 then
+        open_menu("party")
+    elseif menu_id == 14 then
+        open_menu("save")
+    elseif menu_id == 15 then
+        Party.steal_materia()
+    elseif menu_id == 18 then
+        Characters.remove_materia(parameter)
+    elseif menu_id == 19 then
+        Characters.restore_materia(parameter)
+    end
+end
+
 --- Assigns an entity to a playable character.
 --
 -- @param entity_name The entity name.
@@ -34,6 +72,14 @@ set_entity_to_character = function(entity_name, character_id)
         end
 
         entity_manager:set_player_entity(entity_name)
+        local world_map_entry = System.MapChanger.world_map_entry
+        if world_map_entry then
+            entity_manager:place_player_at_field_entry(
+                world_map_entry.x, world_map_entry.y,
+                world_map_entry.triangle, world_map_entry.direction
+            )
+            System.MapChanger.world_map_entry = nil
+        end
     end
     entity_manager:set_entity_to_character(entity_name, character_id)
 end
@@ -271,6 +317,8 @@ System["MapChanger"] = {
 
     --- Point of the map to change to.
     point_name = "",
+
+    world_map_entry = nil,
 
     --- ID of the current field.
     current_map_name = "",
