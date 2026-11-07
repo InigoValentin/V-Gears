@@ -176,7 +176,6 @@ void ScriptManager::InitBinds(){
     // Entity individual point commands
     lua.new_usertype<EntityPoint>(
       "EntityPoint",
-      // Internally returns 3 values:
       "get_position", &EntityPoint::ScriptGetPosition,
       "get_rotation", &EntityPoint::ScriptGetRotation
     );
@@ -360,8 +359,12 @@ void ScriptManager::InitBinds(){
       "Background2D",
       "autoscroll_to_entity", &Background2D::ScriptAutoScrollToEntity,
       "scroll_to_player", &Background2D::ScriptScrollToPlayer,
+      "scroll_to_entity", &Background2D::ScriptScrollToEntity,
       "scroll_to_position", &Background2D::ScriptScrollToPosition,
       "offset", &Background2D::ScriptOffset,
+      "area_on", &Background2D::ScriptAreaOn,
+      "area_off", &Background2D::ScriptAreaOff,
+      "area_clear", &Background2D::ScriptAreaClear,
       "play_animation_looped", &Background2D::ScriptPlayAnimationLooped,
       "play_animation_once", &Background2D::ScriptPlayAnimationOnce
     );

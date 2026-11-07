@@ -157,6 +157,84 @@ class FieldModelInstruction : public KernelCallInstruction{
         void ProcessMOVE(CodeGenerator* code_gen, const std::string& entity);
 
         /**
+         * Processes an ANIME2 opcode.
+         *
+         * Plays an animation of the model and goes back to the previous state, without waiting
+         * for it to end.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] char_id ID of the model, to name the animation.
+         */
+        void ProcessANIME2(CodeGenerator* code_gen, const std::string& entity, int char_id);
+
+        /**
+         * Processes an ANIM!1 opcode.
+         *
+         * Plays an animation of the model and stops at its last frame, without waiting for it to
+         * end. It's the non-waiting version of ANIM!2.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] char_id ID of the model, to name the animation.
+         */
+        void ProcessANIM_1(CodeGenerator* code_gen, const std::string& entity, int char_id);
+
+        /**
+         * Processes a CANIM1 opcode.
+         *
+         * Plays part of an animation and goes back to the previous state, without waiting for it
+         * to end. It's the non-waiting version of CANIM2.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] char_id ID of the model, to name the animation.
+         */
+        void ProcessCANIM1(CodeGenerator* code_gen, const std::string& entity, int char_id);
+
+        /**
+         * Processes a CANM!1 opcode.
+         *
+         * Plays part of an animation and stops at its last frame, without waiting for it to end.
+         * It's the non-waiting version of CANM!2.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] char_id ID of the model, to name the animation.
+         */
+        void ProcessCANM_1(CodeGenerator* code_gen, const std::string& entity, int char_id);
+
+        /**
+         * Processes an ANIMW opcode.
+         *
+         * Waits for the animation that was played by one of the non-waiting animation opcodes.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         */
+        void ProcessANIMW(CodeGenerator* code_gen, const std::string& entity);
+
+        /**
+         * Processes an FMOVE opcode.
+         *
+         * Opcode: 0xAD
+         * Short name: FMOVE
+         *
+         * Memory layout (6 bytes)
+         * |0xAD|B1/B2|X|Y|
+         *
+         * Moves the entity's model to the position, and waits for it to arrive, like MOVE. The
+         * animation is the one the script chose, instead of the walking one. The documentation
+         * for this opcode in the repository is a copy of the one for CMOVE, so this is taken from
+         * how the scripts use it: they set a running animation, call FMOVE, and then set an idle
+         * animation.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         */
+        void ProcessFMOVE(CodeGenerator* code_gen, const std::string& entity);
+
+        /**
          * Processes a TURA opcode.
          *
          * Opcode: 0xAB

@@ -288,6 +288,32 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
             return VGears::NameLookup::Animation(base_name);
         }
 
+        /**
+         * Retrieves the animation a model must play when its script doesn't set a default one.
+         *
+         * In the original game a model without a requested animation plays the first one of its
+         * list.
+         *
+         * @param[in] char_id ID of the model, as given to the CHAR opcode.
+         * @return Name of the first animation of the model. An empty string if the model already
+         * has an animation called "Idle", or it has no animations.
+         */
+        virtual std::string GetDefaultAnimationName(int char_id) override{
+            if (static_cast<unsigned int>(char_id) >= model_loader_->GetModels().size()) return "";
+            const auto& animations = model_loader_->GetModels().at(char_id).animations;
+            if (animations.empty()) return "";
+            std::string first;
+            for (size_t i = 0; i < animations.size(); ++ i){
+                Ogre::String base_name;
+                VGears::StringUtil::splitBase(animations[i].name, base_name);
+                VGears::StringUtil::toLowerCase(base_name);
+                const std::string friendly = VGears::NameLookup::Animation(base_name);
+                if (friendly == "Idle") return "";
+                if (i == 0) first = friendly;
+            }
+            return first;
+        }
+
     private:
 
         /**
@@ -394,6 +420,23 @@ class FieldDataInstaller{
          * @param[in] model_name Name of the model to convert.
          */
         void ConvertModels(std::string model_name);
+
+        /**
+         * Memory banks that are temporary: every field starts with them set to zero.
+         */
+        static const std::vector<int> TEMPORARY_BANKS;
+
+        /**
+         * Retrieves the Lua code every field script starts with.
+         *
+         * It creates the entity container, and sets the temporary memory banks to zero. In the
+         * original game a field can't see what the previous one left in them, but here the
+         * banks live as long as the game, so scripts that wait for a bank to change would see
+         * leftovers.
+         *
+         * @return Lua code to put at the beginning of a field script.
+         */
+        static std::string FieldScriptHeader();
 
     private:
 

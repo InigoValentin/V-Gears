@@ -102,6 +102,39 @@ class FieldCameraInstruction : public KernelCallInstruction{
         void ProcessSCRLC(CodeGenerator* code_gen);
 
         /**
+         * Processes a SCRLA opcode.
+         *
+         * Opcode: 0x63
+         * Short name: SCRLA
+         * Long name: Scroll To Entity
+         *
+         * Memory layout (5 bytes)
+         * |0x63|B|S|E|T|
+         *
+         * Arguments
+         *
+         * - const UByte B: Bank for the scroll speed, or zero if it is specified as a literal
+         * value.
+         * - const UShort S: Speed of the scroll, in frames, or the address to find the speed if B
+         * is non-zero.
+         * - const UByte E: Entity ID to scroll to.
+         * - const UByte T: Type of scroll.
+         *
+         * Scrolls the current view so that entity E is in the center of the view. If the entity
+         * moves during the scroll, the scroll follows it, and so does the camera afterwards.
+         *
+         * Scroll Types:
+         * 0 - No scroll.
+         * 1 - Instantaneous.
+         * 2 - Linear.
+         * 3 - Smooth.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] engine Engine, to find the entity.
+         */
+        void ProcessSCRLA(CodeGenerator* code_gen, const FieldEngine& engine);
+
+        /**
          * Processes a SCRCC opcode.
          *
          * Opcode: 0x65

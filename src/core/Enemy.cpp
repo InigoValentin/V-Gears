@@ -216,10 +216,8 @@ Ogre::Vector3& Enemy::GetPos(){return pos_;}
 
 void Enemy::SetPos(const Ogre::Vector3 &pos){pos_ = pos;}
 
-void Enemy::ScriptGetPos() const{
-    ScriptManager::getSingleton().AddValueToStack(pos_.x);
-    ScriptManager::getSingleton().AddValueToStack(pos_.y);
-    ScriptManager::getSingleton().AddValueToStack(pos_.z);
+std::tuple<float, float, float> Enemy::ScriptGetPos() const{
+    return std::make_tuple(pos_.x, pos_.y, pos_.z);
 }
 
 bool Enemy::IsFront() const{return front_;}

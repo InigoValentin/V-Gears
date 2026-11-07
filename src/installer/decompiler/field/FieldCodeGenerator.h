@@ -16,6 +16,7 @@
 #pragma once
 
 #include <deque>
+#include <set>
 #include <unordered_map>
 #include <boost/algorithm/string.hpp>
 #include "FieldScriptFormatter.h"
@@ -170,6 +171,19 @@ class FunctionMetaData{
 class FieldCodeGenerator : public CodeGenerator{
 
     public:
+
+        /**
+         * Lua condition that tells an on_update script has already reached its end.
+         *
+         * The engine runs on_update again every time it finishes, but in the original game a
+         * script that returns is over for good.
+         */
+        static const std::string ON_UPDATE_FINISHED_CONDITION;
+
+        /**
+         * Lua statement that marks an on_update script as finished.
+         */
+        static const std::string ON_UPDATE_FINISHED_STATEMENT;
 
         /**
          * Type of data.
@@ -346,7 +360,26 @@ class FieldCodeGenerator : public CodeGenerator{
          */
         FieldScriptFormatter& GetFormatter();
 
+        /**
+         * Checks if any script of the field defines a dialog window.
+         *
+         * A window is defined with the WINDOW or WSIZW opcodes. Fields can show messages in
+         * windows that are never defined.
+         *
+         * @param[in] window_id Window ID.
+         * @return True if the field defines the window.
+         */
+        bool IsWindowDefined(uint32 window_id) const;
 
+        /**
+         * Position and size of the window for messages shown in a window that is never defined.
+         *
+         * These are the same values the engine uses for its own script messages.
+         */
+        static const int DEFAULT_WINDOW_X;
+        static const int DEFAULT_WINDOW_Y;
+        static const int DEFAULT_WINDOW_WIDTH;
+        static const int DEFAULT_WINDOW_HEIGHT;
 
     protected:
 
@@ -417,5 +450,15 @@ class FieldCodeGenerator : public CodeGenerator{
          * The formatter.
          */
         FieldScriptFormatter& formatter_;
+
+        /**
+         * IDs of the dialog windows defined by the field. Filled the first time it is needed.
+         */
+        mutable std::set<uint32> defined_windows_;
+
+        /**
+         * Whether defined_windows_ has been filled.
+         */
+        mutable bool defined_windows_collected_ = false;
 
 };

@@ -16,7 +16,12 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <stdexcept>
 #include "FieldCodeGenerator.h"
+#include "FieldDisassembler.h"
 #include "FieldEngine.h"
+
+const std::string FieldCodeGenerator::ON_UPDATE_FINISHED_CONDITION("self.on_update_finished");
+
+const std::string FieldCodeGenerator::ON_UPDATE_FINISHED_STATEMENT("self.on_update_finished = true");
 
 const std::string FunctionMetaData::DELIMITER("_");
 
@@ -167,6 +172,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                       "-- Overflowed jump to " + (boost::format("0x%1$X") % (*instruction)->GetDestAddress()).str()
                       + " (last address in function is " + (boost::format("0x%1$X)") % function->first.end_addr).str()
                     );
+                    if ("on_update" == function->first.name) AddOutputLine(ON_UPDATE_FINISHED_STATEMENT);
                     AddOutputLine("do return 0 end");
                 }
                 // Prevent backward jumps in the on_start script.
@@ -182,8 +188,10 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
         }
         for(; ends_needed > 0; ends_needed --) AddOutputLine("end -- clean-up", true, false);
         // Add missing return:
-        if ("return 0" != lines_.at(lines_.size() - 1).line && "do return 0 end" != lines_.at(lines_.size() - 1).line)
+        if ("return 0" != lines_.at(lines_.size() - 1).line && "do return 0 end" != lines_.at(lines_.size() - 1).line){
+            if ("on_update" == function->first.name) AddOutputLine(ON_UPDATE_FINISHED_STATEMENT);
             AddOutputLine("do return 0 end", false, false);
+        }
         OnEndFunction(function->first);
     }
 
@@ -218,6 +226,12 @@ void FieldCodeGenerator::OnStartFunction(const Function& func){
         AddOutputLine("-- HACK: Set default playable entity an ensure the camera follows it.");
         AddOutputLine("entity_manager:set_player_entity(\"Cloud\")");
         AddOutputLine("background2d:autoscroll_to_entity(entity_manager:get_entity(\"Cloud\"))\n");
+    }
+    // Don't run on_update again once it has reached its end.
+    if (func.name == "on_update"){
+        AddOutputLine("if " + ON_UPDATE_FINISHED_CONDITION + " then", false, true);
+        AddOutputLine("return 0");
+        AddOutputLine("end", true, false);
     }
     // For lines, exit if they are off.
     if (func.name == "on_approach" || func.name == "on_cross" || func.name == "on_near" || func.name == "on_leave"){
@@ -254,6 +268,26 @@ std::string FieldCodeGenerator::ConstructFuncSignature(const Function &function)
 bool FieldCodeGenerator::OutputOnlyRequiredLabels() const{return true;}
 
 FieldScriptFormatter& FieldCodeGenerator::GetFormatter(){return formatter_;}
+
+const int FieldCodeGenerator::DEFAULT_WINDOW_X = 16;
+
+const int FieldCodeGenerator::DEFAULT_WINDOW_Y = 176;
+
+const int FieldCodeGenerator::DEFAULT_WINDOW_WIDTH = 288;
+
+const int FieldCodeGenerator::DEFAULT_WINDOW_HEIGHT = 56;
+
+bool FieldCodeGenerator::IsWindowDefined(uint32 window_id) const{
+    if (!defined_windows_collected_){
+        for (const auto& inst : insts_){
+            const uint32 opcode = inst->GetOpcode();
+            if (opcode == OPCODES::WINDOW || opcode == OPCODES::WSIZW)
+                defined_windows_.insert(inst->GetParam(0)->GetUnsigned());
+        }
+        defined_windows_collected_ = true;
+    }
+    return defined_windows_.find(window_id) != defined_windows_.end();
+}
 
 const std::string FieldCodeGenerator::FormatInstructionNotImplemented(
   const std::string& entity, uint32 address, uint32 opcode

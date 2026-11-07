@@ -23,6 +23,10 @@
 
 namespace VGears{
 
+  static Ogre::Vector3 ConvertRootTranslation(const Ogre::Vector3& translation, bool flip_forward_axis){
+    return Ogre::Vector3(translation.x, translation.y, flip_forward_axis ? -translation.z : translation.z);
+  }
+
    const Ogre::Real AFile::FRAME_DURATION(1.0f / 30.0f);
 
    const String AFile::RESOURCE_TYPE("VGearsAFile");
@@ -38,6 +42,14 @@ namespace VGears{
     AFile::~AFile(){unload();}
 
     void AFile::SetBoneCount(const uint32 bone_count){bone_count_ = bone_count;}
+
+    Ogre::AxisAlignedBox AFile::GetRootTranslationBounds(bool flip_forward_axis) const{
+      Ogre::AxisAlignedBox bounds(Ogre::Vector3::ZERO, Ogre::Vector3::ZERO);
+      for (const Frame& frame : frames_){
+        bounds.merge(ConvertRootTranslation(frame.root_translation, flip_forward_axis));
+      }
+      return bounds;
+    }
 
     void AFile::loadImpl(){
         AFileSerializer serializer;
@@ -77,7 +89,7 @@ namespace VGears{
         key_frame->setRotation(rot);
     }
 
-    void AFile::AddTo(Ogre::SkeletonPtr skeleton, const String& name) const{
+    void AFile::AddTo(Ogre::SkeletonPtr skeleton, const String& name, bool flip_forward_axis) const{
         if(skeleton->hasAnimation(name)) return;
         Ogre::Real length((frames_.size() - 1) * FRAME_DURATION);
         Ogre::Animation *anim(skeleton->createAnimation(name, length));
@@ -94,7 +106,7 @@ namespace VGears{
         ){
             time = (index++) * FRAME_DURATION;
             Ogre::TransformKeyFrame* key_frame(track->createNodeKeyFrame(time));
-            key_frame->setTranslate(frame->root_translation);
+            key_frame->setTranslate(ConvertRootTranslation(frame->root_translation, flip_forward_axis));
             SetFrameRotation(key_frame, frame->root_rotation);
         }
         for(uint32 i(0); i < bone_count_; ++ i){

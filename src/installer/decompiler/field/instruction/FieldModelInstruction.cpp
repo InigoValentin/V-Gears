@@ -115,12 +115,20 @@ void FieldModelInstruction::ProcessInst(
         case OPCODES::CMOVE: code_gen->WriteTodo(md.GetEntityName(), "CMOVE"); break;
         case OPCODES::MOVA: code_gen->WriteTodo(md.GetEntityName(), "MOVA"); break;
         case OPCODES::TURA: ProcessTURA(code_gen, md.GetEntityName(), eng); break;
-        case OPCODES::ANIMW: code_gen->WriteTodo(md.GetEntityName(), "ANIMW"); break;
-        case OPCODES::FMOVE: code_gen->WriteTodo(md.GetEntityName(), "FMOVE"); break;
-        case OPCODES::ANIME2: code_gen->WriteTodo(md.GetEntityName(), "ANIME2"); break;
-        case OPCODES::ANIM_1: code_gen->WriteTodo(md.GetEntityName(), "ANIM_1"); break;
-        case OPCODES::CANIM1: code_gen->WriteTodo(md.GetEntityName(), "CANIM1"); break;
-        case OPCODES::CANM_1: code_gen->WriteTodo(md.GetEntityName(), "CANM_1"); break;
+        case OPCODES::ANIMW: ProcessANIMW(code_gen, md.GetEntityName()); break;
+        case OPCODES::FMOVE: ProcessFMOVE(code_gen, md.GetEntityName()); break;
+        case OPCODES::ANIME2:
+            ProcessANIME2(code_gen, md.GetEntityName(), md.GetCharacterId());
+            break;
+        case OPCODES::ANIM_1:
+            ProcessANIM_1(code_gen, md.GetEntityName(), md.GetCharacterId());
+            break;
+        case OPCODES::CANIM1:
+            ProcessCANIM1(code_gen, md.GetEntityName(), md.GetCharacterId());
+            break;
+        case OPCODES::CANM_1:
+            ProcessCANM_1(code_gen, md.GetEntityName(), md.GetCharacterId());
+            break;
         case OPCODES::MSPED: ProcessMSPED(code_gen, md.GetEntityName()); break;
         case OPCODES::DIR: ProcessDIR(code_gen, md.GetEntityName()); break;
         case OPCODES::TURNGEN: ProcessTURNGEN(code_gen, md.GetEntityName()); break;
@@ -232,6 +240,19 @@ void FieldModelInstruction::ProcessCHAR(CodeGenerator* code_gen, const std::stri
     code_gen->AddOutputLine(
       (boost::format("self.%1% = entity_manager:get_entity(\"%1%\")") % entity).str()
     );
+    // A model that has no animation playing is not drawn. The ones with no "Idle" animation need
+    // a default one, which a DFANM later in the script replaces.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const std::string animation = cg->GetFormatter().GetDefaultAnimationName(params_[0]->GetSigned());
+    if (!animation.empty()){
+        code_gen->AddOutputLine((
+          boost::format("self.%1%:set_default_animation(\"%2%\") -- No Idle animation")
+          % entity % animation
+        ).str());
+        code_gen->AddOutputLine(
+          (boost::format("self.%1%:play_animation(\"%2%\")") % entity % animation).str()
+        );
+    }
 }
 
 void FieldModelInstruction::ProcessDFANM(
@@ -264,6 +285,69 @@ void FieldModelInstruction::ProcessANIME1(
       boost::format("self.%1%:play_animation(\"%2%\") -- speed %3%")
       % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id) % speed
     ).str());
+    code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
+}
+
+void FieldModelInstruction::ProcessANIME2(
+  CodeGenerator* code_gen, const std::string& entity, int char_id
+){
+    // Like ANIME1, but the script doesn't wait for the animation to end.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    auto animation_id = params_[0]->GetUnsigned();
+    auto speed = 1.0f / params_[1]->GetUnsigned();
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:play_animation(\"%2%\") -- speed %3%")
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id) % speed
+    ).str());
+}
+
+void FieldModelInstruction::ProcessANIM_1(
+  CodeGenerator* code_gen, const std::string& entity, int char_id
+){
+    // Like ANIM_2, but the script doesn't wait for the animation to end.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    auto animation_id = params_[0]->GetUnsigned();
+    auto speed = 1.0f / params_[1]->GetUnsigned();
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:play_animation_stop(\"%2%\") -- speed %3%")
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id) % speed
+    ).str());
+}
+
+void FieldModelInstruction::ProcessCANIM1(
+  CodeGenerator* code_gen, const std::string& entity, int char_id
+){
+    // Like CANIM2, but the script doesn't wait for the animation to end.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    auto animation_id = params_[0]->GetUnsigned();
+    auto start_frame = params_[1]->GetUnsigned() / 30.0f;
+    auto end_frame = params_[2]->GetUnsigned() / 30.0f;
+    auto speed = 1.0f / params_[3]->GetUnsigned();
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:play_animation(\"%2%\", %3%, %4%) -- speed %5%")
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id)
+      % start_frame % end_frame % speed
+    ).str());
+}
+
+void FieldModelInstruction::ProcessCANM_1(
+  CodeGenerator* code_gen, const std::string& entity, int char_id
+){
+    // Like CANM_2, but the script doesn't wait for the animation to end.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    auto animation_id = params_[0]->GetUnsigned();
+    auto start_frame = params_[1]->GetUnsigned() / 30.0f;
+    auto end_frame = params_[2]->GetUnsigned() / 30.0f;
+    auto speed = 1.0f / params_[3]->GetUnsigned();
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:play_animation_stop(\"%2%\", %3%, %4%) -- speed %5%")
+      % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id)
+      % start_frame % end_frame % speed
+    ).str());
+}
+
+void FieldModelInstruction::ProcessANIMW(CodeGenerator* code_gen, const std::string& entity){
+    // Waits for the animation that was started with one of the non-waiting opcodes.
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
 }
 
@@ -313,6 +397,26 @@ void FieldModelInstruction::ProcessMOVE(CodeGenerator* code_gen, const std::stri
       (boost::format("self.%1%:move_to_position(%2%, %3%)") % entity % x % y).str()
     );
     code_gen->AddOutputLine((boost::format("self.%1%:move_sync()") % entity).str());
+}
+
+void FieldModelInstruction::ProcessFMOVE(CodeGenerator* code_gen, const std::string& entity){
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->GetScaleFactor();
+    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetSigned(),
+      FieldCodeGenerator::ValueType::Float, scale
+    );
+    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetSigned(),
+      FieldCodeGenerator::ValueType::Float, scale
+    );
+    // Like MOVE, but the animation is the one the script chose, not the walking one.
+    code_gen->AddOutputLine((boost::format("self.%1%:move_auto_animation(false)") % entity).str());
+    code_gen->AddOutputLine(
+      (boost::format("self.%1%:move_to_position(%2%, %3%)") % entity % x % y).str()
+    );
+    code_gen->AddOutputLine((boost::format("self.%1%:move_sync()") % entity).str());
+    code_gen->AddOutputLine((boost::format("self.%1%:move_auto_animation(true)") % entity).str());
 }
 
 void FieldModelInstruction::ProcessTURA(
@@ -605,8 +709,15 @@ void FieldModelInstruction::ProcessOFST(CodeGenerator* code_gen, const std::stri
     const bool literal_values
       = TryParseFloat(x_value, x) && TryParseFloat(y_value, y)
         && TryParseFloat(z_value, z) && TryParseFloat(speed_value, speed);
-    const std::string move_type
-      = params_[4]->GetUnsigned() ? "Entity.SMOOTH" : "Entity.LINEAR";
+    std::string move_type;
+    switch (params_[4]->GetUnsigned()){
+      case 0: move_type = "Entity.NONE"; break;
+      case 1: move_type = "Entity.LINEAR"; break;
+      case 2: move_type = "Entity.SMOOTH"; break;
+      default:
+        code_gen->WriteTodo(entity, "OFST with unsupported movement type");
+        return;
+    }
     if (literal_values){
         speed /= 30.0f;
         code_gen->AddOutputLine((

@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <tuple>
 #include <OgreString.h>
 #include "EntityCollision.h"
 #include "EntityDirection.h"
@@ -243,10 +244,9 @@ class Entity{
         /**
          * Retrieves the entity position.
          *
-         * To be used from Lua scripts only. It doesn't return anything, but adds three values to
-         * the stack for the X, Y and Z coordinates.
+         * @return The X, Y and Z coordinates for Lua scripts.
          */
-        void ScriptGetPosition() const;
+        std::tuple<float, float, float> ScriptGetPosition() const;
 
         /**
          * Sets the entity position.
@@ -533,6 +533,13 @@ class Entity{
          * @todo Verify this description. Also, indicate units (pixels?).
          */
         float GetMoveStopDistance() const;
+
+        /**
+         * Checks whether the current move was requested by a script.
+         *
+         * @return True for scripted movement.
+         */
+        bool IsScriptedMove() const;
 
         /**
          * Sets the destination triangle in the walkmesh.
@@ -1213,6 +1220,8 @@ class Entity{
          * Distance between the entity and it's movement destination point.
          */
         float move_stop_distance_;
+
+        bool scripted_move_;
 
         /**
          * Entity's movement destination triangle ID.

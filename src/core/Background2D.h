@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <map>
+#include <set>
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreRenderQueueListener.h>
 #include <OgreRoot.h>
@@ -130,10 +132,35 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Scrolls the background to the position of the playable character.
          *
+         * Background2D::NONE centers the view instantly and resumes following the character. Any
+         * other type moves the view over time, and leaves it in place once it arrives.
+         *
          * @param[in] type Scroll type.
          * @param[in] seconds Scroll duration.
          */
-        void ScriptScrollToPlayer(const SCROLL_TYPE type, const unsigned int seconds);
+        void ScriptScrollToPlayer(const SCROLL_TYPE type, const float seconds);
+
+        /**
+         * Scrolls the background to an entity, and keeps following it once it arrives.
+         *
+         * @param[in] entity Entity to scroll to.
+         * @param[in] type Scroll type.
+         * @param[in] seconds Scroll duration.
+         */
+        void ScriptScrollToEntity(Entity* entity, const SCROLL_TYPE type, const float seconds);
+
+        /**
+         * Updates the destination of the current scroll, if it is moving towards an entity.
+         */
+        void UpdateScrollTarget();
+
+        /**
+         * Retrieves the scroll position that centers an entity in the view.
+         *
+         * @param[in] entity Entity to center.
+         * @return Scroll position in game internal screen coordinates.
+         */
+        const Ogre::Vector2 GetEntityScroll(const Entity* entity) const;
 
         /**
          * Scrolls the background to a position.
@@ -148,7 +175,7 @@ class Background2D : public Ogre::RenderQueueListener{
         );
 
         /**
-         * Waits for the scroll to complete.
+         * Waits for the scroll to complete. If no scroll is active, the script just continues.
          *
          * @return -1.
          */
@@ -161,6 +188,33 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] y Y coordinate to scroll to.
          */
         void ScriptOffset(const float x, const float y);
+
+        /**
+         * Shows the tiles of a background area that are in a layer.
+         *
+         * Tiles can belong to a scripted area, and to the layers of it given by a bit mask: layer
+         * N is the bit 1 << N. They are only drawn while one of their layers is on. Tiles that
+         * don't belong to an area are always drawn. Areas start with all their layers off.
+         *
+         * @param[in] area Area ID.
+         * @param[in] layer Layer of the area to turn on, from 0 to 31.
+         */
+        void ScriptAreaOn(const int area, const int layer);
+
+        /**
+         * Hides the tiles of a background area that are in a layer.
+         *
+         * @param[in] area Area ID.
+         * @param[in] layer Layer of the area to turn off, from 0 to 31.
+         */
+        void ScriptAreaOff(const int area, const int layer);
+
+        /**
+         * Hides all the tiles of a background area, whatever their layer.
+         *
+         * @param[in] area Area ID.
+         */
+        void ScriptAreaClear(const int area);
 
         /**
          * Stops the current scrolling.
@@ -282,12 +336,15 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] u2
          * @param[in] v2
          * @param[in] blending Blending mode for the tile
+         * @param[in] area Scripted area the tile belongs to, or 0 if it always has to be drawn.
+         * @param[in] state Bit mask with the layers of the area in which the tile is drawn.
          * @todo Depth is z-index??
          * @todo What are v1, v2, u1 and u2?
          */
         void AddTile(
           const int x, const int y, const int width, const int height, const float depth,
-          const float u1, const float v1, const float u2, const float v2, const Blending blending
+          const float u1, const float v1, const float u2, const float v2, const Blending blending,
+          const int area = 0, const int state = 0
         );
 
         /**
@@ -417,9 +474,49 @@ class Background2D : public Ogre::RenderQueueListener{
              * Tile blending mode.
              */
             Blending blending;
+
+            /**
+             * Scripted area the tile belongs to, or 0 if it is always drawn.
+             */
+            int area;
+
+            /**
+             * Bit mask with the layers of the area in which the tile is drawn.
+             */
+            int state;
+
+            /**
+             * Whether the tile is drawn.
+             */
+            bool visible;
         };
 
         typedef std::vector<Tile> TileList;
+
+        /**
+         * Checks if any of the layers in a bit mask is on for an area.
+         *
+         * @param[in] area Area ID.
+         * @param[in] layers Bit mask with layers of the area.
+         * @return True if one of the layers is on.
+         */
+        bool IsAreaStateOn(const int area, const int layers) const;
+
+        /**
+         * Draws or hides the tiles of an area according to its states.
+         *
+         * @param[in] area Area ID.
+         */
+        void RefreshArea(const int area);
+
+        /**
+         * Writes the position of a tile in its vertex buffer.
+         *
+         * A tile that is not visible is written collapsed, so that nothing is rasterised.
+         *
+         * @param[in] tile Tile to write.
+         */
+        void WriteTilePosition(const Tile& tile);
 
         /**
          * Loads a background.
@@ -449,6 +546,30 @@ class Background2D : public Ogre::RenderQueueListener{
          * Apply the camera position to match the current scroll.
          */
         virtual void applyScroll();
+
+        /**
+         * Starts a scroll, replacing the current one if there is any.
+         *
+         * A scroll without type or duration is applied immediately.
+         *
+         * @param[in] position Position to scroll to.
+         * @param[in] type Scroll type.
+         * @param[in] seconds Scroll duration.
+         * @param[in] target_entity Entity the scroll moves towards, or nullptr.
+         * @param[in] follow_target Keep following target_entity when the scroll ends.
+         */
+        void StartScroll(
+          const Ogre::Vector2& position, const SCROLL_TYPE type, const float seconds,
+          Entity* target_entity, const bool follow_target
+        );
+
+        /**
+         * Limits a scroll position to the background range.
+         *
+         * @param[in] position Position to limit.
+         * @return The position, inside the background range.
+         */
+        const Ogre::Vector2 ClampScroll(const Ogre::Vector2& position) const;
 
         /**
          * Calculates the screen scale.
@@ -511,6 +632,11 @@ class Background2D : public Ogre::RenderQueueListener{
          * The list of tiles in the background.
          */
         TileList tiles_;
+
+        /**
+         * The layers that are on for each scripted area, as a bit mask.
+         */
+        std::map<int, unsigned int> area_states_on_;
 
         /**
          * Alpha blending render operation.
@@ -601,6 +727,16 @@ class Background2D : public Ogre::RenderQueueListener{
          * Secund the currens scroll action has taken so far.
          */
         float scroll_current_seconds_;
+
+        /**
+         * Entity the current scroll action moves towards, or nullptr.
+         */
+        Entity* scroll_target_entity_;
+
+        /**
+         * Whether to keep following the target entity when the current scroll action ends.
+         */
+        bool scroll_follow_target_;
 
         /**
          * @todo Document.

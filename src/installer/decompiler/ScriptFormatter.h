@@ -57,6 +57,18 @@ class ScriptFormatter{
         virtual std::string GetFriendlyAnimationName(int animation_id, int id);
 
         /**
+         * Retrieves the animation a model must play when its script doesn't set a default one.
+         *
+         * The engine plays the animation called "Idle" by default. Models that don't have one
+         * show no animation at all, and they are not drawn.
+         *
+         * @param[in] char_id ID of the model, as given to the CHAR opcode.
+         * @return Name of the animation to play, or an empty string if the model already has an
+         * animation called "Idle", or there is no animation to choose.
+         */
+        virtual std::string GetDefaultAnimationName(int char_id);
+
+        /**
          * Retrieves a friendly name for a character.
          *
          * @param[in] char_id ID of the character.

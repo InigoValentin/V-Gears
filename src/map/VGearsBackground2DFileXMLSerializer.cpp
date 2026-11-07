@@ -112,6 +112,8 @@ namespace VGears{
         ReadAttribute(node, "uv", dest.uv);
         ReadAttribute(node, "depth", dest.depth);
         ReadAttribute(node, "blending", dest.blending, B_ALPHA);
+        ReadAttribute(node, "area", dest.area, 0);
+        ReadAttribute(node, "state", dest.state, 0);
         ReadMap(node, "animation", "name", dest.animations);
     }
 

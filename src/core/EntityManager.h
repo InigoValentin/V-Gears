@@ -44,6 +44,16 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         virtual ~EntityManager();
 
         /**
+         * Limits a scripted movement step to its remaining distance.
+         *
+         * @param[in] distance Distance to the target.
+         * @param[in] stop_distance Desired distance from the target.
+         * @param[in] max_step Maximum distance to move this frame.
+         * @return Distance to move this frame.
+         */
+        static float ScriptedMoveStep(float distance, float stop_distance, float max_step);
+
+        /**
          * Handles an input event.
          *
          * @param[in] event Event to handle.
@@ -533,10 +543,11 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          *
          * @param[in] entity Entity to move.
          * @param[in] speed Movement speed.
+         * @param[in] delta_time Time elapsed for this movement step.
          * @return True if the movement was possible and the entity was moved, false otherwise.
          * If the manager is in battle mode, it will always return false.
          */
-        bool PerformWalkmeshMove(Entity* entity, const float speed);
+        bool PerformWalkmeshMove(Entity* entity, const float speed, const float delta_time);
 
         /**
          * Checks if the entity is crossing a walkmesh triangle border.

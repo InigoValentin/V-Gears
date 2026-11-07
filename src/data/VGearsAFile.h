@@ -74,8 +74,17 @@ namespace VGears{
              *
              * @param[in,out] skeleton Skeleton to add the animation to.
              * @param[in] name Animation name.
+             * @param[in] flip_forward_axis Reverse the root translation's forward axis.
              */
-            void AddTo(Ogre::SkeletonPtr skeleton, const String &name) const;
+            void AddTo(Ogre::SkeletonPtr skeleton, const String &name, bool flip_forward_axis = false) const;
+
+            /**
+             * Retrieves the bounds of the animation's root translations.
+             *
+             * @param[in] flip_forward_axis Apply the field-model coordinate conversion.
+             * @return Bounds containing the origin and all root translations.
+             */
+            Ogre::AxisAlignedBox GetRootTranslationBounds(bool flip_forward_axis = false) const;
 
             typedef std::vector<Ogre::Vector3> BoneRotationList;
 

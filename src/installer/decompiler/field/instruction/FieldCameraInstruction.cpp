@@ -37,14 +37,14 @@ void FieldCameraInstruction::ProcessInst(
     case OPCODES::SCR2D: ProcessSCR2D(code_gen); break;
     case OPCODES::SCRCC: ProcessSCRCC(code_gen); break;
     case OPCODES::SCR2DC: ProcessSCR2DC(code_gen); break;
-    case OPCODES::SCRLW: code_gen->WriteTodo(md.GetEntityName(), "SCRLW"); break;
+    case OPCODES::SCRLW: code_gen->AddOutputLine("background2d:scroll_sync()"); break;
     case OPCODES::SCR2DL: ProcessSCR2DL(code_gen); break;
     case OPCODES::VWOFT: ProcessVWOFT(code_gen); break;
     case OPCODES::FADE: ProcessFADE(code_gen); break;
     case OPCODES::FADEW: code_gen->WriteTodo(md.GetEntityName(), "FADEW"); break;
     case OPCODES::SCRLP: code_gen->WriteTodo(md.GetEntityName(), "SCRLP"); break;
     case OPCODES::MVCAM: code_gen->WriteTodo(md.GetEntityName(), "MVCAM"); break;
-    case OPCODES::SCRLA: code_gen->WriteTodo(md.GetEntityName(), "SCRLA"); break;
+    case OPCODES::SCRLA: ProcessSCRLA(code_gen, static_cast<FieldEngine&>(*engine)); break;
     default:
         code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
           md.GetEntityName(), address_, opcode_
@@ -79,10 +79,46 @@ void FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
 }
 
 void FieldCameraInstruction::ProcessSCRLC(CodeGenerator* code_gen){
-    std::string mode = "Background2D.NONE";
-    if (params_[3]->GetUnsigned() == 2) mode = "Background2D.LINEAR";
-    else if (params_[3]->GetUnsigned() == 3) mode = "Background2D.SMOOTH";
-    code_gen->AddOutputLine("background2d:scroll_to_player(" + mode + ", 0)");
+    std::string mode;
+    switch (params_[3]->GetUnsigned()){
+        case 2: mode = "Background2D.LINEAR"; break;
+        case 3: mode = "Background2D.SMOOTH"; break;
+        default:
+            // The other types don't move the camera, nor change what it is following.
+            code_gen->AddOutputLine("-- SCRLC without effect");
+            return;
+    }
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto& seconds = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned(),
+      FieldCodeGenerator::ValueType::Float, 30.0f
+    );
+    code_gen->AddOutputLine("background2d:scroll_to_player(" + mode + ", " + seconds + ")");
+}
+
+void FieldCameraInstruction::ProcessSCRLA(CodeGenerator* code_gen, const FieldEngine& engine){
+    std::string mode;
+    switch (params_[4]->GetUnsigned()){
+        case 0:
+            code_gen->AddOutputLine("-- SCRLA without effect");
+            return;
+        case 1: mode = "Background2D.NONE"; break;
+        case 2: mode = "Background2D.LINEAR"; break;
+        case 3: mode = "Background2D.SMOOTH"; break;
+        default:
+            code_gen->WriteTodo("FieldCameraInstruction", "SCRLA with unsupported scroll type");
+            return;
+    }
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto& seconds = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[2]->GetUnsigned(),
+      FieldCodeGenerator::ValueType::Float, 30.0f
+    );
+    const auto& entity = engine.EntityByIndex(params_[3]->GetUnsigned());
+    code_gen->AddOutputLine((
+      boost::format("background2d:scroll_to_entity(entity_manager:get_entity(\"%1%\"), %2%, %3%)")
+      % entity.GetName() % mode % seconds
+    ).str());
 }
 
 void FieldCameraInstruction::ProcessSCR2D(CodeGenerator* code_gen){

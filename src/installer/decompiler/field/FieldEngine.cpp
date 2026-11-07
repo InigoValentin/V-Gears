@@ -192,6 +192,15 @@ std::vector<FieldDecompiler::Line> FieldEngine::GetLineList() const{
     return lines;
 }
 
+void FieldEngine::AddBackgroundArea(int area){
+    if (area < 0) background_areas_dynamic_ = true;
+    else background_areas_.insert(area);
+}
+
+const std::set<int>& FieldEngine::GetBackgroundAreas() const{return background_areas_;}
+
+bool FieldEngine::BackgroundAreasAreDynamic() const{return background_areas_dynamic_;}
+
 void FieldEngine::AddEntityFunction(
   const std::string& entity_name, size_t entity_index, const std::string& func_name, size_t func_index
 ){

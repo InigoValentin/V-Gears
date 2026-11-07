@@ -204,17 +204,8 @@ void EntityManager::UpdateField(){
 
         // Update screen scroll.
         Entity* scroll_entity = background_2d_.GetAutoScrollEntity();
-        if (scroll_entity == entity_[i]){
-            CameraManager &camera_manager(CameraManager::getSingleton());
-            Ogre::Vector3 view = camera_manager.ProjectPointToScreen(scroll_entity->GetPosition());
-            Ogre::Vector2 pos = background_2d_.GetScreenScroll();
-            Ogre::Viewport *viewport(camera_manager.getViewport());
-            float width = float(viewport->getActualWidth());
-            float height = float(viewport->getActualHeight());
-            view.x = view.x - width / 2 - pos.x;
-            view.y = view.y - height / 2 - pos.y;
-            background_2d_.SetScreenScroll(Ogre::Vector2(-view.x, -view.y));
-        }
+        if (scroll_entity == entity_[i])
+            background_2d_.SetScroll(background_2d_.GetEntityScroll(scroll_entity));
         // Update offset.
         if (entity_[i]->GetOffsetType() != AT_NONE) SetNextOffsetStep(entity_[i]);
         // Update turn.
@@ -243,7 +234,19 @@ void EntityManager::UpdateField(){
                             if (player_run_ == true) speed *= 4;
                         }
                         else speed = entity_[i]->GetMoveAutoSpeed();
-                        bool is_move = PerformWalkmeshMove(entity_[i], speed);
+                        float remaining_time = Timer::getSingleton().GetGameTimeDelta();
+                        bool is_move = false;
+                        if (entity_[i]->IsScriptedMove() && speed > 0.0f){
+                            const float max_step_time = 0.2f / speed;
+                            while (remaining_time > 0.0f && entity_[i]->GetState() == Entity::WALKMESH){
+                                const float step_time = std::min(remaining_time, max_step_time);
+                                const bool moved = PerformWalkmeshMove(entity_[i], speed, step_time);
+                                is_move = is_move || moved;
+                                if (!moved) break;
+                                remaining_time -= step_time;
+                            }
+                        }
+                        else is_move = PerformWalkmeshMove(entity_[i], speed, remaining_time);
                         if (entity_[i]->GetMoveAutoAnimation() == true){
                             if (is_move == true){
                                 if (speed >= entity_[i]->GetMoveRunSpeed()){
@@ -842,7 +845,11 @@ bool EntityManager::SetEntityOnWalkmesh(Entity* entity){
     return true;
 }
 
-bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
+float EntityManager::ScriptedMoveStep(float distance, float stop_distance, float max_step){
+    return std::min(max_step, std::max(0.0f, distance - stop_distance));
+}
+
+bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed, const float delta_time){
     if (IsBattleModule()){
         LOG_WARNING("Tried to perform a walkmesh move, but the EntityManager is in battle mode");
         return false;
@@ -850,9 +857,22 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
     Ogre::Vector3 start_point = entity->GetPosition();
     Ogre::Vector3 move_vector = entity->GetMovePosition() - start_point;
     Ogre::Vector2 direction(move_vector.x, move_vector.y);
+    const float distance_to_target = direction.length();
+    const bool scripted_move = entity->IsScriptedMove();
+    const float stop_distance = entity->GetMoveStopDistance();
+    if (scripted_move && distance_to_target <= stop_distance + 0.0001f){
+        entity->UnsetMove();
+        return false;
+    }
     direction.normalise();
-    direction *= Timer::getSingleton().GetGameTimeDelta();
+    direction *= delta_time;
     direction *= speed;
+    if (scripted_move && !direction.isZeroLength()){
+        direction.normalise();
+        direction *= ScriptedMoveStep(
+          distance_to_target, stop_distance, speed * delta_time
+        );
+    }
     // If movement is still needed but speed or time don't allow it, just return for now.
     if (direction.isZeroLength() == true){
         if (player_entity_ == entity) CheckTriggers(entity, entity->GetPosition());
@@ -1090,7 +1110,8 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
 
     // If the entity has come to destination point, finish movement.
     Ogre::Vector3 final = entity->GetMovePosition() - end_point;
-    if (Ogre::Vector2(final.x, final.y).length() <= entity->GetMoveStopDistance() + speed / 10)
+    const float tolerance = scripted_move ? 0.0001f : speed / 10;
+    if (Ogre::Vector2(final.x, final.y).length() <= stop_distance + tolerance)
         entity->UnsetMove();
 
     return true;
@@ -1514,6 +1535,7 @@ void EntityManager::SetNextJumpStep(Entity* entity){
 
 void EntityManager::SetNextScrollStep(){
     // TODO: Allow this on battle mode?
+    background_2d_.UpdateScrollTarget();
     Background2D::SCROLL_TYPE type = background_2d_.GetScrollType();
     float total = background_2d_.GetScrollSeconds();
     float current = background_2d_.GetScrollCurrentSeconds();

@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -269,6 +270,27 @@ class FieldEngine : public Engine{
         std::vector<FieldDecompiler::Line> GetLineList() const;
 
         /**
+         * Notes that the script turns a background area on or off.
+         *
+         * @param[in] area The area, or -1 if it is picked from a variable.
+         */
+        void AddBackgroundArea(int area);
+
+        /**
+         * Retrieves the background areas the script controls.
+         *
+         * @return The area IDs.
+         */
+        const std::set<int>& GetBackgroundAreas() const;
+
+        /**
+         * Checks if the script picks any background area from a variable.
+         *
+         * @return True if it does.
+         */
+        bool BackgroundAreasAreDynamic() const;
+
+        /**
          * Retrieves all entities in the map.
          *
          * @return A map of entities, with the name and index.
@@ -385,6 +407,16 @@ class FieldEngine : public Engine{
          * The map scale factor.
          */
         float scale_factor_;
+
+        /**
+         * Background areas the script controls.
+         */
+        std::set<int> background_areas_;
+
+        /**
+         * Whether the script picks any background area from a variable.
+         */
+        bool background_areas_dynamic_ = false;
 
         /**
          * The script name.

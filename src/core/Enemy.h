@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <tuple>
 #include <OgreString.h>
 #include "ScriptManager.h"
 
@@ -555,10 +556,9 @@ class Enemy{
         /**
          * Retrieves the enemy position.
          *
-         * To be used from Lua scripts only. It doesn't return anything, but adds three values to
-         * the stack for the X, Y and Z coordinates.
+         * @return The X, Y and Z coordinates for Lua scripts.
          */
-        void ScriptGetPos() const;
+        std::tuple<float, float, float> ScriptGetPos() const;
 
         /**
          * Checks if the enemy is in the front row.

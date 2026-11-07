@@ -68,9 +68,13 @@ void XmlBackground2DFile::Load(){
                   = CameraManager::getSingleton().GetCurrentCamera()
                     ->getProjectionMatrixWithRSDepth() * distance;
                 res = res / res.w;
+                // Tiles that belong to a scripted area are only drawn while a script turns on
+                // the state they belong to.
+                const int area = GetInt(node, "area", 0);
+                const int state = GetInt(node, "state", 0);
                 background->AddTile(
                   static_cast<int>(destination.x), static_cast<int>(destination.y),
-                  width, height, res.z, uv.x, uv.y, uv.z, uv.w, blending
+                  width, height, res.z, uv.x, uv.y, uv.z, uv.w, blending, area, state
                 );
                 TiXmlNode* node2 = node->FirstChild();
                 while (node2 != nullptr){

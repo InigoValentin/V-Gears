@@ -40,6 +40,7 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   move_position_(Ogre::Vector3(0, 0, 0)),
   move_entity_(nullptr),
   move_stop_distance_(0.0f),
+  scripted_move_(false),
   move_triangle_id_(-1),
   move_auto_rotation_(true),
   move_auto_animation_(true),
@@ -246,11 +247,9 @@ void Entity::ScriptSetPosition(const float x, const float y, const float z){
 
 const Ogre::Vector3 Entity::GetPosition() const{return scene_node_->getPosition();}
 
-void Entity::ScriptGetPosition() const{
+std::tuple<float, float, float> Entity::ScriptGetPosition() const{
     Ogre::Vector3 position = scene_node_->getPosition();
-    ScriptManager::getSingleton().AddValueToStack(position.x);
-    ScriptManager::getSingleton().AddValueToStack(position.y);
-    ScriptManager::getSingleton().AddValueToStack(position.z);
+  return std::make_tuple(position.x, position.y, position.z);
 }
 
 void Entity::SetOffset(const Ogre::Vector3& position){
@@ -360,11 +359,16 @@ void Entity::SetMoveRunSpeed(const float speed){move_run_speed_ = speed;}
 
 float Entity::GetMoveRunSpeed() const{return move_run_speed_;}
 
-void Entity::SetMovePosition(const Ogre::Vector3& target){move_position_ = target;}
+void Entity::SetMovePosition(const Ogre::Vector3& target){
+  move_position_ = target;
+  scripted_move_ = false;
+}
 
 const Ogre::Vector3& Entity::GetMovePosition() const{return move_position_;}
 
 float Entity::GetMoveStopDistance() const{return move_stop_distance_;}
+
+bool Entity::IsScriptedMove() const{return scripted_move_;}
 
 void Entity::SetMoveTriangleId(const int triangle){move_triangle_id_ = triangle;}
 
@@ -387,6 +391,7 @@ void Entity::ScriptMoveToPosition(const float x, const float y){
     move_position_ = Ogre::Vector3(x, y, 0);
     move_entity_ = nullptr;
     move_stop_distance_ = 0;
+    scripted_move_ = true;
     LOG_TRIVIAL(
       "Entity '" + name_ + "' set move to walkmesh position '"
       + Ogre::StringConverter::toString(move_position_) + "'."
@@ -398,6 +403,7 @@ void Entity::ScriptMoveToEntity(Entity* entity){
     move_position_ = entity->GetPosition();
     move_entity_ = entity;
     move_stop_distance_ = GetSolidRadius() + entity->GetSolidRadius();
+    scripted_move_ = true;
     LOG_TRIVIAL("Entity '" + name_ + "' set move to entity '" + entity->GetName() + "'.");
 }
 
@@ -415,6 +421,7 @@ void Entity::UnsetMove(){
     state_ = Entity::NONE;
     move_entity_ = nullptr;
     move_stop_distance_ = 0;
+    scripted_move_ = false;
     for (const auto &script : sync_) ScriptManager::getSingleton().ContinueScriptExecution(script);
     sync_.clear();
 }
