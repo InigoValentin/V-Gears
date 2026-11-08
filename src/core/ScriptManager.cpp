@@ -204,10 +204,9 @@ void ScriptManager::Update(const ScriptManager::Type type){
                           + "\" for entity \"" + current_script_id_.entity + "\"."
                         );
 
-                        if (script_entity_[i].queue[0].paused_script_start.entity != ""){
-                            ContinueScriptExecution(script_entity_[i].queue[0].paused_script_start);
-                            script_entity_[i].queue[0].paused_script_start.entity = "";
-                        }
+                        for (const ScriptId& waiting : script_entity_[i].queue[0].paused_scripts_start)
+                            ContinueScriptExecution(waiting);
+                        script_entity_[i].queue[0].paused_scripts_start.clear();
                         sol::object table = GetTableByEntityName(
                           type, current_script_id_.entity,
                           script_entity_[i].queue[0].state
@@ -469,10 +468,9 @@ void ScriptManager::RemoveEntityTopScript(ScriptEntity& entity){
         // Delete the thread.
         luaL_unref(lua_state_, LUA_REGISTRYINDEX, entity.queue[0].state_id);
 
-        if (entity.queue[0].paused_script_end.entity != ""){
-            ContinueScriptExecution(entity.queue[0].paused_script_end);
-            entity.queue[0].paused_script_end.entity = "";
-        }
+        for (const ScriptId& waiting : entity.queue[0].paused_scripts_end)
+            ContinueScriptExecution(waiting);
+        entity.queue[0].paused_scripts_end.clear();
         entity.queue.erase(entity.queue.begin());
     }
 }
@@ -601,6 +599,17 @@ int ScriptManager::ScriptRequestStartSync(
         return 1;
     }
 
+    // A script that already started can't be waited for to start: nothing would resume the caller.
+    for (const QueueScript& queued : script_entity->queue){
+        if (queued.function == function && queued.yield){
+            LOG_TRIVIAL(
+              "[SCRIPT] script:request_start_sync: Function \"" + Ogre::String(function)
+              + "\" for entity \"" + Ogre::String(entity) + "\" already started."
+            );
+            return 1;
+        }
+    }
+
     bool added = ScriptRequest(script_entity, function, priority, "", "", true, false);
 
     if (added == false){
@@ -671,15 +680,24 @@ bool ScriptManager::ScriptRequest(
         script.seconds_to_wait = 0;
         script.wait = false;
         script.yield = false;
-        if (start_sync == true)
-            script.paused_script_start = GetCurrentScriptId();
-        if (end_sync == true) script.paused_script_end = GetCurrentScriptId();
+        if (start_sync == true) script.paused_scripts_start.push_back(GetCurrentScriptId());
+        if (end_sync == true) script.paused_scripts_end.push_back(GetCurrentScriptId());
 
-        // If the script is already running, don't queue it.
+        // If the script is already queued or running, don't queue it again. Whoever waits for the
+        // request must wait for the existing script, because nothing else would resume it.
         if (allow_duplicate == false){
           for (int i = 0; i < script_entity->queue.size(); i ++){
              if (script_entity->queue[i].function == function){
                script_entity->resort = true;
+               QueueScript& existing = script_entity->queue[i];
+               for (const ScriptId& waiting : script.paused_scripts_end)
+                   existing.paused_scripts_end.push_back(waiting);
+               // A script that already started isn't waited for. See ScriptRequestStartSync.
+               if (!existing.yield){
+                   for (const ScriptId& waiting : script.paused_scripts_start)
+                       existing.paused_scripts_start.push_back(waiting);
+               }
+               luaL_unref(lua_state_, LUA_REGISTRYINDEX, script.state_id);
                return true;
             }
             }

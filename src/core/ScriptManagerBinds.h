@@ -135,12 +135,14 @@ void ScriptManager::InitBinds(){
       "set_move_triangle_id", &Entity::SetMoveTriangleId,
       "move_auto_rotation", &Entity::SetMoveAutoRotation,
       "move_auto_animation", &Entity::SetMoveAutoAnimation,
+      "set_move_animations", &Entity::SetMoveAnimations,
       "move_to_position", &Entity::ScriptMoveToPosition,
       "move_to_entity", &Entity::ScriptMoveToEntity,
       "linear_to_position", &Entity::ScriptLinearToPosition,
       "jump_to_position", &Entity::ScriptJumpToPosition,
       "offset_to_position", &Entity::ScriptOffsetToPosition,
       "turn_to_entity", &Entity::ScriptTurnToEntity,
+      "face_entity", &Entity::ScriptFaceEntity,
       "turn_to_direction", &Entity::ScriptTurnToDirection,
       "set_animation_speed", &Entity::ScriptSetAnimationSpeed,
       "play_animation", sol::overload(
@@ -176,7 +178,6 @@ void ScriptManager::InitBinds(){
     // Entity individual point commands
     lua.new_usertype<EntityPoint>(
       "EntityPoint",
-      // Internally returns 3 values:
       "get_position", &EntityPoint::ScriptGetPosition,
       "get_rotation", &EntityPoint::ScriptGetRotation
     );
@@ -360,11 +361,25 @@ void ScriptManager::InitBinds(){
       "Background2D",
       "autoscroll_to_entity", &Background2D::ScriptAutoScrollToEntity,
       "scroll_to_player", &Background2D::ScriptScrollToPlayer,
+      "scroll_to_entity", &Background2D::ScriptScrollToEntity,
       "scroll_to_position", &Background2D::ScriptScrollToPosition,
       "offset", &Background2D::ScriptOffset,
+      "area_on", &Background2D::ScriptAreaOn,
+      "area_off", &Background2D::ScriptAreaOff,
+      "area_clear", &Background2D::ScriptAreaClear,
+      "shake", &Background2D::ScriptShake,
       "play_animation_looped", &Background2D::ScriptPlayAnimationLooped,
       "play_animation_once", &Background2D::ScriptPlayAnimationOnce
     );
+    // Coloured fades of the screen
+    lua.new_usertype<ScreenFade>(
+      "ScreenFade",
+      "fade", &ScreenFade::ScriptFade,
+      "nfade", &ScreenFade::ScriptNFade
+    );
+    sol::table screen_fade_type = lua["ScreenFade"];
+    BindYielding(screen_fade_type, "wait", &ScreenFade::ScriptWait);
+
     sol::table background_type = lua["Background2D"];
     BindYielding(background_type, "scroll_sync", &Background2D::ScriptScrollSync);
     BindYielding(background_type, "animation_sync", &Background2D::ScriptAnimationSync);
@@ -490,6 +505,7 @@ void ScriptManager::InitBinds(){
     lua["audio_manager"] = AudioManager::getSingletonPtr();
     lua["savemap_manager"] = SavemapHandler::getSingletonPtr();
     lua["background2d"] = EntityManager::getSingletonPtr()->GetBackground2D();
+    lua["screen_fade"] = EntityManager::getSingletonPtr()->GetScreenFade();
     lua["walkmesh"] = EntityManager::getSingletonPtr()->GetWalkmesh();
     lua["text_manager"] = TextHandler::getSingletonPtr();
     lua["dialog"] = DialogsManager::getSingletonPtr();

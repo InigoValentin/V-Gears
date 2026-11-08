@@ -14,13 +14,40 @@
  */
 
 #include <boost/test/unit_test.hpp>
+#include <OgreAnimation.h>
+#include <OgreAnimationTrack.h>
+#include <OgreKeyFrame.h>
+#include <OgreSkeleton.h>
 #include "data/VGearsAFile.h"
 
-#pragma message("Unimplemented test file: " __FILE__)
-
 BOOST_AUTO_TEST_CASE(TestVGearsAFile){
-    // TODO
-    BOOST_WARN_MESSAGE(false, "Unimplemented test file: VGearsAFile");
-    BOOST_CHECK(0 == 0);
+    VGears::AFile animation(nullptr, "animation", 0, "test", true);
+    VGears::AFile::Frame first_frame;
+    first_frame.root_rotation = Ogre::Vector3::ZERO;
+    first_frame.root_translation = Ogre::Vector3(2.0f, 3.0f, 4.0f);
+    animation.GetFrames().push_back(first_frame);
+    VGears::AFile::Frame last_frame;
+    last_frame.root_rotation = Ogre::Vector3::ZERO;
+    last_frame.root_translation = Ogre::Vector3(-1.0f, 5.0f, -6.0f);
+    animation.GetFrames().push_back(last_frame);
+
+    Ogre::SkeletonPtr skeleton(new Ogre::Skeleton(nullptr, "skeleton", 0, "test", true));
+    skeleton->createBone("root");
+    animation.AddTo(skeleton, "jump", true);
+
+    Ogre::NodeAnimationTrack* track = skeleton->getAnimation("jump")->getNodeTrack(0);
+    BOOST_CHECK(track->getNodeKeyFrame(0)->getTranslate() == Ogre::Vector3(2.0f, 3.0f, -4.0f));
+    BOOST_CHECK(track->getNodeKeyFrame(1)->getTranslate() == Ogre::Vector3(-1.0f, 5.0f, 6.0f));
+    animation.AddTo(skeleton, "unmodified");
+    track = skeleton->getAnimation("unmodified")->getNodeTrack(0);
+    BOOST_CHECK(track->getNodeKeyFrame(0)->getTranslate() == first_frame.root_translation);
+    BOOST_CHECK(track->getNodeKeyFrame(1)->getTranslate() == last_frame.root_translation);
+
+    const Ogre::AxisAlignedBox bounds = animation.GetRootTranslationBounds(true);
+    BOOST_CHECK(bounds.getMinimum() == Ogre::Vector3(-1.0f, 0.0f, -4.0f));
+    BOOST_CHECK(bounds.getMaximum() == Ogre::Vector3(2.0f, 5.0f, 6.0f));
+    const Ogre::AxisAlignedBox original_bounds = animation.GetRootTranslationBounds();
+    BOOST_CHECK(original_bounds.getMinimum() == Ogre::Vector3(-1.0f, 0.0f, -6.0f));
+    BOOST_CHECK(original_bounds.getMaximum() == Ogre::Vector3(2.0f, 5.0f, 4.0f));
 }
 

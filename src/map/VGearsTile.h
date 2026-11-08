@@ -112,6 +112,16 @@ namespace VGears{
         Blending blending;
 
         /**
+         * Scripted area the tile belongs to, or 0 if it is always drawn.
+         */
+        int area = 0;
+
+        /**
+         * Bit mask with the layers of the area in which the tile is drawn.
+         */
+        int state = 0;
+
+        /**
          * List of animations associated to the tile.
          */
         AnimationMap animations;

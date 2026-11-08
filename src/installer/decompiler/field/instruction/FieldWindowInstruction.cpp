@@ -47,7 +47,7 @@ void FieldWindowInstruction::ProcessInst(
     //std::cout << "Window opcode: " << opcode_ << "\n";
     switch (opcode_){
         case OPCODES::TUTOR: code_gen->WriteTodo(md.GetEntityName(), "TUTOR"); break;
-        case OPCODES::WCLS: code_gen->WriteTodo(md.GetEntityName(), "WCLS"); break;
+        case OPCODES::WCLS: ProcessWCLSE(code_gen); break;
         case OPCODES::WSIZW: ProcessWSIZW(code_gen); break;
         case OPCODES::WSPCL: ProcessWSPCL(code_gen); break;
         case OPCODES::WNUMB: code_gen->WriteTodo(md.GetEntityName(), "WNUMB"); break;
@@ -222,6 +222,16 @@ void FieldWindowInstruction::ProcessMESSAGE(
     // Displays a dialog in the WINDOW that has previously been initialized to display this dialog.
     auto window_id = params_[0]->GetUnsigned();
     auto dialog_id = params_[1]->GetUnsigned();
+    // The engine needs a position and size to show a message. Some fields show messages in
+    // windows that are never defined, so these get default ones.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    if (!cg->IsWindowDefined(window_id)){
+        code_gen->AddOutputLine((
+          boost::format("dialog:dialog_open(\"%1%\", %2%, %3%, %4%, %5%) -- Default, no WINDOW")
+          % window_id % FieldCodeGenerator::DEFAULT_WINDOW_X % FieldCodeGenerator::DEFAULT_WINDOW_Y
+          % FieldCodeGenerator::DEFAULT_WINDOW_WIDTH % FieldCodeGenerator::DEFAULT_WINDOW_HEIGHT
+        ).str());
+    }
     code_gen->AddOutputLine((
       boost::format("dialog:dialog_set_text(\"%1%\", \"%2%_%3%\")")
       % window_id % script_name % dialog_id

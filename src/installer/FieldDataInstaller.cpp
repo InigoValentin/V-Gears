@@ -35,6 +35,19 @@ std::string FieldDataInstaller::FIELD_MAPS_DIR("fields");
 
 int FieldDataInstaller::INACTIVE_GATEWAY_ID(32767);
 
+const std::vector<int> FieldDataInstaller::TEMPORARY_BANKS{5};
+
+std::string FieldDataInstaller::FieldScriptHeader(){
+    std::string header = "EntityContainer = {}\n\n";
+    for (const int bank : TEMPORARY_BANKS){
+        header += "-- Temporary variables start at zero in every field.\n"
+          "for address = 0, Banks.SIZE do\n"
+          "    Banks[" + std::to_string(bank) + "][address] = 0\n"
+          "end\n\n";
+    }
+    return header;
+}
+
 std::string FieldDataInstaller::CreateGateWayScript(
   const std::string& gateway_entity_name, const std::string& target_map_name,
   const std::string& source_spawn_point_name
@@ -357,12 +370,26 @@ void FieldDataInstaller::ConvertModels(std::string model_name){
         auto mesh_name = VGears::NameLookup::model(base_name) + ".mesh";
         Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
         Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
+        const Ogre::AxisAlignedBox bind_bounds = mesh->getBounds();
+        Ogre::AxisAlignedBox translation_bounds(Ogre::Vector3::ZERO, Ogre::Vector3::ZERO);
         for (auto& anim : model->second){
             VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
             VGears::AFilePtr a = afl_mgr.load(anim, "FFVII").staticCast<VGears::AFile>();
             // Convert the FF7 name to a more readable name set in the meta data.
             VGears::StringUtil::splitBase(anim, base_name);
-            a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
+            a->AddTo(skeleton, VGears::NameLookup::Animation(base_name), true);
+                        translation_bounds.merge(a->GetRootTranslationBounds(true));
+                }
+                if (bind_bounds.isFinite()){
+                        const Ogre::AxisAlignedBox animated_bounds(
+                            bind_bounds.getMinimum() + translation_bounds.getMinimum(),
+                            bind_bounds.getMaximum() + translation_bounds.getMaximum()
+                        );
+                        mesh->_setBounds(animated_bounds, false);
+                        mesh->_setBoundingSphereRadius(std::max(
+                            mesh->getBoundingSphereRadius(),
+                            animated_bounds.getCenter().length() + animated_bounds.getHalfSize().length()
+                        ));
         }
         ExportMesh(output_dir_ + FIELD_MODELS_DIR + "/", mesh);
     }
@@ -511,7 +538,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
 
         // Decompile to LUA.
         decompiled = FieldDecompiler::Decompile(
-          field->getName(), raw_field_data, formatter, gateway_script_data, "EntityContainer = {}\n\n"
+          field->getName(), raw_field_data, formatter, gateway_script_data, FieldScriptHeader()
         );
         std::ofstream script_file(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/script.lua");
         if (script_file.is_open()){
@@ -611,7 +638,8 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                       << field->GetWalkmesh()->GetTriangles().size() << ")" << std::endl;
                     triangle_index = 0;
                 }
-                const float z_of_triangle_with_id = field->GetWalkmesh()->GetTriangles().at(triangle_index).a.z;
+                const float z_of_triangle_with_id
+                  = field->GetWalkmesh()->GetTriangles().at(triangle_index).a.z / GetFieldScaleFactor(this_field_id);
                 const Ogre::Vector3 position(
                   gateway.destination.x / downscaler_next, gateway.destination.y / downscaler_next,
                   z_of_triangle_with_id
@@ -628,6 +656,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
 
         // Get lines. Add them to a list, so they aren't processed later as regular entities.
         std::vector<std::string> line_entities;
+        const float line_scale = LINE_SCALE_FACTOR / GetFieldScaleFactor(this_field_id);
         for (FieldDecompiler::Line line : decompiled.lines){
 
             std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));
@@ -635,15 +664,15 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             xml_entity_trigger->SetAttribute("name", line.name);
             xml_entity_trigger->SetAttribute(
               "point1",
-              std::to_string(line.point_a[0] * LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_a[1] * LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_a[2] * LINE_SCALE_FACTOR)
+              std::to_string(line.point_a[0] * line_scale)
+                + " " + std::to_string(line.point_a[1] * line_scale)
+                + " " + std::to_string(line.point_a[2] * line_scale)
             );
             xml_entity_trigger->SetAttribute(
               "point2",
-              std::to_string(line.point_b[0] * LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_b[1] * LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_b[2] * LINE_SCALE_FACTOR)
+              std::to_string(line.point_b[0] * line_scale)
+                + " " + std::to_string(line.point_b[1] * line_scale)
+                + " " + std::to_string(line.point_b[2] * line_scale)
             );
             xml_entity_trigger->SetAttribute("enabled", "true");
             element->LinkEndChild(xml_entity_trigger.release());
@@ -816,6 +845,18 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                     // TODO: Should probably throw to fail conversion:
                     else blending_str = "unknown";
                     xml_element->SetAttribute("blending", blending_str);
+                    // Sprites in an area the script controls (BGON, BGOFF, BGCLR) are drawn only
+                    // while it turns on one of their layers. The rest are always drawn.
+                    if (
+                      sprite.animation_id != 0
+                      && (
+                        decompiled.background_areas_dynamic
+                        || decompiled.background_areas.count(sprite.animation_id) > 0
+                      )
+                    ){
+                        xml_element->SetAttribute("area", static_cast<int>(sprite.animation_id));
+                        xml_element->SetAttribute("state", static_cast<int>(sprite.animation_frame));
+                    }
                     bg_element->LinkEndChild(xml_element.release());
                 }
                 //}
@@ -827,13 +868,15 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
     {
         // Save out the walk mesh as XML.
         const VGears::WalkmeshFilePtr& walkmesh = field->GetWalkmesh();
+        // Scripts, gateways and the camera use the field's scale, so the walkmesh must too.
+        const float field_scale = GetFieldScaleFactor(GetFieldId(field->getName(), map_list_));
         TiXmlDocument doc;
         std::unique_ptr<TiXmlElement> wmesh_element(new TiXmlElement("walkmesh"));
         for (VGears::WalkmeshFile::Triangle& tri : walkmesh->GetTriangles()){
             std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("triangle"));
-            xml_element->SetAttribute("a", Ogre::StringConverter::toString(tri.a));
-            xml_element->SetAttribute("b", Ogre::StringConverter::toString(tri.b));
-            xml_element->SetAttribute("c", Ogre::StringConverter::toString(tri.c));
+            xml_element->SetAttribute("a", Ogre::StringConverter::toString(tri.a / field_scale));
+            xml_element->SetAttribute("b", Ogre::StringConverter::toString(tri.b / field_scale));
+            xml_element->SetAttribute("c", Ogre::StringConverter::toString(tri.c / field_scale));
             xml_element->SetAttribute("a_b", std::to_string(tri.access_side[0]));
             xml_element->SetAttribute("b_c", std::to_string(tri.access_side[1]));
             xml_element->SetAttribute("c_a", std::to_string(tri.access_side[2]));

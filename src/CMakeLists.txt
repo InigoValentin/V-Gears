@@ -600,6 +600,8 @@ set(VGEARS_SOURCE_FILES
     core/AudioManager.cpp
     core/Background2DAnimation.cpp
     core/Background2D.cpp
+    core/ScreenFade.cpp
+    core/ScreenFadeState.cpp
     core/BattleManager.cpp
     core/CameraManager.cpp
     core/ConfigCmd.cpp

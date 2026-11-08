@@ -122,14 +122,20 @@ struct QueueScript{
     bool yield;
 
     /**
-     * The script paused by call of this script
+     * The scripts that wait for this one to start.
+     *
+     * More than one script can wait: a request for a script that is already queued adds a
+     * waiter to the queued one.
      */
-    ScriptId paused_script_start;
+    std::vector<ScriptId> paused_scripts_start;
 
     /**
-     * The script paused by call of this script
+     * The scripts that wait for this one to end.
+     *
+     * More than one script can wait: a request for a script that is already queued or running
+     * adds a waiter to the existing one.
      */
-    ScriptId paused_script_end;
+    std::vector<ScriptId> paused_scripts_end;
 };
 
 

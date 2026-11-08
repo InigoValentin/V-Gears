@@ -104,8 +104,11 @@ void FieldModuleInstruction::ProcessInst(
 
 void FieldModuleInstruction::ProcessBATTLE(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    // Operands: two bank nibbles, one of them always zero, and then the battle ID or the address
+    // to read it from.
     const auto& battle_id = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
+      cg->GetFormatter(), params_[0]->GetUnsigned() + params_[1]->GetUnsigned(),
+      params_[2]->GetUnsigned()
     );
     code_gen->AddOutputLine((boost::format("Battle.start(%1%)") % battle_id).str());
 }

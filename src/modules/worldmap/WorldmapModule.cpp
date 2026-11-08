@@ -769,7 +769,11 @@ namespace VGears {
         );
         if (player_entity_ == nullptr) return;
 
-        const Ogre::AxisAlignedBox& bounds = player_entity_->GetModel()->getBoundingBox();
+        // Cloud's bounds without animations. The bounds in the mesh can't be used for sizing: the
+        // installer enlarges them with the animations' movement, so the model is not culled.
+        const Ogre::AxisAlignedBox bounds(
+          -8.7473f, -8.1671f, -4.1878f, 7.8685f, 5.6837f, 22.8135f
+        );
         const Ogre::Vector3 model_size = bounds.getSize();
         const Ogre::Real model_height = model_size.y;
         if (model_height > 0){

@@ -14,6 +14,7 @@
  */
 
 #pragma once
+#include <tuple>
 #include <OgreRoot.h>
 
 /**
@@ -62,9 +63,11 @@ class EntityPoint{
         const Ogre::Vector3& GetPosition() const;
 
         /**
-         * Informs the script manager of the point position.
+         * Retrieves the point position for Lua scripts.
+         *
+         * @return The X, Y and Z coordinates.
          */
-        void ScriptGetPosition() const;
+        std::tuple<float, float, float> ScriptGetPosition() const;
 
         /**
          * Sets the point orientation.

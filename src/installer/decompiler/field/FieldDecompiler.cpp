@@ -53,5 +53,7 @@ FieldDecompiler::DecompiledScript FieldDecompiler::Decompile(
     ds.luaScript = text_before + output.str() + text_after;
     for (auto entity : engine.GetEntityList()) ds.entities.push_back(entity);
     for (auto line : engine.GetLineList()) ds.lines.push_back(line);
+    ds.background_areas = engine.GetBackgroundAreas();
+    ds.background_areas_dynamic = engine.BackgroundAreasAreDynamic();
     return ds;
 }

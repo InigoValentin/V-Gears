@@ -60,12 +60,10 @@ EntityPoint::GetPosition() const
 }
 
 
-void
+std::tuple<float, float, float>
 EntityPoint::ScriptGetPosition() const
 {
-    ScriptManager::getSingleton().AddValueToStack(position_.x);
-    ScriptManager::getSingleton().AddValueToStack(position_.y);
-    ScriptManager::getSingleton().AddValueToStack(position_.z);
+    return std::make_tuple(position_.x, position_.y, position_.z);
 }
 
 

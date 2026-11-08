@@ -114,11 +114,18 @@ std::unique_ptr<Function> FieldDisassembler::StartFunction(size_t script_index){
 
 void FieldDisassembler::DoDisassemble(){
     // Loop through the scripts for each entity.
+    std::set<std::string> used_entity_names;
     for (size_t entity_number = 0; entity_number < header_.entity_scripts.size(); entity_number ++){
         std::string original_name = header_.field_entity_names[entity_number].data();
         // If the entity name was blank in the file then use a consistent generated name
         if (original_name.empty()) original_name = "entity_" + std::to_string(entity_number);
-        const std::string entity_name = formatter_.GetFriendlyEntityName(original_name);
+        std::string entity_name = formatter_.GetFriendlyEntityName(original_name);
+        // The original game allows several entities to share a name, such as a line and a model.
+        // Here a name identifies the entity in scripts, the map and the engine, so keep it unique.
+        if (!used_entity_names.insert(entity_name).second){
+            entity_name += "_" + std::to_string(entity_number);
+            used_entity_names.insert(entity_name);
+        }
         // Only parse each script one.
         std::set<uint16> parsed_scripts;
         std::vector<ScriptInfo> script_info;

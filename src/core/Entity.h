@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <tuple>
 #include <OgreString.h>
 #include "EntityCollision.h"
 #include "EntityDirection.h"
@@ -243,10 +244,9 @@ class Entity{
         /**
          * Retrieves the entity position.
          *
-         * To be used from Lua scripts only. It doesn't return anything, but adds three values to
-         * the stack for the X, Y and Z coordinates.
+         * @return The X, Y and Z coordinates for Lua scripts.
          */
-        void ScriptGetPosition() const;
+        std::tuple<float, float, float> ScriptGetPosition() const;
 
         /**
          * Sets the entity position.
@@ -535,6 +535,13 @@ class Entity{
         float GetMoveStopDistance() const;
 
         /**
+         * Checks whether the current move was requested by a script.
+         *
+         * @return True for scripted movement.
+         */
+        bool IsScriptedMove() const;
+
+        /**
          * Sets the destination triangle in the walkmesh.
          *
          * Sets the units destination to one of the walkmesh triangles. The
@@ -589,6 +596,14 @@ class Entity{
          * @return The walk animation name.
          */
         const Ogre::String& GetMoveAnimationWalkName() const;
+
+        /**
+         * Sets the animations played when the entity moves on its own.
+         *
+         * @param[in] walk Name of the walk animation.
+         * @param[in] run Name of the run animation.
+         */
+        void SetMoveAnimations(const char* walk, const char* run);
 
         /**
          * Retrieves the entity's run animation name.
@@ -873,6 +888,13 @@ class Entity{
           Entity* entity, const TurnDirection turn_direction,
           const float seconds
         );
+
+        /**
+         * Makes the entity face another entity at once.
+         *
+         * @param[in] entity Entity to face.
+         */
+        void ScriptFaceEntity(Entity* entity);
 
         /**
          * Adds the entity's turn to the sync queue.
@@ -1213,6 +1235,8 @@ class Entity{
          * Distance between the entity and it's movement destination point.
          */
         float move_stop_distance_;
+
+        bool scripted_move_;
 
         /**
          * Entity's movement destination triangle ID.

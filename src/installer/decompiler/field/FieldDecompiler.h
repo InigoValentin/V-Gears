@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <set>
 #include <string>
 #include "FieldScriptFormatter.h"
 #include "installer/decompiler/Decompiler.h"
@@ -92,6 +93,20 @@ class FieldDecompiler: public Decompiler{
              * Lines in the field.
              */
             std::vector<Line> lines;
+
+            /**
+             * Background areas the script turns on or off.
+             *
+             * Background tiles of other areas are always drawn.
+             */
+            std::set<int> background_areas;
+
+            /**
+             * Whether the script picks background areas from variables.
+             *
+             * If so, it is not known which areas it controls, and any of them might be.
+             */
+            bool background_areas_dynamic = false;
         };
 
         /**

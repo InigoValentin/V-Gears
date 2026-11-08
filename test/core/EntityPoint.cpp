@@ -14,13 +14,22 @@
  */
 
 #include <boost/test/unit_test.hpp>
+#include "LuaIncludes.h"
 #include "core/EntityPoint.h"
 
-#pragma message("Unimplemented test file: " __FILE__)
-
 BOOST_AUTO_TEST_CASE(TestEntityPoint){
-    // TODO
-    BOOST_WARN_MESSAGE(false, "Unimplemented test file: EntityPoint");
-    BOOST_CHECK(0 == 0);
+        EntityPoint point("entry");
+        point.SetPosition(Ogre::Vector3(4.0f, -2.0f, 5.5f));
+
+        sol::state lua;
+        lua.open_libraries(sol::lib::base, sol::lib::coroutine);
+        lua.new_usertype<EntityPoint>("EntityPoint", "get_position", &EntityPoint::ScriptGetPosition);
+        lua["point"] = &point;
+        const sol::protected_function_result result = lua.safe_script(
+            "local thread = coroutine.create(function() return point:get_position() end)\n"
+            "local ok, x, y, z = coroutine.resume(thread)\n"
+            "assert(ok and x == 4 and y == -2 and z == 5.5)"
+        );
+        BOOST_REQUIRE(result.valid());
 }
 
