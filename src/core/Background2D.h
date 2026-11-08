@@ -217,6 +217,25 @@ class Background2D : public Ogre::RenderQueueListener{
         void ScriptAreaClear(const int area);
 
         /**
+         * Shakes the view.
+         *
+         * The shake is added to the scroll, and doesn't change it. Each axis is a chain of random
+         * bounces of the given amplitude, one every given number of frames. Changing the
+         * parameters of a shake that is running takes effect when the current bounce ends.
+         *
+         * @param[in] type 0 stops the shake and brings the view back, 1 shakes the X axis, 2 the
+         * Y axis and 3 both.
+         * @param[in] x_amplitude Amplitude of the bounces in the X axis, in original screen pixels.
+         * @param[in] x_frames Frames between bounces in the X axis.
+         * @param[in] y_amplitude Amplitude of the bounces in the Y axis, in original screen pixels.
+         * @param[in] y_frames Frames between bounces in the Y axis.
+         */
+        void ScriptShake(
+          const int type, const int x_amplitude, const int x_frames, const int y_amplitude,
+          const int y_frames
+        );
+
+        /**
          * Stops the current scrolling.
          */
         void UnsetScroll();
@@ -503,6 +522,96 @@ class Background2D : public Ogre::RenderQueueListener{
         bool IsAreaStateOn(const int area, const int layers) const;
 
         /**
+         * A chain of random bounces in one axis of the view.
+         */
+        struct ShakeAxis{
+
+            /**
+             * Amplitude of the next bounces, in original screen pixels.
+             */
+            float amplitude = 0;
+
+            /**
+             * Duration of the next bounces, in seconds.
+             */
+            float seconds = 0;
+
+            /**
+             * Whether the axis is moving.
+             */
+            bool running = false;
+
+            /**
+             * Whether the axis is going back to the center to stop.
+             */
+            bool stopping = false;
+
+            /**
+             * Duration of the movement back to the center, in seconds.
+             */
+            float stop_seconds = 0;
+
+            /**
+             * Position at the start of the current bounce.
+             */
+            float from = 0;
+
+            /**
+             * Position at the end of the current bounce.
+             */
+            float to = 0;
+
+            /**
+             * Duration of the current bounce, in seconds.
+             */
+            float duration = 0;
+
+            /**
+             * Time since the start of the current bounce, in seconds.
+             */
+            float elapsed = 0;
+
+            /**
+             * Index of the next random factor.
+             */
+            size_t step = 0;
+
+            /**
+             * Current position, in original screen pixels.
+             */
+            float value = 0;
+
+            /**
+             * Changes the bounces of the axis, and starts it if it is stopped.
+             */
+            void Configure(const float new_amplitude, const float new_seconds);
+
+            /**
+             * Makes the axis go back to the center and stop after the current bounce.
+             */
+            void Stop(const float seconds_to_center);
+
+            /**
+             * Moves the axis forward in time.
+             *
+             * @return True if the position changed.
+             */
+            bool Advance(const float delta);
+
+            /**
+             * Starts the next bounce.
+             */
+            void StartBounce();
+        };
+
+        /**
+         * Moves the shake forward in time, and applies it to the view if it changed.
+         *
+         * @param[in] delta Seconds since the last frame.
+         */
+        void UpdateShake(const float delta);
+
+        /**
          * Draws or hides the tiles of an area according to its states.
          *
          * @param[in] area Area ID.
@@ -639,6 +748,21 @@ class Background2D : public Ogre::RenderQueueListener{
         std::map<int, unsigned int> area_states_on_;
 
         /**
+         * The shake of the view in the X axis.
+         */
+        ShakeAxis shake_x_;
+
+        /**
+         * The shake of the view in the Y axis.
+         */
+        ShakeAxis shake_y_;
+
+        /**
+         * The shake being applied to the scroll, in virtual screen units.
+         */
+        Ogre::Vector2 shake_offset_ = Ogre::Vector2::ZERO;
+
+        /**
          * Alpha blending render operation.
          */
         Ogre::RenderOperation alpha_render_op_;
@@ -737,6 +861,19 @@ class Background2D : public Ogre::RenderQueueListener{
          * Whether to keep following the target entity when the current scroll action ends.
          */
         bool scroll_follow_target_;
+
+        /**
+         * Position of an instant scroll that waits for the end of the frame.
+         *
+         * A script that sets a position and scrolls to another one in the same frame must see the
+         * scroll start where the camera was, not at the first position. See ScriptScrollToPosition.
+         */
+        Ogre::Vector2 pending_scroll_;
+
+        /**
+         * Whether there is an instant scroll waiting for the end of the frame.
+         */
+        bool has_pending_scroll_ = false;
 
         /**
          * @todo Document.

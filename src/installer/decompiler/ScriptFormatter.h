@@ -69,6 +69,18 @@ class ScriptFormatter{
         virtual std::string GetDefaultAnimationName(int char_id);
 
         /**
+         * Retrieves the animation a model plays when it walks or runs on its own.
+         *
+         * In the original game the second animation of a model is its walk, and the third its
+         * run. Only some models have those called "Walk" and "Run".
+         *
+         * @param[in] char_id ID of the model, as given to the CHAR opcode.
+         * @param[in] index 1 for the walk animation, 2 for the run animation.
+         * @return Name of the animation, or an empty string if the model hasn't got it.
+         */
+        virtual std::string GetMoveAnimationName(int char_id, int index);
+
+        /**
          * Retrieves a friendly name for a character.
          *
          * @param[in] char_id ID of the character.

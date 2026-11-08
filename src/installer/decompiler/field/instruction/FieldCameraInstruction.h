@@ -44,6 +44,24 @@ class FieldCameraInstruction : public KernelCallInstruction{
         void ProcessNFADE(CodeGenerator* code_gen);
 
         /**
+         * Processes a SHAKE opcode.
+         *
+         * Opcode: 0x5E
+         * Short name: SHAKE
+         * Long name: Shake Camera
+         *
+         * Memory layout (8 bytes)
+         * |0x5E|B1|B2|T|XA|XF|YA|YF|
+         *
+         * Adds a shake to the view, without changing the scroll. The type T is 0 to stop it, 1 to
+         * shake the X axis, 2 to shake the Y axis and 3 to shake both. XA and YA are the amplitude
+         * of the bounces, and XF and YF the frames between them.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         */
+        void ProcessSHAKE(CodeGenerator* code_gen);
+
+        /**
          * Prodesses a SCR2D opcode.
          *
          * Opcode: 0x64

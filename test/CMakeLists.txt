@@ -91,6 +91,7 @@ set(SOURCE_FILES
     core/AudioManager.cpp
     core/Background2D.cpp
     core/Background2DAnimation.cpp
+    core/ScreenFadeState.cpp
     core/CameraManager.cpp
     core/ConfigCmd.cpp
     core/ConfigCmdHandler.cpp

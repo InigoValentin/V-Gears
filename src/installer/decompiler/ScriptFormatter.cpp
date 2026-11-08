@@ -23,6 +23,8 @@ std::string ScriptFormatter::GetFriendlyAnimationName(int animation_id, int id){
 
 std::string ScriptFormatter::GetDefaultAnimationName(int char_id){return "";}
 
+std::string ScriptFormatter::GetMoveAnimationName(int char_id, int index){return "";}
+
 std::string ScriptFormatter::GetFriendlyCharName(int char_id){return std::to_string(char_id);}
 
 std::string ScriptFormatter::GetFriendlyFunctionName(const std::string& entity_name, const std::string& function_name){

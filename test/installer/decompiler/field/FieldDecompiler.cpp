@@ -144,6 +144,69 @@ BOOST_AUTO_TEST_CASE(TestFieldDecompilerNonWaitingAnimationsDontWait){
     BOOST_CHECK(output.find("animation_sync") == std::string::npos);
 }
 
+BOOST_AUTO_TEST_CASE(TestFieldDecompilerMovaWalksToTheEntityAndWaits){
+    FieldScriptFormatter formatter;
+    // MOVA 0: the only entity of the synthetic field.
+    const std::string output = DecompileWith({0xAA, 0}, formatter);
+    const size_t walk = output.find("self.Door:move_to_entity(entity_manager:get_entity(\"Door\"))");
+    const size_t wait = output.find("self.Door:move_sync()");
+    BOOST_REQUIRE(walk != std::string::npos && wait != std::string::npos);
+    BOOST_CHECK(walk < wait);
+    BOOST_CHECK(output.find("UNIMPLMENTED") == std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(TestFieldDecompilerScreenFades){
+    FieldScriptFormatter formatter;
+    // FADE 255, 0, 0, speed 8, type 5 - NFADE type 11, 10, 20, 30, 15 frames - FADEW.
+    const std::string output = DecompileWith(
+      {0x6B, 0, 0, 255, 0, 0, 8, 5, 0, 0x25, 0, 0, 11, 10, 20, 30, 15, 0, 0x6C}, formatter
+    );
+    BOOST_CHECK(output.find("screen_fade:fade(5, 255, 0, 0, 8)") != std::string::npos);
+    BOOST_CHECK(output.find("screen_fade:nfade(11, 10, 20, 30, 15)") != std::string::npos);
+    BOOST_CHECK(output.find("screen_fade:wait()") != std::string::npos);
+    // They used to be comments.
+    BOOST_CHECK(output.find("-- fade:") == std::string::npos);
+    BOOST_CHECK(output.find("UNIMPLMENTED") == std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(TestFieldDecompilerWindowCloseTalkRangeAndFacing){
+    FieldScriptFormatter formatter;
+    // WCLS 2 - TALKR 64 - TLKR2 128 - DIRA 0.
+    const std::string output = DecompileWith(
+      {0x2E, 2, 0xC5, 0, 64, 0xD6, 0, 128, 0, 0xB6, 0}, formatter
+    );
+    BOOST_CHECK(output.find("dialog:dialog_close(\"2\")") != std::string::npos);
+    BOOST_CHECK(output.find("self.Door:set_talk_radius(0.5)") != std::string::npos);
+    BOOST_CHECK(output.find("self.Door:set_talk_radius(1)") != std::string::npos);
+    BOOST_CHECK(
+      output.find("self.Door:face_entity(entity_manager:get_entity(\"Door\"))") != std::string::npos
+    );
+    BOOST_CHECK(output.find("UNIMPLMENTED") == std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(TestFieldDecompilerAspedSetsTheAnimationSpeed){
+    FieldScriptFormatter formatter;
+    // ASPED 16 (normal speed), ASPED 32 (double) and ASPED 8 (half).
+    const std::string output = DecompileWith(
+      {0xBD, 0, 16, 0, 0xBD, 0, 32, 0, 0xBD, 0, 8, 0}, formatter
+    );
+    BOOST_CHECK(output.find("self.Door:set_animation_speed(1)") != std::string::npos);
+    BOOST_CHECK(output.find("self.Door:set_animation_speed(2)") != std::string::npos);
+    BOOST_CHECK(output.find("self.Door:set_animation_speed(0.5)") != std::string::npos);
+    BOOST_CHECK(output.find("UNIMPLMENTED") == std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(TestFieldDecompilerShakeKeepsItsParameters){
+    FieldScriptFormatter formatter;
+    // SHAKE 0, 0, 2, 0, 0, 5, 2 (shake the Y axis) and SHAKE 0, 0, 0, 0, 1, 0, 1 (stop).
+    const std::string output = DecompileWith(
+      {0x5E, 0, 0, 2, 0, 0, 5, 2, 0x5E, 0, 0, 0, 0, 1, 0, 1}, formatter
+    );
+    BOOST_CHECK(output.find("background2d:shake(2, 0, 0, 5, 2)") != std::string::npos);
+    BOOST_CHECK(output.find("background2d:shake(0, 0, 1, 0, 1)") != std::string::npos);
+    BOOST_CHECK(output.find("UNIMPLMENTED") == std::string::npos);
+}
+
 BOOST_AUTO_TEST_CASE(TestFieldDecompilerAnimwWaitsForTheAnimation){
     NamedAnimationFormatter formatter;
     // ANIM!1 3, 1 and then ANIMW: the script waits after starting the animation.

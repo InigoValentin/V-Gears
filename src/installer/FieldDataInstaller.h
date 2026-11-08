@@ -314,6 +314,24 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
             return first;
         }
 
+        /**
+         * Retrieves the animation a model plays when it walks or runs on its own.
+         *
+         * @param[in] char_id ID of the model, as given to the CHAR opcode.
+         * @param[in] index 1 for the walk animation, 2 for the run animation.
+         * @return Name of the animation, or an empty string if the model hasn't got it.
+         */
+        virtual std::string GetMoveAnimationName(int char_id, int index) override{
+            if (char_id < 0 || static_cast<unsigned int>(char_id) >= model_loader_->GetModels().size())
+                return "";
+            const auto& animations = model_loader_->GetModels().at(char_id).animations;
+            if (static_cast<unsigned int>(index) >= animations.size()) return "";
+            Ogre::String base_name;
+            VGears::StringUtil::splitBase(animations[index].name, base_name);
+            VGears::StringUtil::toLowerCase(base_name);
+            return VGears::NameLookup::Animation(base_name);
+        }
+
     private:
 
         /**

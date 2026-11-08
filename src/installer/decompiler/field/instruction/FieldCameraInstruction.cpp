@@ -31,7 +31,7 @@ void FieldCameraInstruction::ProcessInst(
     //std::cout << "Camera opcode: " << opcode_ << "\n";
     switch (opcode_){
     case OPCODES::NFADE: ProcessNFADE(code_gen); break;
-    case OPCODES::SHAKE: code_gen->WriteTodo(md.GetEntityName(), "SHAKE"); break;
+    case OPCODES::SHAKE: ProcessSHAKE(code_gen); break;
     case OPCODES::SCRLO: code_gen->WriteTodo(md.GetEntityName(), "SCRLO"); break;
     case OPCODES::SCRLC: ProcessSCRLC(code_gen); break;
     case OPCODES::SCR2D: ProcessSCR2D(code_gen); break;
@@ -41,7 +41,7 @@ void FieldCameraInstruction::ProcessInst(
     case OPCODES::SCR2DL: ProcessSCR2DL(code_gen); break;
     case OPCODES::VWOFT: ProcessVWOFT(code_gen); break;
     case OPCODES::FADE: ProcessFADE(code_gen); break;
-    case OPCODES::FADEW: code_gen->WriteTodo(md.GetEntityName(), "FADEW"); break;
+    case OPCODES::FADEW: code_gen->AddOutputLine("screen_fade:wait()"); break;
     case OPCODES::SCRLP: code_gen->WriteTodo(md.GetEntityName(), "SCRLP"); break;
     case OPCODES::MVCAM: code_gen->WriteTodo(md.GetEntityName(), "MVCAM"); break;
     case OPCODES::SCRLA: ProcessSCRLA(code_gen, static_cast<FieldEngine&>(*engine)); break;
@@ -53,14 +53,9 @@ void FieldCameraInstruction::ProcessInst(
 }
 
 void FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
-    // TODO: Not fully reversed.
-    auto raw_type = params_[4]->GetUnsigned();
-    if (raw_type == 0){
-        code_gen->AddOutputLine("-- fade:clear()");
-        return;
-    }
+    // Operands: the banks of R, G and B (the third nibble is always zero), the type, R, G, B
+    // and the duration in frames.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const std::string type = raw_type == 12 ? "Fade.SUBTRACT" : "Fade.ADD";
     const auto& r = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[5]->GetUnsigned()
     );
@@ -68,14 +63,26 @@ void FieldCameraInstruction::ProcessNFADE(CodeGenerator* code_gen){
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[6]->GetUnsigned()
     );
     const auto& b = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[7]->GetUnsigned()
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[7]->GetUnsigned()
     );
-    const auto& unknown = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[8]->GetUnsigned()
-    );
-    code_gen->AddOutputLine(
-      (boost::format("-- fade:fade(%2%, %3%, %4%, %1%, %5%)") % type % r % g % b % unknown).str()
-    );
+    code_gen->AddOutputLine((
+      boost::format("screen_fade:nfade(%1%, %2%, %3%, %4%, %5%)")
+      % params_[4]->GetUnsigned() % r % g % b % params_[8]->GetUnsigned()
+    ).str());
+}
+
+void FieldCameraInstruction::ProcessSHAKE(CodeGenerator* code_gen){
+    // Operands: two banks for the amplitudes (always zero in the game data), the type, and the
+    // amplitude and frames between bounces of each axis.
+    if (params_[0]->GetUnsigned() != 0 || params_[1]->GetUnsigned() != 0){
+        code_gen->WriteTodo("FieldCameraInstruction", "SHAKE with variable parameters");
+        return;
+    }
+    code_gen->AddOutputLine((
+      boost::format("background2d:shake(%1%, %2%, %3%, %4%, %5%)")
+      % params_[2]->GetUnsigned() % params_[3]->GetUnsigned() % params_[4]->GetUnsigned()
+      % params_[5]->GetUnsigned() % params_[6]->GetUnsigned()
+    ).str());
 }
 
 void FieldCameraInstruction::ProcessSCRLC(CodeGenerator* code_gen){
@@ -192,20 +199,8 @@ void FieldCameraInstruction::ProcessVWOFT(CodeGenerator* code_gen){
 }
 
 void FieldCameraInstruction::ProcessFADE(CodeGenerator* code_gen){
-    // TODO: not fully reversed
-    auto raw_type = params_[8]->GetUnsigned();
-    std::string type;
-    switch (raw_type) {
-        case 1:
-        case 2:
-        case 7:
-        case 8:
-            type = "Fade.SUBTRACT";
-            break;
-        case 4: code_gen->AddOutputLine("-- fade:black()"); return;
-        default: type = "Fade.ADD"; break;
-    }
-
+    // Operands: the banks of R, G and B (the third nibble is always zero), R, G, B, the speed,
+    // the type and the adjust, which doesn't change what is seen.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& r = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetUnsigned()
@@ -214,12 +209,10 @@ void FieldCameraInstruction::ProcessFADE(CodeGenerator* code_gen){
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetUnsigned()
     );
     const auto& b = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[6]->GetUnsigned()
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[6]->GetUnsigned()
     );
-    // TODO: needs to be divided by 30.0f?
-    auto speed = params_[7]->GetUnsigned();
-    auto start = params_[9]->GetUnsigned();
     code_gen->AddOutputLine((
-      boost::format("-- fade:fade(%2%, %3%, %4%, %1%, %5%, %6%)") % type % r % g % b % speed % start
+      boost::format("screen_fade:fade(%1%, %2%, %3%, %4%, %5%)")
+      % params_[8]->GetUnsigned() % r % g % b % params_[7]->GetUnsigned()
     ).str());
 }

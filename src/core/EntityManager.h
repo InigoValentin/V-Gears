@@ -22,6 +22,7 @@
 #include "EntityTrigger.h"
 #include "Event.h"
 #include "Manager.h"
+#include "ScreenFade.h"
 #include "Walkmesh.h"
 
 class EntityModel;
@@ -52,6 +53,45 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @return Distance to move this frame.
          */
         static float ScriptedMoveStep(float distance, float stop_distance, float max_step);
+
+        /**
+         * Decides whether an entity is a better target to interact with than the best one so far.
+         *
+         * The one the player faces more directly wins. If the angles are the same, the nearest
+         * one does.
+         *
+         * @param[in] angle Angle in degrees between where the player faces and the candidate.
+         * @param[in] distance Squared distance to the candidate.
+         * @param[in] best_angle Angle of the best candidate so far, or the largest one allowed.
+         * @param[in] best_distance Squared distance to the best candidate so far.
+         * @return True if the candidate is better.
+         */
+        static bool IsBetterInteractionTarget(
+          float angle, float distance, float best_angle, float best_distance
+        );
+
+        /**
+         * Retrieves how close to a line an entity has to be to trigger it.
+         *
+         * It's the solid radius of the entity, unless a script has made it too small, as scripts
+         * do while a scene is playing. Lines couldn't be triggered at all then.
+         *
+         * @param[in] solid_radius Solid radius of the entity.
+         * @return The distance to the line from which it triggers.
+         */
+        static float TriggerReach(float solid_radius);
+
+        /**
+         * Checks if the edge of the walkmesh stops an entity.
+         *
+         * It stops the player and the characters that wander. The characters that a script walks
+         * to a position are not stopped: the original game lets them walk off the walkmesh.
+         *
+         * @param[in] is_player Whether the entity is the player.
+         * @param[in] scripted_move Whether a script asked the entity to walk to a position.
+         * @return True if the edge of the walkmesh blocks the entity.
+         */
+        static bool WalkmeshEdgeBlocks(bool is_player, bool scripted_move);
 
         /**
          * Handles an input event.
@@ -117,6 +157,13 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @return The 2D background.
          */
         Background2D* GetBackground2D();
+
+        /**
+         * Retrieves the coloured fade of the screen.
+         *
+         * @return The screen fade.
+         */
+        ScreenFade* GetScreenFade();
 
         /**
          * Adds an entity to the manager.
@@ -649,6 +696,12 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * The map background
          */
         Background2D background_2d_;
+
+        /**
+         * The coloured fade of the screen. It has to be created after the background, because the
+         * fade must be drawn over it.
+         */
+        ScreenFade screen_fade_;
 
         /**
          * The entity table name.

@@ -19,6 +19,7 @@
 #include <OgreException.h>
 #include <OgreViewport.h>
 #include <OgreTechnique.h>
+#include <algorithm>
 #include "core/Background2D.h"
 #include "core/CameraManager.h"
 #include "core/EntityManager.h"
@@ -121,6 +122,11 @@ void Background2D::Hide(){scene_manager_->removeRenderQueueListener(this);}
 void Background2D::Show(){scene_manager_->addRenderQueueListener(this);}
 
 void Background2D::Update(){
+    if (has_pending_scroll_){
+        has_pending_scroll_ = false;
+        SetScroll(pending_scroll_);
+    }
+    UpdateShake(Timer::getSingleton().GetGameTimeDelta());
     for (unsigned int i = 0; i < animation_played_.size(); ++ i){
         for (unsigned int j = 0; j < animations_.size(); ++ j){
             if (animations_[j]->GetName() == animation_played_[i].name){
@@ -282,6 +288,109 @@ void Background2D::ScriptAreaOff(const int area, const int layer){
     RefreshArea(area);
 }
 
+namespace{
+    // Random factors the original game applies to each bounce of a shake.
+    const float SHAKE_FACTORS[] = {
+      -1.0f, 1.14f, -1.34f, 0.61f, -0.49f, 0.64f, -0.25f, 0.47f, -1.20f, -0.01f, 1.14f, -0.86f,
+      0.81f, -0.58f, 0.68f, -1.31f, 0.44f, -0.91f, 0.03f, -0.97f, 1.25f, -0.76f, 0.48f, -0.99f,
+      1.34f, -0.85f, 0.55f, -0.65f, 0.07f, -0.83f
+    };
+    const size_t SHAKE_FACTOR_COUNT = sizeof(SHAKE_FACTORS) / sizeof(SHAKE_FACTORS[0]);
+
+    // Frames per second the shake times are given in.
+    const float SHAKE_FRAMES_PER_SECOND = 30.0f;
+
+    // Pixels of the original screen.
+    const float ORIGINAL_SCREEN_WIDTH = 320.0f;
+
+    // Quadratic in and out easing.
+    float ShakeEase(const float t){return t < 0.5f ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);}
+}
+
+void Background2D::ShakeAxis::Configure(const float new_amplitude, const float new_seconds){
+    amplitude = new_amplitude;
+    seconds = std::max(new_seconds, 1.0f / SHAKE_FRAMES_PER_SECOND);
+    stopping = false;
+    if (!running){
+        running = true;
+        StartBounce();
+    }
+}
+
+void Background2D::ShakeAxis::Stop(const float seconds_to_center){
+    if (!running) return;
+    stopping = true;
+    stop_seconds = std::max(seconds_to_center, 1.0f / SHAKE_FRAMES_PER_SECOND);
+}
+
+void Background2D::ShakeAxis::StartBounce(){
+    from = value;
+    elapsed = 0;
+    if (stopping){
+        to = 0;
+        duration = stop_seconds;
+    }
+    else{
+        // Half the amplitude, times the random factor, is the distance in pixels.
+        to = amplitude / 2 * SHAKE_FACTORS[step % SHAKE_FACTOR_COUNT];
+        ++ step;
+        duration = seconds;
+    }
+}
+
+bool Background2D::ShakeAxis::Advance(const float delta){
+    if (!running) return false;
+    const float old_value = value;
+    elapsed += delta;
+    while (elapsed >= duration){
+        elapsed -= duration;
+        value = to;
+        if (stopping && to == 0){
+            // Back in the center: the shake is over.
+            *this = ShakeAxis();
+            return old_value != 0;
+        }
+        StartBounce();
+    }
+    value = from + (to - from) * ShakeEase(elapsed / duration);
+    return value != old_value;
+}
+
+void Background2D::UpdateShake(const float delta){
+    if (!shake_x_.running && !shake_y_.running) return;
+    const bool x_changed = shake_x_.Advance(delta);
+    const bool y_changed = shake_y_.Advance(delta);
+    if (!x_changed && !y_changed) return;
+    const float scale = virtual_screen_size_.x / ORIGINAL_SCREEN_WIDTH;
+    shake_offset_ = Ogre::Vector2(shake_x_.value * scale, shake_y_.value * scale);
+    applyScroll();
+}
+
+void Background2D::ScriptShake(
+  const int type, const int x_amplitude, const int x_frames, const int y_amplitude,
+  const int y_frames
+){
+    LOG_TRIVIAL("Background2d shake type " + std::to_string(type) + ".");
+    const float x_seconds = x_frames / SHAKE_FRAMES_PER_SECOND;
+    const float y_seconds = y_frames / SHAKE_FRAMES_PER_SECOND;
+    switch (type){
+        case 0:
+            {
+                const float seconds = std::max(x_seconds, y_seconds);
+                shake_x_.Stop(seconds);
+                shake_y_.Stop(seconds);
+            }
+            break;
+        case 1: shake_x_.Configure(static_cast<float>(x_amplitude), x_seconds); break;
+        case 2: shake_y_.Configure(static_cast<float>(y_amplitude), y_seconds); break;
+        case 3:
+            shake_x_.Configure(static_cast<float>(x_amplitude), x_seconds);
+            shake_y_.Configure(static_cast<float>(y_amplitude), y_seconds);
+            break;
+        default: LOG_WARNING("Background2d shake type " + std::to_string(type) + " is unknown.");
+    }
+}
+
 void Background2D::ScriptAreaClear(const int area){
     LOG_TRIVIAL("Background2d area " + std::to_string(area) + " cleared.");
     area_states_on_.erase(area);
@@ -296,6 +405,7 @@ void Background2D::Clear(){
     scroll_current_seconds_ = 0;
     scroll_target_entity_ = nullptr;
     scroll_follow_target_ = false;
+    has_pending_scroll_ = false;
     position_ = Ogre::Vector2::ZERO;
     position_real_ = Ogre::Vector2::ZERO;
     offset_ = Ogre::Vector2::ZERO;
@@ -309,6 +419,9 @@ void Background2D::Clear(){
     animation_played_.clear();
     tiles_.clear();
     area_states_on_.clear();
+    shake_x_ = ShakeAxis();
+    shake_y_ = ShakeAxis();
+    shake_offset_ = Ogre::Vector2::ZERO;
     DestroyVertexBuffers();
     CreateVertexBuffers();
 }
@@ -356,6 +469,8 @@ void Background2D::StartScroll(
   const Ogre::Vector2& position, const SCROLL_TYPE type, const float seconds,
   Entity* target_entity, const bool follow_target
 ){
+    // A newer scroll replaces an instant one that has not been applied yet.
+    has_pending_scroll_ = false;
     // Finish the previous scroll first, without following its target.
     scroll_target_entity_ = nullptr;
     scroll_follow_target_ = false;
@@ -379,9 +494,31 @@ void Background2D::ScriptScrollToPosition(
 ){
     LOG_TRIVIAL(
       "Background2d set scroll to position '"
-      + Ogre::StringConverter::toString(Ogre::Vector2(x, y)) + "'."
+      + Ogre::StringConverter::toString(Ogre::Vector2(x, y)) + "', current '"
+      + Ogre::StringConverter::toString(position_) + "', player would be at '"
+      + (EntityManager::getSingleton().ScriptGetPlayerEntity() != nullptr
+        ? Ogre::StringConverter::toString(
+            GetEntityScroll(EntityManager::getSingleton().ScriptGetPlayerEntity())
+          )
+        : Ogre::String("none"))
+      + "', range " + Ogre::StringConverter::toString(range_.getMinimum()) + " "
+      + Ogre::StringConverter::toString(range_.getMaximum()) + "."
     );
     scroll_entity_ = nullptr;
+    if (type == Background2D::NONE || seconds <= 0){
+        // The scripts set a position and then scroll from it to another one, in the same frame.
+        // The camera is only moved at the end of the frame, so if another scroll comes first the
+        // movement starts from where the camera was, and there is no jump.
+        // TODO: Some scenes still show a small camera jump (mds7pb_1, when the NPCs go down the
+        // pinball machine and when Marlene says "Papa"), and the camera stays fixed after them
+        // until the script scrolls to the player. How the original game handles it is not known.
+        scroll_target_entity_ = nullptr;
+        scroll_follow_target_ = false;
+        UnsetScroll();
+        pending_scroll_ = Ogre::Vector2(x, y);
+        has_pending_scroll_ = true;
+        return;
+    }
     StartScroll(Ogre::Vector2(x, y), type, seconds, nullptr, false);
 }
 
@@ -455,7 +592,7 @@ const Ogre::Vector2 Background2D::ClampScroll(const Ogre::Vector2& position) con
 
 void Background2D::applyScroll(){
     if(cv_background2d_manual.GetB() != true){
-        position_real_ = GetScreenScroll();
+        position_real_ = (GetScroll() + shake_offset_) * screen_scale_;
         position_real_.x += offset_.x;
         position_real_.y += offset_.y;
         CameraManager::getSingleton().Set2DScroll(position_real_);

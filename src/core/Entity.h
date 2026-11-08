@@ -598,6 +598,14 @@ class Entity{
         const Ogre::String& GetMoveAnimationWalkName() const;
 
         /**
+         * Sets the animations played when the entity moves on its own.
+         *
+         * @param[in] walk Name of the walk animation.
+         * @param[in] run Name of the run animation.
+         */
+        void SetMoveAnimations(const char* walk, const char* run);
+
+        /**
          * Retrieves the entity's run animation name.
          *
          * @return The run animation name.
@@ -880,6 +888,13 @@ class Entity{
           Entity* entity, const TurnDirection turn_direction,
           const float seconds
         );
+
+        /**
+         * Makes the entity face another entity at once.
+         *
+         * @param[in] entity Entity to face.
+         */
+        void ScriptFaceEntity(Entity* entity);
 
         /**
          * Adds the entity's turn to the sync queue.

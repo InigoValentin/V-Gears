@@ -113,7 +113,7 @@ void FieldModelInstruction::ProcessInst(
         case OPCODES::XYZ: code_gen->WriteTodo(md.GetEntityName(), "XYZ"); break;
         case OPCODES::MOVE: ProcessMOVE(code_gen, md.GetEntityName()); break;
         case OPCODES::CMOVE: code_gen->WriteTodo(md.GetEntityName(), "CMOVE"); break;
-        case OPCODES::MOVA: code_gen->WriteTodo(md.GetEntityName(), "MOVA"); break;
+        case OPCODES::MOVA: ProcessMOVA(code_gen, md.GetEntityName(), eng); break;
         case OPCODES::TURA: ProcessTURA(code_gen, md.GetEntityName(), eng); break;
         case OPCODES::ANIMW: ProcessANIMW(code_gen, md.GetEntityName()); break;
         case OPCODES::FMOVE: ProcessFMOVE(code_gen, md.GetEntityName()); break;
@@ -133,7 +133,7 @@ void FieldModelInstruction::ProcessInst(
         case OPCODES::DIR: ProcessDIR(code_gen, md.GetEntityName()); break;
         case OPCODES::TURNGEN: ProcessTURNGEN(code_gen, md.GetEntityName()); break;
         case OPCODES::TURN: code_gen->WriteTodo(md.GetEntityName(), "TURN"); break;
-        case OPCODES::DIRA: code_gen->WriteTodo(md.GetEntityName(), "DIRA"); break;
+        case OPCODES::DIRA: ProcessDIRA(code_gen, md.GetEntityName(), eng); break;
         case OPCODES::GETDIR: code_gen->WriteTodo(md.GetEntityName(), "GETDIR"); break;
         case OPCODES::GETAXY: code_gen->WriteTodo(md.GetEntityName(), "GETAXY"); break;
         case OPCODES::GETAI: ProcessGETAI(code_gen, eng); break;
@@ -146,19 +146,19 @@ void FieldModelInstruction::ProcessInst(
         case OPCODES::CANM_2:
             ProcessCANM_2(code_gen, md.GetEntityName(), md.GetCharacterId());
             break;
-        case OPCODES::ASPED: code_gen->WriteTodo(md.GetEntityName(), "ASPED"); break;
+        case OPCODES::ASPED: ProcessASPED(code_gen, md.GetEntityName()); break;
         case OPCODES::CC: ProcessCC(code_gen, eng); break;
         case OPCODES::JUMP: ProcessJUMP(code_gen, md.GetEntityName()); break;
         case OPCODES::AXYZI: ProcessAXYZI(code_gen); break;
-        case OPCODES::LADER: ProcessLADER(code_gen, md.GetEntityName()); break;
+        case OPCODES::LADER: ProcessLADER(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
         case OPCODES::OFST: ProcessOFST(code_gen, md.GetEntityName()); break;
         case OPCODES::OFSTW:
             code_gen->AddOutputLine("self." + md.GetEntityName() + ":offset_sync()");
             break;
-        case OPCODES::TALKR: code_gen->WriteTodo(md.GetEntityName(), "TALKR"); break;
+        case OPCODES::TALKR: ProcessTALKR(code_gen, md.GetEntityName()); break;
         case OPCODES::SLIDR: ProcessSLIDR(code_gen, md.GetEntityName()); break;
         case OPCODES::SOLID: ProcessSOLID(code_gen, md.GetEntityName()); break;
-        case OPCODES::TLKR2: code_gen->WriteTodo(md.GetEntityName(), "TLKR2"); break;
+        case OPCODES::TLKR2: ProcessTALKR(code_gen, md.GetEntityName()); break;
         case OPCODES::SLDR2: code_gen->WriteTodo(md.GetEntityName(), "SLDR2"); break;
         case OPCODES::CCANM: code_gen->WriteTodo(md.GetEntityName(), "CCANM"); break;
         case OPCODES::FCFIX: code_gen->WriteTodo(md.GetEntityName(), "FCFIX"); break;
@@ -244,6 +244,14 @@ void FieldModelInstruction::ProcessCHAR(CodeGenerator* code_gen, const std::stri
     // a default one, which a DFANM later in the script replaces.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const std::string animation = cg->GetFormatter().GetDefaultAnimationName(params_[0]->GetSigned());
+    // The walk and run animations are the second and the third of the model.
+    const std::string walk = cg->GetFormatter().GetMoveAnimationName(params_[0]->GetSigned(), 1);
+    const std::string run = cg->GetFormatter().GetMoveAnimationName(params_[0]->GetSigned(), 2);
+    if (!walk.empty() && !run.empty() && (walk != "Walk" || run != "Run")){
+        code_gen->AddOutputLine((
+          boost::format("self.%1%:set_move_animations(\"%2%\", \"%3%\")") % entity % walk % run
+        ).str());
+    }
     if (!animation.empty()){
         code_gen->AddOutputLine((
           boost::format("self.%1%:set_default_animation(\"%2%\") -- No Idle animation")
@@ -286,6 +294,71 @@ void FieldModelInstruction::ProcessANIME1(
       % entity % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation_id) % speed
     ).str());
     code_gen->AddOutputLine((boost::format("self.%1%:animation_sync()") % entity).str());
+}
+
+void FieldModelInstruction::ProcessMOVA(
+  CodeGenerator* code_gen, const std::string& entity, const FieldEngine& engine
+){
+    // Walks to the other entity, and waits until it is there.
+    const auto& target = engine.EntityByIndex(params_[0]->GetUnsigned());
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:move_to_entity(entity_manager:get_entity(\"%2%\"))")
+      % entity % target.GetName()
+    ).str());
+    code_gen->AddOutputLine((boost::format("self.%1%:move_sync()") % entity).str());
+}
+
+void FieldModelInstruction::ProcessTALKR(CodeGenerator* code_gen, const std::string& entity){
+    // The range is given in the same units as the positions.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->GetScaleFactor();
+    const std::string range_value = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned() + params_[1]->GetUnsigned(),
+      params_[2]->GetUnsigned(), FieldCodeGenerator::ValueType::Float, scale
+    );
+    float range = 0;
+    if (TryParseFloat(range_value, range)){
+        code_gen->AddOutputLine(
+          (boost::format("self.%1%:set_talk_radius(%2%)") % entity % range).str()
+        );
+    }
+    else{
+        // A variable: the scale is not applied yet.
+        code_gen->AddOutputLine(
+          "self." + entity + ":set_talk_radius((" + range_value + ") / " + std::to_string(scale) + ")"
+        );
+    }
+}
+
+void FieldModelInstruction::ProcessDIRA(
+  CodeGenerator* code_gen, const std::string& entity, const FieldEngine& engine
+){
+    // Turns the model towards another entity at once.
+    const auto& target = engine.EntityByIndex(params_[0]->GetUnsigned());
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:face_entity(entity_manager:get_entity(\"%2%\"))")
+      % entity % target.GetName()
+    ).str());
+}
+
+void FieldModelInstruction::ProcessASPED(CodeGenerator* code_gen, const std::string& entity){
+    // The value is the speed of the animations: 16 is the normal one, 32 double and 8 half.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const std::string speed_value = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned() + params_[1]->GetUnsigned(),
+      params_[2]->GetUnsigned()
+    );
+    float speed = 0;
+    if (TryParseFloat(speed_value, speed)){
+        code_gen->AddOutputLine((
+          boost::format("self.%1%:set_animation_speed(%2%)") % entity % (speed / 16.0f)
+        ).str());
+    }
+    else{
+        code_gen->AddOutputLine(
+          "self." + entity + ":set_animation_speed((" + speed_value + ") / 16.0)"
+        );
+    }
 }
 
 void FieldModelInstruction::ProcessANIME2(
@@ -618,7 +691,9 @@ void FieldModelInstruction::ProcessAXYZI(CodeGenerator* code_gen){
     ).str());
 }
 
-void FieldModelInstruction::ProcessLADER(CodeGenerator* code_gen, const std::string& entity){
+void FieldModelInstruction::ProcessLADER(
+  CodeGenerator* code_gen, const std::string& entity, int char_id
+){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
     const auto& x = FieldCodeGenerator::FormatValueOrVariable(
@@ -644,13 +719,13 @@ void FieldModelInstruction::ProcessLADER(CodeGenerator* code_gen, const std::str
       FieldCodeGenerator::ValueType::Float, 256.0f / 360.0f
     );
     uint speed = params_[11]->GetUnsigned();
-    // TODO: Animation hardcoded as "btce".
     // TODO: Orientation and speed not set.
     code_gen->AddOutputLine((
       boost::format(
-        "self.%1%:linear_to_position(%2%, %3%, %4%, %5%, \"Climb\", %6%, %7%) "
+        "self.%1%:linear_to_position(%2%, %3%, %4%, %5%, \"%10%\", %6%, %7%) "
         "-- Animation %8% -- Speed %9%"
       ) % entity % x % y % z % keys % orientation % end_triangle % animation % speed
+        % cg->GetFormatter().GetFriendlyAnimationName(char_id, animation)
     ).str());
     code_gen->AddOutputLine((boost::format("self.%1%:linear_sync()") % entity).str());
 }

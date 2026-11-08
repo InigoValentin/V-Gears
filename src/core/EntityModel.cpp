@@ -75,6 +75,10 @@ void EntityModel::PlayAnimation(
         animation_current_name_ = animation;
         animation_current_ = model_->getAnimationState(animation);
         animation_current_->setLoop((play_type == Entity::PLAY_LOOPED) ? true : false);
+        // Single frame animations have no length. A looping animation without length wraps its
+        // time position dividing by zero, ends up with a time that is not a number, and never
+        // finishes, so any script waiting for it would wait forever.
+        if (animation_current_->getLength() <= 0.0f) animation_current_->setLoop(false);
         animation_current_->setEnabled(true);
         animation_current_->setTimePosition(
           (start == -1) ? animation_current_->getLength() : start

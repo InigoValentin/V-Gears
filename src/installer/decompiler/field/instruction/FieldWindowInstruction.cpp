@@ -47,7 +47,7 @@ void FieldWindowInstruction::ProcessInst(
     //std::cout << "Window opcode: " << opcode_ << "\n";
     switch (opcode_){
         case OPCODES::TUTOR: code_gen->WriteTodo(md.GetEntityName(), "TUTOR"); break;
-        case OPCODES::WCLS: code_gen->WriteTodo(md.GetEntityName(), "WCLS"); break;
+        case OPCODES::WCLS: ProcessWCLSE(code_gen); break;
         case OPCODES::WSIZW: ProcessWSIZW(code_gen); break;
         case OPCODES::WSPCL: ProcessWSPCL(code_gen); break;
         case OPCODES::WNUMB: code_gen->WriteTodo(md.GetEntityName(), "WNUMB"); break;

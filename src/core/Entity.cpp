@@ -382,6 +382,11 @@ void Entity::SetMoveAutoAnimation(const bool animate){move_auto_animation_ = ani
 
 bool Entity::GetMoveAutoAnimation() const{return move_auto_animation_;}
 
+void Entity::SetMoveAnimations(const char* walk, const char* run){
+    move_animation_walk_ = walk;
+    move_animation_run_ = run;
+}
+
 const Ogre::String& Entity::GetMoveAnimationWalkName() const{return move_animation_walk_;}
 
 const Ogre::String& Entity::GetMoveAnimationRunName() const{return move_animation_run_;}
@@ -608,6 +613,15 @@ Entity::ScriptTurnToEntity(Entity* entity, const TurnDirection turn_direction, c
     Ogre::Degree angle = GetDirectionToEntity(entity);
     SetTurn(angle, entity, turn_direction, AT_SMOOTH, seconds);
     LOG_TRIVIAL("Entity '" + name_ + "' turn to entity '" + entity->GetName() + ".");
+}
+
+void Entity::ScriptFaceEntity(Entity* entity){
+    if (entity == nullptr || entity == this){
+        LOG_ERROR("Face entity: Invalid entity pointer (NULL or self).");
+        return;
+    }
+    SetRotation(GetDirectionToEntity(entity));
+    LOG_TRIVIAL("Entity '" + name_ + "' faces entity '" + entity->GetName() + "'.");
 }
 
 int Entity::ScriptTurnSync(){
