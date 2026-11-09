@@ -2635,7 +2635,7 @@ class FF7Data{
             else if("pi" == alphanumeric_id){
                 info.numeric_id = 0x1c;
                 info.name = "Sector 7 Support Pillar Top";
-                info.name_normal = "sector_7_pillar top";
+                info.name_normal = "sector_7_pillar_top";
                 info.is_scene = true;
             }
             else if("pj" == alphanumeric_id){
@@ -2830,46 +2830,48 @@ class FF7Data{
                 info.name_normal = "blank_2";
                 info.is_scene = true;
             }
+            // Battle location IDs follow the alphabetical order of the model IDs (og = 0, oh = 1...).
+            // Unverified labels for qp-qv were matched against the location names in formations.
             else if("qp" == alphanumeric_id){
-                info.numeric_id = 0x3d;
-                info.name = "unkonwon";
-                info.name_normal = "unknown_qp";
-                info.is_scene = true;
-            }
-            else if("qq" == alphanumeric_id){
                 info.numeric_id = 0x3d;
                 info.name = "Corel Railway - Canyon";
                 info.name_normal = "railway_canyon";
                 info.is_scene = true;
             }
-            else if("qr" == alphanumeric_id){
+            else if("qq" == alphanumeric_id){
                 info.numeric_id = 0x3e;
                 info.name = "Whirlwind Maze - Crater";
                 info.name_normal = "whirlwind_maze_crater";
                 info.is_scene = true;
             }
-            else if("qs" == alphanumeric_id){
+            else if("qr" == alphanumeric_id){
                 info.numeric_id = 0x3f;
                 info.name = "Corel Railway - Rollercoaster";
                 info.name_normal = "railway_rollercoaster";
                 info.is_scene = true;
             }
-            else if("qt" == alphanumeric_id){
+            else if("qs" == alphanumeric_id){
                 info.numeric_id = 0x40;
                 info.name = "Wooden Bridge";
                 info.name_normal = "wooden_bridge";
                 info.is_scene = true;
             }
-            else if("qu" == alphanumeric_id){
+            else if("qt" == alphanumeric_id){
                 info.numeric_id = 0x41;
                 info.name = "Da Chao";
                 info.name_normal = "da_chao";
                 info.is_scene = true;
             }
-            else if("qv" == alphanumeric_id){
+            else if("qu" == alphanumeric_id){
                 info.numeric_id = 0x42;
                 info.name = "Fort Condor";
                 info.name_normal = "fort_condor";
+                info.is_scene = true;
+            }
+            else if("qv" == alphanumeric_id){
+                info.numeric_id = 0x43;
+                info.name = "Dirt Wasteland";
+                info.name_normal = "dirt_wasteland";
                 info.is_scene = true;
             }
             else if("qw" == alphanumeric_id){

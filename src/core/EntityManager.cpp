@@ -13,6 +13,8 @@
  * GNU General Public License for more details.
  */
 
+#include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <cmath>
 #include <limits>
@@ -37,6 +39,24 @@ template<>EntityManager *Ogre::Singleton<EntityManager>::msSingleton = nullptr;
 
 ConfigVar cv_debug_grid("debug_grid", "Draw debug grid", "false");
 ConfigVar cv_debug_axis("debug_axis", "Draw debug axis", "false");
+ConfigVar cv_encounter_multiplier(
+  "encounter_multiplier", "Multiplier of the random encounter rate (0 disables them)", "1"
+);
+ConfigVar cv_debug_encounters("debug_encounters", "Log random encounter checks", "false");
+
+/**
+ * Frames of walking (at 30 frames per second) between two encounter checks. The original game
+ * checks every 8 frames.
+ */
+static const float ENCOUNTER_CHECK_FRAMES = 8.0f;
+
+/**
+ * Value added to the encounter accumulator in each check, before dividing it by the rate of the
+ * table. The original game uses the speed of the player, which is not known here, so this is tuned
+ * to a battle every 15-30 seconds of walking in most fields. The encounter_multiplier cvar scales
+ * it.
+ */
+static const float ENCOUNTER_STEP_VALUE = 5.0f;
 
 const float EntityManager::SCENE_SCALE = 0.003f;
 
@@ -109,7 +129,12 @@ EntityManager::EntityManager():
   player_lock_(false),
   player_run_(false),
   random_encounters_(false),
-  encounter_rate_(0)
+  encounter_rate_(0),
+  encounter_table_(1),
+  encounter_distance_(0.0f),
+  encounter_last_position_(Ogre::Vector3::ZERO),
+  encounter_last_position_valid_(false),
+  encounter_safe_steps_(0)
 {
     LOG_TRIVIAL("EntityManager created.");
     scene_node_ = Ogre::Root::getSingleton().getSceneManager("Scene")
@@ -178,6 +203,8 @@ void EntityManager::Input(const VGears::Event& event){
 void EntityManager::UpdateField(){
     // Update all entity scripts
     ScriptManager::getSingleton().Update(ScriptManager::ENTITY);
+    // The player is walking if there is a move set by the input.
+    const bool walked = player_entity_ != nullptr && player_move_ != Ogre::Vector3::ZERO;
 
     // Set move point for player entity
     if (player_entity_ != nullptr && player_move_ != Ogre::Vector3::ZERO){
@@ -294,6 +321,8 @@ void EntityManager::UpdateField(){
     player_run_ = false;
     if (background_2d_.GetScrollType() != Background2D::NONE) SetNextScrollStep();
     background_2d_.Update();
+    // This can start a battle and change the module, so it's the last thing to do.
+    UpdateEncounters(walked);
     screen_fade_.Update(Timer::getSingleton().GetGameTimeDelta());
 }
 
@@ -305,7 +334,11 @@ void EntityManager::UpdateBattle(){
     }
     for (unsigned int i = 0; i < battle_entity_.size(); ++ i){
         battle_entity_[i]->Update();
-        battle_entity_[i]->PlayAnimationContinue(battle_entity_[i]->GetDefaultAnimationName());
+        // Go back to the default animation, unless an animation has been requested. Requested
+        // animations that are not looped go back to the default one by themselves when they end.
+        if (battle_entity_[i]->GetAnimationState() != Entity::REQUESTED_ANIMATION){
+            battle_entity_[i]->PlayAnimationContinue(battle_entity_[i]->GetDefaultAnimationName());
+        }
     }
     //CameraManager::getSingleton().GetCurrentCamera()->roll(Ogre::Radian(0.01));
 }
@@ -456,6 +489,8 @@ void EntityManager::UpdateDebug(){
 void EntityManager::OnResize(){background_2d_.OnResize();}
 
 void EntityManager::ClearField(){
+    ClearEncounterTables();
+    entities_hidden_by_battle_.clear();
     walkmesh_.Clear();
     background_2d_.Clear();
     screen_fade_.Clear();
@@ -736,6 +771,8 @@ void EntityManager::ScriptPlayerLock(const bool lock){
     if (lock == true) player_move_ = Ogre::Vector3::ZERO;
 }
 
+bool EntityManager::IsPlayerLocked() const{return player_lock_;}
+
 void EntityManager::SetPlayerMoveRotation(const Ogre::Radian rotation){
     if (IsBattleModule()){
         LOG_WARNING("Tried to set player move rotation the EntityManager is in battle mode.");
@@ -746,9 +783,125 @@ void EntityManager::SetPlayerMoveRotation(const Ogre::Radian rotation){
 
 bool EntityManager::GetRandomEncounters(){return random_encounters_;}
 
+float EntityManager::GetEncounterMultiplier() const{return cv_encounter_multiplier.GetF();}
+
+bool EntityManager::IsDebugEncounters() const{return cv_debug_encounters.GetB();}
+
 void EntityManager::SetRandomEncounters(bool active){random_encounters_ = active;}
 
 float EntityManager::GetEncounterRate(){return encounter_rate_;}
+
+void EntityManager::HideFieldEntities(){
+    entities_hidden_by_battle_.clear();
+    for (Entity* entity : entity_){
+        if (entity->IsVisible()){
+            entities_hidden_by_battle_.push_back(entity);
+            entity->SetVisible(false);
+        }
+    }
+}
+
+void EntityManager::ShowFieldEntities(){
+    // Only the ones that still exist: the field could have been changed during the battle.
+    for (Entity* hidden : entities_hidden_by_battle_){
+        if (std::find(entity_.begin(), entity_.end(), hidden) != entity_.end()) hidden->SetVisible(true);
+    }
+    entities_hidden_by_battle_.clear();
+}
+
+void EntityManager::ClearEncounterTables(){
+    encounter_tables_.clear();
+    encounter_table_ = 1;
+    encounter_distance_ = 0.0f;
+    encounter_last_position_valid_ = false;
+    encounter_accumulator_ = 0;
+    encounter_last_battle_ = -1;
+}
+
+void EntityManager::AddEncounterTable(
+  const int id, const int rate, const std::vector<std::pair<int, int>>& battles,
+  const std::vector<std::pair<int, int>>& specials
+){
+    EncounterTable table;
+    table.rate = rate;
+    table.battles = battles;
+    table.specials = specials;
+    encounter_tables_[id] = table;
+}
+
+void EntityManager::ScriptSetEncounterTable(const int id){encounter_table_ = id;}
+
+int EntityManager::ScriptRollEncounterBattle() const{
+    auto found = encounter_tables_.find(encounter_table_);
+    if (found == encounter_tables_.end()) return -1;
+    const EncounterTable& table = found->second;
+    // Like the original game: a roll out of 64 is checked against the special battles one after
+    // the other (each one adds its probability). If none is hit, a new roll chooses a standard
+    // battle, the last one being the default.
+    int roll = std::rand() % 64;
+    int sum = 0;
+    for (const auto& special : table.specials){
+        sum += special.second;
+        if (roll < sum) return special.first;
+    }
+    if (table.battles.empty()) return -1;
+    roll = std::rand() % 64;
+    sum = 0;
+    for (const auto& battle : table.battles){
+        sum += battle.second;
+        if (roll < sum) return battle.first;
+    }
+    return table.battles.back().first;
+}
+
+void EntityManager::UpdateEncounters(const bool walked){
+    if (player_entity_ == nullptr){
+        encounter_last_position_valid_ = false;
+        return;
+    }
+    const Ogre::Vector3 position = player_entity_->GetPosition();
+    const float distance
+      = encounter_last_position_valid_ ? (position - encounter_last_position_).length() : 0.0f;
+    encounter_last_position_ = position;
+    encounter_last_position_valid_ = true;
+    // Only walking counts: not scripted movements, and not jumps to another place.
+    if (!walked || player_lock_ || distance > 2.0f) return;
+    if (!random_encounters_ || encounter_tables_.empty()) return;
+    auto found = encounter_tables_.find(encounter_table_);
+    if (found == encounter_tables_.end()) return;
+    const float multiplier = cv_encounter_multiplier.GetF();
+    if (multiplier <= 0.0f) return;
+    // Same as the original game. Every few frames of walking the accumulator grows by a value
+    // divided by the rate (the lower the rate, the more often the encounters), and an encounter
+    // starts if a random number is lower than the accumulator.
+    const int rate = found->second.rate;
+    if (rate <= 0) return;
+    encounter_distance_ += Timer::getSingleton().GetGameTimeDelta() * 30.0f;
+    while (encounter_distance_ >= ENCOUNTER_CHECK_FRAMES){
+        encounter_distance_ -= ENCOUNTER_CHECK_FRAMES;
+        encounter_accumulator_ += static_cast<int>(ENCOUNTER_STEP_VALUE * multiplier * 256.0f) / rate;
+        const int roll = std::rand() % 256 * 256;
+        if (cv_debug_encounters.GetB()){
+            LOG_TRIVIAL(
+              "Encounter check: rate " + std::to_string(rate) + ", accumulator "
+              + std::to_string(encounter_accumulator_ / 256.0f) + "/256, roll "
+              + std::to_string(roll / 256)
+            );
+        }
+        if (roll >= encounter_accumulator_) continue;
+        int battle = ScriptRollEncounterBattle();
+        // The same battle is not repeated: it's rolled again once.
+        if (battle == encounter_last_battle_) battle = ScriptRollEncounterBattle();
+        if (battle < 0) return;
+        encounter_distance_ = 0.0f;
+        encounter_accumulator_ = 0;
+        encounter_last_battle_ = battle;
+        LOG_TRIVIAL("Random encounter: battle " + std::to_string(battle));
+        // The battle is started by a script, as it has to change the module of every manager.
+        ScriptManager::getSingleton().RunString("Encounter.start(" + std::to_string(battle) + ")");
+        return;
+    }
+}
 
 void EntityManager::SetEncounterRate(float rate){
     if (rate >= 1.0f) encounter_rate_ = 1.0f;

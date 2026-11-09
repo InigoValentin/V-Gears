@@ -587,6 +587,34 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
         std::unique_ptr<TiXmlElement> xml_forward_direction(new TiXmlElement("movement_rotation"));
         xml_forward_direction->SetAttribute("degree", std::to_string(triggers->MovementRotation()));
         element->LinkEndChild(xml_forward_direction.release());
+        // Random encounters. The section has two tables of 24 bytes: enabled (1 byte), rate
+        // (1 byte), six standard and four special encounters (16 bits each, battle ID in the lower
+        // 10 bits and probability, out of 64, in the upper 6), and 2 bytes of padding.
+        {
+            const std::vector<u8>& raw_encounter = field->GetRawEncounter();
+            std::unique_ptr<TiXmlElement> xml_encounters(new TiXmlElement("encounters"));
+            bool any_table = false;
+            for (int table = 0; table < 2 && raw_encounter.size() >= static_cast<size_t>(24 * (table + 1)); table ++){
+                const u8* data = raw_encounter.data() + 24 * table;
+                if (data[0] == 0) continue;
+                std::unique_ptr<TiXmlElement> xml_table(new TiXmlElement("table"));
+                xml_table->SetAttribute("id", table + 1);
+                xml_table->SetAttribute("rate", static_cast<int>(data[1]));
+                for (int e = 0; e < 10; e ++){
+                    const unsigned int value = data[2 + 2 * e] | (data[3 + 2 * e] << 8);
+                    const int battle = value & 0x3FF;
+                    const int probability = value >> 10;
+                    if (probability == 0) continue;
+                    std::unique_ptr<TiXmlElement> xml_encounter(new TiXmlElement(e < 6 ? "battle" : "special"));
+                    xml_encounter->SetAttribute("id", battle);
+                    xml_encounter->SetAttribute("probability", probability);
+                    xml_table->LinkEndChild(xml_encounter.release());
+                }
+                xml_encounters->LinkEndChild(xml_table.release());
+                any_table = true;
+            }
+            if (any_table) element->LinkEndChild(xml_encounters.release());
+        }
         // Get this fields Id.
         const size_t this_field_id = GetFieldId(field->getName(), map_list_);
         // Use the ID to find the pre-computed list of gateways in all other fields that link to

@@ -59,6 +59,12 @@ struct Enemy{
          * -1 to not move the camera.
          */
         int camera;
+
+        /**
+         * Animation script of the model to play for the attack, as in the model animation scripts
+         * ("scriptN"). -1 if there is none.
+         */
+        int animation;
     };
 
     /**
@@ -195,6 +201,15 @@ struct Enemy{
      * Enemy attacks.
      */
     std::vector<Attack> attacks;
+
+    /**
+     * Enemy AI scripts, as bytecode.
+     *
+     * There are 16 slots: 0 initialization, 1 main (when it's the enemy turn), 2 general counter,
+     * 3 death counter, 4 physical counter, 5 magic counter, 6 battle end, 7 pre-turn, and 8 to 15
+     * custom event scripts. Empty vectors are slots without script.
+     */
+    std::vector<std::vector<u8>> ai_scripts;
 
     /**
      * List of attacks that can be used while manipulated.

@@ -20,6 +20,10 @@
     <!-- Battle UI -->
     <prototype file_name="screens/battle/prototypes.xml" />
     <screen file_name="screens/battle/battle.xml" />
+    <screen file_name="screens/battle/battle_fx.xml" />
+
+    <!-- Game over screen -->
+    <screen file_name="screens/game_over/game_over.xml" />
 
     <!-- Fade effect for map changer -->
     <screen file_name="screens/fade/fade.xml" />

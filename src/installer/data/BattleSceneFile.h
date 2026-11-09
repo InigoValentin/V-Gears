@@ -638,6 +638,11 @@ class BattleSceneFile{
         std::vector<Enemy> enemies_;
 
         /**
+         * AI scripts of the 3 enemies of the scene, 16 slots each.
+         */
+        std::vector<std::vector<u8>> ai_scripts_[3];
+
+        /**
          * Formations found in the scene.
          */
         std::vector<Formation> formations_;

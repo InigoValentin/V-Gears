@@ -43,6 +43,8 @@ class FieldMediaInstruction : public KernelCallInstruction{
 
         void ProcessAKAO2(CodeGenerator* code_gen);
 
+        void ProcessBMUSC(CodeGenerator* code_gen);
+
         void ProcessMUSIC(CodeGenerator* code_gen);
 
         void ProcessSOUND(CodeGenerator* code_gen);

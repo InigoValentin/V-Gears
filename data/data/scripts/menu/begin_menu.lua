@@ -101,7 +101,7 @@ if UiContainer == nil then UiContainer = {} end
                                             console("debug_walkmesh false")
                                             script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
                                             set_party(0, 2, 3)
-                                            Battle.start(220)
+                                            Battle.start(372) -- Single level 2 MP, easy test battle
                                             MenuSettings.pause_available = true
                                             end
                                             elseif button == Config.CONTROLS.DOWN then

@@ -29,6 +29,9 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <cstdlib>
+#include <tinyxml.h>
 #include <OgreEntity.h>
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
@@ -41,6 +44,7 @@
 #include <OgreResourceGroupManager.h>
 #include "data/VGearsTexFile.h"
 #include "core/InputManager.h"
+#include "core/Logger.h"
 #include "core/EntityManager.h"
 #include "core/EntityModel.h"
 #include "core/DialogsManager.h"
@@ -595,7 +599,12 @@ namespace VGears {
       active_function_id_(-1),
       initialized_(false),
       frame_listener_attached_(false),
-      cancel_was_pressed_(false)
+      cancel_was_pressed_(false),
+      encounter_frames_(0),
+      encounter_accumulator_(0),
+      encounter_last_battle_(-1),
+      encounters_locked_(false),
+      paused_for_battle_(false)
     {}
 
     WorldmapModule::~WorldmapModule(){
@@ -658,6 +667,8 @@ namespace VGears {
                     terrain_triangle.function_id = triangle.function_id;
                     terrain_triangle.mesh_x = static_cast<int>(map_x * 4 + mesh_x);
                     terrain_triangle.mesh_y = static_cast<int>(map_y * 4 + mesh_y);
+                    // The 5 lower bits of the location are the region of the random encounters.
+                    terrain_triangle.region = std::min<int>(triangle.Location & 0x1F, 15);
                     terrain_triangles_.push_back(terrain_triangle);
 
                     if (unavailable_texture_ids.find(triangle.TextureInfo)
@@ -1096,7 +1107,7 @@ namespace VGears {
       }
 
     bool WorldmapModule::frameStarted(const Ogre::FrameEvent& event){
-      if (!initialized_ || player_entity_ == nullptr) return true;
+      if (!initialized_ || player_entity_ == nullptr || paused_for_battle_) return true;
 
         ::Entity* active_entity = EntityManager::getSingleton().ScriptGetPlayerEntity();
       if (active_entity == player_entity_){
@@ -1139,10 +1150,16 @@ namespace VGears {
               ? submarine_entity_ : tiny_bronco_entity_))));
 
         Ogre::Vector3 movement = Ogre::Vector3::ZERO;
-        if (InputManager::getSingleton().IsButtonPressed(OIS::KC_LEFT)) movement.x -= 1.0f;
-        if (InputManager::getSingleton().IsButtonPressed(OIS::KC_RIGHT)) movement.x += 1.0f;
-        if (InputManager::getSingleton().IsButtonPressed(OIS::KC_UP)) movement.z -= 1.0f;
-        if (InputManager::getSingleton().IsButtonPressed(OIS::KC_DOWN)) movement.z += 1.0f;
+        // Scripts lock the player during events and transitions.
+        if (EntityManager::getSingleton().IsPlayerLocked()){
+            // Nothing: no movement.
+        }
+        else{
+            if (InputManager::getSingleton().IsButtonPressed(OIS::KC_LEFT)) movement.x -= 1.0f;
+            if (InputManager::getSingleton().IsButtonPressed(OIS::KC_RIGHT)) movement.x += 1.0f;
+            if (InputManager::getSingleton().IsButtonPressed(OIS::KC_UP)) movement.z -= 1.0f;
+            if (InputManager::getSingleton().IsButtonPressed(OIS::KC_DOWN)) movement.z += 1.0f;
+        }
         bool is_walking = false;
         if (!movement.isZeroLength()){
           movement.normalise();
@@ -1181,6 +1198,9 @@ namespace VGears {
                     else{
                         active_function_mesh_index_ = -1;
                         active_function_id_ = -1;
+                    }
+                    if (current_vehicle_ == VehicleType::ON_FOOT){
+                        UpdateEncounters(event.timeSinceLastFrame, triangle);
                     }
                     const Ogre::Vector3 model_forward(0.0f, 0.0f, 1.0f);
                     const Ogre::Vector3 move_direction(movement.x, 0.0f, movement.z);
@@ -1222,6 +1242,133 @@ namespace VGears {
         camera->lookAt(target);
       }
 
+    void WorldmapModule::LoadEncounters(){
+        encounter_records_.clear();
+        TiXmlDocument document("./data/gamedata/world_encounters.xml");
+        if (!document.LoadFile()){
+            LOG_WARNING("World map encounters were not found. There will be no random battles.");
+            return;
+        }
+        TiXmlHandle handle(&document);
+        for (
+          TiXmlElement* record = handle.FirstChildElement("world_encounters")
+            .FirstChildElement("record").ToElement();
+          record != nullptr; record = record->NextSiblingElement("record")
+        ){
+            EncounterRecord data;
+            int enabled = 0;
+            data.rate = 0;
+            data.terrain = 0;
+            record->QueryIntAttribute("enabled", &enabled);
+            record->QueryIntAttribute("rate", &data.rate);
+            record->QueryIntAttribute("terrain", &data.terrain);
+            data.enabled = enabled != 0;
+            for (unsigned int i = 0; i < 15; ++ i) data.words[i] = 0;
+            std::istringstream words(record->Attribute("words") ? record->Attribute("words") : "");
+            for (unsigned int i = 0; i < 15; ++ i){
+                unsigned int word = 0;
+                if (!(words >> word)) break;
+                data.words[i] = static_cast<uint16>(word);
+            }
+            encounter_records_.push_back(data);
+        }
+        LOG_TRIVIAL("World map encounters loaded: " + std::to_string(encounter_records_.size()));
+    }
+
+    int WorldmapModule::RollEncounterBattle(const EncounterRecord& record) const{
+        // Same order as the original game: the special battles first, then the standard ones. The
+        // chance of a word is its probability out of 64, as the roll is a 16 bit value and the
+        // probability sits in the 6 highest bits.
+        const uint16* w = record.words;
+        int battle = -1;
+        int roll = (std::rand() % 256) << 8;
+        // Words 7 and 8 (indices 6 and 7): back attacks.
+        if (w[6] > roll) battle = w[6] & 0x3FF;
+        else if (w[6] + w[7] > roll) battle = w[7] & 0x3FF;
+        // Word 9: side attack. Needs a party of more than one member.
+        if (battle < 0){
+            roll = (std::rand() % 256) << 8;
+            if (w[8] > roll) battle = w[8] & 0x3FF;
+        }
+        // Word 10: pincer attack.
+        if (battle < 0){
+            roll = (std::rand() % 256) << 8;
+            if (w[9] > roll) battle = w[9] & 0x3FF;
+        }
+        // Words 1-6: standard battles. The last battle is not repeated (one reroll).
+        for (unsigned int attempt = 0; battle < 0 && attempt < 2; ++ attempt){
+            roll = (std::rand() % 256) << 8;
+            int sum = 0;
+            for (unsigned int i = 0; i < 6; ++ i){
+                sum += w[i];
+                if (sum > roll){
+                    battle = w[i] & 0x3FF;
+                    break;
+                }
+            }
+            if (battle == encounter_last_battle_ && attempt == 0) battle = -1;
+        }
+        return battle;
+    }
+
+    void WorldmapModule::UpdateEncounters(const float delta_time, const TerrainTriangle& triangle){
+        if (encounters_locked_ || encounter_records_.size() < 64) return;
+        // The original game checks every 16 frames of walking, at 30 frames per second.
+        encounter_frames_ += delta_time * 30.0f;
+        if (encounter_frames_ < 16.0f) return;
+        encounter_frames_ -= 16.0f;
+
+        // Region and terrain group. The terrain types 0x10 and 0x18 count as 0 and 8.
+        const int region = std::min<int>(triangle.region, 15);
+        int terrain = triangle.walkability_type;
+        if (terrain == 0x10) terrain = 0;
+        else if (terrain == 0x18) terrain = 8;
+        int group = 0;
+        for (int i = 0; i < 4; ++ i){
+            if (encounter_records_[region * 4 + i].terrain == terrain){
+                group = i;
+                break;
+            }
+        }
+        const EncounterRecord& record = encounter_records_[region * 4 + group];
+
+        // The accumulator grows on every check, so the chance gets higher until a battle starts.
+        const float multiplier = EntityManager::getSingleton().GetEncounterMultiplier();
+        if (multiplier <= 0.0f) return;
+        const int speed = static_cast<int>(16 * multiplier);
+        encounter_accumulator_ += (record.rate != 0) ? (speed << 10) / record.rate : 0x7FFF;
+        const int check = std::rand() % 256;
+        if (EntityManager::getSingleton().IsDebugEncounters()){
+            LOG_TRIVIAL(
+              "World encounter check: region " + std::to_string(region) + ", terrain "
+              + std::to_string(terrain) + ", group " + std::to_string(group) + ", rate "
+              + std::to_string(record.rate) + ", chance " + std::to_string(encounter_accumulator_ >> 8)
+              + "/256, roll " + std::to_string(check)
+            );
+        }
+        if (check >= (encounter_accumulator_ >> 8) || !record.enabled) return;
+        encounter_accumulator_ = 0;
+        const int battle = RollEncounterBattle(record);
+        if (battle < 0) return;
+        encounter_last_battle_ = battle;
+        LOG_TRIVIAL("World random encounter: battle " + std::to_string(battle));
+        ScriptManager::getSingleton().RunString("Encounter.start(" + std::to_string(battle) + ")");
+    }
+
+    void WorldmapModule::PauseForBattle(){
+        paused_for_battle_ = true;
+        if (world_map_node_ != nullptr) world_map_node_->setVisible(false);
+    }
+
+    void WorldmapModule::ResumeAfterBattle(){
+        paused_for_battle_ = false;
+        encounter_frames_ = 0;
+        if (world_map_node_ != nullptr) world_map_node_->setVisible(true);
+        if (player_entity_ != nullptr) UpdateCamera(0, true);
+    }
+
+    void WorldmapModule::SetEncountersLocked(const bool locked){encounters_locked_ = locked;}
+
     void WorldmapModule::Init(){
       if (initialized_){
         if (frame_listener_attached_) return;
@@ -1238,6 +1385,7 @@ namespace VGears {
         CreateWorldMap(Root::getSingleton().getSceneManager("Scene"));
         ScriptManager::getSingleton().RunFile("scripts/worldmap/wm0.lua");
         CreatePlayer();
+        LoadEncounters();
         initialized_ = true;
         Root::getSingleton().addFrameListener(this);
       frame_listener_attached_ = true;

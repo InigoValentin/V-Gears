@@ -120,7 +120,7 @@ int KernelDataInstaller::ReadCommands(){
         else data.target.fixed_row = false;
         if (data.target_raw == (data.target_raw | 0x20)) data.target.short_range = true;
         else data.target.short_range = false;
-        if (data.target_raw == (data.target_raw | 0x40)) data.target.default_enemy = true;
+        if (data.target_raw == (data.target_raw | 0x40)) data.target.all_rows = true;
         else data.target.all_rows = false;
         if (data.target_raw == (data.target_raw | 0x80)) data.target.random = true;
         else data.target.random = false;
@@ -267,9 +267,11 @@ int KernelDataInstaller::ReadAttacks(){
         else data.target.random = false;
         data.damage_formula = data.damage_raw >> 4; // Upper nybble.
         data.damage_modifier = data.damage_raw & 15; // Lower nybble.
-        data.status.chance = 63 - (data.status_change_raw ^ 63); // Out of 63;
-        if (data.status_change_raw == (data.status_change_raw | 0x00000080)) data.status.mode = TOGGLE;
-        else if (data.status_change_raw == (data.status_change_raw | 0x00000040)) data.status.mode = CURE;
+        // Status attack byte: the lower 6 bits are the chance out of 63, and the upper bits the
+        // mode (0x80 toggles the statuses, 0x40 cures them, otherwise they are inflicted).
+        data.status.chance = data.status_change_raw & 0x3F;
+        if ((data.status_change_raw & 0x80) != 0) data.status.mode = TOGGLE;
+        else if ((data.status_change_raw & 0x40) != 0) data.status.mode = CURE;
         else data.status.mode = INFLICT;
         switch (data.condition_raw){
             case 0: data.restore_type = RESTORE_HP; break;
@@ -278,42 +280,13 @@ int KernelDataInstaller::ReadAttacks(){
             default: data.restore_type = RESTORE_NONE;
         }
         // In KERNEL.BIN, items that don't induce statuses actually have all statuses marked, and
-        // a chance of 255. If it's the case, skip statuses altogether.
-        if (data.status.chance <= 64){
-            // TODO: Im fairly sure that this can be done with a single-line loop...
-            // ... but I don't know how
-            if (data.status_raw == (data.status_raw | 0x00000001)) data.status.status.push_back(DEATH);
-            if (data.status_raw == (data.status_raw | 0x00000002)) data.status.status.push_back(NEAR_DEATH);
-            if (data.status_raw == (data.status_raw | 0x00000004)) data.status.status.push_back(SLEEP);
-            if (data.status_raw == (data.status_raw | 0x00000008)) data.status.status.push_back(POISONED);
-            if (data.status_raw == (data.status_raw | 0x00000010)) data.status.status.push_back(SADNESS);
-            if (data.status_raw == (data.status_raw | 0x00000020)) data.status.status.push_back(FURY);
-            if (data.status_raw == (data.status_raw | 0x00000040)) data.status.status.push_back(CONFU);
-            if (data.status_raw == (data.status_raw | 0x00000080)) data.status.status.push_back(SILENCE);
-            if (data.status_raw == (data.status_raw | 0x00000100)) data.status.status.push_back(HASTE);
-            if (data.status_raw == (data.status_raw | 0x00000200)) data.status.status.push_back(SLOW);
-            if (data.status_raw == (data.status_raw | 0x00000400)) data.status.status.push_back(STOP);
-            if (data.status_raw == (data.status_raw | 0x00000800)) data.status.status.push_back(FROG);
-            if (data.status_raw == (data.status_raw | 0x00001000)) data.status.status.push_back(SMALL);
-            if (data.status_raw == (data.status_raw | 0x00002000)) data.status.status.push_back(SLOW_NUMB);
-            if (data.status_raw == (data.status_raw | 0x00004000)) data.status.status.push_back(PETRIFY);
-            if (data.status_raw == (data.status_raw | 0x00008000)) data.status.status.push_back(REGEN);
-            if (data.status_raw == (data.status_raw | 0x00010000)) data.status.status.push_back(BARRIER);
-            if (data.status_raw == (data.status_raw | 0x00020000)) data.status.status.push_back(M_BARRIER);
-            if (data.status_raw == (data.status_raw | 0x00040000)) data.status.status.push_back(REFLECT);
-            if (data.status_raw == (data.status_raw | 0x00080000)) data.status.status.push_back(DUAL);
-            if (data.status_raw == (data.status_raw | 0x00100000)) data.status.status.push_back(SHIELD);
-            if (data.status_raw == (data.status_raw | 0x00200000)) data.status.status.push_back(D_SENTENCE);
-            if (data.status_raw == (data.status_raw | 0x00400000)) data.status.status.push_back(MANIPULATE);
-            if (data.status_raw == (data.status_raw | 0x00800000)) data.status.status.push_back(BERSERK);
-            if (data.status_raw == (data.status_raw | 0x01000000)) data.status.status.push_back(PEERLESS);
-            if (data.status_raw == (data.status_raw | 0x02000000)) data.status.status.push_back(PARALYSIS);
-            if (data.status_raw == (data.status_raw | 0x04000000)) data.status.status.push_back(DARKNESS);
-            if (data.status_raw == (data.status_raw | 0x08000000)) data.status.status.push_back(DUAL_DRAIN);
-            if (data.status_raw == (data.status_raw | 0x10000000)) data.status.status.push_back(DEATH_FORCE);
-            if (data.status_raw == (data.status_raw | 0x20000000)) data.status.status.push_back(RESIST);
-            if (data.status_raw == (data.status_raw | 0x40000000)) data.status.status.push_back(LUCKY_GIRL);
-            if (data.status_raw == (data.status_raw | 0x80000000)) data.status.status.push_back(IMPRISONED);
+        // a chance of 255. If it's the case, skip statuses altogether. The status IDs are the bit
+        // positions of the original game: 0 death, 1 near death, 2 sleep, 3 poison, 4 fury,
+        // 5 sadness, 6 confusion, 7 silence, 8 haste, 9 slow, 10 stop...
+        if (data.status_change_raw != 0xFF && data.status_raw != 0xFFFFFFFF){
+            for (int bit = 0; bit < 32; bit ++){
+                if ((data.status_raw & (1u << bit)) != 0) data.status.status.push_back(bit);
+            }
         }
         // Get elements
         if (data.element_raw == (data.element_raw | 0x0001)) data.elements.push_back(FIRE);
@@ -372,7 +345,16 @@ void KernelDataInstaller::WriteAttacks(std::string file_name){
           << ", fixed_row = " << attack.target.fixed_row
           << ", short_range = " << attack.target.short_range
           << ", all_rows = " << attack.target.all_rows
-          << ", random = " << attack.target.random << "}\n}\n";
+          << ", random = " << attack.target.random << "},\n"
+          << "    elements = {";
+        for (int element : attack.elements) file << element << ", ";
+        file << "},\n    status = {";
+        // Status effects: ID (bit position), mode (0 inflict, 1 cure, 2 toggle) and chance out of 63.
+        for (int status : attack.status.status){
+            file << "{status = " << status << ", mode = " << attack.status.mode
+              << ", chance = " << attack.status.chance << "}, ";
+        }
+        file << "}\n}\n";
     }
     file.close();
 }

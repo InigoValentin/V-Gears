@@ -649,6 +649,59 @@ bool WorldInstaller::ProcessMap(){
     else return false;
 }
 
+void WorldInstaller::ExportEncounters(
+  File& archive_file, const VGears::LGPArchive::FileEntry& entry
+){
+    // ENC_W.BIN: 160 bytes of chocobo encounters and battle data, then 64 records of 16 words.
+    // Record = region * 4 + terrain group. Word 0: enabled (low byte bit 0) and rate (high byte,
+    // the lower the more often). Words 1-6: standard battles, 7-10: special battles
+    // (back attack x2, side, pincer) and 11-15: others. A word is a battle ID (10 bits) and a
+    // probability out of 64 (6 bits).
+    static const unsigned int HEADER_SIZE = 0xA0;
+    static const unsigned int RECORD_COUNT = 64;
+    static const unsigned int RECORD_SIZE = 32;
+    if (entry.data_size < HEADER_SIZE + RECORD_COUNT * RECORD_SIZE){
+        std::cerr << "ENC_W.BIN has an unexpected size." << std::endl;
+        return;
+    }
+    std::vector<u8> data(entry.data_size);
+    File file(&archive_file, entry.data_offset, entry.data_size);
+    file.GetFileBuffer(data.data(), 0, entry.data_size);
+    // Walkability types that select each of the 4 terrain groups of every region. This table is
+    // in the executable of the game, not in the data files. The region of a triangle is
+    // (location & 0x1F), and a region over 15 is 15.
+    static const unsigned int TERRAIN_TYPES[16][4] = {
+      {0, 9, 0, 17}, {0, 0, 0, 17}, {0, 9, 1, 17}, {0, 20, 0, 17},
+      {0, 9, 8, 17}, {0, 0, 25, 17}, {0, 9, 19, 17}, {0, 0, 1, 17},
+      {0, 0, 1, 17}, {0, 9, 14, 17}, {0, 9, 25, 17}, {0, 10, 9, 17},
+      {0, 9, 25, 17}, {0, 0, 8, 11}, {0, 0, 8, 0}, {0, 0, 1, 0}
+    };
+    boost::filesystem::create_directories(output_dir_ + "/gamedata");
+    TiXmlDocument doc;
+    std::unique_ptr<TiXmlElement> root(new TiXmlElement("world_encounters"));
+    for (unsigned int region = 0; region < 16; ++ region){
+        for (unsigned int group = 0; group < 4; ++ group){
+            const unsigned int index = region * 4 + group;
+            const unsigned int offset = HEADER_SIZE + index * RECORD_SIZE;
+            std::unique_ptr<TiXmlElement> record(new TiXmlElement("record"));
+            record->SetAttribute("region", region);
+            record->SetAttribute("terrain", TERRAIN_TYPES[region][group]);
+            record->SetAttribute("enabled", data[offset] & 0x01);
+            record->SetAttribute("rate", data[offset + 1]);
+            std::string words;
+            for (unsigned int w = 1; w < 16; ++ w){
+                const unsigned int word = data[offset + w * 2] | (data[offset + w * 2 + 1] << 8);
+                words += (w > 1 ? " " : "") + std::to_string(word);
+            }
+            record->SetAttribute("words", words);
+            root->LinkEndChild(record.release());
+        }
+    }
+    doc.LinkEndChild(new TiXmlDeclaration("1.0", "", ""));
+    doc.LinkEndChild(root.release());
+    doc.SaveFile(output_dir_ + "/gamedata/world_encounters.xml");
+}
+
 bool WorldInstaller::GenerateScripts(
     const std::vector<std::string>& field_names,
     const std::map<u16, float>& field_scale_factors,
@@ -674,6 +727,7 @@ bool WorldInstaller::GenerateScripts(
     const VGears::LGPArchive::FileList& archive_entries = archive.GetFiles();
     std::vector<const VGears::LGPArchive::FileEntry*> event_entries;
     const VGears::LGPArchive::FileEntry* field_table_entry = nullptr;
+    const VGears::LGPArchive::FileEntry* encounter_entry = nullptr;
     bool has_wm0 = false;
     for (const VGears::LGPArchive::FileEntry& entry : archive_entries){
         std::string lower_name = entry.file_name;
@@ -696,6 +750,12 @@ bool WorldInstaller::GenerateScripts(
         else if (lower_name == "field.tbl"){
             field_table_entry = &entry;
         }
+        else if (lower_name == "enc_w.bin"){
+            encounter_entry = &entry;
+        }
+    }
+    if (encounter_entry != nullptr){
+        ExportEncounters(archive_file, *encounter_entry);
     }
     if (event_entries.empty() || !has_wm0 || field_table_entry == nullptr){
         error_message = "WM0.EV, other world event files, or FIELD.TBL were not found inside WORLD_US.LGP.";

@@ -156,6 +156,31 @@ class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
         const Ogre::Vector3 ProjectPointToScreen(const Ogre::Vector3& point);
 
         /**
+         * Sets the battle camera.
+         *
+         * Unlike {@see StartBattleCamera}, it doesn't save the state of the field camera, so it
+         * can be used to change the camera during a battle.
+         *
+         * @param[in] position Camera position.
+         * @param[in] orientation Point the camera looks at.
+         */
+        void SetBattleCamera(const Ogre::Vector3 position, const Ogre::Vector3 orientation);
+
+        /**
+         * Projects a point of the scene into the coordinates of the UI.
+         *
+         * To be called from Lua scripts. UI units are the ones used by the UI widgets: 720 units
+         * are the height of the screen, with the origin at the top left corner.
+         *
+         * @param[in] x X coordinate of the point.
+         * @param[in] y Y coordinate of the point.
+         * @param[in] z Z coordinate of the point.
+         * @return X and Y in UI units, and the depth of the point (negative if it's behind the
+         * camera).
+         */
+        std::tuple<float, float, float> ScriptProjectToUi(const float x, const float y, const float z);
+
+        /**
          * Retrieves the camera.
          *
          * @return The current camera.
@@ -243,6 +268,11 @@ class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
          * A backup of the field or world camera position for when the battle camera is activated.
          */
         Ogre::Vector3 position_backup_;
+
+        /**
+         * Field of view of the camera before a battle, restored when the battle ends.
+         */
+        Ogre::Radian fov_backup_;
 
         /**
          * A backup of the field or world camera orientation for when the battle camera is active.

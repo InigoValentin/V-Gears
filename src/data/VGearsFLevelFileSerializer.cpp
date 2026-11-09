@@ -164,7 +164,11 @@ namespace VGears{
                 // TODO
                 break;
             case SECTION_ENCOUNTER:
-                // TODO
+                {
+                    std::vector<u8> buffer(stream->size());
+                    stream->read(buffer.data(), buffer.size());
+                    dest->SetRawEncounter(buffer);
+                }
                 break;
             case SECTION_TRIGGER:
                 ReadTriggers(stream, dest);

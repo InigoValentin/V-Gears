@@ -48,23 +48,33 @@ unsigned int BattleDataInstaller::InitializeScenes(){
     scenes_.clear();
     enemies_.clear();
     attacks_.clear();
-    // Get all scenes from scene.bin.
-    for (int i = 0; i < 32; i ++){
-        File scene_bin_block(&scene_bin_, i * 0x2000, 0x2000);
-        for (int o = 0; o < 10; o ++){
-            scene_bin_block.SetOffset(4 * o);
-            u32 start_offset = scene_bin_block.readU32LE() * 4;
-            u32 end_offset = scene_bin_block.readU32LE() * 4;
-            if (end_offset > start_offset + 0x2000) end_offset = start_offset + 0x2000;
-            if (start_offset >= 0 && start_offset < 0x2000){
-                File scene_bin_fragment(&scene_bin_block, start_offset, end_offset - start_offset - 1);
-                File* extracted = ExtractGZipScene(scene_bin_fragment);
-                if (extracted != NULL){
-                    scenes_uncompressed_.push_back(extracted);
-                    total_scenes_ ++;
-                }
-            }
-            else break;
+    scenes_uncompressed_.clear();
+    total_scenes_ = 0;
+    // scene.bin is a sequence of 0x2000 bytes blocks (33 in the original game). Each block starts
+    // with up to 16 pointers (in 4-byte units) to gzipped scenes, terminated by 0xFFFFFFFF. A scene
+    // ends where the next one starts, or at the end of the block. There are 256 scenes in total.
+    // Scene indexes are positional: every slot must be kept, even if it can't be extracted,
+    // because battle IDs (scene * 4 + setup) are derived from them.
+    const u32 block_size = 0x2000;
+    const u32 blocks = scene_bin_.GetFileSize() / block_size;
+    for (u32 i = 0; i < blocks; i ++){
+        File scene_bin_block(&scene_bin_, i * block_size, block_size);
+        u32 offsets[16];
+        u32 count = 0;
+        for (; count < 16; count ++){
+            scene_bin_block.SetOffset(4 * count);
+            u32 pointer = scene_bin_block.readU32LE();
+            if (pointer == 0xFFFFFFFF || pointer * 4 >= block_size) break;
+            offsets[count] = pointer * 4;
+        }
+        for (u32 o = 0; o < count; o ++){
+            u32 start_offset = offsets[o];
+            u32 end_offset = (o + 1 < count) ? offsets[o + 1] : block_size;
+            if (end_offset <= start_offset) end_offset = block_size;
+            File scene_bin_fragment(&scene_bin_block, start_offset, end_offset - start_offset);
+            // NULL if it can't be extracted. Kept to preserve scene indexes.
+            scenes_uncompressed_.push_back(ExtractGZipScene(scene_bin_fragment));
+            total_scenes_ ++;
         }
     }
     return total_scenes_;
@@ -120,7 +130,19 @@ unsigned int BattleDataInstaller::InitializeSpellModels(){
 
 unsigned int BattleDataInstaller::ProcessScene(){
     if (next_scene_ >= scenes_uncompressed_.size()) return total_scenes_;
-    BattleSceneFile scene(next_scene_, scenes_uncompressed_[next_scene_]);
+    File* scene_file = scenes_uncompressed_[next_scene_];
+    if (scene_file == NULL){
+        // Keep battle IDs stable: an unreadable scene still takes its 4 battle slots.
+        std::cout << "Warning: scene " << next_scene_ << " could not be extracted." << std::endl;
+        for (int f = 0; f < 4; f ++){
+            Formation empty;
+            empty.id = next_scene_ * 4 + f;
+            formations_.push_back(empty);
+        }
+        next_scene_ ++;
+        return next_scene_;
+    }
+    BattleSceneFile scene(next_scene_, *scene_file);
     scenes_.push_back(scene);
     // Add new enemies to the list.
     std::vector<Enemy> enemies = scene.GetEnemies();
@@ -138,11 +160,11 @@ unsigned int BattleDataInstaller::ProcessScene(){
         )) continue;
         attacks_.push_back(attacks[a]);
     }
-    // Add new formations to the list.
+    // Battle ID = scene index * 4 + setup index, as referenced by field scripts and encounters.
     std::vector<Formation> formations = scene.GetFormations();
-    for (Formation f : formations){
-        f.id = formations_.size(); // Assign the next ID.
-        formations_.push_back(f);
+    for (int f = 0; f < formations.size(); f ++){
+        formations[f].id = next_scene_ * 4 + f;
+        formations_.push_back(formations[f]);
     }
     next_scene_ ++;
     return next_scene_;
@@ -275,7 +297,10 @@ unsigned int BattleDataInstaller::ProcessBattleModel(){
             scene_data.id = info.numeric_id;
             scene_data.model = info.alphanumeric_id + "_" + info.name_normal + ".mesh";
             scene_data.description = info.name;
-            scene_data_.push_back(scene_data);
+            // Every texture of a scene model reaches this point, but the map needs one entry.
+            if (std::none_of(scene_data_.begin(), scene_data_.end(), [&](const SceneModel& s){
+                return s.id == scene_data.id && s.model == scene_data.model;
+            })) scene_data_.push_back(scene_data);
             path += "scenes/";
         }
         else path += "enemies/";
@@ -630,7 +655,8 @@ void BattleDataInstaller::WriteEnemies(){
         std::unique_ptr<TiXmlElement> attacks(new TiXmlElement("attacks"));
         for (Enemy::Attack attack : enemy.attacks){
             std::unique_ptr<TiXmlElement> xml_attack(new TiXmlElement("attack"));
-            xml_attack->SetAttribute("status", attack.id);
+            xml_attack->SetAttribute("id", attack.id);
+            xml_attack->SetAttribute("animation", attack.animation);
             xml_attack->SetAttribute("camera", attack.camera);
             attacks->LinkEndChild(xml_attack.release());
         }
@@ -666,6 +692,30 @@ void BattleDataInstaller::WriteEnemies(){
             animations->LinkEndChild(xml_animation.release());
         }
         container->LinkEndChild(animations.release());
+        // AI scripts, as hexadecimal bytecode.
+        {
+            static const char* AI_SLOT_NAMES[16] = {
+              "init", "main", "counter_general", "counter_death", "counter_physical", "counter_magic",
+              "battle_end", "pre_turn", "event_1", "event_2", "event_3", "event_4", "event_5",
+              "event_6", "event_7", "event_8"
+            };
+            std::unique_ptr<TiXmlElement> ai(new TiXmlElement("ai"));
+            for (size_t slot = 0; slot < enemy.ai_scripts.size() && slot < 16; slot ++){
+                if (enemy.ai_scripts[slot].empty()) continue;
+                std::string hex;
+                char digits[3];
+                for (u8 byte : enemy.ai_scripts[slot]){
+                    snprintf(digits, sizeof(digits), "%02x", byte);
+                    hex += digits;
+                }
+                std::unique_ptr<TiXmlElement> xml_script(new TiXmlElement("script"));
+                xml_script->SetAttribute("slot", static_cast<int>(slot));
+                xml_script->SetAttribute("name", AI_SLOT_NAMES[slot]);
+                xml_script->SetAttribute("data", hex);
+                ai->LinkEndChild(xml_script.release());
+            }
+            container->LinkEndChild(ai.release());
+        }
         xml.LinkEndChild(container.release());
         std::string file_name = BuildEnemyFileName(enemy);
         xml.SaveFile(output_dir_ + file_name);
@@ -697,7 +747,8 @@ void BattleDataInstaller::WriteAttacks(){
         damage->LinkEndChild(damage_modifier.release());
         std::unique_ptr<TiXmlElement> damage_acc(new TiXmlElement("Parameter"));
         damage_acc->SetAttribute("id", "accuracy");
-        damage_acc->SetAttribute("value", attack.damage.accuracy);
+        // Accuracy is a fraction between 0 and 1, it can't be written as an integer.
+        damage_acc->SetDoubleAttribute("value", attack.damage.accuracy);
         damage->LinkEndChild(damage_acc.release());
         std::unique_ptr<TiXmlElement> damage_darkness(new TiXmlElement("Parameter"));
         damage_darkness->SetAttribute("id", "affected_by_darkness");
@@ -817,6 +868,18 @@ void BattleDataInstaller::WriteAttacks(){
         xml.SaveFile(output_dir_ + file_name);
         attack_map_[attack.id] = file_name;
     }
+    // Index of the attack files by ID, as file names include the attack name.
+    TiXmlDocument index;
+    std::unique_ptr<TiXmlElement> attacks(new TiXmlElement("attacks"));
+    for (const auto& entry : attack_map_){
+        std::unique_ptr<TiXmlElement> xml_attack(new TiXmlElement("attack"));
+        xml_attack->SetAttribute("id", entry.first);
+        // The file name in the map has the gamedata/attack/ path.
+        xml_attack->SetAttribute("file", entry.second.substr(entry.second.find_last_of('/') + 1));
+        attacks->LinkEndChild(xml_attack.release());
+    }
+    index.LinkEndChild(attacks.release());
+    index.SaveFile(output_dir_ + "gamedata/attack/_index.xml");
 }
 
 void BattleDataInstaller::WriteFormations(){

@@ -81,7 +81,7 @@ void FieldModuleInstruction::ProcessInst(
         case OPCODES::LSTMP: code_gen->WriteTodo(md.GetEntityName(), "LSTMP"); break;
         case OPCODES::BATTLE: ProcessBATTLE(code_gen); break;
         case OPCODES::BTLON: ProcessBTLON(code_gen); break;
-        case OPCODES::BTLMD: code_gen->WriteTodo(md.GetEntityName(), "BTLMD"); break;
+        case OPCODES::BTLMD: ProcessBTLMD(code_gen); break;
         case OPCODES::MPJPO:
             // Gateway function will do nothing if this is set to true
             code_gen->AddOutputLine(
@@ -111,6 +111,13 @@ void FieldModuleInstruction::ProcessBATTLE(CodeGenerator* code_gen){
       params_[2]->GetUnsigned()
     );
     code_gen->AddOutputLine((boost::format("Battle.start(%1%)") % battle_id).str());
+}
+
+void FieldModuleInstruction::ProcessBTLMD(CodeGenerator* code_gen){
+    // Battle mode: flags for the next battles, see BattleManager::ScriptSetMode.
+    code_gen->AddOutputLine(
+      (boost::format("battle_manager:set_mode(%1%)") % params_[0]->GetUnsigned()).str()
+    );
 }
 
 void FieldModuleInstruction::ProcessBTLON(CodeGenerator* code_gen){

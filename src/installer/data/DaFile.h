@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include <vector>
 #include "common/File.h"
 #include "common/TypeDefine.h"
@@ -79,17 +81,17 @@ class DaFile{
             /**
              * X value, short format.
              */
-            char16_t s_x;
+            int16_t s_x;
 
             /**
              * Y value, short format.
              */
-            char16_t s_y;
+            int16_t s_y;
 
             /**
              * Z value, short format
              */
-            char16_t s_z;
+            int16_t s_z;
 
             /**
              * X value, integer format.
@@ -139,6 +141,14 @@ class DaFile{
         };
 
         struct Animation{
+
+            /**
+             * Index of the animation in the original file.
+             *
+             * Animations too small to be real ones are skipped, but the others keep their original
+             * index, as it's the number used by the animation scripts.
+             */
+            u32 index;
 
             /**
              * Number of bones in the animation.

@@ -442,6 +442,32 @@ class Entity{
         virtual bool IsVisible() const = 0;
 
         /**
+         * Retrieves the duration of an animation.
+         *
+         * @param[in] animation Animation name.
+         * @return The animation length in seconds, 0 if the animation doesn't exist or the entity
+         * has no animations.
+         */
+        virtual float GetAnimationLength(const Ogre::String& animation) const;
+
+        /**
+         * Retrieves the number of animations of the entity.
+         *
+         * @return The number of animations, 0 if the entity has no animations.
+         */
+        virtual unsigned int GetAnimationCount() const;
+
+        /**
+         * Retrieves the duration of an animation.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] animation Animation name.
+         * @return The animation length in seconds, 0 if it doesn't exist.
+         */
+        float ScriptGetAnimationLength(const char* animation) const;
+
+        /**
          * Sets the entity's state.
          *
          * @param[in] state The entity's state.

@@ -101,7 +101,11 @@ void AudioManager::UpdateDebug(){}
 
 void AudioManager::OnResize(){}
 
-void AudioManager::ClearField(){tracks_.clear();}
+void AudioManager::ClearField(){
+    tracks_.clear();
+    // The battle music is set by the scripts of each field.
+    battle_track_ = -1;
+}
 
 void AudioManager::ClearBattle(){battle_track_ = -1;}
 
@@ -143,6 +147,34 @@ void AudioManager::MusicPlay(const Ogre::String& name){
             music_.Play(music->file);
         }
     }
+}
+
+void AudioManager::ScriptPlayMusicOnce(const char* name){
+    if (!initialized_) return;
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    AudioManager::Music* music = GetMusic(Ogre::String(name));
+    if (music == nullptr){
+        LOG_ERROR("No music found with name \"" + Ogre::String(name) + "\".");
+        return;
+    }
+    // A negative loop point means no loop: the player stops at the end of the track.
+    if (module_ == Module::BATTLE){
+        music_.Pause();
+        battle_music_.SetLoop(-1);
+        battle_music_.Play(music->file);
+    }
+    else{
+        battle_music_.Stop();
+        music_.SetLoop(-1);
+        music_.Play(music->file);
+    }
+}
+
+void AudioManager::EndBattleMusic(){
+    if (!initialized_) return;
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    battle_music_.Stop();
+    music_.Resume();
 }
 
 void AudioManager::SoundPlay(const Ogre::String& name){
@@ -305,6 +337,8 @@ void AudioManager::Player::Play(const Ogre::String &file){
 
     // If the same track is already playing, don't restart.
     if (file_ == file) return;
+    // Another track is playing: stop it first, or it would keep playing with no way to stop it.
+    if (!file_.empty()) Stop();
 
     // Open vorbis file.
     if (ov_fopen(const_cast<char*>(file.c_str()), &vorbis_file_)){

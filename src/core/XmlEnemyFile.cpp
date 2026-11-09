@@ -54,41 +54,75 @@ void XmlEnemyFile::LoadEnemy(Enemy& enemy){
             }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "elements"){
-            TiXmlNode* node_elm = node->FirstChild();
-            while (node_elm != nullptr && node->ValueStr() == "element"){
+            for (TiXmlNode* node_elm = node->FirstChild(); node_elm != nullptr; node_elm = node_elm->NextSibling()){
+                if (node_elm->Type() != TiXmlNode::TINYXML_ELEMENT || node_elm->ValueStr() != "element") continue;
                 Enemy::Element elm;
-                elm.id = GetInt(node_elm, "element");
+                elm.id = GetInt(node_elm, "id");
                 elm.factor = GetFloat(node_elm, "factor");
                 enemy.AddElement(elm);
-                node_elm = node_elm->NextSibling();
             }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "immunities"){
-            TiXmlNode* node_imm = node->FirstChild();
-            while (node_imm != nullptr && node->ValueStr() == "element"){
+            for (TiXmlNode* node_imm = node->FirstChild(); node_imm != nullptr; node_imm = node_imm->NextSibling()){
+                if (node_imm->Type() != TiXmlNode::TINYXML_ELEMENT || node_imm->ValueStr() != "immunity") continue;
                 Enemy::Immunity imm;
-                imm.status = GetInt(node_imm, "immunity");
+                imm.status = GetInt(node_imm, "status");
                 imm.rate = GetFloat(node_imm, "rate");
                 enemy.AddImmunity(imm);
-                node_imm = node_imm->NextSibling();
             }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "attacks"){
-            // TODO
+            for (TiXmlNode* node_atk = node->FirstChild(); node_atk != nullptr; node_atk = node_atk->NextSibling()){
+                if (node_atk->Type() != TiXmlNode::TINYXML_ELEMENT || node_atk->ValueStr() != "attack") continue;
+                Enemy::Attack atk;
+                atk.id = GetInt(node_atk, "id");
+                atk.animation = GetInt(node_atk, "animation", -1);
+                atk.camera = GetInt(node_atk, "camera", -1);
+                enemy.AddAttack(atk);
+            }
         }
         else if (
           node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "manipulate"
         ){
             // TODO
         }
-        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "steal"){
-            // TODO
+        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "ai"){
+            // AI scripts, as hexadecimal bytecode.
+            for (TiXmlNode* script = node->FirstChild(); script != nullptr; script = script->NextSibling()){
+                if (script->Type() != TiXmlNode::TINYXML_ELEMENT || script->ValueStr() != "script") continue;
+                const std::string hex = GetString(script, "data");
+                std::string code;
+                for (size_t i = 0; i + 1 < hex.size(); i += 2){
+                    code.push_back(static_cast<char>(std::stoi(hex.substr(i, 2), nullptr, 16)));
+                }
+                enemy.SetAiScript(GetInt(script, "slot"), code);
+            }
         }
-        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "drops"){
-            // TODO
+        else if (
+          node->Type() == TiXmlNode::TINYXML_ELEMENT
+          && (node->ValueStr() == "steal" || node->ValueStr() == "drop" || node->ValueStr() == "drops")
+        ){
+            const bool is_steal = node->ValueStr() == "steal";
+            TiXmlNode* node_item = node->FirstChild();
+            while (node_item != nullptr){
+                if (node_item->Type() == TiXmlNode::TINYXML_ELEMENT && node_item->ValueStr() == "item"){
+                    Enemy::Item item;
+                    item.id = GetInt(node_item, "id");
+                    item.rate = GetFloat(node_item, "rate");
+                    if (is_steal) enemy.AddSteal(item);
+                    else enemy.AddDrop(item);
+                }
+                node_item = node_item->NextSibling();
+            }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "animations"){
-            // TODO
+            TiXmlNode* node_anim = node->FirstChild();
+            while (node_anim != nullptr){
+                if (node_anim->Type() == TiXmlNode::TINYXML_ELEMENT){
+                    enemy.AddAnimation(GetInt(node_anim, "id"));
+                }
+                node_anim = node_anim->NextSibling();
+            }
         }
         node = node->NextSibling();
     }

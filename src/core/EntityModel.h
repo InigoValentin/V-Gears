@@ -60,6 +60,10 @@ class EntityModel : public Entity{
          */
         virtual bool IsVisible() const;
 
+        virtual float GetAnimationLength(const Ogre::String& animation) const;
+
+        virtual unsigned int GetAnimationCount() const;
+
         Ogre::Entity* GetModel();
 
         /**

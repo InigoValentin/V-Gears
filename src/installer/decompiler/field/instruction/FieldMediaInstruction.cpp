@@ -38,7 +38,7 @@ void FieldMediaInstruction::ProcessInst(
         case OPCODES::MUSVT: code_gen->WriteTodo(md.GetEntityName(), "MUSVT"); break;
         case OPCODES::MUSVM: code_gen->WriteTodo(md.GetEntityName(), "MUSVM"); break;
         case OPCODES::MULCK: ProcessMULCK(code_gen); break;
-        case OPCODES::BMUSC: code_gen->WriteTodo(md.GetEntityName(), "BMUSC"); break;
+        case OPCODES::BMUSC: ProcessBMUSC(code_gen); break;
         case OPCODES::CHMPH: code_gen->WriteTodo(md.GetEntityName(), "CHMPH"); break;
         case OPCODES::PMVIE: ProcessPMVIE(code_gen); break;
         case OPCODES::MOVIE: ProcessMOVIE(code_gen); break;
@@ -75,6 +75,13 @@ void FieldMediaInstruction::ProcessAKAO2(CodeGenerator* code_gen){
       boost::format("-- music:execute_akao(0x%6$02x, %1%, %2%, %3%, %4%, %5%)")
       % param1 % param2 % param3 % param4 % param5 % op
     ).str());
+}
+
+void FieldMediaInstruction::ProcessBMUSC(CodeGenerator* code_gen){
+    // Battle music: one of the music tracks of the field, used by the battles of the field.
+    code_gen->AddOutputLine(
+      (boost::format("audio_manager:set_battle_track_id(%1%)") % params_[0]->GetUnsigned()).str()
+    );
 }
 
 void FieldMediaInstruction::ProcessMUSIC(CodeGenerator* code_gen){

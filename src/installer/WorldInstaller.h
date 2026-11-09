@@ -21,6 +21,7 @@
 #include <common/TypeDefine.h>
 #include "DiskImage.h"
 #include "common/File.h"
+#include "data/VGearsLGPArchive.h"
 
 /**
  * The world map data installer.
@@ -75,6 +76,14 @@ class WorldInstaller{
          * processed. False if there are more maps to process.
          */
         bool ProcessMap();
+
+        /**
+         * Exports the random encounters of the world map to gamedata/world_encounters.xml.
+         *
+         * @param[in] archive_file World map archive file.
+         * @param[in] entry Entry of ENC_W.BIN in the archive.
+         */
+        void ExportEncounters(File& archive_file, const VGears::LGPArchive::FileEntry& entry);
 
                 bool GenerateScripts(
                     const std::vector<std::string>& field_names,

@@ -60,6 +60,23 @@ namespace VGears {
             int GetTerrainTriangleUnderEntity(const char* entity_name) const;
             bool UnboardVehicle(const char* vehicle_name);
 
+            /**
+             * Hides the world map and stops it while a battle is on.
+             */
+            void PauseForBattle();
+
+            /**
+             * Shows the world map again after a battle.
+             */
+            void ResumeAfterBattle();
+
+            /**
+             * Prevents or allows random encounters (the SetBattleLock opcode).
+             *
+             * @param[in] locked True to prevent them.
+             */
+            void SetEncountersLocked(const bool locked);
+
         private:
 
             struct TerrainTriangle{
@@ -68,6 +85,21 @@ namespace VGears {
                 uint8 function_id;
                 int mesh_x;
                 int mesh_y;
+                /// Encounter region of the triangle, 0-15.
+                uint8 region;
+            };
+
+            /**
+             * Random encounters of a region and terrain group, from ENC_W.BIN.
+             */
+            struct EncounterRecord{
+                bool enabled;
+                /// Lower values mean more frequent encounters.
+                int rate;
+                /// Walkability type that selects this record.
+                int terrain;
+                /// Words 1-15 of the record: battle ID (10 bits) and probability (6 bits).
+                uint16 words[15];
             };
 
             void CreateWorldMap(Ogre::SceneManager* scene_manager);
@@ -89,6 +121,16 @@ namespace VGears {
             ) const;
             bool IsActiveTerrainAllowed(uint8 walkability_type) const;
             void TriggerTriangleFunction(const TerrainTriangle& triangle);
+            void LoadEncounters();
+            void UpdateEncounters(const float delta_time, const TerrainTriangle& triangle);
+            int RollEncounterBattle(const EncounterRecord& record) const;
+
+            std::vector<EncounterRecord> encounter_records_;
+            float encounter_frames_;
+            int encounter_accumulator_;
+            int encounter_last_battle_;
+            bool encounters_locked_;
+            bool paused_for_battle_;
 
             std::vector<TerrainTriangle> terrain_triangles_;
             Ogre::SceneManager* scene_manager_;

@@ -50,6 +50,25 @@ void XmlMapFile::LoadMap(){
             Ogre::Degree rotation = Ogre::Degree(GetFloat(node, "degree", 0));
             EntityManager::getSingleton().SetPlayerMoveRotation(Ogre::Radian(rotation));
         }
+        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "encounters"){
+            // Random encounter tables. Encounters are enabled until a script disables them.
+            EntityManager::getSingleton().ClearEncounterTables();
+            for (TiXmlNode* table = node->FirstChild(); table != nullptr; table = table->NextSibling()){
+                if (table->Type() != TiXmlNode::TINYXML_ELEMENT || table->ValueStr() != "table") continue;
+                std::vector<std::pair<int, int>> battles;
+                std::vector<std::pair<int, int>> specials;
+                for (TiXmlNode* entry = table->FirstChild(); entry != nullptr; entry = entry->NextSibling()){
+                    if (entry->Type() != TiXmlNode::TINYXML_ELEMENT) continue;
+                    const std::pair<int, int> encounter(GetInt(entry, "id"), GetInt(entry, "probability"));
+                    if (entry->ValueStr() == "battle") battles.push_back(encounter);
+                    else if (entry->ValueStr() == "special") specials.push_back(encounter);
+                }
+                EntityManager::getSingleton().AddEncounterTable(
+                  GetInt(table, "id", 1), GetInt(table, "rate"), battles, specials
+                );
+            }
+            EntityManager::getSingleton().SetRandomEncounters(true);
+        }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "background2d"){
             Ogre::String name = GetString(node, "file_name");
             if (name != ""){

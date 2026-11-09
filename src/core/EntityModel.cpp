@@ -61,6 +61,18 @@ void EntityModel::SetVisible(const bool visible){model_->setVisible(visible);}
 
 bool EntityModel::IsVisible() const{return model_->isVisible();}
 
+float EntityModel::GetAnimationLength(const Ogre::String& animation) const{
+    Ogre::AnimationStateSet* states = model_->getAllAnimationStates();
+    if (states == nullptr || states->hasAnimationState(animation) == false) return 0.0f;
+    return states->getAnimationState(animation)->getLength();
+}
+
+unsigned int EntityModel::GetAnimationCount() const{
+    Ogre::AnimationStateSet* states = model_->getAllAnimationStates();
+    if (states == nullptr) return 0;
+    return states->getAnimationStates().size();
+}
+
 Ogre::Entity* EntityModel::GetModel(){return model_;}
 
 void EntityModel::PlayAnimation(

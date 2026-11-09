@@ -18,7 +18,9 @@
 #include <cstdint>
 #include "data/DaFile.h"
 
-const float DaFile::OFFSET_SCALE = 0.0070312473867f;
+// Root offsets are in the same units as the model geometry (the root height of an idle Cloud is 466,
+// against leg bones of 277 and 253), so they are not scaled.
+const float DaFile::OFFSET_SCALE = 1.0f;
 
 DaFile::DaFile(File file): da_file_(file){
     animations_.clear();
@@ -42,7 +44,7 @@ std::vector<std::string> DaFile::GenerateAFiles(std::string model_id, std::strin
          * animation frame has three floats (of 4 bytes) for root rotation, three for root offset,
          * and after them, the bone rotation data.
          */
-        std::string file_index_name = std::to_string(anim);
+        std::string file_index_name = std::to_string(animations_[anim].index);
         while (file_index_name.size() < 2) file_index_name = "0" + file_index_name;
         std::string file_name = path + model_id + "_" + file_index_name + ".a";
         std::ofstream a(file_name, std::ios::out | std::ios::binary);
@@ -79,24 +81,13 @@ std::vector<std::string> DaFile::GenerateAFiles(std::string model_id, std::strin
 }
 
 int DaFile::ExtendSignInteger(int val, int len){
-    int result, aux;
-    if ((val & (int) pow(2, (len - 1))) != 0){
-        aux = (int) pow(2, 16) - 1;
-        aux ^= (int) (pow(2, len) - 1);
-        aux |= val;
-        result = aux;
-    }
-    else result = val;
-    return result;
+    // Two's complement value of "len" bits to a signed integer.
+    if (len > 0 && (val & (1 << (len - 1))) != 0) return val - (1 << len);
+    return val;
 }
 
 int DaFile::GetSignExtendedShort(int val, int len){
-    int result = 0;
-    if (len > 0){
-        if (len < 16) result = ExtendSignInteger(val, len);
-        else result = val;
-    }
-    return result;
+    return ExtendSignInteger(val, len);
 }
 
 void DaFile::Read(){
@@ -108,6 +99,7 @@ void DaFile::Read(){
     //for (int a = 0; a < 1; a ++){ // TODO DEBUG
         int start_offset = bit_offset_ / 8; // In bytes.
         Animation anim = ReadAnimation();
+        anim.index = a;
         if (anim.frame_count > 0) animations_.push_back(anim);
         // Manually go to the next animation
         bit_offset_ = (start_offset + anim.size + 12) * 8; // + 12 is for skipping the main header.
@@ -146,12 +138,13 @@ DaFile::Animation DaFile::ReadAnimation(){
 DaFile::Frame DaFile::ReadFirstFrame(u32 bones, u8 key){
     Frame frame;
     // Read root offset. In the first frame, always 16 bytes each, as short.
-    frame.offset.s_x = (int16_t) GetBitsS(16);
-    frame.offset.s_y = (int16_t) GetBitsS(16);
-    frame.offset.s_z = (int16_t) GetBitsS(16);
+    frame.offset.s_x = GetBitsS(16);
+    frame.offset.s_y = GetBitsS(16);
+    frame.offset.s_z = GetBitsS(16);
     // Turn offset to float. Any scaling that needs to be done would be done here.
     frame.offset.f_x = static_cast<float>(frame.offset.s_x) * OFFSET_SCALE;
-    frame.offset.f_y = static_cast<float>(frame.offset.s_y) * OFFSET_SCALE;
+    // Y points down in the original data, up in the converted models.
+    frame.offset.f_y = static_cast<float>(frame.offset.s_y) * -OFFSET_SCALE;
     frame.offset.f_z = static_cast<float>(frame.offset.s_z) * OFFSET_SCALE;
     // Read bones.
     for (int i = 0; i < bones; i ++){
@@ -159,13 +152,13 @@ DaFile::Frame DaFile::ReadFirstFrame(u32 bones, u8 key){
         // Now get each bone rotation (the first bone is actually the root, not part of the
         // skeleton). During the first frame, the rotations are always (12 - key) bits. The values
         // are shifted by key to align it to 12 bits.
-        bone.s_x = GetBitsS(12 - key) << key;
-        bone.s_y = GetBitsS(12 - key) << key;
-        bone.s_z = GetBitsS(12 - key) << key;
-        // Store the INT version as the absolute value of the SHORT version.
-        bone.i_x = (bone.s_x < 0) ? bone.s_x + 0x1000 : bone.s_x;
-        bone.i_y = (bone.s_y < 0) ? bone.s_y + 0x1000 : bone.s_y;
-        bone.i_z = (bone.s_z < 0) ? bone.s_z + 0x1000 : bone.s_z;
+        bone.s_x = GetBitsS(12 - key) * (1 << key);
+        bone.s_y = GetBitsS(12 - key) * (1 << key);
+        bone.s_z = GetBitsS(12 - key) * (1 << key);
+        // Store the INT version as the angle in the 0-4095 range.
+        bone.i_x = bone.s_x & 0xFFF;
+        bone.i_y = bone.s_y & 0xFFF;
+        bone.i_z = bone.s_z & 0xFFF;
         // Convert to float.
         bone.f_x = static_cast<float>(bone.i_x) / 4096.0f * 360.0f;
         bone.f_y = static_cast<float>(bone.i_y) / 4096.0f * 360.0f;
@@ -178,98 +171,56 @@ DaFile::Frame DaFile::ReadFirstFrame(u32 bones, u8 key){
 DaFile::Frame DaFile::ReadFrame(u32 bones, u8 key, Frame prev){
     Frame frame;
 
-    // Get dynamic root offset and add the previous frame values.
-    // Note: in compressed frames, offset delta is a signed integer, so skip the short value
+    // Get the root offset delta and add it to the previous frame values. Deltas are in the same
+    // units as the first frame offset, so they get the same scale.
     frame.offset.s_x = 0;
     frame.offset.s_y = 0;
     frame.offset.s_z = 0;
     frame.offset.i_x = GetDynamicOffsetFromStream();
     frame.offset.i_y = GetDynamicOffsetFromStream();
     frame.offset.i_z = GetDynamicOffsetFromStream();
-    frame.offset.f_x = static_cast<float>(frame.offset.i_x) + prev.offset.f_x;
-    frame.offset.f_y = static_cast<float>(frame.offset.i_y) * -1 + prev.offset.f_y; // Invert Y.
-    frame.offset.f_z = static_cast<float>(frame.offset.i_z) + prev.offset.f_z;
+    frame.offset.f_x = static_cast<float>(frame.offset.i_x) * OFFSET_SCALE + prev.offset.f_x;
+    frame.offset.f_y = static_cast<float>(frame.offset.i_y) * -OFFSET_SCALE + prev.offset.f_y;
+    frame.offset.f_z = static_cast<float>(frame.offset.i_z) * OFFSET_SCALE + prev.offset.f_z;
 
     for (int i = 0; i < bones; i ++){
         TriValue bone;
-        // The same applies here.  Add the offsets and convert to INT form, adding 0x1000 if it is
-        // less than 0. When Final Fantasy VII loads these animations, it is possible for the value
-        // to sneak up above the 4095 boundary through a series of positive offsets.
+        // Rotations are 12 bit angles (4096 is a full turn). Deltas are added to the previous
+        // value, already shifted to 12 bits, and the result wraps around a full turn.
         bone.s_x = GetCompressedDeltaFromStream(key) + prev.bones[i].s_x;
         bone.s_y = GetCompressedDeltaFromStream(key) + prev.bones[i].s_y;
         bone.s_z = GetCompressedDeltaFromStream(key) + prev.bones[i].s_z;
-        bone.i_x = (bone.s_x < 0) ? bone.s_x + 0x1000 : bone.s_x;
-        bone.i_y = (bone.s_y < 0) ? bone.s_y + 0x1000 : bone.s_y;
-        bone.i_z = (bone.s_z < 0) ? bone.s_z + 0x1000 : bone.s_z;
-        bone.f_x = static_cast<float>(bone.i_x) / pow(2, 12 - key) * 360.0f;
-        bone.f_y = static_cast<float>(bone.i_y) / pow(2, 12 - key) * 360.0f;
-        bone.f_z = static_cast<float>(bone.i_z) / pow(2, 12 - key) * 360.0f;
+        bone.i_x = bone.s_x & 0xFFF;
+        bone.i_y = bone.s_y & 0xFFF;
+        bone.i_z = bone.s_z & 0xFFF;
+        bone.f_x = static_cast<float>(bone.i_x) / 4096.0f * 360.0f;
+        bone.f_y = static_cast<float>(bone.i_y) / 4096.0f * 360.0f;
+        bone.f_z = static_cast<float>(bone.i_z) / 4096.0f * 360.0f;
         frame.bones.push_back(bone);
     }
     return frame;
 }
 
 int DaFile::GetDynamicOffsetFromStream(){
-    int value;
-    int control_bit = GetBitsS(1);
-    if (control_bit == 1) value = GetBitsS(16);
-    else value = GetBitsS(7);
-    if (value > 0x7fff) value = (value - 0xffff);
-    return value;
+    // The control bit is an unsigned flag: 1 for a 16 bit value, 0 for a 7 bit one.
+    if (GetBitsU(1) == 1) return GetBitsS(16);
+    return GetBitsS(7);
 }
 
 int DaFile::GetBitsU(int bits){
+    // Bits are read most significant first.
     int value = 0;
-    int base_byte, bi, res, num_bytes, unaligned_by_bits;
-    int first_aligned_byte, last_aligned_byte, end_bits;
-    bool is_aligned, clean_end;
-    if (bits < 1) return value;
-    base_byte = bit_offset_ / 8;
-    unaligned_by_bits = bit_offset_ % 8;
-
-    if (unaligned_by_bits + bits > 8){
-        is_aligned = (unaligned_by_bits == 0);
-        end_bits = (bit_offset_ + bits) % 8;
-        clean_end = (end_bits == 0);
-        num_bytes =
-          (bits - (is_aligned ? 0 : 8 - unaligned_by_bits) - (clean_end ? 0 : end_bits)) / 8
-          + (is_aligned ? 0 : 1) + (clean_end ? 0 : 1);
-        last_aligned_byte = num_bytes - (clean_end ? 0 : 1) - 1;
-        first_aligned_byte = 0;
-        res = 0;
-        // Unaligned prefix: stored at the beginning of the byte
-        if (!is_aligned){
-            res = da_bytes_[base_byte];
-            res &= (int) (pow(2, (8 - unaligned_by_bits)) - 1);
-            first_aligned_byte = 1;
-        }
-        // Aligned bytes
-        for (bi = first_aligned_byte; bi <= last_aligned_byte; bi ++){
-            res *= 256;
-            res |= da_bytes_[base_byte + bi];
-        }
-        // Suffix: Stored at the end of the byte
-        if (!clean_end){
-            res *= (int) pow(2, end_bits);
-            res |= (
-              (da_bytes_[base_byte + last_aligned_byte + 1]) / (int) (pow(2, 8 - end_bits))
-              & (int) (pow(2, end_bits) - 1)
-            );
-        }
+    for (int i = 0; i < bits; i ++){
+        const int byte = da_bytes_[bit_offset_ / 8];
+        const int bit = (byte >> (7 - (bit_offset_ % 8))) & 1;
+        value = (value << 1) | bit;
+        bit_offset_ ++;
     }
-    else{
-        res = da_bytes_[base_byte];
-        res /= (int) pow(2, 8 - (unaligned_by_bits + bits));
-        res &= (int) (pow(2, bits) - 1);
-    }
-    value = (short)res;
-    bit_offset_ += bits;
     return value;
 }
 
 int DaFile::GetBitsS(int bits){
-    int tmp = GetBitsU(bits);
-    return GetSignExtendedShort(tmp, bits);
+    return GetSignExtendedShort(GetBitsU(bits), bits);
 }
 
 int DaFile::GetCompressedDeltaFromStream(int lowered_precision_bits){
@@ -285,7 +236,7 @@ int DaFile::GetCompressedDeltaFromStream(int lowered_precision_bits){
             case 1: case 2: case 3: case 4: case 5: case 6:
                 bits = key;
                 // Read a corresponding number of bits from the stream.
-                temp = (int16_t) GetBitsS(bits);
+                temp = GetBitsS(bits);
                 //  Invert the value of the last bit
                 sign = (int) pow(2, bits - 1);
                 // Set sign.
@@ -297,7 +248,7 @@ int DaFile::GetCompressedDeltaFromStream(int lowered_precision_bits){
             case 7:
                 // Read an uncompressed value from the stream (at requested precision),
                 // and return.
-                temp = (int16_t) GetBitsS(12 - lowered_precision_bits);
+                temp = GetBitsS(12 - lowered_precision_bits);
                 return (temp << lowered_precision_bits);
         }
     }

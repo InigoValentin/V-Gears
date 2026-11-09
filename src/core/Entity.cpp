@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <cmath>
 #include <OgreSceneNode.h>
 #include <OgreMaterialManager.h>
 #include "core/ConfigVar.h"
@@ -71,6 +72,8 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   animation_default_("Idle"),
   animation_current_name_(""),
   animation_auto_play_(true),
+  animation_state_(Entity::AUTO_ANIMATION),
+  animation_play_type_(Entity::PLAY_LOOPED),
   is_character_(false),
   character_id_(-1),
   is_line_(false)
@@ -280,13 +283,14 @@ void Entity::ScriptSetRotation(const float rotation){SetRotation(Ogre::Degree(ro
 
 Ogre::Degree Entity::GetRotation() const{
     assert(model_root_node_);
-    Ogre::Quaternion q = model_root_node_->getOrientation();
-    Ogre::Degree temp;
-    // On battle module, rotate on Y axis.
-    Ogre::Vector3 vec = EntityManager::getSingleton().IsBattleModule()
-      ? Ogre::Vector3::UNIT_Z : Ogre::Vector3::UNIT_Z;
-    q.ToAngleAxis(temp, vec);
-    return temp;
+    // The rotation is around the Y axis in battle, around Z in the rest of modules (see
+    // {@see SetRotation}), so the angle is twice the angle of the component of that axis.
+    const Ogre::Quaternion q = model_root_node_->getOrientation();
+    const float axis = EntityManager::getSingleton().IsBattleModule() ? q.y : q.z;
+    float angle = Ogre::Degree(Ogre::Radian(2.0f * std::atan2(axis, q.w))).valueDegrees();
+    // Same range as set by SetRotation.
+    angle = angle - Ogre::Math::Floor(angle / 360.0f) * 360.0f;
+    return Ogre::Degree(angle);
 }
 
 float Entity::ScriptGetRotation() const{return GetRotation().valueDegrees();}
@@ -717,6 +721,14 @@ void Entity::ScriptPlayAnimation(const char* name, const float start, const floa
 
 void Entity::ScriptPlayAnimationStop(const char* name, const float start, const float end){
     PlayAnimation(Ogre::String(name), Entity::REQUESTED_ANIMATION, Entity::PLAY_ONCE, start, end);
+}
+
+float Entity::GetAnimationLength(const Ogre::String& animation) const{return 0.0f;}
+
+unsigned int Entity::GetAnimationCount() const{return 0;}
+
+float Entity::ScriptGetAnimationLength(const char* animation) const{
+    return GetAnimationLength(Ogre::String(animation));
 }
 
 void Entity::ScriptSetDefaultAnimation(const char* animation){

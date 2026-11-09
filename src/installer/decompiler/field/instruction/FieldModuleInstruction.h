@@ -85,6 +85,8 @@ class FieldModuleInstruction : public KernelCallInstruction{
          *
          * @param[in,out] code_gen Code generator to append lines.
          */
+        void ProcessBTLMD(CodeGenerator* code_gen);
+
         void ProcessBTLON(CodeGenerator* code_gen);
 
         /**

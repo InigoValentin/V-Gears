@@ -73,7 +73,7 @@ struct Formation{
          * Like a normal one, but all players in the front row. Change command
          * disabled.
          */
-        LOCKED
+        LOCKED = 8
     };
 
     /**

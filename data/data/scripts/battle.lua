@@ -170,19 +170,72 @@ Battle.logic_script = {
     end,
 }
 
+--- Flags set by the field opcode BTLMD (battle_manager:set_mode).
+Battle.Mode = {
+    NO_RESULTS = 0x80,
+    ARENA = 0x40,
+    NO_VICTORY_MUSIC = 0x20,
+    NO_ESCAPE = 0x08,
+    PREEMPTIVE = 0x04,
+    TIMED = 0x02,
+    NO_GAME_OVER = 0x100,
+}
+
+--- Checks if a BTLMD flag is set for the current battle.
+Battle.has_mode = function(flag)
+    return math.floor(battle_manager:get_mode() / flag) % 2 == 1
+end
+
 --- Starts a battle.
 --
 -- @param id Battle ID.
 Battle.start = function(id)
-    battle_manager:start_battle(id)
-    script:request_end_sync(Script.UI, "BattleUi", "show", 0)
+    Battle.pending_id = id
+    script:request_end_sync(Script.UI, "Fade", "battle_transition", 0)
     return 0
+end
+
+--- Starts a battle right away, with no transition. It can be called from the battle tick, so it
+-- doesn't yield. Used for battles that follow another battle.
+--
+-- @param id Battle ID.
+Battle.chain = function(id)
+    battle_manager:start_battle(id)
+    script:request(Script.UI, "BattleUi", "show", 0)
+end
+
+--- Random encounters.
+Encounter = {
+
+    --- Indicates that the current battle is a random encounter.
+    active = false,
+}
+
+--- Starts a random encounter.
+--
+-- Called by the engine when the player walks into one. It isn't a script, so it can't yield.
+-- @param id Battle ID.
+Encounter.start = function(id)
+    -- The player can't walk during the battle.
+    player_lock(true)
+    Encounter.active = true
+    Battle.pending_id = id
+    script:request(Script.UI, "Fade", "battle_transition", 0)
 end
 
 --- Ends a battle.
 Battle.finish = function()
     battle_manager:end_battle()
-    script:request_end_sync(Script.UI, "BattleUi", "hide", 0)
+    -- Random encounters give control back to the player.
+    if Encounter.active then
+        Encounter.active = false
+        player_lock(false)
+    elseif Battle.locked_by_transition then
+        player_lock(false)
+    end
+    Battle.locked_by_transition = false
+    -- Not "request_end_sync": this can be called from the battle tick, which can't yield.
+    script:request(Script.UI, "BattleUi", "hide", 0)
     return 0
 end
 
@@ -445,4 +498,13 @@ Battle.add_random_modifier_and_zero_check = function( damage )
     end
 
     return random_damage
+end
+
+--- Opcodes of the world map scripts that deal with battles.
+SetBattleLock = function(locked)
+    world_map_module:set_encounters_locked(locked ~= 0)
+end
+
+TriggerBattle = function(id)
+    Encounter.start(id)
 end

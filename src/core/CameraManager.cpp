@@ -195,12 +195,11 @@ void CameraManager::StartBattleCamera(
       camera_->getOrientation().w, camera_->getOrientation().x,
       camera_->getOrientation().y, camera_->getOrientation().z
     );
-    camera_->setPosition(position);
-    //CameraManager::getSingleton().GetCurrentCamera()->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-    camera_->lookAt(orientation);
-    camera_->roll(Ogre::Angle(90));
-    // Fix: compensate for the battle UI covered section of the screen.
-    camera_->move(Ogre::Vector3(0, 0, -4));
+    // The field camera has its own field of view and a frustum moved by the 2D scroll. The battle
+    // camera needs the default ones, and a known orientation: lookAt depends on the current
+    // orientation, so the camera would look different depending on where the battle started.
+    fov_backup_ = camera_->getFOVy();
+    SetBattleCamera(position, orientation);
 
     /*Ogre::SceneNode* rootScene =
               Ogre::Root::getSingleton().getSceneManager("Scene") ->getRootSceneNode();
@@ -218,6 +217,18 @@ void CameraManager::StartBattleCamera(
       << rootScene->getOrientation().y << ", " << rootScene->getOrientation().z << std::endl;*/
 }
 
+void CameraManager::SetBattleCamera(const Ogre::Vector3 position, const Ogre::Vector3 orientation){
+    camera_->resetFrustumExtents();
+    camera_->setFOVy(Ogre::Radian(Ogre::Math::PI / 4.0f));
+    camera_->setOrientation(Ogre::Quaternion::IDENTITY);
+    camera_->setPosition(position);
+    //CameraManager::getSingleton().GetCurrentCamera()->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
+    camera_->lookAt(orientation);
+    camera_->roll(Ogre::Angle(90));
+    // Fix: compensate for the battle UI covered section of the screen.
+    camera_->move(Ogre::Vector3(0, 0, -4));
+}
+
 void CameraManager::EndBattleCamera(){
     /*std::cout << "CAMERA BATTLE END: " << camera_->getPosition().x << ", "
       << camera_->getPosition().y << ", " << camera_->getPosition().z << ", "
@@ -229,6 +240,9 @@ void CameraManager::EndBattleCamera(){
     CameraManager::getSingleton().GetCurrentCamera()->setOrientation(Ogre::Quaternion(
       orientation_backup_.w, orientation_backup_.x, orientation_backup_.y, orientation_backup_.z
     ));
+    // Back to the field of view and 2D scroll of the field.
+    camera_->setFOVy(fov_backup_);
+    Set2DScroll(d2_scroll_);
     /*std::cout << "CAMERA BATTLE END FINISH: " << camera_->getPosition().x << ", "
       << camera_->getPosition().y << ", " << camera_->getPosition().z << ", "
       << camera_->getOrientation().w << ", "<< camera_->getOrientation().x << ", "
@@ -265,6 +279,16 @@ const Ogre::Vector3 CameraManager::ProjectPointToScreen(const Ogre::Vector3& poi
     view.x = width + view.x * width;
     view.y = height - view.y * height;
     return view;
+}
+
+std::tuple<float, float, float> CameraManager::ScriptProjectToUi(
+  const float x, const float y, const float z
+){
+    if (camera_ == nullptr || viewport_ == nullptr) return std::make_tuple(0.0f, 0.0f, 0.0f);
+    const Ogre::Vector3 point = ProjectPointToScreen(Ogre::Vector3(x, y, z));
+    // Pixels to UI units.
+    const float scale = 720.0f / static_cast<float>(viewport_->getActualHeight());
+    return std::make_tuple(point.x * scale, point.y * scale, point.z);
 }
 
 Ogre::Camera* CameraManager::GetCurrentCamera(){return camera_;}
