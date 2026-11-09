@@ -1,7 +1,7 @@
 # Minimum required CMake and project declaration
 cmake_minimum_required(VERSION 3.5)
 # Enable both C and CXX languages so C and C++ toolchains are configured.
-project(V-Gears VERSION 0.1.19 LANGUAGES C CXX)
+project(V-Gears VERSION 0.2.0 LANGUAGES C CXX)
 
 # Provide a central common include for project-wide policies and defaults.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
