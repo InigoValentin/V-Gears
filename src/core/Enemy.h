@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <map>
+#include <tuple>
 #include <OgreString.h>
 #include "ScriptManager.h"
 
@@ -62,6 +64,11 @@ class Enemy{
              * -1 to not move the camera.
              */
             int camera;
+
+            /**
+             * Animation script of the model to play for the attack. -1 if there is none.
+             */
+            int animation = -1;
         };
 
         /**
@@ -555,10 +562,9 @@ class Enemy{
         /**
          * Retrieves the enemy position.
          *
-         * To be used from Lua scripts only. It doesn't return anything, but adds three values to
-         * the stack for the X, Y and Z coordinates.
+         * @return The X, Y and Z coordinates for Lua scripts.
          */
-        void ScriptGetPos() const;
+        std::tuple<float, float, float> ScriptGetPos() const;
 
         /**
          * Checks if the enemy is in the front row.
@@ -646,6 +652,147 @@ class Enemy{
         int ScriptGetAttackCount();
 
         /**
+         * Retrieves the number of items the enemy can drop.
+         *
+         * To be used from Lua scripts.
+         *
+         * @return The number of droppable items.
+         */
+        int ScriptGetDropCount() const;
+
+        /**
+         * Retrieves the animation script of an attack.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Attack index, lower than {@see ScriptGetAttackCount}.
+         * @return The animation script number of the model, -1 if there is none.
+         */
+        int ScriptGetAttackAnimation(const unsigned int index) const;
+
+        /**
+         * Retrieves the number of elements the enemy reacts to.
+         *
+         * To be used from Lua scripts.
+         */
+        int ScriptGetElementCount() const;
+
+        /**
+         * Sets an AI script.
+         *
+         * @param[in] slot Script slot (0 initialization, 1 main, 2 general counter, 3 death
+         * counter, 4 physical counter, 5 magic counter, 6 battle end, 7 pre-turn, 8 to 15 events).
+         * @param[in] code The script bytecode.
+         */
+        void SetAiScript(const unsigned int slot, const std::string& code);
+
+        /**
+         * Retrieves an AI script.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] slot Script slot, as in {@see SetAiScript}.
+         * @return The script bytecode, empty if the enemy has no script in that slot.
+         */
+        std::string ScriptGetAiScript(const unsigned int slot) const;
+
+        /**
+         * Retrieves the number of status immunities of the enemy.
+         *
+         * To be used from Lua scripts.
+         */
+        int ScriptGetImmunityCount() const;
+
+        /**
+         * Retrieves the status ID of an immunity (0 is death, 1 near death, 2 sleep, 3 poison...).
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Index, lower than {@see ScriptGetImmunityCount}.
+         * @return The status ID, -1 if the index is not valid.
+         */
+        int ScriptGetImmunity(const unsigned int index) const;
+
+        /**
+         * Retrieves the rate of an immunity.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Index, lower than {@see ScriptGetImmunityCount}.
+         * @return The immunity rate, between 0 and 1. 0 if the index is not valid.
+         */
+        float ScriptGetImmunityRate(const unsigned int index) const;
+
+        /**
+         * Retrieves the element index (0 is fire, 1 ice, 2 lightning...) of an element reaction.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Index, lower than {@see ScriptGetElementCount}.
+         * @return The element, -1 if the index is not valid.
+         */
+        int ScriptGetElement(const unsigned int index) const;
+
+        /**
+         * Retrieves the damage factor of an element reaction.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Index, lower than {@see ScriptGetElementCount}.
+         * @return The factor: 1 normal, 2 double, 0.5 half, 0 nullified, negative for absorbed.
+         * 1 if the index is not valid.
+         */
+        float ScriptGetElementFactor(const unsigned int index) const;
+
+        /**
+         * Retrieves the number of attack animations of the enemy.
+         *
+         * To be used from Lua scripts.
+         *
+         * @return The number of attack animations.
+         */
+        int ScriptGetAnimationCount() const;
+
+        /**
+         * Retrieves an attack animation index of the enemy.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Index in the enemy animation list, lower than
+         * {@see ScriptGetAnimationCount}.
+         * @return The animation number in the model (as in "XX_NN"), -1 if the index is not valid.
+         */
+        int ScriptGetAnimation(const unsigned int index) const;
+
+        /**
+         * Retrieves the model prefix used in the animation names (the first two characters of the
+         * model name).
+         *
+         * To be used from Lua scripts.
+         */
+        std::string ScriptGetModelPrefix() const;
+
+        /**
+         * Retrieves the ID of a droppable item.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Drop index, must be lower than reported by {@see ScriptGetDropCount}.
+         * @return The item ID, -1 if the index is not valid.
+         */
+        int ScriptGetDropId(const unsigned int index) const;
+
+        /**
+         * Retrieves the drop rate of a droppable item.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Drop index, must be lower than reported by {@see ScriptGetDropCount}.
+         * @return The drop rate, between 0 and 1. 0 if the index is not valid.
+         */
+        float ScriptGetDropRate(const unsigned int index) const;
+
+        /**
          * Retrieves an attack.
          *
          * To be used from Lua scripts.
@@ -719,6 +866,11 @@ class Enemy{
          * Elemental affinities.
          */
         std::vector<Element> elements_;
+
+        /**
+         * AI scripts by slot, as bytecode.
+         */
+        std::map<unsigned int, std::string> ai_scripts_;
 
         /**
          * Status immunities and resistances.

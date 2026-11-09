@@ -17,6 +17,5 @@
 
 bool UncondJumpInstruction::IsUncondJump() const{return true;}
 
-void UncondJumpInstruction::ProcessInst(
-  Function& function, ValueStack& stack, Engine* engine, CodeGenerator* code_gen
-){}
+void UncondJumpInstruction::ProcessInst(Function& function, ValueStack& stack, Engine* engine, CodeGenerator* code_gen){
+}

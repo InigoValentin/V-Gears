@@ -82,8 +82,8 @@ class BattleSceneFile{
                 /**
                  * ID of the battle that start upon defeating all enemies.
                  *
-                 * If set, a new set of enemies will be loaded when all the current ones are
-                 * defeated, without ending the battle scene.
+                 * If set, a new set of enemies will be loaded when all the
+                 * current ones are defeated, without ending the battle scene.
                  */
                 u16 next_battle;
 
@@ -98,7 +98,8 @@ class BattleSceneFile{
                 u16 unused;
 
                 /**
-                 * In arena battles, candidate enemy formation IDs for next round.
+                 * In arena battles, candidate enemy formation IDs for next
+                 * round.
                  */
                 u16 next_arena_candidates[4];
 
@@ -116,16 +117,17 @@ class BattleSceneFile{
                  * 01 - Preemptive.
                  * 02 - Back attack.
                  * 03 - Side attack.
-                 * 04 - Attacked from both sides (pincer attack, reverse side attack).
+                 * 04 - Attacked from both sides (pincer attack, reverse side).
                  * 05 - Another attack from both sides battle (different maybe?).
                  * 06 - Another side attack.
                  * 07 - A third side attack.
-                 * 08 - Normal battle that locks player in the front row, change command disabled.
+                 * 08 - Normal battle that locks player in the front row, change
+                 * command disabled.
                  */
                 u8 layout;
 
                 /**
-                 * Indexed Pre-Battle Camera position .
+                 * Indexed Pre-Battle Camera position.
                  */
                 u8 camera;
             };
@@ -217,22 +219,26 @@ class BattleSceneFile{
                 /**
                  * Binary "Cover Flags".
                  *
-                 * These flags are used in conjunction with row to determine if a target can be
-                 * selected as the target of a short-range attack. The determination of this is
-                 * worked out in this way: An enemy exists in row 1 and another in row 2. If the
-                 * enemy in row 1 shares a cover flag with the enemy in row 2 then the enemy in row
-                 * 2 cannot be targeted until all enemies in row 1 that share a cover flag with the
-                 * row 2 enemy is defeated. It works like this. Two active enemies exist, A and B.
+                 * These flags are used in conjunction with row to determine if
+                 * a target can be selected as the target of a short-range
+                 * attack. The determination of this is worked out in this way:
+                 * An enemy exists in row 1 and another in row 2. If the enemy
+                 * in row 1 shares a cover flag with the enemy in row 2 then the
+                 * enemy in row 2 cannot be targeted until all enemies in row 1
+                 * that share a cover flag with the row 2 enemy is defeated. It
+                 * works like this. Two active enemies exist, A and B.
                  *
-                 * If ((B's row > A's row) and (B's cover flags AND A's cover flags) > 0) then
-                 * enemy B cannot be targeted by short-range attacks.
+                 * If ((B's row > A's row) and
+                 * (B's cover flags AND A's cover flags) > 0) then enemy B
+                 * cannot be targeted by short-range attacks.
                  */
                 u16 cover_flags;
 
                 /**
                  * Initial condition flags. Only last 5 bits are considered.
                  * 0x0001  Visible.
-                 * 0x0002  Indicates initial direction facing if players get a side attack.
+                 * 0x0002  Indicates initial direction facing if players get a
+                 * side attack.
                  * 0x0004  Unknown.
                  * 0x0008  Targetable.
                  * 0x0010  Main Script Active.
@@ -308,19 +314,22 @@ class BattleSceneFile{
                 u16 attacks[16];
 
                 /**
-                 * Enemy Attacks Camera Movement Id for single and multiple targets (2 bytes each).
+                 * Enemy Attacks Camera Movement Id for single and multiple
+                 * targets (2 bytes each).
                  *
-                 * If set this will overwrite camera movement set in attack itself.
+                 * If set this will overwrite camera movement set in attack
+                 * itself.
                  */
                 u16 attack_camera[16];
 
                 /**
                  * Item drop/steal rates.
                  *
-                 * These are chances to get items listed in @{see item}. 1 byte per item. If the
-                 * rate is lower than 80h, for e.g. 08h - then this is a drop item and has 8/63 [63
-                 * is max] chance for drop. But if rate is higher than 80h, let's say... A0h, then
-                 * this is an item for steal, and chances for successful steal is
+                 * These are chances to get items listed in @{see item}. 1 byte
+                 * per item. If the rate is lower than 80h, for e.g. 08h - then
+                 * this is a drop item and has 8/63 [63 is max] chance for drop.
+                 * But if rate is higher than 80h, let's say... A0h, then this
+                 * is an item for steal, and chances for successful steal is
                  * A0h - 80h = 20h = 32/63.
                  */
                 u8 item_rate[4];
@@ -431,29 +440,32 @@ class BattleSceneFile{
                 /**
                  * MP cost. 2 bytes.
                  *
-                 * Determines the camera movement when the command is executed over a single target.
+                 * Determines the camera movement when the command is executed
+                 * over a single target.
                  */
                 u16 mp;
 
                 /**
                  * Impact sound. 2 bytes.
                  *
-                 * Determines the camera movement when the command is executed over multiple targets.
+                 * Determines the camera movement when the command is executed
+                 * over multiple targets.
                  */
                 u16 sound;
 
                 /**
                  * Camera movement ID for single target. 2 bytes.
                  *
-                 * Determines the camera movement when the command is executed over a single target.
+                 * Determines the camera movement when the command is executed
+                 * over a single target.
                  */
                 u16 camera_single;
 
                 /**
                  * Camera movement ID for multiple target. 2 bytes.
                  *
-                 * Determines the camera movement when the command is executed over multiple
-                 * targets.
+                 * Determines the camera movement when the command is executed
+                 * over multiple targets.
                  */
                 u16 camera_multiple;
 
@@ -472,11 +484,13 @@ class BattleSceneFile{
                 /**
                  * Damage formula. 1 byte.
                  *
-                 * This byte is divided into two nybbles (four bits). Upper nybble determines what
-                 * considerations are made in calculating damage such as physical/magical, allowing
-                 * criticals, how to calculate accuracy, etc. There are also three sets of known
-                 * formulae that are paired with the upper nybble values. These are selected in the
-                 * Lower Nybble and determine how to calculate pre-defense damage
+                 * This byte is divided into two nybbles (four bits). Upper
+                 * nybble determines what considerations are made in calculating
+                 * damage such as physical/magical, allowing criticals, how to
+                 * calculate accuracy, etc. There are also three sets of known
+                 * formulae that are paired with the upper nybble values. These
+                 * are selected in the Lower Nybble and determine how to
+                 * calculate pre-defense damage
                  */
                 u8 damage;
 
@@ -514,11 +528,14 @@ class BattleSceneFile{
                 u8 additional_effects_mod;
 
                 /**
-                 * Information about what status can be inflicted or cured. 4 bytes.
+                 * Information about what status can be inflicted or cured. 4
+                 * bytes.
                  *
-                 * The first six bits are the chance of inflicting/curing (out of 63). If the
-                 * seventh bit is set, the status is cured instead of inflicted. If the eighth bit
-                 * is set, then the status is toggled (cured if present, inflicted if not present).
+                 * The first six bits are the chance of inflicting/curing (out
+                 * of 63). If the seventh bit is set, the status is cured
+                 * instead of inflicted. If the eighth bit is set, then the
+                 * status is toggled (cured if present, inflicted if not
+                 * present).
                  */
                 u32 status;
 
@@ -589,7 +606,7 @@ class BattleSceneFile{
          * Retrieves a location name from it's ID.
          *
          * @param[in] id Location ID.
-         * @return The location name, or "UNKNOWN Location" if the ID is invalid.
+         * @return The location name, or "UNKNOWN Location" for an invalid ID.
          */
         static std::string LocationToString(const int id);
 
@@ -619,6 +636,11 @@ class BattleSceneFile{
          * Enemies found in the scene.
          */
         std::vector<Enemy> enemies_;
+
+        /**
+         * AI scripts of the 3 enemies of the scene, 16 slots each.
+         */
+        std::vector<std::vector<u8>> ai_scripts_[3];
 
         /**
          * Formations found in the scene.

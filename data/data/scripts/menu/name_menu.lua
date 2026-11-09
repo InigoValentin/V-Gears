@@ -48,8 +48,11 @@ UiContainer.NameMenu = {
     -- For the current submenu, handles directional keys, enter and escape events.
     -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
     -- @param event Trigger event. Normally, "Press".
-    on_button = function(self, button, event)
+    on_button = function(self, button, event, source_key)
         if UiContainer.current_menu == "name" then
+            if button == Config.ACTIONS.CONFIRM and source_key == "Space" and UiContainer.current_submenu == "" then
+                return 0
+            end
             if UiContainer.current_submenu == "confirm" then
                 if button == "Right" then
                     audio_manager:play_sound("Cursor")
@@ -65,7 +68,7 @@ UiContainer.NameMenu = {
                         self.confirm_position = self.confirm_position_total
                     end
                     ui_manager:get_widget("NameMenu.Container.Confirm.Cursor"):set_default_animation("Position" .. self.confirm_position)
-                elseif button == "Enter" then
+                elseif button == Config.ACTIONS.CONFIRM then
                     audio_manager:play_sound("Cursor")
                     if self.confirm_position == 2 then -- Back
                         UiContainer.current_submenu = ""
@@ -115,7 +118,7 @@ UiContainer.NameMenu = {
                     else
                         audio_manager:play_sound("Error")
                     end
-                elseif button == "Enter" then
+                elseif button == Config.ACTIONS.CONFIRM then
                     if self.options_position == 1 then -- Clear name.
                         audio_manager:play_sound("Cursor")
                         self.name = ""

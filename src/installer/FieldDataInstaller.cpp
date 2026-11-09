@@ -14,8 +14,10 @@
  */
 
 #include <string>
+#include <algorithm>
 #include <boost/filesystem.hpp>
 #include <QtCore/QDir>
+#include "DiskImage.h"
 #include "FieldDataInstaller.h"
 #include "TexFile.h"
 #include "common/File.h"
@@ -32,6 +34,19 @@ std::string FieldDataInstaller::FIELD_MODELS_DIR("models/fields");
 std::string FieldDataInstaller::FIELD_MAPS_DIR("fields");
 
 int FieldDataInstaller::INACTIVE_GATEWAY_ID(32767);
+
+const std::vector<int> FieldDataInstaller::TEMPORARY_BANKS{5};
+
+std::string FieldDataInstaller::FieldScriptHeader(){
+    std::string header = "EntityContainer = {}\n\n";
+    for (const int bank : TEMPORARY_BANKS){
+        header += "-- Temporary variables start at zero in every field.\n"
+          "for address = 0, Banks.SIZE do\n"
+          "    Banks[" + std::to_string(bank) + "][address] = 0\n"
+          "end\n\n";
+    }
+    return header;
+}
 
 std::string FieldDataInstaller::CreateGateWayScript(
   const std::string& gateway_entity_name, const std::string& target_map_name,
@@ -51,8 +66,7 @@ std::string FieldDataInstaller::CreateGateWayScript(
       "    on_near = function(self, entity)\n"
       "        if entity == \"Cloud\" then\n"
       "            if not Data.DisableGateways then\n"
-      "                load_field_map_request(\""
-      + target_map_name + "\", \"" + source_spawn_point_name + "\")\n"
+      "                load_field_map_request(\"" + target_map_name + "\", \"" + source_spawn_point_name + "\")\n"
       "            end\n"
       "        end\n"
       "        return 0\n"
@@ -66,8 +80,9 @@ std::string FieldDataInstaller::CreateGateWayScript(
 size_t FieldDataInstaller::GetFieldId(
   const std::string& name, const std::vector<std::string>& field_id_to_name_lookup
 ){
-    for (size_t i = 0; i < field_id_to_name_lookup.size(); i ++)
+    for (size_t i = 0; i < field_id_to_name_lookup.size(); i ++){
         if (field_id_to_name_lookup[i] == name) return i;
+    }
     throw std::runtime_error("No Id found for field name");
 }
 
@@ -94,7 +109,7 @@ bool FieldDataInstaller::WillCrash(const Ogre::String& resource_name){
       || resource_name == "coloin1" // boost::bad_format_string: format-string is ill-formed
       || resource_name == "del3" // Segmentation fault.
       || resource_name == "elmin4_2" // boost::bad_format_string: format-string is ill-formed
-    ){return true;}
+    ) return true;
     return false;
 }
 
@@ -137,7 +152,7 @@ bool FieldDataInstaller::IsTestField(const Ogre::String& resource_name){
       || resource_name == "mds7_w2"
       || resource_name == "mds7_w3"
       || resource_name == "mds7"
-    ){return true;}
+    )return true;
     return false;
 }
 
@@ -155,7 +170,7 @@ void FieldDataInstaller::CollectFieldScaleFactors(
       = FieldDecompiler::ScaleFactor(field->GetRawScript());
 }
 
-void FieldDataInstaller::CollectSpawnPoints(
+bool FieldDataInstaller::CollectSpawnPoints(
   VGears::FLevelFilePtr& field, const std::vector<std::string>& field_id_to_name_lookup,
   FieldSpawnPointsMap& spawn_points
 ){
@@ -175,9 +190,15 @@ void FieldDataInstaller::CollectSpawnPoints(
         );
     }
     catch (const ::DecompilerException& ex){
-        std::cerr << "CollectSpawnPoints: DecompilerException: " << ex.what() << std::endl;
+        std::cerr << "CollectSpawnPoints: decompiler failed for " << field->getName()
+          << ": " << ex.what() << std::endl;
+                return false;
     }
     const VGears::TriggersFilePtr& triggers = field->GetTriggers();
+    if (triggers.isNull()){
+        std::cerr << "CollectSpawnPoints: missing trigger data for " << field->getName() << std::endl;
+        return false;
+    }
     const auto& gateways = triggers->GetGateways();
     for (size_t i = 0; i < gateways.size(); i ++){
         const VGears::TriggersFile::Gateway& gateway = gateways[i];
@@ -205,10 +226,15 @@ void FieldDataInstaller::CollectSpawnPoints(
             }
         }
     }
+    return true;
 }
 
-FieldDataInstaller::FieldDataInstaller(const std::string input_dir, const std::string output_dir):
-  input_dir_(input_dir), output_dir_(output_dir)
+FieldDataInstaller::FieldDataInstaller(
+    const DiskImage& disk_image, const std::string output_dir,
+    std::function<void(std::string)> log_output_line
+):
+    disk_image_(disk_image), output_dir_(output_dir),
+    write_output_line_(log_output_line)
 {}
 
 FieldDataInstaller::~FieldDataInstaller(){}
@@ -234,14 +260,21 @@ void FieldDataInstaller::CollectSpawnAndScaleFactors(int field_index){
     }
     auto resource_name = (*flevel_file_list_)[field_index];
     // Exclude things that are not fields.
-    //if (IsAFieldFile(resource_name) && !WillCrash(resource_name)){
-    // TODO: DEBUG: Only testing fields.
-    if (IsAFieldFile(resource_name) && IsTestField(resource_name) && !WillCrash(resource_name)){
-        VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton().load(
-          resource_name, "FFVIIFields"
-        ).staticCast<VGears::FLevelFile>();
-        CollectSpawnPoints(field, map_list_, spawn_points_);
-        CollectFieldScaleFactors(field, scale_factors_, map_list_);
+    if (IsAFieldFile(resource_name) && !WillCrash(resource_name)){
+                try{
+                        VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton()
+                            .load(resource_name, "FFVIIFields").staticCast<VGears::FLevelFile>();
+                        if (!CollectSpawnPoints(field, map_list_, spawn_points_)){
+                                failed_fields_.push_back(resource_name);
+                                return;
+                        }
+                        CollectFieldScaleFactors(field, scale_factors_, map_list_);
+                }
+                catch (const std::exception& exception){
+                        failed_fields_.push_back(resource_name);
+                        std::cerr << "CollectSpawnAndScaleFactors: skipped " << resource_name
+                            << " after error: " << exception.what() << std::endl;
+                }
     }
 }
 
@@ -254,22 +287,21 @@ void FieldDataInstaller::Convert(int field_index){
     auto resource_name = (*flevel_file_list_)[field_index];
     // Exclude things that are not fields.
     if (IsAFieldFile(resource_name)){
-        //if (/*IsTestField(resource_name) &&*/ !WillCrash(resource_name)){
-        // TODO: DEBUG: Only test fields
-        if (IsTestField(resource_name) && !WillCrash(resource_name)){
+                if (std::find(failed_fields_.begin(), failed_fields_.end(), resource_name)
+                    != failed_fields_.end()){
+                        std::cerr << "[ERROR] Skip field: " << resource_name
+                            << " because its scripts or scale factor could not be collected." << std::endl;
+                }
+                else if (!WillCrash(resource_name)){
             //write_output_line_("Converting field " + resource_name);
             CreateDir(FIELD_MAPS_DIR + "/" + resource_name);
-            VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton().load(
-                resource_name, "FFVIIFields"
-              ).staticCast<VGears::FLevelFile>();
+            VGears::FLevelFilePtr field = VGears::LZSFLevelFileManager::GetSingleton()
+              .load(resource_name, "FFVIIFields").staticCast<VGears::FLevelFile>();
             PcFieldToVGearsField(field);
         }
         else{
-            /*write_output_line_(
-              "[ERROR] Skip field " + resource_name + " due to crash or hang issue."
-            );*/
-            std::cerr << "[ERROR] Skip field: " << resource_name
-              << " due to crash or hang issue." << std::endl;
+                        std::cerr << "[ERROR] Skip field: " << resource_name
+                            << " due to a known crash or hang issue." << std::endl;
         }
     }
 }
@@ -303,11 +335,11 @@ std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){
     std::vector<std::string> models;
 
     // Open char_lgp as a lgp archive
-    VGears::LGPArchive char_lgp(input_dir_ + "data/field/char.lgp", "LGP");
-    char_lgp.open(input_dir_ + "data/field/char.lgp", true);
+    VGears::LGPArchive char_lgp(*disk_image_.filePath("data/field/char.lgp"), "LGP");
+    char_lgp.open(*disk_image_.filePath("data/field/char.lgp"), true);
     char_lgp.load();
     // Also, open it as a file for reading
-    File char_file(input_dir_ + "data/field/char.lgp");
+    File char_file(*disk_image_.filePath("data/field/char.lgp"));
 
     //Ogre::StringVectorPtr file_list = char_lgp.list(true, true);
     field_model_file_list_ = char_lgp.list(true, true);
@@ -322,9 +354,7 @@ std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){
         out.close();
         //field_model_file_list_->push_back(f.file_name);
     }
-    for (
-      auto it = used_models_and_anims_.map.begin(); it != used_models_and_anims_.map.end(); it ++
-    ){
+    for (auto it = used_models_and_anims_.map.begin(); it != used_models_and_anims_.map.end(); it ++){
         models.push_back(it->first);
     }
     return models;
@@ -340,26 +370,36 @@ void FieldDataInstaller::ConvertModels(std::string model_name){
         auto mesh_name = VGears::NameLookup::model(base_name) + ".mesh";
         Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
         Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
+        const Ogre::AxisAlignedBox bind_bounds = mesh->getBounds();
+        Ogre::AxisAlignedBox translation_bounds(Ogre::Vector3::ZERO, Ogre::Vector3::ZERO);
         for (auto& anim : model->second){
             VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
             VGears::AFilePtr a = afl_mgr.load(anim, "FFVII").staticCast<VGears::AFile>();
             // Convert the FF7 name to a more readable name set in the meta data.
             VGears::StringUtil::splitBase(anim, base_name);
-            a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
+            a->AddTo(skeleton, VGears::NameLookup::Animation(base_name), true);
+                        translation_bounds.merge(a->GetRootTranslationBounds(true));
+                }
+                if (bind_bounds.isFinite()){
+                        const Ogre::AxisAlignedBox animated_bounds(
+                            bind_bounds.getMinimum() + translation_bounds.getMinimum(),
+                            bind_bounds.getMaximum() + translation_bounds.getMaximum()
+                        );
+                        mesh->_setBounds(animated_bounds, false);
+                        mesh->_setBoundingSphereRadius(std::max(
+                            mesh->getBoundingSphereRadius(),
+                            animated_bounds.getCenter().length() + animated_bounds.getHalfSize().length()
+                        ));
         }
         ExportMesh(output_dir_ + FIELD_MODELS_DIR + "/", mesh);
     }
     catch (const Ogre::Exception& ex){
-        write_output_line_(
-          "[ERROR] Ogre exception converting model " + model->first + ": " + ex.what()
-        );
-        std::cerr << "[ERROR] Ogre exception converting model "
-          << model->first <<": " << ex.what() << std::endl;
+        //write_output_line_("[ERROR] Ogre exception converting model " + model->first + ": " + ex.what());
+        std::cerr << "[ERROR] Ogre exception converting model " << model->first <<": " << ex.what() << std::endl;
     }
     catch (const std::exception& ex){
-        write_output_line_("[ERROR] Exception converting model " + model->first + ": " + ex.what());
-        std::cerr << "[ERROR] Exception converting model "
-          << model->first << ": " << ex.what() << std::endl;
+        //write_output_line_("[ERROR] Exception converting model " + model->first + ": " + ex.what());
+        std::cerr << "[ERROR] Exception converting model " << model->first << ": " << ex.what() << std::endl;
     }
 }
 
@@ -372,9 +412,7 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
     Ogre::MeshSerializer mesh_serializer;
     Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
     Ogre::SkeletonSerializer skeleton_serializer;
-    skeleton_serializer.exportSkeleton(
-      skeleton.getPointer(), outdir + base_mesh_name + ".skeleton"
-    );
+    skeleton_serializer.exportSkeleton(skeleton.getPointer(), outdir + base_mesh_name + ".skeleton");
     mesh->setSkeletonName(base_mesh_name + ".skeleton");
     mesh_serializer.exportMesh(mesh.getPointer(), outdir + mesh->getName());
     Ogre::Mesh::SubMeshIterator it(mesh->getSubMeshIterator());
@@ -383,9 +421,7 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
     std::set<std::string> textures;
     while (it.hasMoreElements()){
         Ogre::SubMesh *sub_mesh(it.getNext());
-        Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(
-          sub_mesh->getMaterialName())
-        );
+        Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName()));
         if (mat != nullptr){
             for (size_t techs = 0; techs < mat->getNumTechniques(); techs ++){
                 Ogre::Technique* tech = mat->getTechnique(techs);
@@ -398,25 +434,18 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
                               texture_unit_num < pass->getNumTextureUnitStates();
                               texture_unit_num ++
                             ){
-                                Ogre::TextureUnitState* unit
-                                  = pass->getTextureUnitState(texture_unit_num);
+                                Ogre::TextureUnitState* unit = pass->getTextureUnitState(texture_unit_num);
                                 if (unit && unit->getTextureName().empty() == false){
                                     // Convert the texture from .tex to .png.
-                                    TexFile tex(
-                                      output_dir_ + "temp/char/" + unit->getTextureName()
-                                    );
+                                    TexFile tex(output_dir_ + "temp/char/" + unit->getTextureName());
 
                                     // Ensure the output material script references png files
                                     // rather than tex files.
                                     Ogre::String base_name;
-                                    VGears::StringUtil::splitBase(
-                                      unit->getTextureName(), base_name
-                                    );
+                                    VGears::StringUtil::splitBase(unit->getTextureName(), base_name);
                                     unit->setTextureName(base_mesh_name + "_" + base_name + ".png");
 
-                                    tex.SavePng(
-                                      output_dir_ + FIELD_MODELS_DIR + "/" + base_name + ".png", 0
-                                    );
+                                    tex.SavePng(output_dir_ + FIELD_MODELS_DIR + "/" + base_name + ".png", 0);
                                     // Copy subtexture (xxxx.png) to model_xxxx.png
                                     // TODO: obtain the "data" folder
                                     // programatically.
@@ -445,8 +474,8 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
     for (auto& texture_name : textures){
         std::string tex_name = texture_name.c_str();
         try{
-            Ogre::TexturePtr texture_ptr
-              = Ogre::TextureManager::getSingleton().load(tex_name, "FFVIITextures" /*"FFVII"*/);
+            Ogre::TexturePtr texture_ptr = Ogre::TextureManager::getSingleton().load(tex_name, "FFVIITextures");
+            //Ogre::TexturePtr texture_ptr = Ogre::TextureManager::getSingleton().load(tex_name, "FFVII");
             Ogre::Image image;
             texture_ptr->convertToImage(image);
             Ogre::String base_name;
@@ -461,8 +490,7 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
 
 float FieldDataInstaller::GetFieldScaleFactor(size_t field_id){
     auto it = scale_factors_.find(field_id);
-    if (it == std::end(scale_factors_))
-        throw std::runtime_error("Scale factor not found for field id");
+    if (it == std::end(scale_factors_)) throw std::runtime_error("Scale factor not found for field id");
     return it->second;
 }
 
@@ -496,8 +524,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
         if (gateway.destination_field_id != INACTIVE_GATEWAY_ID){
             const std::string gateway_entity_name = "Gateway" + std::to_string(i);
             gateway_script_data += CreateGateWayScript(
-              gateway_entity_name,
-              map_list_.at(gateway.destination_field_id),
+              gateway_entity_name, map_list_.at(gateway.destination_field_id),
               "Spawn_" + field->getName() + "_" + std::to_string(i)
             );
         }
@@ -511,39 +538,28 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
 
         // Decompile to LUA.
         decompiled = FieldDecompiler::Decompile(
-          field->getName(), raw_field_data, formatter, gateway_script_data,
-          "EntityContainer = {}\n\n"
+          field->getName(), raw_field_data, formatter, gateway_script_data, FieldScriptHeader()
         );
-        std::ofstream script_file(
-          output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/script.lua"
-        );
+        std::ofstream script_file(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/script.lua");
         if (script_file.is_open()){
             script_file << decompiled.luaScript;
-            field_text_writer_.Begin(
-              output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/text.xml"
-            );
+            field_text_writer_.Begin(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/text.xml");
             try{field_text_writer_.Write(raw_field_data, field->getName());}
             catch (const std::out_of_range& ex){
-                write_output_line_(
-                  "[ERROR] Failed to read texts from field " + field->getName() + ": " + ex.what()
-                );
+                write_output_line_("[ERROR] Failed to read texts from field " + field->getName() + ": " + ex.what());
                 std::cerr << "[ERROR] Failed to read texts from field "
                   << field->getName() << ": " << ex.what() << std::endl;
             }
             field_text_writer_.End();
         }
         else{
-            write_output_line_(
-              "[ERROR] Failed to open script file from field " + field->getName() + " for writing."
-            );
+            write_output_line_("[ERROR] Failed to open script file from field " + field->getName() + " for writing.");
             std::cerr << "[ERROR] Failed to open script file from field "
               << field->getName() << "for writing." << std::endl;
         }
     }
     catch (const ::DecompilerException& ex){
-        write_output_line_(
-          "[ERROR] Internal decompiler error in field " + field->getName() + ": " + ex.what()
-        );
+        write_output_line_("[ERROR] Internal decompiler error in field " + field->getName() + ": " + ex.what());
         std::cerr << "[ERROR] Internal decompiler error in field "
           << field->getName() << ": " << ex.what() << std::endl;
     }
@@ -571,6 +587,34 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
         std::unique_ptr<TiXmlElement> xml_forward_direction(new TiXmlElement("movement_rotation"));
         xml_forward_direction->SetAttribute("degree", std::to_string(triggers->MovementRotation()));
         element->LinkEndChild(xml_forward_direction.release());
+        // Random encounters. The section has two tables of 24 bytes: enabled (1 byte), rate
+        // (1 byte), six standard and four special encounters (16 bits each, battle ID in the lower
+        // 10 bits and probability, out of 64, in the upper 6), and 2 bytes of padding.
+        {
+            const std::vector<u8>& raw_encounter = field->GetRawEncounter();
+            std::unique_ptr<TiXmlElement> xml_encounters(new TiXmlElement("encounters"));
+            bool any_table = false;
+            for (int table = 0; table < 2 && raw_encounter.size() >= static_cast<size_t>(24 * (table + 1)); table ++){
+                const u8* data = raw_encounter.data() + 24 * table;
+                if (data[0] == 0) continue;
+                std::unique_ptr<TiXmlElement> xml_table(new TiXmlElement("table"));
+                xml_table->SetAttribute("id", table + 1);
+                xml_table->SetAttribute("rate", static_cast<int>(data[1]));
+                for (int e = 0; e < 10; e ++){
+                    const unsigned int value = data[2 + 2 * e] | (data[3 + 2 * e] << 8);
+                    const int battle = value & 0x3FF;
+                    const int probability = value >> 10;
+                    if (probability == 0) continue;
+                    std::unique_ptr<TiXmlElement> xml_encounter(new TiXmlElement(e < 6 ? "battle" : "special"));
+                    xml_encounter->SetAttribute("id", battle);
+                    xml_encounter->SetAttribute("probability", probability);
+                    xml_table->LinkEndChild(xml_encounter.release());
+                }
+                xml_encounters->LinkEndChild(xml_table.release());
+                any_table = true;
+            }
+            if (any_table) element->LinkEndChild(xml_encounters.release());
+        }
         // Get this fields Id.
         const size_t this_field_id = GetFieldId(field->getName(), map_list_);
         // Use the ID to find the pre-computed list of gateways in all other fields that link to
@@ -605,17 +649,13 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                         + std::to_string(spawn_point_records[i].gateway_index_or_map_jump_address)
                     );
                 }
-                const float downscaler_next = 128.0f * GetFieldScaleFactor(
-                  gateway.destination_field_id
-                );
+                const float downscaler_next = 128.0f * GetFieldScaleFactor(gateway.destination_field_id);
 
                 // Position Z is actually the target walkmesh triangle ID, so this is tiny bit more
                 // complex. Now "get the Z value of the triangle with that ID". Note that ID
                 // actually just means index.
                 unsigned int triangle_index = static_cast<unsigned int>(gateway.destination.z);
-                if (
-                  triangle_index >= field->GetWalkmesh()->GetTriangles().size()
-                ){
+                if (triangle_index >= field->GetWalkmesh()->GetTriangles().size()){
                     write_output_line_(
                       "[WARNING] In field " + field->getName() + ": Map jump triangle ("
                       + std::to_string(triangle_index) + ") out of bounds ("
@@ -627,16 +667,15 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                     triangle_index = 0;
                 }
                 const float z_of_triangle_with_id
-                  = field->GetWalkmesh()->GetTriangles().at(triangle_index).a.z;
+                  = field->GetWalkmesh()->GetTriangles().at(triangle_index).a.z / GetFieldScaleFactor(this_field_id);
                 const Ogre::Vector3 position(
                   gateway.destination.x / downscaler_next, gateway.destination.y / downscaler_next,
                   z_of_triangle_with_id
                 );
-                if (position != Ogre::Vector3::ZERO && first_entity_point == Ogre::Vector3::ZERO)
+                if (position != Ogre::Vector3::ZERO && first_entity_point == Ogre::Vector3::ZERO){
                     first_entity_point = position;
-                xml_entity_point->SetAttribute(
-                  "position", Ogre::StringConverter::toString(position)
-                );
+                }
+                xml_entity_point->SetAttribute("position", Ogre::StringConverter::toString(position));
                 const float rotation = (360.0f * static_cast<float>(gateway.dir)) / 255.0f;
                 xml_entity_point->SetAttribute("rotation", std::to_string(rotation));
                 element->LinkEndChild(xml_entity_point.release());
@@ -645,6 +684,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
 
         // Get lines. Add them to a list, so they aren't processed later as regular entities.
         std::vector<std::string> line_entities;
+        const float line_scale = LINE_SCALE_FACTOR / GetFieldScaleFactor(this_field_id);
         for (FieldDecompiler::Line line : decompiled.lines){
 
             std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));
@@ -652,15 +692,15 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             xml_entity_trigger->SetAttribute("name", line.name);
             xml_entity_trigger->SetAttribute(
               "point1",
-              std::to_string(line.point_a[0] * LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_a[1] * LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_a[2] * LINE_SCALE_FACTOR)
+              std::to_string(line.point_a[0] * line_scale)
+                + " " + std::to_string(line.point_a[1] * line_scale)
+                + " " + std::to_string(line.point_a[2] * line_scale)
             );
             xml_entity_trigger->SetAttribute(
               "point2",
-              std::to_string(line.point_b[0] * LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_b[1] * LINE_SCALE_FACTOR)
-                + " " + std::to_string(line.point_b[2] * LINE_SCALE_FACTOR)
+              std::to_string(line.point_b[0] * line_scale)
+                + " " + std::to_string(line.point_b[1] * line_scale)
+                + " " + std::to_string(line.point_b[2] * line_scale)
             );
             xml_entity_trigger->SetAttribute("enabled", "true");
             element->LinkEndChild(xml_entity_trigger.release());
@@ -670,19 +710,16 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
         for (FieldDecompiler::FieldEntity entity : decompiled.entities){
             // If the entity has been added as a line, skip.
             if (line_entities.size() > 0){
-                if (
-                  *std::find(line_entities.begin(), line_entities.end(), entity.name) == entity.name
-                ){
-                    continue;
-                }
+                                if (std::find(line_entities.begin(), line_entities.end(), entity.name)
+                                    != line_entities.end()) continue;
             }
             const int char_id = entity.char_id;
             if (char_id != -1){
-                const VGears::ModelListFile::ModelDescription& desc
-                  = models->GetModels().at(char_id);
+                const VGears::ModelListFile::ModelDescription& desc = models->GetModels().at(char_id);
                 auto& animations = used_models_and_anims_.ModelAnimations(desc.hrc_name);
-                for (const auto& anim : desc.animations)
+                for (const auto& anim : desc.animations){
                     animations.insert(used_models_and_anims_.NormalizeAnimationName(anim.name));
+                }
                 std::unique_ptr<TiXmlElement> xml_entity_script(new TiXmlElement("entity_model"));
                 xml_entity_script->SetAttribute("name", entity.name);
                 // TODO: Add to list of HRC's to convert, obtain name of converted .mesh file.
@@ -696,22 +733,16 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                     // For player models the position is set manually in the xml because if a map
                     // is loaded manually this is where the player will end up. Hence we set the
                     // position to the first entity_point that we have.
-                    xml_entity_script->SetAttribute(
-                      "position", Ogre::StringConverter::toString(first_entity_point)
-                    );
+                    xml_entity_script->SetAttribute("position", Ogre::StringConverter::toString(first_entity_point));
                 }
                 else{
-                    xml_entity_script->SetAttribute(
-                      "position", Ogre::StringConverter::toString(Ogre::Vector3::ZERO)
-                    );
+                    xml_entity_script->SetAttribute("position", Ogre::StringConverter::toString(Ogre::Vector3::ZERO));
                 }
                 xml_entity_script->SetAttribute("direction", "0");
                 // TODO: This isn't quite right, the models animation
                 // translation seems to be inverted?
                 xml_entity_script->SetAttribute("scale", "0.03125 0.03125 0.03125");
-                xml_entity_script->SetAttribute(
-                  "root_orientation", "0.7071067811865476 0.7071067811865476 0 0"
-                );
+                xml_entity_script->SetAttribute("root_orientation", "0.7071067811865476 0.7071067811865476 0 0");
                 element->LinkEndChild(xml_entity_script.release());
             }
             else{
@@ -725,26 +756,20 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             const VGears::TriggersFile::Gateway& gateway = gateways[i];
             // If non-inactive gateway:
             if (gateway.destination_field_id != INACTIVE_GATEWAY_ID){
-                std::unique_ptr<TiXmlElement> xml_entity_trigger(
-                  new TiXmlElement("entity_trigger")
-                );
+                std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));
                 xml_entity_trigger->SetAttribute("name", "Gateway" + std::to_string(i));
                 xml_entity_trigger->SetAttribute(
                   "point1",
                   Ogre::StringConverter::toString(
                     Ogre::Vector3(
-                      gateway.exit_line[0].x,
-                      gateway.exit_line[0].y,
-                      gateway.exit_line[0].z) / downscaler_this
+                      gateway.exit_line[0].x, gateway.exit_line[0].y, gateway.exit_line[0].z) / downscaler_this
                   )
                 );
                 xml_entity_trigger->SetAttribute(
                   "point2",
                   Ogre::StringConverter::toString(
                     Ogre::Vector3(
-                      gateway.exit_line[1].x,
-                      gateway.exit_line[1].y,
-                      gateway.exit_line[1].z) / downscaler_this
+                      gateway.exit_line[1].x, gateway.exit_line[1].y, gateway.exit_line[1].z) / downscaler_this
                     )
                   );
                 // Enabled is hard coded to true.
@@ -783,11 +808,9 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             const int width = bg_image->getWidth();
             const int height = bg_image->getHeight();
             const VGears::CameraMatrixFilePtr& camera_matrix = field->GetCameraMatrix();
-            const Ogre::Vector3 position
-              = camera_matrix->GetPosition() / GetFieldScaleFactor(this_field_id);
+            const Ogre::Vector3 position = camera_matrix->GetPosition() / GetFieldScaleFactor(this_field_id);
             const Ogre::Quaternion orientation = camera_matrix->GetOrientation();
-            const Ogre::Degree fov
-              = camera_matrix->GetFov(static_cast<float>(BG_PSX_SCREEN_HEIGHT));
+            const Ogre::Degree fov = camera_matrix->GetFov(static_cast<float>(BG_PSX_SCREEN_HEIGHT));
             const int min_x = triggers->GetCameraRange().left * BG_SCALE_UP_FACTOR;
             const int min_y = triggers->GetCameraRange().top * BG_SCALE_UP_FACTOR;
             const int max_x = triggers->GetCameraRange().right * BG_SCALE_UP_FACTOR;
@@ -833,15 +856,12 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                     const float v1 = static_cast<float>(sprite.src.y + sprite.height) / height;
                     xml_element->SetAttribute(
                       "uv",
-                      Ogre::StringConverter::toString(u0) + " "
-                      + Ogre::StringConverter::toString(v0) + " "
-                      + Ogre::StringConverter::toString(u1) + " "
-                      + Ogre::StringConverter::toString(v1)
+                      Ogre::StringConverter::toString(u0) + " " + Ogre::StringConverter::toString(v0) + " "
+                      + Ogre::StringConverter::toString(u1) + " " + Ogre::StringConverter::toString(v1)
                     );
                     // TODO: It works (on FFVII PC), but why this number?
                     xml_element->SetAttribute(
-                      "depth",
-                      Ogre::StringConverter::toString(static_cast<float>(sprite.depth) * (0.03125f))
+                      "depth", Ogre::StringConverter::toString(static_cast<float>(sprite.depth) * (0.03125f))
                     );
                     // TODO: Copied from DatFile::AddTile.
                     // Add to common method.
@@ -853,26 +873,38 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                     // TODO: Should probably throw to fail conversion:
                     else blending_str = "unknown";
                     xml_element->SetAttribute("blending", blending_str);
+                    // Sprites in an area the script controls (BGON, BGOFF, BGCLR) are drawn only
+                    // while it turns on one of their layers. The rest are always drawn.
+                    if (
+                      sprite.animation_id != 0
+                      && (
+                        decompiled.background_areas_dynamic
+                        || decompiled.background_areas.count(sprite.animation_id) > 0
+                      )
+                    ){
+                        xml_element->SetAttribute("area", static_cast<int>(sprite.animation_id));
+                        xml_element->SetAttribute("state", static_cast<int>(sprite.animation_frame));
+                    }
                     bg_element->LinkEndChild(xml_element.release());
                 }
                 //}
             }
             bg_doc.LinkEndChild(bg_element.release());
-            bg_doc.SaveFile(
-              output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/bg.xml"
-            );
+            bg_doc.SaveFile(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/bg.xml");
         }
     }
     {
         // Save out the walk mesh as XML.
         const VGears::WalkmeshFilePtr& walkmesh = field->GetWalkmesh();
+        // Scripts, gateways and the camera use the field's scale, so the walkmesh must too.
+        const float field_scale = GetFieldScaleFactor(GetFieldId(field->getName(), map_list_));
         TiXmlDocument doc;
         std::unique_ptr<TiXmlElement> wmesh_element(new TiXmlElement("walkmesh"));
         for (VGears::WalkmeshFile::Triangle& tri : walkmesh->GetTriangles()){
             std::unique_ptr<TiXmlElement> xml_element(new TiXmlElement("triangle"));
-            xml_element->SetAttribute("a", Ogre::StringConverter::toString(tri.a));
-            xml_element->SetAttribute("b", Ogre::StringConverter::toString(tri.b));
-            xml_element->SetAttribute("c", Ogre::StringConverter::toString(tri.c));
+            xml_element->SetAttribute("a", Ogre::StringConverter::toString(tri.a / field_scale));
+            xml_element->SetAttribute("b", Ogre::StringConverter::toString(tri.b / field_scale));
+            xml_element->SetAttribute("c", Ogre::StringConverter::toString(tri.c / field_scale));
             xml_element->SetAttribute("a_b", std::to_string(tri.access_side[0]));
             xml_element->SetAttribute("b_c", std::to_string(tri.access_side[1]));
             xml_element->SetAttribute("c_a", std::to_string(tri.access_side[2]));

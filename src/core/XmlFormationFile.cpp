@@ -29,6 +29,10 @@ void XmlFormationFile::LoadFormation(){
     }
     BattleManager::getSingleton().SetFormationId(GetInt(node, "id"));
     BattleManager::getSingleton().SetNextFormationId(GetInt(node, "next"));
+    BattleManager::getSingleton().SetLayout(
+      static_cast<BattleManager::LAYOUT>(GetInt(node, "layout"))
+    );
+    BattleManager::getSingleton().SetPreemptiveDisabled(GetInt(node, "preemptive_disabled") == 1);
     if (GetInt(node, "escapable") == 1)
         BattleManager::getSingleton().SetEscapeability(GetFloat(node, "escape_difficulty"));
     else BattleManager::getSingleton().SetEscapeability(-1.0f);

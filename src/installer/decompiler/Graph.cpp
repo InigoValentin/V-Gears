@@ -39,8 +39,7 @@ Group::Group(GraphVertex vertex, InstIterator start, InstIterator end, GroupPtr 
     coalesced_else = false;
 }
 
-GraphProperties::GraphProperties(Engine *engine, const Graph &graph): engine(engine), graph(&graph)
-{}
+GraphProperties::GraphProperties(Engine *engine, const Graph &graph): engine(engine), graph(&graph){}
 
 GraphProperties::GraphProperties(const GraphProperties& rhs){*this = rhs;}
 
@@ -54,11 +53,7 @@ GraphProperties& GraphProperties::operator = (const GraphProperties& rhs){
 
 void GraphProperties::operator()(std::ostream& out) const{
     out << "node [shape=record]" << std::endl;
-    for (
-      FuncMap::iterator fn = engine->functions.begin();
-      fn != engine->functions.end();
-      ++ fn
-    ){
+    for (FuncMap::iterator fn = engine->functions.begin(); fn != engine->functions.end(); ++ fn){
         int index = (boost::get(boost::vertex_index, *graph, fn->second.vertex));
         out << "XXX" << index << " [shape=none, label=\"\", height=0]" << std::endl;
         out << "XXX" << index << " -> " << index << std::endl;

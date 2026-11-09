@@ -13,8 +13,11 @@
  * GNU General Public License for more details.
  */
 
+#include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include <limits>
 #include <OgreEntity.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
@@ -36,6 +39,24 @@ template<>EntityManager *Ogre::Singleton<EntityManager>::msSingleton = nullptr;
 
 ConfigVar cv_debug_grid("debug_grid", "Draw debug grid", "false");
 ConfigVar cv_debug_axis("debug_axis", "Draw debug axis", "false");
+ConfigVar cv_encounter_multiplier(
+  "encounter_multiplier", "Multiplier of the random encounter rate (0 disables them)", "1"
+);
+ConfigVar cv_debug_encounters("debug_encounters", "Log random encounter checks", "false");
+
+/**
+ * Frames of walking (at 30 frames per second) between two encounter checks. The original game
+ * checks every 8 frames.
+ */
+static const float ENCOUNTER_CHECK_FRAMES = 8.0f;
+
+/**
+ * Value added to the encounter accumulator in each check, before dividing it by the rate of the
+ * table. The original game uses the speed of the player, which is not known here, so this is tuned
+ * to a battle every 15-30 seconds of walking in most fields. The encounter_multiplier cvar scales
+ * it.
+ */
+static const float ENCOUNTER_STEP_VALUE = 5.0f;
 
 const float EntityManager::SCENE_SCALE = 0.003f;
 
@@ -101,13 +122,19 @@ Ogre::Degree EntityManager::GetDirectionToPoint(
 }
 
 EntityManager::EntityManager():
+    background_3d_(nullptr),
   player_entity_(nullptr),
   player_move_(Ogre::Vector3::ZERO),
   player_move_rotation_(0),
   player_lock_(false),
   player_run_(false),
   random_encounters_(false),
-  encounter_rate_(0)
+  encounter_rate_(0),
+  encounter_table_(1),
+  encounter_distance_(0.0f),
+  encounter_last_position_(Ogre::Vector3::ZERO),
+  encounter_last_position_valid_(false),
+  encounter_safe_steps_(0)
 {
     LOG_TRIVIAL("EntityManager created.");
     scene_node_ = Ogre::Root::getSingleton().getSceneManager("Scene")
@@ -144,7 +171,7 @@ void EntityManager::Input(const VGears::Event& event){
         else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_up")
             player_move_.y = 1;
         if (event.type == VGears::ET_KEY_REPEAT && event.event == "run") player_run_ = true;
-        if (event.type == VGears::ET_KEY_PRESS && event.event == "interact"){
+        if (event.type == VGears::ET_KEY_PRESS && event.event == "CONFIRM"){
             CheckEntityInteract();
             for (unsigned int i = 0; i < entity_triggers_.size(); ++ i){
                 if (
@@ -176,6 +203,8 @@ void EntityManager::Input(const VGears::Event& event){
 void EntityManager::UpdateField(){
     // Update all entity scripts
     ScriptManager::getSingleton().Update(ScriptManager::ENTITY);
+    // The player is walking if there is a move set by the input.
+    const bool walked = player_entity_ != nullptr && player_move_ != Ogre::Vector3::ZERO;
 
     // Set move point for player entity
     if (player_entity_ != nullptr && player_move_ != Ogre::Vector3::ZERO){
@@ -203,17 +232,8 @@ void EntityManager::UpdateField(){
 
         // Update screen scroll.
         Entity* scroll_entity = background_2d_.GetAutoScrollEntity();
-        if (scroll_entity == entity_[i]){
-            CameraManager &camera_manager(CameraManager::getSingleton());
-            Ogre::Vector3 view = camera_manager.ProjectPointToScreen(scroll_entity->GetPosition());
-            Ogre::Vector2 pos = background_2d_.GetScreenScroll();
-            Ogre::Viewport *viewport(camera_manager.getViewport());
-            float width = float(viewport->getActualWidth());
-            float height = float(viewport->getActualHeight());
-            view.x = view.x - width / 2 - pos.x;
-            view.y = view.y - height / 2 - pos.y;
-            background_2d_.SetScreenScroll(Ogre::Vector2(-view.x, -view.y));
-        }
+        if (scroll_entity == entity_[i])
+            background_2d_.SetScroll(background_2d_.GetEntityScroll(scroll_entity));
         // Update offset.
         if (entity_[i]->GetOffsetType() != AT_NONE) SetNextOffsetStep(entity_[i]);
         // Update turn.
@@ -242,7 +262,19 @@ void EntityManager::UpdateField(){
                             if (player_run_ == true) speed *= 4;
                         }
                         else speed = entity_[i]->GetMoveAutoSpeed();
-                        bool is_move = PerformWalkmeshMove(entity_[i], speed);
+                        float remaining_time = Timer::getSingleton().GetGameTimeDelta();
+                        bool is_move = false;
+                        if (entity_[i]->IsScriptedMove() && speed > 0.0f){
+                            const float max_step_time = 0.2f / speed;
+                            while (remaining_time > 0.0f && entity_[i]->GetState() == Entity::WALKMESH){
+                                const float step_time = std::min(remaining_time, max_step_time);
+                                const bool moved = PerformWalkmeshMove(entity_[i], speed, step_time);
+                                is_move = is_move || moved;
+                                if (!moved) break;
+                                remaining_time -= step_time;
+                            }
+                        }
+                        else is_move = PerformWalkmeshMove(entity_[i], speed, remaining_time);
                         if (entity_[i]->GetMoveAutoAnimation() == true){
                             if (is_move == true){
                                 if (speed >= entity_[i]->GetMoveRunSpeed()){
@@ -289,6 +321,9 @@ void EntityManager::UpdateField(){
     player_run_ = false;
     if (background_2d_.GetScrollType() != Background2D::NONE) SetNextScrollStep();
     background_2d_.Update();
+    // This can start a battle and change the module, so it's the last thing to do.
+    UpdateEncounters(walked);
+    screen_fade_.Update(Timer::getSingleton().GetGameTimeDelta());
 }
 
 void EntityManager::UpdateBattle(){
@@ -299,13 +334,22 @@ void EntityManager::UpdateBattle(){
     }
     for (unsigned int i = 0; i < battle_entity_.size(); ++ i){
         battle_entity_[i]->Update();
-        battle_entity_[i]->PlayAnimationContinue(battle_entity_[i]->GetDefaultAnimationName());
+        // Go back to the default animation, unless an animation has been requested. Requested
+        // animations that are not looped go back to the default one by themselves when they end.
+        if (battle_entity_[i]->GetAnimationState() != Entity::REQUESTED_ANIMATION){
+            battle_entity_[i]->PlayAnimationContinue(battle_entity_[i]->GetDefaultAnimationName());
+        }
     }
     //CameraManager::getSingleton().GetCurrentCamera()->roll(Ogre::Radian(0.01));
 }
 
 void EntityManager::UpdateWorld(){
-    // TODO: Implement
+    ScriptManager::getSingleton().Update(ScriptManager::ENTITY);
+    for (Entity* entity : entity_){
+        entity->Update();
+    }
+    player_move_ = Ogre::Vector3::ZERO;
+    player_run_ = false;
 }
 
 void EntityManager::AddFieldOrWorldMapEntity(
@@ -326,6 +370,31 @@ void EntityManager::AddFieldOrWorldMapEntity(
     entity->setRootOrientation(root_orientation);
     entity_.push_back(entity);
     ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
+}
+
+EntityModel* EntityManager::AddWorldMapEntity(
+  const Ogre::String& name, const Ogre::String& file_name,
+  const Ogre::Vector3& position, const Ogre::Degree& rotation,
+  const Ogre::Vector3& scale, const Ogre::String& resource_group
+){
+    if (!IsWorldModule()){
+        LOG_ERROR("Tried to add a world-map entity outside world-map mode.");
+        return nullptr;
+    }
+    if (GetEntity(name) != nullptr){
+        LOG_ERROR("Tried to add duplicate world-map entity '" + name + "'.");
+        return nullptr;
+    }
+
+    Ogre::SceneNode* node = scene_node_->createChildSceneNode("Model_" + name);
+    EntityModel* entity = new EntityModel(name, file_name, node, resource_group);
+    entity->SetPosition(position);
+    entity->SetRotation(rotation);
+    entity->setScale(scale);
+    entity->SetVisible(true);
+    entity_.push_back(entity);
+    ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
+    return entity;
 }
 
 void EntityManager::AddBattleEntity(
@@ -420,8 +489,11 @@ void EntityManager::UpdateDebug(){
 void EntityManager::OnResize(){background_2d_.OnResize();}
 
 void EntityManager::ClearField(){
+    ClearEncounterTables();
+    entities_hidden_by_battle_.clear();
     walkmesh_.Clear();
     background_2d_.Clear();
+    screen_fade_.Clear();
     DialogsManager::getSingleton().Clear();
     for (unsigned int i = 0; i < entity_.size(); ++ i){
         ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, entity_[i]->GetName());
@@ -474,12 +546,57 @@ void EntityManager::ClearBattle(){
 }
 
 void EntityManager::ClearWorld(){
-    // TODO implement
+    walkmesh_.Clear();
+    for (Entity* entity : entity_){
+        ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, entity->GetName());
+        delete entity;
+    }
+    entity_.clear();
+    player_entity_ = nullptr;
+    player_move_ = Ogre::Vector3::ZERO;
+    player_move_rotation_ = 0;
+    player_lock_ = false;
+    player_run_ = false;
+    for (EntityTrigger* trigger : entity_triggers_){
+        ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, trigger->GetName());
+        delete trigger;
+    }
+    entity_triggers_.clear();
+    for (EntityPoint* point : entity_points_) delete point;
+    entity_points_.clear();
+    for (const Ogre::String& script : entity_scripts_){
+        ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, script);
+    }
+    entity_scripts_.clear();
+    scene_node_->removeAndDestroyAllChildren();
 }
 
 Walkmesh* EntityManager::GetWalkmesh(){return &walkmesh_;}
 
+bool EntityManager::IsWorldPositionBlocked(
+    const Entity* moving_entity, const Ogre::Vector3& position
+) const{
+        if (!IsWorldModule() || moving_entity == nullptr) return false;
+
+        for (const Entity* other : entity_){
+                if (other == moving_entity || !other->IsSolid()) continue;
+
+                const Ogre::Vector3 other_position = other->GetPosition();
+                const Ogre::Real dx = position.x - other_position.x;
+                const Ogre::Real dz = position.z - other_position.z;
+                const Ogre::Real radius = moving_entity->GetSolidRadius() + other->GetSolidRadius();
+                if (dx * dx + dz * dz >= radius * radius) continue;
+
+                const Ogre::Real moving_top = position.y + moving_entity->GetHeight();
+                const Ogre::Real other_top = other_position.y + other->GetHeight();
+                if (position.y < other_top && other_position.y < moving_top) return true;
+        }
+        return false;
+}
+
 Background2D* EntityManager::GetBackground2D(){return &background_2d_;}
+
+ScreenFade* EntityManager::GetScreenFade(){return &screen_fade_;}
 
 void EntityManager::AddEntity(
   const Ogre::String& name, const Ogre::String& file_name,
@@ -610,6 +727,25 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
     }
 }
 
+void EntityManager::ScriptPlacePlayerAtFieldEntry(
+    const float x, const float y, const int triangle_id, const float direction
+){
+        if (player_entity_ == nullptr || walkmesh_.GetNumberOfTriangles() <= 0) return;
+
+        int safe_triangle_id = triangle_id;
+        if (safe_triangle_id < 0 || safe_triangle_id >= walkmesh_.GetNumberOfTriangles()){
+                LOG_WARNING("World-map field entry has an invalid walkmesh triangle; using triangle 0.");
+                safe_triangle_id = 0;
+        }
+
+        player_entity_->SetPosition(Ogre::Vector3(
+            x, y, walkmesh_.GetA(static_cast<unsigned int>(safe_triangle_id)).z
+        ));
+        player_entity_->SetRotation(Ogre::Degree(direction));
+        player_entity_->SetMoveTriangleId(safe_triangle_id);
+        player_entity_->SetState(Entity::WALKMESH);
+}
+
 Entity* EntityManager::ScriptGetPlayerEntity() const{
     if (IsBattleModule()){
         LOG_WARNING("Tried to set a player entity but the EntityManager is in battle mode.");
@@ -635,6 +771,8 @@ void EntityManager::ScriptPlayerLock(const bool lock){
     if (lock == true) player_move_ = Ogre::Vector3::ZERO;
 }
 
+bool EntityManager::IsPlayerLocked() const{return player_lock_;}
+
 void EntityManager::SetPlayerMoveRotation(const Ogre::Radian rotation){
     if (IsBattleModule()){
         LOG_WARNING("Tried to set player move rotation the EntityManager is in battle mode.");
@@ -645,9 +783,125 @@ void EntityManager::SetPlayerMoveRotation(const Ogre::Radian rotation){
 
 bool EntityManager::GetRandomEncounters(){return random_encounters_;}
 
+float EntityManager::GetEncounterMultiplier() const{return cv_encounter_multiplier.GetF();}
+
+bool EntityManager::IsDebugEncounters() const{return cv_debug_encounters.GetB();}
+
 void EntityManager::SetRandomEncounters(bool active){random_encounters_ = active;}
 
 float EntityManager::GetEncounterRate(){return encounter_rate_;}
+
+void EntityManager::HideFieldEntities(){
+    entities_hidden_by_battle_.clear();
+    for (Entity* entity : entity_){
+        if (entity->IsVisible()){
+            entities_hidden_by_battle_.push_back(entity);
+            entity->SetVisible(false);
+        }
+    }
+}
+
+void EntityManager::ShowFieldEntities(){
+    // Only the ones that still exist: the field could have been changed during the battle.
+    for (Entity* hidden : entities_hidden_by_battle_){
+        if (std::find(entity_.begin(), entity_.end(), hidden) != entity_.end()) hidden->SetVisible(true);
+    }
+    entities_hidden_by_battle_.clear();
+}
+
+void EntityManager::ClearEncounterTables(){
+    encounter_tables_.clear();
+    encounter_table_ = 1;
+    encounter_distance_ = 0.0f;
+    encounter_last_position_valid_ = false;
+    encounter_accumulator_ = 0;
+    encounter_last_battle_ = -1;
+}
+
+void EntityManager::AddEncounterTable(
+  const int id, const int rate, const std::vector<std::pair<int, int>>& battles,
+  const std::vector<std::pair<int, int>>& specials
+){
+    EncounterTable table;
+    table.rate = rate;
+    table.battles = battles;
+    table.specials = specials;
+    encounter_tables_[id] = table;
+}
+
+void EntityManager::ScriptSetEncounterTable(const int id){encounter_table_ = id;}
+
+int EntityManager::ScriptRollEncounterBattle() const{
+    auto found = encounter_tables_.find(encounter_table_);
+    if (found == encounter_tables_.end()) return -1;
+    const EncounterTable& table = found->second;
+    // Like the original game: a roll out of 64 is checked against the special battles one after
+    // the other (each one adds its probability). If none is hit, a new roll chooses a standard
+    // battle, the last one being the default.
+    int roll = std::rand() % 64;
+    int sum = 0;
+    for (const auto& special : table.specials){
+        sum += special.second;
+        if (roll < sum) return special.first;
+    }
+    if (table.battles.empty()) return -1;
+    roll = std::rand() % 64;
+    sum = 0;
+    for (const auto& battle : table.battles){
+        sum += battle.second;
+        if (roll < sum) return battle.first;
+    }
+    return table.battles.back().first;
+}
+
+void EntityManager::UpdateEncounters(const bool walked){
+    if (player_entity_ == nullptr){
+        encounter_last_position_valid_ = false;
+        return;
+    }
+    const Ogre::Vector3 position = player_entity_->GetPosition();
+    const float distance
+      = encounter_last_position_valid_ ? (position - encounter_last_position_).length() : 0.0f;
+    encounter_last_position_ = position;
+    encounter_last_position_valid_ = true;
+    // Only walking counts: not scripted movements, and not jumps to another place.
+    if (!walked || player_lock_ || distance > 2.0f) return;
+    if (!random_encounters_ || encounter_tables_.empty()) return;
+    auto found = encounter_tables_.find(encounter_table_);
+    if (found == encounter_tables_.end()) return;
+    const float multiplier = cv_encounter_multiplier.GetF();
+    if (multiplier <= 0.0f) return;
+    // Same as the original game. Every few frames of walking the accumulator grows by a value
+    // divided by the rate (the lower the rate, the more often the encounters), and an encounter
+    // starts if a random number is lower than the accumulator.
+    const int rate = found->second.rate;
+    if (rate <= 0) return;
+    encounter_distance_ += Timer::getSingleton().GetGameTimeDelta() * 30.0f;
+    while (encounter_distance_ >= ENCOUNTER_CHECK_FRAMES){
+        encounter_distance_ -= ENCOUNTER_CHECK_FRAMES;
+        encounter_accumulator_ += static_cast<int>(ENCOUNTER_STEP_VALUE * multiplier * 256.0f) / rate;
+        const int roll = std::rand() % 256 * 256;
+        if (cv_debug_encounters.GetB()){
+            LOG_TRIVIAL(
+              "Encounter check: rate " + std::to_string(rate) + ", accumulator "
+              + std::to_string(encounter_accumulator_ / 256.0f) + "/256, roll "
+              + std::to_string(roll / 256)
+            );
+        }
+        if (roll >= encounter_accumulator_) continue;
+        int battle = ScriptRollEncounterBattle();
+        // The same battle is not repeated: it's rolled again once.
+        if (battle == encounter_last_battle_) battle = ScriptRollEncounterBattle();
+        if (battle < 0) return;
+        encounter_distance_ = 0.0f;
+        encounter_accumulator_ = 0;
+        encounter_last_battle_ = battle;
+        LOG_TRIVIAL("Random encounter: battle " + std::to_string(battle));
+        // The battle is started by a script, as it has to change the module of every manager.
+        ScriptManager::getSingleton().RunString("Encounter.start(" + std::to_string(battle) + ")");
+        return;
+    }
+}
 
 void EntityManager::SetEncounterRate(float rate){
     if (rate >= 1.0f) encounter_rate_ = 1.0f;
@@ -660,16 +914,17 @@ bool EntityManager::IsKeyOn(unsigned int key_code){
     // TODO: Maybe this will interfere with something down the road?
     // Some scene where the player can't move but must press a button?
     if (player_lock_) return false;
-    unsigned int code = key_code;
-    // Translate keycodes to game key codes.
-    // For example 32 is standard for "Enter", but in game is "Circle/Action".
-    // TODO: Finish this list.
-    // TOOD: Get values from config.lua
-    switch (key_code){
-        case 32: code = OIS::KC_SPACE; break;
-    }
-    bool pressed = InputManager::getSingleton().IsButtonPressed(code);
-    return pressed;
+    // The key code of the scripts is a mask of the pad buttons, and the check is true if any of
+    // them is pressed. Translate each to its key. For example 32 is "Circle/Action", the space bar.
+    // TODO: Get values from config.lua
+    static const struct{unsigned int mask; int key;} KEYS[] = {
+      {4, OIS::KC_PGUP}, {8, OIS::KC_PGDOWN}, {32, OIS::KC_SPACE}, {64, OIS::KC_ESCAPE},
+      {4096, OIS::KC_UP}, {8192, OIS::KC_RIGHT}, {16384, OIS::KC_DOWN}, {32768, OIS::KC_LEFT}
+    };
+    for (const auto& entry : KEYS)
+        if ((key_code & entry.mask) && InputManager::getSingleton().IsButtonPressed(entry.key))
+            return true;
+    return false;
 }
 
 bool EntityManager::IsKeyOff(unsigned int key_code){return !IsKeyOn(key_code);}
@@ -749,7 +1004,29 @@ bool EntityManager::SetEntityOnWalkmesh(Entity* entity){
     return true;
 }
 
-bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
+float EntityManager::TriggerReach(float solid_radius){
+    // The radius an entity has when a script doesn't change it.
+    const float default_radius = 0.21f;
+    return solid_radius < 0.01f ? default_radius : solid_radius;
+}
+
+bool EntityManager::WalkmeshEdgeBlocks(bool is_player, bool scripted_move){
+    return is_player || !scripted_move;
+}
+
+bool EntityManager::IsBetterInteractionTarget(
+  float angle, float distance, float best_angle, float best_distance
+){
+    const float same_angle = 0.001f;
+    if (angle < best_angle - same_angle) return true;
+    return std::fabs(angle - best_angle) <= same_angle && distance < best_distance;
+}
+
+float EntityManager::ScriptedMoveStep(float distance, float stop_distance, float max_step){
+    return std::min(max_step, std::max(0.0f, distance - stop_distance));
+}
+
+bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed, const float delta_time){
     if (IsBattleModule()){
         LOG_WARNING("Tried to perform a walkmesh move, but the EntityManager is in battle mode");
         return false;
@@ -757,9 +1034,22 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
     Ogre::Vector3 start_point = entity->GetPosition();
     Ogre::Vector3 move_vector = entity->GetMovePosition() - start_point;
     Ogre::Vector2 direction(move_vector.x, move_vector.y);
+    const float distance_to_target = direction.length();
+    const bool scripted_move = entity->IsScriptedMove();
+    const float stop_distance = entity->GetMoveStopDistance();
+    if (scripted_move && distance_to_target <= stop_distance + 0.0001f){
+        entity->UnsetMove();
+        return false;
+    }
     direction.normalise();
-    direction *= Timer::getSingleton().GetGameTimeDelta();
+    direction *= delta_time;
     direction *= speed;
+    if (scripted_move && !direction.isZeroLength()){
+        direction.normalise();
+        direction *= ScriptedMoveStep(
+          distance_to_target, stop_distance, speed * delta_time
+        );
+    }
     // If movement is still needed but speed or time don't allow it, just return for now.
     if (direction.isZeroLength() == true){
         if (player_entity_ == entity) CheckTriggers(entity, entity->GetPosition());
@@ -997,7 +1287,8 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed){
 
     // If the entity has come to destination point, finish movement.
     Ogre::Vector3 final = entity->GetMovePosition() - end_point;
-    if (Ogre::Vector2(final.x, final.y).length() <= entity->GetMoveStopDistance() + speed / 10)
+    const float tolerance = scripted_move ? 0.0001f : speed / 10;
+    if (Ogre::Vector2(final.x, final.y).length() <= stop_distance + tolerance)
         entity->UnsetMove();
 
     return true;
@@ -1012,6 +1303,7 @@ bool EntityManager::WalkmeshBorderCross(
     }
     int current_triangle = entity->GetMoveTriangleId();
     if (current_triangle == -1) return true;
+    const bool free_walk = !WalkmeshEdgeBlocks(entity == player_entity_, entity->IsScriptedMove());
     Ogre::Vector2 pos = Ogre::Vector2(position.x, position.y);
     for (;;){
         Ogre::Vector3 A3 = walkmesh_.GetA(current_triangle);
@@ -1034,14 +1326,15 @@ bool EntityManager::WalkmeshBorderCross(
         }
         if (next_triangle >= 0){
             bool lock = walkmesh_.IsLocked(next_triangle);
-            if (lock == false){
+            if (lock == false || free_walk){
                 current_triangle = next_triangle;
                 continue;
             }
         }
         position.z = PointElevation(pos, A3, B3, C3);
         entity->SetMoveTriangleId(current_triangle);
-        return true;
+        // A walk of a script goes on over the edge, keeping the last triangle.
+        return !free_walk;
     }
 }
 
@@ -1101,7 +1394,7 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
 
             // Calculate distance
             float square_dist = SquareDistanceToLine(entity_position, point_a, point_b, proj);
-            float solid_radius = entity->GetSolidRadius();
+            float solid_radius = TriggerReach(entity->GetSolidRadius());
 
             // Calculate direction.
             const Ogre::Degree direction_to_line = GetDirectionToPoint(entity_position, proj);
@@ -1219,6 +1512,8 @@ void EntityManager::CheckEntityInteract(){
     Ogre::Degree angle_pc = player_entity_->GetRotation();
     Entity* entity_to_interact = NULL;
     Ogre::Degree less_angle(90);
+    float best_distance = std::numeric_limits<float>::max();
+    Ogre::Real nearest_worldmap_distance = -1.0f;
     for (unsigned int i = 0; i < entity_.size(); ++ i){
         if (entity_[i]->IsTalkable() == false) continue;
         if (entity_[i] == player_entity_) continue;
@@ -1226,6 +1521,26 @@ void EntityManager::CheckEntityInteract(){
         float interact_range =  entity_[i]->GetTalkRadius();
         Ogre::Vector3 pos2 = player_entity_->GetPosition();
         float solid_range = player_entity_->GetSolidRadius();
+                if (IsWorldModule()){
+                        const Ogre::Real target_bottom = pos1.y;
+                        const Ogre::Real player_bottom = pos2.y;
+                                                const Ogre::Real talk_range
+                                                    = interact_range + solid_range + 0.05f;
+                        const Ogre::Real distance
+                            = (pos1.x - pos2.x) * (pos1.x - pos2.x)
+                                + (pos1.z - pos2.z) * (pos1.z - pos2.z);
+                        const bool height_overlap
+                            = player_bottom <= target_bottom + entity_[i]->GetHeight()
+                                && player_bottom + player_entity_->GetHeight() >= target_bottom;
+                        if (
+                                height_overlap && distance <= talk_range * talk_range
+                                && (nearest_worldmap_distance < 0 || distance < nearest_worldmap_distance)
+                        ){
+                                entity_to_interact = entity_[i];
+                                nearest_worldmap_distance = distance;
+                        }
+                        continue;
+                }
         int height = (pos1.z < pos2.z) ? entity_[i]->GetHeight() : player_entity_->GetHeight();
         if (((pos1.z - pos2.z + height) < (height * 2)) && ((pos1.z - pos2.z + height) >= 0)){
             interact_range = (interact_range + solid_range) * (interact_range + solid_range);
@@ -1236,8 +1551,15 @@ void EntityManager::CheckEntityInteract(){
                 Ogre::Degree angle = angle_pc - angle_to_model;
                 angle = (angle < Ogre::Degree(0)) ? -angle : angle;
                 angle = (angle >= Ogre::Degree(180)) ? Ogre::Degree(360) - angle : angle;
-                if (angle < less_angle){
-                    angle = less_angle;
+                // With several entities in range, interact with the one the player faces most.
+                // Nobody 90 degrees or more away from where the player faces is considered.
+                if (
+                  angle < Ogre::Degree(90) && IsBetterInteractionTarget(
+                    angle.valueDegrees(), distance, less_angle.valueDegrees(), best_distance
+                  )
+                ){
+                    less_angle = angle;
+                    best_distance = distance;
                     entity_to_interact = entity_[i];
                 }
             }
@@ -1305,7 +1627,10 @@ void EntityManager::SetNextLinearStep(Entity* entity){
     Ogre::Vector3 end = entity->GetLinearEnd();
     Ogre::Vector3 current = entity->GetPosition();
     float delta = Timer::getSingleton().GetGameTimeDelta();
-    if (entity == player_entity_){
+    // The player climbs a ladder with the directional keys. While a scene has the player locked
+    // the keys have no effect, and the scene makes the player move on its own, as with any other
+    // entity.
+    if (entity == player_entity_ && !player_lock_){
         LinearMovement move = entity->GetLinearMovement();
         if (move == LM_DOWN_TO_UP || move == LM_UP_TO_DOWN){
             if (player_move_.y > 0){ // move up
@@ -1400,6 +1725,7 @@ void EntityManager::SetNextJumpStep(Entity* entity){
 
 void EntityManager::SetNextScrollStep(){
     // TODO: Allow this on battle mode?
+    background_2d_.UpdateScrollTarget();
     Background2D::SCROLL_TYPE type = background_2d_.GetScrollType();
     float total = background_2d_.GetScrollSeconds();
     float current = background_2d_.GetScrollCurrentSeconds();

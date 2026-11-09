@@ -22,81 +22,31 @@
 #include <OgreColourValue.h>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/predef/os.h>
 #include <boost/filesystem.hpp>
 #include <tinyxml.h>
+#include "DiskImage.h"
 #include "MediaDataInstaller.h"
+#include "SfxDump.h"
 #include "data/VGearsLGPArchive.h"
 #include "data/VGearsTexFile.h"
 #include "TexFile.h"
-#if (BOOST_OS_WINDOWS)
-#include <stdlib>
-#elif (BOOST_OS_SOLARIS)
-#include <stdlib>
-#include <limits>
-#elif (BOOST_OS_LINUX)
-#include <unistd.h>
-#include <limits.h>
-#elif (BOOST_OS_MACOS)
-#include <mach-o/dyld.h>
-#elif (BOOST_OS_BSD_FREE)
-#include <sys/types>
-#include <sys/sysctl>
-#endif
 
 int MediaDataInstaller::TOTAL_SOUNDS = 750;
 
 MediaDataInstaller::MediaDataInstaller(
-  const std::string input_dir, const std::string output_dir, const bool keep_originals,
-  const bool no_ffmpeg, const bool no_timidity
+  const DiskImage& disk_image, const std::string output_dir, const bool keep_originals,
+  const bool ffmpeg, const bool timidity
 ):
-  input_dir_(input_dir), output_dir_(output_dir), keep_originals_(keep_originals),
-  no_ffmpeg_(no_ffmpeg), no_timidity_(no_timidity),
-  menu_(input_dir + "data/menu/menu_us.lgp", "LGP"), window_(input_dir + "data/kernel/WINDOW.BIN"),
-  midi_(input_dir + "data/midi/midi.lgp", "LGP")
-{PopulateMaps();}
-
-
-std::string MediaDataInstaller::GetExecutablePath(){
-    #if (BOOST_OS_WINDOWS)
-    char *exe_path;
-    if (_get_pgmptr(&exe_path) != 0) exe_path = "";
-    #elif (BOOST_OS_SOLARIS)
-    char exe_path[PATH_MAX];
-    if (realpath(getexecname(), exe_path) == NULL) exe_path[0] = '\0';
-    #elif (BOOST_OS_LINUX)
-    char exe_path[PATH_MAX];
-    ssize_t len = ::readlink("/proc/self/exe", exe_path, sizeof(exe_path));
-    if (len == -1 || len == sizeof(exe_path)) len = 0;
-    exe_path[len] = '\0';
-    #elif (BOOST_OS_MACOS)
-    char exe_path[PATH_MAX];
-    uint32_t len = sizeof(exe_path);
-    if (_NSGetExecutablePath(exe_path, &len) != 0){
-        exe_path[0] = '\0'; // buffer too small (!)
-    }
-    else {
-        // resolve symlinks, ., .. if possible
-        char *canonical_path = realpath(exe_path, NULL);
-        if (canonical_path != NULL){
-            strncpy(exe_path,canonical_path,len);
-            free(canonical_path);
-        }
-    }
-    #elif (BOOST_OS_BSD_FREE)
-    char exe_path[2048];
-    int mib[4];
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PATHNAME;
-    mib[3] = -1;
-    size_t len = sizeof(exe_path);
-    if (sysctl(mib, 4, exe_path, &len, NULL, 0) != 0) exe_path[0] = '\0';
-    #endif
-    return
-      strlen(exe_path) > 0
-      ? boost::filesystem::path(exe_path).remove_filename().make_preferred().string()
-      : std::string();
+  disk_image_(disk_image), output_dir_(output_dir), keep_originals_(keep_originals),
+  ffmpeg_(ffmpeg), timidity_(timidity),
+    window_(*disk_image_.filePath("data/kernel/WINDOW.BIN")),
+    processed_sounds_(0),
+    menu_(VGears::LGPArchive(*disk_image_.filePath("data/menu/menu_us.lgp"), "LGP")),
+    midi_(VGears::LGPArchive(*disk_image_.filePath("data/midi/midi.lgp"), "LGP")),
+    processed_musics_(0),
+    processed_videos_(0)
+{
+    PopulateMaps();
 }
 
 
@@ -143,8 +93,7 @@ void MediaDataInstaller::PopulateMaps(){
     sound_map_[19] = "Grenade";
     sound_description_[19] = "Grenade item in battle.";
     sound_map_[20] = "Ladder|BattleItem";
-    sound_description_[20]
-      = "Character grabbing a ladder on the fields, character reaching for an item during battle";
+    sound_description_[20] = "Character grabbing a ladder on the fields, character reaching for an item during battle";
     sound_map_[21] = "EnemyDeath";
     sound_description_[21] = "When most enemies die.";
     sound_map_[22] = "AeriCriticalHit";
@@ -402,8 +351,7 @@ void MediaDataInstaller::PopulateMaps(){
     sound_map_[148] = "Ailment";
     sound_description_[148] = "Status ailment inflicted.";
     sound_map_[149] = "Sensor";
-    sound_description_[149]
-      = "Sensors or lasers on some fields, like the red ones blocking the party on the plate.";
+    sound_description_[149] = "Sensors or lasers on some fields, like the red ones blocking the party on the plate.";
     sound_map_[150] = "TV";
     sound_description_[150] = "Television transmitting.";
     sound_map_[151] = "AribusterExplode";
@@ -837,8 +785,7 @@ void MediaDataInstaller::PopulateMaps(){
     sound_map_[365] = "BigGuard";
     sound_description_[365] = "Big Guard enemy skill.";
     sound_map_[366] = "Heartbeat";
-    sound_description_[366]
-      = "ShinRa mansion heartbeat background effects. Heard in other places too.";
+    sound_description_[366] = "ShinRa mansion heartbeat background effects. Heard in other places too.";
     sound_map_[367] = "";
     sound_description_[367] = "";
     sound_map_[368] = "BladeBeam";
@@ -1134,10 +1081,10 @@ MediaDataInstaller::~MediaDataInstaller(){}
 
 void MediaDataInstaller::InstallSprites(){
     // Actually open the lgp as a file for reading
-    File menu(input_dir_ + "data/menu/menu_us.lgp");
+    File menu(*disk_image_.filePath("data/menu/menu_us.lgp"));
 
     // Also, open it as a LGP archive.
-    menu_.open(input_dir_ + "data/menu/menu_us.lgp", true);
+    menu_.open(*disk_image_.filePath("data/menu/menu_us.lgp"), true);
     menu_.load();
 
 
@@ -1165,9 +1112,7 @@ void MediaDataInstaller::InstallSprites(){
           && f.file_name != "btl_win_a_h.tex"
           && f.file_name != "btl_win_b_h.tex"
           && f.file_name != "btl_win_b_l.tex"
-        ){
-            continue;
-        }
+        ) continue;
 
         // Save the TEX File
         std::fstream out;
@@ -1338,16 +1283,12 @@ void MediaDataInstaller::InstallSprites(){
             // Fonts, save all palettes, make one default.
             for (int p = 0; p < 16; p ++){
                 // Digits font. Default palette 7.
-                tex.SavePng(
-                  img_dir + "fonts/digits_" + std::to_string(p) + ".png", 16, 0, 156, 16, p
-                );
+                tex.SavePng(img_dir + "fonts/digits_" + std::to_string(p) + ".png", 16, 0, 156, 16, p);
                 if (p == 7) tex.SavePng(img_dir + "fonts/digits.png", 16, 0, 156, 16, p);
             }
             for (int p = 0; p < 16; p ++){
                 // Time font. Default palette 12.
-                tex.SavePng(
-                  img_dir + "fonts/timer_" + std::to_string(p) + ".png", 32, 160, 224, 90, p
-                );
+                tex.SavePng(img_dir + "fonts/timer_" + std::to_string(p) + ".png", 32, 160, 224, 90, p);
                 if (p == 12) tex.SavePng(img_dir + "fonts/timer.png", 32, 160, 224, 90, p);
             }
             // Reels, palete 11.
@@ -1374,38 +1315,47 @@ void MediaDataInstaller::InstallSprites(){
 }
 
 int MediaDataInstaller::InstallSoundsInit(){
-    // SFXDump handles the wav conversion
-    std::string command = (boost::format(
-      "%1%/sfxdump %2%data/sound/audio.fmt %2%data/sound/audio.dat %3%audio/sounds/"
-    ) % GetExecutablePath() % input_dir_ % output_dir_).str();    
-    std::system(command.c_str());
+    std::unique_ptr<std::string> fmt_path = disk_image_.filePath("data/sound/audio.fmt");
+    std::unique_ptr<std::string> data_path = disk_image_.filePath("data/sound/audio.dat");
+    std::string sound_dir =
+      (boost::filesystem::path(output_dir_) / "audio" / "sounds").string();
+
+    if (!fmt_path){
+        std::cerr << "MediaDataInstaller: could not find data/sound/audio.fmt in the selected game data."
+                  << std::endl;
+    }
+    else if (!data_path){
+        std::cerr << "MediaDataInstaller: could not find data/sound/audio.dat in the selected game data."
+                  << std::endl;
+    }
+    else if (SfxDumpConvert(fmt_path->c_str(), data_path->c_str(), sound_dir.c_str()) != 0){
+        std::cerr << "MediaDataInstaller: failed to convert FFVII sound effects."
+                  << std::endl;
+    }
     processed_sounds_ = 0;
     return TOTAL_SOUNDS;
 }
 
 bool MediaDataInstaller::InstallSounds(){
-    if (!no_ffmpeg_){
-        std::string f_path
-          = output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav";
+    if (ffmpeg_){
+        // TODO: check for ffmpeg executable and warn if not found.
+        std::string f_path = output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav";
         std::ifstream file(f_path);
         if (file.is_open()){
             file.close();
              std::string command = (boost::format(
-              "ffmpeg -hide_banner -loglevel panic -y "
-              "-i %1%audio/sounds/%2%.wav %1%audio/sounds/%2%.ogg"
+              "ffmpeg -hide_banner -loglevel panic -y  -i %1%audio/sounds/%2%.wav %1%audio/sounds/%2%.ogg"
             ) % output_dir_ % processed_sounds_).str();
             std::system(command.c_str());
-            //std::cout << "    ADD SOUND " << processed_sounds_ << ".ogg" << std::endl;
+            std::cout << "    ADD SOUND " << processed_sounds_ << ".ogg" << std::endl;
             sounds_.push_back("audio/sounds/" + std::to_string(processed_sounds_) + ".ogg");
             // Remove the wav file.
             if (!keep_originals_)
-                std::remove((
-                  output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav"
-                ).c_str());
+                std::remove((output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav").c_str());
         }
         else{
             sounds_.push_back("audio/sounds/INVALID.ogg");
-            //std::cout << "    -- ADD SOUND INVALID.ogg" << std::endl;
+            std::cout << "    -- ADD SOUND INVALID.ogg" << std::endl;
         }
     }
     processed_sounds_ ++;
@@ -1439,7 +1389,7 @@ void MediaDataInstaller::WriteSoundIndex(){
 
 int MediaDataInstaller::InstallMusicsInit(){
     // Read the music index file.
-    std::ifstream music_idx(input_dir_ + "data/music/music.idx");
+    std::ifstream music_idx(*disk_image_.filePath("data/music/music.idx"));
     int i = 0;
     std::string name;
     if (music_idx.is_open()){
@@ -1473,7 +1423,7 @@ bool MediaDataInstaller::InstallMusics(){
         }
     }
 
-    File midi(input_dir_ + "data/midi/midi.lgp");
+    File midi(*disk_image_.filePath("data/midi/midi.lgp"));
 
     std::fstream out;
     out.open(output_dir_ + "audio/musics/" + std::to_string(index) + ".mid", std::ios::out);
@@ -1482,15 +1432,15 @@ bool MediaDataInstaller::InstallMusics(){
     out.close();
 
     // Convert to ogg (TiMidity + FFMpeg)
+    // TODO: Chek for ffmpeg and timidity executables and warn if not found.
     std::string command = (boost::format(
       "timidity --quiet=3 %1%audio/musics/%2%.mid -Ow -o - "
       "| ffmpeg -hide_banner -loglevel panic -y -i - %1%audio/musics/%2%.ogg"
     ) % output_dir_ % index).str();
-    if (!no_ffmpeg_ && !no_timidity_) std::system(command.c_str());
+    if (ffmpeg_ && timidity_) std::system(command.c_str());
 
     // Remove the midi file.
-    if (!keep_originals_)
-        std::remove((output_dir_ + "audio/musics/" + std::to_string(index) + ".mid").c_str());
+    if (!keep_originals_) std::remove((output_dir_ + "audio/musics/" + std::to_string(index) + ".mid").c_str());
 
     musics_.push_back("audio/musics/" + std::to_string(processed_musics_) + ".ogg");
     processed_musics_ ++;
@@ -1500,7 +1450,7 @@ bool MediaDataInstaller::InstallMusics(){
 
 void MediaDataInstaller::InstallHQMusics(){
     std::vector<std::string> hq_musics = {"hearth", "sato", "sensui", "wind"};
-    for (std::string hq_music : hq_musics){
+    for (const std::string hq_music : hq_musics){
 
         int index = 2000;
         for (auto const& m : musics_map_){
@@ -1512,15 +1462,14 @@ void MediaDataInstaller::InstallHQMusics(){
 
         std::string command = (boost::format(
           "ffmpeg -hide_banner -loglevel panic -y -i %1%musics/%2%.wav %3%audio/sounds/%4%.ogg"
-        ) % input_dir_ % hq_music % output_dir_ % index).str();
-        if (!no_ffmpeg_)  std::system(command.c_str());
+        ) % disk_image_.getContentPath() % hq_music % output_dir_ % index).str();
+        if (ffmpeg_)  std::system(command.c_str());
     }
 }
 
 void MediaDataInstaller::WriteMusicsIndex(){
     TiXmlDocument xml;
     std::unique_ptr<TiXmlElement> container(new TiXmlElement("musics"));
-    //for (string item : items_){
     for (int id = 0; id < musics_.size(); id ++){
         std::string path = musics_[id];
         std::unique_ptr<TiXmlElement> xml_music(new TiXmlElement("music"));
@@ -1577,3 +1526,29 @@ void MediaDataInstaller::WriteMusicsIndex(){
     xml.SaveFile(output_dir_ + "audio/musics/_musics.xml");
 }
 
+int MediaDataInstaller::InstallVideosInit(){
+    // TODO: Look ofor anothe rvideo folders
+    processed_videos_ = 0;
+    const boost::filesystem::path movies_dir(output_dir_ + "/ff7/movies/");
+    if (!boost::filesystem::exists(movies_dir) || !boost::filesystem::is_directory(movies_dir)) return 0;
+
+    int total_videos = 0;
+    for (const auto& entry : boost::filesystem::directory_iterator(movies_dir)){
+        if (boost::filesystem::is_regular_file(entry.path())){
+            std::cout << entry.path().filename().string() << std::endl;
+            videos_.push_back(entry.path().string());
+            total_videos ++;
+        }
+    }
+    return total_videos;
+}
+
+void MediaDataInstaller::InstallVideos(){
+    if (processed_videos_ < 0 || processed_videos_ >= videos_.size()) return;
+    const std::string output_dir = output_dir_ + "video/";
+    boost::filesystem::create_directories(output_dir);
+    const boost::filesystem::path source(videos_[processed_videos_]);
+    const boost::filesystem::path destination = boost::filesystem::path(output_dir) / source.filename();
+    boost::filesystem::copy_file(source, destination, boost::filesystem::copy_options::overwrite_existing);
+    processed_videos_ ++;
+}

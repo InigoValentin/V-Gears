@@ -54,11 +54,9 @@ FieldDisassembler::FieldDisassembler(
     ReadHeader();
 }
 
-FieldDisassembler::FieldDisassembler(
-  FieldScriptFormatter& formatter, FieldEngine *engine, InstVec &insts
-): Disassembler(insts), engine_(engine), formatter_(formatter){
-    section_pointers_size_ = (sizeof(uint32) * NUM_SECTIONS);
-}
+FieldDisassembler::FieldDisassembler(FieldScriptFormatter& formatter, FieldEngine *engine, InstVec &insts):
+  Disassembler(insts), engine_(engine), formatter_(formatter)
+{section_pointers_size_ = (sizeof(uint32) * NUM_SECTIONS);}
 
 float FieldDisassembler::GetScaleFactor() const{return scale_factor_;}
 
@@ -70,8 +68,7 @@ void FieldDisassembler::ReadHeader(){
         for (int i = 0; i < NUM_SECTIONS; i ++) sections_[i] = stream_->ReadU32();
         // Now fix up from PSX RAM pointers to simple file offsets.
         const uint32 basePtr = sections_[0];
-        for (int i = 0; i < NUM_SECTIONS; i++)
-            sections_[i] = (sections_[i] - basePtr) + section_pointers_size_;
+        for (int i = 0; i < NUM_SECTIONS; i++) sections_[i] = (sections_[i] - basePtr) + section_pointers_size_;
         // Now seek to the script section.
         stream_->Seek(sections_[SCRIPT]);
     }
@@ -86,9 +83,7 @@ void FieldDisassembler::Open(const char *filename){
     ReadHeader();
 }
 
-uint32 FieldDisassembler::GetEndOfScriptOffset(
-  uint16 cur_entry_point, size_t entity_index, size_t script_index
-){
+uint32 FieldDisassembler::GetEndOfScriptOffset(uint16 cur_entry_point, size_t entity_index, size_t script_index){
     uint16 next_entry_point = cur_entry_point;
     do{
         if (script_index + 1 >= 32){
@@ -119,19 +114,24 @@ std::unique_ptr<Function> FieldDisassembler::StartFunction(size_t script_index){
 
 void FieldDisassembler::DoDisassemble(){
     // Loop through the scripts for each entity.
+    std::set<std::string> used_entity_names;
     for (size_t entity_number = 0; entity_number < header_.entity_scripts.size(); entity_number ++){
         std::string original_name = header_.field_entity_names[entity_number].data();
         // If the entity name was blank in the file then use a consistent generated name
         if (original_name.empty()) original_name = "entity_" + std::to_string(entity_number);
-        const std::string entity_name = formatter_.GetFriendlyEntityName(original_name);
+        std::string entity_name = formatter_.GetFriendlyEntityName(original_name);
+        // The original game allows several entities to share a name, such as a line and a model.
+        // Here a name identifies the entity in scripts, the map and the engine, so keep it unique.
+        if (!used_entity_names.insert(entity_name).second){
+            entity_name += "_" + std::to_string(entity_number);
+            used_entity_names.insert(entity_name);
+        }
         // Only parse each script one.
         std::set<uint16> parsed_scripts;
         std::vector<ScriptInfo> script_info;
         // Collect the scripts to parse
         for (
-          size_t script_index = 0;
-          script_index < header_.entity_scripts[entity_number].size();
-          script_index ++
+          size_t script_index = 0; script_index < header_.entity_scripts[entity_number].size(); script_index ++
         ){
             uint16 script_entry_point = header_.entity_scripts[entity_number][script_index];
             // If this scripts entry point is already parsed, don't do it again as it means
@@ -151,8 +151,7 @@ void FieldDisassembler::DoDisassemble(){
             const bool is_start = it == script_info.begin();
             const bool is_end = it == (-- script_info.end());
             DisassembleIndivdualScript(
-              entity_name, entity_number, it->index, it->entry_point,
-              it->next_entry_point, is_start, is_end
+              entity_name, entity_number, it->index, it->entry_point, it->next_entry_point, is_start, is_end
             );
         }
     }
@@ -161,8 +160,7 @@ void FieldDisassembler::DoDisassemble(){
 int FieldDisassembler::FindId(uint32 start_addr, uint32 end_addr, const InstVec& insts){
     for (const InstPtr& instruction : insts){
         if (instruction->GetAddress() >= start_addr && instruction->GetAddress() <= end_addr){
-            if (instruction->GetOpcode() == OPCODES::opCodeCHAR)
-                return instruction->GetParam(0)->GetSigned();
+            if (instruction->GetOpcode() == OPCODES::opCodeCHAR) return instruction->GetParam(0)->GetSigned();
         }
     }
     return -1;
@@ -183,9 +181,7 @@ void FieldDisassembler::AddFunc(
     // Read.
     if (to_return_only){
         // Read opcodes to the end or bail at the first return.
-        is_line = ReadOpCodesToPositionOrReturn(
-          next_script_entry_point + section_pointers_size_, point_a, point_b
-        );
+        is_line = ReadOpCodesToPositionOrReturn(next_script_entry_point + section_pointers_size_, point_a, point_b);
         auto stream_pos = stream_->GetPosition();
         const size_t endPos = next_script_entry_point + section_pointers_size_;
         // Can't be the end if there is more data:
@@ -194,11 +190,8 @@ void FieldDisassembler::AddFunc(
     else{
         // Keep going until all of the scriptis fectched, i.e if bailed at a
         // return, then call again until everything is parsed.
-        while (stream_->GetPosition() != next_script_entry_point + section_pointers_size_){
-            is_line = ReadOpCodesToPositionOrReturn(
-              next_script_entry_point + section_pointers_size_, point_a, point_b
-            );
-        }
+        while (stream_->GetPosition() != next_script_entry_point + section_pointers_size_)
+            is_line = ReadOpCodesToPositionOrReturn(next_script_entry_point + section_pointers_size_, point_a, point_b);
     }
     // Read metadata, mark start and/or end.
     std::string meta_data;
@@ -260,31 +253,21 @@ void FieldDisassembler::DisassembleIndivdualScript(
     if (script_index > 0){
         if (script_index == 1){
             AddFunc(
-              entity_name, entity_index, script_index, next_script_entry_point,
-              is_start, is_end, false, "on_interact"
+              entity_name, entity_index, script_index, next_script_entry_point, is_start, is_end, false, "on_interact"
             );
         }
-        else{
-            AddFunc(
-              entity_name, entity_index, script_index, next_script_entry_point,
-              is_start, is_end, false, ""
-            );
-        }
+        else AddFunc(entity_name, entity_index, script_index, next_script_entry_point, is_start, is_end, false, "");
     }
     else{
         const size_t end_pos = next_script_entry_point + section_pointers_size_;
         // Read the init script, which means stop at the first return.
-        AddFunc(
-          entity_name, entity_index, script_index, next_script_entry_point,
-          is_start, is_end, true, "on_start"
-        );
+        AddFunc(entity_name, entity_index, script_index, next_script_entry_point, is_start, is_end, true, "on_start");
         // Not at the end of this script? Then the remaining data is the "main" script
         auto stream_pos = stream_->GetPosition();
         if (stream_pos != end_pos){
             // The "main" script can have more than one return statement...
             AddFunc(
-              entity_name, entity_index, script_index, next_script_entry_point,
-              false, is_end, false, "on_update"
+              entity_name, entity_index, script_index, next_script_entry_point, false, is_end, false, "on_update"
             );
             stream_pos = stream_->GetPosition();
             // ... but should end exactly on the end pos
@@ -779,90 +762,51 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
                     switch (opcode){
                         case OPCODES_KAWAI::EYETX:
                             // Parameters were "BBBB"
-                            ParseOpcode(
-                              opcode, "EYETX", new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "EYETX", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::TRNSP:
                             // Parameters were "B"
-                            ParseOpcode(
-                              opcode, "TRNSP", new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "TRNSP", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::AMBNT:
                             // Parameters were "AMBNT"
-                            ParseOpcode(
-                              opcode, "AMBNT",
-                              new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "AMBNT", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown03:
-                            ParseOpcode(
-                              opcode, "Unknown03",
-                              new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "Unknown03", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown04:
-                            ParseOpcode(
-                              opcode, "Unknown04",
-                              new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "Unknown04", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown05:
-                            ParseOpcode(
-                              opcode, "Unknown03",
-                              new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "Unknown05", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::LIGHT:
-                            ParseOpcode(
-                              opcode, "LIGHT",
-                              new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "LIGHT", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown07:
-                            ParseOpcode(
-                              opcode, "Unknown07",
-                              new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "Unknown07", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown08:
-                            ParseOpcode(
-                              opcode, "Unknown08",
-                              new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "Unknown08", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown09:
-                            ParseOpcode(
-                              opcode, "Unknown09",
-                              new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "Unknown09", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::SBOBJ:
-                            ParseOpcode(
-                              opcode, "SBOBJ", new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "SBOBJ", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown0B:
-                            ParseOpcode(
-                              opcode, "Unknown0B",
-                              new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "Unknown0B", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown0C:
-                            ParseOpcode(
-                              opcode, "Unknown0C", new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "Unknown0C", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::SHINE:
-                            ParseOpcode(
-                              opcode, "SHINE", new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "SHINE", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::RESET:
-                            ParseOpcode(
-                              opcode, "RESET", new FieldModelInstruction(), 0, parameters.c_str()
-                            );
+                            ParseOpcode(opcode, "RESET", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         default:
                             throw UnknownSubOpcodeException(this->address_, opcode);
@@ -1097,9 +1041,7 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
                 ParseOpcode(full_opcode, "ADPAL", new FieldBackgroundInstruction(), 0, "NNNBBBBBB");
                 break;
             case OPCODES::MPPAL2:
-                ParseOpcode(
-                  full_opcode, "MPPAL2", new FieldBackgroundInstruction(), 0, "NNNBBBBBB"
-                );
+                ParseOpcode(full_opcode, "MPPAL2", new FieldBackgroundInstruction(), 0, "NNNBBBBBB");
                 break;
             case OPCODES::STPLS:
                 ParseOpcode(full_opcode, "STPLS", new FieldBackgroundInstruction(), 0, "BBBB");

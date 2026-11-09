@@ -142,6 +142,12 @@ namespace VGears{
 
     void FLevelFile::SetRawScript(const std::vector<u8>& script_data){raw_script_ = script_data;}
 
+    const std::vector<u8>& FLevelFile::GetRawEncounter() const{return raw_encounter_;}
+
+    void FLevelFile::SetRawEncounter(const std::vector<u8>& encounter_data){
+        raw_encounter_ = encounter_data;
+    }
+
     void FLevelFile::SetBackground(const BackgroundFilePtr &background){background_ = background;}
 
     const CameraMatrixFilePtr& FLevelFile::GetCameraMatrix(void) const{return camera_matrix_;}

@@ -55,18 +55,20 @@ void Manager::SetBattleModule(){SetModule(Module::BATTLE);}
 void Manager::SetWorldModule(){SetModule(Module::WORLD);}
 
 void Manager::SetPreviousModule(){
-    if (module_ != Module::BATTLE)
+    if (module_ != Module::BATTLE){
         LOG_WARNING(
-          "Called Manager::SetPreviousModule without battle module active. Doing nothing"
-          + "Current module is " + std::to_string(module_)
+          std::string("Called Manager::SetPreviousModule without battle module active. ")
+          + "Doing nothing. Current module is " + std::to_string(module_)
         );
-    else if(module_ = prev_module_)
+        return;
+    }
+    if (prev_module_ == Module::BATTLE){
         LOG_WARNING(
-          "Called Manager::SetPreviousModule but there is no previous module. Doing nothing"
-          + "Current module is " + std::to_string(module_)
+          "Called Manager::SetPreviousModule but there is no previous module. Doing nothing."
         );
-    else module_ = prev_module_;
-    return;
+        return;
+    }
+    module_ = prev_module_;
 }
 
 void Manager::Update(){

@@ -104,7 +104,7 @@ void WorldKernelCallInstruction::ProcessInst(
                     case 3: type = "black"; break;
                     case 4: type = "gold"; break;
                 }
-                func = "SetChocoboType(" + type + ");";
+                func = "SetChocoboType(\"" + type + "\");";
             }
             break;
         case 0x34c:
@@ -117,13 +117,13 @@ void WorldKernelCallInstruction::ProcessInst(
                     case -1: type = "gold"; break;
                     case -2: type = "black"; break;
                 }
-                func = "SetSubmarineColor(" + type + ");";
+                func = "SetSubmarineColor(\"" + type + "\");";
             }
             break;
         case 0x349:
             {
                 std::string type = stack.Pop()->GetString();
-                std::string comment = "// ";
+                std::string comment = "-- ";
                 switch (std::stoi(type)){
                     case 0: comment += "before temple of the ancients,"; break;
                     case 1: comment += "after temple of the ancients"; break;
@@ -138,7 +138,7 @@ void WorldKernelCallInstruction::ProcessInst(
         case 0x300:
             {
                 std::string type = stack.Pop()->GetString();
-                std::string comment = "// ";
+                std::string comment = "-- ";
                 try{
                     switch (std::stoi(type)){
                         case 0: comment += "Cloud"; break;

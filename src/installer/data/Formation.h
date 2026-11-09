@@ -38,39 +38,42 @@ struct Formation{
         /**
          * Preemptive attack.
          *
-         * Enemies are on their back, they bars are empty. When attacked, or after a certain time,
-         * they turn and their bars start to fill.
+         * Enemies are on their back, they bars are empty. When attacked, or
+         * after a certain time, they turn and their bars start to fill.
          */
         PREEMPTIVE,
 
         /**
          * Back attack.
          *
-         * Players are on their back, they bars are empty. When attacked, or after a certain time,
-         * they turn and their bars start to fill. Player rows are reversed.
+         * Players are on their back, they bars are empty. When attacked, or
+         * after a certain time, they turn and their bars start to fill.
+         * Player rows are reversed.
          */
         BACK_ATTACK,
 
         /**
          * Side attack.
          *
-         * Players in both sides, enemies in center, facing one or other direction. Change command
-         * disabled.
+         * Players in both sides, enemies in center, facing one or other
+         * direction. Change command disabled.
          */
         SIDE_ATTACK,
 
         /**
-         * Enemies in both sides, player in center, front row, facing one or the other direction.
-         * Change command disabled. Unescapable until one of the sides is cleared.
+         * Enemies in both sides, player in center, front row, facing one or the
+         * other direction. Change command disabled. Unescapable until one of
+         * the sides is cleared.
          */
         PINCER_ATTACK,
 
         /**
          * Locked position fight.
          *
-         * Like a normal one, but all players in the front row. Change command disabled.
+         * Like a normal one, but all players in the front row. Change command
+         * disabled.
          */
-        LOCKED
+        LOCKED = 8
     };
 
     /**
@@ -106,42 +109,46 @@ struct Formation{
         /**
          * Cover flags.
          *
-         * These flags are used in conjunction with row to determine if a target can be selected
-         * as the target of a short-range attack. The determination of this is worked out in this
-         * way: An enemy exists in row 1 and another in row 2. If the enemy in row 1 shares a cover
-         * flag with the enemy in row 2 then the enemy in row 2 cannot be targeted until all
-         * enemies in row 1 that share a cover flag with the row 2 enemy is defeated. It works like
-         * this. Two active enemies exist, A and B.
+         * These flags are used in conjunction with row to determine if a target
+         * can be selected as the target of a short-range attack. The
+         * determination of this is worked out in this way: An enemy exists in
+         * row 1 and another in row 2. If the enemy in row 1 shares a cover flag
+         * with the enemy in row 2 then the enemy in row 2 cannot be targeted
+         * until all enemies in row 1 that share a cover flag with the row 2
+         * enemy are defeated. It works like this. Two active enemies exist, A
+         * and B.
          *
-         * If ((B's row > A's row) and (B's cover flags AND A's cover flags) > 0)
+         * If ((B's row > A's row) and (B's flags AND A's flags) > 0)
          * then enemy B cannot be targeted by short-range attacks.
          *
          * For any enemies A and B.
          *
          * Example:
-         * Consider the Battery Cap x6 battle in the forest between Nibelheim and Rocket Town.
-         * Their cover flags (in binary) are:
+         * Consider the Battery Cap x6 battle in the forest between Nibelheim
+         * and Rocket Town. Their cover flags (in binary) are:
          *
          * Row 1:       00100
          * Row 2:    00110 01100
          * Row 3: 00011 00100 11000
          *
-         * The battery caps in row 2 cannot be targeted by a short-range attack until the one in
-         * row 1 has been defeated because they share the 0x4 cover flag. Once row 1 has been
-         * cleared:
+         * The battery caps in row 2 cannot be targeted by a short-range attack
+         * until the one in row 1 has been defeated because they share the 0x4
+         * cover flag. Once row 1 has been cleared:
          *
          * Row 2:    00110 01100
          * Row 3: 00011 00100 11000
          *
-         * The battery cap on left in row 2 covers the left two in row 3 because it shares flag 0x4
-         * with the one in the middle and flag 0x2 with the one on the far left. As long as it is
-         * active these in row 3 cannot be targeted. Similarly, the battery cap on the right in row
-         * 2 shares the 0x4 flag with the middle of row 3 and the 0x8 flag with the far right of
-         * row 3 so these cannot be targeted until the right side of row 2 is defeated. It is also
-         * necessary to note that because row 1 does not share any flags with the extreme right and
-         * left of row 3, they can be targeted if the corresponding enemy in row 2 is defeated even
-         * if the row 1 enemy is still active. Also of note is that enemies in the same row that
-         * share cover flags are not considered.
+         * The battery cap on left in row 2 covers the left two in row 3 because
+         * it shares flag 0x4 with the one in the middle and flag 0x2 with the
+         * one on the far left. As long as it is active these in row 3 cannot be
+         * targeted. Similarly, the battery cap on the right in row 2 shares the
+         * 0x4 flag with the middle of row 3 and the 0x8 flag with the far right
+         * of row 3 so these cannot be targeted until the right side of row 2 is
+         * defeated. It is also necessary to note that because row 1 does not
+         * share any flags with the extreme right and left of row 3, they can be
+         * targeted if the corresponding enemy in row 2 is defeated even if the
+         * row 1 enemy is still active. Also of note is that enemies in the same
+         * row that share cover flags are not considered.
          */
         char cover[5];
 
@@ -227,7 +234,8 @@ struct Formation{
     unsigned int id;
 
     /**
-     * When all enemies are defeated, begin battle with this ID without ending battle scene.
+     * When all enemies are defeated, begin battle with this ID without ending
+     * battle scene.
      */
     int next_formation;
 
@@ -247,7 +255,8 @@ struct Formation{
     bool skip_victory_pose;
 
     /**
-     * If true, spoils (item, ap, money...) will not be obtained after the battle.
+     * If true, spoils (item, ap, money...) will not be obtained after the
+     * battle.
      *
      * The spoil screens will not be displayed.
      */
@@ -271,8 +280,9 @@ struct Formation{
     /**
      * Location ID.
      *
-     * Must be set, except for formations referenced by other formation's {@see next_formation} or
-     * {@see next_arena_formation_candidates}. In those cases, it can be -1.
+     * Must be set, except for formations referenced by other formation's
+     * {@see next_formation} or {@see next_arena_formation_candidates}. In those
+     * cases, it can be -1.
      */
     int location;
 
@@ -299,7 +309,7 @@ struct Formation{
     bool is_arena_battle;
 
     /**
-     * FOr arena battles, candidates fro the next formation.
+     * For arena battles, candidates for the next formation.
      */
     std::vector<int> next_arena_formation_candidates;
 

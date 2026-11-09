@@ -18,6 +18,6 @@
 
 bool ReturnInstruction::IsReturn() const{return true;}
 
-void ReturnInstruction::ProcessInst(
-  Function& function, ValueStack& stack, Engine* engine, CodeGenerator *code_gen
-){code_gen->AddOutputLine("return;");}
+void ReturnInstruction::ProcessInst(Function& function, ValueStack& stack, Engine* engine, CodeGenerator *code_gen){
+    code_gen->AddOutputLine("return;");
+}

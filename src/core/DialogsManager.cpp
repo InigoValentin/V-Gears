@@ -88,8 +88,8 @@ void DialogsManager::Initialise(){
 }
 
 void DialogsManager::Input(const VGears::Event& input){
-    if (input.type == VGears::ET_KEY_PRESS && input.event == "message_ok") next_pressed_ = true;
-    else if (input.type == VGears::ET_KEY_REPEAT && input.event == "message_ok")
+    if (input.type == VGears::ET_KEY_PRESS && input.event == "CONFIRM") next_pressed_ = true;
+    else if (input.type == VGears::ET_KEY_REPEAT && input.event == "CONFIRM")
         next_repeated_ = true;
     else if (input.type == VGears::ET_KEY_PRESS && input.event == "message_up") up_pressed_ = true;
     else if (input.type == VGears::ET_KEY_PRESS && input.event == "message_down")
@@ -167,6 +167,30 @@ void DialogsManager::SetText(const char* d_name, const char* text){
         ShowMessage(id, data->x, data->y, data->w, data->h);
         messages_[id]->text_area->SetText(std::string("[ERROR string not found:] ") + text);
     }
+}
+
+bool DialogsManager::ShowScriptMessage(const char* text){
+    if (text == nullptr || limit_area_ == nullptr) return false;
+
+    int message_id = -1;
+    for (size_t i = 0; i < messages_.size(); ++i){
+        if (messages_[i]->widget->GetName() == "Timer") continue;
+        if (messages_[i]->state == MS_CLOSED){
+            message_id = static_cast<int>(i);
+            break;
+        }
+    }
+    if (message_id < 0) return false;
+
+    MessageData* data = messages_[message_id];
+    data->clickable = true;
+    data->closeable = true;
+    data->show_cursor = false;
+    data->show_window = true;
+    data->auto_close = false;
+    ShowMessage(message_id, 16, 176, 288, 56);
+    data->text_area->SetText(text);
+    return true;
 }
 
 void DialogsManager::SetNumeric(const char* d_name, const bool numeric, const bool timer){
@@ -490,4 +514,4 @@ void DialogsManager::UpdateField(){
 
 void DialogsManager::UpdateBattle(){}
 
-void DialogsManager::UpdateWorld(){}
+void DialogsManager::UpdateWorld(){UpdateField();}

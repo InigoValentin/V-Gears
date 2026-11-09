@@ -57,6 +57,30 @@ class ScriptFormatter{
         virtual std::string GetFriendlyAnimationName(int animation_id, int id);
 
         /**
+         * Retrieves the animation a model must play when its script doesn't set a default one.
+         *
+         * The engine plays the animation called "Idle" by default. Models that don't have one
+         * show no animation at all, and they are not drawn.
+         *
+         * @param[in] char_id ID of the model, as given to the CHAR opcode.
+         * @return Name of the animation to play, or an empty string if the model already has an
+         * animation called "Idle", or there is no animation to choose.
+         */
+        virtual std::string GetDefaultAnimationName(int char_id);
+
+        /**
+         * Retrieves the animation a model plays when it walks or runs on its own.
+         *
+         * In the original game the second animation of a model is its walk, and the third its
+         * run. Only some models have those called "Walk" and "Run".
+         *
+         * @param[in] char_id ID of the model, as given to the CHAR opcode.
+         * @param[in] index 1 for the walk animation, 2 for the run animation.
+         * @return Name of the animation, or an empty string if the model hasn't got it.
+         */
+        virtual std::string GetMoveAnimationName(int char_id, int index);
+
+        /**
          * Retrieves a friendly name for a character.
          *
          * @param[in] char_id ID of the character.
@@ -73,9 +97,7 @@ class ScriptFormatter{
          * @return Friendly name assigned to the entity, or
          * function_name if there is none.
          */
-        virtual std::string GetFriendlyFunctionName(
-          const std::string& entity_name, const std::string& function_name
-        );
+        virtual std::string GetFriendlyFunctionName(const std::string& entity_name, const std::string& function_name);
 
         /**
          * Retrieves the header comment for a function in an entity.
@@ -85,7 +107,5 @@ class ScriptFormatter{
          * @return The function comment. An empty string if the entity or
          * the function don't exist.
          */
-        virtual std::string GetFunctionComment(
-          const std::string& entity_name, const std::string& function_name
-        );
+        virtual std::string GetFunctionComment(const std::string& entity_name, const std::string& function_name);
 };

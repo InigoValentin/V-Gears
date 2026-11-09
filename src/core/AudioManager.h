@@ -282,6 +282,23 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
          */
         void ScriptSetBattleTrack(int id);
 
+        /**
+         * Plays a music track once, without looping.
+         *
+         * To be called from Lua scripts. Used for short tracks like the victory fanfare. In battle
+         * it plays in the battle music player, replacing the battle music.
+         *
+         * @param[in] name Name of the track, as in the music index.
+         */
+        void ScriptPlayMusicOnce(const char* name);
+
+        /**
+         * Stops the battle music and lets the field or world map music continue.
+         *
+         * To be called when a battle ends, before going back to the previous module.
+         */
+        void EndBattleMusic();
+
     private:
 
         /**

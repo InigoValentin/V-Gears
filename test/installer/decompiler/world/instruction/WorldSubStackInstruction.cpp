@@ -16,11 +16,18 @@
 #include <boost/test/unit_test.hpp>
 #include "installer/decompiler/world/instruction/WorldSubStackInstruction.h"
 
-#pragma message("Unimplemented test file: " __FILE__)
+BOOST_AUTO_TEST_CASE(TestWorldSubStackInstructionLeftShiftIsValidLua){
+    WorldSubStackInstruction instruction;
+    instruction.SetOpcode(0x51);
 
-BOOST_AUTO_TEST_CASE(TestWorldSubStackInstruction){
-    // TODO
-    BOOST_WARN_MESSAGE(false, "Unimplemented test file: WorldSubStackInstruction");
-    BOOST_CHECK(0 == 0);
+    ValueStack stack;
+    stack.Push(new VarValue("2"));
+    stack.Push(new VarValue("2928 - Read(912)"));
+    Function function;
+    instruction.ProcessInst(function, stack, nullptr, nullptr);
+
+    BOOST_CHECK_EQUAL(
+        stack.Pop()->GetString(), "((2928 - Read(912)) * (2 ^ 2))"
+    );
 }
 

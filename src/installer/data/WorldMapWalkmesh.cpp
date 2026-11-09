@@ -62,8 +62,7 @@ void WorldMapWalkmesh::Triangle::setCA(const int id, const bool warp){
     ca_.warp = warp;
 }
 
-WorldMapWalkmesh::WorldMapWalkmesh(const unsigned int id, const bool warp):
-  id_(id), warp_(warp), calculated_(false){
+WorldMapWalkmesh::WorldMapWalkmesh(const unsigned int id, const bool warp): id_(id), warp_(warp), calculated_(false){
     triangles_.clear();
 }
 
@@ -73,9 +72,10 @@ void WorldMapWalkmesh::addTriangle(
 ){
     calculated_ = false;
     Triangle tri(triangles_.size(), a, b, c, walkability, event);
-    if (id_ == 0 && triangles_.size() < 50){
-        std::cout << "Adding triangle " << tri.getId() << " W: "<< walkability << " - " << tri.getWalkability() << "     E: " << event << " - " << tri.getEvent() << std::endl;
-    }
+    //if (id_ == 0 && triangles_.size() < 50){
+    //    std::cout << "Adding triangle " << tri.getId() << " W: "<< walkability << " - " << tri.getWalkability()
+    //      << "     E: " << event << " - " << tri.getEvent() << std::endl;
+    //}
     triangles_.push_back(tri);
 }
 
@@ -106,17 +106,11 @@ void WorldMapWalkmesh::generate(std::string path){
         );
         // WARN: This is never actually calculated. See the comments on calculate()
         if (tri.getAB().id > -1)
-            xml_tri->SetAttribute(
-              "a_b", std::to_string(tri.getAB().id) + (tri.getAB().warp ? " warp" : "")
-            );
+            xml_tri->SetAttribute("a_b", std::to_string(tri.getAB().id) + (tri.getAB().warp ? " warp" : ""));
         if (tri.getBC().id > -1)
-            xml_tri->SetAttribute(
-              "b_c", std::to_string(tri.getBC().id) + (tri.getBC().warp ? " warp" : "")
-            );
+            xml_tri->SetAttribute("b_c", std::to_string(tri.getBC().id) + (tri.getBC().warp ? " warp" : ""));
         if (tri.getCA().id > -1)
-            xml_tri->SetAttribute(
-              "c_a", std::to_string(tri.getCA().id) + (tri.getCA().warp ? " warp" : "")
-            );
+            xml_tri->SetAttribute("c_a", std::to_string(tri.getCA().id) + (tri.getCA().warp ? " warp" : ""));
         xml_tri->SetAttribute("walkability", std::to_string(tri.getWalkability()));
         if (tri.getEvent() > -1) xml_tri->SetAttribute("event", std::to_string(tri.getEvent()));
         xml->LinkEndChild(xml_tri.release());

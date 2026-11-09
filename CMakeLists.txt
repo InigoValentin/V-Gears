@@ -1,7 +1,7 @@
 # Minimum required CMake and project declaration
 cmake_minimum_required(VERSION 3.5)
 # Enable both C and CXX languages so C and C++ toolchains are configured.
-project(V-Gears VERSION 0.1.19 LANGUAGES C CXX)
+project(V-Gears VERSION 0.2.0 LANGUAGES C CXX)
 
 # Provide a central common include for project-wide policies and defaults.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
@@ -47,15 +47,57 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build" FORCE)
 endif()
 
-# First, build external libraries (luabind and luajit).
-add_subdirectory(lib)
+# LuaJIT is a system dependency; sol2 is header-only.
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(LUAJIT QUIET luajit)
+endif()
+
+if(LUAJIT_FOUND)
+    set(VGEARS_LUAJIT_INCLUDE_DIRS ${LUAJIT_INCLUDE_DIRS})
+    set(VGEARS_LUAJIT_LIBRARIES ${LUAJIT_LINK_LIBRARIES})
+else()
+    find_path(VGEARS_LUAJIT_INCLUDE_DIR
+        NAMES lua.hpp
+        PATH_SUFFIXES luajit-2.1 luajit-2.0 luajit-5.1
+    )
+    find_library(VGEARS_LUAJIT_LIBRARY
+        NAMES luajit-5.1 luajit-2.1 luajit
+    )
+    if(NOT VGEARS_LUAJIT_INCLUDE_DIR OR NOT VGEARS_LUAJIT_LIBRARY)
+        message(FATAL_ERROR
+            "LuaJIT development files were not found. Install libluajit-5.1-dev "
+            "or set VGEARS_LUAJIT_INCLUDE_DIR and VGEARS_LUAJIT_LIBRARY."
+        )
+    endif()
+    set(VGEARS_LUAJIT_INCLUDE_DIRS ${VGEARS_LUAJIT_INCLUDE_DIR})
+    set(VGEARS_LUAJIT_LIBRARIES ${VGEARS_LUAJIT_LIBRARY})
+endif()
 
 # Build v-gears (and, if requested, the installer).
 add_subdirectory(src)
 
 # If requested, build tests
 if(BUILD_TESTS)
+    enable_testing()
     add_subdirectory(test)
+endif()
+
+# Install Linux desktop integration assets for the installer so desktop shells
+# can map the running window to its icon.
+if(UNIX AND NOT APPLE AND BUILD_INSTALLER)
+    install(
+        FILES ${CMAKE_SOURCE_DIR}/v-gears-installer.desktop
+        DESTINATION share/applications
+    )
+    install(
+        FILES ${CMAKE_SOURCE_DIR}/v-gears-installer.png
+        DESTINATION share/icons/hicolor/256x256/apps
+    )
+    install(
+        FILES ${CMAKE_SOURCE_DIR}/v-gears-installer.png
+        DESTINATION share/pixmaps
+    )
 endif()
 
 # TODO: Generate Installer (.msi, .deb, .appImage...)

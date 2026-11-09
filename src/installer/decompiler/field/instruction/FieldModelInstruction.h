@@ -157,6 +157,155 @@ class FieldModelInstruction : public KernelCallInstruction{
         void ProcessMOVE(CodeGenerator* code_gen, const std::string& entity);
 
         /**
+         * Processes a MOVA opcode.
+         *
+         * Opcode: 0xAA
+         * Short name: MOVA
+         * Long name: Move to Entity
+         *
+         * Memory layout (2 bytes)
+         * |0xAA|E|
+         *
+         * Walks the model towards the entity with ID E, up to the point where the two touch, and
+         * waits until it gets there.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] engine Engine, to find the entity.
+         */
+        void ProcessMOVA(
+          CodeGenerator* code_gen, const std::string& entity, const FieldEngine& engine
+        );
+
+        /**
+         * Processes a TALKR or TLKR2 opcode.
+         *
+         * Opcodes: 0xC5 and 0xD6
+         * Short names: TALKR and TLKR2
+         * Long names: Talk Range and Talk Range (16-bit)
+         *
+         * Sets how far from the model the player can start a conversation with it. It's the same
+         * for both opcodes, which only differ in the size of the value.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         */
+        void ProcessTALKR(CodeGenerator* code_gen, const std::string& entity);
+
+        /**
+         * Processes a DIRA opcode.
+         *
+         * Opcode: 0xB6
+         * Short name: DIRA
+         * Long name: Direction to Entity
+         *
+         * Memory layout (2 bytes)
+         * |0xB6|E|
+         *
+         * Turns the model towards the entity with ID E at once.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] engine Engine, to find the entity.
+         */
+        void ProcessDIRA(
+          CodeGenerator* code_gen, const std::string& entity, const FieldEngine& engine
+        );
+
+        /**
+         * Processes an ASPED opcode.
+         *
+         * Opcode: 0xBD
+         * Short name: ASPED
+         * Long name: Animation Speed
+         *
+         * Sets the speed of all the animations the model plays: 16 is normal speed, 32 is double
+         * and 8 is half.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         */
+        void ProcessASPED(CodeGenerator* code_gen, const std::string& entity);
+
+        /**
+         * Processes an ANIME2 opcode.
+         *
+         * Plays an animation of the model and goes back to the previous state, without waiting
+         * for it to end.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] char_id ID of the model, to name the animation.
+         */
+        void ProcessANIME2(CodeGenerator* code_gen, const std::string& entity, int char_id);
+
+        /**
+         * Processes an ANIM!1 opcode.
+         *
+         * Plays an animation of the model and stops at its last frame, without waiting for it to
+         * end. It's the non-waiting version of ANIM!2.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] char_id ID of the model, to name the animation.
+         */
+        void ProcessANIM_1(CodeGenerator* code_gen, const std::string& entity, int char_id);
+
+        /**
+         * Processes a CANIM1 opcode.
+         *
+         * Plays part of an animation and goes back to the previous state, without waiting for it
+         * to end. It's the non-waiting version of CANIM2.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] char_id ID of the model, to name the animation.
+         */
+        void ProcessCANIM1(CodeGenerator* code_gen, const std::string& entity, int char_id);
+
+        /**
+         * Processes a CANM!1 opcode.
+         *
+         * Plays part of an animation and stops at its last frame, without waiting for it to end.
+         * It's the non-waiting version of CANM!2.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         * @param[in] char_id ID of the model, to name the animation.
+         */
+        void ProcessCANM_1(CodeGenerator* code_gen, const std::string& entity, int char_id);
+
+        /**
+         * Processes an ANIMW opcode.
+         *
+         * Waits for the animation that was played by one of the non-waiting animation opcodes.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         */
+        void ProcessANIMW(CodeGenerator* code_gen, const std::string& entity);
+
+        /**
+         * Processes an FMOVE opcode.
+         *
+         * Opcode: 0xAD
+         * Short name: FMOVE
+         *
+         * Memory layout (6 bytes)
+         * |0xAD|B1/B2|X|Y|
+         *
+         * Moves the entity's model to the position, and waits for it to arrive, like MOVE. The
+         * animation is the one the script chose, instead of the walking one. The documentation
+         * for this opcode in the repository is a copy of the one for CMOVE, so this is taken from
+         * how the scripts use it: they set a running animation, call FMOVE, and then set an idle
+         * animation.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity.
+         */
+        void ProcessFMOVE(CodeGenerator* code_gen, const std::string& entity);
+
+        /**
          * Processes a TURA opcode.
          *
          * Opcode: 0xAB
@@ -340,8 +489,9 @@ class FieldModelInstruction : public KernelCallInstruction{
          *
          * @param[in,out] code_gen Code generator to append lines.
          * @param[in] entity The name of the entity.
+         * @param[in] char_id ID of the character model, to name the climbing animation.
          */
-        void ProcessLADER(CodeGenerator* code_gen, const std::string& entity);
+        void ProcessLADER(CodeGenerator* code_gen, const std::string& entity, int char_id);
 
         /**
          * Processes an SLIDR opcode.

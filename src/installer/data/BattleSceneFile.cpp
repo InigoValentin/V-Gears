@@ -147,9 +147,51 @@ void BattleSceneFile::Read(File file){
         scene_.attack_data[a].special = file.readU16LE();
     }
     for (int a = 0; a < 32; a ++) scene_.attack_ids[a] = file.readU16LE();
-    for (int a = 0; a < 32; a ++)
-        for (int b = 0; b < 32; b ++) scene_.attack_names[a][b] = file.readU8();
-    // TODO: Keep reading for AI scripts.
+    for (int a = 0; a < 32; a ++) for (int b = 0; b < 32; b ++) scene_.attack_names[a][b] = file.readU8();
+    // AI scripts. The AI block is at a fixed offset, and starts with an offset for each of the 3
+    // enemies of the scene (0xFFFF if the enemy has none). Each enemy block has 16 offsets
+    // (0xFFFF for slots without a script) followed by the scripts, which end with the opcode 0x73.
+    for (int e = 0; e < 3; e ++) ai_scripts_[e].assign(16, std::vector<u8>());
+    {
+        const u32 ai_base = 0x0E80;
+        const u32 file_size = file.GetFileSize();
+        if (file_size > ai_base + 6){
+            std::vector<u8> bytes(file_size);
+            file.GetFileBuffer(bytes.data(), 0, file_size);
+            u16 block_offsets[3];
+            for (int e = 0; e < 3; e ++) block_offsets[e] = bytes[ai_base + 2 * e] | (bytes[ai_base + 2 * e + 1] << 8);
+            for (int e = 0; e < 3; e ++){
+                if (block_offsets[e] == 0xFFFF) continue;
+                const u32 block_start = ai_base + block_offsets[e];
+                // The block ends where the next enemy block starts, or at the end of the file.
+                u32 block_end = file_size;
+                for (int n = e + 1; n < 3; n ++){
+                    if (block_offsets[n] != 0xFFFF){
+                        block_end = ai_base + block_offsets[n];
+                        break;
+                    }
+                }
+                if (block_start + 32 > file_size || block_end > file_size) continue;
+                u16 entries[16];
+                for (int k = 0; k < 16; k ++) entries[k] = bytes[block_start + 2 * k] | (bytes[block_start + 2 * k + 1] << 8);
+                for (int k = 0; k < 16; k ++){
+                    if (entries[k] == 0xFFFF) continue;
+                    // A script ends where the next one starts, or at the end of the block.
+                    u32 script_end = block_end - block_start;
+                    for (int n = 0; n < 16; n ++){
+                        if (entries[n] != 0xFFFF && entries[n] > entries[k] && entries[n] < script_end) script_end = entries[n];
+                    }
+                    if (entries[k] >= script_end || block_start + script_end > file_size) continue;
+                    std::vector<u8> script(
+                      bytes.begin() + block_start + entries[k], bytes.begin() + block_start + script_end
+                    );
+                    // Padding at the end.
+                    while (!script.empty() && script.back() == 0xFF) script.pop_back();
+                    ai_scripts_[e][k] = script;
+                }
+            }
+        }
+    }
 
     // All the data is read, now format it.
 
@@ -188,11 +230,24 @@ void BattleSceneFile::Read(File file){
             if (scene_.enemy_data[e].animation_index[a] != 0xFF)
                 enemy.animations.push_back(scene_.enemy_data[e].animation_index[a]);
         }
+        // Attacks. Each of the 16 slots has an attack ID, the animation script of the model to play
+        // and the camera to use.
+        // The AI scripts of the enemy.
+        enemy.ai_scripts = ai_scripts_[e];
+        for (int a = 0; a < 16; a ++){
+            if (scene_.enemy_data[e].attacks[a] == 0xFFFF) continue;
+            Enemy::Attack attack;
+            attack.id = scene_.enemy_data[e].attacks[a];
+            attack.animation
+              = (scene_.enemy_data[e].animation_index[a] != 0xFF)
+              ? scene_.enemy_data[e].animation_index[a] : -1;
+            attack.camera
+              = (scene_.enemy_data[e].attack_camera[a] != 0xFFFF)
+              ? scene_.enemy_data[e].attack_camera[a] : -1;
+            enemy.attacks.push_back(attack);
+        }
         for (int l = 0; l < 8; l ++){
-            if (
-              scene_.enemy_data[e].elements[l] != 0xFF
-              && scene_.enemy_data[e].element_rates[l] != 0xFF
-            ){
+            if (scene_.enemy_data[e].elements[l] != 0xFF && scene_.enemy_data[e].element_rates[l] != 0xFF ){
                 Enemy::Element element;
                 element.id = scene_.enemy_data[e].elements[l];
                 switch (scene_.enemy_data[e].element_rates[l]){
@@ -207,196 +262,13 @@ void BattleSceneFile::Read(File file){
                 enemy.elements.push_back(element);
             }
         }
+        // Immunities are a bitmask: the bit position is the status ID, as in the original game
+        // (0 death, 1 near death, 2 sleep, 3 poison, 4 sadness, 5 fury, 6 confusion, 7 silence...).
         if (scene_.enemy_data[e].immunities != 0xFFFFFFFF){
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000001)){
+            for (int bit = 0; bit < 32; bit ++){
+                if ((scene_.enemy_data[e].immunities & (1u << bit)) == 0) continue;
                 Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::DEATH;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000002)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::NEAR_DEATH;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000004)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::SLEEP;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000008)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::POISONED;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000010)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::SADNESS;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000020)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::FURY;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000040)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::CONFU;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000080)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::SILENCE;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000100)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::HASTE;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000200)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::SLOW;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000400)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::STOP;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00000800)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::FROG;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00001000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::SMALL;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00002000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::SLOW_NUMB;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00004000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::PETRIFY;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00008000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::REGEN;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00010000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::BARRIER;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00020000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::M_BARRIER;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00040000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::REFLECT;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00080000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::DUAL;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00100000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::SHIELD;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00200000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::D_SENTENCE;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00400000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::MANIPULATE;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x00800000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::BERSERK;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x01000000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::PEERLESS;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x02000000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::PARALYSIS;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x04000000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::DARKNESS;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x08000000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::DUAL_DRAIN;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x10000000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::DEATH_FORCE;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x20000000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::RESIST;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x40000000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::LUCKY_GIRL;
-                immunity.rate = 1.0f;
-                enemy.immunities.push_back(immunity);
-            }
-            if (scene_.enemy_data[e].immunities == (scene_.enemy_data[e].immunities | 0x80000000)){
-                Enemy::Immunity immunity;
-                immunity.status = GameData::STATUS::IMPRISONED;
+                immunity.status = bit;
                 immunity.rate = 1.0f;
                 enemy.immunities.push_back(immunity);
             }
@@ -428,8 +300,6 @@ void BattleSceneFile::Read(File file){
         }
         if (scene_.enemy_data[e].morph != 0xFFFF) enemy.morph = scene_.enemy_data[e].morph;
 
-        //std::cout << "ENEMY " << enemy.id << ": " << enemy.name << "\n";
-
         enemies_.push_back(enemy);
     }
 
@@ -452,33 +322,22 @@ void BattleSceneFile::Read(File file){
         attack.damage.accuracy = scene_.attack_data[a].accuracy / 255.0f;
         if (scene_.attack_data[a].impact_effect != 0xFF)
             attack.animation.impact_effect = scene_.attack_data[a].impact_effect;
-        if (scene_.attack_data[a].hurt_anim != 0xFF)
-            attack.animation.hurt_anim = scene_.attack_data[a].hurt_anim;
+        if (scene_.attack_data[a].hurt_anim != 0xFF) attack.animation.hurt_anim = scene_.attack_data[a].hurt_anim;
         attack.mp = scene_.attack_data[a].mp;
-        if (scene_.attack_data[a].sound != 0xFFFF)
-            attack.animation.sound = scene_.attack_data[a].sound;
+        if (scene_.attack_data[a].sound != 0xFFFF) attack.animation.sound = scene_.attack_data[a].sound;
         if (scene_.attack_data[a].camera_single != 0xFFFF)
             attack.animation.camera_single = scene_.attack_data[a].camera_single;
         if (scene_.attack_data[a].camera_multiple != 0xFFFF)
             attack.animation.camera_multiple = scene_.attack_data[a].camera_multiple;
-        attack.target.selection_enabled
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x01));
-        attack.target.default_enemy
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x02));
-        attack.target.default_multiple
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x04));
-        attack.target.toggle_multiple
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x08));
-        attack.target.fixed_row
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x10));
-        attack.target.short_range
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x20));
-        attack.target.all_rows
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x40));
-        attack.target.random
-          = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x80));
-        if (scene_.attack_data[a].effect != 0xFFFF)
-            attack.animation.effect = scene_.attack_data[a].effect;
+        attack.target.selection_enabled = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x01));
+        attack.target.default_enemy = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x02));
+        attack.target.default_multiple = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x04));
+        attack.target.toggle_multiple = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x08));
+        attack.target.fixed_row = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x10));
+        attack.target.short_range = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x20));
+        attack.target.all_rows = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x40));
+        attack.target.random = (scene_.attack_data[a].target == (scene_.attack_data[a].target | 0x80));
+        if (scene_.attack_data[a].effect != 0xFFFF) attack.animation.effect = scene_.attack_data[a].effect;
         attack.damage.formula = scene_.attack_data[a].damage >> 4;
         attack.damage.modifier = scene_.attack_data[a].damage & 15;
         attack.damage.power = scene_.attack_data[a].power;
@@ -488,252 +347,33 @@ void BattleSceneFile::Read(File file){
             case 2: attack.damage.restore = GameData::RestoreType::STATUS; break;
             default: attack.damage.restore = GameData::RestoreType::NONE;
         }
-        int status_chance_raw = 63 - (scene_.attack_data[a].status_change ^ 63); // Out of 63;
-        int status_mode;
-        if (
-          scene_.attack_data[a].status_change == (scene_.attack_data[a].status_change | 0x00000080)
-        ){
-            status_mode = GameData::STATUS_EFFECT_MODE::TOGGLE;
-        }
-        else if (
-          scene_.attack_data[a].status_change == (scene_.attack_data[a].status_change | 0x00000040)
-        ){
-            status_mode = GameData::STATUS_EFFECT_MODE::TOGGLE;
-        }
-        else status_mode = GameData::STATUS_EFFECT_MODE::TOGGLE;
+        // Status attack byte: the lower 6 bits are the chance out of 63, and the upper 2 bits the
+        // mode (0x80 toggles the statuses, 0x40 cures them, otherwise they are inflicted).
+        // The status bitmask has the status IDs as bit positions, as in the original game.
+        const int status_chance_raw = scene_.attack_data[a].status_change & 0x3F;
+        int status_mode = GameData::STATUS_EFFECT_MODE::INFLICT;
+        if ((scene_.attack_data[a].status_change & 0x80) != 0) status_mode = GameData::STATUS_EFFECT_MODE::TOGGLE;
+        else if ((scene_.attack_data[a].status_change & 0x40) != 0) status_mode = GameData::STATUS_EFFECT_MODE::CURE;
         if (scene_.attack_data[a].status != 0xFFFFFFFF){
-            float status_chance = status_chance_raw / 63.0f;
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000001)){
+            const float status_chance = status_chance_raw / 63.0f;
+            for (int bit = 0; bit < 32; bit ++){
+                if ((scene_.attack_data[a].status & (1u << bit)) == 0) continue;
                 Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::DEATH;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000002)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::NEAR_DEATH;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000004)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::SLEEP;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000008)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::POISONED;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000010)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::SADNESS;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000020)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::FURY;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000040)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::CONFU;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000080)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::SILENCE;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000100)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::HASTE;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000200)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::SLOW;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000400)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::STOP;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00000800)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::FROG;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00001000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::SMALL;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00002000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::SLOW_NUMB;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00004000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::PETRIFY;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00008000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::REGEN;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00010000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::BARRIER;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00020000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::M_BARRIER;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00040000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::REFLECT;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00080000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::DUAL;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00100000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::SHIELD;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00200000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::D_SENTENCE;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00400000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::MANIPULATE;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x00800000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::BERSERK;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x01000000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::PEERLESS;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x02000000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::PARALYSIS;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x04000000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::DARKNESS;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x08000000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::DUAL_DRAIN;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x10000000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::DEATH_FORCE;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x20000000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::RESIST;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x40000000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::LUCKY_GIRL;
-                effect.chance = status_chance;
-                effect.type = status_mode;
-                attack.status_effects.push_back(effect);
-            }
-            if (scene_.attack_data[a].status == (scene_.attack_data[a].status | 0x80000000)){
-                Attack::StatusEffect effect;
-                effect.id = GameData::STATUS::IMPRISONED;
+                effect.id = bit;
                 effect.chance = status_chance;
                 effect.type = status_mode;
                 attack.status_effects.push_back(effect);
             }
         }
-        if (scene_.attack_data[a].element >= 0 && scene_.attack_data[a].element <= 0x0F)
-            attack.elements.push_back(scene_.attack_data[a].element);
-        attack.damage.damage_mp
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0001));
-        attack.damage.affected_by_darkness
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0004));
+        // Attack elements are a bitmask (0x0001 is fire, 0x0002 ice...), while enemies elements are
+        // indexes (0 is fire, 1 is ice...). Elements are stored as indexes.
+        if (scene_.attack_data[a].element != 0xFFFF){
+            for (int bit = 0; bit < 16; bit ++){
+                if ((scene_.attack_data[a].element & (1 << bit)) != 0) attack.elements.push_back(bit);
+            }
+        }
+        attack.damage.damage_mp = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0001));
+        attack.damage.affected_by_darkness = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0004));
         if ((scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0010))){
             if (attack.damage.damage_mp) attack.damage.drain_mp = true;
             else attack.damage.drain_hp = true;
@@ -744,14 +384,10 @@ void BattleSceneFile::Read(File file){
         }
         attack.damage.ignore_status_defense
           = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0080));
-        attack.target.only_for_dead
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0100));
-        attack.reflectable
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0200));
-        attack.target.no_re_target
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0800));
-        attack.damage.critical
-          = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x2000));
+        attack.target.only_for_dead = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0100));
+        attack.reflectable = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0200));
+        attack.target.no_re_target = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x0800));
+        attack.damage.critical = (scene_.attack_data[a].special != (scene_.attack_data[a].special | 0x2000));
 
         // TODO: Parse scene_.attack_data[a].additional_effects with
         // scene_.attack_data[a].additional_effects_mod for special attack modifiers (23 total).
@@ -764,14 +400,19 @@ void BattleSceneFile::Read(File file){
     // Formations
     for (int f = 0; f < 4; f ++){
         Formation formation;
-        if (scene_.setup[f].next_battle != 0xFFFF)
-            formation.next_formation = scene_.setup[f].next_battle;
+        if (scene_.setup[f].next_battle != 0xFFFF) formation.next_formation = scene_.setup[f].next_battle;
         formation.escape_counter = (scene_.setup[f].escape_counter / 64.0f);
-        // TODO: What is flag 0x01? Multilimb enemies?
-        formation.escapable = (scene_.setup[f].flags == scene_.setup[f].flags | 0x02);
-        formation.skip_victory_pose = (scene_.setup[f].flags != scene_.setup[f].flags | 0x04);
-        formation.skip_spoils = (scene_.setup[f].flags != scene_.setup[f].flags | 0x08);
-        formation.preemptive_disabled = (scene_.setup[f].flags != scene_.setup[f].flags | 0x10);
+        // Observed in the original scene.bin (1024 setups): the upper byte is always 0xFF and
+        // bit 0x02 is clear in most random battles, so it means "can't escape" (inverted).
+        // TODO: What is flag 0x01?
+        formation.escapable = ((scene_.setup[f].flags & 0x02) == 0);
+        // TODO: Bits 0x04, 0x08 and 0x10 are set in almost every setup, so they can't be read as
+        // positive "skip victory pose", "skip spoils" and "preemptive disabled" flags (the previous
+        // code, due to operator precedence, always set all three). Use defaults until their
+        // meaning is verified against known battles.
+        formation.skip_victory_pose = false;
+        formation.skip_spoils = false;
+        formation.preemptive_disabled = false;
         // TODO: What is flag 0x20?
         // TODO: What is flag 0x40?
         // TODO: What is flag 0x80?
@@ -796,33 +437,24 @@ void BattleSceneFile::Read(File file){
                 enemy.z = scene_.formation[f][e].z;
                 enemy.row = scene_.formation[f][e].row;
                 enemy.cover[0] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x01)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x01) ? '1' : '0'
                 );
                 enemy.cover[1] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x02)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x02) ? '1' : '0'
                 );
                 enemy.cover[2] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x04)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x04) ? '1' : '0'
                 );
                 enemy.cover[3] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x08)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x08) ? '1' : '0'
                 );
                 enemy.cover[4] = (
-                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x10)
-                  ? '1' : '0'
+                  scene_.formation[f][e].cover_flags == (scene_.formation[f][e].cover_flags | 0x10) ? '1' : '0'
                 );
-                enemy.visible
-                  = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x01);
-                enemy.direction
-                  = ((scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x02) ? 1 : 0);
-                enemy.targeteable
-                  = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x08);
-                enemy.main_script_active
-                  = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x10);
+                enemy.visible = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x01);
+                enemy.direction = ((scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x02) ? 1 : 0);
+                enemy.targeteable = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x08);
+                enemy.main_script_active = (scene_.formation[f][e].flags == scene_.formation[f][e].flags | 0x10);
                 formation.enemies.push_back(enemy);
             }
         }
@@ -842,9 +474,7 @@ void BattleSceneFile::Read(File file){
             formation.initial_camera_position = scene_.setup[f].camera;
         for (int a = 0; a < 4; a ++){
             if (scene_.setup[f].next_arena_candidates[a] != 999){
-                formation.next_arena_formation_candidates.push_back(
-                  scene_.setup[f].next_arena_candidates[a]
-                );
+                formation.next_arena_formation_candidates.push_back(scene_.setup[f].next_arena_candidates[a]);
                 formation.is_arena_battle = true;
             }
         }

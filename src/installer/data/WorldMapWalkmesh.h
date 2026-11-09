@@ -33,7 +33,8 @@ class WorldMapWalkmesh{
             public:
 
                 /**
-                 * Triangle reached when exiting this triangle from one of its borders.
+                 * Triangle reached when exiting this triangle from one of its
+                 * borders.
                  */
                 struct Target{
 
@@ -45,8 +46,8 @@ class WorldMapWalkmesh{
                     int id;
 
                     /**
-                     * False if the target triangle is truly adjacent, true if it warps to other
-                     * side of the world.
+                     * False if the target triangle is truly adjacent, true if
+                     * it warps to other side of the world.
                      */
                     bool warp;
                 };
@@ -59,7 +60,8 @@ class WorldMapWalkmesh{
                  * @param[in] b X, Y, Z coordinates of the second vertex.
                  * @param[in] c X, Y, Z coordinates of the third vertex.
                  * @param[in] walkability Walkability mode ID.
-                 * @param[in] event Event triggered upon entering the triangle. -1 for no event.
+                 * @param[in] event Event triggered upon entering the triangle,
+                 * or -1 for no event.
                  */
                 Triangle(
                   const unsigned int id, Ogre::Vector3 a, const Ogre::Vector3 b,
@@ -95,24 +97,24 @@ class WorldMapWalkmesh{
                 Ogre::Vector3 getC() const;
 
                 /**
-                 * Retrieves the triangle reached when exiting the triangle by the side between the
-                 * vertices A and B.
+                 * Retrieves the triangle reached when exiting the triangle by
+                 * the side between the vertices A and B.
                  *
                  * @return Target triangle.
                  */
                 Target getAB() const;
 
                 /**
-                 * Retrieves the triangle reached when exiting the triangle by the side between the
-                 * vertices B and C.
+                 * Retrieves the triangle reached when exiting the triangle by
+                 * the side between the vertices B and C.
                  *
                  * @return Target triangle.
                  */
                 Target getBC() const;
 
                 /**
-                 * Retrieves the triangle reached when exiting the triangle by the side between the
-                 * vertices C and A.
+                 * Retrieves the triangle reached when exiting the triangle by
+                 * the side between the vertices C and A.
                  *
                  * @return Target triangle.
                  */
@@ -128,36 +130,41 @@ class WorldMapWalkmesh{
                 /**
                  * Retrieves the event triggered upon entering the triangle.
                  *
-                 * @return The ID of the event triggered on entering, or -1 if none.
+                 * @return The ID of the event triggered on entering, or -1 if
+                 * none.
                  */
                 int getEvent() const;
 
                 /**
-                 * Sets the triangle reached when exiting the triangle by the side between the
-                 * vertices A and B.
+                 * Sets the triangle reached when exiting the triangle by the
+                 * side between the vertices A and B.
                  *
-                 * @param[in] id Target triangle ID. -1 to indicate no way out by the edge.
-                 * @param[in] warp True to indicate world warping (ie, if walking into an edge of
-                 * the world gets you at the other end).
+                 * @param[in] id Target triangle ID. -1 to indicate no way out
+                 * by the edge.
+                 * @param[in] warp True to indicate world warping (ie, if
+                 * walking into an edge of the world gets you at the other end).
                  */
                 void setAB(const int id, const bool warp);
 
                 /**
-                 * Sets the triangle reached when exiting the triangle by the side between the
-                 * vertices B and C.
+                 * Sets the triangle reached when exiting the triangle by the
+                 * side between the vertices B and C.
                  *
-                 * @param[in] id Target triangle ID. -1 to indicate no way out by the edge.
-                 * @param[in] warp True to indicate world warping (ie, if walking into an edge of
-                 * the world gets you at the other end).
+                 * @param[in] id Target triangle ID. -1 to indicate no way out
+                 * by the edge.
+                 * @param[in] warp True to indicate world warping (ie, if
+                 * walking into an edge of the world gets you at the other end).
                  */
                 void setBC(const int id, const bool warp);
 
                 /**
-                 * Sets the triangle reached when exiting the triangle by the side between the
-                 * vertices C and A.
+                 * Sets the triangle reached when exiting the triangle by the
+                 * side between the vertices C and A.
                  *
-                 * @param[in] id Target triangle ID. -1 to indicate no way out by the edge.
-                 * @param[in] warp True to indicate world warping (ie, if walking into an edge of
+                 * @param[in] id Target triangle ID. -1 to indicate no way out
+                 * by the edge.
+                 * @param[in] warp True to indicate world warping (ie, if
+                 * walking into an edge of the world gets you at the other end).
                  * the world gets you at the other end).
                  */
                 void setCA(const int id, const bool warp);
@@ -185,17 +192,20 @@ class WorldMapWalkmesh{
                 Ogre::Vector3 c_;
 
                 /**
-                 * Target reached when exiting by the side formed by {@see a_} and {@see b_}.
+                 * Target reached when exiting by the side formed by {@see a_}
+                 * and {@see b_}.
                  */
                 Target ab_;
 
                 /**
-                 * Target reached when exiting by the side formed by {@see b_} and {@see c_}.
+                 * Target reached when exiting by the side formed by {@see b_}
+                 * and {@see c_}.
                  */
                 Target bc_;
 
                 /**
-                 * Target reached when exiting by the side formed by {@see c_} and {@see a_}.
+                 * Target reached when exiting by the side formed by {@see c_}
+                 * and {@see a_}.
                  */
                 Target ca_;
 
@@ -214,8 +224,8 @@ class WorldMapWalkmesh{
          * Constructor.
          *
          * @param[in] id World map ID.
-         * @param[in] warp Indicates if the world map is warpable (ie, if walking into an edge of
-         * the world gets you at the other end).
+         * @param[in] warp Indicates if the world map is warpable (ie, if
+         * walking into an edge of the world gets you at the other end).
          */
         WorldMapWalkmesh(const unsigned int id, const bool warp);
 
@@ -226,7 +236,8 @@ class WorldMapWalkmesh{
          * @param[in] b X, Y, Z coordinates of the second vertex.
          * @param[in] c X, Y, Z coordinates of the third vertex.
          * @param[in] walkability Walkability mode ID.
-         * @param[in] event Event triggered upon entering the triangle. -1 for no event.
+         * @param[in] event Event triggered upon entering the triangle. -1 for
+         * no event.
          */
         void addTriangle(
           const Ogre::Vector3 a, const Ogre::Vector3 b, const Ogre::Vector3 c,
@@ -236,7 +247,8 @@ class WorldMapWalkmesh{
         /**
          * Generates a world map walkmesh file.
          *
-         * @param[in] path Path where the file will be saved (directory must exist).
+         * @param[in] path Path where the file will be saved (directory must
+         * exist).
          */
         void generate(const std::string path);
 
@@ -258,8 +270,8 @@ class WorldMapWalkmesh{
         std::vector<Triangle> triangles_;
 
         /**
-         * Indicates if the relations between triangles has been calculated since the last triangle
-         * was added.
+         * Indicates if the relations between triangles has been calculated
+         * since the last triangle was added.
          */
         bool calculated_;
 

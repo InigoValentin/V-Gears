@@ -14,6 +14,7 @@
  */
 
 #include <boost/format.hpp>
+#include <stdexcept>
 #include "decompiler/world/WorldDisassembler.h"
 #include "decompiler/world/WorldEngine.h"
 #include "decompiler/world/instruction/WorldBinaryEqualStackInstruction.h"
@@ -27,8 +28,8 @@
 #include "decompiler/world/instruction/WorldSubStackInstruction.h"
 #include "decompiler/world/instruction/WorldUncondJumpInstruction.h"
 
-WorldDisassembler::WorldDisassembler(WorldEngine*, InstVec &insts, int script_number):
-  Disassembler(insts), script_number_(script_number){}
+WorldDisassembler::WorldDisassembler(WorldEngine* engine, InstVec &insts, int script_number):
+    Disassembler(insts), engine_(engine), script_number_(script_number){}
 
 WorldDisassembler::~WorldDisassembler(){}
 
@@ -76,17 +77,24 @@ void WorldDisassembler::DoDisassemble(){
         tmp.instruction_pointer = this->stream_->ReadU16();
         world_data.emplace_back(tmp);
     }
-    int i = this->script_number_;
-    for (int i = 1; i < 2; i ++){ //for (int i = 1; i < 2; i ++){
-        WorldScriptData data = world_data[i];
-        this->stream_->Seek((256 * sizeof(int)) + (data.instruction_pointer*sizeof(uint16)));
+    if (script_number_ < 0 || script_number_ >= static_cast<int>(world_data.size())){
+        throw std::out_of_range("World-map script index is outside the call table.");
+    }
+    const WorldScriptData& data = world_data[script_number_];
+    if (data.type == 0 && data.instruction_pointer == 0) return;
+
+        const unsigned int code_offset = static_cast<unsigned int>(
+          256 * sizeof(uint32) + data.instruction_pointer * sizeof(uint16)
+        );
+        if (code_offset >= stream_->GetSize()) return;
+        this->stream_->Seek(code_offset);
         this->address_ = this->stream_->GetPosition();
         bool end = false;
-        for (;;){ //    while (this->_f.pos() != (int)this->_f.size())
+        for (;;){
+            if (end) break;
             uint32 full_opcode = 0;
             uint16 opcode = this->stream_->ReadU16();
             std::string opcode_prefix;
-            if (end) break;
             if (opcode == 0x203) end = true;
             if (opcode >= 0x204 && opcode < 0x300)
                 ParseOpcode(opcode, "reset stack", new WorldKernelCallInstruction(), 0, "");
@@ -96,9 +104,7 @@ void WorldDisassembler::DoDisassemble(){
                         ParseOpcode(opcode, "reset stack", new WorldNoOutputInstruction(), 0, "");
                         break;
                     case 0x201:
-                        ParseOpcode(
-                          opcode, "jump if false", new WorldCondJumpInstruction(), 0, "w"
-                        );
+                        ParseOpcode(opcode, "jump if false", new WorldCondJumpInstruction(), 0, "w");
                         break;
                     case 0x203:
                         ParseOpcode(opcode, "return", new WorldKernelCallInstruction(), 0, "");
@@ -106,34 +112,23 @@ void WorldDisassembler::DoDisassemble(){
                     case 0x200:
                         ParseOpcode(opcode, "jump", new WorldUncondJumpInstruction(), 0, "w");
                         break;
-
                     case 0x118:
-                        ParseOpcode(
-                          opcode, "push byte from bank 0", new WorldLoadBankInstruction(), 2, "w"
-                        );
+                        ParseOpcode(opcode, "push byte from bank 0", new WorldLoadBankInstruction(), 2, "w");
                         break;
                     case 0x110:
                         ParseOpcode(opcode, "push constant", new WorldLoadInstruction(), 2, "w");
                         break;
                     case 0x119:
-                        ParseOpcode(
-                          opcode, "push byte from bank 1", new WorldLoadBankInstruction(), 2, "w"
-                        );
+                        ParseOpcode(opcode, "push byte from bank 1", new WorldLoadBankInstruction(), 2, "w");
                         break;
                     case 0x11c:
-                        ParseOpcode(
-                          opcode, "push word from bank 0", new WorldLoadBankInstruction(), 2, "w"
-                        );
+                        ParseOpcode(opcode, "push word from bank 0", new WorldLoadBankInstruction(), 2, "w");
                         break;
                     case 0x114:
-                        ParseOpcode(
-                          opcode, "push bit from bank 0", new WorldLoadBankInstruction(), 2, "w"
-                        );
+                        ParseOpcode(opcode, "push bit from bank 0", new WorldLoadBankInstruction(), 2, "w");
                         break;
                     case 0x11b:
-                        ParseOpcode(
-                          opcode, "push special", new WorldLoadBankInstruction(), 2, "w"
-                        );
+                        ParseOpcode(opcode, "push special", new WorldLoadBankInstruction(), 2, "w");
                         break;
                     case 0x11f:
                         ParseOpcode(opcode, "push special", new WorldLoadInstruction(), 2, "w");
@@ -141,7 +136,6 @@ void WorldDisassembler::DoDisassemble(){
                     case 0x117:
                         ParseOpcode(opcode, "push special", new WorldLoadBankInstruction(), 2, "w");
                         break;
-
                     case 0x0e0:
                         ParseOpcode(opcode, "write bank", new WorldStoreInstruction(), 0, "");
                         break;
@@ -165,9 +159,7 @@ void WorldDisassembler::DoDisassemble(){
                         ParseOpcode(opcode, "push logicand", new WorldSubStackInstruction(), 2, "");
                         break;
                     case 0x062:
-                        ParseOpcode(
-                          opcode, "push lessequal", new WorldSubStackInstruction(), 2, ""
-                        );
+                        ParseOpcode(opcode, "push lessequal", new WorldSubStackInstruction(), 2, "");
                         break;
                     case 0x030:
                         ParseOpcode(opcode, "push mul", new WorldSubStackInstruction(), 2, "");
@@ -182,17 +174,13 @@ void WorldDisassembler::DoDisassemble(){
                         ParseOpcode(opcode, "push or", new WorldSubStackInstruction(), 2, "");
                         break;
                     case 0x070:
-                        ParseOpcode(
-                          opcode, "push equal", new WorldBinaryEqualStackInstruction(), 2, ""
-                        );
+                        ParseOpcode(opcode, "push equal", new WorldBinaryEqualStackInstruction(), 2, "");
                         break;
                     case 0x041:
                         ParseOpcode(opcode, "push sub", new WorldSubStackInstruction(), 2, "");
                         break;
                     case 0x063:
-                        ParseOpcode(
-                          opcode, "push greaterequal", new WorldSubStackInstruction(), 2, ""
-                        );
+                        ParseOpcode(opcode, "push greaterequal", new WorldSubStackInstruction(), 2, "");
                         break;
                     case 0x017:
                         ParseOpcode(opcode, "push logicnot", new WorldSubStackInstruction(), 2, "");
@@ -209,7 +197,6 @@ void WorldDisassembler::DoDisassemble(){
                     case 0x015:
                         ParseOpcode(opcode, "push neg", new WorldSubStackInstruction(), 2, "");
                         break;
-
                     case 0x320:
                         ParseOpcode(opcode, "unknown 320", new WorldKernelCallInstruction(), 0, "");
                         break;
@@ -265,26 +252,20 @@ void WorldDisassembler::DoDisassemble(){
                         ParseOpcode(opcode, "unknown 331", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x319:
-                        ParseOpcode(
-                          opcode, "unknown 319", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 319", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x353:
                         ParseOpcode(opcode, "unknown 353", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x33e:
-                        ParseOpcode(
-                          opcode, "unknown 33e", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "unknown 33e", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x321:
                         ParseOpcode(opcode, "unknown 321", new WorldKernelCallInstruction(), 0, "");
                         break;
 
                     case 0x31d:
-                        ParseOpcode(
-                          opcode, "play sound effect", new WorldKernelCallInstruction(), 2, "w"
-                        );
+                        ParseOpcode(opcode, "play sound effect", new WorldKernelCallInstruction(), 2, "w");
                         break;
                     case 0x336:
                         ParseOpcode(
@@ -293,235 +274,152 @@ void WorldDisassembler::DoDisassemble(){
                         );
                         break;
                     case 0x328:
-                        ParseOpcode(
-                          opcode, "set active entity direction",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set active entity direction", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x33d:
-                        ParseOpcode(
-                          opcode, "set field entry point2?", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set field entry point2?", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x351:
-                        ParseOpcode(
-                          opcode, "set music volume", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set music volume", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x352:
-                        ParseOpcode(
-                          opcode, "shake camera on / off", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "shake camera on / off", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x34f:
-                        ParseOpcode(
-                          opcode, "set active entity y position",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set active entity y position", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x30b:
-                        ParseOpcode(
-                          opcode, "set active entity y offset",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set active entity y offset", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x347:
                         ParseOpcode(
-                          opcode, "move active entity to entity by model id ?",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "move active entity to entity by model id ?", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x30e:
-                        ParseOpcode(
-                          opcode, "active entity play animation",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "active entity play animation", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x305:
-                        ParseOpcode(
-                          opcode, "set wait frames", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set wait frames", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x306:
                         ParseOpcode(opcode, "wait?", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x307:
-                        ParseOpcode(
-                          opcode, "set control lock", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set control lock", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x303:
-                        ParseOpcode(
-                          opcode, "set active entity movespeed",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set active entity movespeed", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x32c:
-                        ParseOpcode(
-                          opcode, "set window parameters", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set window parameters", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x32d:
-                        ParseOpcode(
-                          opcode, "wait for window ready", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "wait for window ready", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x324:
-                        ParseOpcode(
-                          opcode, "set window dimensions", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set window dimensions", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x325:
-                        ParseOpcode(
-                          opcode, "set window message", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set window message", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x32e:
-                        ParseOpcode(
-                          opcode, "wait for message acknowledge",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "wait for message acknowledge", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x32b:
-                        ParseOpcode(
-                          opcode, "set battle lock", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set battle lock", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x326:
-                        ParseOpcode(
-                          opcode, "set window prompt", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set window prompt", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x327:
-                        ParseOpcode(
-                          opcode, "wait for prompt acknowledge ?",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "wait for prompt acknowledge ?", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x318:
-                        ParseOpcode(
-                          opcode, "enter field scene", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "enter field scene", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x33b:
-                        ParseOpcode(
-                          opcode, "fade out?", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "fade out?", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x348:
-                        ParseOpcode(
-                          opcode, "fade in ?", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "fade in ?", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x330:
-                        ParseOpcode(
-                          opcode, "set active entity", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set active entity", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x350:
-                        ParseOpcode(
-                          opcode, "set meteor texture on/off",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set meteor texture on/off", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x34b:
-                        ParseOpcode(
-                          opcode, "set chocobo type", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set chocobo type", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x34c:
-                        ParseOpcode(
-                          opcode, "set submarine color", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set submarine color", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x349:
-                        ParseOpcode(
-                          opcode, "set world progress", new WorldKernelCallInstruction(), 0, ""
+                        ParseOpcode(opcode, "set world progress", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x300:
-                        ParseOpcode(
-                          opcode, "load model", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "load model", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x302:
-                        ParseOpcode(
-                          opcode, "set player entity", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set player entity", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x30c:
-                        ParseOpcode(
-                          opcode, "enter vehicle?", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "enter vehicle?", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x308:
                         ParseOpcode(
-                          opcode, "set active entity mesh coordinates",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "set active entity mesh coordinates", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x309:
                         ParseOpcode(
-                          opcode, "set active entity coordinates in mesh",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "set active entity coordinates in mesh", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x304:
                         ParseOpcode(
-                          opcode, "set active entity direction & facing",
-                          new WorldKernelCallInstruction(), 0, ""
+                          opcode, "set active entity direction & facing", new WorldKernelCallInstruction(), 0, ""
                         );
                         break;
                     case 0x310:
-                        ParseOpcode(
-                          opcode, "set active point", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set active point", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x311:
-                        ParseOpcode(
-                          opcode, "set point mesh coordinates",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set point mesh coordinates", new WorldKernelCallInstruction(), 0, "" );
                         break;
                     case 0x312:
-                        ParseOpcode(
-                          opcode, "set point coordinates in mesh",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set point coordinates in mesh", new WorldKernelCallInstruction(), 0, "" );
                         break;
                     case 0x313:
-                        ParseOpcode(
-                          opcode, "set point terrain BGR", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set point terrain BGR", new WorldKernelCallInstruction(), 0, "" );
                         break;
                     case 0x314:
-                        ParseOpcode(
-                          opcode, "set point dropoff parameters",
-                          new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set point dropoff parameters", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x315:
-                        ParseOpcode(
-                          opcode, "set point sky BGR", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set point sky BGR", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x316:
-                        ParseOpcode(
-                          opcode, "set point BGR3?", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "set point BGR3?", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x317:
-                        ParseOpcode(
-                          opcode, "trigger battle", new WorldKernelCallInstruction(), 0, ""
-                        );
+                        ParseOpcode(opcode, "trigger battle", new WorldKernelCallInstruction(), 0, "");
                         break;
                     default: throw UnknownOpcodeException(this->address_, opcode);
                 }
             }
             this->address_ += 2;
         }
-        for (auto& instruction : this->insts_)
-            instruction->SetAddress(instruction->GetAddress() / 2);
-    }
+        for (auto& instruction : this->insts_) instruction->SetAddress(instruction->GetAddress() / 2);
+        if (!insts_.empty()){
+            const uint32 start_address = insts_.front()->GetAddress();
+            const uint32 end_address = insts_.back()->GetAddress();
+            Function function(start_address, end_address);
+            function.name = "world_function_" + std::to_string(script_number_);
+            engine_->functions[start_address] = function;
+        }
 }
 

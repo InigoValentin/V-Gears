@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include <zlib.h>
 #include <tinyxml.h>
 #include <boost/filesystem.hpp>
@@ -33,10 +34,10 @@
 #include "common/FinalFantasy7/FF7NameLookup.h"
 
 BattleDataInstaller::BattleDataInstaller(
-  const std::string input_dir, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr
+  const DiskImage& disk_image, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr
 ):
-  input_dir_(input_dir), output_dir_(output_dir),
-  scene_bin_(input_dir + "data/battle/scene.bin"), total_scenes_(0), next_scene_(0),
+  disk_image_(disk_image), output_dir_(output_dir),
+  scene_bin_(*const_cast<DiskImage&>(disk_image).filePath("data/battle/scene.bin")), total_scenes_(0), next_scene_(0),
   res_mgr_(res_mgr)
 {}
 
@@ -47,25 +48,33 @@ unsigned int BattleDataInstaller::InitializeScenes(){
     scenes_.clear();
     enemies_.clear();
     attacks_.clear();
-    // Get all scenes from scene.bin.
-    for (int i = 0; i < 32; i ++){
-        File scene_bin_block(&scene_bin_, i * 0x2000, 0x2000);
-        for (int o = 0; o < 10; o ++){
-            scene_bin_block.SetOffset(4 * o);
-            u32 start_offset = scene_bin_block.readU32LE() * 4;
-            u32 end_offset = scene_bin_block.readU32LE() * 4;
-            if (end_offset > start_offset + 0x2000) end_offset = start_offset + 0x2000;
-            if (start_offset >= 0 && start_offset < 0x2000){
-                File scene_bin_fragment(
-                  &scene_bin_block, start_offset, end_offset - start_offset - 1
-                );
-                File* extracted = ExtractGZipScene(scene_bin_fragment);
-                if (extracted != NULL){
-                    scenes_uncompressed_.push_back(extracted);
-                    total_scenes_ ++;
-                }
-            }
-            else break;
+    scenes_uncompressed_.clear();
+    total_scenes_ = 0;
+    // scene.bin is a sequence of 0x2000 bytes blocks (33 in the original game). Each block starts
+    // with up to 16 pointers (in 4-byte units) to gzipped scenes, terminated by 0xFFFFFFFF. A scene
+    // ends where the next one starts, or at the end of the block. There are 256 scenes in total.
+    // Scene indexes are positional: every slot must be kept, even if it can't be extracted,
+    // because battle IDs (scene * 4 + setup) are derived from them.
+    const u32 block_size = 0x2000;
+    const u32 blocks = scene_bin_.GetFileSize() / block_size;
+    for (u32 i = 0; i < blocks; i ++){
+        File scene_bin_block(&scene_bin_, i * block_size, block_size);
+        u32 offsets[16];
+        u32 count = 0;
+        for (; count < 16; count ++){
+            scene_bin_block.SetOffset(4 * count);
+            u32 pointer = scene_bin_block.readU32LE();
+            if (pointer == 0xFFFFFFFF || pointer * 4 >= block_size) break;
+            offsets[count] = pointer * 4;
+        }
+        for (u32 o = 0; o < count; o ++){
+            u32 start_offset = offsets[o];
+            u32 end_offset = (o + 1 < count) ? offsets[o + 1] : block_size;
+            if (end_offset <= start_offset) end_offset = block_size;
+            File scene_bin_fragment(&scene_bin_block, start_offset, end_offset - start_offset);
+            // NULL if it can't be extracted. Kept to preserve scene indexes.
+            scenes_uncompressed_.push_back(ExtractGZipScene(scene_bin_fragment));
+            total_scenes_ ++;
         }
     }
     return total_scenes_;
@@ -78,10 +87,10 @@ unsigned int BattleDataInstaller::InitializeBattleModels(){
     battle_lgp_file_names_.clear();
     battle_models_.clear();
     // Open battle.lgp
-    File battle_lgp_file(input_dir_ + "data/battle/battle.lgp");
+    File battle_lgp_file(*disk_image_.filePath("data/battle/battle.lgp"));
     // Also, open it as a LGP archive.
-    VGears::LGPArchive battle_lgp(input_dir_ + "data/battle/battle.lgp", "LGP");
-    battle_lgp.open(input_dir_ + "data/battle/battle.lgp", true);
+    VGears::LGPArchive battle_lgp(*disk_image_.filePath("data/battle/battle.lgp"), "LGP");
+    battle_lgp.open(*disk_image_.filePath("data/battle/battle.lgp"), true);
     battle_lgp.load();
     VGears::LGPArchive::FileList file_list = battle_lgp.GetFiles();
     for (int i = 0; i < file_list.size(); i ++){
@@ -102,10 +111,10 @@ unsigned int BattleDataInstaller::InitializeSpellModels(){
     battle_lgp_file_names_.clear();
     battle_models_.clear();
     // Open battle.lgp
-    File magic_lgp_file(input_dir_ + "data/battle/magic.lgp");
+    File magic_lgp_file(*disk_image_.filePath("data/battle/magic.lgp"));
     // Also, open it as a LGP archive.
-    VGears::LGPArchive magic_lgp(input_dir_ + "data/battle/magic.lgp", "LGP");
-    magic_lgp.open(input_dir_ + "data/battle/magic.lgp", true);
+    VGears::LGPArchive magic_lgp(*disk_image_.filePath("data/battle/magic.lgp"), "LGP");
+    magic_lgp.open(*disk_image_.filePath("data/battle/magic.lgp"), true);
     magic_lgp.load();
     VGears::LGPArchive::FileList file_list = magic_lgp.GetFiles();
     for (int i = 0; i < file_list.size(); i ++){
@@ -121,39 +130,41 @@ unsigned int BattleDataInstaller::InitializeSpellModels(){
 
 unsigned int BattleDataInstaller::ProcessScene(){
     if (next_scene_ >= scenes_uncompressed_.size()) return total_scenes_;
-    BattleSceneFile scene(next_scene_, scenes_uncompressed_[next_scene_]);
+    File* scene_file = scenes_uncompressed_[next_scene_];
+    if (scene_file == NULL){
+        // Keep battle IDs stable: an unreadable scene still takes its 4 battle slots.
+        std::cout << "Warning: scene " << next_scene_ << " could not be extracted." << std::endl;
+        for (int f = 0; f < 4; f ++){
+            Formation empty;
+            empty.id = next_scene_ * 4 + f;
+            formations_.push_back(empty);
+        }
+        next_scene_ ++;
+        return next_scene_;
+    }
+    BattleSceneFile scene(next_scene_, *scene_file);
     scenes_.push_back(scene);
     // Add new enemies to the list.
     std::vector<Enemy> enemies = scene.GetEnemies();
     for (int e = 0; e < enemies.size(); e ++){
-        bool already_added = false;
-        for (int l = 0; l < enemies_.size(); l ++){
-            if (enemies_[l].id == enemies[e].id){
-                already_added = true;
-                break;
-            }
-        }
-        if (already_added) continue;
+        if (std::any_of(
+          enemies_.begin(), enemies_.end(), [&](const Enemy& existing){ return existing.id == enemies[e].id; }
+        )) continue;
         enemies_.push_back(enemies[e]);
     }
     // Add new attacks to the list.
     std::vector<Attack> attacks = scene.GetAttacks();
     for (int a = 0; a < attacks.size(); a ++){
-        bool already_added = false;
-        for (int l = 0; l < attacks_.size(); l ++){
-            if (attacks_[l].id == attacks[a].id){
-                already_added = true;
-                break;
-            }
-        }
-        if (already_added) continue;
+        if (std::any_of(
+          attacks_.begin(), attacks_.end(), [&](const Attack& existing){ return existing.id == attacks[a].id; }
+        )) continue;
         attacks_.push_back(attacks[a]);
     }
-    // Add new formations to the list.
+    // Battle ID = scene index * 4 + setup index, as referenced by field scripts and encounters.
     std::vector<Formation> formations = scene.GetFormations();
-    for (Formation f : formations){
-        f.id = formations_.size(); // Assign the next ID.
-        formations_.push_back(f);
+    for (int f = 0; f < formations.size(); f ++){
+        formations[f].id = next_scene_ * 4 + f;
+        formations_.push_back(formations[f]);
     }
     next_scene_ ++;
     return next_scene_;
@@ -203,16 +214,14 @@ unsigned int BattleDataInstaller::ProcessBattleModel(){
           output_dir_ + "temp/battle_models/"
           + battle_lgp_file_names_[next_model_to_process_] + ".script"
         );
-        bool found = false;
-        for (int m = 0; m < battle_models_.size(); m ++){
-            if (battle_models_[m].id == id){
-                battle_models_[m].script
-                  = battle_lgp_file_names_[next_model_to_process_] + ".script";
-                found = true;
-                break;
-            }
+        auto model_it = std::find_if(
+            battle_models_.begin(), battle_models_.end(),
+            [&](const BattleModel& model){ return model.id == id; }
+        );
+        if (model_it != battle_models_.end()){
+                model_it->script = battle_lgp_file_names_[next_model_to_process_] + ".script";
         }
-        if (found == false){
+        else{
             BattleModel model;
             model.id = id;
             model.script = battle_lgp_file_names_[next_model_to_process_] + ".script";
@@ -222,8 +231,7 @@ unsigned int BattleDataInstaller::ProcessBattleModel(){
     else if (type == "da"){
         // .da Animation file.
         battle_lgp_files_[next_model_to_process_].WriteFile(
-          output_dir_ + "temp/battle_models/"
-          + battle_lgp_file_names_[next_model_to_process_] + ".anim"
+          output_dir_ + "temp/battle_models/" + battle_lgp_file_names_[next_model_to_process_] + ".anim"
         );
         bool found = false;
         for (int m = 0; m < battle_models_.size(); m ++){
@@ -246,8 +254,7 @@ unsigned int BattleDataInstaller::ProcessBattleModel(){
     ){
         // .tex texture files. Save directly to their directory.
         battle_lgp_files_[next_model_to_process_].WriteFile(
-          output_dir_ + "temp/battle_models/"
-          + battle_lgp_file_names_[next_model_to_process_] + ".tex"
+          output_dir_ + "temp/battle_models/" + battle_lgp_file_names_[next_model_to_process_] + ".tex"
         );
         TexFile tex(battle_lgp_files_[next_model_to_process_]);
         std::string path = output_dir_ + "models/battle/";
@@ -290,7 +297,10 @@ unsigned int BattleDataInstaller::ProcessBattleModel(){
             scene_data.id = info.numeric_id;
             scene_data.model = info.alphanumeric_id + "_" + info.name_normal + ".mesh";
             scene_data.description = info.name;
-            scene_data_.push_back(scene_data);
+            // Every texture of a scene model reaches this point, but the map needs one entry.
+            if (std::none_of(scene_data_.begin(), scene_data_.end(), [&](const SceneModel& s){
+                return s.id == scene_data.id && s.model == scene_data.model;
+            })) scene_data_.push_back(scene_data);
             path += "scenes/";
         }
         else path += "enemies/";
@@ -317,8 +327,7 @@ unsigned int BattleDataInstaller::ProcessBattleModel(){
     else{
         // .p polygon file.
         battle_lgp_files_[next_model_to_process_].WriteFile(
-          output_dir_ + "temp/battle_models/"
-          + battle_lgp_file_names_[next_model_to_process_] + ".p"
+          output_dir_ + "temp/battle_models/" + battle_lgp_file_names_[next_model_to_process_] + ".p"
         );
         bool found = false;
         for (int m = 0; m < battle_models_.size(); m ++){
@@ -361,9 +370,7 @@ unsigned int BattleDataInstaller::ProcessSpellModel(){
 
     if (ext == "d"){
         // Skeleton file.
-        magic_lgp_files_[next_model_to_process_].WriteFile(
-          output_dir_ + "temp/spell_models/" + fname
-        );
+        magic_lgp_files_[next_model_to_process_].WriteFile(output_dir_ + "temp/spell_models/" + fname);
         bool found = false;
         for (int m = 0; m < spell_models_.size(); m ++){
             if (spell_models_[m].id == id){
@@ -409,9 +416,7 @@ unsigned int BattleDataInstaller::ProcessSpellModel(){
     if (ext == "tex"){
         // Texture files. They can be shared among various spells, so just convert them and don't
         // add them to a particular model.
-        magic_lgp_files_[next_model_to_process_].WriteFile(
-          output_dir_ + "temp/spell_models/" + fname
-        );
+        magic_lgp_files_[next_model_to_process_].WriteFile(output_dir_ + "temp/spell_models/" + fname);
         TexFile tex(output_dir_ + "temp/spell_models/" + fname);
         std::string path = output_dir_ + "models/battle/attacks/" + id + ".png";
         // Many of these tex files are wrong and dummied out in the OG, so try/catch.
@@ -425,9 +430,7 @@ unsigned int BattleDataInstaller::ProcessSpellModel(){
     }
     if (ext == "a00"){
         // Animation file.
-        magic_lgp_files_[next_model_to_process_].WriteFile(
-          output_dir_ + "temp/spell_models/" + fname
-        );
+        magic_lgp_files_[next_model_to_process_].WriteFile(output_dir_ + "temp/spell_models/" + fname);
         bool found = false;
         for (int m = 0; m < spell_models_.size(); m ++){
             if (spell_models_[m].id == id){
@@ -485,25 +488,19 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
 
         if ("" != model.anim){ // Skip for non-animated, ie battle backgrounds
             DaFile da(File(output_dir_ + "temp/battle_models/" + model.anim));
-            std::vector<std::string> a_files = da.GenerateAFiles(
-              model.id, output_dir_ + "temp/battle_models/"
-            );
+            std::vector<std::string> a_files = da.GenerateAFiles(model.id, output_dir_ + "temp/battle_models/");
             for (std::string file_name : a_files) model.a.push_back(file_name);
         }
 
         if ("" != model.script){ // Skip non scripted models
             AbFile ab(File(output_dir_ + "temp/battle_models/" + model.script), info.is_enemy);
-            ab.GenerateScripts(
-                model.id + "_" + info.name_normal, output_dir_ + "scripts/battle_models/"
-            );
+            ab.GenerateScripts(model.id + "_" + info.name_normal, output_dir_ + "scripts/battle_models/");
         }
 
         // Reload the resources for the newly created hrc and rsd.
         // TODO: Could this be done with res_mgr_->declareResource() ? Probably faster
         res_mgr_->removeResourceLocation(output_dir_ + "temp/battle_models/", "FFVII");
-        res_mgr_->addResourceLocation(
-          output_dir_ + "temp/battle_models/", "FileSystem", "FFVII", true, true
-        );
+        res_mgr_->addResourceLocation(output_dir_ + "temp/battle_models/", "FileSystem", "FFVII", true, true);
 
         Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(
           model.id + "_" + info.name_normal + ".hrc", "FFVII"
@@ -517,8 +514,7 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
             VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
             Ogre::String a_base_name;
             VGears::StringUtil::splitBase(anim, a_base_name);
-            VGears::AFilePtr a
-              = afl_mgr.load(a_base_name + ".a", "FFVII").staticCast<VGears::AFile>();
+            VGears::AFilePtr a = afl_mgr.load(a_base_name + ".a", "FFVII").staticCast<VGears::AFile>();
             // Convert the FF7 name to a more readable name set in the meta data.
             VGears::StringUtil::splitBase(anim, base_name);
             a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
@@ -526,12 +522,10 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
         ExportMesh(path, mesh);
     }
     catch (const Ogre::Exception& ex){
-        std::cerr << "[ERROR] Ogre exception converting battle model "
-          << model.hrc <<": " << ex.what() << std::endl;
+        std::cerr << "[ERROR] Ogre exception converting battle model " << model.hrc <<": " << ex.what() << std::endl;
     }
     catch (const std::exception& ex){
-        std::cerr << "[ERROR] Exception converting battle model "
-          << model.hrc << ": " << ex.what() << std::endl;
+        std::cerr << "[ERROR] Exception converting battle model " << model.hrc << ": " << ex.what() << std::endl;
     }
     next_model_to_convert_ ++;
     return next_model_to_convert_;
@@ -559,25 +553,19 @@ unsigned int BattleDataInstaller::ConvertSpellModel(){
         // Decompile the .a00 file (if any) into a .a file.
         if ("" != model.anim){ // Skip for non-animated.
             DaFile da(File(output_dir_ + "temp/spell_models/" + model.anim));
-            std::vector<std::string> a_files = da.GenerateAFiles(
-              model.id, output_dir_ + "temp/spell_models/"
-            );
+            std::vector<std::string> a_files = da.GenerateAFiles(model.id, output_dir_ + "temp/spell_models/");
             for (std::string file_name : a_files) model.a.push_back(file_name);
         }
 
         // Reload the resources for the newly created hrc and rsd.
         // TODO: Could this be done with res_mgr_->declareResource() ? Probably faster
         res_mgr_->removeResourceLocation(output_dir_ + "temp/spell_models/", "FFVII");
-        res_mgr_->addResourceLocation(
-          output_dir_ + "temp/spell_models/", "FileSystem", "FFVII", true, true
-        );
+        res_mgr_->addResourceLocation(output_dir_ + "temp/spell_models/", "FileSystem", "FFVII", true, true);
 
         // Export meshes thet have an .hrc skeleton.
         if (model.hrc != ""){
             std::cout << "[EXPORT MESH] " << model.hrc << std::endl;
-            Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(
-              model.id + ".hrc", "FFVII"
-            );
+            Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(model.id + ".hrc", "FFVII");
             Ogre::String base_name;
             VGears::StringUtil::splitBase(model.hrc, base_name);
             auto mesh_name = model.id + ".mesh";
@@ -587,8 +575,7 @@ unsigned int BattleDataInstaller::ConvertSpellModel(){
                 VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
                 Ogre::String a_base_name;
                 VGears::StringUtil::splitBase(anim, a_base_name);
-                VGears::AFilePtr a
-                  = afl_mgr.load(a_base_name + ".a", "FFVII").staticCast<VGears::AFile>();
+                VGears::AFilePtr a = afl_mgr.load(a_base_name + ".a", "FFVII").staticCast<VGears::AFile>();
                 // Convert the FF7 name to a more readable name set in the meta data.
                 VGears::StringUtil::splitBase(anim, base_name);
                 a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
@@ -597,12 +584,10 @@ unsigned int BattleDataInstaller::ConvertSpellModel(){
         }
     }
     catch (const Ogre::Exception& ex){
-        std::cerr << "[ERROR] Ogre exception converting spell model "
-          << model.hrc <<": " << ex.what() << std::endl;
+        std::cerr << "[ERROR] Ogre exception converting spell model " << model.hrc <<": " << ex.what() << std::endl;
     }
     catch (const std::exception& ex){
-        std::cerr << "[ERROR] Exception converting spell model "
-          << model.hrc << ": " << ex.what() << std::endl;
+        std::cerr << "[ERROR] Exception converting spell model " << model.hrc << ": " << ex.what() << std::endl;
     }
     next_model_to_convert_ ++;
     return next_model_to_convert_;
@@ -670,7 +655,8 @@ void BattleDataInstaller::WriteEnemies(){
         std::unique_ptr<TiXmlElement> attacks(new TiXmlElement("attacks"));
         for (Enemy::Attack attack : enemy.attacks){
             std::unique_ptr<TiXmlElement> xml_attack(new TiXmlElement("attack"));
-            xml_attack->SetAttribute("status", attack.id);
+            xml_attack->SetAttribute("id", attack.id);
+            xml_attack->SetAttribute("animation", attack.animation);
             xml_attack->SetAttribute("camera", attack.camera);
             attacks->LinkEndChild(xml_attack.release());
         }
@@ -706,6 +692,30 @@ void BattleDataInstaller::WriteEnemies(){
             animations->LinkEndChild(xml_animation.release());
         }
         container->LinkEndChild(animations.release());
+        // AI scripts, as hexadecimal bytecode.
+        {
+            static const char* AI_SLOT_NAMES[16] = {
+              "init", "main", "counter_general", "counter_death", "counter_physical", "counter_magic",
+              "battle_end", "pre_turn", "event_1", "event_2", "event_3", "event_4", "event_5",
+              "event_6", "event_7", "event_8"
+            };
+            std::unique_ptr<TiXmlElement> ai(new TiXmlElement("ai"));
+            for (size_t slot = 0; slot < enemy.ai_scripts.size() && slot < 16; slot ++){
+                if (enemy.ai_scripts[slot].empty()) continue;
+                std::string hex;
+                char digits[3];
+                for (u8 byte : enemy.ai_scripts[slot]){
+                    snprintf(digits, sizeof(digits), "%02x", byte);
+                    hex += digits;
+                }
+                std::unique_ptr<TiXmlElement> xml_script(new TiXmlElement("script"));
+                xml_script->SetAttribute("slot", static_cast<int>(slot));
+                xml_script->SetAttribute("name", AI_SLOT_NAMES[slot]);
+                xml_script->SetAttribute("data", hex);
+                ai->LinkEndChild(xml_script.release());
+            }
+            container->LinkEndChild(ai.release());
+        }
         xml.LinkEndChild(container.release());
         std::string file_name = BuildEnemyFileName(enemy);
         xml.SaveFile(output_dir_ + file_name);
@@ -737,7 +747,8 @@ void BattleDataInstaller::WriteAttacks(){
         damage->LinkEndChild(damage_modifier.release());
         std::unique_ptr<TiXmlElement> damage_acc(new TiXmlElement("Parameter"));
         damage_acc->SetAttribute("id", "accuracy");
-        damage_acc->SetAttribute("value", attack.damage.accuracy);
+        // Accuracy is a fraction between 0 and 1, it can't be written as an integer.
+        damage_acc->SetDoubleAttribute("value", attack.damage.accuracy);
         damage->LinkEndChild(damage_acc.release());
         std::unique_ptr<TiXmlElement> damage_darkness(new TiXmlElement("Parameter"));
         damage_darkness->SetAttribute("id", "affected_by_darkness");
@@ -857,6 +868,18 @@ void BattleDataInstaller::WriteAttacks(){
         xml.SaveFile(output_dir_ + file_name);
         attack_map_[attack.id] = file_name;
     }
+    // Index of the attack files by ID, as file names include the attack name.
+    TiXmlDocument index;
+    std::unique_ptr<TiXmlElement> attacks(new TiXmlElement("attacks"));
+    for (const auto& entry : attack_map_){
+        std::unique_ptr<TiXmlElement> xml_attack(new TiXmlElement("attack"));
+        xml_attack->SetAttribute("id", entry.first);
+        // The file name in the map has the gamedata/attack/ path.
+        xml_attack->SetAttribute("file", entry.second.substr(entry.second.find_last_of('/') + 1));
+        attacks->LinkEndChild(xml_attack.release());
+    }
+    index.LinkEndChild(attacks.release());
+    index.SaveFile(output_dir_ + "gamedata/attack/_index.xml");
 }
 
 void BattleDataInstaller::WriteFormations(){
@@ -977,9 +1000,7 @@ std::string BattleDataInstaller::BuildAttackFileName(Attack attack){
           (attack.name[n] >= '0' && attack.name[n] <= '9')
           || (attack.name[n] >= 'a' && attack.name[n] <= 'z')
           || (attack.name[n] >= 'A' && attack.name[n] <= 'Z')
-        ){
-            file_name += attack.name[n];
-        }
+        ) file_name += attack.name[n];
     }
     file_name += ".xml";
     return file_name;
@@ -1005,26 +1026,22 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
         switch (ret){
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflateInit2 - Z_MEM_ERROR in file "
-                  << file.GetFileName() << std::endl;
+                std::cout << "Warning: inflateInit2 - Z_MEM_ERROR in file " << file.GetFileName() << std::endl;
                 break;
             case Z_STREAM_ERROR:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflateInit2 - Z_STREAM_ERROR in file "
-                  << file.GetFileName() << std::endl;
+                std::cout << "Warning: inflateInit2 - Z_STREAM_ERROR in file " << file.GetFileName() << std::endl;
                 break;
             default:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflateInit2 - unknown error in file "
-                  << file.GetFileName() << std::endl;
+                std::cout << "Warning: inflateInit2 - unknown error in file " << file.GetFileName() << std::endl;
         }
         return NULL;
     }
     do{
         if (strm.next_out == NULL){
             inflateEnd(&strm);
-            std::cout << "Warning: strm.next_out == NULL in file "
-              << file.GetFileName() << std::endl;
+            std::cout << "Warning: strm.next_out == NULL in file " << file.GetFileName() << std::endl;
             return NULL;
         }
         ret = inflate(&strm, Z_NO_FLUSH);
@@ -1032,18 +1049,15 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
         switch (ret){
             case Z_NEED_DICT:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflate - Z_NEED_DICT in file "
-                  << file.GetFileName() << std::endl;
+                std::cout << "Warning: inflate - Z_NEED_DICT in file " << file.GetFileName() << std::endl;
                 return NULL;
             case Z_DATA_ERROR:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflate - Z_DATA_ERROR in file "
-                  << file.GetFileName() << std::endl;
+                std::cout << "Warning: inflate - Z_DATA_ERROR in file " << file.GetFileName() << std::endl;
                 return NULL;
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
-                std::cout << "Warning: inflate - Z_MEM_ERROR in file "
-                  << file.GetFileName() << std::endl;
+                std::cout << "Warning: inflate - Z_MEM_ERROR in file " << file.GetFileName() << std::endl;
                 return NULL;
         }
         if (ret != Z_STREAM_END){
@@ -1079,18 +1093,14 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
       skeleton.get(), output_dir_ + "models/battle/" + outdir + base_mesh_name + ".skeleton"
     );
     mesh->setSkeletonName(outdir + base_mesh_name + ".skeleton");
-    mesh_serializer.exportMesh(
-      mesh.get(), output_dir_ + "models/battle/" + outdir + mesh->getName()
-    );
+    mesh_serializer.exportMesh(mesh.get(), output_dir_ + "models/battle/" + outdir + mesh->getName());
     Ogre::MaterialSerializer mat_ser;
     std::set<std::string> textures;
     Ogre::Mesh::SubMeshList sub_meshes = mesh->getSubMeshes();
     for (Ogre::SubMesh* sub_mesh : sub_meshes){
         // Change material name to avoid conflicts with field model materials.
         sub_mesh->setMaterialName(sub_mesh->getMaterialName());
-        Ogre::MaterialPtr mat(
-            Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName())
-        );
+        Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName()));
         if (mat == nullptr) continue;
         for (size_t techs = 0; techs < mat->getNumTechniques(); techs ++){
             Ogre::Technique* tech = mat->getTechnique(techs);
@@ -1099,9 +1109,7 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
                 Ogre::Pass* pass = tech->getPass(pass_num);
                 if (pass == nullptr) continue;
                 for (
-                  size_t texture_unit_num = 0;
-                  texture_unit_num < pass->getNumTextureUnitStates();
-                  texture_unit_num ++
+                  size_t texture_unit_num = 0; texture_unit_num < pass->getNumTextureUnitStates(); texture_unit_num ++
                 ){
                     Ogre::TextureUnitState* unit = pass->getTextureUnitState(texture_unit_num);
                     if (unit && unit->getTextureName().empty() == false){
@@ -1119,9 +1127,7 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
             battle_materials_.push_back(sub_mesh->getMaterialName());
         }
     }
-    mat_ser.exportQueued(
-      output_dir_ + "models/battle/" + outdir + base_mesh_name + VGears::EXT_MATERIAL
-    );
+    mat_ser.exportQueued(output_dir_ + "models/battle/" + outdir + base_mesh_name + VGears::EXT_MATERIAL);
 }
 
 void BattleDataInstaller::GenerateRsdFiles(BattleModel model, std::string path){
@@ -1134,8 +1140,7 @@ void BattleDataInstaller::GenerateRsdFiles(BattleModel model, std::string path){
         content += "MAT=" + base_name + ".MAT\n";
         content += "GRP=" + base_name + ".GRP\n";
         content += "NTEX=" + std::to_string(model.tex.size()) + "\n";
-        for (int t = 0; t < model.tex.size(); t ++)
-            content += "TEX[" + std::to_string(t) + "]=" + model.tex[t] + "\n";
+        for (int t = 0; t < model.tex.size(); t ++) content += "TEX[" + std::to_string(t) + "]=" + model.tex[t] + "\n";
         content += "\n";
         std::ofstream out(path + base_name + ".rsd");
         out << content;
@@ -1236,8 +1241,7 @@ void BattleDataInstaller::DecompileSpellModelHrc(
         if (offset == 0) decompiled += "0\n\n";
         else {
             decompiled += std::to_string(offset) + " ";
-            if (p_index < model.p.size())
-                decompiled += model.p[p_index].substr(0, model.p[p_index].length() - 2);
+            if (p_index < model.p.size()) decompiled += model.p[p_index].substr(0, model.p[p_index].length() - 2);
             p_index ++;
             decompiled += "\n\n";
         }

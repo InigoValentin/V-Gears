@@ -16,11 +16,17 @@
 #include <boost/test/unit_test.hpp>
 #include "installer/decompiler/field/FieldCodeGenerator.h"
 
-#pragma message("Unimplemented test file: " __FILE__)
-
 BOOST_AUTO_TEST_CASE(TestFieldCodeGenerator){
-    // TODO
-    BOOST_WARN_MESSAGE(false, "Unimplemented test file: FieldCodeGenerator");
-    BOOST_CHECK(0 == 0);
+    FunctionMetaData entity_only("start_end_Cloud");
+    BOOST_CHECK(entity_only.IsStart());
+    BOOST_CHECK(entity_only.IsEnd());
+    BOOST_CHECK_EQUAL(entity_only.GetEntityName(), "Cloud");
+    BOOST_CHECK_EQUAL(entity_only.GetCharacterId(), -1);
+
+    FunctionMetaData with_character("start_end_0_Cloud");
+    BOOST_CHECK(with_character.IsStart());
+    BOOST_CHECK(with_character.IsEnd());
+    BOOST_CHECK_EQUAL(with_character.GetEntityName(), "Cloud");
+    BOOST_CHECK_EQUAL(with_character.GetCharacterId(), 0);
 }
 

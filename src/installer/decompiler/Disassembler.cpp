@@ -14,11 +14,16 @@
  */
 
 #include "decompiler/Disassembler.h"
+#include <utility>
 
 Disassembler::Disassembler(InstVec &insts) : insts_(insts), address_base_(0){}
 
 void Disassembler::Open(const char *filename){
     stream_ = std::make_unique<BinaryReader>(BinaryReader::ReadAll(filename));
+}
+
+void Disassembler::Open(std::vector<unsigned char> data){
+    stream_ = std::make_unique<BinaryReader>(std::move(data));
 }
 
 void Disassembler::DoDumpDisassembly(std::ostream &output){
@@ -77,9 +82,7 @@ void Disassembler::ReadParams(InstPtr inst, const char *types){
     }
 }
 
-void Disassembler::ReadParams(
-  InstPtr inst, const char *types, const std::vector<std::string>& params
-){
+void Disassembler::ReadParams(InstPtr inst, const char *types, const std::vector<std::string>& params){
     while (*types){
         std::string type(types, 1);
         if (type == "N") address_ ++;

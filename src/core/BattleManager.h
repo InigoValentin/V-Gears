@@ -21,6 +21,7 @@
 #include "Manager.h"
 #include "core/XmlBattleCharactersFile.h"
 #include "core/XmlBattleScenesFile.h"
+#include "core/XmlAttackFile.h"
 
 /**
  * The battle manager.
@@ -294,6 +295,163 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         void SetLayout(const LAYOUT layout);
 
         /**
+         * Retrieves the battle layout.
+         *
+         * To be called from Lua scripts.
+         *
+         * @return The layout, as in {@see LAYOUT}, as an integer.
+         */
+        int ScriptGetLayout() const;
+
+        /**
+         * Retrieves the formation ID of the next battle.
+         *
+         * To be called from Lua scripts.
+         *
+         * @return The next battle formation ID, -1 if there is none.
+         */
+        int GetNextFormationId() const;
+
+        /**
+         * Sets the battle mode flags for the next battles (the BTLMD field opcode).
+         *
+         * To be called from Lua scripts. The flags are: 0x80 no results screens, 0x40 arena, 0x20 no
+         * victory music, 0x08 can't escape, 0x04 preemptive attack, 0x02 timed battle and 0x100
+         * disable game over. They are kept until they are set again or the field changes.
+         *
+         * @param[in] mode The flags.
+         */
+        void ScriptSetMode(const int mode);
+
+        /**
+         * Retrieves the battle mode flags.
+         *
+         * To be called from Lua scripts.
+         *
+         * @return The flags, as in {@see ScriptSetMode}.
+         */
+        int GetMode() const;
+
+        /**
+         * Retrieves the ID of the current battle formation.
+         *
+         * To be called from Lua scripts.
+         *
+         * @return The formation ID, -1 if there is none.
+         */
+        int GetFormationId() const;
+
+        /**
+         * Retrieves the escape difficulty of the battle.
+         *
+         * To be called from Lua scripts.
+         *
+         * @return Values between 0 and 1 (both included), from easy to hard. -1 if the battle
+         * can't be escaped from.
+         */
+        float GetEscapeDifficulty() const;
+
+        /**
+         * Checks if the battle can start as preemptive.
+         *
+         * @return False if preemptive attacks are disabled for this battle.
+         */
+        bool IsPreemptiveAllowed() const;
+
+        /**
+         * Sets if preemptive attacks are disabled for the battle.
+         *
+         * @param[in] disabled True to disable preemptive attacks.
+         */
+        void SetPreemptiveDisabled(const bool disabled);
+
+        /**
+         * Checks if the victory pose must be shown.
+         *
+         * To be called from Lua scripts.
+         */
+        bool ShowVictoryPose() const;
+
+        /**
+         * Checks if the spoils screens must be shown.
+         *
+         * To be called from Lua scripts.
+         */
+        bool ShowSpoils() const;
+
+        /**
+         * Shows or hides an enemy model.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] index The enemy index, 0 based.
+         * @param[in] visible True to show the enemy model, false to hide it.
+         */
+        void ScriptSetEnemyVisible(const unsigned int index, const bool visible);
+
+        /**
+         * Retrieves the name of the entity of an enemy.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] index The enemy index, 0 based.
+         * @return The entity name, empty if the index is not valid.
+         */
+        std::string ScriptGetEnemyEntityName(const unsigned int index) const;
+
+        /**
+         * Retrieves the name of the entity of a party member.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] index The party position, 0 based (the same as in the party).
+         * @return The entity name, empty if there is no one in that position.
+         */
+        std::string ScriptGetPartyEntityName(const unsigned int index) const;
+
+        /**
+         * Retrieves the prefix used in the animation names of a party member model.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] index The party position, 0 based (the same as in the party).
+         * @return The animation prefix (the model name first two letters), empty if there is no
+         * one in that position.
+         */
+        std::string ScriptGetPartyAnimationPrefix(const unsigned int index) const;
+
+        /**
+         * Retrieves the model name of a party member, without path or extension (as in
+         * "rt_cloud").
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] index The party position, 0 based (the same as in the party).
+         * @return The model name, empty if there is no one in that position.
+         */
+        std::string ScriptGetPartyModelName(const unsigned int index) const;
+
+        /**
+         * Retrieves the data of an attack.
+         *
+         * Attack files are read the first time they are needed.
+         *
+         * @param[in] id Attack ID.
+         * @return The attack data, nullptr if there is no such attack.
+         */
+        const AttackData* GetAttackData(const int id);
+
+        /**
+         * Checks if there is attack data for an attack, without logging an error if there isn't.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] id Attack ID.
+         * @return True if there is an attack file for the attack.
+         */
+        bool HasAttackData(const int id);
+
+        /**
          * Sets the battle formation ID.
          *
          * @param[in] id Battle formation ID. Negative values to clean the manager.
@@ -355,6 +513,17 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         void SetInitialCamera(const unsigned int id);
 
         /**
+         * Changes the battle camera to one of the cameras of the formation.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] index Camera index, 0 based.
+         * @return The number of cameras of the formation. The camera isn't changed if the index is
+         * not valid.
+         */
+        int ScriptSetCamera(const int index);
+
+        /**
          * Adds a camera for the next battle.
          *
          * @param[in] id Camera ID.
@@ -373,6 +542,22 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         void LoadParty();
 
         /**
+         * Logs the state of the camera.
+         *
+         * @param[in] title Text to start the message with.
+         */
+        void LogCamera(const std::string& title) const;
+
+        /**
+         * Model rotations, in degrees, to face the party, the enemies, or the left or right side
+         * of the battle camera.
+         */
+        static const int FACING_TO_PARTY;
+        static const int FACING_TO_ENEMIES;
+        static const int FACING_TO_LEFT;
+        static const int FACING_TO_RIGHT;
+
+        /**
          * Updates the manager while in the field.
          *
          * It does nothing
@@ -385,11 +570,36 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         void UpdateBattle() override;
 
         /**
+         * Frames left until the initial battle camera is checked and set again.
+         */
+        int camera_check_frames_ = 0;
+
+        /**
+         * Battle mode flags, set by the field scripts. {@see ScriptSetMode}
+         */
+        int battle_mode_ = 0;
+
+        /**
          * Updates manager while in the world map.
          *
          * It does nothing
          */
         void UpdateWorld() override;
+
+        /**
+         * Depth (Y coordinate) of the party in normal battles.
+         */
+        static const float PARTY_Y;
+
+        /**
+         * Distance between party members.
+         */
+        static constexpr float PARTY_SPACING = 6.0f;
+
+        /**
+         * Distance from the center to each side in side attacks.
+         */
+        static const float SIDE_DISTANCE;
 
         /**
          * Scale factor for battle enemy models.
@@ -463,6 +673,11 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         bool show_spoils_;
 
         /**
+         * True if the current battle started in the world map.
+         */
+        bool battle_from_world_ = false;
+
+        /**
          * Indicates if the battle can be preemptive (not if it will definitely be).
          */
         bool preemptive_;
@@ -481,6 +696,42 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          * List of enemies for the battle.
          */
         std::vector<Enemy> enemies_;
+
+        /**
+         * Names of the entities of the enemies in the battle, in the same order as the enemies.
+         */
+        std::vector<std::string> enemy_entity_name_;
+
+        /**
+         * Names of the entities of the party members, by party position. Empty if no one is in
+         * that position.
+         */
+        std::vector<std::string> party_entity_name_;
+
+        /**
+         * Animation prefixes of the party members models, by party position.
+         */
+        std::vector<std::string> party_animation_prefix_;
+
+        /**
+         * Model names of the party members, by party position, without path or extension.
+         */
+        std::vector<std::string> party_model_name_;
+
+        /**
+         * File names of the attacks by ID, loaded the first time an attack is requested.
+         */
+        std::map<int, std::string> attack_index_;
+
+        /**
+         * Indicates if {@see attack_index_} has been loaded.
+         */
+        bool attack_index_loaded_ = false;
+
+        /**
+         * Attacks already read.
+         */
+        std::map<int, AttackData> attack_cache_;
 
         /**
          * Map of playable character models.

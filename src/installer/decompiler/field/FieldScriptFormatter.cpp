@@ -23,9 +23,6 @@ void FieldScriptFormatter::AddSpawnPoint(
 std::string FieldScriptFormatter::GetSpawnPointName(
   unsigned int map_id, const std::string& entity,
   const std::string& function_name, unsigned int address
-){
-    return GetMapName(map_id)
-      + "_" + entity + "_" + function_name + "_" + std::to_string(address);
-}
+){return GetMapName(map_id) + "_" + entity + "_" + function_name + "_" + std::to_string(address);}
 
 std::string FieldScriptFormatter::GetMapName(unsigned int map_id) { return std::to_string(map_id);}

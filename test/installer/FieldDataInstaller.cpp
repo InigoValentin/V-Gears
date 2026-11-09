@@ -18,6 +18,17 @@
 
 #pragma message("Unimplemented test file: " __FILE__)
 
+BOOST_AUTO_TEST_CASE(TestFieldScriptHeaderResetsTemporaryBanks){
+    const std::string header = FieldDataInstaller::FieldScriptHeader();
+    // The container must exist before anything else in the script uses it.
+    BOOST_CHECK(header.find("EntityContainer = {}") == 0);
+    BOOST_CHECK(header.find("for address = 0, Banks.SIZE do") != std::string::npos);
+    BOOST_CHECK(header.find("Banks[5][address] = 0") != std::string::npos);
+    // Only the temporary banks are reset: saved variables must survive a field change.
+    BOOST_CHECK(header.find("Banks[1]") == std::string::npos);
+    BOOST_CHECK(header.find("Banks[2]") == std::string::npos);
+}
+
 BOOST_AUTO_TEST_CASE(TestFieldDataInstaller){
     // TODO
     BOOST_WARN_MESSAGE(false, "Unimplemented test file: FieldDataInstaller");

@@ -59,6 +59,12 @@ struct Enemy{
          * -1 to not move the camera.
          */
         int camera;
+
+        /**
+         * Animation script of the model to play for the attack, as in the model animation scripts
+         * ("scriptN"). -1 if there is none.
+         */
+        int animation;
     };
 
     /**
@@ -90,8 +96,8 @@ struct Enemy{
         /**
          * Immunity rate.
          *
-         * 0 or lower means no immunity, 1 or higher completely immune. Values between 0 and 1
-         * indicate resistance.
+         * 0 or lower means no immunity, 1 or higher completely immune. Values
+         * between 0 and 1 indicate resistance.
          */
         float rate;
     };
@@ -197,10 +203,19 @@ struct Enemy{
     std::vector<Attack> attacks;
 
     /**
+     * Enemy AI scripts, as bytecode.
+     *
+     * There are 16 slots: 0 initialization, 1 main (when it's the enemy turn), 2 general counter,
+     * 3 death counter, 4 physical counter, 5 magic counter, 6 battle end, 7 pre-turn, and 8 to 15
+     * custom event scripts. Empty vectors are slots without script.
+     */
+    std::vector<std::vector<u8>> ai_scripts;
+
+    /**
      * List of attacks that can be used while manipulated.
      *
-     * The first one is also the one used in berserkr. If empty, it means the enemy can't be
-     * manipulated or berserkd.
+     * The first one is also the one used in berserkr. If empty, it means the
+     * enemy can't be manipulated or berserkd.
      */
     std::vector<u16> manipulate_attacks;
 

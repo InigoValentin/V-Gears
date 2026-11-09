@@ -18,7 +18,8 @@
 #include "Instruction.h"
 
 /**
- * Default implementation for stack-based instruction performing a kernel function call.
+ * Default implementation for stack-based instruction performing a kernel
+ * function call.
  */
 class KernelCallStackInstruction : public Instruction{
 

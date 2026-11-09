@@ -21,8 +21,6 @@ void BinaryOpStackInstruction::ProcessInst(
 ){
     ValuePtr op1 = stack.Pop();
     ValuePtr op2 = stack.Pop();
-    if (code_gen->GetBinaryOrder() == FIFO_ARGUMENT_ORDER)
-        stack.Push(new BinaryOpValue(op2, op1, code_gen_data_));
-    else if (code_gen->GetBinaryOrder() == LIFO_ARGUMENT_ORDER)
-        stack.Push(new BinaryOpValue(op1, op2, code_gen_data_));
+    if (code_gen->GetBinaryOrder() == FIFO_ARGUMENT_ORDER) stack.Push(new BinaryOpValue(op2, op1, code_gen_data_));
+    else if (code_gen->GetBinaryOrder() == LIFO_ARGUMENT_ORDER) stack.Push(new BinaryOpValue(op1, op2, code_gen_data_));
 }

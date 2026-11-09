@@ -216,10 +216,8 @@ Ogre::Vector3& Enemy::GetPos(){return pos_;}
 
 void Enemy::SetPos(const Ogre::Vector3 &pos){pos_ = pos;}
 
-void Enemy::ScriptGetPos() const{
-    ScriptManager::getSingleton().AddValueToStack(pos_.x);
-    ScriptManager::getSingleton().AddValueToStack(pos_.y);
-    ScriptManager::getSingleton().AddValueToStack(pos_.z);
+std::tuple<float, float, float> Enemy::ScriptGetPos() const{
+    return std::make_tuple(pos_.x, pos_.y, pos_.z);
 }
 
 bool Enemy::IsFront() const{return front_;}
@@ -245,12 +243,72 @@ void Enemy::SetCover(std::string cover){cover_ = cover;}
 int Enemy::ScriptGetAttackCount(){return attacks_.size();}
 
 int Enemy::ScriptGetAttack(const unsigned int index){
-    if (attacks_.size() < index) return -1;
+    if (index >= attacks_.size()) return -1;
     return attacks_[index].id;
 }
 
+int Enemy::ScriptGetAnimationCount() const{return animations_.size();}
+
+int Enemy::ScriptGetAnimation(const unsigned int index) const{
+    if (index >= animations_.size()) return -1;
+    return animations_[index];
+}
+
+std::string Enemy::ScriptGetModelPrefix() const{return model_.substr(0, 2);}
+
+int Enemy::ScriptGetAttackAnimation(const unsigned int index) const{
+    if (index >= attacks_.size()) return -1;
+    return attacks_[index].animation;
+}
+
+int Enemy::ScriptGetElementCount() const{return elements_.size();}
+
+void Enemy::SetAiScript(const unsigned int slot, const std::string& code){
+    ai_scripts_[slot] = code;
+}
+
+std::string Enemy::ScriptGetAiScript(const unsigned int slot) const{
+    auto found = ai_scripts_.find(slot);
+    if (found == ai_scripts_.end()) return "";
+    return found->second;
+}
+
+int Enemy::ScriptGetImmunityCount() const{return immunities_.size();}
+
+int Enemy::ScriptGetImmunity(const unsigned int index) const{
+    if (index >= immunities_.size()) return -1;
+    return immunities_[index].status;
+}
+
+float Enemy::ScriptGetImmunityRate(const unsigned int index) const{
+    if (index >= immunities_.size()) return 0.0f;
+    return immunities_[index].rate;
+}
+
+int Enemy::ScriptGetElement(const unsigned int index) const{
+    if (index >= elements_.size()) return -1;
+    return elements_[index].id;
+}
+
+float Enemy::ScriptGetElementFactor(const unsigned int index) const{
+    if (index >= elements_.size()) return 1.0f;
+    return elements_[index].factor;
+}
+
+int Enemy::ScriptGetDropCount() const{return drop_.size();}
+
+int Enemy::ScriptGetDropId(const unsigned int index) const{
+    if (index >= drop_.size()) return -1;
+    return drop_[index].id;
+}
+
+float Enemy::ScriptGetDropRate(const unsigned int index) const{
+    if (index >= drop_.size()) return 0.0f;
+    return drop_[index].rate;
+}
+
 int Enemy::ScriptGetCameraForAttack(const unsigned int index){
-    if (attacks_.size() < index) return -1;
+    if (index >= attacks_.size()) return -1;
     return attacks_[index].camera;
 }
 

@@ -164,7 +164,11 @@ namespace VGears{
                 // TODO
                 break;
             case SECTION_ENCOUNTER:
-                // TODO
+                {
+                    std::vector<u8> buffer(stream->size());
+                    stream->read(buffer.data(), buffer.size());
+                    dest->SetRawEncounter(buffer);
+                }
                 break;
             case SECTION_TRIGGER:
                 ReadTriggers(stream, dest);
@@ -230,9 +234,8 @@ namespace VGears{
         WalkmeshFile::TriangleList& triangles(walkmesh->GetTriangles());
         WalkmeshFile::TriangleList::iterator it(triangles.begin());
         WalkmeshFile::TriangleList::const_iterator it_end(triangles.end());
-        Ogre::Real scale
-          = static_cast<Ogre::Real>(dest->GetCameraMatrix()->GetCount());
-        scale *= FIELD_POSITION_SCALE;
+        // The field's own scale is stored in its script, the installer applies it on top of this.
+        const Ogre::Real scale = static_cast<Ogre::Real>(FIELD_POSITION_SCALE);
         while (it != it_end){
             it->a /= scale;
             it->b /= scale;

@@ -20,6 +20,7 @@
 #include <OgreMesh.h>
 #include <tinyxml.h>
 #include "data/VGearsFLevelFile.h"
+#include "DiskImage.h"
 #include "ScopedLgp.h"
 #include "SpawnPointDb.h"
 #include "ModelsAndAnimationsDb.h"
@@ -48,9 +49,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         BaseFF7FieldScriptFormatter(
           const std::string& field_name, const std::vector<std::string>& field_id_to_name_lookup,
           FieldSpawnPointsMap& spawn_points
-        ) :
-          field_name_(field_name), field_id_to_name_lookup_(field_id_to_name_lookup),
-          spawn_points_(spawn_points)
+        ) : field_name_(field_name), field_id_to_name_lookup_(field_id_to_name_lookup), spawn_points_(spawn_points)
         {}
 
         /**
@@ -66,11 +65,9 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
          * @return The composed spawn point name.
          */
         virtual std::string GetSpawnPointName(
-          unsigned int map_id, const std::string& entity,
-          const std::string& function_name, unsigned int address
+          unsigned int map_id, const std::string& entity, const std::string& function_name, unsigned int address
         ) override{
-            return
-              field_name_ + "_" + entity + "_" + function_name + "_addr_" + std::to_string(address);
+            return field_name_ + "_" + entity + "_" + function_name + "_addr_" + std::to_string(address);
         }
 
         /**
@@ -79,9 +76,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
          * @param[in] map_id The map ID.
          * @return The map name.
          */
-        virtual std::string GetMapName(unsigned int map_id) override{
-            return field_id_to_name_lookup_[map_id];
-        }
+        virtual std::string GetMapName(unsigned int map_id) override{return field_id_to_name_lookup_[map_id];}
 
         /**
          * Retrieves a user friendly variable name.
@@ -91,9 +86,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
          * @return Friendly name for the variable, or an empty string if it
          * doesn't have one assigned.
          */
-        virtual std::string GetFriendlyVarName(
-          unsigned int bank, unsigned int addr
-        ) override{
+        virtual std::string GetFriendlyVarName(unsigned int bank, unsigned int addr) override{
             return VGears::NameLookup::FieldScriptVarName(bank, addr);
         }
 
@@ -115,9 +108,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
          * @return Friendly name for the entity, or an empty string if it
          * doesn't have one assigned.
          */
-        virtual std::string GetFriendlyCharName(int char_id) override{
-            return VGears::NameLookup::CharName(char_id);
-        }
+        virtual std::string GetFriendlyCharName(int char_id) override{return VGears::NameLookup::CharName(char_id);}
 
         /**
          * Retrieves a user friendly function name.
@@ -130,9 +121,7 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
         virtual std::string GetFriendlyFunctionName(
           const std::string& entity, const std::string& function_name
         ) override{
-            return VGears::NameLookup::FieldScriptFunctionName(
-              field_name_, entity, function_name
-            );
+            return VGears::NameLookup::FieldScriptFunctionName(field_name_, entity, function_name);
         }
 
         /**
@@ -143,12 +132,8 @@ class BaseFF7FieldScriptFormatter : public FieldScriptFormatter{
          * @return Friendly comment for the function, or an empty string if it
          * doesn't have one assigned.
          */
-        virtual std::string GetFunctionComment(
-          const std::string& entity, const std::string& function_name
-        ) override{
-            return VGears::NameLookup::FieldScriptFunctionComment(
-              field_name_, entity, function_name
-            );
+        virtual std::string GetFunctionComment(const std::string& entity, const std::string& function_name) override{
+            return VGears::NameLookup::FieldScriptFunctionComment(field_name_, entity, function_name);
         }
 
     protected:
@@ -184,9 +169,7 @@ class FF7FieldScriptGatewayCollector : public BaseFF7FieldScriptFormatter{
         FF7FieldScriptGatewayCollector(
           const std::string& field_name, const std::vector<std::string>& field_id_to_name_lookup,
           FieldSpawnPointsMap& spawn_points, size_t this_field_id
-        ) :
-          BaseFF7FieldScriptFormatter(field_name,field_id_to_name_lookup, spawn_points),
-          field_id_(this_field_id)
+        ) : BaseFF7FieldScriptFormatter(field_name,field_id_to_name_lookup, spawn_points), field_id_(this_field_id)
         {}
 
         /**
@@ -269,11 +252,8 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
          */
         FF7FieldScriptFormatter(
           const std::string& field_name, const VGears::ModelListFilePtr& models,
-          const std::vector<std::string>& field_id_to_name_lookup,
-          FieldSpawnPointsMap& spawn_points
-        ) :
-          BaseFF7FieldScriptFormatter(field_name, field_id_to_name_lookup, spawn_points),
-          model_loader_(models)
+          const std::vector<std::string>& field_id_to_name_lookup, FieldSpawnPointsMap& spawn_points
+        ) : BaseFF7FieldScriptFormatter(field_name, field_id_to_name_lookup, spawn_points), model_loader_(models)
         {}
 
         // Names an animation, can't return empty
@@ -295,9 +275,8 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
             }
             const auto& model_info = model_loader_->GetModels().at(char_id);
             if (static_cast<unsigned int>(id) >= model_info.animations.size()){
-                std::cerr << "FF7FieldScriptFormatter::AnimationName ERROR:"
-                  << "In field " << field_name_ << " the model " << model_info.name
-                  << " animation with ID " << id << " is out of bounds ("
+                std::cerr << "FF7FieldScriptFormatter::AnimationName ERROR:" << "In field " << field_name_
+                  << " the model " << model_info.name << " animation with ID " << id << " is out of bounds ("
                   << model_info.animations.size() << ")" << std::endl;
                 return std::to_string(id);
             }
@@ -305,6 +284,50 @@ class FF7FieldScriptFormatter : public BaseFF7FieldScriptFormatter{
             // Trim off ".yos" or whatever extension the model loader adds in.
             Ogre::String base_name;
             VGears::StringUtil::splitBase(raw_name, base_name);
+            VGears::StringUtil::toLowerCase(base_name);
+            return VGears::NameLookup::Animation(base_name);
+        }
+
+        /**
+         * Retrieves the animation a model must play when its script doesn't set a default one.
+         *
+         * In the original game a model without a requested animation plays the first one of its
+         * list.
+         *
+         * @param[in] char_id ID of the model, as given to the CHAR opcode.
+         * @return Name of the first animation of the model. An empty string if the model already
+         * has an animation called "Idle", or it has no animations.
+         */
+        virtual std::string GetDefaultAnimationName(int char_id) override{
+            if (static_cast<unsigned int>(char_id) >= model_loader_->GetModels().size()) return "";
+            const auto& animations = model_loader_->GetModels().at(char_id).animations;
+            if (animations.empty()) return "";
+            std::string first;
+            for (size_t i = 0; i < animations.size(); ++ i){
+                Ogre::String base_name;
+                VGears::StringUtil::splitBase(animations[i].name, base_name);
+                VGears::StringUtil::toLowerCase(base_name);
+                const std::string friendly = VGears::NameLookup::Animation(base_name);
+                if (friendly == "Idle") return "";
+                if (i == 0) first = friendly;
+            }
+            return first;
+        }
+
+        /**
+         * Retrieves the animation a model plays when it walks or runs on its own.
+         *
+         * @param[in] char_id ID of the model, as given to the CHAR opcode.
+         * @param[in] index 1 for the walk animation, 2 for the run animation.
+         * @return Name of the animation, or an empty string if the model hasn't got it.
+         */
+        virtual std::string GetMoveAnimationName(int char_id, int index) override{
+            if (char_id < 0 || static_cast<unsigned int>(char_id) >= model_loader_->GetModels().size())
+                return "";
+            const auto& animations = model_loader_->GetModels().at(char_id).animations;
+            if (static_cast<unsigned int>(index) >= animations.size()) return "";
+            Ogre::String base_name;
+            VGears::StringUtil::splitBase(animations[index].name, base_name);
             VGears::StringUtil::toLowerCase(base_name);
             return VGears::NameLookup::Animation(base_name);
         }
@@ -324,17 +347,23 @@ class FieldDataInstaller{
         /**
          * Installer constructor
          *
-         * @param[in] input_dir Path to the directory containing the original
-         * data to parse.
+         * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory to write generated data
          * to.
          */
-        FieldDataInstaller(const std::string input_dir, const std::string output_dir);
+        FieldDataInstaller(
+          const DiskImage& disk_image, const std::string output_dir,
+          std::function<void(std::string)> log_output_line
+        );
 
         /**
          * Installer destructor.
          */
         ~FieldDataInstaller();
+
+        const MapList& GetMapList() const{return map_list_;}
+        const FieldScaleFactorMap& GetFieldScaleFactors() const{return scale_factors_;}
+        const MapList& GetConvertedMapList() const{return converted_map_list_;}
 
         /**
          * Initializer for {@see CollectionFieldSpawnAndScaleFactors}.
@@ -351,16 +380,18 @@ class FieldDataInstaller{
          *
          * Installation step 2.
          *
-         * @param[in] field_index Index of the field to collect from. Must be less than the value
-         * returned by {@see CollectSpawnAndScaleFactorsInit}.
+         * @param[in] field_index Index of the field to collect from. Must be
+         * less than the value returned by
+         * {@see CollectSpawnAndScaleFactorsInit}.
          */
         void CollectSpawnAndScaleFactors(int field_index);
 
         /**
          * Converts FFVII PC fields to V-Gears format.
          *
-         * @param[in] field_index Index of the field to collect from. Must be less than the value
-         * returned by {@see CollectSpawnAndScaleFactorsInit}.
+         * @param[in] field_index Index of the field to collect from. Must be
+         * less than the value returned by
+         * {@see CollectSpawnAndScaleFactorsInit}.
          */
         void Convert(int field_index);
 
@@ -378,8 +409,8 @@ class FieldDataInstaller{
          *
          * Installation step 4.
          *
-         * @param[in] field_index Index of the field to collect from. Must be less than the value
-         * returned by {@see WriteInit}.
+         * @param[in] field_index Index of the field to collect from. Must be
+         * less than the value returned by {@see WriteInit}.
          */
         void Write(int field_index);
 
@@ -408,6 +439,23 @@ class FieldDataInstaller{
          */
         void ConvertModels(std::string model_name);
 
+        /**
+         * Memory banks that are temporary: every field starts with them set to zero.
+         */
+        static const std::vector<int> TEMPORARY_BANKS;
+
+        /**
+         * Retrieves the Lua code every field script starts with.
+         *
+         * It creates the entity container, and sets the temporary memory banks to zero. In the
+         * original game a field can't see what the previous one left in them, but here the
+         * banks live as long as the game, so scripts that wait for a bank to change would see
+         * leftovers.
+         *
+         * @return Lua code to put at the beginning of a field script.
+         */
+        static std::string FieldScriptHeader();
+
     private:
 
         /**
@@ -431,15 +479,13 @@ class FieldDataInstaller{
          * @return The field ID for the specified name.
          * @throws std::runtime_error If there is no ID for the field name.
          */
-        static size_t GetFieldId(
-          const std::string& name, const std::vector<std::string>& field_id_to_name_lookup
-        );
+        static size_t GetFieldId(const std::string& name, const std::vector<std::string>& field_id_to_name_lookup);
 
         /**
          * Checks if a file is a field file.
          *
-         * To verify it, it just checks that the extension is not '.tex', '.tut' or
-         * '.siz' and that the name is not 'maplist'.
+         * To verify it, it just checks that the extension is not '.tex', '.tut'
+         * or '.siz' and that the name is not 'maplist'.
          *
          * @param[in] resource_name The name of the file to test.
          * @return False if the file is surely not a field file, true otherwise.
@@ -449,12 +495,11 @@ class FieldDataInstaller{
         /**
          * Checks if a map cause fatal crash bugs.
          *
-         * It uses a hardcoded list of maps that are known to cause errors. This can be
-         * removed when whatever is causing the crash(s) is fixed.
+         * It uses a hardcoded list of maps that are known to cause errors. This
+         * can be removed when whatever is causing the crash(s) is fixed.
          *
-         * NOTE: Even so, conversion of all models will fail with a bone index out of
-         * bounds.
-         *
+         * @note: Even so, conversion of all models will fail with a bone index
+         * out of bounds.
          * @param[in] resource_name The name of the map file to test.
          * @return True if the map will crash, false otherwise.
          */
@@ -463,8 +508,8 @@ class FieldDataInstaller{
         /**
          * Checks if a map is a test field.
          *
-         * It uses a hardcoded list of maps that are known to be test maps. Unused maps
-         * are considered to be test maps.
+         * It uses a hardcoded list of maps that are known to be test maps.
+         * Unused maps are considered to be test maps.
          *
          * @param[in] resource_name The name of the map file to test.
          * @return True if the map is a test map, false otherwise.
@@ -475,10 +520,10 @@ class FieldDataInstaller{
          * Collects the scale factor from a map.
          *
          * @param[in] field The field to collect from.
-         * @param[out] scale_factors The scale factor for the map will be set here, in
-         * the appropiate map entry.
-         * @param[in] field_id_to_name_lookup Lookup table to relate field IDs and
-         * names.
+         * @param[out] scale_factors The scale factor for the map will be set
+         * here, in the appropiate map entry.
+         * @param[in] field_id_to_name_lookup Lookup table to relate field IDs
+         * and names.
          */
         static void CollectFieldScaleFactors(
           VGears::FLevelFilePtr& field, FieldScaleFactorMap& scale_factors,
@@ -488,16 +533,17 @@ class FieldDataInstaller{
         /**
          * Collects the spawn point from a field.
          *
-         * If a spawn is new, a new record will be added to the spawn point database.
-         * If it was already there, update the record to add the origin.
+         * If a spawn is new, a new record will be added to the spawn point
+         * database. If it was already there, update the record to add the
+         * origin.
          *
          * @param[in] field The field to collect from.
-         * @param[in] field_id_to_name_lookup Lookup table to relate field IDs and
-         * names.
-         * @param[out] spawn_points Spawn points will be added sequentially to the end
-         * of this map.
+         * @param[in] field_id_to_name_lookup Lookup table to relate field IDs
+         * and names.
+         * @param[out] spawn_points Spawn points will be added sequentially to
+         * the end of this map.
          */
-        static void CollectSpawnPoints(
+        static bool CollectSpawnPoints(
           VGears::FLevelFilePtr& field, const std::vector<std::string>& field_id_to_name_lookup,
           FieldSpawnPointsMap& spawn_points
         );
@@ -505,8 +551,8 @@ class FieldDataInstaller{
         /**
          * The scale factor for line point coordinates.
          *
-         * When a LINE opcode is found in the game scripts, the line points X and Y coordinates
-         * must be scaled down by this factor.
+         * When a LINE opcode is found in the game scripts, the line points X
+         * and Y coordinates must be scaled down by this factor.
          */
         static float LINE_SCALE_FACTOR;
 
@@ -571,7 +617,7 @@ class FieldDataInstaller{
         /**
          * The path to the directory from which to read the PC game data.
          */
-        std::string input_dir_;
+        DiskImage disk_image_;
 
         /**
          * The path to the directory where to save the V-Gears data.
@@ -618,6 +664,8 @@ class FieldDataInstaller{
          * The list of maps.
          */
         std::vector<std::string> map_list_;
+
+        std::vector<std::string> failed_fields_;
 
         /**
          * Map of the collected spawn points.

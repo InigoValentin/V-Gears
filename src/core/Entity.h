@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <tuple>
 #include <OgreString.h>
 #include "EntityCollision.h"
 #include "EntityDirection.h"
@@ -225,6 +226,15 @@ class Entity{
         void ScriptSetPosition(const float x, const float y, const float z);
 
         /**
+         * Moves the entity by the specified position offset.
+         *
+         * @param[in] x X coordinate offset.
+         * @param[in] y Y coordinate offset.
+         * @param[in] z Z coordinate offset.
+         */
+        void ScriptMoveBy(const float x, const float y, const float z);
+
+        /**
          * Retrieves the entity position.
          *
          * @return The entity position.
@@ -234,10 +244,9 @@ class Entity{
         /**
          * Retrieves the entity position.
          *
-         * To be used from Lua scripts only. It doesn't return anything, but adds three values to
-         * the stack for the X, Y and Z coordinates.
+         * @return The X, Y and Z coordinates for Lua scripts.
          */
-        void ScriptGetPosition() const;
+        std::tuple<float, float, float> ScriptGetPosition() const;
 
         /**
          * Sets the entity position.
@@ -319,6 +328,20 @@ class Entity{
          * @return The entity's height.
          */
         float GetHeight() const;
+
+        /**
+         * Sets the entity collision height and updates its debug proxies.
+         *
+         * @param[in] height Height in map units.
+         */
+        void SetHeight(const float height);
+
+        /**
+         * Sets the orientation of the debug collision proxies.
+         *
+         * @param[in] orientation Proxy orientation relative to the entity.
+         */
+        void SetCollisionDebugOrientation(const Ogre::Quaternion& orientation);
 
         /**
          * Sets the entity's solid radius.
@@ -419,6 +442,32 @@ class Entity{
         virtual bool IsVisible() const = 0;
 
         /**
+         * Retrieves the duration of an animation.
+         *
+         * @param[in] animation Animation name.
+         * @return The animation length in seconds, 0 if the animation doesn't exist or the entity
+         * has no animations.
+         */
+        virtual float GetAnimationLength(const Ogre::String& animation) const;
+
+        /**
+         * Retrieves the number of animations of the entity.
+         *
+         * @return The number of animations, 0 if the entity has no animations.
+         */
+        virtual unsigned int GetAnimationCount() const;
+
+        /**
+         * Retrieves the duration of an animation.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] animation Animation name.
+         * @return The animation length in seconds, 0 if it doesn't exist.
+         */
+        float ScriptGetAnimationLength(const char* animation) const;
+
+        /**
          * Sets the entity's state.
          *
          * @param[in] state The entity's state.
@@ -512,6 +561,13 @@ class Entity{
         float GetMoveStopDistance() const;
 
         /**
+         * Checks whether the current move was requested by a script.
+         *
+         * @return True for scripted movement.
+         */
+        bool IsScriptedMove() const;
+
+        /**
          * Sets the destination triangle in the walkmesh.
          *
          * Sets the units destination to one of the walkmesh triangles. The
@@ -566,6 +622,14 @@ class Entity{
          * @return The walk animation name.
          */
         const Ogre::String& GetMoveAnimationWalkName() const;
+
+        /**
+         * Sets the animations played when the entity moves on its own.
+         *
+         * @param[in] walk Name of the walk animation.
+         * @param[in] run Name of the run animation.
+         */
+        void SetMoveAnimations(const char* walk, const char* run);
 
         /**
          * Retrieves the entity's run animation name.
@@ -850,6 +914,13 @@ class Entity{
           Entity* entity, const TurnDirection turn_direction,
           const float seconds
         );
+
+        /**
+         * Makes the entity face another entity at once.
+         *
+         * @param[in] entity Entity to face.
+         */
+        void ScriptFaceEntity(Entity* entity);
 
         /**
          * Adds the entity's turn to the sync queue.
@@ -1190,6 +1261,8 @@ class Entity{
          * Distance between the entity and it's movement destination point.
          */
         float move_stop_distance_;
+
+        bool scripted_move_;
 
         /**
          * Entity's movement destination triangle ID.

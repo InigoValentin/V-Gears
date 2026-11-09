@@ -32,19 +32,6 @@
 #include "XmlMapsFile.h"
 #include "DialogsManager.h"
 #include "TextHandler.h"
-#include <luabind/detail/class_registry.hpp>
-#include <luabind/typeid.hpp>
-
-// Global guard for luabind registrations (defined in ScriptManagerBinds.cpp)
-extern bool g_luabind_binds_registered;
-
-
-/*
- * TODO:
- *
- * If I manage to upgrade luabind version (or even better, remove it and use an external one),
- * I could pass entire objects to Lua scripts as tables, and this will be waaaaay easier.
- */
 
 /**
  * Prints to the game console.
@@ -65,7 +52,12 @@ void ScriptPrint(const char* text){
  * @param[in] text The new map name.
  */
 void ScriptMap(const char* text){
+  VGears::WorldmapModule::getSingleton().Suspend();
+  EntityManager::getSingleton().SetFieldModule();
     EntityManager::getSingleton().Clear();
+    // The battle music and mode are set by the scripts of each field.
+    AudioManager::getSingleton().ScriptSetBattleTrack(-1);
+    BattleManager::getSingleton().ScriptSetMode(0);
     XmlMapsFile xml("./data/fields/_fields.xml");
     Ogre::String file_name = xml.GetMapFileNameByName(text);
     XmlMapFile xml_map("./data/fields/" + file_name);
@@ -90,916 +82,510 @@ void ScriptConsole(const char* text){
     Console::getSingleton().ExecuteCommand(text);
 }
 
+/**
+ * Binds a yielding member function to a class table.
+ *
+ * sol2 v2.20.6 function wrappers don't understand sol::yielding_t, so
+ * sol::yielding can't be used with new_usertype or set_function. The raw
+ * stack pusher does support it, so the yielding closure is pushed manually
+ * and set as a field of the class table.
+ *
+ * @param[in,out] table The class table to bind the function to.
+ * @param[in] name Function name for scripts.
+ * @param[in] function The member function to bind.
+ */
+template <typename F>
+void BindYielding(sol::table& table, const char* name, F function){
+    table.push();
+    sol::stack::push(table.lua_state(), sol::yielding(function));
+    lua_setfield(table.lua_state(), -2, name);
+    lua_pop(table.lua_state(), 1);
+}
+
 void ScriptManager::InitBinds(){
-  if (g_luabind_binds_registered) return;
+    sol::state_view lua_view(lua_state_);
+    sol::table lua = lua_view.globals();
 
-  // If luabind has already registered any class in this Lua state (for
-  // example a plugin performed bindings earlier), skip the whole binds
-  // registration to avoid the "register a class twice" assertion.
-  luabind::detail::class_registry* registry = luabind::detail::class_registry::get_registry(lua_state_);
-  if (registry) {
-    if (!registry->get_classes().empty()){
-      std::cerr << "[ScriptManager] InitBinds() skipped: luabind registry already contains classes" << std::endl;
-      g_luabind_binds_registered = true;
-      return;
-    }
-  }
-
-  g_luabind_binds_registered = true;
-
-  std::cerr << "[ScriptManager] InitBinds() starting registration" << std::endl;
-  // Global functions.
-    luabind::module(lua_state_)[
-        luabind::def("print", (void(*)(const char*)) &ScriptPrint),
-        luabind::def("map", (void(*)(const char*)) &ScriptMap),
-        luabind::def("console", (void(*)(const char*)) &ScriptConsole)
-    ];
+    // Global functions.
+    lua.set_function("print", &ScriptPrint);
+    lua.set_function("map", &ScriptMap);
+    lua.set_function("console", &ScriptConsole);
 
     // Individual entity commands.
-    luabind::module(lua_state_)[
-        luabind::class_<Entity>("Entity")
-          .def(
-            "set_position",
-            (void(Entity::*)(const float, const float, const float)) &Entity::ScriptSetPosition
-          )
-          .def("get_position", (void(Entity::*)()) &Entity::ScriptGetPosition)
-          .def("set_rotation", (void(Entity::*)(const float)) &Entity::ScriptSetRotation)
-          .def("get_rotation", (float(Entity::*)()) &Entity::ScriptGetRotation)
-          .def("set_solid_radius", (void(Entity::*)(const float)) &Entity::SetSolidRadius)
-          .def("get_solid_radius", (float(Entity::*)()) &Entity::GetSolidRadius)
-          .def("set_solid", (void(Entity::*)(const bool)) &Entity::SetSolid)
-          .def("is_solid", (bool(Entity::*)()) &Entity::IsSolid)
-          .def("set_talk_radius", (void(Entity::*)(const float)) &Entity::SetTalkRadius)
-          .def("get_talk_radius", (float(Entity::*)()) &Entity::GetTalkRadius)
-          // Some old test script use this, its just an alias for SetTalkable:
-          .def("set_interactable", (void(Entity::*)(const bool)) &Entity::SetTalkable)
-          .def("set_talkable", (void(Entity::*)(const bool)) &Entity::SetTalkable)
-          .def("is_talkable", (bool(Entity::*)()) &Entity::IsTalkable)
-          .def("set_visible", (void(Entity::*)(const bool)) &Entity::SetVisible)
-          .def("is_visible", (bool(Entity::*)()) &Entity::IsVisible)
-          .def("set_move_auto_speed", (void(Entity::*)(const float)) &Entity::SetMoveAutoSpeed)
-          .def("get_move_auto_speed", (float(Entity::*)()) &Entity::GetMoveAutoSpeed)
-          .def("get_move_triangle_id", (int(Entity::*)()) &Entity::GetMoveTriangleId)
-          .def("set_move_triangle_id", (void(Entity::*)(const int)) &Entity::SetMoveTriangleId)
-          .def("move_auto_rotation", (void(Entity::*)(const bool)) &Entity::SetMoveAutoRotation)
-          .def("move_auto_animation", (void(Entity::*)(const bool)) &Entity::SetMoveAutoAnimation)
-          .def(
-            "move_to_position",
-            (void(Entity::*)(const float, const float)) &Entity::ScriptMoveToPosition
-          )
-          .def("move_to_entity", (void(Entity::*)(Entity*)) &Entity::ScriptMoveToEntity)
-          .def("move_sync", (int(Entity::*)()) &Entity::ScriptMoveSync, luabind::yield)
-          .def(
-            "linear_to_position",
-            (void(Entity::*)(
-              const float, const float, const float, const LinearMovement,
-              const char*, const float, const int
-            )) &Entity::ScriptLinearToPosition
-          )
-          .def(
-            "linear_sync", (int(Entity::*)()) &Entity::ScriptLinearSync, luabind::yield
-          )
-          .def(
-            "jump_to_position",
-            (void(Entity::*)(const float, const float, const float, const float, const int))
-              &Entity::ScriptJumpToPosition
-          )
-          .def("jump_sync", (int(Entity::*)()) &Entity::ScriptJumpSync, luabind::yield)
-          .def(
-            "offset_to_position",
-            (void(Entity::*)(const float, const float, const float, const ActionType, const float))
-              &Entity::ScriptOffsetToPosition
-          )
-          .def("offset_sync", (int(Entity::*)()) &Entity::ScriptOffsetSync, luabind::yield)
-          .def(
-            "turn_to_entity",
-            (void(Entity::*)(Entity*, const TurnDirection, const float)) &Entity::ScriptTurnToEntity
-          )
-          .def(
-            "turn_to_direction", (
-              void(Entity::*)(const float, const TurnDirection, const ActionType, const float)
-            ) &Entity::ScriptTurnToDirection)
-          .def("turn_sync", (int(Entity::*)()) &Entity::ScriptTurnSync, luabind::yield)
-          .def(
-            "set_animation_speed", (void(Entity::*)(const float)) &Entity::ScriptSetAnimationSpeed
-          )
-          .def("play_animation", (void(Entity::*)(const char*)) &Entity::ScriptPlayAnimation)
-          .def(
-            "play_animation_stop", (void(Entity::*)(const char*)) &Entity::ScriptPlayAnimationStop
-          )
-          .def(
-            "play_animation",
-            (void(Entity::*)(const char*, const float, const float)) &Entity::ScriptPlayAnimation
-          )
-          .def(
-            "play_animation_stop",
-            (void(Entity::*)(const char*, const float, const float))
-            &Entity::ScriptPlayAnimationStop
-          )
-          .def(
-            "set_default_animation",
-            (void(Entity::*)(const char*)) &Entity::ScriptSetDefaultAnimation
-          )
-          .def("animation_sync", (int(Entity::*)()) &Entity::ScriptAnimationSync, luabind::yield)
-          .enum_("constants")[
-             luabind::value("NONE", AT_NONE),
-             luabind::value("LINEAR", AT_LINEAR),
-             luabind::value("SMOOTH", AT_SMOOTH),
-             luabind::value("CLOCKWISE", TD_CLOCKWISE),
-             luabind::value("ANTICLOCKWISE", TD_ANTICLOCKWISE),
-             luabind::value("CLOSEST", TD_CLOSEST),
-             luabind::value("UP_TO_DOWN", LM_UP_TO_DOWN),
-             luabind::value("DOWN_TO_UP", LM_DOWN_TO_UP),
-             luabind::value("LEFT_TO_RIGHT", LM_LEFT_TO_RIGHT),
-             luabind::value("RIGHT_TO_LEFT", LM_RIGHT_TO_LEFT)
-           ]
-    ];
-
-    // Field commands.
-    // TODO: Duplicated in group EntityManager, this can probably be deleted
-    luabind::module(lua_state_)[
-        luabind::class_<EntityManager>("Field")
-          .def(
-            "random_encounters_on",
-            (float(EntityManager::*)(bool)) &EntityManager::SetRandomEncounters
-          )
-    ];
+    lua.new_usertype<Entity>(
+      "Entity",
+      "set_position", &Entity::ScriptSetPosition,
+      "move_by", &Entity::ScriptMoveBy,
+      "get_position", &Entity::ScriptGetPosition,
+      "get_name", &Entity::GetName,
+      "set_rotation", &Entity::ScriptSetRotation,
+      "get_rotation", &Entity::ScriptGetRotation,
+      "set_solid_radius", &Entity::SetSolidRadius,
+      "get_solid_radius", &Entity::GetSolidRadius,
+      "set_solid", &Entity::SetSolid,
+      "is_solid", &Entity::IsSolid,
+      "set_talk_radius", &Entity::SetTalkRadius,
+      "get_talk_radius", &Entity::GetTalkRadius,
+      // Some old test script use this, its just an alias for SetTalkable:
+      "set_interactable", &Entity::SetTalkable,
+      "set_talkable", &Entity::SetTalkable,
+      "is_talkable", &Entity::IsTalkable,
+      "set_visible", &Entity::SetVisible,
+      "is_visible", &Entity::IsVisible,
+      "set_move_auto_speed", &Entity::SetMoveAutoSpeed,
+      "get_move_auto_speed", &Entity::GetMoveAutoSpeed,
+      "get_move_triangle_id", &Entity::GetMoveTriangleId,
+      "set_move_triangle_id", &Entity::SetMoveTriangleId,
+      "move_auto_rotation", &Entity::SetMoveAutoRotation,
+      "move_auto_animation", &Entity::SetMoveAutoAnimation,
+      "set_move_animations", &Entity::SetMoveAnimations,
+      "move_to_position", &Entity::ScriptMoveToPosition,
+      "move_to_entity", &Entity::ScriptMoveToEntity,
+      "linear_to_position", &Entity::ScriptLinearToPosition,
+      "jump_to_position", &Entity::ScriptJumpToPosition,
+      "offset_to_position", &Entity::ScriptOffsetToPosition,
+      "turn_to_entity", &Entity::ScriptTurnToEntity,
+      "face_entity", &Entity::ScriptFaceEntity,
+      "turn_to_direction", &Entity::ScriptTurnToDirection,
+      "set_animation_speed", &Entity::ScriptSetAnimationSpeed,
+      "play_animation", sol::overload(
+        sol::resolve<void(const char*)>(&Entity::ScriptPlayAnimation),
+        sol::resolve<void(const char*, const float, const float)>(&Entity::ScriptPlayAnimation)
+      ),
+      "play_animation_stop", sol::overload(
+        sol::resolve<void(const char*)>(&Entity::ScriptPlayAnimationStop),
+        sol::resolve<void(const char*, const float, const float)>(
+          &Entity::ScriptPlayAnimationStop
+        )
+      ),
+      "get_animation_length", &Entity::ScriptGetAnimationLength,
+      "get_animation_count", &Entity::GetAnimationCount,
+      "set_default_animation", &Entity::ScriptSetDefaultAnimation
+    );
+    sol::table entity_type = lua["Entity"];
+    BindYielding(entity_type, "move_sync", &Entity::ScriptMoveSync);
+    BindYielding(entity_type, "linear_sync", &Entity::ScriptLinearSync);
+    BindYielding(entity_type, "jump_sync", &Entity::ScriptJumpSync);
+    BindYielding(entity_type, "offset_sync", &Entity::ScriptOffsetSync);
+    BindYielding(entity_type, "turn_sync", &Entity::ScriptTurnSync);
+    BindYielding(entity_type, "animation_sync", &Entity::ScriptAnimationSync);
+    entity_type["NONE"] = AT_NONE;
+    entity_type["LINEAR"] = AT_LINEAR;
+    entity_type["SMOOTH"] = AT_SMOOTH;
+    entity_type["CLOCKWISE"] = TD_CLOCKWISE;
+    entity_type["ANTICLOCKWISE"] = TD_ANTICLOCKWISE;
+    entity_type["CLOSEST"] = TD_CLOSEST;
+    entity_type["UP_TO_DOWN"] = LM_UP_TO_DOWN;
+    entity_type["DOWN_TO_UP"] = LM_DOWN_TO_UP;
+    entity_type["LEFT_TO_RIGHT"] = LM_LEFT_TO_RIGHT;
+    entity_type["RIGHT_TO_LEFT"] = LM_RIGHT_TO_LEFT;
 
     // Entity individual point commands
-    luabind::module(lua_state_)[
-        luabind::class_<EntityPoint>("EntityPoint")
-          // Internally returns 3 values:
-          .def("get_position", (void(EntityPoint::*)()) &EntityPoint::ScriptGetPosition)
-          .def("get_rotation", (float(EntityPoint::*)()) &EntityPoint::ScriptGetRotation)
-    ];
+    lua.new_usertype<EntityPoint>(
+      "EntityPoint",
+      "get_position", &EntityPoint::ScriptGetPosition,
+      "get_rotation", &EntityPoint::ScriptGetRotation
+    );
 
     // Commands for the entity manager, not related to any particular entity.
-    luabind::module(lua_state_)[
-        luabind::class_<EntityManager>("EntityManager")
-          .def("set_paused", (void(EntityManager::*)(const bool)) &EntityManager::ScriptSetPaused)
-          .def(
-             "add_entity",
-             (void(EntityManager::*)(
-               const char*, const char*, const float,const float,
-               const float, const float, const int
-             )) &EntityManager::ScriptAddEntity
-          )
-          .def(
-             "add_entity_script",
-             (void(EntityManager::*)(const char*)) &EntityManager::ScriptAddEntityScript
-          )
-          .def(
-             "get_entity", (Entity*(EntityManager::*)(const char*)) &EntityManager::ScriptGetEntity
-          )
-          .def(
-             "get_entity_from_index",
-             (Entity*(EntityManager::*)(const int)) &EntityManager::GetEntityFromIndex
-           )
-          .def(
-             "get_entity_from_character_id",
-             (Entity*(EntityManager::*)(const int)) &EntityManager::GetEntityFromCharacterId
-          )
-          .def(
-             "get_entity_point",
-             (EntityPoint*(EntityManager::*)(const char*)) &EntityManager::ScriptGetEntityPoint
-          )
-          .def(
-             "set_player_entity",
-             (void(EntityManager::*)(const char*)) &EntityManager::ScriptSetPlayerEntity
-          )
-          .def(
-             "get_player_entity",
-             (Entity*(EntityManager::*)()) &EntityManager::ScriptGetPlayerEntity
-          )
-          .def(
-            "unset_player_entity",
-            (void(EntityManager::*)()) &EntityManager::ScriptUnsetPlayerEntity
-          )
-          .def(
-            "player_lock", (void(EntityManager::*)(const bool)) &EntityManager::ScriptPlayerLock
-          )
-          .def(
-            "random_encounters_on",
-            (float(EntityManager::*)(bool)) &EntityManager::SetRandomEncounters
-          )
-          .def("is_key_on", (bool(EntityManager::*)(unsigned int)) &EntityManager::IsKeyOn)
-          .def("is_key_off", (bool(EntityManager::*)(unsigned int)) &EntityManager::IsKeyOff)
-          .def(
-            "set_entity_to_character",
-            (void(EntityManager::*)(const char*, unsigned int)) &EntityManager::SetEntityToCharacter
-          )
-    ];
+    lua.new_usertype<EntityManager>(
+      "EntityManager",
+      "set_paused", &EntityManager::ScriptSetPaused,
+      "add_entity", &EntityManager::ScriptAddEntity,
+      "add_entity_script", &EntityManager::ScriptAddEntityScript,
+      "get_entity", &EntityManager::ScriptGetEntity,
+      "get_entity_from_index", &EntityManager::GetEntityFromIndex,
+      "get_entity_from_character_id", &EntityManager::GetEntityFromCharacterId,
+      "get_entity_point", &EntityManager::ScriptGetEntityPoint,
+      "set_player_entity", &EntityManager::ScriptSetPlayerEntity,
+      "place_player_at_field_entry", &EntityManager::ScriptPlacePlayerAtFieldEntry,
+      "get_player_entity", &EntityManager::ScriptGetPlayerEntity,
+      "unset_player_entity", &EntityManager::ScriptUnsetPlayerEntity,
+      "player_lock", &EntityManager::ScriptPlayerLock,
+      "is_player_locked", &EntityManager::IsPlayerLocked,
+      "random_encounters_on", &EntityManager::SetRandomEncounters,
+      "set_encounter_table", &EntityManager::ScriptSetEncounterTable,
+      "roll_encounter_battle", &EntityManager::ScriptRollEncounterBattle,
+      "is_key_on", &EntityManager::IsKeyOn,
+      "is_key_off", &EntityManager::IsKeyOff,
+      "set_entity_to_character", &EntityManager::SetEntityToCharacter
+    );
 
     // Commands for the battle manager.
-    luabind::module(lua_state_)[
-        luabind::class_<BattleManager>("BattleManager")
-          .def(
-            "start_battle", (void(BattleManager::*)(const unsigned int)) &BattleManager::StartBattle
-          )
-          .def("end_battle", (void(BattleManager::*)()) &BattleManager::EndBattle)
-          .def("get_enemy_count", (int(BattleManager::*)()) &BattleManager::ScriptGetEnemyCount)
-          .def(
-            "get_enemy",
-            (Enemy*(BattleManager::*)(const unsigned int)) &BattleManager::ScriptGetEnemy
-          )
-          .def(
-            "add_attack_model",
-            (void(BattleManager::*)(
-              const unsigned int, const char*, const float,
-              const float, const float, const int, const char*
-            )) &BattleManager::ScriptAddAttackModel
-          )
-    ];
+    lua.new_usertype<BattleManager>(
+      "BattleManager",
+      "start_battle", &BattleManager::StartBattle,
+      "end_battle", &BattleManager::EndBattle,
+      "get_enemy_count", &BattleManager::ScriptGetEnemyCount,
+      "get_enemy", &BattleManager::ScriptGetEnemy,
+      "add_attack_model", &BattleManager::ScriptAddAttackModel,
+      "has_attack", &BattleManager::HasAttackData,
+      "set_camera", &BattleManager::ScriptSetCamera,
+      "get_layout", &BattleManager::ScriptGetLayout,
+      "get_attack", [](BattleManager& manager, const int id, sol::this_state state) -> sol::object{
+          sol::state_view view(state);
+          const AttackData* attack = manager.GetAttackData(id);
+          if (attack == nullptr) return sol::make_object(view, sol::nil);
+          sol::table result = view.create_table();
+          result["id"] = attack->id;
+          result["name"] = attack->name;
+          result["mp"] = attack->mp;
+          result["reflectable"] = attack->reflectable;
+          sol::table damage = view.create_table();
+          for (const auto& p : attack->damage) damage[p.first] = p.second;
+          result["damage"] = damage;
+          sol::table target = view.create_table();
+          for (const auto& p : attack->target) target[p.first] = p.second;
+          result["target"] = target;
+          sol::table animation = view.create_table();
+          for (const auto& p : attack->animation) animation[p.first] = p.second;
+          result["animation"] = animation;
+          sol::table effects = view.create_table();
+          int e = 1;
+          for (const auto& effect : attack->effects){
+              sol::table entry = view.create_table();
+              entry["id"] = effect.id;
+              entry["chance"] = effect.chance;
+              entry["mode"] = effect.mode;
+              effects[e ++] = entry;
+          }
+          result["effects"] = effects;
+          sol::table elements = view.create_table();
+          int n = 1;
+          for (int element : attack->elements) elements[n ++] = element;
+          result["elements"] = elements;
+          return result;
+      },
+      "get_next_formation_id", &BattleManager::GetNextFormationId,
+      "set_mode", &BattleManager::ScriptSetMode,
+      "get_mode", &BattleManager::GetMode,
+      "get_formation_id", &BattleManager::GetFormationId,
+      "get_escape_difficulty", &BattleManager::GetEscapeDifficulty,
+      "is_preemptive_allowed", &BattleManager::IsPreemptiveAllowed,
+      "show_victory_pose", &BattleManager::ShowVictoryPose,
+      "show_spoils", &BattleManager::ShowSpoils,
+      "set_enemy_visible", &BattleManager::ScriptSetEnemyVisible,
+      "get_enemy_entity_name", &BattleManager::ScriptGetEnemyEntityName,
+      "get_party_entity_name", &BattleManager::ScriptGetPartyEntityName,
+      "get_party_animation_prefix", &BattleManager::ScriptGetPartyAnimationPrefix,
+      "get_party_model_name", &BattleManager::ScriptGetPartyModelName
+    );
 
     // Commands for enemy handling.
-    luabind::module(lua_state_)[
-    luabind::class_<Enemy>("Enemy")
-      .def("get_id", (int(Enemy::*)()) &Enemy::GetId)
-      .def("get_name", (std::string(Enemy::*)()) &Enemy::GetName)
-      .def("get_level", (int(Enemy::*)()) &Enemy::GetLevel)
-      .def("get_ap", (int(Enemy::*)()) &Enemy::GetAp)
-      .def("get_exp", (int(Enemy::*)()) &Enemy::GetExp)
-      .def("get_money", (int(Enemy::*)()) &Enemy::GetMoney)
-      .def("get_str", (int(Enemy::*)()) &Enemy::GetStr)
-      .def("get_def", (int(Enemy::*)()) &Enemy::GetDef)
-      .def("get_mag", (int(Enemy::*)()) &Enemy::GetMag)
-      .def("get_spr", (int(Enemy::*)()) &Enemy::GetSpr)
-      .def("get_dex", (int(Enemy::*)()) &Enemy::GetDex)
-      .def("get_lck", (int(Enemy::*)()) &Enemy::GetLck)
-      .def("get_eva", (int(Enemy::*)()) &Enemy::GetEva)
-      .def("get_meva", (int(Enemy::*)()) &Enemy::GetMeva)
-      .def("get_hp", (int(Enemy::*)()) &Enemy::GetHp)
-      .def("get_hp_max", (int(Enemy::*)()) &Enemy::GetHpMax)
-      .def("get_mp", (int(Enemy::*)()) &Enemy::GetMp)
-      .def("get_mp_max", (int(Enemy::*)()) &Enemy::GetMpMax)
-      .def("get_position", (void(Enemy::*)()) &Enemy::ScriptGetPos)
-      .def("is_front", (bool(Enemy::*)()) &Enemy::IsFront)
-      .def("is_visible", (bool(Enemy::*)()) &Enemy::IsVisible)
-      .def("is_targeteable", (bool(Enemy::*)()) &Enemy::IsTargeteable)
-      .def("is_active", (bool(Enemy::*)()) &Enemy::IsActive)
-      .def("get_attack_count", (int(Enemy::*)()) &Enemy::ScriptGetAttackCount)
-      .def("get_attack", (int(Enemy::*)(const unsigned int)) &Enemy::ScriptGetAttack)
-      .def(
-        "get_camera_for_attack",
-        (int(Enemy::*)(const unsigned int)) &Enemy::ScriptGetCameraForAttack
-      )
+    lua.new_usertype<Enemy>(
+      "Enemy",
+      "get_id", &Enemy::GetId,
+      "get_name", &Enemy::GetName,
+      "get_level", &Enemy::GetLevel,
+      "get_ap", &Enemy::GetAp,
+      "get_exp", &Enemy::GetExp,
+      "get_money", &Enemy::GetMoney,
+      "get_str", &Enemy::GetStr,
+      "get_def", &Enemy::GetDef,
+      "get_mag", &Enemy::GetMag,
+      "get_spr", &Enemy::GetSpr,
+      "get_dex", &Enemy::GetDex,
+      "get_lck", &Enemy::GetLck,
+      "get_eva", &Enemy::GetEva,
+      "get_meva", &Enemy::GetMeva,
+      "get_hp", &Enemy::GetHp,
+      "get_hp_max", &Enemy::GetHpMax,
+      "get_mp", &Enemy::GetMp,
+      "get_mp_max", &Enemy::GetMpMax,
+      "get_position", &Enemy::ScriptGetPos,
+      "is_front", &Enemy::IsFront,
+      "is_visible", &Enemy::IsVisible,
+      "is_targeteable", &Enemy::IsTargeteable,
+      "is_active", &Enemy::IsActive,
+      "get_attack_count", &Enemy::ScriptGetAttackCount,
+      "get_attack", &Enemy::ScriptGetAttack,
+      "get_camera_for_attack", &Enemy::ScriptGetCameraForAttack,
+      "get_drop_count", &Enemy::ScriptGetDropCount,
+      "get_animation_count", &Enemy::ScriptGetAnimationCount,
+      "get_attack_animation", &Enemy::ScriptGetAttackAnimation,
+      "get_element_count", &Enemy::ScriptGetElementCount,
+      "get_ai_script", &Enemy::ScriptGetAiScript,
+      "get_immunity_count", &Enemy::ScriptGetImmunityCount,
+      "get_immunity", &Enemy::ScriptGetImmunity,
+      "get_immunity_rate", &Enemy::ScriptGetImmunityRate,
+      "get_element", &Enemy::ScriptGetElement,
+      "get_element_factor", &Enemy::ScriptGetElementFactor,
+      "get_animation", &Enemy::ScriptGetAnimation,
+      "get_model_prefix", &Enemy::ScriptGetModelPrefix,
+      "get_model", &Enemy::GetModel,
+      "get_drop_id", &Enemy::ScriptGetDropId,
+      "get_drop_rate", &Enemy::ScriptGetDropRate
       // TODO: Implement cover flags.
       // TODO: Implement immunities
       // TODO: Implement elements
-      // TODO: Implement item drops
       // TODO: Implement stealable items
       // TODO: Implement manipulability status and attacks.
       // TODO: Implement morph item
-];
+    );
 
     // Commands for the audio manager.
-    luabind::module(lua_state_)[
-        luabind::class_<AudioManager>("AudioManager")
-          .def("play_music", (void(AudioManager::*)(const char*)) &AudioManager::ScriptPlayMusic)
-          .def("play_sound", (void(AudioManager::*)(const char*)) &AudioManager::ScriptPlaySound)
-          .def(
-            "play_sound",
-            (void(AudioManager::*)(const char*, const int)) &AudioManager::ScriptPlaySound
-          )
-          .def(
-            "play_sounds",
-            (void(AudioManager::*)(const char*, const char*, const char*, const char*))
-            &AudioManager::ScriptPlaySounds
-          )
-          .def("get_track_id", (int(AudioManager::*)(int)) &AudioManager::ScriptGetTrack)
-          .def("get_battle_track_id", (int(AudioManager::*)()) &AudioManager::ScriptGetBattleTrack)
-          .def(
-            "set_battle_track_id", (void(AudioManager::*)(int)) &AudioManager::ScriptSetBattleTrack
-          )
-    ];
+    lua.new_usertype<AudioManager>(
+      "AudioManager",
+      "play_music", &AudioManager::ScriptPlayMusic,
+      "play_sound", sol::overload(
+        sol::resolve<void(const char*)>(&AudioManager::ScriptPlaySound),
+        sol::resolve<void(const char*, const int)>(&AudioManager::ScriptPlaySound)
+      ),
+      "play_sounds", &AudioManager::ScriptPlaySounds,
+      "get_track_id", &AudioManager::ScriptGetTrack,
+      "get_battle_track_id", &AudioManager::ScriptGetBattleTrack,
+      "set_battle_track_id", &AudioManager::ScriptSetBattleTrack,
+      "play_music_once", &AudioManager::ScriptPlayMusicOnce
+    );
 
-    // Commands for the audio manager.
-    luabind::module(lua_state_)[
-        luabind::class_<CameraManager>("CameraManager")
-          .def("set_camera",
-             (void(CameraManager::*)(
-               const int, const int, const int, const int, const int, const int
-             )) &CameraManager::ScriptSetCamera
-           )
-    ];
+    // Commands for the camera manager.
+    lua.new_usertype<CameraManager>(
+      "CameraManager",
+      "set_camera", &CameraManager::ScriptSetCamera,
+      "project_to_ui", &CameraManager::ScriptProjectToUi
+    );
 
-    // Commands for the savemap handelr.
-    luabind::module(lua_state_)[
-        luabind::class_<SavemapHandler>("SavemapHandler")
-          .def(
-            "release", (void(SavemapHandler::*)()) &SavemapHandler::Release
-          )
-          .def(
-            "get_current_savemap",
-            (Savemap*(SavemapHandler::*)()) &SavemapHandler::GetCurrentSavemap
-          )
-          .def(
-            "get_savemap",
-            (Savemap*(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSavemap
-          )
-          .def(
-            "set_data",
-            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const int))
-              &SavemapHandler::SetData
-          )
-          .def(
-            "set_control_key", (void(SavemapHandler::*)(const char*)) &SavemapHandler::SetControlKey
-          )
-          .def(
-            "set_window_colours",
-            (void(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int,
-              const unsigned int, const unsigned int, const unsigned int,
-              const unsigned int, const unsigned int, const unsigned int,
-              const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapHandler::SetWindowColours
-          )
-          .def("set_money", (void(SavemapHandler::*)(const unsigned int)) &SavemapHandler::SetMoney)
-          .def(
-            "set_game_time",
-            (void(SavemapHandler::*)(const unsigned int)) &SavemapHandler::SetGameTime
-          )
-          .def(
-            "set_countdown_time",
-            (void(SavemapHandler::*)(const unsigned int)) &SavemapHandler::SetCountdownTime
-          )
-          .def(
-            "set_key_item",
-            (void(SavemapHandler::*)(const unsigned int, const bool)) &SavemapHandler::SetKeyItem
-          )
-          .def(
-            "set_party",
-            (void(SavemapHandler::*)(const int, const int, const int)) &SavemapHandler::SetParty
-          )
-          .def(
-            "set_item",
-            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const unsigned int))
-              &SavemapHandler::SetItem
-          )
-          .def(
-            "set_materia",
-            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const unsigned int))
-              &SavemapHandler::SetMateria
-          )
-          .def(
-            "set_e_skill_materia",
-            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const bool))
-              &SavemapHandler::SetESkillMateria
-          )
-          .def(
-            "set_materia_stash",
-            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const unsigned int))
-              &SavemapHandler::SetMateriaStash
-          )
-          .def(
-            "set_e_skill_materia_stash",
-            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const bool))
-              &SavemapHandler::SetESkillMateriaStash
-          )
-          .def(
-            "set_location",
-            (void(SavemapHandler::*)(
-              const float, const float, const float, const unsigned int, const int,
-              const char*, const char*
-            )) &SavemapHandler::SetLocation
-          )
-          .def(
-            "set_setting",
-            (void(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::SetSetting
-          )
-          .def(
-            "set_character_info",
-            (void(SavemapHandler::*)(
-              const unsigned int, const int, const char*, const bool, const bool, const unsigned int,
-              const unsigned int, const bool, const unsigned int, const unsigned int,
-              const unsigned int, const unsigned int, const unsigned int, const unsigned int,
-              const int
-            )) &SavemapHandler::SetCharacterInfo
-          )
-          .def(
-            "set_character_stat",
-            (void(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapHandler::SetCharacterStat
-          )
-          .def(
-            "set_character_limit_learned",
-            (void(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int,
-              const bool, const unsigned int
-            )) &SavemapHandler::SetCharacterLimitLearned
-          )
-          .def(
-            "set_character_materia",
-            (void(SavemapHandler::*)(
-              const unsigned int, const bool, const unsigned int,
-              const unsigned int, const unsigned int
-            )) &SavemapHandler::SetCharacterMateria
-          )
-          .def(
-            "set_character_e_skill_materia",
-            (void(SavemapHandler::*)(
-              const unsigned int, const bool, const unsigned int, const unsigned int, const bool
-            )) &SavemapHandler::SetCharacterESkillMateria
-          )
-          .def(
-            "set_character_status",
-            (void(SavemapHandler::*)(const unsigned int, const unsigned int, const bool))
-              &SavemapHandler::SetCharacterStatus
-          )
-          .def(
-            "save", (bool(SavemapHandler::*)(const unsigned int, const bool)) &SavemapHandler::Save
-          )
-          .def(
-            "is_slot_empty",
-            (bool(SavemapHandler::*)(const unsigned int)) &SavemapHandler::IsSlotEmpty
-          )
-          .def(
-            "get_slot_control_key",
-            (std::string(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotControlKey
-          )
-          .def(
-            "get_slot_control_key",
-            (unsigned int(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapHandler::GetSlotWindowCornerColourComponent
-          )
-          .def(
-            "get_slot_money",
-            (unsigned int(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotMoney
-          )
-          .def(
-            "get_slot_game_time",
-            (unsigned int(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotGameTime
-          )
-          .def(
-            "get_slot_countdown_time",
-            (unsigned int(SavemapHandler::*)(const unsigned int))
-              &SavemapHandler::GetSlotCountdownTime
-          )
-          .def(
-            "get_slot_party_member",
-            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotPartyMember
-          )
-          .def(
-            "get_slot_item_at_pos_id",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotItemAtPosId
-          )
-          .def(
-            "get_slot_item_at_pos_qty",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotItemAtPosQty
-          )
-          .def(
-            "get_slot_key_item",
-            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotKeyItem
-          )
-          .def(
-            "get_slot_materia_at_pos_id",
-            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotMateriaAtPosId
-          )
-          .def(
-            "get_slot_materia_at_pos_ap",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotMateriaAtPosAp
-          )
-          .def(
-            "is_slot_materia_at_pos_e_skill",
-            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::IsSlotMateriaAtPosESkill
-          )
-          .def(
-            "is_slot_materia_at_pos_e_skill_learned",
-            (bool(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapHandler::IsSlotMateriaAtPosESkillLearned
-          )
-          .def(
-            "get_slot_stash_at_pos_id",
-            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotStashAtPosId
-          )
-          .def(
-            "get_slot_stash_at_pos_ap",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotStashAtPosAp
-          )
-          .def(
-            "is_slot_stash_at_pos_e_skill",
-            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::IsSlotStashAtPosESkill
-          )
-          .def(
-            "is_slot_stash_at_pos_e_skill_learned",
-            (bool(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapHandler::IsSlotStashAtPosESkillLearned
-          )
-          .def(
-            "get_slot_location_x",
-            (float(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotLocationX
-          )
-          .def(
-            "get_slot_location_y",
-            (float(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotLocationY
-          )
-          .def(
-            "get_slot_location_z",
-            (float(SavemapHandler::*)(const unsigned int)) &SavemapHandler::GetSlotLocationZ
-          )
-          .def(
-            "get_slot_location_triangle",
-            (unsigned int(SavemapHandler::*)(const unsigned int))
-              &SavemapHandler::GetSlotLocationTriangle
-          )
-          .def(
-            "get_slot_location_angle",
-            (unsigned int(SavemapHandler::*)(const unsigned int))
-              &SavemapHandler::GetSlotLocationAngle
-          )
-          .def(
-            "get_slot_location_field",
-            (std::string(SavemapHandler::*)(const unsigned int))
-              &SavemapHandler::GetSlotLocationField
-          )
-          .def(
-            "get_slot_location_name",
-            (std::string(SavemapHandler::*)(const unsigned int))
-              &SavemapHandler::GetSlotLocationName
-          )
-          .def(
-            "get_slot_setting",
-            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotSetting
-          )
-          .def(
-            "get_slot_character_char_id",
-            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterCharId
-          )
-          .def(
-            "get_slot_character_name",
-            (std::string(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterName
-          )
-          .def(
-            "get_slot_character_level",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterLevel
-          )
-          .def(
-            "get_slot_character_kills",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterKills
-          )
-          .def(
-            "is_slot_character_enabled",
-            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::IsSlotCharacterEnabled
-          )
-          .def(
-            "is_slot_character_locked",
-            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::IsSlotCharacterLocked
-          )
-          .def(
-            "is_slot_character_back_row",
-            (bool(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::IsSlotCharacterBackRow
-          )
-          .def(
-            "get_slot_character_exp",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterExp
-          )
-          .def(
-            "get_slot_character_exp_to_next",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterExpToNext
-          )
-          .def(
-            "get_slot_character_limit_level",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterLimitLevel
-          )
-          .def(
-            "get_slot_character_limit_bar",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterLimitBar
-          )
-          .def(
-            "get_slot_character_weapon_id",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterWeaponId
-          )
-          .def(
-            "get_slot_character_armor_id",
-            (unsigned int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterArmorId
-          )
-          .def(
-            "get_slot_character_accessory_id",
-            (int(SavemapHandler::*)(const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotCharacterAccessoryId
-          )
-          .def(
-            "get_slot_character_stat_base",
-            (unsigned int(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapHandler::GetSlotCharacterStatBase
-          )
-          .def(
-            "get_slot_character_stat_extra",
-            (unsigned int(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapHandler::GetSlotCharacterStatExtra
-          )
-          .def(
-            "get_slot_character_limit_uses",
-            (unsigned int(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapHandler::GetSlotCharacterLimitUses
-          )
-          .def(
-            "is_slot_character_limit_learned",
-            (unsigned int(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const unsigned int, const unsigned int
-            )) &SavemapHandler::IsSlotCharacterLimitLearned
-          )
-          .def(
-            "get_slot_character_materia_id",
-            (int(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const bool, const unsigned int
-            )) &SavemapHandler::GetSlotCharacterMateriaId
-          )
-          .def(
-            "get_slot_character_materia_ap",
-            (unsigned int(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const bool, const unsigned int
-            )) &SavemapHandler::GetSlotCharacterMateriaAp
-          )
-          .def(
-            "get_slot_character_materia_e_skill",
-            (bool(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const bool,
-              const unsigned int, const unsigned int
-            )) &SavemapHandler::IsSlotCharacterMateriaESkill
-          )
-          .def(
-            "get_slot_character_materia_e_skill_learned",
-            (bool(SavemapHandler::*)(
-              const unsigned int, const unsigned int, const bool,
-              const unsigned int, const unsigned int
-            )) &SavemapHandler::IsSlotCharacterMateriaESkillLearned
-          )
-          .def(
-            "get_slot_data",
-            (int(SavemapHandler::*)(const unsigned int, const unsigned int, const unsigned int))
-              &SavemapHandler::GetSlotData
-          )
-    ];
+    // Commands for the savemap handler.
+    lua.new_usertype<SavemapHandler>(
+      "SavemapHandler",
+      "release", &SavemapHandler::Release,
+      "get_current_savemap", &SavemapHandler::GetCurrentSavemap,
+      "get_savemap", &SavemapHandler::GetSavemap,
+      "set_data", &SavemapHandler::SetData,
+      "set_control_key", &SavemapHandler::SetControlKey,
+      "set_window_colours", &SavemapHandler::SetWindowColours,
+      "set_money", &SavemapHandler::SetMoney,
+      "set_game_time", &SavemapHandler::SetGameTime,
+      "set_countdown_time", &SavemapHandler::SetCountdownTime,
+      "set_key_item", &SavemapHandler::SetKeyItem,
+      "set_party", &SavemapHandler::SetParty,
+      "set_item", &SavemapHandler::SetItem,
+      "set_materia", &SavemapHandler::SetMateria,
+      "set_e_skill_materia", &SavemapHandler::SetESkillMateria,
+      "set_materia_stash", &SavemapHandler::SetMateriaStash,
+      "set_e_skill_materia_stash", &SavemapHandler::SetESkillMateriaStash,
+      "set_location", &SavemapHandler::SetLocation,
+      "set_setting", &SavemapHandler::SetSetting,
+      "set_character_info", &SavemapHandler::SetCharacterInfo,
+      "set_character_stat", &SavemapHandler::SetCharacterStat,
+      "set_character_limit_learned", &SavemapHandler::SetCharacterLimitLearned,
+      "set_character_materia", &SavemapHandler::SetCharacterMateria,
+      "set_character_e_skill_materia", &SavemapHandler::SetCharacterESkillMateria,
+      "set_character_status", &SavemapHandler::SetCharacterStatus,
+      "save", sol::resolve<bool(unsigned int, bool)>(&SavemapHandler::Save),
+      "is_slot_empty", &SavemapHandler::IsSlotEmpty,
+      "get_slot_control_key", sol::overload(
+        &SavemapHandler::GetSlotControlKey,
+        // Registered under the same name in the original bindings.
+        &SavemapHandler::GetSlotWindowCornerColourComponent
+      ),
+      "get_slot_money", &SavemapHandler::GetSlotMoney,
+      "get_slot_game_time", &SavemapHandler::GetSlotGameTime,
+      "get_slot_countdown_time", &SavemapHandler::GetSlotCountdownTime,
+      "get_slot_party_member", &SavemapHandler::GetSlotPartyMember,
+      "get_slot_item_at_pos_id", &SavemapHandler::GetSlotItemAtPosId,
+      "get_slot_item_at_pos_qty", &SavemapHandler::GetSlotItemAtPosQty,
+      "get_slot_key_item", &SavemapHandler::GetSlotKeyItem,
+      "get_slot_materia_at_pos_id", &SavemapHandler::GetSlotMateriaAtPosId,
+      "get_slot_materia_at_pos_ap", &SavemapHandler::GetSlotMateriaAtPosAp,
+      "is_slot_materia_at_pos_e_skill", &SavemapHandler::IsSlotMateriaAtPosESkill,
+      "is_slot_materia_at_pos_e_skill_learned",
+        &SavemapHandler::IsSlotMateriaAtPosESkillLearned,
+      "get_slot_stash_at_pos_id", &SavemapHandler::GetSlotStashAtPosId,
+      "get_slot_stash_at_pos_ap", &SavemapHandler::GetSlotStashAtPosAp,
+      "is_slot_stash_at_pos_e_skill", &SavemapHandler::IsSlotStashAtPosESkill,
+      "is_slot_stash_at_pos_e_skill_learned",
+        &SavemapHandler::IsSlotStashAtPosESkillLearned,
+      "get_slot_location_x", &SavemapHandler::GetSlotLocationX,
+      "get_slot_location_y", &SavemapHandler::GetSlotLocationY,
+      "get_slot_location_z", &SavemapHandler::GetSlotLocationZ,
+      "get_slot_location_triangle", &SavemapHandler::GetSlotLocationTriangle,
+      "get_slot_location_angle", &SavemapHandler::GetSlotLocationAngle,
+      "get_slot_location_field", &SavemapHandler::GetSlotLocationField,
+      "get_slot_location_name", &SavemapHandler::GetSlotLocationName,
+      "get_slot_setting", &SavemapHandler::GetSlotSetting,
+      "get_slot_character_char_id", &SavemapHandler::GetSlotCharacterCharId,
+      "get_slot_character_name", &SavemapHandler::GetSlotCharacterName,
+      "get_slot_character_level", &SavemapHandler::GetSlotCharacterLevel,
+      "get_slot_character_kills", &SavemapHandler::GetSlotCharacterKills,
+      "is_slot_character_enabled", &SavemapHandler::IsSlotCharacterEnabled,
+      "is_slot_character_locked", &SavemapHandler::IsSlotCharacterLocked,
+      "is_slot_character_back_row", &SavemapHandler::IsSlotCharacterBackRow,
+      "get_slot_character_exp", &SavemapHandler::GetSlotCharacterExp,
+      "get_slot_character_exp_to_next", &SavemapHandler::GetSlotCharacterExpToNext,
+      "get_slot_character_limit_level", &SavemapHandler::GetSlotCharacterLimitLevel,
+      "get_slot_character_limit_bar", &SavemapHandler::GetSlotCharacterLimitBar,
+      "get_slot_character_weapon_id", &SavemapHandler::GetSlotCharacterWeaponId,
+      "get_slot_character_armor_id", &SavemapHandler::GetSlotCharacterArmorId,
+      "get_slot_character_accessory_id", &SavemapHandler::GetSlotCharacterAccessoryId,
+      "get_slot_character_stat_base", &SavemapHandler::GetSlotCharacterStatBase,
+      "get_slot_character_stat_extra", &SavemapHandler::GetSlotCharacterStatExtra,
+      "get_slot_character_limit_uses", &SavemapHandler::GetSlotCharacterLimitUses,
+      "is_slot_character_limit_learned", &SavemapHandler::IsSlotCharacterLimitLearned,
+      "get_slot_character_materia_id", &SavemapHandler::GetSlotCharacterMateriaId,
+      "get_slot_character_materia_ap", &SavemapHandler::GetSlotCharacterMateriaAp,
+      "get_slot_character_materia_e_skill", &SavemapHandler::IsSlotCharacterMateriaESkill,
+      "get_slot_character_materia_e_skill_learned",
+        &SavemapHandler::IsSlotCharacterMateriaESkillLearned,
+      "get_slot_data", &SavemapHandler::GetSlotData
+    );
 
     // 2D background and camera commands
-    luabind::module(lua_state_)[
-        luabind::class_<Background2D>("Background2D")
-          .def(
-            "autoscroll_to_entity",
-            (void(Background2D::*)(Entity*)) &Background2D::ScriptAutoScrollToEntity
-          )
-          .def(
-            "scroll_to_player",
-            (void(Background2D::*)(const Background2D::SCROLL_TYPE, const unsigned int))
-              &Background2D::ScriptScrollToPlayer
-          )
-          .def(
-            "scroll_to_position",
-            (void(Background2D::*)(
-              const float, const float, const Background2D::SCROLL_TYPE, const float
-            )) &Background2D::ScriptScrollToPosition
-          )
-          .def(
-            "scroll_sync", (int(Background2D::*)()) &Background2D::ScriptScrollSync, luabind::yield
-          )
-          .def(
-            "offset", (void(Background2D::*)(const float, const float)) &Background2D::ScriptOffset
-          )
-          .def(
-            "play_animation_looped",
-            (void(Background2D::*)(const char*)) &Background2D::ScriptPlayAnimationLooped
-          )
-          .def(
-            "play_animation_once",
-            (void(Background2D::*)(const char*)) &Background2D::ScriptPlayAnimationOnce
-          )
-          .def(
-            "animation_sync",
-            (int(Background2D::*)(const char*)) &Background2D::ScriptAnimationSync,
-            luabind::yield
-          )
-          .enum_("constants")[
-            luabind::value("NONE", AT_NONE),
-            luabind::value("LINEAR", AT_LINEAR),
-            luabind::value("SMOOTH", AT_SMOOTH)
-          ]
-    ];
+    lua.new_usertype<Background2D>(
+      "Background2D",
+      "autoscroll_to_entity", &Background2D::ScriptAutoScrollToEntity,
+      "scroll_to_player", &Background2D::ScriptScrollToPlayer,
+      "scroll_to_entity", &Background2D::ScriptScrollToEntity,
+      "scroll_to_position", &Background2D::ScriptScrollToPosition,
+      "offset", &Background2D::ScriptOffset,
+      "area_on", &Background2D::ScriptAreaOn,
+      "area_off", &Background2D::ScriptAreaOff,
+      "area_clear", &Background2D::ScriptAreaClear,
+      "shake", &Background2D::ScriptShake,
+      "play_animation_looped", &Background2D::ScriptPlayAnimationLooped,
+      "play_animation_once", &Background2D::ScriptPlayAnimationOnce
+    );
+    // Coloured fades of the screen
+    lua.new_usertype<ScreenFade>(
+      "ScreenFade",
+      "fade", &ScreenFade::ScriptFade,
+      "nfade", &ScreenFade::ScriptNFade
+    );
+    sol::table screen_fade_type = lua["ScreenFade"];
+    BindYielding(screen_fade_type, "wait", &ScreenFade::ScriptWait);
+
+    sol::table background_type = lua["Background2D"];
+    BindYielding(background_type, "scroll_sync", &Background2D::ScriptScrollSync);
+    BindYielding(background_type, "animation_sync", &Background2D::ScriptAnimationSync);
+    background_type["NONE"] = AT_NONE;
+    background_type["LINEAR"] = AT_LINEAR;
+    background_type["SMOOTH"] = AT_SMOOTH;
 
     // Walkmesh commands
-    luabind::module(lua_state_)[
-        luabind::class_<Walkmesh>("Walkmesh")
-          .def("lock_walkmesh", (void(Walkmesh ::*)(unsigned int, bool)) &Walkmesh ::LockWalkmesh)
-          .def("is_locked", (bool(Walkmesh ::*)(unsigned int)) &Walkmesh ::IsLocked)
-    ];
+    lua.new_usertype<Walkmesh>(
+      "Walkmesh",
+      "lock_walkmesh", &Walkmesh::LockWalkmesh,
+      "is_locked", &Walkmesh::IsLocked
+    );
 
     // Text handler commands
-    luabind::module(lua_state_)[
-        luabind::class_<TextHandler>("TextHandler")
-          .def(
-            "set_character_name",
-            (void(TextHandler ::*)(unsigned int, const char*)) &TextHandler::SetCharacterName
-          )
-          .def("set_party", (void(TextHandler ::*)(int, int, int)) &TextHandler::SetParty)
-    ];
+    lua.new_usertype<TextHandler>(
+      "TextHandler",
+      "set_character_name", &TextHandler::SetCharacterName,
+      "set_party", &TextHandler::SetParty
+    );
 
     // Dialog commands
-    luabind::module(lua_state_)[
-        luabind::class_<DialogsManager>("Dialog")
-          .def(
-            "dialog_open",
-            (void(DialogsManager::*)(const char*, int, int, int, int)) &DialogsManager::OpenDialog
-          )
-          .def(
-            "set_numeric",
-            (void(DialogsManager::*)(const char*, const bool, const bool))
-              &DialogsManager::SetNumeric
-          )
-          .def(
-            "update_timer",
-            (void(DialogsManager::*)(const unsigned int)) &DialogsManager::UpdateTimer
-          )
-          .def(
-            "set_mode",
-            (void(DialogsManager::*)(const char*, const unsigned int, const bool))
-              &DialogsManager::SetMode
-          )
-          .def(
-            "dialog_set_text",
-            (void(DialogsManager::*)(const char*, const char*)) &DialogsManager::SetText
-          )
-          .def(
-            "dialog_wait_for_close",
-            (int(DialogsManager::*)(const char*)) &DialogsManager::Sync,
-            luabind::yield
-          )
-          .def("dialog_close", (void(DialogsManager::*)(const char*)) &DialogsManager::Hide)
-          .def(
-            "set_variable",
-            (void(DialogsManager::*)(const char*, const char*, const char*))
-              &DialogsManager::SetVariable
-          )
-          .def(
-            "set_clickable",
-            (void(DialogsManager::*)(const char*, const bool)) &DialogsManager::SetClickable
-          )
-          .def(
-            "set_cursor",
-            (void(DialogsManager::*)(const char*, const int, const int)) &DialogsManager::SetCursor
-          )
-          .def("get_cursor", (int(DialogsManager::*)(const char*)) &DialogsManager::GetCursor)
-          .enum_("constants")[
-            luabind::value("SOLID", MSL_SOLID),
-            luabind::value("TRANSPARENT", MSL_TRANSPARENT),
-            luabind::value("NONE", MSL_NONE)
-          ]
-          .def(
-            "set_map_name", (void(DialogsManager::*)(const char*)) &DialogsManager::ScriptSetMapName
-          )
-          .def(
-            "get_map_name", (std::string(DialogsManager::*)()) &DialogsManager::GetMapName
-          )
-    ];
+    lua.new_usertype<DialogsManager>(
+      "Dialog",
+      "dialog_open", &DialogsManager::OpenDialog,
+      "set_numeric", &DialogsManager::SetNumeric,
+      "update_timer", &DialogsManager::UpdateTimer,
+      "set_mode", &DialogsManager::SetMode,
+      "dialog_set_text", &DialogsManager::SetText,
+      "show_message", &DialogsManager::ShowScriptMessage,
+      "dialog_close", &DialogsManager::Hide,
+      "set_variable", &DialogsManager::SetVariable,
+      "set_clickable", &DialogsManager::SetClickable,
+      "set_cursor", &DialogsManager::SetCursor,
+      "get_cursor", &DialogsManager::GetCursor,
+      "set_map_name", &DialogsManager::ScriptSetMapName,
+      "get_map_name", &DialogsManager::GetMapName
+    );
+    sol::table dialog_type = lua["Dialog"];
+    BindYielding(dialog_type, "dialog_wait_for_close", &DialogsManager::Sync);
+    dialog_type["SOLID"] = MSL_SOLID;
+    dialog_type["TRANSPARENT"] = MSL_TRANSPARENT;
+    dialog_type["NONE"] = MSL_NONE;
 
     // UI widget commands
-    luabind::module(lua_state_)[
-        luabind::class_<UiWidget>("UiWidget")
-          .def("set_visible", (void(UiWidget::*)(const bool)) &UiWidget::SetVisible)
-          .def("is_visible", (bool(UiWidget::*)()) &UiWidget::IsVisible)
-          .def("play_animation", (void(UiWidget::*)(const char*)) &UiWidget::ScriptPlayAnimation)
-          .def(
-            "play_animation_stop",
-            (void(UiWidget::*)(const char*)) &UiWidget::ScriptPlayAnimationStop
-          )
-          .def(
-            "play_animation",
-            (void(UiWidget::*)(const char*, const float, const float))
-              &UiWidget::ScriptPlayAnimation
-          )
-          .def(
-            "play_animation_stop",
-            (void(UiWidget::*)(const char*, const float, const float))
-            &UiWidget::ScriptPlayAnimationStop
-          )
-          .def(
-            "set_default_animation",
-            (void(UiWidget::*)(const char*)) &UiWidget::ScriptSetDefaultAnimation
-          )
-          .def(
-            "animation_sync", (int(UiWidget::*)()) &UiWidget::ScriptAnimationSync, luabind::yield
-          )
-          .def(
-            "set_colour",
-            (void(UiWidget::*)(const float, const float, const float)) &UiWidget::SetColour
-          )
-          .def("set_alpha", (void(UiWidget::*)(const float)) &UiWidget::SetAlpha)
-          .def("set_x", (void(UiWidget::*)(const float, const float)) &UiWidget::SetX)
-          .def("set_y", (void(UiWidget::*)(const float, const float)) &UiWidget::SetY)
-          .def("set_z", (void(UiWidget::*)(const float)) &UiWidget::SetZ)
-          .def("get_width", (float(UiWidget::*)()) &UiWidget::ScriptGetWidth)
-          .def("set_width", (void(UiWidget::*)(const float)) &UiWidget::ScriptSetWidth)
-          .def("set_width", (void(UiWidget::*)(const float, const float)) &UiWidget::SetWidth)
-          .def("get_height", (float(UiWidget::*)()) &UiWidget::ScriptGetHeight)
-          .def("set_height", (void(UiWidget::*)(const float)) &UiWidget::ScriptSetHeight)
-          .def("set_height", (void(UiWidget::*)(const float, const float)) &UiWidget::SetHeight)
-          .def("set_text", (void(UiWidget::*)(const char*)) &UiWidget::SetText)
-          .def("set_image", (void(UiWidget::*)(const char*)) &UiWidget::SetImage)
-    ];
+    lua.new_usertype<UiWidget>(
+      "UiWidget",
+      "set_visible", &UiWidget::SetVisible,
+      "is_visible", &UiWidget::IsVisible,
+      "play_animation", sol::overload(
+        sol::resolve<void(const char*)>(&UiWidget::ScriptPlayAnimation),
+        sol::resolve<void(const char*, const float, const float)>(
+          &UiWidget::ScriptPlayAnimation
+        )
+      ),
+      "play_animation_stop", sol::overload(
+        sol::resolve<void(const char*)>(&UiWidget::ScriptPlayAnimationStop),
+        sol::resolve<void(const char*, const float, const float)>(
+          &UiWidget::ScriptPlayAnimationStop
+        )
+      ),
+      "set_default_animation", &UiWidget::ScriptSetDefaultAnimation,
+      "set_colour", &UiWidget::SetColour,
+      "set_alpha", &UiWidget::SetAlpha,
+      "set_x", &UiWidget::SetX,
+      "set_y", &UiWidget::SetY,
+      "set_z", &UiWidget::SetZ,
+      "get_width", &UiWidget::ScriptGetWidth,
+      "set_width", sol::overload(&UiWidget::ScriptSetWidth, &UiWidget::SetWidth),
+      "get_height", &UiWidget::ScriptGetHeight,
+      "set_height", sol::overload(&UiWidget::ScriptSetHeight, &UiWidget::SetHeight),
+      "set_text", &UiWidget::SetText,
+      "set_image", &UiWidget::SetImage
+    );
+    sol::table ui_widget_type = lua["UiWidget"];
+    BindYielding(ui_widget_type, "animation_sync", &UiWidget::ScriptAnimationSync);
 
     // UI manager commands. Use to get a specific widget.
-    luabind::module(lua_state_)[
-        luabind::class_<UiManager>("UiManager")
-          .def("get_widget", (UiWidget*(UiManager::*)(const char*)) &UiManager::ScriptGetWidget)
-    ];
+    lua.new_usertype<UiManager>(
+      "UiManager",
+      "get_widget", &UiManager::ScriptGetWidget
+    );
 
     // Timer command. To show a in-game timer.
-    luabind::module(lua_state_)[
-        luabind::class_<Timer>("Timer")
-          .def("get_game_time_total", (float(Timer::*)()) &Timer::GetGameTimeTotal)
-          .def("set_timer", (float(Timer::*)(const float)) &Timer::SetGameTimer)
-          .def("get_timer", (int(Timer::*)()) &Timer::GetGameTimer)
-    ];
+    lua.new_usertype<Timer>(
+      "Timer",
+      "get_game_time_total", &Timer::GetGameTimeTotal,
+      "set_timer", &Timer::SetGameTimer,
+      "get_timer", &Timer::GetGameTimer
+    );
 
     // Commands that control script execution
-    luabind::module(lua_state_)[
-        luabind::class_<ScriptManager>("Script")
-          .def(
-            "wait", (int(ScriptManager::*)(const float)) &ScriptManager::ScriptWait, luabind::yield
-          )
-          .def(
-            "request",
-            (void(ScriptManager::*)(const ScriptManager::Type, const char*, const char*, const int))
-              &ScriptManager::ScriptRequest
-          )
-          .def(
-            "request_start_sync",
-            (int(ScriptManager::*)(const ScriptManager::Type, const char*, const char*, const int))
-              &ScriptManager::ScriptRequestStartSync,
-            luabind::yield
-          )
-          .def(
-            "request_end_sync",
-            (int(ScriptManager::*) (const ScriptManager::Type, const char*, const char*, const int))
-              &ScriptManager::ScriptRequestEndSync,
-            luabind::yield
-          )
-          .enum_("constants")[
-            luabind::value("SYSTEM", ScriptManager::SYSTEM),
-            luabind::value("ENTITY", ScriptManager::ENTITY),
-            luabind::value("UI", ScriptManager::UI)
-          ]
-    ];
+    lua.new_usertype<ScriptManager>(
+      "Script",
+      "request", sol::resolve<void(
+        const ScriptManager::Type, const char*, const char*, const int
+      )>(&ScriptManager::ScriptRequest)
+    );
+    sol::table script_type = lua["Script"];
+    BindYielding(script_type, "wait", &ScriptManager::ScriptWait);
+    BindYielding(script_type, "request_start_sync", &ScriptManager::ScriptRequestStartSync);
+    BindYielding(script_type, "request_end_sync", &ScriptManager::ScriptRequestEndSync);
+    script_type["SYSTEM"] = ScriptManager::SYSTEM;
+    script_type["ENTITY"] = ScriptManager::ENTITY;
+    script_type["UI"] = ScriptManager::UI;
 
-    // Commnds to initiate modules
-    luabind::module(lua_state_)[
-        luabind::class_<VGears::WorldmapModule>("world_map_module")
-          .def("init", (void(VGears::WorldmapModule::*)()) &VGears::WorldmapModule::Init)
-    ];
+    // Commands to initiate modules
+    lua.new_usertype<VGears::WorldmapModule>(
+      "world_map_module",
+      "init", &VGears::WorldmapModule::Init,
+      "suspend", &VGears::WorldmapModule::Suspend,
+      "clear_vehicle_terrains", &VGears::WorldmapModule::ClearVehicleTerrains,
+      "add_vehicle_terrain", &VGears::WorldmapModule::AddVehicleTerrain,
+      "get_terrain_type_under_entity", &VGears::WorldmapModule::GetTerrainTypeUnderEntity,
+      "get_terrain_triangle_under_entity", &VGears::WorldmapModule::GetTerrainTriangleUnderEntity,
+      "unboard_vehicle", &VGears::WorldmapModule::UnboardVehicle,
+      "set_encounters_locked", &VGears::WorldmapModule::SetEncountersLocked
+    );
 
     // Register all command handlers
-    auto a = boost::ref(*(EntityManager::getSingletonPtr()));
-    luabind::globals(lua_state_);
-    //auto b = luabind::globals(lua_state_)["entity_manager"];
-    luabind::globals(lua_state_)["camera_manager"]
-      = boost::ref(*(CameraManager::getSingletonPtr()));
-    luabind::globals(lua_state_)["entity_manager"]
-      = boost::ref(*(EntityManager::getSingletonPtr()));
-    luabind::globals(lua_state_)["battle_manager"]
-      = boost::ref(*(BattleManager::getSingletonPtr()));
-    luabind::globals(lua_state_)["audio_manager"] = boost::ref(*(AudioManager::getSingletonPtr()));
-    luabind::globals(lua_state_)["savemap_manager"]
-      = boost::ref(*(SavemapHandler::getSingletonPtr()));
-    luabind::globals(lua_state_)["background2d"]
-      = boost::ref(*(EntityManager::getSingletonPtr()->GetBackground2D()));
-    luabind::globals(lua_state_)["walkmesh"]
-      = boost::ref(*(EntityManager::getSingletonPtr()->GetWalkmesh()));
-    luabind::globals(lua_state_)["text_manager"] = boost::ref(*(TextHandler::getSingletonPtr()));
-    luabind::globals(lua_state_)["dialog"] = boost::ref(*(DialogsManager::getSingletonPtr()));
-    luabind::globals(lua_state_)["ui_manager"] = boost::ref(*(UiManager::getSingletonPtr()));
-    luabind::globals(lua_state_)["world_map_module"]
-      = boost::ref(*(VGears::WorldmapModule::getSingletonPtr()));
-    luabind::globals(lua_state_)["timer"] = boost::ref(*(Timer::getSingletonPtr()));
-    luabind::globals(lua_state_)["script"] = boost::ref(*this);
+    lua["camera_manager"] = CameraManager::getSingletonPtr();
+    lua["entity_manager"] = EntityManager::getSingletonPtr();
+    lua["battle_manager"] = BattleManager::getSingletonPtr();
+    lua["audio_manager"] = AudioManager::getSingletonPtr();
+    lua["savemap_manager"] = SavemapHandler::getSingletonPtr();
+    lua["background2d"] = EntityManager::getSingletonPtr()->GetBackground2D();
+    lua["screen_fade"] = EntityManager::getSingletonPtr()->GetScreenFade();
+    lua["walkmesh"] = EntityManager::getSingletonPtr()->GetWalkmesh();
+    lua["text_manager"] = TextHandler::getSingletonPtr();
+    lua["dialog"] = DialogsManager::getSingletonPtr();
+    lua["ui_manager"] = UiManager::getSingletonPtr();
+    lua["world_map_module"] = VGears::WorldmapModule::getSingletonPtr();
+    lua["timer"] = Timer::getSingletonPtr();
+    lua["script"] = this;
 }

@@ -81,6 +81,18 @@ namespace VGears{
             const std::vector<u8>& GetRawScript() const;
 
             /**
+             * Retrieves the raw encounter data section.
+             *
+             * It has two encounter tables of 24 bytes. Each one has a byte indicating if it's
+             * enabled, the encounter rate, six standard encounters and four special encounters.
+             * Encounters are 16 bit values, with the battle ID in the lower 10 bits and the
+             * probability (out of 64) in the upper 6 bits.
+             *
+             * @return The raw encounter data, empty if the file has no such section.
+             */
+            const std::vector<u8>& GetRawEncounter() const;
+
+            /**
              * Retrieves the level background.
              *
              * @return The background file in the level.
@@ -128,6 +140,13 @@ namespace VGears{
              * @param[in] script_data The scripts for the level.
              */
             void SetRawScript(const std::vector<u8>& script_data);
+
+            /**
+             * Sets the raw encounter data section.
+             *
+             * @param[in] encounter_data The raw section.
+             */
+            void SetRawEncounter(const std::vector<u8>& encounter_data);
 
             /**
              * Sets the background for the level.
@@ -271,6 +290,11 @@ namespace VGears{
              * The level script data.
              */
             std::vector<u8> raw_script_;
+
+            /**
+             * Raw encounter data section.
+             */
+            std::vector<u8> raw_encounter_;
 
             /**
              * The background texture loader.

@@ -22,21 +22,24 @@
 #include "core/Timer.h"
 
 EntityModel::EntityModel(
-  const Ogre::String& name, const Ogre::String file_name, Ogre::SceneNode* node
+  const Ogre::String& name, const Ogre::String file_name, Ogre::SceneNode* node,
+  const Ogre::String& resource_group
 ): Entity(name, node), animation_current_(nullptr)
 {
     Ogre::SceneManager* scene_manager;
-    Ogre::String res_group;
+  Ogre::String res_group = resource_group;
+  if (res_group.empty()){
     switch(EntityManager::getSingleton().GetModule()){
-        case Manager::BATTLE:
-            res_group = "BATTLE_MODELS";
-            break;
-        case Manager::WORLD:
-            res_group = "WORLD_MODELS";
-            break;
-        case Manager::FIELD:
-        default:
-            res_group = "FIELD_MODELS";
+      case Manager::BATTLE:
+        res_group = "BATTLE_MODELS";
+        break;
+      case Manager::WORLD:
+        res_group = "WORLD_MODELS";
+        break;
+      case Manager::FIELD:
+      default:
+        res_group = "FIELD_MODELS";
+    }
     }
     scene_manager = Ogre::Root::getSingleton().getSceneManager("Scene");
     model_ = scene_manager->createEntity(name_, file_name, res_group);
@@ -58,6 +61,18 @@ void EntityModel::SetVisible(const bool visible){model_->setVisible(visible);}
 
 bool EntityModel::IsVisible() const{return model_->isVisible();}
 
+float EntityModel::GetAnimationLength(const Ogre::String& animation) const{
+    Ogre::AnimationStateSet* states = model_->getAllAnimationStates();
+    if (states == nullptr || states->hasAnimationState(animation) == false) return 0.0f;
+    return states->getAnimationState(animation)->getLength();
+}
+
+unsigned int EntityModel::GetAnimationCount() const{
+    Ogre::AnimationStateSet* states = model_->getAllAnimationStates();
+    if (states == nullptr) return 0;
+    return states->getAnimationStates().size();
+}
+
 Ogre::Entity* EntityModel::GetModel(){return model_;}
 
 void EntityModel::PlayAnimation(
@@ -72,6 +87,10 @@ void EntityModel::PlayAnimation(
         animation_current_name_ = animation;
         animation_current_ = model_->getAnimationState(animation);
         animation_current_->setLoop((play_type == Entity::PLAY_LOOPED) ? true : false);
+        // Single frame animations have no length. A looping animation without length wraps its
+        // time position dividing by zero, ends up with a time that is not a number, and never
+        // finishes, so any script waiting for it would wait forever.
+        if (animation_current_->getLength() <= 0.0f) animation_current_->setLoop(false);
         animation_current_->setEnabled(true);
         animation_current_->setTimePosition(
           (start == -1) ? animation_current_->getLength() : start

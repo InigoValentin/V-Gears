@@ -61,6 +61,7 @@ struct QueueScript{
       function(""),
       argument1(""),
       argument2(""),
+      argument3(""),
       priority(0),
       state(NULL),
       seconds_to_wait(0),
@@ -82,6 +83,11 @@ struct QueueScript{
      * Second function argument.
      */
     Ogre::String argument2;
+
+    /**
+     * Third function argument.
+     */
+    Ogre::String argument3;
 
     /**
      * Function priority.
@@ -116,14 +122,20 @@ struct QueueScript{
     bool yield;
 
     /**
-     * The script paused by call of this script
+     * The scripts that wait for this one to start.
+     *
+     * More than one script can wait: a request for a script that is already queued adds a
+     * waiter to the queued one.
      */
-    ScriptId paused_script_start;
+    std::vector<ScriptId> paused_scripts_start;
 
     /**
-     * The script paused by call of this script
+     * The scripts that wait for this one to end.
+     *
+     * More than one script can wait: a request for a script that is already queued or running
+     * adds a waiter to the existing one.
      */
-    ScriptId paused_script_end;
+    std::vector<ScriptId> paused_scripts_end;
 };
 
 
@@ -300,10 +312,10 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
          * @param[in] type Type of script.
          * @param[in] name Script name.
          * @param[in] state Initial script state.
-         * @return The table.
+         * @return The table, or a nil reference if it doesn't exist.
          * @todo Understand and document.
          */
-        luabind::object GetTableByEntityName(
+        sol::object GetTableByEntityName(
           const ScriptManager::Type type, const Ogre::String& name, lua_State* state
         ) const;
 
@@ -400,12 +412,15 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
          * @param[in] argument2 Second argument for the script.
          * @param[in] start_sync If true, the script will be started synchronously.
          * @param[in] end_sync @todo Understand and document.
+         * @param[in] argument3 Third argument for the script.
+         * @param[in] allow_duplicate If true, queue this call even if the same function is queued.
          * @return True on success, false on error (i.e. if the entity or the script don't exist)
          */
         bool ScriptRequest(
           ScriptEntity* script_entity, const Ogre::String& function,
           const int priority, const Ogre::String& argument1,
-          const Ogre::String& argument2, bool start_sync, bool end_sync
+          const Ogre::String& argument2, bool start_sync, bool end_sync,
+          const Ogre::String& argument3 = "", bool allow_duplicate = false
         );
 
         /**

@@ -128,66 +128,70 @@ struct Attack{
         /**
          * The target can be selected.
          *
-         * If the target of the attack is selectable, at least between some subset of
-         * possible targets, this must be true.
+         * If the target of the attack is selectable, at least between some
+         * subset of possible targets, this must be true.
          */
         bool selection_enabled;
 
         /**
          * The default target is an enemy.
          *
-         * When true, the cursor starts in an enemy row. When false, it starts in the ally
-         * row. It may or may not be possible to change it.
+         * When true, the cursor starts in an enemy row. When false, it starts
+         * in the ally row. It may or may not be possible to change it.
          */
         bool default_enemy;
 
         /**
          * The default target is a group.
          *
-         * When true, the cursor starts will all the members of a row selected. When false,
-         * it starts with only one target selected. It may or may not be possible to change
-         * it.
+         * When true, the cursor starts will all the members of a row selected.
+         * When false, it starts with only one target selected. It may or may
+         * not be possible to change it.
          */
         bool default_multiple;
 
         /**
          * The selection can change between groups and individuals.
          *
-         * When true, the target can be changed between groups and individuals When false,
-         * only {@see default_multiple} determines if the target is an individual or a
-         * group.
+         * When true, the target can be changed between groups and individuals. 
+         * When false, only {@see default_multiple} determines if the target is
+         * an individual or a group.
          */
         bool toggle_multiple;
 
         /**
          * The target group can be changed.
          *
-         * When true, the target cannot be changed between enemies and allies. In this case
-         * {@see default_enemy} will determine the group that can be targeted.
+         * When true, the target cannot be changed between enemies and allies.
+         * In this case, {@see default_enemy} will determine the group that can
+         * be targeted.  {@see default_enemy} will determine the group that can
+         * be targeted.
          */
         bool fixed_row;
 
         /**
          * The command is short ranged.
          *
-         * When true, if the target or the caster is not in the front of their row, the
-         * target will take half damage. Also, when true, an enemy covered by another enemy
-         * can't be targeted.
+         * When true, if the target or the caster is not in the front of their
+         * row, the target will take half damage. Also, when true, an enemy
+         * covered by another enemy  target will take half damage. Also, when
+         * true, an enemy covered by another enemy can't be targeted.
          */
         bool short_range;
 
         /**
          * Targets all, enemies and allies.
          *
-         * When true, all allies and enemies are targets, and the selection can't be changed.
+         * When true, all allies and enemies are targets, and the selection
+         * can't be changed.
          */
         bool all_rows;
 
         /**
          * The target is random.
          *
-         * When multiple targets are selected, one will be selected at random to be the
-         * receiving target. Cursor will cycle among all viable targets.
+         * When multiple targets are selected, one will be selected at random to
+         * be the receiving target. Cursor will cycle among all viable targets.
          */
         bool random;
 
@@ -222,31 +226,32 @@ struct Attack{
         int impact_effect;
 
         /**
-         * Index of the animation played by the target when hit. -1 to not show any.
+         * Index of the animation played by the target when hit. -1 to not show
+         * any.
          */
         int hurt_anim;
 
         /**
          * Impact sound.
          *
-         * Determines the camera movement when the command is executed over multiple targets. -1 to not
-         * play any.
+         * Determines the camera movement when the command is executed over
+         * multiple targets. -1 to not play any.
          */
         int sound;
 
         /**
          * Camera movement ID for single target.
          *
-         * Determines the camera movement when the command is executed over a single target.  -1 to not
-         * move the camera.
+         * Determines the camera movement when the command is executed over a
+         * single target.  -1 to not move the camera.
          */
         int camera_single;
 
         /**
          * Camera movement ID for multiple target.
          *
-         * Determines the camera movement when the command is executed over multiple
-         * targets. -1 to not move the camera.
+         * Determines the camera movement when the command is executed over
+         * multiple targets. -1 to not move the camera. 
          */
         int camera_multiple;
     };

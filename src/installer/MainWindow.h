@@ -15,9 +15,10 @@
 
 #pragma once
 
-#include <QtWidgets/QMainWindow> // IVV fix path #include <QMainWindow>
+#include <QtWidgets/QMainWindow>
 #include <QtCore/QSettings>
 #include <memory>
+#include "DiskImage.h"
 
 namespace Ui {
     class MainWindow;
@@ -147,9 +148,9 @@ class MainWindow : public QMainWindow{
          */
         void InitSettings(void);
 
-        // The Q_OBJECT macro must appear in the private section of a class definition
-        //that declares its own signals and slots or that uses other services provided
-        // by Qt's meta-object system.
+        // The Q_OBJECT macro must appear in the private section of a class
+        // definition that declares its own signals and slots or that uses other
+        // services provided by Qt's meta-object system.
         Q_OBJECT
 
         /**
@@ -171,4 +172,9 @@ class MainWindow : public QMainWindow{
          * The installer.
          */
         std::unique_ptr<class DataInstaller> installer_;
+
+        /**
+         * The selected disk image.
+         */
+        DiskImage disk_image_;
 };

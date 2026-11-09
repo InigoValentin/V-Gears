@@ -22,8 +22,7 @@ void KernelCallStackInstruction::ProcessInst(
     code_gen->GetArgList().clear();
     bool returns_value = (code_gen_data_.find("r") == 0);
     std::string metadata = (!returns_value ? code_gen_data_ : code_gen_data_.substr(1));
-    for (size_t i = 0; i < metadata.length(); i ++)
-        code_gen->ProcessSpecialMetadata(this, metadata[i], i);
+    for (size_t i = 0; i < metadata.length(); i ++) code_gen->ProcessSpecialMetadata(this, metadata[i], i);
     stack.Push(new CallValue(name_, code_gen->GetArgList()));
     if (!returns_value){
         std::stringstream stream;

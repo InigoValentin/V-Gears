@@ -66,6 +66,48 @@ for i = 1, 24 do -- E. Skill list
         Characters[0].armor.materia[2].skills[i] = false
     end
 end
+-- Magic for testing. Materia IDs: Fire 49, Ice 50, Earth 51, Lightning 52, Restore 53, Heal 54,
+-- Revive 55, Poison 60. AP is enough to reach the highest level.
+Characters[0].weapon.materia[1] = {id = 49, ap = 100000}
+Characters[0].armor.materia[1] = {id = 53, ap = 100000}
+Characters[2].weapon.materia[0] = {id = 50, ap = 100000}
+Characters[2].weapon.materia[1] = {id = 52, ap = 100000}
+Characters[2].armor.materia[0] = {id = 54, ap = 100000}
+Characters[2].armor.materia[1] = {id = 55, ap = 100000}
+Characters[3].weapon.materia[0] = {id = 53, ap = 100000}
+Characters[3].weapon.materia[1] = {id = 49, ap = 100000}
+Characters[3].armor.materia[0] = {id = 60, ap = 100000}
+Characters[3].armor.materia[1] = {id = 51, ap = 100000}
+-- Status magic: Seal 56 (Sleepel, Silence), Mystify 57 (Confu, Berserk), Transform 58 (Mini, Toad),
+-- Time 65 (Haste, Slow, Stop), Destruct 68 (DeBarrier, DeSpell, Death). Cloud already has Barrier
+-- (62) in his armor.
+Characters[0].weapon.materia[2] = {id = 65, ap = 100000}
+Characters[0].weapon.materia[3] = {id = 56, ap = 100000}
+Characters[2].armor.materia[2] = {id = 68, ap = 100000}
+Characters[2].armor.materia[3] = {id = 57, ap = 100000}
+Characters[3].armor.materia[2] = {id = 58, ap = 100000}
+-- Summons: Choco/Mog 74, Shiva 75, Ifrit 76, Ramuh 77, Titan 78, Odin 79, Leviathan 80, Bahamut 81,
+-- Kjata 82, Alexander 83, Phoenix 84, Neo Bahamut 85, Hades 86, Typhoon 87, Bahamut ZERO 88,
+-- Knights of Round 89, Master Summon 90. They cost between 14 and 250 MP.
+Characters[0].weapon.materia[4] = {id = 75, ap = 100000} -- Shiva
+Characters[0].weapon.materia[5] = {id = 76, ap = 100000} -- Ifrit
+Characters[2].weapon.materia[2] = {id = 77, ap = 100000} -- Ramuh
+Characters[2].weapon.materia[3] = {id = 74, ap = 100000} -- Choco/Mog
+Characters[3].weapon.materia[2] = {id = 84, ap = 100000} -- Phoenix
+Characters[3].weapon.materia[3] = {id = 81, ap = 100000} -- Bahamut
+-- Items to try: Potion, Hi-Potion, Ether, Phoenix Down, Antidote, Echo Screen, Hyper, Tranquilizer,
+-- Remedy, Speed Drink, Grenade, Shrapnel, Molotov.
+for _, item in ipairs({{0, 6}, {1, 4}, {3, 4}, {7, 4}, {8, 3}, {12, 3}, {13, 2}, {14, 2}, {15, 2}, {17, 3}, {20, 5}, {21, 3}, {53, 3}}) do
+    Inventory.add_item(item[1], item[2])
+end
+-- Uncomment to have enough MP to cast anything, summons included.
+--[[
+for _, c in ipairs({0, 2, 3}) do
+    Characters[c].stats.mp.base = 999
+    Characters[c].stats.mp.max = 999
+    Characters[c].stats.mp.current = 999
+end
+]]
 Materia.add(4)
 Materia.add(44)
 Materia.add(12)

@@ -16,9 +16,12 @@
 #pragma once
 
 #include <string>
+#include <map>
 #include <vector>
 #include <common/TypeDefine.h>
+#include "DiskImage.h"
 #include "common/File.h"
+#include "data/VGearsLGPArchive.h"
 
 /**
  * The world map data installer.
@@ -30,13 +33,14 @@ class WorldInstaller{
         /**
          * Constructor.
          *
-         * @param[in] input_dir Path to the directory containing the original data to parse.
+         * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory of the installation data.
-         * @param[in] keep_originals True to keep original data after conversion, false to remove.
+         * @param[in] keep_originals True to keep original data after
+         * conversion, false to remove.
          * @param[in] res_mgr The application resource manager.
          */
         WorldInstaller(
-          const std::string input_dir, const std::string output_dir,
+          const DiskImage& disk_image, const std::string output_dir,
           const bool keep_originals, Ogre::ResourceGroupManager* res_mgr
         );
 
@@ -60,18 +64,33 @@ class WorldInstaller{
         /**
          * Generates the materials needed for the world map.
          *
-         * TODO: Note that this function stil doesn't use the game data, and it has a lot of
-         * hardcoded things.
+         * @todo Note that this function stil doesn't use the game data, and it
+         * has a lot of hardcoded things.
          */
         void GenerateMaterials();
 
         /**
          * Processes the next map to process.
          *
-         * @return True if, once the map has been processed, all maps are processed. False if there
-         * are more maps to process.
+         * @return True if, once the map has been processed, all maps are
+         * processed. False if there are more maps to process.
          */
         bool ProcessMap();
+
+        /**
+         * Exports the random encounters of the world map to gamedata/world_encounters.xml.
+         *
+         * @param[in] archive_file World map archive file.
+         * @param[in] entry Entry of ENC_W.BIN in the archive.
+         */
+        void ExportEncounters(File& archive_file, const VGears::LGPArchive::FileEntry& entry);
+
+                bool GenerateScripts(
+                    const std::vector<std::string>& field_names,
+                    const std::map<u16, float>& field_scale_factors,
+                    const std::vector<std::string>& converted_fields,
+                    std::string& error_message
+                );
 
         //void ReadMapFile(std::string file_name);
 
@@ -220,7 +239,7 @@ class WorldInstaller{
         /**
          * A map.
          *
-         * A map is defined in a WM*.MAP file. They are divided in 0xB800 byte blocks.
+         * A map is defined in a WM*.MAP file. Divided in 0xB800 byte blocks.
          */
         struct Map{
 
@@ -269,8 +288,9 @@ class WorldInstaller{
         /**
          * Path to the world map elements models directory.
          *
-         * Elements can be locations, playable characters, enemies, transportations... anything
-         * that it's not in itself part of the terrain.
+         * Elements can be locations, playable characters, enemies,
+         * transportations... anything that it's not in itself part of the
+         * terrain.
          */
         static std::string ELEMENT_MODELS_DIR;
 
@@ -313,9 +333,9 @@ class WorldInstaller{
         std::vector<Texture> texture_;
 
         /**
-         * The path to the directory from which to read the PC game data.
+         * The disk image to extract the PC game data from.
          */
-        std::string input_dir_;
+        DiskImage disk_image_;
 
         /**
          * The path to the directory where to save the V-Gears data.

@@ -135,5 +135,6 @@
     <text name="BattleUiMp">MP</text>
     <text name="BattleUiLimit">LIMIT</text>
     <text name="BattleUiTime">TIME</text>
+    <text name="GameOverText">GAME OVER</text>
     <text name="BattleUiDebugExit">Debug: Press 'K' to end battle.</text>
 </texts>

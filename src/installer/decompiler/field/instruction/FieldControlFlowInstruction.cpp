@@ -41,6 +41,10 @@ void FieldControlFlowInstruction::ProcessInst(
             //     'main' return is kept, the code of 'main' is never executed.
             //     There are safeguards forfunctions without a return in the end,
             //     so it's OK not to include it here.
+            // - The engine runs on_update again every time it finishes. In the original game a
+            //     script that returns is over for good, so on_update is marked as finished.
+            if (func.name == "on_update")
+                code_gen->AddOutputLine(FieldCodeGenerator::ON_UPDATE_FINISHED_STATEMENT);
             if (func.name != "on_start") code_gen->AddOutputLine("do return 0 end");
             break;
         case OPCODES::REQ: ProcessREQ(code_gen, eng); break;

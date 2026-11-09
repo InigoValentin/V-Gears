@@ -374,6 +374,46 @@ void CmdScreenshot(const Ogre::StringVector& params){
 
 
 
+/**
+ * Starts a screen fade, like the FADE opcode does. It is meant to test the fades by hand.
+ *
+ * @param[in] params Command parameters: the command name, the fade type, red, green, blue and
+ * speed.
+ */
+void CmdFade(const Ogre::StringVector& params){
+    if (params.size() != 6){
+        Console::getSingleton().AddTextToOutput(
+          "Usage: /fade <type 1-10> <red 0-255> <green 0-255> <blue 0-255> <speed>"
+        );
+        return;
+    }
+    EntityManager::getSingleton().GetScreenFade()->ScriptFade(
+      Ogre::StringConverter::parseInt(params[1]), Ogre::StringConverter::parseInt(params[2]),
+      Ogre::StringConverter::parseInt(params[3]), Ogre::StringConverter::parseInt(params[4]),
+      Ogre::StringConverter::parseInt(params[5])
+    );
+}
+
+/**
+ * Starts a screen fade, like the NFADE opcode does. It is meant to test the fades by hand.
+ *
+ * @param[in] params Command parameters: the command name, the fade type (0 clears it, 11 adds
+ * and 12 subtracts), red, green, blue and frames.
+ */
+void CmdNFade(const Ogre::StringVector& params){
+    if (params.size() != 6){
+        Console::getSingleton().AddTextToOutput(
+          "Usage: /nfade <type 0, 11 or 12> <red 0-255> <green 0-255> <blue 0-255> <frames>"
+        );
+        return;
+    }
+    EntityManager::getSingleton().GetScreenFade()->ScriptNFade(
+      Ogre::StringConverter::parseInt(params[1]), Ogre::StringConverter::parseInt(params[2]),
+      Ogre::StringConverter::parseInt(params[3]), Ogre::StringConverter::parseInt(params[4]),
+      Ogre::StringConverter::parseInt(params[5])
+    );
+}
+
 /*
 void CmdViewer(const Ogre::StringVector& params){
     if (params.size() == 2 || params.size() > 3){
@@ -448,6 +488,8 @@ void ConfigCmdHandler::InitCmd(){
     AddCommand("map", "Run game module", "", CmdMap, CmdMapCompletion);
     AddCommand("resolution", "Change resolution", "", CmdResolution, CmdResolutionCompletition);
     AddCommand("screenshot", "Capture current screen content", "", CmdScreenshot, NULL);
+    AddCommand("fade", "Start a screen fade", "<type> <r> <g> <b> <speed>", CmdFade, NULL);
+    AddCommand("nfade", "Start a screen nfade", "<type> <r> <g> <b> <frames>", CmdNFade, NULL);
     //AddCommand(
     //  "viewer", "Run viewer module", "", CmdViewer, CmdViewerCompletion
     //);

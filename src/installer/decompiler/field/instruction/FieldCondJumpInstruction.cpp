@@ -31,7 +31,7 @@ void FieldCondJumpInstruction::ProcessInst(
     std::string func_name;
     if (opcode_ == OPCODES::IFKEYON) func_name = "entity_manager:is_key_on";
     else if (opcode_ == OPCODES::IFKEYOFF) func_name = "entity_manager:is_key_off";
-    else if (opcode_ == OPCODES::IFKEY) func_name = "Key";
+    else if (opcode_ == OPCODES::IFKEY) func_name = "entity_manager:is_key_on";
     else if (opcode_ == OPCODES::IFMEMBQ) func_name = "IFMEMBQ";
     else if (opcode_ == OPCODES::IFPRTYQ) func_name = "IFPRTYQ";
 

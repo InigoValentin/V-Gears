@@ -36,7 +36,7 @@ class EntityModel : public Entity{
          */
         EntityModel(
           const Ogre::String& name, const Ogre::String file_name,
-          Ogre::SceneNode* node
+          Ogre::SceneNode* node, const Ogre::String& resource_group = ""
         );
         virtual ~EntityModel();
 
@@ -59,6 +59,10 @@ class EntityModel : public Entity{
          * @return True if the model is visible, false if it's invisible.
          */
         virtual bool IsVisible() const;
+
+        virtual float GetAnimationLength(const Ogre::String& animation) const;
+
+        virtual unsigned int GetAnimationCount() const;
 
         Ogre::Entity* GetModel();
 

@@ -33,11 +33,6 @@ ConfigVar cv_debug_script(
  */
 template<>ScriptManager *Ogre::Singleton<ScriptManager>::msSingleton = nullptr;
 
-/**
- * Global guard used by ScriptManagerBinds to prevent multiple luabind class registrations.
- */
-bool g_luabind_binds_registered = false;
-
 Ogre::String script_entity_type[] = {"SYSTEM", "ENTITY", "UI", "BATTLE"};
 
 /**
@@ -54,7 +49,7 @@ ScriptManager::ScriptManager():
   system_table_name_("System"), entity_table_name_("EntityContainer"), ui_table_name_("UiContainer")
 {
     lua_state_ = lua_open();
-    luabind::open(lua_state_);
+    sol::register_main_thread(lua_state_);
     luaopen_base(lua_state_);
     luaopen_string(lua_state_);
     luaopen_table(lua_state_);
@@ -71,6 +66,24 @@ ScriptManager::ScriptManager():
 ScriptManager::~ScriptManager(){lua_close(lua_state_);}
 
 void ScriptManager::Input(const VGears::Event& event){
+    if (
+      event.event != ""
+      && (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
+    ){
+        Ogre::String argument2 = "";
+        if (event.type == VGears::ET_KEY_PRESS) argument2 = "Press";
+        else if (event.type == VGears::ET_KEY_REPEAT_WAIT) argument2 = "Repeat";
+        const Ogre::String source_key = KeyToString(
+          static_cast<OIS::KeyCode>(event.param1)
+        );
+        for (unsigned int i = 0; i < script_entity_.size(); ++ i){
+            ScriptRequest(
+              &script_entity_[i], "on_button", 100,
+              event.event, argument2, false, false, source_key, true
+            );
+        }
+        return;
+    }
     if (
       (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
       && (
@@ -191,39 +204,50 @@ void ScriptManager::Update(const ScriptManager::Type type){
                           + "\" for entity \"" + current_script_id_.entity + "\"."
                         );
 
-                        if (script_entity_[i].queue[0].paused_script_start.entity != ""){
-                            ContinueScriptExecution(script_entity_[i].queue[0].paused_script_start);
-                            script_entity_[i].queue[0].paused_script_start.entity = "";
-                        }
-                        luabind::object table = GetTableByEntityName(
+                        for (const ScriptId& waiting : script_entity_[i].queue[0].paused_scripts_start)
+                            ContinueScriptExecution(waiting);
+                        script_entity_[i].queue[0].paused_scripts_start.clear();
+                        sol::object table = GetTableByEntityName(
                           type, current_script_id_.entity,
                           script_entity_[i].queue[0].state
                         );
+                        sol::object function;
+                        if (table.get_type() == sol::type::table)
+                            function = table.as<sol::table>()[current_script_id_.function];
                         if (
-                          table.is_valid()
-                          && luabind::type(table) == LUA_TTABLE
-                          && luabind::type(table[current_script_id_.function]) == LUA_TFUNCTION
+                          table.get_type() == sol::type::table
+                          && function.get_type() == sol::type::function
                         ){
                             int ret = 0;
-                            try{
-                                ret = luabind::resume_function<int>(
-                                  table[current_script_id_.function], table,
-                                  script_entity_[i].queue[0].argument1.c_str(),
-                                  script_entity_[i].queue[0].argument2.c_str()
-                                );
+                            lua_State* thread = script_entity_[i].queue[0].state;
+                            sol::coroutine coroutine(thread, sol::function(function));
+                            auto result = coroutine(
+                              table, script_entity_[i].queue[0].argument1,
+                              script_entity_[i].queue[0].argument2,
+                              script_entity_[i].queue[0].argument3
+                            );
+                            if (result.valid()){
+                                // The coroutine yields with the bound function
+                                // return value on top of the thread stack; a
+                                // completed script leaves its return value there.
+                                if (lua_gettop(thread) > 0 && lua_isnumber(thread, -1))
+                                    ret = static_cast<int>(lua_tointeger(thread, -1));
+                                lua_settop(thread, 0);
                             }
-                            catch (luabind::error& e){
+                            else{
+                                sol::error error = result;
                                 std::string msg = "LUA error in entity " + script_entity_[i].name
                                   + " (" + current_script_id_.entity + ") " + " in function "
                                   + script_entity_[i].queue[0].function + " ("
                                   + current_script_id_.function + ")";
-                                if (lua_tostring(script_entity_[i].queue[0].state, -1) != NULL){
+                                if (lua_tostring(thread, -1) != nullptr){
                                     msg = msg + ". Details: " + std::string(
-                                      lua_tostring(script_entity_[i].queue[0].state, -1)
+                                      lua_tostring(thread, -1)
                                     );
                                 }
-                                msg = msg + ". Exception: " + e.what();
+                                msg = msg + ". Exception: " + error.what();
                                 LOG_ERROR(msg);
+                                lua_settop(thread, 0);
                             }
 
                             if (ret == 0){
@@ -267,14 +291,21 @@ void ScriptManager::Update(const ScriptManager::Type type){
                         );
 
                         int ret = 0;
-                        try{
-                            ret = luabind::resume<int>(script_entity_[i].queue[0].state);
+                        lua_State* thread = script_entity_[i].queue[0].state;
+                        // sol.hpp bundles a compat53 shim: on LuaJIT this maps
+                        // to the native 2-argument lua_resume.
+                        int status = lua_resume(thread, nullptr, 0);
+                        if (status == LUA_YIELD || status == 0){
+                            if (lua_gettop(thread) > 0 && lua_isnumber(thread, -1))
+                                ret = static_cast<int>(lua_tointeger(thread, -1));
+                            lua_settop(thread, 0);
                         }
-                        catch(luabind::error& e){
-                            luabind::object error_msg(luabind::from_stack(e.state(), -1));
+                        else{
+                            const char* error = lua_tostring(thread, -1);
                             LOG_WARNING(
-                              Ogre::String(luabind::object_cast<std::string >(error_msg))
+                              Ogre::String(error != nullptr ? error : "unknown lua error")
                             );
+                            lua_settop(thread, 0);
                         }
 
                         if (ret == 0){ // Finished.
@@ -375,18 +406,19 @@ void ScriptManager::AddEntity(
         }
     }
 
-    luabind::object table = GetTableByEntityName(type, entity_name, lua_state_);
+    sol::object table = GetTableByEntityName(type, entity_name, lua_state_);
 
-    if (table.is_valid() && luabind::type(table) == LUA_TTABLE){
+    if (table.get_type() == sol::type::table){
         ScriptEntity script_entity;
         script_entity.name = entity_name;
         script_entity.type = type;
 
         // Initialize entity field for model entity.
-        if (entity != nullptr) table["entity"] = boost::ref(*entity);
+        if (entity != nullptr) table.as<sol::table>()["entity"] = entity;
 
         // Check the "on_start" script
-        if (luabind::type(table["on_start"]) == LUA_TFUNCTION){
+        sol::object on_start = table.as<sol::table>()["on_start"];
+        if (on_start.get_type() == sol::type::function){
             QueueScript script;
             script.function = "on_start";
             script.priority = 1;
@@ -401,7 +433,8 @@ void ScriptManager::AddEntity(
         }
 
         // Check the "on_update" script.
-        if (luabind::type(table["on_update"]) == LUA_TFUNCTION){
+        sol::object on_update = table.as<sol::table>()["on_update"];
+        if (on_update.get_type() == sol::type::function){
             QueueScript script;
             script.function = "on_update";
             script.priority = 999;
@@ -435,33 +468,37 @@ void ScriptManager::RemoveEntityTopScript(ScriptEntity& entity){
         // Delete the thread.
         luaL_unref(lua_state_, LUA_REGISTRYINDEX, entity.queue[0].state_id);
 
-        if (entity.queue[0].paused_script_end.entity != ""){
-            ContinueScriptExecution(entity.queue[0].paused_script_end);
-            entity.queue[0].paused_script_end.entity = "";
-        }
+        for (const ScriptId& waiting : entity.queue[0].paused_scripts_end)
+            ContinueScriptExecution(waiting);
+        entity.queue[0].paused_scripts_end.clear();
         entity.queue.erase(entity.queue.begin());
     }
 }
 
-luabind::object ScriptManager::GetTableByEntityName(
+sol::object ScriptManager::GetTableByEntityName(
   const ScriptManager::Type type, const Ogre::String& name, lua_State* state
 ) const{
     // Get the real table by name
     Ogre::StringVector table_path = StringTokenise(name, ".");
-    luabind::object table = luabind::globals(state);
+    sol::state_view lua(state);
+    sol::object table = lua.globals();
 
     switch(type){
-        case ScriptManager::SYSTEM: table = table[system_table_name_]; break;
-        case ScriptManager::ENTITY: table = table[entity_table_name_]; break;
-        case ScriptManager::UI: table = table[ui_table_name_]; break;
-        case ScriptManager::BATTLE: table = table[battle_table_name_]; break;
+        case ScriptManager::SYSTEM:
+          table = table.as<sol::table>()[system_table_name_]; break;
+        case ScriptManager::ENTITY:
+          table = table.as<sol::table>()[entity_table_name_]; break;
+        case ScriptManager::UI:
+          table = table.as<sol::table>()[ui_table_name_]; break;
+        case ScriptManager::BATTLE:
+          table = table.as<sol::table>()[battle_table_name_]; break;
     }
 
-    if (luabind::type(table) != LUA_TTABLE) return luabind::object();
+    if (table.get_type() != sol::type::table) return sol::make_object(state, sol::nil);
 
     for (unsigned int i = 0; i < table_path.size(); ++ i){
-        table = table[table_path[i]];
-        if (luabind::type(table) != LUA_TTABLE) return luabind::object();
+        table = table.as<sol::table>()[table_path[i]];
+        if (table.get_type() != sol::type::table) return sol::make_object(state, sol::nil);
     }
     return table;
 }
@@ -562,6 +599,17 @@ int ScriptManager::ScriptRequestStartSync(
         return 1;
     }
 
+    // A script that already started can't be waited for to start: nothing would resume the caller.
+    for (const QueueScript& queued : script_entity->queue){
+        if (queued.function == function && queued.yield){
+            LOG_TRIVIAL(
+              "[SCRIPT] script:request_start_sync: Function \"" + Ogre::String(function)
+              + "\" for entity \"" + Ogre::String(entity) + "\" already started."
+            );
+            return 1;
+        }
+    }
+
     bool added = ScriptRequest(script_entity, function, priority, "", "", true, false);
 
     if (added == false){
@@ -608,18 +656,22 @@ int ScriptManager::ScriptRequestEndSync(
 
 bool ScriptManager::ScriptRequest(
   ScriptEntity* script_entity, const Ogre::String& function, const int priority,
-  const Ogre::String& argument1, const Ogre::String& argument2, bool start_sync, bool end_sync
+  const Ogre::String& argument1, const Ogre::String& argument2, bool start_sync,
+  bool end_sync, const Ogre::String& argument3, bool allow_duplicate
 ){
-    luabind::object table
+    if (script_entity == nullptr) return false;
+
+    sol::object table
       = GetTableByEntityName(script_entity->type, script_entity->name, lua_state_);
-    if (
-      table.is_valid() && luabind::type(table) == LUA_TTABLE
-      && luabind::type(table[function]) == LUA_TFUNCTION
-    ){
+    sol::object table_function;
+    if (table.get_type() == sol::type::table)
+        table_function = table.as<sol::table>()[function];
+    if (table_function.get_type() == sol::type::function){
         QueueScript script;
         script.function = function;
         script.argument1 = argument1;
         script.argument2 = argument2;
+        script.argument3 = argument3;
         script.priority = priority;
         script.state = lua_newthread(lua_state_);
         // The thread must not be garbage collected,
@@ -628,15 +680,26 @@ bool ScriptManager::ScriptRequest(
         script.seconds_to_wait = 0;
         script.wait = false;
         script.yield = false;
-        if (start_sync == true)
-            script.paused_script_start = GetCurrentScriptId();
-        if (end_sync == true) script.paused_script_end = GetCurrentScriptId();
+        if (start_sync == true) script.paused_scripts_start.push_back(GetCurrentScriptId());
+        if (end_sync == true) script.paused_scripts_end.push_back(GetCurrentScriptId());
 
-        // If the script is already running, don't queue it.
-        for (int i = 0; i < script_entity->queue.size(); i ++){
+        // If the script is already queued or running, don't queue it again. Whoever waits for the
+        // request must wait for the existing script, because nothing else would resume it.
+        if (allow_duplicate == false){
+          for (int i = 0; i < script_entity->queue.size(); i ++){
              if (script_entity->queue[i].function == function){
-                 script_entity->resort = true;
-                 return true;
+               script_entity->resort = true;
+               QueueScript& existing = script_entity->queue[i];
+               for (const ScriptId& waiting : script.paused_scripts_end)
+                   existing.paused_scripts_end.push_back(waiting);
+               // A script that already started isn't waited for. See ScriptRequestStartSync.
+               if (!existing.yield){
+                   for (const ScriptId& waiting : script.paused_scripts_start)
+                       existing.paused_scripts_start.push_back(waiting);
+               }
+               luaL_unref(lua_state_, LUA_REGISTRYINDEX, script.state_id);
+               return true;
+            }
             }
         }
 

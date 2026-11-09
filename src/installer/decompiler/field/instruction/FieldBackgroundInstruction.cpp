@@ -33,11 +33,11 @@ void FieldBackgroundInstruction::ProcessInst(
         case OPCODES::BGPDH: code_gen->WriteTodo(md.GetEntityName(), "BGPDH");break;
         case OPCODES::BGSCR: code_gen->WriteTodo(md.GetEntityName(), "BGSCR"); break;
         case OPCODES::MPPAL: code_gen->WriteTodo(md.GetEntityName(), "MPPAL"); break;
-        case OPCODES::BGON: ProcessBGON(code_gen); break;
-        case OPCODES::BGOFF: ProcessBGOFF(code_gen); break;
+        case OPCODES::BGON: ProcessBGON(code_gen, static_cast<FieldEngine&>(*engine)); break;
+        case OPCODES::BGOFF: ProcessBGOFF(code_gen, static_cast<FieldEngine&>(*engine)); break;
         case OPCODES::BGROL: code_gen->WriteTodo(md.GetEntityName(), "BGROL"); break;
         case OPCODES::BGROL2: code_gen->WriteTodo(md.GetEntityName(), "BGROL2"); break;
-        case OPCODES::BGCLR: ProcessBGCLR(code_gen); break;
+        case OPCODES::BGCLR: ProcessBGCLR(code_gen, static_cast<FieldEngine&>(*engine)); break;
         case OPCODES::STPAL: ProcessSTPAL(code_gen); break;
         case OPCODES::LDPAL: ProcessLDPAL(code_gen); break;
         case OPCODES::CPPAL: ProcessCPPAL(code_gen); break;
@@ -56,7 +56,8 @@ void FieldBackgroundInstruction::ProcessInst(
     }
 }
 
-void FieldBackgroundInstruction::ProcessBGON(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessBGON(CodeGenerator* code_gen, FieldEngine& engine){
+    engine.AddBackgroundArea(params_[0]->GetUnsigned() == 0 ? params_[2]->GetUnsigned() : -1);
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& background_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
@@ -65,11 +66,12 @@ void FieldBackgroundInstruction::ProcessBGON(CodeGenerator* code_gen){
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     code_gen->AddOutputLine(
-      (boost::format("-- field:background_on(%1%, %2%)") % background_id % layer_id).str()
+      (boost::format("background2d:area_on(%1%, %2%)") % background_id % layer_id).str()
     );
 }
 
-void FieldBackgroundInstruction::ProcessBGOFF(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessBGOFF(CodeGenerator* code_gen, FieldEngine& engine){
+    engine.AddBackgroundArea(params_[0]->GetUnsigned() == 0 ? params_[2]->GetUnsigned() : -1);
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& background_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
@@ -78,17 +80,18 @@ void FieldBackgroundInstruction::ProcessBGOFF(CodeGenerator* code_gen){
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
     code_gen->AddOutputLine(
-      (boost::format("-- field:background_off(%1%, %2%)") % background_id % layer_id).str()
+      (boost::format("background2d:area_off(%1%, %2%)") % background_id % layer_id).str()
     );
 }
 
-void FieldBackgroundInstruction::ProcessBGCLR(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessBGCLR(CodeGenerator* code_gen, FieldEngine& engine){
+    engine.AddBackgroundArea(params_[1]->GetUnsigned() == 0 ? params_[2]->GetUnsigned() : -1);
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& background_id = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[2]->GetUnsigned()
     );
     code_gen->AddOutputLine(
-      (boost::format("-- field:background_clear(%1%)") % background_id).str()
+      (boost::format("background2d:area_clear(%1%)") % background_id).str()
     );
 }
 

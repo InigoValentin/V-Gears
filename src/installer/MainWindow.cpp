@@ -25,18 +25,16 @@
 #include <QtWidgets/QCheckBox>
 #include "DataInstaller.h"
 #include "MainWindow.h"
-#include "ui_MainWindow.h"
-#include "Release.h"
+#include <ui_MainWindow.h>
 
 /**
  * Indicates if an installer has already been created.
  */
 static bool installer_created = false;
 
-Release release;
-
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), main_window_(new Ui::MainWindow){
     main_window_->setupUi(this);
+    main_window_->advancedOptions->setVisible(main_window_->chk_advanced_options->isChecked());
     // Goto the data tab by default.
     main_window_->tabWidget->setCurrentIndex(0);
     // Turn off the launcher tab for now since it dosen't actually work
@@ -45,8 +43,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), main_window_(new U
     main_window_->btn_vgears_config->setText(settings_->value("ConfigDir").toString());
     main_window_->line_data_dst->setText(settings_->value("DataDir").toString());
     main_window_->line_vgears_exe->setText(settings_->value("VGearsEXE").toString());
-    // TODO" Hard coded paths for debugging to save time. Remove them.
-    main_window_->line_data_src->setText("/home/ivalentin/FF7InstallDisk/");
     //main_window_->line_data_dst->setText("/home/ivalentin/.v-gears/data/");
     timer_ = new QTimer(this);
     connect(timer_, SIGNAL(timeout()), this, SLOT(DoProgress()));
@@ -63,9 +59,7 @@ void MainWindow::InitSettings(void){
     );
     win = true;
 #else
-    settings_ = new QSettings(
-      QSettings::NativeFormat,QSettings::UserScope, "v-gears", "launcher", 0
-    );
+    settings_ = new QSettings(QSettings::NativeFormat,QSettings::UserScope, "v-gears", "launcher", 0);
 #endif
     //Check settings.
     if (settings_->value("ConfigDir").isNull()){
@@ -79,11 +73,7 @@ void MainWindow::InitSettings(void){
     }
 
     if (settings_->value("VGearsEXE").isNull()){
-        if (win){
-            settings_->setValue(
-              "VGearsEXE",QString("%1/v-gears.exe").arg(QCoreApplication::applicationDirPath())
-            );
-        }
+        if (win) settings_->setValue("VGearsEXE",QString("%1/v-gears.exe").arg(QCoreApplication::applicationDirPath()));
         else settings_->setValue("VGearsEXE", QString("/usr/games/v-gears"));
     }
 }
@@ -94,8 +84,7 @@ void MainWindow::on_line_vgears_config_editingFinished(){
 
 void MainWindow::on_btn_vgears_config_clicked(){
     QString temp = QFileDialog::getExistingDirectory(
-      this, tr("Select Location of VGears Configuration Data,"),
-      settings_->value("ConfigDir").toString()
+      this, tr("Select Location of VGears Configuration Data,"), settings_->value("ConfigDir").toString()
     );
     if (!temp.isNull()){
         settings_->setValue("ConfigDir", temp);
@@ -108,9 +97,7 @@ void MainWindow::on_line_vgears_exe_editingFinished(){
 }
 
 void MainWindow::on_btn_vgears_exe_clicked(){
-    QString temp = QFileDialog::getOpenFileName(
-      this, tr("Location of VGears Executable,"), QDir::rootPath()
-    );
+    QString temp = QFileDialog::getOpenFileName(this, tr("Location of VGears Executable,"), QDir::rootPath());
     if (!temp.isNull()){
         settings_->setValue("VGearsEXE", temp);
         main_window_->line_vgears_exe->setText(temp);
@@ -121,15 +108,9 @@ void MainWindow::on_btn_vgears_run_clicked(){
     QString configDir(main_window_->btn_vgears_config->text());
     QString exe(main_window_->line_vgears_exe->text());
     QStringList args;
-    args.append(
-      QString("--resources-file=%1/resources.cfg").arg(main_window_->btn_vgears_config->text())
-    );
-    args.append(
-      QString("--config-file=%1/v-gears.cfg").arg(main_window_->btn_vgears_config->text())
-    );
-    args.append(
-      QString("--plugins-file=/%1/plugins.cfg").arg(main_window_->btn_vgears_config->text())
-    );
+    args.append(QString("--resources-file=%1/resources.cfg").arg(main_window_->btn_vgears_config->text()));
+    args.append(QString("--config-file=%1/v-gears.cfg").arg(main_window_->btn_vgears_config->text()));
+    args.append(QString("--plugins-file=/%1/plugins.cfg").arg(main_window_->btn_vgears_config->text()));
     // Check that the config dir is set up correctly.
     QProcess vGears;
     vGears.startDetached(exe,args,configDir);
@@ -138,23 +119,20 @@ void MainWindow::on_btn_vgears_run_clicked(){
 void MainWindow::on_btn_data_src_clicked(){
     const QString filter = tr("ISO images (*.iso)");
     QString temp = QFileDialog::getOpenFileName(
-      this,
-      tr("Select ISO image"),
-      settings_->value("DataDir").toString(),
-      filter
+      this, tr("Select ISO image"), settings_->value("DataDir").toString(), filter
     );
     std::cout << "Selected ISO: " << temp.toStdString() << std::endl;
     if (!temp.isNull()){
         main_window_->line_data_src->setText(temp);
-        release = Release(temp.toStdString());
-        main_window_->isoData->setText(QString::fromStdString(release.getId()));
-        if (!release.isValid()){
+        disk_image_ = DiskImage(temp.toStdString());
+        main_window_->isoData->setText(QString::fromStdString(disk_image_.getId()));
+        if (!disk_image_.isValid()){
             main_window_->isoError->setStyleSheet("QLabel { color : red; }");
-            main_window_->isoError->setText(QString::fromStdString(release.getErrorMessage()));
+            main_window_->isoError->setText(QString::fromStdString(disk_image_.getErrorMessage()));
         }
-        else if (!release.isSupported()){
+        else if (!disk_image_.isSupported()){
             main_window_->isoError->setStyleSheet("QLabel { color : orange; }");
-            main_window_->isoError->setText(QString::fromStdString(release.getWarningMessage()));
+            main_window_->isoError->setText(QString::fromStdString(disk_image_.getWarningMessage()));
         }
         else{
             main_window_->isoError->setStyleSheet("QLabel { color : green; }");
@@ -181,34 +159,29 @@ void MainWindow::on_btn_data_run_clicked(){
     if (main_window_->line_data_src->text().isEmpty()){
         QMessageBox::critical(
           this, tr("Input error"),
-          tr(
-            "The installation needs a Final Fantasy VII ISO image.\n\n"
-            "Select the ISO from the PC install disk."
-          )
+          tr("The installation needs a Final Fantasy VII ISO image.\n\nSelect the ISO from the PC install disk.")
         );
     }
-    if (release.isValid() == false){
+    if (disk_image_.isValid() == false){
         QMessageBox::critical(
           this, tr("Input error"),
-          tr(
-            "The selected ISO is not a valid Final Fantasy VII game."
-            "\n\nSelect a valid ISO image of Final Fantasy VII.")
+          tr("The selected ISO is not a valid Final Fantasy VII game.\n\nSelect a valid image of Final Fantasy VII.")
         );
     }
     else if (main_window_->line_data_dst->text().isEmpty())
         QMessageBox::critical(this, tr("Output error"), tr("No output path provided"));
     else{
-      // Normalize the output path and extract to original_data.
+        // Normalize the output path and extract to original_data.
         QString output = QDir::fromNativeSeparators(main_window_->line_data_dst->text());
         if (!output.endsWith("/")) output += "/";
 
-        bool extraction_success = release.extractIso(output.toStdString());
+        bool extraction_success = disk_image_.extractImage(output.toStdString());
         if (!extraction_success) {
             QMessageBox::critical(this, tr("Extraction error"), tr("Failed to extract ISO file."));
             return;
         }
 
-      QString input = QDir::fromNativeSeparators(QString::fromStdString(release.getContentPath()));
+      QString input = QDir::fromNativeSeparators(QString::fromStdString(disk_image_.getContentPath()));
       if (input.isEmpty()) {
         QMessageBox::critical(this, tr("Extraction error"), tr("Extracted data path is invalid."));
         return;
@@ -237,14 +210,13 @@ void MainWindow::on_btn_data_run_clicked(){
 
         // Ensure required files are in the input dir
         for (auto& file : required_files){
-            QString full_path = input + QString::fromStdString(file);
-            if (!QFile::exists(full_path)){
+            std::cout << "Checking for required file: " << file << std::endl;
+            const auto matched_file = disk_image_.filePath(file);
+            if (!matched_file){
                 QMessageBox::critical(
                   this, tr("Missing input file"),
-                  tr(
-                    "Some of the required files were not found among the extracted data.\n\n"
-                    " Make sure that the file '"
-                  ) + file.c_str() + tr("' is in the extracted data.")
+                  tr("Some of the required files were not found among the extracted data.\n\nMake sure that the file '")
+                    + file.c_str() + tr("' is in the extracted data.")
                 );
                 return;
             }
@@ -253,36 +225,31 @@ void MainWindow::on_btn_data_run_clicked(){
             // Due to the use of singletons, the installer can't be re-run.
             // TODO: Verify that this is true, and if so, try to fix it.
             QMessageBox::critical(
-              this, tr("Error"),
-              tr("Please, fix the errors, and then close the installer before trying again.")
+              this, tr("Error"), tr("Please, fix the errors, and then close the installer before trying again.")
             );
             return;
         }
         // Start data conversion
         try{
-
             // Parse advanced options.
             DataInstaller::AdvancedOptions options;
-            options.skip_battle_data
-              = (Qt::Checked == main_window_->chk_no_battle_data->checkState());
-            options.skip_battle_models
-              = (Qt::Checked == main_window_->chk_no_battle_models->checkState());
-            options.skip_kernel = (Qt::Checked == main_window_->chk_no_kernel->checkState());
-            options.skip_images = (Qt::Checked == main_window_->chk_no_images->checkState());
-            options.skip_sounds = (Qt::Checked == main_window_->chk_no_sounds->checkState());
-            options.skip_music = (Qt::Checked == main_window_->chk_no_music->checkState());
-            options.skip_fields = (Qt::Checked == main_window_->chk_no_fields->checkState());
-            options.skip_field_models
-              = (Qt::Checked == main_window_->chk_no_field_models->checkState());
-            options.skip_wm = (Qt::Checked == main_window_->chk_no_wm->checkState());
-            options.skip_wm_models = (Qt::Checked == main_window_->chk_no_wm_models->checkState());
-            options.no_ffmpeg = (Qt::Checked == main_window_->chk_no_ffmpeg->checkState());
-            options.no_timidity = (Qt::Checked == main_window_->chk_no_timidity->checkState());
+            options.battle_data = (Qt::Checked == main_window_->chk_battle_data->checkState());
+            options.battle_models = (Qt::Checked == main_window_->chk_battle_models->checkState());
+            options.kernel = (Qt::Checked == main_window_->chk_kernel->checkState());
+            options.images = (Qt::Checked == main_window_->chk_images->checkState());
+            options.sounds = (Qt::Checked == main_window_->chk_sounds->checkState());
+            options.music = (Qt::Checked == main_window_->chk_music->checkState());
+            options.videos = (Qt::Checked == main_window_->chk_videos->checkState());
+            options.fields = (Qt::Checked == main_window_->chk_fields->checkState());
+            options.field_models = (Qt::Checked == main_window_->chk_field_models->checkState());
+            options.wm = (Qt::Checked == main_window_->chk_wm->checkState());
+            options.wm_models = (Qt::Checked == main_window_->chk_wm_models->checkState());
+            options.ffmpeg = (Qt::Checked == main_window_->chk_ffmpeg->checkState());
+            options.timidity = (Qt::Checked == main_window_->chk_timidity->checkState());
             options.keep_originals = (Qt::Checked == main_window_->chk_keep_original->checkState());
-
             installer_created = true;
             installer_ = std::make_unique<DataInstaller>(
-              QDir::toNativeSeparators(input).toStdString(),
+              disk_image_,
               QDir::toNativeSeparators(output).toStdString(),
               options,
               [this](const std::string log_line, int level, bool as_progress = false){
@@ -301,9 +268,7 @@ void MainWindow::on_btn_data_run_clicked(){
 }
 
 void MainWindow::on_chk_advanced_options_stateChanged(){
-    if (main_window_->chk_advanced_options->checkState() == Qt::Checked)
-        main_window_->advancedOptions->setMaximumHeight(500);
-    else main_window_->advancedOptions->setMaximumHeight(0);
+    main_window_->advancedOptions->setVisible(main_window_->chk_advanced_options->checkState() == Qt::Checked);
 }
 
 void MainWindow::EnableUi(bool enable){
