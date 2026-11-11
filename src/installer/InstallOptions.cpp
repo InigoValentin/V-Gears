@@ -78,7 +78,7 @@ namespace InstallRules{
 
     ToolNeeds ToolsNeeded(const InstallOptions& o){
         ToolNeeds needs;
-        needs.ffmpeg = o.sounds || o.music;
+        needs.ffmpeg = o.sounds || o.music || o.videos;
         needs.timidity = o.music;
         return needs;
     }

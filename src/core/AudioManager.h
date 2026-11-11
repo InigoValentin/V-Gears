@@ -213,6 +213,18 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
         void SoundPlay(const Ogre::String& name);
 
         /**
+         * Plays the sound of a movie, in its own channel.
+         *
+         * @param[in] file Path to the ogg file.
+         */
+        void MoviePlay(const Ogre::String& file);
+
+        /**
+         * Stops the sound of the movie.
+         */
+        void MovieStop();
+
+        /**
          * Stops the currently playing music.
          *
          * Playback can't be resumed. If the battle mode is active, the battle music player will be
@@ -509,6 +521,11 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
          * Sound effect player.
          */
         AudioManager::Player fx_;
+
+        /**
+         * Player of the sound of movies.
+         */
+        AudioManager::Player movie_;
 
         /**
          * List of music.

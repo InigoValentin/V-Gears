@@ -34,7 +34,7 @@ int AudioManager::channel_buffer_size_ = 96 * 1024;
 
 AudioManager::AudioManager():
   initialized_(false), thread_continue_(true), update_mutex_(), music_(&update_mutex_),
-  battle_music_(&update_mutex_), fx_(&update_mutex_)
+  battle_music_(&update_mutex_), fx_(&update_mutex_), movie_(&update_mutex_)
 {
     al_device_ = alcOpenDevice(nullptr);
     if (al_device_ != nullptr){
@@ -143,6 +143,7 @@ void AudioManager::MusicPlay(const Ogre::String& name){
         }
         else{
             battle_music_.Stop();
+            LOG_TRIVIAL("Music '" + name + "' plays '" + music->file + "'.");
             music_.SetLoop(music->loop);
             music_.Play(music->file);
         }
@@ -188,6 +189,19 @@ void AudioManager::SoundPlay(const Ogre::String& name){
         fx_.SetLoop(-1);
         fx_.Play(fx->file);
     }
+}
+
+void AudioManager::MoviePlay(const Ogre::String& file){
+    if (!initialized_) return;
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    movie_.SetLoop(-1);
+    movie_.Play(file);
+}
+
+void AudioManager::MovieStop(){
+    if (!initialized_) return;
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    movie_.Stop();
 }
 
 void AudioManager::ScriptPlaySound(const char* name){
@@ -282,12 +296,14 @@ void AudioManager::UpdateField(){
     boost::recursive_mutex::scoped_lock lock(update_mutex_);
     music_.Update();
     fx_.Update();
+    movie_.Update();
 }
 
 void AudioManager::UpdateBattle(){
     boost::recursive_mutex::scoped_lock lock(update_mutex_);
     battle_music_.Update();
     fx_.Update();
+    movie_.Update();
 }
 
 void AudioManager::UpdateWorld(){UpdateField();}
@@ -378,7 +394,10 @@ void AudioManager::Player::Play(const Ogre::String &file){
 
 void AudioManager::Player::Stop(){
     boost::recursive_mutex::scoped_lock lock(*update_mutex_);
-    if (!alIsSource(source_)) return;
+    // Nothing to stop if there is no track. The id of a source that was deleted can be given to
+    // another player, so checking if it is a source is not enough: it would delete the source of
+    // the other player and free the vorbis file a second time.
+    if (file_.empty() || !alIsSource(source_)) return;
     // Stop source
     alSourceStop(source_);
     // Get source buffers
@@ -396,6 +415,7 @@ void AudioManager::Player::Stop(){
     ov_clear(&vorbis_file_);
     stream_finished_ = false;
     file_ = "";
+    source_ = 0;
 }
 
 void AudioManager::Player::SetLoop(const float loop){
@@ -404,6 +424,8 @@ void AudioManager::Player::SetLoop(const float loop){
 }
 
 void AudioManager::Player::Update(){
+    // A player with no track has no source. Its old id may belong to another player by now.
+    if (file_.empty()) return;
     // Try to fill processed buffers
     int processed = 0;
     alGetSourcei(source_, AL_BUFFERS_PROCESSED, &processed);

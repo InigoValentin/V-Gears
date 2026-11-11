@@ -91,6 +91,8 @@ set(SOURCE_FILES
     core/AudioManager.cpp
     core/Background2D.cpp
     core/Background2DAnimation.cpp
+    core/MovieCameraFrame.cpp
+    core/MovieState.cpp
     core/ScreenFadeState.cpp
     core/CameraManager.cpp
     core/ConfigCmd.cpp
@@ -283,6 +285,8 @@ add_test(NAME v-gears-tests COMMAND v-gears-tests)
 add_executable(v-gears-installer-tests
     installer/InstallLogic.cpp
     installer/ExternalTools.cpp
+    installer/MovieCamera.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/MovieCamera.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/ExternalTools.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/InstallLayout.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/InstallLog.cpp

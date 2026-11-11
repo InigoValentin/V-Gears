@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -200,6 +201,26 @@ namespace ExternalTools{
      */
     bool ConvertToOgg(
       const std::string& ffmpeg, const std::string& input, const std::string& output, std::string* error = nullptr
+    );
+
+    /**
+     * Converts a movie to what the game plays: a folder with its frames as JPEG files (00000.jpg,
+     * 00001.jpg...), an ogg file with its sound, and movie.xml with the number of frames and the
+     * frames per second.
+     *
+     * @param[in] ffmpeg Path of FFmpeg.
+     * @param[in] input The movie.
+     * @param[in] directory Folder to create. It is removed if the conversion fails.
+     * @param[in] name Name of the movie, which is the name of the ogg file.
+     * @param[in] camera Content of the camera file of the movie, which the game uses to draw the
+     * models over it. It's written as camera.cam, and the first frame that has a camera in
+     * movie.xml. Empty if the movie has no camera.
+     * @param[out] error Reason of the failure. Optional.
+     * @return True if the frames were created. A movie without sound is converted anyway.
+     */
+    bool ConvertMovie(
+      const std::string& ffmpeg, const std::string& input, const std::string& directory,
+      const std::string& name, const std::vector<uint8_t>& camera = {}, std::string* error = nullptr
     );
 
     /**

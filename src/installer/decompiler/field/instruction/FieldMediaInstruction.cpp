@@ -209,22 +209,114 @@ void FieldMediaInstruction::ProcessMULCK(CodeGenerator* code_gen){
     ).str());
 }
 
+namespace{
+
+    // The movies, in the order the game identifies them. It's the list in FF7.EXE.
+    const char* const MOVIES[] = {
+      "fship2",
+      "fship2n",
+      "d_ropego",
+      "d_ropein",
+      "u_ropein",
+      "u_ropego",
+      "gold2",
+      "gold3",
+      "gold4",
+      "gold6",
+      "gold5",
+      "boogup",
+      "boogdown",
+      "junair_u",
+      "junair_d",
+      "junelein",
+      "junelego",
+      "junin_in",
+      "junin_go",
+      "moriya",
+      "mkup",
+      "northmk",
+      "mk8",
+      "ontrain",
+      "mainplr",
+      "smk",
+      "southmk",
+      "plrexp",
+      "fallpl",
+      "monitor",
+      "bike",
+      "mtnvl",
+      "mtnvl2",
+      "brgnvl",
+      "nvlmk",
+      "nivlsfs",
+      "jenova_e",
+      "junon",
+      "hiwind0",
+      "mtcrl",
+      "gold1",
+      "biskdead",
+      "boogdemo",
+      "boogstar",
+      "setogake",
+      "rcktfail",
+      "jairofly",
+      "jairofal",
+      "gold7",
+      "gold7_2",
+      "earithdd",
+      "funeral",
+      "car_1209",
+      "opening",
+      "greatpit",
+      "c_scene1",
+      "c_scene2",
+      "c_scene3",
+      "biglight",
+      "meteosky",
+      "weapon0",
+      "weapon1",
+      "weapon2",
+      "weapon3",
+      "weapon4",
+      "weapon5",
+      "hwindfly",
+      "phoenix",
+      "nrcrl",
+      "nrcrl_b",
+      "dumcrush",
+      "zmind01",
+      "zmind02",
+      "zmind03",
+      "gelnica",
+      "rcketoff",
+      "white2"
+    };
+}
+
 void FieldMediaInstruction::ProcessPMVIE(CodeGenerator* code_gen){
-    code_gen->AddOutputLine(
-      (boost::format("-- field:movie_set(%1%)") % params_[0]->GetUnsigned()
+    const size_t id = params_[0]->GetUnsigned();
+    if (id >= sizeof(MOVIES) / sizeof(MOVIES[0])){
+        code_gen->AddOutputLine(
+          (boost::format("-- Unknown movie %1%") % id).str()
+        );
+        return;
+    }
+    // The scale of the field, to place the models over the movie.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    code_gen->AddOutputLine((
+      boost::format("movie_player:set(\"%1%\", %2%)") % MOVIES[id] % cg->GetScaleFactor()
     ).str());
 }
 
 void FieldMediaInstruction::ProcessMOVIE(CodeGenerator* code_gen){
-    code_gen->AddOutputLine("-- field:play_movie()");
+    code_gen->AddOutputLine("movie_player:play()");
 }
 
 void FieldMediaInstruction::ProcessMVIEF(CodeGenerator* code_gen){
-    // TODO: Check for assignment to value.
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[2]->GetUnsigned());
     code_gen->AddOutputLine(
-      (boost::format("-- %1% = field:get_movie_frame()") % destination).str()
+      (boost::format("%1% = movie_player:get_frame()") % destination).str()
     );
 }

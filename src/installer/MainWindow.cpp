@@ -44,7 +44,43 @@
 #include "InstallOptions.h"
 #include "InstallVerifier.h"
 #include "MainWindow.h"
+#include "MovieCamera.h"
 #include <ui_MainWindow.h>
+
+namespace{
+
+    /**
+     * Converts the movies in a folder to what the game plays: frames and sound. The game can't
+     * decode the original videos. The movies that already have a converted folder are skipped,
+     * and the originals are kept so they are not extracted again.
+     *
+     * @param[in] video_dir Folder with the extracted movies.
+     */
+    void ConvertMovies(const std::string& video_dir){
+        const ExternalTools::Tool ffmpeg = ExternalTools::FindFfmpeg(ExternalTools::CurrentLocations());
+        if (!ffmpeg.usable){
+            InstallLog::Get().Add(
+              "[WARNING] FFmpeg can't be used, so the videos are not converted and the game can't play them: "
+              + ffmpeg.problem
+            );
+            return;
+        }
+        QDir directory(QString::fromStdString(video_dir));
+        for (const QString& file : directory.entryList({"*.avi"}, QDir::Files)){
+            const std::string name = QFileInfo(file).completeBaseName().toStdString();
+            const std::string destination = video_dir + name;
+            if (QFileInfo::exists(QString::fromStdString(destination + "/movie.xml"))) continue;
+            InstallLog::Get().Add("Converting " + name + ".avi...");
+            std::string error;
+            if (ExternalTools::ConvertMovie(
+                  ffmpeg.path, video_dir + file.toStdString(), destination, name,
+                  MovieCamera::LoadCamera(video_dir + "moviecam.lgp", name), &error
+                ))
+                InstallLog::Get().Add("Converted " + name);
+            else InstallLog::Get().Add("[WARNING] Could not convert " + name + ": " + error);
+        }
+    }
+}
 
 /**
  * Indicates if an installer has already been created.
@@ -880,6 +916,7 @@ void MainWindow::StartVideoExtraction(const QString& output){
               },
               [](const std::string& message){InstallLog::Get().Add(message);}, &extracted, &skipped
             );
+            if (ok) ConvertMovies(output.toStdString() + "data/video/");
         }
         catch (const std::exception& ex){
             error = ex.what();

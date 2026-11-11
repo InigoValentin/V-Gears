@@ -451,6 +451,16 @@ void ScriptManager::InitBinds(){
       "fade", &ScreenFade::ScriptFade,
       "nfade", &ScreenFade::ScriptNFade
     );
+    // Movies
+    lua.new_usertype<MoviePlayer>(
+      "MoviePlayer",
+      "set", &MoviePlayer::ScriptSet,
+      "stop", &MoviePlayer::ScriptStop,
+      "get_frame", &MoviePlayer::ScriptGetFrame,
+      "is_playing", &MoviePlayer::ScriptIsPlaying
+    );
+    sol::table movie_player_type = lua["MoviePlayer"];
+    BindYielding(movie_player_type, "play", &MoviePlayer::ScriptPlay);
     sol::table screen_fade_type = lua["ScreenFade"];
     BindYielding(screen_fade_type, "wait", &ScreenFade::ScriptWait);
 
@@ -581,6 +591,7 @@ void ScriptManager::InitBinds(){
     lua["savemap_manager"] = SavemapHandler::getSingletonPtr();
     lua["background2d"] = EntityManager::getSingletonPtr()->GetBackground2D();
     lua["screen_fade"] = EntityManager::getSingletonPtr()->GetScreenFade();
+    lua["movie_player"] = EntityManager::getSingletonPtr()->GetMoviePlayer();
     lua["walkmesh"] = EntityManager::getSingletonPtr()->GetWalkmesh();
     lua["text_manager"] = TextHandler::getSingletonPtr();
     lua["dialog"] = DialogsManager::getSingletonPtr();

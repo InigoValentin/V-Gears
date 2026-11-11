@@ -249,8 +249,29 @@ void CameraManager::EndBattleCamera(){
       << camera_->getOrientation().y << ", " << camera_->getOrientation().z << std::endl;*/
 }
 
+void CameraManager::SetMovieCamera(
+  const Ogre::Vector3& position, const Ogre::Quaternion& orientation, const Ogre::Radian& fov
+){
+    movie_camera_ = true;
+    camera_->setPosition(position);
+    camera_->setOrientation(orientation);
+    camera_->setFOVy(fov);
+    // The movie fills the screen: it doesn't scroll.
+    camera_->resetFrustumExtents();
+}
+
+void CameraManager::EndMovieCamera(){
+    if (!movie_camera_) return;
+    movie_camera_ = false;
+    camera_->setPosition(d2_position_);
+    camera_->setOrientation(d2_orientation_);
+    camera_->setFOVy(d2_fov_);
+    Set2DScroll(d2_scroll_);
+}
+
 void CameraManager::Set2DScroll(const Ogre::Vector2& position){
     d2_scroll_ = position;
+    if (movie_camera_) return;
     if(camera_free_ == true) return;
     float width = static_cast<float>(viewport_->getActualWidth());
     float height = static_cast<float>(viewport_->getActualHeight());

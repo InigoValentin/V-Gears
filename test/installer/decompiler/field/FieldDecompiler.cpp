@@ -155,6 +155,20 @@ BOOST_AUTO_TEST_CASE(TestFieldDecompilerMovaWalksToTheEntityAndWaits){
     BOOST_CHECK(output.find("UNIMPLMENTED") == std::string::npos);
 }
 
+BOOST_AUTO_TEST_CASE(TestFieldDecompilerMoviesAreChosenPlayedAndTheirFrameRead){
+    FieldScriptFormatter formatter;
+    // PMVIE 53, MOVIE, MVIEF into the variable 6 of the bank 6.
+    const std::string output = DecompileWith({0xF8, 53, 0xF9, 0xFA, 0x06, 0x06}, formatter);
+    const size_t set = output.find("movie_player:set(\"opening\", ");
+    const size_t play = output.find("movie_player:play()");
+    const size_t frame = output.find("Banks[6][6] = movie_player:get_frame()");
+    BOOST_REQUIRE(set != std::string::npos && play != std::string::npos);
+    BOOST_REQUIRE(frame != std::string::npos);
+    BOOST_CHECK(set < play && play < frame);
+    // An unknown movie is not played.
+    BOOST_CHECK(DecompileWith({0xF8, 200}, formatter).find("movie_player:set") == std::string::npos);
+}
+
 BOOST_AUTO_TEST_CASE(TestFieldDecompilerScreenFades){
     FieldScriptFormatter formatter;
     // FADE 255, 0, 0, speed 8, type 5 - NFADE type 11, 10, 20, 30, 15 frames - FADEW.

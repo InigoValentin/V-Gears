@@ -494,15 +494,7 @@ void Background2D::ScriptScrollToPosition(
 ){
     LOG_TRIVIAL(
       "Background2d set scroll to position '"
-      + Ogre::StringConverter::toString(Ogre::Vector2(x, y)) + "', current '"
-      + Ogre::StringConverter::toString(position_) + "', player would be at '"
-      + (EntityManager::getSingleton().ScriptGetPlayerEntity() != nullptr
-        ? Ogre::StringConverter::toString(
-            GetEntityScroll(EntityManager::getSingleton().ScriptGetPlayerEntity())
-          )
-        : Ogre::String("none"))
-      + "', range " + Ogre::StringConverter::toString(range_.getMinimum()) + " "
-      + Ogre::StringConverter::toString(range_.getMaximum()) + "."
+      + Ogre::StringConverter::toString(Ogre::Vector2(x, y)) + "'."
     );
     scroll_entity_ = nullptr;
     if (type == Background2D::NONE || seconds <= 0){
@@ -888,6 +880,8 @@ void Background2D::renderQueueEnded(
   Ogre::uint8 queue_group_id, const Ogre::String& invocation, bool& repeat_this_invocation
 ){
     if (cv_show_background2d.GetB() == false) return;
+    // The movie takes the place of the background, and the models are drawn over it.
+    if (EntityManager::getSingleton().GetMoviePlayer()->IsDrawnBehind()) return;
     if (queue_group_id == Ogre::RENDER_QUEUE_MAIN){
         Ogre::GpuProgramParametersPtr rs_params = render_system_->getFixedFunctionParams(
           Ogre::TVC_NONE, Ogre::FOG_NONE

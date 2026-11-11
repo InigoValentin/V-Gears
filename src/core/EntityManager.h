@@ -25,6 +25,7 @@
 #include "EntityTrigger.h"
 #include "Event.h"
 #include "Manager.h"
+#include "MoviePlayer.h"
 #include "ScreenFade.h"
 #include "Walkmesh.h"
 
@@ -167,6 +168,13 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @return The screen fade.
          */
         ScreenFade* GetScreenFade();
+
+        /**
+         * Retrieves the movie player.
+         *
+         * @return The movie player.
+         */
+        MoviePlayer* GetMoviePlayer();
 
         /**
          * Adds an entity to the manager.
@@ -769,6 +777,11 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * The map background
          */
         Background2D background_2d_;
+
+        /**
+         * The movie player. It has to be created before the screen fade, which is drawn over it.
+         */
+        MoviePlayer movie_player_;
 
         /**
          * The coloured fade of the screen. It has to be created after the background, because the

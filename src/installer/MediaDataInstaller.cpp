@@ -28,6 +28,7 @@
 #include "MediaDataInstaller.h"
 #include "ExternalTools.h"
 #include "InstallLog.h"
+#include "MovieCamera.h"
 #include "SfxDump.h"
 #include "data/VGearsLGPArchive.h"
 #include "data/VGearsTexFile.h"
@@ -1613,7 +1614,28 @@ void MediaDataInstaller::InstallVideos(){
     const std::string output_dir = data_dir_ + "video/";
     boost::filesystem::create_directories(output_dir);
     const boost::filesystem::path source(videos_[processed_videos_]);
+    processed_videos_ ++;
+    if (ToolsReady(false)){
+        // The game can't decode these videos, so they are converted to frames and ogg sound, in the
+        // background. Videos that aren't avi files are not movies.
+        if (source.extension() != ".avi" && source.extension() != ".AVI") return;
+        const std::string ffmpeg = ffmpeg_tool_.path;
+        const std::string name = source.stem().string();
+        const std::string input = source.string();
+        const std::string camera_archive = (source.parent_path() / "moviecam.lgp").string();
+        const std::string directory = (boost::filesystem::path(output_dir) / name).string();
+        RunConversion(
+          "movie " + name,
+          [ffmpeg, input, directory, name, camera_archive](std::string* error){
+              return ExternalTools::ConvertMovie(
+                ffmpeg, input, directory, name, MovieCamera::LoadCamera(camera_archive, name),
+                error
+              );
+          },
+          nullptr
+        );
+        return;
+    }
     const boost::filesystem::path destination = boost::filesystem::path(output_dir) / source.filename();
     boost::filesystem::copy_file(source, destination, boost::filesystem::copy_options::overwrite_existing);
-    processed_videos_ ++;
 }

@@ -14,12 +14,15 @@
  */
 
 #include "ExternalTools.h"
+#include "MovieCamera.h"
 #include <QtCore/QProcess>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <algorithm>
 #include <boost/filesystem.hpp>
 #include <cctype>
+#include <cstdio>
+#include <fstream>
 #include <cstdlib>
 
 namespace fs = boost::filesystem;
@@ -259,6 +262,14 @@ namespace ExternalTools{
         return {"--quiet=3", midi, "-Ow", "-o", "-"};
     }
 
+    namespace{
+        std::string FrameName(const int frame){
+            char number[16];
+            snprintf(number, sizeof(number), "%05d", frame);
+            return std::string(number) + ".jpg";
+        }
+    }
+
     bool ConvertToOgg(
       const std::string& ffmpeg, const std::string& input, const std::string& output, std::string* error
     ){
@@ -269,6 +280,47 @@ namespace ExternalTools{
         fs::remove(output, ec);
         if (error) *error = "ffmpeg failed: " + Describe(result);
         return false;
+    }
+
+    bool ConvertMovie(
+      const std::string& ffmpeg, const std::string& input, const std::string& directory,
+      const std::string& name, const std::vector<uint8_t>& camera, std::string* error
+    ){
+        boost::system::error_code ec;
+        fs::remove_all(directory, ec);
+        fs::create_directories(directory, ec);
+        // The movies of the original game have 15 frames per second.
+        const float frames_per_second = 15.0f;
+        const RunResult frames = Run(
+          ffmpeg,
+          {"-hide_banner", "-loglevel", "panic", "-y", "-i", input, "-an", "-q:v", "3",
+           "-start_number", "0", directory + "/%05d.jpg"},
+          -1
+        );
+        int frame_count = 0;
+        while (fs::exists(directory + "/" + FrameName(frame_count), ec)) ++ frame_count;
+        if (!frames.started || !frames.finished || frames.exit_code != 0 || frame_count == 0){
+            fs::remove_all(directory, ec);
+            if (error) *error = "ffmpeg failed: " + Describe(frames);
+            return false;
+        }
+        // The sound. Some movies have none.
+        const std::string ogg = directory + "/" + name + ".ogg";
+        const RunResult sound = Run(
+          ffmpeg, {"-hide_banner", "-loglevel", "panic", "-y", "-i", input, "-vn", ogg}, -1
+        );
+        if (!sound.started || !sound.finished || sound.exit_code != 0 || fs::file_size(ogg, ec) == 0 || ec)
+            fs::remove(ogg, ec);
+        std::ofstream info(directory + "/movie.xml");
+        info << "<movie frames=\"" << frame_count << "\" fps=\"" << frames_per_second << "\"";
+        const int first_camera_frame = MovieCamera::FirstCameraFrame(camera);
+        if (first_camera_frame >= 0){
+            info << " camera_frame=\"" << first_camera_frame << "\"";
+            std::ofstream camera_file(directory + "/camera.cam", std::ios::binary);
+            camera_file.write(reinterpret_cast<const char*>(camera.data()), camera.size());
+        }
+        info << "/>\n";
+        return true;
     }
 
     bool ConvertMidiToOgg(

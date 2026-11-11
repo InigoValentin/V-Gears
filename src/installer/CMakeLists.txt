@@ -18,6 +18,7 @@ set(INSTALLER_SOURCE_FILES
     ExternalTools.cpp
     InstallVerifier.cpp
     VideoFiles.cpp
+    MovieCamera.cpp
     KernelDataInstaller.cpp
     MainWindow.cpp
     MediaDataInstaller.cpp

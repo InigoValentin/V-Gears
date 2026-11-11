@@ -323,6 +323,9 @@ void EntityManager::UpdateField(){
     background_2d_.Update();
     // This can start a battle and change the module, so it's the last thing to do.
     UpdateEncounters(walked);
+    // The movie follows the speed of the game, so the scenes that are timed with it stay in sync.
+    // Its sound doesn't, so at any other speed they drift apart.
+    movie_player_.Update(Timer::getSingleton().GetGameTimeDelta());
     screen_fade_.Update(Timer::getSingleton().GetGameTimeDelta());
 }
 
@@ -597,6 +600,8 @@ bool EntityManager::IsWorldPositionBlocked(
 Background2D* EntityManager::GetBackground2D(){return &background_2d_;}
 
 ScreenFade* EntityManager::GetScreenFade(){return &screen_fade_;}
+
+MoviePlayer* EntityManager::GetMoviePlayer(){return &movie_player_;}
 
 void EntityManager::AddEntity(
   const Ogre::String& name, const Ogre::String& file_name,
