@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=Application;Game;
 Encoding=UTF-8
-Exec=/usr/bin/v-gears-launcher
+Exec=sh -c "cd ~/.v-gears && exec /usr/games/v-gears"
 #Path=/usr/share/v-gears
 GenericName=V Gears
 Icon=v-gears.png

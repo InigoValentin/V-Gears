@@ -427,6 +427,11 @@ class BattleDataInstaller{
         std::string output_dir_;
 
         /**
+         * Directory where the game data is installed (<install dir>/data/).
+         */
+        std::string data_dir_;
+
+        /**
          * Pointer to the application resource manager.
          */
         Ogre::ResourceGroupManager* res_mgr_;

@@ -277,3 +277,19 @@ target_link_libraries(v-gears-tests
     ${ZLIB_LIBRARIES}
 )
 add_test(NAME v-gears-tests COMMAND v-gears-tests)
+
+
+# Tests of the installer logic that doesn't need the rest of the engine (layout, option rules, verifier, log).
+add_executable(v-gears-installer-tests
+    installer/InstallLogic.cpp
+    installer/ExternalTools.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/ExternalTools.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/InstallLayout.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/InstallLog.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/InstallOptions.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/InstallVerifier.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/VideoFiles.cpp
+)
+SET_PROPERTY(TARGET v-gears-installer-tests PROPERTY FOLDER "build/v-gears-test")
+target_link_libraries(v-gears-installer-tests ${_test_qt_libs} ${Boost_LIBRARIES})
+add_test(NAME v-gears-installer-tests COMMAND v-gears-installer-tests)

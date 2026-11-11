@@ -26,6 +26,8 @@
 #include <tinyxml.h>
 #include "DiskImage.h"
 #include "MediaDataInstaller.h"
+#include "ExternalTools.h"
+#include "InstallLog.h"
 #include "SfxDump.h"
 #include "data/VGearsLGPArchive.h"
 #include "data/VGearsTexFile.h"
@@ -34,11 +36,9 @@
 int MediaDataInstaller::TOTAL_SOUNDS = 750;
 
 MediaDataInstaller::MediaDataInstaller(
-  const DiskImage& disk_image, const std::string output_dir, const bool keep_originals,
-  const bool ffmpeg, const bool timidity
+  const DiskImage& disk_image, const std::string output_dir, const bool keep_originals
 ):
-  disk_image_(disk_image), output_dir_(output_dir), keep_originals_(keep_originals),
-  ffmpeg_(ffmpeg), timidity_(timidity),
+  disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "data/"), keep_originals_(keep_originals),
     window_(*disk_image_.filePath("data/kernel/WINDOW.BIN")),
     processed_sounds_(0),
     menu_(VGears::LGPArchive(*disk_image_.filePath("data/menu/menu_us.lgp"), "LGP")),
@@ -1116,14 +1116,14 @@ void MediaDataInstaller::InstallSprites(){
 
         // Save the TEX File
         std::fstream out;
-        out.open(output_dir_ + "images/" + f.file_name, std::ios::out);
+        out.open(data_dir_ + "images/" + f.file_name, std::ios::out);
         menu.SetOffset(f.data_offset);
         for (int j = 0; j < f.data_size; j ++) out << menu.readU8();
         out.close();
 
         // Open the TEX file and save PNGs.
-        std::string img_dir = output_dir_ + "images/";
-        TexFile tex(output_dir_ + "images/" + f.file_name);
+        std::string img_dir = data_dir_ + "images/";
+        TexFile tex(data_dir_ + "images/" + f.file_name);
         if (f.file_name == "barre.tex")
             tex.SavePng(img_dir + "characters/1.png", 0, 0, 83, 95, 0);
         else if (f.file_name == "bins.tex")
@@ -1310,7 +1310,7 @@ void MediaDataInstaller::InstallSprites(){
         // TODO: Extract arena reels from coloa.tex, colob.tex and coloc.tex
 
         // Delete Tex file.
-        if (!keep_originals_) std::remove((output_dir_ + "images/" + f.file_name).c_str());
+        if (!keep_originals_) std::remove((data_dir_ + "images/" + f.file_name).c_str());
     }
 }
 
@@ -1318,7 +1318,7 @@ int MediaDataInstaller::InstallSoundsInit(){
     std::unique_ptr<std::string> fmt_path = disk_image_.filePath("data/sound/audio.fmt");
     std::unique_ptr<std::string> data_path = disk_image_.filePath("data/sound/audio.dat");
     std::string sound_dir =
-      (boost::filesystem::path(output_dir_) / "audio" / "sounds").string();
+      (boost::filesystem::path(data_dir_) / "audio" / "sounds").string();
 
     if (!fmt_path){
         std::cerr << "MediaDataInstaller: could not find data/sound/audio.fmt in the selected game data."
@@ -1337,21 +1337,22 @@ int MediaDataInstaller::InstallSoundsInit(){
 }
 
 bool MediaDataInstaller::InstallSounds(){
-    if (ffmpeg_){
-        // TODO: check for ffmpeg executable and warn if not found.
-        std::string f_path = output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav";
-        std::ifstream file(f_path);
+    if (ToolsReady(false)){
+        const std::string wav = data_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav";
+        const std::string ogg = data_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".ogg";
+        std::ifstream file(wav);
         if (file.is_open()){
             file.close();
-             std::string command = (boost::format(
-              "ffmpeg -hide_banner -loglevel panic -y  -i %1%audio/sounds/%2%.wav %1%audio/sounds/%2%.ogg"
-            ) % output_dir_ % processed_sounds_).str();
-            std::system(command.c_str());
+            // Converted in the background. The wav file is removed once it has been converted.
+            const std::string ffmpeg = ffmpeg_tool_.path;
+            const bool keep = keep_originals_;
+            RunConversion(
+              "sound " + std::to_string(processed_sounds_),
+              [ffmpeg, wav, ogg](std::string* error){return ExternalTools::ConvertToOgg(ffmpeg, wav, ogg, error);},
+              [wav, keep](){if (!keep) std::remove(wav.c_str());}
+            );
             std::cout << "    ADD SOUND " << processed_sounds_ << ".ogg" << std::endl;
             sounds_.push_back("audio/sounds/" + std::to_string(processed_sounds_) + ".ogg");
-            // Remove the wav file.
-            if (!keep_originals_)
-                std::remove((output_dir_ + "audio/sounds/" + std::to_string(processed_sounds_) + ".wav").c_str());
         }
         else{
             sounds_.push_back("audio/sounds/INVALID.ogg");
@@ -1369,6 +1370,8 @@ void MediaDataInstaller::WriteSoundIndex(){
     //for (string item : items_){
     for (int id = 0; id < sounds_.size(); id ++){
         std::string path = sounds_[id];
+        // A sound that could not be converted has no file, and listing it would make the game look for it.
+        if (path != "audio/sounds/INVALID.ogg" && !boost::filesystem::exists(data_dir_ + path)) continue;
         std::unique_ptr<TiXmlElement> xml_sound(new TiXmlElement("sound"));
         xml_sound->SetAttribute("file_name", path);
         xml_sound->SetAttribute("name", id);
@@ -1384,7 +1387,7 @@ void MediaDataInstaller::WriteSoundIndex(){
         }
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(output_dir_ + "audio/sounds/_sounds.xml");
+    xml.SaveFile(data_dir_ + "audio/sounds/_sounds.xml");
 }
 
 int MediaDataInstaller::InstallMusicsInit(){
@@ -1426,21 +1429,28 @@ bool MediaDataInstaller::InstallMusics(){
     File midi(*disk_image_.filePath("data/midi/midi.lgp"));
 
     std::fstream out;
-    out.open(output_dir_ + "audio/musics/" + std::to_string(index) + ".mid", std::ios::out);
+    out.open(data_dir_ + "audio/musics/" + std::to_string(index) + ".mid", std::ios::out);
     midi.SetOffset(f.data_offset);
     for (int j = 0; j < f.data_size; j ++) out << midi.readU8();
     out.close();
 
-    // Convert to ogg (TiMidity + FFMpeg)
-    // TODO: Chek for ffmpeg and timidity executables and warn if not found.
-    std::string command = (boost::format(
-      "timidity --quiet=3 %1%audio/musics/%2%.mid -Ow -o - "
-      "| ffmpeg -hide_banner -loglevel panic -y -i - %1%audio/musics/%2%.ogg"
-    ) % output_dir_ % index).str();
-    if (ffmpeg_ && timidity_) std::system(command.c_str());
-
-    // Remove the midi file.
-    if (!keep_originals_) std::remove((output_dir_ + "audio/musics/" + std::to_string(index) + ".mid").c_str());
+    // Convert to ogg (TiMidity + FFMpeg).
+    const std::string midi_path = data_dir_ + "audio/musics/" + std::to_string(index) + ".mid";
+    const std::string ogg_path = data_dir_ + "audio/musics/" + std::to_string(index) + ".ogg";
+    const bool keep = keep_originals_;
+    if (ToolsReady(true)){
+        // Converted in the background. The midi file is removed once it has been converted.
+        const std::string timidity = timidity_tool_.path;
+        const std::string ffmpeg = ffmpeg_tool_.path;
+        RunConversion(
+          "music " + std::to_string(index),
+          [timidity, ffmpeg, midi_path, ogg_path](std::string* error){
+              return ExternalTools::ConvertMidiToOgg(timidity, ffmpeg, midi_path, ogg_path, error);
+          },
+          [midi_path, keep](){if (!keep) std::remove(midi_path.c_str());}
+        );
+    }
+    // Without the programs the midi file is the only copy of the track, so it stays.
 
     musics_.push_back("audio/musics/" + std::to_string(processed_musics_) + ".ogg");
     processed_musics_ ++;
@@ -1460,11 +1470,64 @@ void MediaDataInstaller::InstallHQMusics(){
             }
         }
 
-        std::string command = (boost::format(
-          "ffmpeg -hide_banner -loglevel panic -y -i %1%musics/%2%.wav %3%audio/sounds/%4%.ogg"
-        ) % disk_image_.getContentPath() % hq_music % output_dir_ % index).str();
-        if (ffmpeg_)  std::system(command.c_str());
+        if (ToolsReady(false)){
+            const std::string ffmpeg = ffmpeg_tool_.path;
+            // TODO: This path doesn't exist in the PC install disk (the files are in DATA/MUSIC, and one of them is
+            // called HEART, not "hearth"), so these conversions have never run. They are skipped quietly, as
+            // before, until the source files and the destination are sorted out.
+            const std::string wav = disk_image_.getContentPath() + "musics/" + hq_music + ".wav";
+            const std::string ogg = data_dir_ + "audio/sounds/" + std::to_string(index) + ".ogg";
+            if (!boost::filesystem::exists(wav)) continue;
+            RunConversion(
+              "high quality music " + hq_music,
+              [ffmpeg, wav, ogg](std::string* error){return ExternalTools::ConvertToOgg(ffmpeg, wav, ogg, error);}
+            );
+        }
     }
+}
+
+bool MediaDataInstaller::ToolsReady(bool need_timidity){
+    if (!tools_resolved_){
+        tools_resolved_ = true;
+        const ExternalTools::Locations& locations = ExternalTools::CurrentLocations();
+        ffmpeg_tool_ = ExternalTools::FindFfmpeg(locations);
+        timidity_tool_ = ExternalTools::FindTimidity(locations);
+        if (ffmpeg_tool_.usable) InstallLog::Get().Add("Using " + ffmpeg_tool_.version + " (" + ffmpeg_tool_.path + ")");
+        else{
+            InstallLog::Get().Add(
+              "[WARNING] FFmpeg can't be used, so the sound effects and the music will not be converted (the "
+              "extracted .wav and .mid files are left in place): " + ffmpeg_tool_.problem
+            );
+        }
+        if (timidity_tool_.usable) InstallLog::Get().Add("Using " + timidity_tool_.version + " (" + timidity_tool_.path + ")");
+        else{
+            InstallLog::Get().Add(
+              "[WARNING] TiMidity can't be used, so the music will not be converted (the extracted .mid files are "
+              "left in place): " + timidity_tool_.problem
+            );
+        }
+    }
+    return ffmpeg_tool_.usable && (!need_timidity || timidity_tool_.usable);
+}
+
+void MediaDataInstaller::RunConversion(
+  const std::string& description, std::function<bool(std::string*)> job, std::function<void()> on_success
+){
+    if (!conversions_) conversions_ = std::make_unique<TaskPool>();
+    conversions_->Run([description, job, on_success](){
+        std::string error;
+        if (job(&error)){
+            if (on_success) on_success();
+        }
+        else{
+            // The source file is kept, since it hasn't been converted.
+            InstallLog::Get().Add("[WARNING] Could not convert " + description + ": " + error);
+        }
+    });
+}
+
+void MediaDataInstaller::WaitForConversions(){
+    if (conversions_) conversions_->Wait();
 }
 
 void MediaDataInstaller::WriteMusicsIndex(){
@@ -1472,6 +1535,8 @@ void MediaDataInstaller::WriteMusicsIndex(){
     std::unique_ptr<TiXmlElement> container(new TiXmlElement("musics"));
     for (int id = 0; id < musics_.size(); id ++){
         std::string path = musics_[id];
+        // A track that could not be converted has no file, and listing it would make the game look for it.
+        if (!boost::filesystem::exists(data_dir_ + path)) continue;
         std::unique_ptr<TiXmlElement> xml_music(new TiXmlElement("music"));
         xml_music->SetAttribute("file_name", path);
         xml_music->SetAttribute("name", id);
@@ -1523,7 +1588,7 @@ void MediaDataInstaller::WriteMusicsIndex(){
         }
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(output_dir_ + "audio/musics/_musics.xml");
+    xml.SaveFile(data_dir_ + "audio/musics/_musics.xml");
 }
 
 int MediaDataInstaller::InstallVideosInit(){
@@ -1545,7 +1610,7 @@ int MediaDataInstaller::InstallVideosInit(){
 
 void MediaDataInstaller::InstallVideos(){
     if (processed_videos_ < 0 || processed_videos_ >= videos_.size()) return;
-    const std::string output_dir = output_dir_ + "video/";
+    const std::string output_dir = data_dir_ + "video/";
     boost::filesystem::create_directories(output_dir);
     const boost::filesystem::path source(videos_[processed_videos_]);
     const boost::filesystem::path destination = boost::filesystem::path(output_dir) / source.filename();

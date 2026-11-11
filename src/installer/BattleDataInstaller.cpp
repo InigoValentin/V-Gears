@@ -24,6 +24,7 @@
 #include <boost/filesystem.hpp>
 #include <OgreMesh.h>
 #include "BattleDataInstaller.h"
+#include "ModelMaterials.h"
 #include "TexFile.h"
 #include "data/VGearsHRCFileManager.h"
 #include "data/VGearsAFileManager.h"
@@ -36,7 +37,7 @@
 BattleDataInstaller::BattleDataInstaller(
   const DiskImage& disk_image, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr
 ):
-  disk_image_(disk_image), output_dir_(output_dir),
+  disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "data/"),
   scene_bin_(*const_cast<DiskImage&>(disk_image).filePath("data/battle/scene.bin")), total_scenes_(0), next_scene_(0),
   res_mgr_(res_mgr)
 {}
@@ -257,7 +258,7 @@ unsigned int BattleDataInstaller::ProcessBattleModel(){
           output_dir_ + "temp/battle_models/" + battle_lgp_file_names_[next_model_to_process_] + ".tex"
         );
         TexFile tex(battle_lgp_files_[next_model_to_process_]);
-        std::string path = output_dir_ + "models/battle/";
+        std::string path = data_dir_ + "models/battle/";
         if (info.is_player){
             path += "characters/";
             // Add or update on character_data_
@@ -418,13 +419,13 @@ unsigned int BattleDataInstaller::ProcessSpellModel(){
         // add them to a particular model.
         magic_lgp_files_[next_model_to_process_].WriteFile(output_dir_ + "temp/spell_models/" + fname);
         TexFile tex(output_dir_ + "temp/spell_models/" + fname);
-        std::string path = output_dir_ + "models/battle/attacks/" + id + ".png";
+        std::string path = data_dir_ + "models/battle/attacks/" + id + ".png";
         // Many of these tex files are wrong and dummied out in the OG, so try/catch.
         try{
             tex.SavePng(path);
         }
         catch(const std::exception& e){
-            std::cerr << "Error converting texture " << (output_dir_ + "temp/spell_models/" + fname)
+            std::cerr << "[WARNING] Error converting texture " << (output_dir_ + "temp/spell_models/" + fname)
               << " to png: " << e.what() << std::endl;
         }
     }
@@ -494,7 +495,7 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
 
         if ("" != model.script){ // Skip non scripted models
             AbFile ab(File(output_dir_ + "temp/battle_models/" + model.script), info.is_enemy);
-            ab.GenerateScripts(model.id + "_" + info.name_normal, output_dir_ + "scripts/battle_models/");
+            ab.GenerateScripts(model.id + "_" + info.name_normal, data_dir_ + "scripts/battle_models/");
         }
 
         // Reload the resources for the newly created hrc and rsd.
@@ -718,7 +719,7 @@ void BattleDataInstaller::WriteEnemies(){
         }
         xml.LinkEndChild(container.release());
         std::string file_name = BuildEnemyFileName(enemy);
-        xml.SaveFile(output_dir_ + file_name);
+        xml.SaveFile(data_dir_ + file_name);
         enemy_map_[enemy.id] = file_name;
 
     }
@@ -865,7 +866,7 @@ void BattleDataInstaller::WriteAttacks(){
         container->LinkEndChild(anim.release());
         xml.LinkEndChild(container.release());
         std::string file_name = BuildAttackFileName(attack);
-        xml.SaveFile(output_dir_ + file_name);
+        xml.SaveFile(data_dir_ + file_name);
         attack_map_[attack.id] = file_name;
     }
     // Index of the attack files by ID, as file names include the attack name.
@@ -879,7 +880,7 @@ void BattleDataInstaller::WriteAttacks(){
         attacks->LinkEndChild(xml_attack.release());
     }
     index.LinkEndChild(attacks.release());
-    index.SaveFile(output_dir_ + "gamedata/attack/_index.xml");
+    index.SaveFile(data_dir_ + "gamedata/attack/_index.xml");
 }
 
 void BattleDataInstaller::WriteFormations(){
@@ -945,7 +946,7 @@ void BattleDataInstaller::WriteFormations(){
         std::string file_name = std::to_string(formation.id);
         while (file_name.length() < 4) file_name = "0" + file_name;
         file_name = "gamedata/formation/" + file_name + ".xml";
-        xml.SaveFile(output_dir_ + file_name);
+        xml.SaveFile(data_dir_ + file_name);
         formation_map_[formation.id] = file_name;
     }
 }
@@ -965,7 +966,7 @@ void BattleDataInstaller::WriteCharacterData(){
         container->LinkEndChild(xml_character.release());
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(output_dir_ + "models/battle/characters.xml");
+    xml.SaveFile(data_dir_ + "models/battle/characters.xml");
 }
 
 void BattleDataInstaller::WriteSceneData(){
@@ -979,7 +980,7 @@ void BattleDataInstaller::WriteSceneData(){
         container->LinkEndChild(xml_scene.release());
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(output_dir_ + "models/battle/scenes.xml");
+    xml.SaveFile(data_dir_ + "models/battle/scenes.xml");
 }
 
 std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){
@@ -1086,20 +1087,19 @@ File* BattleDataInstaller::ExtractGZipScene(File file){
 void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
     VGears::String base_mesh_name;
     VGears::StringUtil::splitFull(mesh->getName(), base_mesh_name);
+    MakeMaterialsUnique(mesh, outdir + base_mesh_name);
     Ogre::MeshSerializer mesh_serializer;
     Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
     Ogre::SkeletonSerializer skeleton_serializer;
     skeleton_serializer.exportSkeleton(
-      skeleton.get(), output_dir_ + "models/battle/" + outdir + base_mesh_name + ".skeleton"
+      skeleton.get(), data_dir_ + "models/battle/" + outdir + base_mesh_name + ".skeleton"
     );
     mesh->setSkeletonName(outdir + base_mesh_name + ".skeleton");
-    mesh_serializer.exportMesh(mesh.get(), output_dir_ + "models/battle/" + outdir + mesh->getName());
+    mesh_serializer.exportMesh(mesh.get(), data_dir_ + "models/battle/" + outdir + mesh->getName());
     Ogre::MaterialSerializer mat_ser;
     std::set<std::string> textures;
     Ogre::Mesh::SubMeshList sub_meshes = mesh->getSubMeshes();
     for (Ogre::SubMesh* sub_mesh : sub_meshes){
-        // Change material name to avoid conflicts with field model materials.
-        sub_mesh->setMaterialName(sub_mesh->getMaterialName());
         Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName()));
         if (mat == nullptr) continue;
         for (size_t techs = 0; techs < mat->getNumTechniques(); techs ++){
@@ -1127,7 +1127,7 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
             battle_materials_.push_back(sub_mesh->getMaterialName());
         }
     }
-    mat_ser.exportQueued(output_dir_ + "models/battle/" + outdir + base_mesh_name + VGears::EXT_MATERIAL);
+    mat_ser.exportQueued(data_dir_ + "models/battle/" + outdir + base_mesh_name + VGears::EXT_MATERIAL);
 }
 
 void BattleDataInstaller::GenerateRsdFiles(BattleModel model, std::string path){

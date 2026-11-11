@@ -343,6 +343,11 @@ class WorldInstaller{
         std::string output_dir_;
 
         /**
+         * Directory where the game data is installed (<install dir>/data/).
+         */
+        std::string data_dir_;
+
+        /**
          * If true, original files will not be deleted after conversion.
          */
         bool keep_originals_;

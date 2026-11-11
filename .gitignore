@@ -25,5 +25,8 @@ doc/FFVII/RAW/
 .cproject
 .directory
 v-gears-new*.png
-/.vscode/c_cpp_properties.json
+.vscode
 src/installer/MainWindow.ui.autosave
+
+# Generated from MainWindow.ui at build time.
+src/installer/ui_MainWindow.h

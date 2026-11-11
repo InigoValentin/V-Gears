@@ -16,6 +16,8 @@
 #include <QtCore/QDir>
 #include <boost/filesystem.hpp>
 #include "DataInstaller.h"
+#include "InstallLayout.h"
+#include "InstallLog.h"
 #include "DiskImage.h"
 
 float DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
@@ -29,7 +31,7 @@ DataInstaller::DataInstaller(
 #else
   : application_("plugins.cfg", "resources.cfg", "install.log"),
 #endif
-  disk_image_(disk_image), output_dir_(output_dir),
+  disk_image_(disk_image), output_dir_(output_dir), data_dir_(InstallLayout::DataDir(output_dir)),
   options_(options), write_output_line_(write_output_line)
 {
     if (!application_.initOgre(true)) throw std::runtime_error("Ogre init failure");
@@ -54,7 +56,34 @@ DataInstaller::DataInstaller(
 
 DataInstaller::~DataInstaller(){}
 
+const char* DataInstaller::StepGroup(int state){
+    if (state >= FIELD_CONVERT_MODELS_INIT && state <= FIELD_CONVERT_MODELS)
+        return "Field models";
+    if (state >= FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT && state <= FIELD_WRITE_END)
+        return "Field maps";
+    if (state == WM_MODELS) return "World map models";
+    if (state >= WM_INIT && state <= WM_MAPS) return "World map";
+    if (state >= MEDIA_VIDEOS && state < FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT)
+        return "Videos";
+    if (state >= MEDIA_MUSICS_INIT && state < MEDIA_VIDEOS) return "Music";
+    if (state >= MEDIA_SOUNDS_INIT && state < MEDIA_MUSICS_INIT) return "Sounds";
+    if (state == MEDIA_IMAGES) return "Images";
+    if (state >= KERNEL_PRICES && state < MEDIA_IMAGES) return "Kernel data";
+    if (state >= SPELL_MODELS_INIT && state < KERNEL_PRICES) return "Spell models";
+    if (state >= BATTLE_MODELS_INIT && state < SPELL_MODELS_INIT) return "Battle models";
+    if (state >= BATTLE_SCENES_INIT && state < BATTLE_MODELS_INIT) return "Battle data";
+    if (state == CLEAN) return "Cleanup";
+    return "Preparation";
+}
+
 float DataInstaller::Progress(){
+    // Report each part of the installation separately in the log.
+    const char* group = StepGroup(installation_state_);
+    if (current_group_ != group){
+        current_group_ = group;
+        InstallLog::Get().BeginStep(group);
+    }
+    if (installation_state_ == DONE) InstallLog::Get().EndStep();
     switch (installation_state_){
         case IDLE:
             installation_state_ = CREATE_DIRECTORIES;
@@ -70,7 +99,7 @@ float DataInstaller::Progress(){
             if (input_dir.empty()) throw std::runtime_error("Input data directory is empty");
             kernel_installer_ = std::make_unique<KernelDataInstaller>(disk_image_);
             media_installer_ = std::make_unique<MediaDataInstaller>(
-              disk_image_, output_dir_, options_.keep_originals, options_.ffmpeg, options_.timidity
+              disk_image_, output_dir_, options_.keep_originals
             );
                         field_installer_ = std::make_unique<FieldDataInstaller>(
                             disk_image_, output_dir_, [this](std::string log_message){
@@ -191,73 +220,73 @@ float DataInstaller::Progress(){
         case KERNEL_COMMANDS:
             write_output_line_("Extracting command data...", 2, true);
             kernel_installer_->ReadCommands();
-            kernel_installer_->WriteCommands(output_dir_ + "gamedata/commands.lua");
+            kernel_installer_->WriteCommands(data_dir_ + "gamedata/commands.lua");
             installation_state_ = KERNEL_ATTACKS;
             return CalcProgress();
         case KERNEL_ATTACKS:
             write_output_line_("Extracting attack data...", 2, true);
             kernel_installer_->ReadAttacks();
-            kernel_installer_->WriteAttacks(output_dir_ + "gamedata/attacks.lua");
+            kernel_installer_->WriteAttacks(data_dir_ + "gamedata/attacks.lua");
             installation_state_ = KERNEL_CHARACTERS;
             return CalcProgress();
         case KERNEL_CHARACTERS:
             write_output_line_("Extracting character data...", 2, true);
             kernel_installer_->ReadCharacters();
-            kernel_installer_->WriteCharacters(output_dir_ + "gamedata/characters.lua");
+            kernel_installer_->WriteCharacters(data_dir_ + "gamedata/characters.lua");
             installation_state_ = KERNEL_ITEMS;
             return CalcProgress();
         case KERNEL_ITEMS:
             write_output_line_("Extracting item data...", 2, true);
             kernel_installer_->ReadItems();
-            kernel_installer_->WriteItems(output_dir_ + "gamedata/items.lua");
+            kernel_installer_->WriteItems(data_dir_ + "gamedata/items.lua");
             installation_state_ = KERNEL_GROWTH;
             return CalcProgress();
         case KERNEL_GROWTH:
             write_output_line_("Extracting growth data...", 2, true);
             kernel_installer_->ReadGrowth();
-            kernel_installer_->WriteGrowth(output_dir_ + "gamedata/growth.lua");
+            kernel_installer_->WriteGrowth(data_dir_ + "gamedata/growth.lua");
             installation_state_ = KERNEL_WEAPONS;
             return CalcProgress();
         case KERNEL_WEAPONS:
             write_output_line_("Extracting weapon data...", 2, true);
             kernel_installer_->ReadWeapons();
-            kernel_installer_->WriteWeapons(output_dir_ + "gamedata/weapons.lua");
+            kernel_installer_->WriteWeapons(data_dir_ + "gamedata/weapons.lua");
             installation_state_ = KERNEL_ARMORS;
             return CalcProgress();
         case KERNEL_ARMORS:
             write_output_line_("Extracting armor data...", 2, true);
             kernel_installer_->ReadArmors();
-            kernel_installer_->WriteArmors(output_dir_ + "gamedata/armors.lua");
+            kernel_installer_->WriteArmors(data_dir_ + "gamedata/armors.lua");
             installation_state_ = KERNEL_ACCESSORIES;
             return CalcProgress();
         case KERNEL_ACCESSORIES:
             write_output_line_("Extracting accessory data...", 2, true);
             kernel_installer_->ReadAccessories();
-            kernel_installer_->WriteAccessories(output_dir_ + "gamedata/accessories.lua");
+            kernel_installer_->WriteAccessories(data_dir_ + "gamedata/accessories.lua");
             installation_state_ = KERNEL_MATERIA;
             return CalcProgress();
         case KERNEL_MATERIA:
             write_output_line_("Extracting materia data...", 2, true);
             kernel_installer_->ReadMateria();
-            kernel_installer_->WriteMateria(output_dir_ + "gamedata/materia.lua");
+            kernel_installer_->WriteMateria(data_dir_ + "gamedata/materia.lua");
             installation_state_ = KERNEL_KEY_ITEMS;
             return CalcProgress();
         case KERNEL_KEY_ITEMS:
             write_output_line_("Extracting key item data...", 2, true);
             kernel_installer_->ReadKeyItems();
-            kernel_installer_->WriteKeyItems(output_dir_ + "gamedata/key_items.lua");
+            kernel_installer_->WriteKeyItems(data_dir_ + "gamedata/key_items.lua");
             installation_state_ = KERNEL_SUMMON_NAMES;
             return CalcProgress();
         case KERNEL_SUMMON_NAMES:
             write_output_line_("Extracting summon attack names data...", 2, true);
             kernel_installer_->ReadSummonNames();
-            kernel_installer_->WriteSummonNames(output_dir_ + "gamedata/summons.lua");
+            kernel_installer_->WriteSummonNames(data_dir_ + "gamedata/summons.lua");
             installation_state_ = KERNEL_SAVEMAP;
             return CalcProgress();
         case KERNEL_SAVEMAP:
             write_output_line_("Extracting the initial savemap...", 2, true);
             kernel_installer_->ReadInitialSaveMap();
-            kernel_installer_->WriteInitialSaveMap(output_dir_ + "gamedata/initial_savemap.lua");
+            kernel_installer_->WriteInitialSaveMap(data_dir_ + "gamedata/initial_savemap.lua");
             installation_state_ = MEDIA_IMAGES;
             return CalcProgress();
         case MEDIA_IMAGES:
@@ -288,8 +317,7 @@ float DataInstaller::Progress(){
             else cur_substep_ ++;
             return CalcProgress();
         case MEDIA_SOUNDS_INDEX:
-            write_output_line_("Building sound index...", 2, true);
-            media_installer_->WriteSoundIndex();
+            // The index is written when the conversions, which run in the background, have finished.
             installation_state_ = MEDIA_MUSICS_INIT;
             return CalcProgress();
         case MEDIA_MUSICS_INIT:
@@ -315,8 +343,7 @@ float DataInstaller::Progress(){
             installation_state_ = MEDIA_MUSICS_INDEX;
             return CalcProgress();
         case MEDIA_MUSICS_INDEX:
-            write_output_line_("Building music track index...", 2, true);
-            media_installer_->WriteMusicsIndex();
+            // The index is written when the conversions, which run in the background, have finished.
             installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
             return CalcProgress();
         case MEDIA_VIDEOS:
@@ -332,12 +359,14 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT:
             // Skip fields if option is set.
-            if (!options_.fields){
+            if (!options_.fields && !options_.wm){
                 write_output_line_("Skipping field maps installation...", 2, true);
                 installation_state_ = WM_INIT;
                 return CalcProgress();
             }
-            write_output_line_("Collecting spawn points and scale factors...", 2, true);
+            // The world map scripts need the field list and scale factors even if the fields aren't converted.
+            if (!options_.fields) write_output_line_("Collecting field data for the world map...", 2, true);
+            else write_output_line_("Collecting spawn points and scale factors...", 2, true);
             substeps_ = field_installer_->CollectSpawnAndScaleFactorsInit(application_.ResMgr());
             cur_substep_ = 0;
             installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS;
@@ -346,8 +375,14 @@ float DataInstaller::Progress(){
             field_installer_->CollectSpawnAndScaleFactors(cur_substep_);
             cur_substep_ ++;
             if (cur_substep_ == substeps_){
-                installation_state_ = FIELD_CONVERT;
                 cur_substep_ = 0;
+                if (options_.fields) installation_state_ = FIELD_CONVERT;
+                else{
+                    // Fields are not converted: use the ones already installed.
+                    write_output_line_("Skipping field maps installation...", 2, true);
+                    field_installer_->LoadInstalledFields();
+                    installation_state_ = WM_INIT;
+                }
             }
             return CalcProgress();
         case FIELD_CONVERT:
@@ -436,6 +471,20 @@ float DataInstaller::Progress(){
             installation_state_ = CLEAN;
             return CalcProgress();
         case CLEAN:
+            // The audio conversions run in the background while the other steps are done.
+            if (media_installer_){
+                write_output_line_("Waiting for the audio conversions to finish...", 2, true);
+                media_installer_->WaitForConversions();
+                // Now the files that exist are known, so the indexes list only those.
+                if (options_.sounds){
+                    write_output_line_("Building sound index...", 2, true);
+                    media_installer_->WriteSoundIndex();
+                }
+                if (options_.music){
+                    write_output_line_("Building music track index...", 2, true);
+                    media_installer_->WriteMusicsIndex();
+                }
+            }
             write_output_line_("Cleaning up...", 2, true);
             if (!options_.keep_originals) CleanInstall();
             installation_state_ = DONE;
@@ -467,75 +516,45 @@ const float DataInstaller::CalcProgress(){
 }
 
 void DataInstaller::CreateDirectories(){
-    CreateDir("audio/musics");
-    CreateDir("audio/sounds");
-    CreateDir("fields");
-    CreateDir("fonts");
-    CreateDir("temp");
-    CreateDir("temp/char");
-    CreateDir("temp/battle_models");
-    CreateDir("temp/world_models");
-    CreateDir("temp/spell_models");
-    CreateDir("temp/wm");
-    CreateDir("gamedata");
-    CreateDir("gamedata/enemy");
-    CreateDir("gamedata/attack");
-    CreateDir("gamedata/formation");
-    CreateDir("images/icons");
-    CreateDir("images/other");
-    CreateDir("images/characters");
-    CreateDir("images/fonts");
-    CreateDir("images/reels");
-    CreateDir("images/window");
-    CreateDir("screens");
-    CreateDir("scripts");
-    CreateDir("scripts/battle_models");
-    CreateDir("system");
-    CreateDir("texts");
-    CreateDir("models/fields/");
-    CreateDir("models/battle/characters");
-    CreateDir("models/battle/scenes");
-    CreateDir("models/battle/enemies");
-    CreateDir("models/battle/attacks");
-    CreateDir("models/world/terrain/0");
-    CreateDir("models/world/terrain/1");
-    CreateDir("models/world/terrain/2");
-    CreateDir("models/world/elements/");
-    CreateDir("world/0");
-    CreateDir("world/1");
-    CreateDir("world/2");
+    for (const std::string& dir : InstallLayout::DataSubdirs()) CreateDir(dir);
+    CreateDir("temp", true);
+    for (const std::string& dir : InstallLayout::TempSubdirs()) CreateDir("temp/" + dir, true);
 
     application_.ResMgr()->addResourceLocation(output_dir_ + "temp/char/", "FileSystem", "FFVII", true, true);
     application_.ResMgr()->addResourceLocation(output_dir_ + "temp/battle_models/", "FileSystem", "FFVII", true, true);
     application_.ResMgr()->addResourceLocation(output_dir_ + "temp/world_models/", "FileSystem", "FFVII", true, true);
-    application_.ResMgr()->addResourceLocation(output_dir_ + "models/", "FileSystem", "FFVII", true, true);
+    application_.ResMgr()->addResourceLocation(data_dir_ + "models/", "FileSystem", "FFVII", true, true);
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/fields/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "models/fields/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/battle/characters/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "models/battle/characters/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/battle/scenes/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "models/battle/scenes/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/battle/enemies/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "models/battle/enemies/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/battle/attacks/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "models/battle/attacks/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      output_dir_ + "models/world/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "models/world/", "FileSystem", "FFVIITextures", true, true
     );
     const auto fields_lgp_path = disk_image_.filePath("data/field/flevel.lgp");
     if (!fields_lgp_path) throw std::runtime_error("Missing required file: data/field/flevel.lgp");
     fields_lgp_ = std::make_unique<ScopedLgp>(application_.getRoot(), *fields_lgp_path, "LGP", "FFVIIFields");
 }
 
-void DataInstaller::CleanInstall(){boost::filesystem::remove_all(output_dir_ + "data/temp/");}
+void DataInstaller::CleanInstall(){
+    // The game itself reads some of the temp directories, so only the rest are removed.
+    for (const std::string& dir : InstallLayout::RemovableTempSubdirs())
+        boost::filesystem::remove_all(InstallLayout::TempDir(output_dir_) + dir + "/");
+}
 
-void DataInstaller::CreateDir(const std::string& path){
-    QString target = QString::fromStdString(output_dir_ + path);
+void DataInstaller::CreateDir(const std::string& path, bool in_root){
+    QString target = QString::fromStdString((in_root ? output_dir_ : data_dir_) + path);
     QDir dir(target);
     if (!dir.mkpath(".")) throw std::runtime_error("Failed to mkpath");
 }

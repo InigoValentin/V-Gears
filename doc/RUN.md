@@ -12,6 +12,8 @@ cd ~/.v-gears/;
 
 ```
 
+The data installer also has a **Launch game** button, which starts the engine from the installation directory.
+
 ## Key Mappings
 
 Here is a list of key mappings, adapted from the PSX version of the game:

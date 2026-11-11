@@ -357,6 +357,13 @@ class FieldDataInstaller{
         );
 
         /**
+         * Fills the converted field list with the fields already installed in the data directory.
+         *
+         * Used when the fields are not converted in this run but other steps (like the world map scripts) need them.
+         */
+        void LoadInstalledFields();
+
+        /**
          * Installer destructor.
          */
         ~FieldDataInstaller();
@@ -623,6 +630,11 @@ class FieldDataInstaller{
          * The path to the directory where to save the V-Gears data.
          */
         std::string output_dir_;
+
+        /**
+         * Directory where the game data is installed (<install dir>/data/).
+         */
+        std::string data_dir_;
 
         /**
          * Helper variable to indicate internal progress of installation steps.
