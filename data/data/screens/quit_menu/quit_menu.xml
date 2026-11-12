@@ -1,0 +1,15 @@
+<screen name="QuitMenu" script="scripts/menu/quit_menu.lua" visible="false">
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Confirm" x="50" y="80" width="220" height="70" visible="true">
+            <prototype name="Window" />
+            <text_area name="Line1" text_name="QuitMenuLine1" x="12" y="8" font="FFVIIFont" visible="true" />
+            <text_area name="Line2" text_name="QuitMenuLine2" x="12" y="22" font="FFVIIFont" visible="true" />
+            <text_area name="Yes" text_name="Yes" x="95" y="38" font="FFVIIFont" visible="true" />
+            <text_area name="No" text_name="No" x="95" y="50" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="icons/cursor.png" x="68" y="36" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:36" />
+                <animation name="Position2" length="0" y="0:48" />
+            </sprite>
+        </widget>
+    </widget>
+</screen>

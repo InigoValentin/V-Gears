@@ -24,6 +24,7 @@
 #include "EntityManager.h"
 #include "BattleManager.h"
 #include "AudioManager.h"
+#include "InputManager.h"
 #include "SavemapHandler.h"
 #include "Timer.h"
 #include "UiManager.h"
@@ -203,6 +204,7 @@ void ScriptManager::InitBinds(){
       "unset_player_entity", &EntityManager::ScriptUnsetPlayerEntity,
       "player_lock", &EntityManager::ScriptPlayerLock,
       "is_player_locked", &EntityManager::IsPlayerLocked,
+      "set_player_default_run", &EntityManager::SetPlayerDefaultRun,
       "random_encounters_on", &EntityManager::SetRandomEncounters,
       "set_encounter_table", &EntityManager::ScriptSetEncounterTable,
       "roll_encounter_battle", &EntityManager::ScriptRollEncounterBattle,
@@ -335,7 +337,18 @@ void ScriptManager::InitBinds(){
       "get_track_id", &AudioManager::ScriptGetTrack,
       "get_battle_track_id", &AudioManager::ScriptGetBattleTrack,
       "set_battle_track_id", &AudioManager::ScriptSetBattleTrack,
-      "play_music_once", &AudioManager::ScriptPlayMusicOnce
+      "play_music_once", &AudioManager::ScriptPlayMusicOnce,
+      "set_music_volume", &AudioManager::ScriptSetMusicVolume,
+      "set_sound_volume", &AudioManager::ScriptSetSoundVolume
+    );
+
+    // Commands for the input manager (controller settings).
+    lua.new_usertype<InputManager>(
+      "InputManager",
+      "set_game_event_keys", &InputManager::ScriptSetGameEventKeys,
+      "get_game_event_keys", &InputManager::ScriptGetGameEventKeys,
+      "get_default_game_event_keys", &InputManager::ScriptGetDefaultGameEventKeys,
+      "capture_next_key", &InputManager::ScriptCaptureNextKey
     );
 
     // Commands for the camera manager.
@@ -527,6 +540,7 @@ void ScriptManager::InitBinds(){
       ),
       "set_default_animation", &UiWidget::ScriptSetDefaultAnimation,
       "set_colour", &UiWidget::SetColour,
+      "set_colours", &UiWidget::SetColours,
       "set_alpha", &UiWidget::SetAlpha,
       "set_x", &UiWidget::SetX,
       "set_y", &UiWidget::SetY,
@@ -544,7 +558,8 @@ void ScriptManager::InitBinds(){
     // UI manager commands. Use to get a specific widget.
     lua.new_usertype<UiManager>(
       "UiManager",
-      "get_widget", &UiManager::ScriptGetWidget
+      "get_widget", &UiManager::ScriptGetWidget,
+      "set_window_colours", &UiManager::SetWindowColours
     );
 
     // Timer command. To show a in-game timer.
@@ -584,6 +599,7 @@ void ScriptManager::InitBinds(){
     );
 
     // Register all command handlers
+    lua["input_manager"] = InputManager::getSingletonPtr();
     lua["camera_manager"] = CameraManager::getSingletonPtr();
     lua["entity_manager"] = EntityManager::getSingletonPtr();
     lua["battle_manager"] = BattleManager::getSingletonPtr();

@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <map>
 #include <vector>
 #include <OgreSingleton.h>
 #include <OgreString.h>
@@ -185,6 +186,60 @@ class InputManager : public Manager, public Ogre::Singleton<InputManager>{
         void BindGameEvent(const Ogre::String& event, const ButtonList& buttons);
 
         /**
+         * Replaces all the keys bound to a game event.
+         *
+         * To be called from Lua scripts (controller setting of the config menu) and from the
+         * console command "set_game_event_keys".
+         *
+         * @param[in] event The game event.
+         * @param[in] keys Key names separated by commas (for example "Enter,Space"). Each one can
+         * be a combination of keys joined with '+' (for example "LCtrl+X"). If empty, the event is
+         * left with no keys.
+         */
+        void ScriptSetGameEventKeys(const char* event, const char* keys);
+
+        /**
+         * Gets the keys bound to a game event.
+         *
+         * @param[in] event The game event.
+         * @return Key names separated by commas, like the ones taken by ScriptSetGameEventKeys.
+         * Empty if the event has no keys.
+         */
+        std::string ScriptGetGameEventKeys(const char* event) const;
+
+        /**
+         * Makes the next key that is pressed be reported to the scripts as the game event
+         * "KEY_CAPTURE" (the name of the key is the third argument of on_button), instead of
+         * doing what it is bound to. To be called from Lua scripts, to let the player choose a
+         * key.
+         */
+        void ScriptCaptureNextKey();
+
+        /**
+         * Binds the directions of the menus (game events "Up", "Down", "Left" and "Right") to the
+         * arrow keys, if the configuration doesn't bind them.
+         */
+        void EnsureDefaultGameEvents();
+
+        /**
+         * Remembers the keys that every game event has now as its default keys.
+         *
+         * To be called once the configuration file was read, and before the keys chosen by the
+         * player are applied. See ScriptGetDefaultGameEventKeys.
+         */
+        void SnapshotDefaultGameEvents();
+
+        /**
+         * Gets the default keys of a game event: the ones it had when SnapshotDefaultGameEvents was
+         * called. To be called from Lua scripts, to restore the default keys.
+         *
+         * @param[in] event The game event.
+         * @return Key names separated by commas, like the ones of ScriptGetGameEventKeys. Empty if
+         * the event had no keys.
+         */
+        std::string ScriptGetDefaultGameEventKeys(const char* event) const;
+
+        /**
          * Activates all bindings for a button.
          *
          * @param[in] button ID of the button.
@@ -302,5 +357,15 @@ class InputManager : public Manager, public Ogre::Singleton<InputManager>{
          * List of game event bindings.
          */
         std::vector<BindGameEventInfo> bind_game_events_;
+
+        /**
+         * Indicates if the next key pressed must be captured for the scripts.
+         */
+        bool capture_next_key_ = false;
+
+        /**
+         * Default keys of the game events (see SnapshotDefaultGameEvents), by event.
+         */
+        std::map<Ogre::String, std::string> default_game_event_keys_;
 };
 

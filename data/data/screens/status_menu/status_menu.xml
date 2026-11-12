@@ -1,0 +1,241 @@
+<screen name="StatusMenu" script="scripts/menu/status_menu.lua" visible="false">
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Character" width="100%" height="70" visible="true">
+            <prototype name="Window" />
+            <sprite name="Portrait" image="other/choco.png" x="10" y="12" width="42" height="48" visible="true" />
+            <widget name="Data" x="66" y="14" width="100%-66" height="100%-14" visible="true">
+                <prototype name="MenuCharacterData" />
+            </widget>
+            <text_area name="ExpLbl" text_name="StatusMenuExp" x="170" y="6" font="FFVIIFont" visible="true" />
+            <text_area name="Exp" x="220" y="8" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="NextLevelBar" image="icons/menu_bar.png" x="180" y="19" width="56" height="8" visible="true" />
+            <sprite name="NextLevelLinePart1" x="181" y="20" width="20" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.125, 0.5 0.125 0.125" alpha="0.8" visible="false" />
+            <sprite name="NextLevelLinePart2" x="181" y="23" width="20" height="3" colours="0.5 0.125 0.125, 0.5 0.125 0.125, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+            <text_area name="NextLbl" text_name="StatusMenuNextLevel" x="170" y="32" font="FFVIIFont" visible="true" />
+            <text_area name="Next" x="220" y="34" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="LimitLbl" text_name="StatusMenuLimitLevel" x="170" y="47" font="FFVIIFont" visible="true" />
+            <text_area name="LimitLevel" x="230" y="49" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="LimitLevelBar" image="icons/menu_bar.png" x="259" y="48" width="56" height="8" visible="true" />
+            <sprite name="LimitLinePart1" x="260" y="49" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
+            <sprite name="LimitLinePart2" x="260" y="52" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+        </widget>
+        <widget name="Title" x="100%-70" y="0" width="70" height="22" visible="true">
+            <prototype name="Window" />
+            <text_area name="Title" text_name="StatusMenuTitle" x="12" y="5" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Page1" x="0" y="70" width="100%" height="100%-70" visible="true">
+            <widget name="Body" x="0" y="0" width="100%" height="100%" visible="true">
+                <prototype name="Window" />
+            </widget>
+            <widget name="Attributes" x="0" y="0" width="150" height="100%" visible="true">
+                <text_area name="StrLbl" text_name="StatusMenuStr" x="28" y="8" font="FFVIIFont" visible="true" />
+                <text_area name="Str" x="100" y="9" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DexLbl" text_name="StatusMenuDex" x="28" y="20" font="FFVIIFont" visible="true" />
+                <text_area name="Dex" x="100" y="21" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="VitLbl" text_name="StatusMenuVit" x="28" y="32" font="FFVIIFont" visible="true" />
+                <text_area name="Vit" x="100" y="33" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="MagLbl" text_name="StatusMenuMag" x="28" y="44" font="FFVIIFont" visible="true" />
+                <text_area name="Mag" x="100" y="45" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="SprLbl" text_name="StatusMenuSpr" x="28" y="56" font="FFVIIFont" visible="true" />
+                <text_area name="Spr" x="100" y="57" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="LckLbl" text_name="StatusMenuLck" x="28" y="68" font="FFVIIFont" visible="true" />
+                <text_area name="Lck" x="100" y="69" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkLbl" text_name="StatusMenuAttack" x="28" y="85" font="FFVIIFont" visible="true" />
+                <text_area name="Atk" x="100" y="86" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkPctLbl" text_name="StatusMenuAttackPct" x="28" y="97" font="FFVIIFont" visible="true" />
+                <text_area name="AtkPct" x="100" y="98" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="StatusMenuDefense" x="28" y="109" font="FFVIIFont" visible="true" />
+                <text_area name="Def" x="100" y="110" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefPctLbl" text_name="StatusMenuDefensePct" x="28" y="121" font="FFVIIFont" visible="true" />
+                <text_area name="DefPct" x="100" y="122" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="MAtkLbl" text_name="StatusMenuMagicAtk" x="28" y="133" font="FFVIIFont" visible="true" />
+                <text_area name="MAtk" x="100" y="134" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="MDefLbl" text_name="StatusMenuMagicDef" x="28" y="145" font="FFVIIFont" visible="true" />
+                <text_area name="MDef" x="100" y="146" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="MDefPctLbl" text_name="StatusMenuMagicDefPct" x="28" y="157" font="FFVIIFont" visible="true" />
+                <text_area name="MDefPct" x="100" y="158" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Equipment" x="0" y="0" width="100%" height="100%" visible="true">
+                <widget name="Wpn" x="0" y="85" width="100%" height="32" visible="true">
+                    <sprite name="Icon" image="icons/item_weapon_0.png" x="162" y="-3" width="18" height="18" visible="true" />
+                    <text_area name="Lbl" x="196" y="0" font="FFVIIFont" visible="true" />
+                    <widget name="Slots" x="188" y="17" width="120" height="14" visible="true">
+                        <sprite name="Slot1" image="icons/materia_slot.png" x="0" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Slot2" image="icons/materia_slot.png" x="15" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Link1" image="icons/materia_slot_link.png" x="10" y="0" width="8" height="14" visible="true"/>
+                        <sprite name="Slot3" image="icons/materia_slot.png" x="30" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Slot4" image="icons/materia_slot.png" x="45" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Link2" image="icons/materia_slot_link.png" x="40" y="0" width="8" height="14" visible="true"/>
+                        <sprite name="Slot5" image="icons/materia_slot.png" x="60" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Slot6" image="icons/materia_slot.png" x="75" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Link3" image="icons/materia_slot_link.png" x="70" y="0" width="8" height="14" visible="true"/>
+                        <sprite name="Slot7" image="icons/materia_slot.png" x="90" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Slot8" image="icons/materia_slot.png" x="105" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Link4" image="icons/materia_slot_link.png" x="100" y="0" width="8" height="14" visible="true"/>
+                        <sprite name="Mat1" image="icons/materia_3.png" x="2" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat2" image="icons/materia_3.png" x="17" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat3" image="icons/materia_3.png" x="32" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat4" image="icons/materia_3.png" x="47" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat5" image="icons/materia_3.png" x="62" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat6" image="icons/materia_3.png" x="77" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat7" image="icons/materia_3.png" x="92" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat8" image="icons/materia_3.png" x="107" y="2" width="10" height="10" visible="true"/>
+                    </widget>
+                </widget>
+                <widget name="Arm" x="0" y="118" width="100%" height="32" visible="true">
+                    <sprite name="Icon" image="icons/item_armor.png" x="162" y="-3" width="18" height="18" visible="true" />
+                    <text_area name="Lbl" x="196" y="0" font="FFVIIFont" visible="true" />
+                    <widget name="Slots" x="188" y="17" width="120" height="14" visible="true">
+                        <sprite name="Slot1" image="icons/materia_slot.png" x="0" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Slot2" image="icons/materia_slot.png" x="15" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Link1" image="icons/materia_slot_link.png" x="10" y="0" width="8" height="14" visible="true"/>
+                        <sprite name="Slot3" image="icons/materia_slot.png" x="30" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Slot4" image="icons/materia_slot.png" x="45" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Link2" image="icons/materia_slot_link.png" x="40" y="0" width="8" height="14" visible="true"/>
+                        <sprite name="Slot5" image="icons/materia_slot.png" x="60" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Slot6" image="icons/materia_slot.png" x="75" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Link3" image="icons/materia_slot_link.png" x="70" y="0" width="8" height="14" visible="true"/>
+                        <sprite name="Slot7" image="icons/materia_slot.png" x="90" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Slot8" image="icons/materia_slot.png" x="105" y="0" width="14" height="14" visible="true"/>
+                        <sprite name="Link4" image="icons/materia_slot_link.png" x="100" y="0" width="8" height="14" visible="true"/>
+                        <sprite name="Mat1" image="icons/materia_3.png" x="2" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat2" image="icons/materia_3.png" x="17" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat3" image="icons/materia_3.png" x="32" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat4" image="icons/materia_3.png" x="47" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat5" image="icons/materia_3.png" x="62" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat6" image="icons/materia_3.png" x="77" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat7" image="icons/materia_3.png" x="92" y="2" width="10" height="10" visible="true"/>
+                        <sprite name="Mat8" image="icons/materia_3.png" x="107" y="2" width="10" height="10" visible="true"/>
+                    </widget>
+                </widget>
+                <widget name="Acc" x="0" y="150" width="100%" height="14" visible="true">
+                    <sprite name="Icon" image="icons/item_accessory.png" x="162" y="-3" width="18" height="18" visible="true" />
+                    <text_area name="Lbl" x="196" y="0" font="FFVIIFont" visible="true" />
+                </widget>
+            </widget>
+        </widget>
+        <widget name="Page2" x="0" y="70" width="100%" height="100%-70" visible="false">
+            <widget name="Body" x="0" y="0" width="100%" height="100%" visible="true">
+                <prototype name="Window" />
+            </widget>
+            <widget name="Table" x="0" y="0" width="100%" height="100%" visible="true">
+                <text_area name="Heading" text_name="StatusMenuElement" x="8" y="3" font="FFVIIFont" visible="true" />
+                <widget name="Attack" x="28" y="26" width="100%-28" height="42" visible="true">
+                    <text_area name="Lbl" text_name="StatusMenuAttackGroup" x="0" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name1" x="62" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name2" x="122" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name3" x="182" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name4" x="62" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name5" x="122" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name6" x="182" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name7" x="62" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name8" x="122" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name9" x="182" y="28" font="FFVIIFont" visible="true" />
+                </widget>
+                <widget name="Halve" x="28" y="74" width="100%-28" height="42" visible="true">
+                    <text_area name="Lbl" text_name="StatusMenuHalve" x="0" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name1" x="62" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name2" x="122" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name3" x="182" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name4" x="62" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name5" x="122" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name6" x="182" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name7" x="62" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name8" x="122" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name9" x="182" y="28" font="FFVIIFont" visible="true" />
+                </widget>
+                <widget name="Invalid" x="28" y="122" width="100%-28" height="42" visible="true">
+                    <text_area name="Lbl" text_name="StatusMenuInvalid" x="0" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name1" x="62" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name2" x="122" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name3" x="182" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name4" x="62" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name5" x="122" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name6" x="182" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name7" x="62" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name8" x="122" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name9" x="182" y="28" font="FFVIIFont" visible="true" />
+                </widget>
+                <widget name="Absorb" x="28" y="170" width="100%-28" height="42" visible="true">
+                    <text_area name="Lbl" text_name="StatusMenuAbsorb" x="0" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name1" x="62" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name2" x="122" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name3" x="182" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name4" x="62" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name5" x="122" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name6" x="182" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name7" x="62" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name8" x="122" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name9" x="182" y="28" font="FFVIIFont" visible="true" />
+                </widget>
+            </widget>
+        </widget>
+        <widget name="Page3" x="0" y="70" width="100%" height="100%-70" visible="false">
+            <widget name="Body" x="0" y="0" width="100%" height="100%" visible="true">
+                <prototype name="Window" />
+            </widget>
+            <widget name="Table" x="0" y="0" width="100%" height="100%" visible="true">
+                <widget name="Attack" x="16" y="4" width="100%-16" height="98" visible="true">
+                    <text_area name="Lbl" text_name="StatusMenuAttackGroup" x="0" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Effect" text_name="StatusMenuEffect" x="0" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name1" x="46" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name2" x="132" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name3" x="218" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name4" x="304" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name5" x="46" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name6" x="132" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name7" x="218" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name8" x="304" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name9" x="46" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name10" x="132" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name11" x="218" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name12" x="304" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name13" x="46" y="42" font="FFVIIFont" visible="true" />
+                    <text_area name="Name14" x="132" y="42" font="FFVIIFont" visible="true" />
+                    <text_area name="Name15" x="218" y="42" font="FFVIIFont" visible="true" />
+                    <text_area name="Name16" x="304" y="42" font="FFVIIFont" visible="true" />
+                    <text_area name="Name17" x="46" y="56" font="FFVIIFont" visible="true" />
+                    <text_area name="Name18" x="132" y="56" font="FFVIIFont" visible="true" />
+                    <text_area name="Name19" x="218" y="56" font="FFVIIFont" visible="true" />
+                    <text_area name="Name20" x="304" y="56" font="FFVIIFont" visible="true" />
+                    <text_area name="Name21" x="46" y="70" font="FFVIIFont" visible="true" />
+                    <text_area name="Name22" x="132" y="70" font="FFVIIFont" visible="true" />
+                    <text_area name="Name23" x="218" y="70" font="FFVIIFont" visible="true" />
+                    <text_area name="Name24" x="304" y="70" font="FFVIIFont" visible="true" />
+                    <text_area name="Name25" x="46" y="84" font="FFVIIFont" visible="true" />
+                    <text_area name="Name26" x="132" y="84" font="FFVIIFont" visible="true" />
+                </widget>
+                <widget name="Defend" x="16" y="110" width="100%-16" height="98" visible="true">
+                    <text_area name="Lbl" text_name="StatusMenuDefend" x="0" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Effect" text_name="StatusMenuEffect" x="0" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name1" x="46" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name2" x="132" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name3" x="218" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name4" x="304" y="0" font="FFVIIFont" visible="true" />
+                    <text_area name="Name5" x="46" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name6" x="132" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name7" x="218" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name8" x="304" y="14" font="FFVIIFont" visible="true" />
+                    <text_area name="Name9" x="46" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name10" x="132" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name11" x="218" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name12" x="304" y="28" font="FFVIIFont" visible="true" />
+                    <text_area name="Name13" x="46" y="42" font="FFVIIFont" visible="true" />
+                    <text_area name="Name14" x="132" y="42" font="FFVIIFont" visible="true" />
+                    <text_area name="Name15" x="218" y="42" font="FFVIIFont" visible="true" />
+                    <text_area name="Name16" x="304" y="42" font="FFVIIFont" visible="true" />
+                    <text_area name="Name17" x="46" y="56" font="FFVIIFont" visible="true" />
+                    <text_area name="Name18" x="132" y="56" font="FFVIIFont" visible="true" />
+                    <text_area name="Name19" x="218" y="56" font="FFVIIFont" visible="true" />
+                    <text_area name="Name20" x="304" y="56" font="FFVIIFont" visible="true" />
+                    <text_area name="Name21" x="46" y="70" font="FFVIIFont" visible="true" />
+                    <text_area name="Name22" x="132" y="70" font="FFVIIFont" visible="true" />
+                    <text_area name="Name23" x="218" y="70" font="FFVIIFont" visible="true" />
+                    <text_area name="Name24" x="304" y="70" font="FFVIIFont" visible="true" />
+                    <text_area name="Name25" x="46" y="84" font="FFVIIFont" visible="true" />
+                    <text_area name="Name26" x="132" y="84" font="FFVIIFont" visible="true" />
+                </widget>
+            </widget>
+        </widget>
+    </widget>
+</screen>

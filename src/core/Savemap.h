@@ -937,9 +937,9 @@ class Savemap{
         static constexpr unsigned int BANK_ADDRESS_COUNT = 256;
 
         /**
-         * MAx colour component value.
+         * Max colour component value (they are stored in a byte).
          */
-        static constexpr unsigned int MAX_COLOUR = 254;
+        static constexpr unsigned int MAX_COLOUR = 255;
 
 
         /**

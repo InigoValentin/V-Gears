@@ -567,6 +567,10 @@ void UiWidget::SetColours(
     SetUpdateTransformation();
 }
 
+void UiWidget::SetWindowBackground(const bool background){window_background_ = background;}
+
+bool UiWidget::IsWindowBackground() const{return window_background_;}
+
 void UiWidget::SetAlpha(const float a){
     colour_1_.a = a;
     colour_2_.a = a;

@@ -305,6 +305,27 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
         void ScriptPlayMusicOnce(const char* name);
 
         /**
+         * Sets the volume of the music (field, battle and world tracks) and of the audio of the
+         * movies.
+         *
+         * It applies right away to the track that is playing and to the ones that start later. To
+         * be called from Lua scripts.
+         *
+         * @param[in] volume Volume, from 0 (muted) to 1 (maximum).
+         */
+        void ScriptSetMusicVolume(const float volume);
+
+        /**
+         * Sets the volume of the sound effects.
+         *
+         * It applies right away to the sound that is playing and to the ones that start later. To
+         * be called from Lua scripts.
+         *
+         * @param[in] volume Volume, from 0 (muted) to 1 (maximum).
+         */
+        void ScriptSetSoundVolume(const float volume);
+
+        /**
          * Stops the battle music and lets the field or world map music continue.
          *
          * To be called when a battle ends, before going back to the previous module.
@@ -361,6 +382,15 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
                  * @param[in] loop Loop point
                  */
                 void SetLoop(const float loop);
+
+                /**
+                 * Sets the volume of the player.
+                 *
+                 * Applies to the track that is playing, and is kept for the ones that start later.
+                 *
+                 * @param[in] gain Volume, from 0 (muted) to 1 (maximum).
+                 */
+                void SetGain(const float gain);
 
                 /**
                  * Updates the audio player.
@@ -423,6 +453,11 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
                  * Audio source.
                  */
                 ALuint source_;
+
+                /**
+                 * Volume of the player, from 0 to 1.
+                 */
+                float gain_ = 1.0f;
 
                 /**
                  * Fills the audio buffer.

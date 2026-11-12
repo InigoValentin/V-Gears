@@ -14,7 +14,13 @@ end
 -- @param force If false, exisiting game data will not be overwritten if control keys are different.
 save_game = function(slot, force)
     savemap_manager:set_control_key(ControlKey)
-    savemap_manager:set_window_colours(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12) -- TODO Actual data
+    -- Window colours of the config menu: red, green and blue (0-255) of the top-left, top-right,
+    -- bottom-right and bottom-left corners.
+    local colours = MenuSettings.config.window_colours
+    savemap_manager:set_window_colours(
+        colours[1][1], colours[1][2], colours[1][3], colours[2][1], colours[2][2], colours[2][3],
+        colours[3][1], colours[3][2], colours[3][3], colours[4][1], colours[4][2], colours[4][3]
+    )
     savemap_manager:set_money(Inventory.money)
     savemap_manager:set_game_time(123456) -- TODO Actual data
     savemap_manager:set_countdown_time(0) -- TODO Actual data
@@ -35,7 +41,7 @@ save_game = function(slot, force)
             if Materia[i].id == Materia.ENEMY_SKILL_ID then
                 for s = 1, 24 do
                     if Materia[i].skills[s] == true then
-                        savemap_manager:set_e_skill_materia(i - 1, s, true)
+                        savemap_manager:set_e_skill_materia(i - 1, s - 1, true)
                     end
                 end
             end
@@ -46,7 +52,7 @@ save_game = function(slot, force)
     local x, y, z = player:get_position()
 
     savemap_manager:set_location(x, y, z, player:get_move_triangle_id(), player:get_rotation(), System["MapChanger"].current_map_name, System["MapChanger"].location_name) -- TODO Actual data
-    -- TODO Settings, when implemented
+    -- TODO: Save the rest of the settings of the config menu (MenuSettings.config).
     for i = 0, 11 do
         if Characters[i] ~= nil and Characters[i].char_id ~= nil then
             local c = Characters[i]
@@ -63,23 +69,17 @@ save_game = function(slot, force)
                 savemap_manager:set_character_limit_learned(i, l - 1, 0, c.limit.learned[l][1], c.limit.uses[l])
                 savemap_manager:set_character_limit_learned(i, l - 1, 1, c.limit.learned[l][2], c.limit.uses[l])
             end
-            for m = 0, 8 do
-                if c.weapon.materia[m] ~= nil then
-                    savemap_manager:set_character_materia(i, true, m, c.weapon.materia[m].id, c.weapon.materia[m].ap)
-                    if c.weapon.materia[m].id == Materia.ENEMY_SKILL_ID then
-                        for s = 1, 24 do
-                            if c.weapon.materia[m].skills[s] == true then
-                                savemap_manager:set_character_e_skill_materie(i, true, m, s, true)
-                            end
-                        end
-                    end
-                end
-                if c.armor[m] ~= nil then
-                    savemap_manager:set_character_materia(i, false, m, c.armor.materia[m].id, c.weapon.materia[m].ap)
-                    if c.weapon.materia[m].id == Materia.ENEMY_SKILL_ID then
-                        for s = 1, 24 do
-                            if c.armor.materia[m].skills[s] == true then
-                                savemap_manager:set_character_e_skill_materie(i, true, m, s, true)
+            for m = 0, 7 do
+                for _, part in ipairs({"weapon", "armor"}) do
+                    local is_weapon = (part == "weapon")
+                    local materia = c[part].materia[m]
+                    if materia ~= nil then
+                        savemap_manager:set_character_materia(i, is_weapon, m, materia.id, materia.ap)
+                        if materia.id == Materia.ENEMY_SKILL_ID then
+                            for s = 1, 24 do
+                                if materia.skills[s] == true then
+                                    savemap_manager:set_character_e_skill_materia(i, is_weapon, m, s - 1, true)
+                                end
                             end
                         end
                     end
@@ -109,7 +109,8 @@ load_game = function(slot)
             Banks[b][a] = savemap_manager:get_slot_data(slot, b, a)
         end
     end
-    -- TODO: Window colours
+    -- TODO: Window colours and the rest of the settings of the config menu (MenuSettings.config),
+    -- then apply the colours with ui_manager:set_window_colours().
     Inventory.money = savemap_manager:get_slot_money(slot)
     -- TODO: Game time
     -- TODO: Countdown

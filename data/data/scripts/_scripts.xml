@@ -15,6 +15,8 @@
     <script file="gamedata/weapons.lua" />
 
     <script file="scripts/system.lua" />
+    <script file="scripts/character_effects.lua" />
+    <script file="scripts/character_abilities.lua" />
     <script file="scripts/save.lua" />
 
     <!-- TODO: Don't always parse initial savemap when loading is implemented. -->
@@ -26,6 +28,7 @@
     <script file="scripts/battle_ai.lua" />
     <script file="scripts/battle/battle_ai_vm.lua" />
     <script file="scripts/menu/menu_helpers.lua" />
+    <script file="scripts/menu/menu_lib.lua" />
 
     <!-- TODO: Debugging pourposes only -->
     <script file="scripts/debug_data.lua" />

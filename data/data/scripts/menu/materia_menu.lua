@@ -714,6 +714,7 @@ UiContainer.MateriaMenu = {
         ui_manager:get_widget("MateriaMenu"):set_visible(false)
         UiContainer.current_menu = "main"
         UiContainer.current_submenu = ""
+        UiContainer.resume_menu("main")
         return 0;
     end,
 }

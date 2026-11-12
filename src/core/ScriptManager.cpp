@@ -92,10 +92,6 @@ void ScriptManager::Input(const VGears::Event& event){
         || event.param1 == OIS::KC_ESCAPE
         || event.param1 == OIS::KC_SPACE
         || event.param1 == OIS::KC_LCONTROL
-        || event.param1 == OIS::KC_LEFT
-        || event.param1 == OIS::KC_RIGHT
-        || event.param1 == OIS::KC_DOWN
-        || event.param1 == OIS::KC_UP
         || event.param1 == OIS::KC_PGUP
         || event.param1 == OIS::KC_PGDOWN
         || event.param1 == OIS::KC_BACK

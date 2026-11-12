@@ -52,9 +52,9 @@ void FieldPartyInstruction::ProcessInst(
         case OPCODES::PRTYP: code_gen->WriteTodo(md.GetEntityName(), "PRTYP"); break;
         case OPCODES::PRTYM: code_gen->WriteTodo(md.GetEntityName(), "PRTYM"); break;
         case OPCODES::PRTYE: ProcessPRTYE(code_gen); break;
-        case OPCODES::MMBUD: code_gen->WriteTodo(md.GetEntityName(), "MMBUD"); break;
-        case OPCODES::MMBLK: code_gen->WriteTodo(md.GetEntityName(), "MMBLK"); break;
-        case OPCODES::MMBUK: code_gen->WriteTodo(md.GetEntityName(), "MMBUK"); break;
+        case OPCODES::MMBUD: ProcessMMBUD(code_gen); break;
+        case OPCODES::MMBLK: ProcessMMBLK(code_gen); break;
+        case OPCODES::MMBUK: ProcessMMBUK(code_gen); break;
         case OPCODES::CHGLD: ProcessCHGLD(code_gen); break;
         default:
             code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
@@ -138,6 +138,28 @@ void FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
     }
     code_gen->AddOutputLine((
       boost::format("set_party(%1%, %2%, %3%)") % chars[0] % chars[1] % chars[2]
+    ).str());
+}
+
+void FieldPartyInstruction::ProcessMMBUD(CodeGenerator* code_gen){
+    // Param 0 is the character, param 1 is 0 to hide it in the PHS and anything else to show it.
+    code_gen->AddOutputLine((
+      boost::format("set_character_enable(%1%, %2%)") % params_[0]->GetString()
+        % (params_[1]->GetUnsigned() != 0 ? "true" : "false")
+    ).str());
+}
+
+void FieldPartyInstruction::ProcessMMBLK(CodeGenerator* code_gen){
+    // Locks the character in the party: it can't be swapped in the PHS.
+    code_gen->AddOutputLine((
+      boost::format("set_party_lock(%1%, true)") % params_[0]->GetString()
+    ).str());
+}
+
+void FieldPartyInstruction::ProcessMMBUK(CodeGenerator* code_gen){
+    // Unlocks the character, so it can be swapped in the PHS again.
+    code_gen->AddOutputLine((
+      boost::format("set_party_lock(%1%, false)") % params_[0]->GetString()
     ).str());
 }
 

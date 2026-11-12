@@ -164,6 +164,21 @@ class FieldPartyInstruction : public KernelCallInstruction{
         void ProcessPRTYE(CodeGenerator* code_gen);
 
         /**
+         * Processes a MMBUD opcode: makes a character available or unavailable in the PHS.
+         */
+        void ProcessMMBUD(CodeGenerator* code_gen);
+
+        /**
+         * Processes a MMBLK opcode: locks a character in the party.
+         */
+        void ProcessMMBLK(CodeGenerator* code_gen);
+
+        /**
+         * Processes a MMBUK opcode: unlocks a character in the party.
+         */
+        void ProcessMMBUK(CodeGenerator* code_gen);
+
+        /**
          * Processes a CHGLD opcode.
          *
          * Opcode: 0x3B

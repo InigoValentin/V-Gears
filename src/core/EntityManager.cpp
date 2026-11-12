@@ -259,7 +259,8 @@ void EntityManager::UpdateField(){
                             speed = entity_[i]->GetMoveWalkSpeed();
                             // TODO: Set as a constant.
                             // Or even better, as a configurable variable.
-                            if (player_run_ == true) speed *= 4;
+                            // The run key inverts the default movement.
+                            if (player_run_ != player_default_run_) speed *= 4;
                         }
                         else speed = entity_[i]->GetMoveAutoSpeed();
                         float remaining_time = Timer::getSingleton().GetGameTimeDelta();
@@ -777,6 +778,8 @@ void EntityManager::ScriptPlayerLock(const bool lock){
 }
 
 bool EntityManager::IsPlayerLocked() const{return player_lock_;}
+
+void EntityManager::SetPlayerDefaultRun(const bool run){player_default_run_ = run;}
 
 void EntityManager::SetPlayerMoveRotation(const Ogre::Radian rotation){
     if (IsBattleModule()){

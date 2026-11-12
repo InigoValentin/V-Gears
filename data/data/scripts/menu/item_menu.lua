@@ -191,13 +191,9 @@ UiContainer.ItemMenu = {
                     end
                     cursor:set_default_animation("Position" .. self.item_cursor_position)
                     -- If an item is selected, show description
-                    if (Inventory[self.item_cursor_item_selected] ~= nil) then
-                        desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected + 1].item].description)
-                    else
-                        desc_label:set_text("")
-                    end
+                    self.show_item_description(self)
                 elseif button == Config.CONTROLS.UP then
-                    if self.item_cursor_item_selected == 0 then
+                    if self.item_cursor_item_selected <= 1 then
                         -- At the very begining, do nothing
                         audio_manager:play_sound("Error")
                         return 0
@@ -214,36 +210,24 @@ UiContainer.ItemMenu = {
                     end
                     cursor:set_default_animation("Position" .. self.item_cursor_position)
                     -- If an item is selected, show description
-                    if (Inventory[self.item_cursor_item_selected] ~= nil) then
-                        desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected + 1].item].description)
-                    else
-                        desc_label:set_text("")
-                    end
+                    self.show_item_description(self)
                 elseif button == Config.ACTIONS.R1 then
                     if self.first_item_in_window + self.item_cursor_position_total < self.inventory_size - self.item_cursor_position_total then
                         audio_manager:play_sound("Cursor")
                         self.item_cursor_item_selected = self.item_cursor_item_selected + self.item_cursor_position_total
                         self.first_item_in_window = self.first_item_in_window + self.item_cursor_position_total
                         self.populate_items(self)
-                        if (Inventory[self.item_cursor_item_selected] ~= nil) then
-                            desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected + 1].item].description)
-                        else
-                            desc_label:set_text("")
-                        end
+                        self.show_item_description(self)
                     else
                         audio_manager:play_sound("Error")
                     end
                 elseif button == Config.ACTIONS.L1 then
-                    if self.first_item_in_window - self.item_cursor_position_total > 1 then
+                    if self.first_item_in_window - self.item_cursor_position_total >= 0 then
                         audio_manager:play_sound("Cursor")
                         self.item_cursor_item_selected = self.item_cursor_item_selected - self.item_cursor_position_total
                         self.first_item_in_window = self.first_item_in_window - self.item_cursor_position_total
                         self.populate_items(self)
-                        if (Inventory[self.item_cursor_item_selected] ~= nil) then
-                            desc_label:set_text(Game.Items[Inventory[self.item_cursor_item_selected + 1].item].description)
-                        else
-                            desc_label:set_text("")
-                        end
+                        self.show_item_description(self)
                     else
                         audio_manager:play_sound("Error")
                     end
@@ -253,10 +237,11 @@ UiContainer.ItemMenu = {
                     UiContainer.current_submenu = "bar_selection"
                     ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
                 elseif button == Config.ACTIONS.CONFIRM then
-                    if Game.Items[Inventory[self.item_cursor_item_selected].item].menu == 1 then
+                    local selected = Inventory[self.item_cursor_item_selected]
+                    if selected ~= nil and Game.Items[selected.item].menu == 1 then
                         audio_manager:play_sound("Cursor")
-                        self.item_in_use = Inventory[self.item_cursor_item_selected].item
-                        if (Game.Items[Inventory[self.item_cursor_item_selected - 1].item].target.default_multiple) == 1 then
+                        self.item_in_use = selected.item
+                        if (Game.Items[selected.item].target.default_multiple) == 1 then
                             self.item_in_use_party = true
                             self.submenu_chars(self, true)
                         else
@@ -506,6 +491,17 @@ UiContainer.ItemMenu = {
         ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_default_animation("Position" .. self.order_cursor_position)
     end,
 
+    --- Shows the description of the highlighted inventory item, or clears it if the slot is empty.
+    show_item_description = function(self)
+        local label = ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText")
+        local entry = Inventory[self.item_cursor_item_selected]
+        if entry ~= nil then
+            label:set_text(Game.Items[entry.item].description)
+        else
+            label:set_text("")
+        end
+    end,
+
     --- Initializes the item selection selection mode.
     submenu_items = function(self)
         UiContainer.current_submenu = "item_selection"
@@ -527,11 +523,7 @@ UiContainer.ItemMenu = {
         end
 
 
-        if (Inventory[0] ~= nil) then
-            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text(Game.Items[Inventory[0].item].description)
-        else
-            ui_manager:get_widget("ItemMenu.Container.ItemMenuSecondBar.ItemText"):set_text("")
-        end
+        self.show_item_description(self)
     end,
 
     --- Initializes the character selection mode.
@@ -966,7 +958,7 @@ UiContainer.ItemMenu = {
             local w_name = ui_manager:get_widget("ItemMenu.Container.ItemList.Name" .. tostring(i))
             local w_colon = ui_manager:get_widget("ItemMenu.Container.ItemList.Colon" .. tostring(i))
             local w_qty = ui_manager:get_widget("ItemMenu.Container.ItemList.Qty" .. tostring(i))
-            local inventory_index = i + first_item_in_window + 1
+            local inventory_index = i + first_item_in_window
             if Inventory[inventory_index] == nil then
                 w_icon:set_visible(false)
                 w_name:set_visible(false)
@@ -1059,6 +1051,7 @@ UiContainer.ItemMenu = {
         ui_manager:get_widget("ItemMenu"):set_visible(false)
         UiContainer.current_menu = "main"
         UiContainer.current_submenu = ""
+        UiContainer.resume_menu("main")
         return 0;
     end,
 }

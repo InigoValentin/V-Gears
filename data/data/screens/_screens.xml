@@ -7,10 +7,15 @@
     <prototype file_name="screens/main_menu/prototypes.xml" />
     <screen file_name="screens/main_menu/main_menu.xml" />
     <screen file_name="screens/pause_menu/pause_menu.xml" />
-    <prototype file_name="screens/item_menu/prototypes.xml" />
     <screen file_name="screens/item_menu/item_menu.xml" />
     <screen file_name="screens/equip_menu/equip_menu.xml" />
     <screen file_name="screens/materia_menu/materia_menu.xml" />
+    <screen file_name="screens/status_menu/status_menu.xml" />
+    <screen file_name="screens/magic_menu/magic_menu.xml" />
+    <screen file_name="screens/limit_menu/limit_menu.xml" />
+    <screen file_name="screens/quit_menu/quit_menu.xml" />
+    <screen file_name="screens/phs_menu/phs_menu.xml" />
+    <screen file_name="screens/config_menu/config_menu.xml" />
     <screen file_name="screens/name_menu/name_menu.xml" />
     <screen file_name="screens/save_menu/save_menu.xml" />
     <prototype file_name="screens/save_menu/prototypes.xml" />

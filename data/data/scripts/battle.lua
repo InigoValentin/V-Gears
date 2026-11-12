@@ -103,6 +103,29 @@ Battle.Damage = {
 
 
 
+--- Is the ATB time stopped by the menus the player has open?
+--
+-- Depends on the ATB setting of the config menu (MenuSettings.config.atb):
+--  * 1, active: time never stops.
+--  * 2, recommended: time stops while a list (magic, summon, item) is open.
+--  * 3, wait: time stops while a list is open and while a target is being chosen.
+Battle.is_time_stopped = function()
+    local mode = (MenuSettings.config ~= nil) and MenuSettings.config.atb or 2
+    local ui = UiContainer.BattleUi
+    if mode == 1 or ui == nil then return false end
+    local state = ui.window_state
+    if mode == 2 then return state == "list" end
+    return state == "list" or state == "target"
+end
+
+--- Can the battle camera move by itself? (Camera angle: Auto in the config menu.)
+--
+-- TODO: The battle camera doesn't move during the battle yet. When it does, the movements of the
+-- camera (attacks, magic, summons) must only happen if this returns true.
+Battle.is_camera_auto = function()
+    return MenuSettings.config == nil or MenuSettings.config.camera ~= 2
+end
+
 Battle.logic_script = {
     unit_type = Battle.Type.LOGIC,
 
@@ -133,6 +156,8 @@ Battle.logic_script = {
     on_update = function( self )
         local timer = timer:get_game_time_total()
         local delta = timer - self.game_timer
+        -- The timers don't advance while the menus stop the ATB time.
+        if Battle.is_time_stopped() then delta = 0 end
 
         -- update timers
         for key, value in pairs( EntityContainer ) do
