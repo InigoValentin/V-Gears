@@ -1,7 +1,7 @@
 # Minimum required CMake and project declaration
 cmake_minimum_required(VERSION 3.5)
 # Enable both C and CXX languages so C and C++ toolchains are configured.
-project(V-Gears VERSION 0.2.0 LANGUAGES C CXX)
+project(V-Gears VERSION 0.3.0 LANGUAGES C CXX)
 
 # Provide a central common include for project-wide policies and defaults.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
@@ -39,6 +39,10 @@ endif()
 set(CMAKE_PACKAGE_ICON v-gears.png)
 
 # Generate version header into the build tree so source tree is not modified.
+set(VGEARS_VERSION ${PROJECT_VERSION})
+set(VGEARS_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(VGEARS_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(VGEARS_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Version.h.in ${CMAKE_BINARY_DIR}/generated/Version.h @ONLY)
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
