@@ -923,14 +923,16 @@ bool EntityManager::IsKeyOn(unsigned int key_code){
     // Some scene where the player can't move but must press a button?
     if (player_lock_) return false;
     // The key code of the scripts is a mask of the pad buttons, and the check is true if any of
-    // them is pressed. Translate each to its key. For example 32 is "Circle/Action", the space bar.
-    // TODO: Get values from config.lua
-    static const struct{unsigned int mask; int key;} KEYS[] = {
-      {4, OIS::KC_PGUP}, {8, OIS::KC_PGDOWN}, {32, OIS::KC_SPACE}, {64, OIS::KC_ESCAPE},
-      {4096, OIS::KC_UP}, {8192, OIS::KC_RIGHT}, {16384, OIS::KC_DOWN}, {32768, OIS::KC_LEFT}
+    // them is pressed. Translate each to its game event (see bind_game_event in config.cfg), so
+    // the keys chosen in the controller settings are the ones that count. For example 32 is
+    // "Circle/Action", the OK button.
+    static const struct{unsigned int mask; const char* event;} BUTTONS[] = {
+      {1, "L2"}, {2, "R2"}, {4, "L1"}, {8, "R1"}, {16, "MENU"}, {32, "CONFIRM"}, {64, "CANCEL"},
+      {128, "EXTRA"}, {256, "SELECT"}, {2048, "START"},
+      {4096, "Up"}, {8192, "Right"}, {16384, "Down"}, {32768, "Left"}
     };
-    for (const auto& entry : KEYS)
-        if ((key_code & entry.mask) && InputManager::getSingleton().IsButtonPressed(entry.key))
+    for (const auto& entry : BUTTONS)
+        if ((key_code & entry.mask) && InputManager::getSingleton().IsGameEventPressed(entry.event))
             return true;
     return false;
 }

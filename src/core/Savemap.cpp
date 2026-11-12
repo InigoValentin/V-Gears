@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <boost/filesystem.hpp>
 #include <string>
 #include <iostream>
 #include <algorithm>
@@ -144,6 +145,7 @@ void Savemap::operator = (const Savemap &to_copy){
     }
     for (int i = 0; i < 11; i ++) characters_[i] = to_copy.characters_[i];
     for (int i = 0; i < 3; i ++) party_[i] = to_copy.party_[i];
+    settings_ = to_copy.settings_;
 }
 
 void Savemap::SetData(const unsigned int bank, const unsigned int address, const int value){
@@ -253,8 +255,13 @@ void Savemap::SetLocation(
     location_.name = name;
 }
 
-void Savemap::SetSetting(const unsigned int key, const unsigned int value){
-    // TODO : Implements when settings are working.
+void Savemap::SetSetting(const std::string& key, const int value){settings_[key] = value;}
+
+bool Savemap::HasSetting(const std::string& key) const{return settings_.count(key) > 0;}
+
+int Savemap::GetSetting(const std::string& key) const{
+    const auto it = settings_.find(key);
+    return (it == settings_.end()) ? 0 : it->second;
 }
 
 void Savemap::SetCharacterInfo(
@@ -484,11 +491,6 @@ int Savemap::GetLocationAngle(){return location_.angle;}
 std::string Savemap::GetLocationField(){return location_.field;}
 
 std::string Savemap::GetLocationName(){return location_.name;}
-
-int Savemap::GetSetting(const unsigned int key){
-    // TODO: Implement.
-    return 0;
-}
 
 int Savemap::GetCharacterCharId(const unsigned int id){
     if (id >= MAX_CHARACTERS) return -1;
@@ -824,10 +826,17 @@ void Savemap::Write(int slot, std::string file_name){
     }
     container->LinkEndChild(stash.release());
 
-    // TODO: Settings. Save all the options of the config menu (MenuSettings.config in the scripts):
-    // window colours, sound, controller, cursor mode, ATB mode, battle speed, battle message
-    // speed, field message speed, movement, camera angle and magic order. Savemap::Settings and the
-    // window colours already exist, but they are not written to the XML nor read back.
+    // Settings (config menu). The window colours are saved apart.
+    if (!settings_.empty()){
+        std::unique_ptr<TiXmlElement> settings(new TiXmlElement("Settings"));
+        for (const auto& setting : settings_){
+            std::unique_ptr<TiXmlElement> element(new TiXmlElement("Setting"));
+            element->SetAttribute("name", setting.first);
+            element->SetAttribute("value", setting.second);
+            settings->LinkEndChild(element.release());
+        }
+        container->LinkEndChild(settings.release());
+    }
 
     // Characters
     std::unique_ptr<TiXmlElement> characters(new TiXmlElement("Characters"));
@@ -1009,7 +1018,14 @@ void Savemap::Write(int slot, std::string file_name){
 
     // Save
     xml.LinkEndChild(container.release());
-    xml.SaveFile(file_name);
+    // The folder of the saved games may not exist yet (a fresh installation): create it, or the
+    // game would not be saved.
+    const boost::filesystem::path path(file_name);
+    if (path.has_parent_path()){
+        boost::system::error_code error;
+        boost::filesystem::create_directories(path.parent_path(), error);
+    }
+    if (!xml.SaveFile(file_name)) LOG_ERROR("Can't write the saved game \"" + file_name + "\".");
     slot_ = slot;
     return;
 
@@ -1055,49 +1071,67 @@ void Savemap::Read(std::string file_name){
                     if (position == "top_left"){
                         colour = -1;
                         colour_elm->QueryIntAttribute("red", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[0][0] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[0][0] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("green", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[0][1] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[0][1] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("blue", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[0][2] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[0][2] = colour;
                     }
                     else if (position == "top_right"){
                         colour = -1;
                         colour_elm->QueryIntAttribute("red", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[1][0] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[1][0] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("green", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[1][1] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[1][1] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("blue", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[1][2] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[1][2] = colour;
                     }
                     else if (position == "bottom_right"){
                         colour = -1;
                         colour_elm->QueryIntAttribute("red", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[2][0] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[2][0] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("green", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[2][1] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[2][1] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("blue", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[2][2] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[2][2] = colour;
                     }
-                    else if (position == "bottol_left"){
+                    else if (position == "bottom_left"){
                         colour = -1;
                         colour_elm->QueryIntAttribute("red", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[3][0] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[3][0] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("green", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[3][1] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[3][1] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("blue", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[3][2] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[3][2] = colour;
                     }
                 }
                 colour_node = colour_node->NextSibling();
+            }
+        }
+        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "Settings"){
+            TiXmlNode* setting_node = node->FirstChild();
+            while (setting_node != nullptr){
+                if (
+                  setting_node->Type() == TiXmlNode::TINYXML_ELEMENT
+                  && setting_node->ValueStr() == "Setting"
+                ){
+                    std::string name;
+                    int value = 0;
+                    TiXmlElement* setting_elm = setting_node->ToElement();
+                    if (
+                      setting_elm->QueryStringAttribute("name", &name) == TIXML_SUCCESS
+                      && setting_elm->QueryIntAttribute("value", &value) == TIXML_SUCCESS
+                    ) settings_[name] = value;
+                }
+                setting_node = setting_node->NextSibling();
             }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "Money"){

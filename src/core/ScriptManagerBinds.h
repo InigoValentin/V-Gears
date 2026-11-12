@@ -392,6 +392,9 @@ void ScriptManager::InitBinds(){
         // Registered under the same name in the original bindings.
         &SavemapHandler::GetSlotWindowCornerColourComponent
       ),
+      "get_slot_window_colour", &SavemapHandler::GetSlotWindowCornerColourComponent,
+      "is_slot_setting_set", &SavemapHandler::IsSlotSettingSet,
+      "get_slot_setting", &SavemapHandler::GetSlotSetting,
       "get_slot_money", &SavemapHandler::GetSlotMoney,
       "get_slot_game_time", &SavemapHandler::GetSlotGameTime,
       "get_slot_countdown_time", &SavemapHandler::GetSlotCountdownTime,
@@ -416,7 +419,6 @@ void ScriptManager::InitBinds(){
       "get_slot_location_angle", &SavemapHandler::GetSlotLocationAngle,
       "get_slot_location_field", &SavemapHandler::GetSlotLocationField,
       "get_slot_location_name", &SavemapHandler::GetSlotLocationName,
-      "get_slot_setting", &SavemapHandler::GetSlotSetting,
       "get_slot_character_char_id", &SavemapHandler::GetSlotCharacterCharId,
       "get_slot_character_name", &SavemapHandler::GetSlotCharacterName,
       "get_slot_character_level", &SavemapHandler::GetSlotCharacterLevel,

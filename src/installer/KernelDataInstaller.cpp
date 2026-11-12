@@ -1032,7 +1032,7 @@ void KernelDataInstaller::WriteWeapons(std::string file_name){
         file << "},\n    stats = {";
         for (StatBonus s : weapon.stat_bonus){
             file << "\n        " << GetBasicStatName(s.stat) << " = "
-              << static_cast<int>(s.stat) << ",";
+              << static_cast<int>(s.bonus) << ",";
         }
         if (weapon.stat_bonus.size() > 0) file << "\n    },\n";
         else file << "},\n";
@@ -1225,7 +1225,7 @@ void KernelDataInstaller::WriteArmors(std::string file_name){
         file << "},\n    stats = {";
         for (StatBonus s : armor.stat_bonus){
             file << "\n        " << GetBasicStatName(s.stat) << " = "
-              << static_cast<int>(s.stat) << ",";
+              << static_cast<int>(s.bonus) << ",";
         }
         if (armor.stat_bonus.size() > 0) file << "\n    },\n";
         else file << "},\n";
@@ -1429,7 +1429,7 @@ void KernelDataInstaller::WriteAccessories(std::string file_name){
         file << "},\n    stats = {";
         for (StatBonus s : accessory.stat_bonus){
             file << "\n        " << GetBasicStatName(s.stat) << " = "
-              << static_cast<int>(s.stat) << ",";
+              << static_cast<int>(s.bonus) << ",";
         }
         if (accessory.stat_bonus.size() > 0) file << "\n    },\n";
         else file << "},\n";

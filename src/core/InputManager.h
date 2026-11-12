@@ -153,6 +153,17 @@ class InputManager : public Manager, public Ogre::Singleton<InputManager>{
         bool IsButtonPressed(int button) const;
 
         /**
+         * Checks if a game event is active: all the keys of any of its bindings are being pressed.
+         *
+         * Use it, instead of checking keys, to poll the controls of the game, so the keys chosen
+         * in the controller settings are used. It is false while the console is open.
+         *
+         * @param[in] event The game event, for example "CONFIRM" or "walk_left".
+         * @return true if the event is active, false otherwise.
+         */
+        bool IsGameEventPressed(const Ogre::String& event) const;
+
+        /**
          * Retrieves the current input events.
          *
          * The input event queue will be empty after calling this function.

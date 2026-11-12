@@ -444,9 +444,10 @@ Characters.recalculate_stats = function(id)
     stats.lck.total = stats.lck.base
     stats.hp.max = stats.hp.base
     stats.mp.max = stats.mp.base
-    -- Weapon bonus. HP and MP are percents of base, the rest absolutes.
+    -- Weapon bonus. HP and MP are percents of base, the rest absolutes. The stats are keyed by name,
+    -- so they are walked with pairs (ipairs only walks the array part and found nothing).
     local weapon = Game.Items[Characters[id].weapon.id]
-    for stat, value in ipairs(weapon.stats) do
+    for stat, value in pairs(weapon.stats or {}) do
         if stat == "str" then
             stats.str.total = stats.str.total + value
         elseif stat == "vit" then
@@ -467,7 +468,7 @@ Characters.recalculate_stats = function(id)
     end
     -- Armor bonus. HP and MP are percents of bsae, the rest absolutes.
     local armor = Game.Items[Characters[id].armor.id]
-    for stat, value in ipairs(armor.stats) do
+    for stat, value in pairs(armor.stats or {}) do
         if stat == "str" then
             stats.str.total = stats.str.total + value
         elseif stat == "vit" then
@@ -489,7 +490,7 @@ Characters.recalculate_stats = function(id)
     -- Accesory bonus
     local accessory = Game.Items[Characters[id].accessory]
     if (accessory ~= nil) then
-        for stat, value in ipairs(armor.stats) do
+        for stat, value in pairs(accessory.stats or {}) do
             if stat == "str" then
                 stats.str.total = stats.str.total + value
             elseif stat == "vit" then
@@ -516,12 +517,12 @@ Characters.recalculate_stats = function(id)
             table.insert(materias, Game.Materia[Characters[id].weapon.materia[m].id])
         end
         if Characters[id].armor.materia[m] ~= nil then
-            table.insert(materias, Game.Materia[Characters[id].weapon.materia[m].id])
+            table.insert(materias, Game.Materia[Characters[id].armor.materia[m].id])
         end
     end
     -- Get materia bonuses. All are percents of base.
     for _, materia in ipairs(materias) do
-        for stat, value in ipairs(materia.stats) do
+        for stat, value in pairs(materia.stats or {}) do
             if stat == "str" then
                 stats.str.total = stats.str.total + (value * stats.str.base / 100)
             elseif stat == "vit" then

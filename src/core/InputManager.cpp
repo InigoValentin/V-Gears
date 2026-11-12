@@ -143,6 +143,22 @@ void InputManager::Update(){
 
 bool InputManager::IsButtonPressed(int button) const{return button_state_[button];}
 
+bool InputManager::IsGameEventPressed(const Ogre::String& event) const{
+    if (Console::getSingleton().IsVisible() == true) return false;
+    for (const BindGameEventInfo& bind : bind_game_events_){
+        if (bind.event != event || bind.buttons.empty()) continue;
+        bool all_pressed = true;
+        for (const int button : bind.buttons){
+            if (IsButtonPressed(button) == false){
+                all_pressed = false;
+                break;
+            }
+        }
+        if (all_pressed == true) return true;
+    }
+    return false;
+}
+
 void InputManager::GetInputEvents(InputEventArray& input_events){
     input_events = event_queue_;
     event_queue_.clear();

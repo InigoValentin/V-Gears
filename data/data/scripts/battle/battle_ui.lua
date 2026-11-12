@@ -310,7 +310,8 @@ UiContainer.BattleUi = {
     --- Handles button events.
     --
     -- For the current submenu, handles directional keys, enter and escape events.
-    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param button Game event (the directions, OK, cancel...) or, for the debug keys, the name of
+    -- the key.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if self.active == false then do return 0 end end

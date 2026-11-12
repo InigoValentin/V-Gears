@@ -242,6 +242,11 @@ name_character = function(id)
         print("Tried to rename invalid character with ID " .. tostring(id))
         return 0
     end
+    -- While the name menu is not enabled, the character just gets its default name.
+    if not UiContainer.NameMenu.enabled then
+        UiContainer.NameMenu:apply_default_name(id)
+        return 0
+    end
     UiContainer.NameMenu.id = id
     UiContainer.NameMenu.chocobo = false
     script:request(Script.UI, "NameMenu", "show", 0)

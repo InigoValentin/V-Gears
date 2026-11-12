@@ -179,9 +179,21 @@ void SavemapHandler::SetLocation(
     current_savemap_->SetLocation(x, y, z, triangle, angle, std::string(field), std::string(name));
 }
 
-void SavemapHandler::SetSetting(const unsigned int key, const unsigned int value){
+void SavemapHandler::SetSetting(const char* key, const int value){
     if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
-    current_savemap_->SetSetting(key, value);
+    current_savemap_->SetSetting(std::string(key), value);
+}
+
+bool SavemapHandler::IsSlotSettingSet(const unsigned int slot, const char* key){
+    if (slot >= MAX_SAVE_SLOTS) return false;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->HasSetting(std::string(key));
+}
+
+int SavemapHandler::GetSlotSetting(const unsigned int slot, const char* key){
+    if (slot >= MAX_SAVE_SLOTS) return 0;
+    if (savemaps_read_ == false) ReadSavemaps();
+    return saved_savemaps_[slot]->GetSetting(std::string(key));
 }
 
 void SavemapHandler::SetCharacterInfo(
@@ -391,12 +403,6 @@ std::string SavemapHandler::GetSlotLocationName(const unsigned int slot){
     if (slot >= MAX_SAVE_SLOTS) return "";
     if (savemaps_read_ == false) ReadSavemaps();
     return saved_savemaps_[slot]->GetLocationName();
-}
-
-int SavemapHandler::GetSlotSetting(const unsigned int slot, const unsigned int key){
-    if (slot >= MAX_SAVE_SLOTS) return 0;
-    if (savemaps_read_ == false) ReadSavemaps();
-    return saved_savemaps_[slot]->GetSetting(key);
 }
 
 int SavemapHandler::GetSlotCharacterCharId(const unsigned int slot, const unsigned int id){

@@ -86,10 +86,8 @@ local ROWS = {
 --
 -- TODO: These are placeholders. They don't change the game yet. Each option must be connected to
 -- its setting as it is implemented.
--- TODO: Apply the volumes (apply_volumes), the movement (apply_movement) and the window colours
--- when the settings are loaded.
--- TODO: Save and load all of them with the savemap (see the TODO about the settings in save.lua and
--- Savemap.cpp).
+-- The settings are saved with the game (save_settings) and loaded with it (load_settings). The keys of
+-- the controller are not: they are saved in controls.cfg.
 MenuSettings.config = MenuSettings.config or {
     cursor = 1,         -- 1: Initial, 2: Memory.
     atb = 2,            -- 1: Active, 2: Recommended, 3: Wait.
@@ -148,6 +146,13 @@ local function set_keys(action, keys)
         input_manager:set_game_event_keys(event, text)
     end
 end
+
+--- Settings (fields of MenuSettings.config) saved with the game, apart from the window colours.
+-- The values are numbers: choices start at 1, and sliders and volumes at 0.
+local SAVED_SETTINGS = {
+    "music_volume", "sound_volume", "cursor", "atb", "battle_speed", "battle_message",
+    "field_message", "movement", "camera", "magic_order",
+}
 
 --- Handlers of the buttons that change the value of the colour under the cursor.
 local function colour_buttons()
@@ -488,6 +493,60 @@ UiContainer.ConfigMenu = UiContainer.Menu.new{
         self:refresh_sound_window()
         -- Played after applying the volume, so the sound effect is heard with the new volume.
         UiContainer.play_sound("Cursor")
+    end,
+
+    --- Gives the settings to the savemap, to be saved with the game. See save_game in save.lua.
+    save_settings = function(self)
+        local config = MenuSettings.config
+        for _, key in ipairs(SAVED_SETTINGS) do
+            savemap_manager:set_setting(key, config[key])
+        end
+        local c = config.window_colours
+        savemap_manager:set_window_colours(
+            c[1][1], c[1][2], c[1][3], c[2][1], c[2][2], c[2][3],
+            c[3][1], c[3][2], c[3][3], c[4][1], c[4][2], c[4][3]
+        )
+    end,
+
+    --- Loads the settings of a saved game and applies them. See load_game in save.lua.
+    --
+    -- Games saved before the settings were saved don't have them, and don't change the ones the
+    -- player has. Values that are out of range (a damaged file) are brought inside it.
+    --
+    -- @param slot Slot of the saved game (0-15).
+    load_settings = function(self, slot)
+        if not savemap_manager:is_slot_setting_set(slot, SAVED_SETTINGS[1]) then return end
+        local config = MenuSettings.config
+        -- Range of the values of each setting.
+        local ranges = {
+            music_volume = { 0, VOLUME_MAX }, sound_volume = { 0, VOLUME_MAX },
+        }
+        for _, row in ipairs(ROWS) do
+            if row.kind == KIND.SLIDER then ranges[row.key] = { 0, SLIDER_MAX }
+            elseif row.key ~= nil then ranges[row.key] = { 1, row.count } end
+        end
+        for _, key in ipairs(SAVED_SETTINGS) do
+            if savemap_manager:is_slot_setting_set(slot, key) then
+                local range = ranges[key]
+                config[key] = math.max(range[1], math.min(range[2], savemap_manager:get_slot_setting(slot, key)))
+            end
+        end
+        -- Corners: top-left, top-right, bottom-right and bottom-left, as in the savemap.
+        for corner = 1, 4 do
+            for channel = 1, 3 do
+                config.window_colours[corner][channel] = math.max(COLOUR_MIN, math.min(COLOUR_MAX,
+                    savemap_manager:get_slot_window_colour(slot, corner - 1, channel - 1)))
+            end
+        end
+        self:apply_all()
+    end,
+
+    --- Applies all the settings that act on the game right away: volumes, movement and the
+    -- colours of the windows. The rest are read by the game when it needs them.
+    apply_all = function(self)
+        self:apply_volumes()
+        self:apply_movement()
+        self:apply_window_colours()
     end,
 
     --- Applies the movement setting (walk or run by default) to the player.

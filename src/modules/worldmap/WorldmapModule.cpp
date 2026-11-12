@@ -1134,8 +1134,7 @@ namespace VGears {
 
         const bool highwind_active = active_entity == highwind_entity_;
       const bool vehicle_active = current_vehicle_ != VehicleType::ON_FOOT;
-        const bool cancel_pressed
-          = InputManager::getSingleton().IsButtonPressed(OIS::KC_ESCAPE);
+        const bool cancel_pressed = InputManager::getSingleton().IsGameEventPressed("CANCEL");
         if (vehicle_active && cancel_pressed && !cancel_was_pressed_){
             ScriptManager::getSingleton().ScriptRequest(
               ScriptManager::ENTITY, active_entity->GetName().c_str(), "unboard", 0
@@ -1155,10 +1154,12 @@ namespace VGears {
             // Nothing: no movement.
         }
         else{
-            if (InputManager::getSingleton().IsButtonPressed(OIS::KC_LEFT)) movement.x -= 1.0f;
-            if (InputManager::getSingleton().IsButtonPressed(OIS::KC_RIGHT)) movement.x += 1.0f;
-            if (InputManager::getSingleton().IsButtonPressed(OIS::KC_UP)) movement.z -= 1.0f;
-            if (InputManager::getSingleton().IsButtonPressed(OIS::KC_DOWN)) movement.z += 1.0f;
+            // The game events of the movement, so the keys of the controller settings are used.
+            InputManager& input = InputManager::getSingleton();
+            if (input.IsGameEventPressed("walk_left")) movement.x -= 1.0f;
+            if (input.IsGameEventPressed("walk_right")) movement.x += 1.0f;
+            if (input.IsGameEventPressed("walk_up")) movement.z -= 1.0f;
+            if (input.IsGameEventPressed("walk_down")) movement.z += 1.0f;
         }
         bool is_walking = false;
         if (!movement.isZeroLength()){

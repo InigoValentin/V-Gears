@@ -1,6 +1,12 @@
 if UiContainer == nil then UiContainer = {} end
 
 --- The name menu.
+--- Is a key one that types a character in the name menu? The letters (their name is one character)
+-- and the space bar.
+local function is_typing_key(key)
+    return key ~= nil and (key == "Space" or #key == 1)
+end
+
 UiContainer.NameMenu = {
 
     --- Indicates if a chocobo is being renamed instead of a character.
@@ -11,6 +17,12 @@ UiContainer.NameMenu = {
 
     --- Default name.
     default_name = "",
+
+    --- Is the name menu shown when the game asks to name a character?
+    --
+    -- TODO: Turn it on when the menu works with the controller settings (see is_typing_key). While
+    -- it is off, the characters keep their default names and the game goes on.
+    enabled = false,
 
     --- Currently input-ed name.
     name = "",
@@ -45,23 +57,26 @@ UiContainer.NameMenu = {
 
     --- Handles button events.
     --
-    -- For the current submenu, handles directional keys, enter and escape events.
-    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- For the current submenu, handles the directions, OK, and the keys that type letters.
+    -- @param button Game event (the directions, OK...) or, for the letters and the space bar,
+    -- the name of the key.
     -- @param event Trigger event. Normally, "Press".
+    -- @param source_key Name of the key that produced the event.
     on_button = function(self, button, event, source_key)
         if UiContainer.current_menu == "name" then
-            if button == Config.ACTIONS.CONFIRM and source_key == "Space" and UiContainer.current_submenu == "" then
+            -- A letter or the space bar that is also the OK key types, it doesn't confirm.
+            if button == Config.ACTIONS.CONFIRM and is_typing_key(source_key) and UiContainer.current_submenu == "" then
                 return 0
             end
             if UiContainer.current_submenu == "confirm" then
-                if button == "Right" then
+                if button == Config.CONTROLS.RIGHT then
                     audio_manager:play_sound("Cursor")
                     self.confirm_position = self.confirm_position + 1
                     if self.confirm_position > self.confirm_position_total then
                         self.confirm_position = 1
                     end
                     ui_manager:get_widget("NameMenu.Container.Confirm.Cursor"):set_default_animation("Position" .. self.confirm_position)
-                elseif button == "Left" then
+                elseif button == Config.CONTROLS.LEFT then
                     audio_manager:play_sound("Cursor")
                     self.confirm_position = self.confirm_position - 1
                     if self.confirm_position < 1 then
@@ -83,26 +98,26 @@ UiContainer.NameMenu = {
                 local character_index
                 if button == "Space" then
                     character_index = string.find(self.letters, " ")
-                else
+                elseif is_typing_key(button) then
                     character_index = string.find(self.letters, button)
                 end
 
                 -- Handle buttons.
-                if button == "Down" then
+                if button == Config.CONTROLS.DOWN then
                     audio_manager:play_sound("Cursor")
                     self.options_position = self.options_position + 1
                     if self.options_position > self.options_position_total then
                         self.options_position = 1
                     end
                     ui_manager:get_widget("NameMenu.Container.Options.Cursor"):set_default_animation("Position" .. self.options_position)
-                elseif button == "Up" then
+                elseif button == Config.CONTROLS.UP then
                     audio_manager:play_sound("Cursor")
                     self.options_position = self.options_position - 1
                     if self.options_position < 1 then
                         self.options_position = self.options_position_total
                     end
                     ui_manager:get_widget("NameMenu.Container.Options.Cursor"):set_default_animation("Position" .. self.options_position)
-                elseif button == "Left" then
+                elseif button == Config.CONTROLS.LEFT then
                     if self.text_cursor > 1 then
                         self.text_cursor = self.text_cursor - 1
                         self.draw_cursor(self)
@@ -110,7 +125,7 @@ UiContainer.NameMenu = {
                     else
                         audio_manager:play_sound("Error")
                     end
-                elseif button == "Right" then
+                elseif button == Config.CONTROLS.RIGHT then
                     if self.text_cursor < self.max_characters then
                         audio_manager:play_sound("Cursor")
                         self.text_cursor = self.text_cursor + 1
@@ -164,6 +179,26 @@ UiContainer.NameMenu = {
         return 0
     end,
 
+    --- Gets the default name of a character.
+    --
+    -- @param id ID of the character.
+    get_default_name = function(self, id)
+        local name = Characters[id].name
+        -- HACK: Hack for Ex-Soldier default. Can this be extracted from menu.lgp?
+        if string.lower(name) == "ex-soldier" then return "Cloud" end
+        return name
+    end,
+
+    --- Gives a character its default name, without showing the menu.
+    --
+    -- Used when the menu is not enabled.
+    --
+    -- @param id ID of the character.
+    apply_default_name = function(self, id)
+        Characters[id].name = self:get_default_name(id)
+        export_character_names()
+    end,
+
     --- Opens the name menu.
     --
     -- Populates and updates displayed data before opening. It also pauses the game. Shows a fade
@@ -180,14 +215,8 @@ UiContainer.NameMenu = {
         ui_manager:get_widget("NameMenu.Container.Confirm.Cursor"):set_default_animation("Position" .. self.confirm_position)
         ui_manager:get_widget("NameMenu.Container.Options.Cursor"):set_default_animation("Position" .. self.options_position)
         ui_manager:get_widget("NameMenu.Container.Character.Portrait"):set_image("characters/" .. tostring(self.id) .. ".png")
-        if (string.lower(Characters[self.id].name) == "ex-soldier") then
-            -- HACK: Hack for Ex-Soldier default. Can this be extracted from menu.lgp?
-            self.default_name = "Cloud"
-            self.name = "Cloud"
-        else
-            self.default_name = Characters[self.id].name
-            self.name = Characters[self.id].name
-        end
+        self.default_name = self:get_default_name(self.id)
+        self.name = self.default_name
         self.text_cursor = math.min(#(self.name) + 1, self.max_characters)
         self.populate_name(self)
         self.draw_cursor(self)

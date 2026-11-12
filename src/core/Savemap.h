@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include "common/TypeDefine.h"
 
@@ -211,11 +212,26 @@ class Savemap{
         /**
          * Sets a setting value in the savemap.
          *
-         * @param[in] key Setting key.
+         * @param[in] key Name of the setting.
          * @param[in] value Setting value.
-         * @todo Does nothing, implement when settings are working.
          */
-        void SetSetting(const unsigned int key, const unsigned int value);
+        void SetSetting(const std::string& key, const int value);
+
+        /**
+         * Checks if the savemap has a setting.
+         *
+         * @param[in] key Name of the setting.
+         * @return True if the setting was saved. Savemaps from older versions have none.
+         */
+        bool HasSetting(const std::string& key) const;
+
+        /**
+         * Gets the value of a setting.
+         *
+         * @param[in] key Name of the setting.
+         * @return The value of the setting, or 0 if the savemap doesn't have it.
+         */
+        int GetSetting(const std::string& key) const;
 
         /**
          * Sets a character basic information in the savemap.
@@ -536,15 +552,6 @@ class Savemap{
          * been saved, an empty string.
          */
         std::string GetLocationName();
-
-        /**
-         * Retrieves a setting.
-         *
-         * @param[in] key Setting key.
-         * @return The setting value.
-         * @todo Implement and document properly.
-         */
-        int GetSetting(const unsigned int key);
 
         /**
          * Retrieves the char ID of a character.
@@ -941,102 +948,6 @@ class Savemap{
          */
         static constexpr unsigned int MAX_COLOUR = 255;
 
-
-        /**
-         * Game settings.
-         */
-        struct Settings{
-
-            /**
-             * Magic sorting methods.
-             */
-            enum class MagicOrder{
-
-                /**
-                 * Restore-Attack-Indirect.
-                 */
-                RAI,
-
-                /**
-                 * Restore-Indirect-Attack.
-                 */
-                RIA,
-
-                /**
-                 * Attack-Indirect-Restore.
-                 */
-                AIR,
-
-                /**
-                 * Attack-Restore-Indirect.
-                 */
-                ARI,
-
-                /**
-                 * Indirect-Restore-Attack.
-                 */
-                IRA,
-
-                /**
-                 * Indirect-Attack-Restore.
-                 */
-                IAR,
-            };
-
-            /**
-             * ATB modes.
-             */
-            enum class AtbMode{
-
-                /**
-                 * Active battle.
-                 */
-                ACTIVE,
-
-                /**
-                 * Mixed mode.
-                 */
-                RECOMMENDED,
-
-                /**
-                 * Paused mode.
-                 */
-                WAIT
-            };
-
-            /**
-             * Battle speed.
-             */
-            unsigned int battle_speed;
-
-            /**
-             * Battle message speed.
-             */
-            unsigned int battle_msg_speed;
-
-            /**
-             * Field message speed
-             */
-            unsigned int msg_speed;
-
-            /**
-             * Magic order.
-             */
-            MagicOrder order;
-
-            /**
-             * ATB mode.
-             */
-            AtbMode atb_mode;
-
-            /**
-             * Indicates if the battle help window is to be shown.
-             */
-            bool batle_help;
-
-            // TODO: Key mappings, when implemented.
-        };
-
         /**
          * Location information.
          *
@@ -1373,9 +1284,9 @@ class Savemap{
         Location location_;
 
         /**
-         * Game settings.
+         * Settings of the game (config menu), by name. The scripts decide which ones there are.
          */
-        Settings settings_;
+        std::map<std::string, int> settings_;
 
         /**
          * Memory banks.
