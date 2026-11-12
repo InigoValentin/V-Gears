@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <fstream>
 #include <OgreRoot.h>
 #include <OgreConfigFile.h>
 #include <OgreArchiveManager.h>
@@ -163,6 +164,14 @@ int main(int argc, char *argv[]){
         // Execute the configuration file to locad values.
         ConfigFile config;
         config.Execute("./data/config/config.cfg");
+        input_manager->EnsureDefaultGameEvents();
+        // The keys of the configuration file are the default ones.
+        input_manager->SnapshotDefaultGameEvents();
+        // Controller settings chosen by the player, if any. They replace the default keys.
+        {
+            std::ifstream controls("./controls.cfg");
+            if (controls.good()) config.Execute("./controls.cfg");
+        }
 
         // Initialize UID and run it's scripts.
         ui_manager->Initialise();

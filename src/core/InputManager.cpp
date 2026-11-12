@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <algorithm>
 #include "core/Console.h"
 #include "core/InputManager.h"
 #include "core/InputManagerCommands.h"
@@ -51,6 +52,18 @@ void InputManager::Reset(){
 }
 
 void InputManager::ButtonPressed(int button, char text, bool down){
+    // A script asked for the next key (to let the player choose one): report it as an event and do
+    // nothing else with it.
+    if (capture_next_key_ == true && down == true){
+        capture_next_key_ = false;
+        VGears::Event capture_event;
+        capture_event.type = VGears::ET_KEY_PRESS;
+        capture_event.param1 = button;
+        capture_event.param2 = text;
+        capture_event.event = "KEY_CAPTURE";
+        event_queue_.push_back(capture_event);
+        return;
+    }
     if (button_state_[button] != down){
         button_state_[button] = down;
         button_text_[button] = text;
@@ -130,6 +143,22 @@ void InputManager::Update(){
 
 bool InputManager::IsButtonPressed(int button) const{return button_state_[button];}
 
+bool InputManager::IsGameEventPressed(const Ogre::String& event) const{
+    if (Console::getSingleton().IsVisible() == true) return false;
+    for (const BindGameEventInfo& bind : bind_game_events_){
+        if (bind.event != event || bind.buttons.empty()) continue;
+        bool all_pressed = true;
+        for (const int button : bind.buttons){
+            if (IsButtonPressed(button) == false){
+                all_pressed = false;
+                break;
+            }
+        }
+        if (all_pressed == true) return true;
+    }
+    return false;
+}
+
 void InputManager::GetInputEvents(InputEventArray& input_events){
     input_events = event_queue_;
     event_queue_.clear();
@@ -150,6 +179,65 @@ void InputManager::BindGameEvent(const Ogre::String& event, const ButtonList& bu
     info.event = event;
     info.buttons = buttons;
     bind_game_events_.push_back(info);
+}
+
+void InputManager::ScriptSetGameEventKeys(const char* event, const char* keys){
+    const Ogre::String event_name(event);
+    bind_game_events_.erase(
+      std::remove_if(
+        bind_game_events_.begin(), bind_game_events_.end(),
+        [&event_name](const BindGameEventInfo& bind){return bind.event == event_name;}
+      ),
+      bind_game_events_.end()
+    );
+    Ogre::StringVector combinations = Ogre::StringUtil::split(Ogre::String(keys), ",");
+    for (Ogre::String& combination : combinations){
+        Ogre::StringUtil::trim(combination);
+        if (combination.empty()) continue;
+        ButtonList key_codes;
+        if (ParseKeys(combination, key_codes) == false) BindGameEvent(event_name, key_codes);
+    }
+}
+
+std::string InputManager::ScriptGetGameEventKeys(const char* event) const{
+    const Ogre::String event_name(event);
+    std::string keys;
+    for (const BindGameEventInfo& bind : bind_game_events_){
+        if (bind.event != event_name) continue;
+        if (!keys.empty()) keys += ",";
+        for (unsigned int i = 0; i < bind.buttons.size(); ++ i){
+            if (i > 0) keys += "+";
+            keys += KeyToString(static_cast<OIS::KeyCode>(bind.buttons[i]));
+        }
+    }
+    return keys;
+}
+
+void InputManager::ScriptCaptureNextKey(){capture_next_key_ = true;}
+
+void InputManager::SnapshotDefaultGameEvents(){
+    default_game_event_keys_.clear();
+    for (const BindGameEventInfo& bind : bind_game_events_){
+        if (default_game_event_keys_.count(bind.event) == 0){
+            default_game_event_keys_[bind.event] = ScriptGetGameEventKeys(bind.event.c_str());
+        }
+    }
+}
+
+std::string InputManager::ScriptGetDefaultGameEventKeys(const char* event) const{
+    const auto it = default_game_event_keys_.find(Ogre::String(event));
+    return (it == default_game_event_keys_.end()) ? std::string() : it->second;
+}
+
+void InputManager::EnsureDefaultGameEvents(){
+    const struct{const char* event; OIS::KeyCode key;} defaults[] = {
+      {"Up", OIS::KC_UP}, {"Down", OIS::KC_DOWN}, {"Left", OIS::KC_LEFT}, {"Right", OIS::KC_RIGHT}
+    };
+    for (const auto& entry : defaults){
+        if (ScriptGetGameEventKeys(entry.event).empty()){
+            BindGameEvent(entry.event, ButtonList(1, static_cast<int>(entry.key)));
+        }
+    }
 }
 
 void InputManager::ActivateBinds(const int button) {

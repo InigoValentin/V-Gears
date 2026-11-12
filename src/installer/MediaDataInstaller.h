@@ -15,11 +15,14 @@
 
 #pragma once
 
+#include <memory>
 #include <unordered_map>
 #include "DiskImage.h"
 #include "data/VGearsLGPArchive.h"
 #include "common/BinGZipFile.h"
 #include "TexFile.h"
+#include "ExternalTools.h"
+#include "TaskPool.h"
 
 /**
  * The media data installer.
@@ -35,13 +38,8 @@ class MediaDataInstaller{
          * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory of the installation data.
          * @param[in] keep_originals True to keep original data after conversion, false to remove.
-         * @param[in] no_ffmpeg True to prevent system calls to ffmpeg command, false to allow.
-         * @param[in] no_timidity True to prevent system calls to timidity command, false to allow.
          */
-        MediaDataInstaller(
-          const DiskImage& disk_image, const std::string output_dir, const bool keep_originals,
-          const bool no_ffmpeg, const bool no_timidity
-        );
+        MediaDataInstaller(const DiskImage& disk_image, const std::string output_dir, const bool keep_originals);
 
         /**
          * Destructor.
@@ -102,6 +100,14 @@ class MediaDataInstaller{
         void InstallHQMusics();
 
         /**
+         * Waits until every audio conversion started by the install steps has finished.
+         *
+         * The conversions run in the background, so the other steps don't wait for them. Call it before using or
+         * deleting their results.
+         */
+        void WaitForConversions();
+
+        /**
          * Writes the XML file with all music tracks.
          */
         void WriteMusicsIndex();
@@ -121,6 +127,40 @@ class MediaDataInstaller{
     private:
 
         /**
+         * Runs a conversion in the background.
+         *
+         * A failed conversion is logged as a warning.
+         *
+         * @param[in] description What is being converted, for the log.
+         * @param[in] job Does the conversion. Returns false, and sets the error, if it fails.
+         * @param[in] on_success Called, in the background thread, if the conversion succeeds.
+         */
+        void RunConversion(
+          const std::string& description, std::function<bool(std::string*)> job,
+          std::function<void()> on_success = nullptr
+        );
+
+        /**
+         * Finds the conversion programs the first time it is called, and reports what is missing.
+         *
+         * @param[in] need_timidity True if TiMidity is needed too (the music).
+         * @return True if the programs are usable.
+         */
+        bool ToolsReady(bool need_timidity);
+
+        /**
+         * FFmpeg and TiMidity, found by {@see ToolsReady}.
+         */
+        ExternalTools::Tool ffmpeg_tool_;
+        ExternalTools::Tool timidity_tool_;
+        bool tools_resolved_ = false;
+
+        /**
+         * Threads that run the conversions. Created when the first conversion starts.
+         */
+        std::unique_ptr<TaskPool> conversions_;
+
+        /**
          * Number of sound files to extract.
          */
         static int TOTAL_SOUNDS;
@@ -134,6 +174,11 @@ class MediaDataInstaller{
          * The path to the directory where to save the V-Gears data.
          */
         std::string output_dir_;
+
+        /**
+         * Directory where the game data is installed (<install dir>/data/).
+         */
+        std::string data_dir_;
 
         /**
          * The menu.lgp file.
@@ -199,15 +244,5 @@ class MediaDataInstaller{
          * If true, orginal files will not be deleted after conversion.
          */
         bool keep_originals_;
-
-        /**
-         * Flag to enable system calls to ffmpeg.
-         */
-        bool ffmpeg_;
-
-        /**
-         * Flag to enable system calls to timidity.
-         */
-        bool timidity_;
 
 };

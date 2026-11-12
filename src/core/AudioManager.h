@@ -213,6 +213,18 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
         void SoundPlay(const Ogre::String& name);
 
         /**
+         * Plays the sound of a movie, in its own channel.
+         *
+         * @param[in] file Path to the ogg file.
+         */
+        void MoviePlay(const Ogre::String& file);
+
+        /**
+         * Stops the sound of the movie.
+         */
+        void MovieStop();
+
+        /**
          * Stops the currently playing music.
          *
          * Playback can't be resumed. If the battle mode is active, the battle music player will be
@@ -293,6 +305,27 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
         void ScriptPlayMusicOnce(const char* name);
 
         /**
+         * Sets the volume of the music (field, battle and world tracks) and of the audio of the
+         * movies.
+         *
+         * It applies right away to the track that is playing and to the ones that start later. To
+         * be called from Lua scripts.
+         *
+         * @param[in] volume Volume, from 0 (muted) to 1 (maximum).
+         */
+        void ScriptSetMusicVolume(const float volume);
+
+        /**
+         * Sets the volume of the sound effects.
+         *
+         * It applies right away to the sound that is playing and to the ones that start later. To
+         * be called from Lua scripts.
+         *
+         * @param[in] volume Volume, from 0 (muted) to 1 (maximum).
+         */
+        void ScriptSetSoundVolume(const float volume);
+
+        /**
          * Stops the battle music and lets the field or world map music continue.
          *
          * To be called when a battle ends, before going back to the previous module.
@@ -349,6 +382,15 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
                  * @param[in] loop Loop point
                  */
                 void SetLoop(const float loop);
+
+                /**
+                 * Sets the volume of the player.
+                 *
+                 * Applies to the track that is playing, and is kept for the ones that start later.
+                 *
+                 * @param[in] gain Volume, from 0 (muted) to 1 (maximum).
+                 */
+                void SetGain(const float gain);
 
                 /**
                  * Updates the audio player.
@@ -411,6 +453,11 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
                  * Audio source.
                  */
                 ALuint source_;
+
+                /**
+                 * Volume of the player, from 0 to 1.
+                 */
+                float gain_ = 1.0f;
 
                 /**
                  * Fills the audio buffer.
@@ -509,6 +556,11 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
          * Sound effect player.
          */
         AudioManager::Player fx_;
+
+        /**
+         * Player of the sound of movies.
+         */
+        AudioManager::Player movie_;
 
         /**
          * List of music.

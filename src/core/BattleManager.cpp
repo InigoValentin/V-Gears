@@ -19,6 +19,7 @@
 #include <cmath>
 #include <OgreEntity.h>
 #include <OgreRoot.h>
+#include <OgreResourceGroupManager.h>
 #include <OgreViewport.h>
 #include "FF7Character.h"
 #include "core/AudioManager.h"
@@ -289,6 +290,34 @@ void BattleManager::ScriptAddAttackModel(
       id, std::string(model), Ogre::Vector3(x, y, z),
       Ogre::Degree(orientation), std::string(animation)
     );
+}
+
+std::string BattleManager::ScriptAddEffectModel(
+  const char* model, const float x, const float y, const float z, const float scale
+){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to add an effect model, but the BattleManager is not in battle mode.");
+        return "";
+    }
+    const std::string mesh = "effects/" + std::string(model) + ".mesh";
+    if (!Ogre::ResourceGroupManager::getSingleton().resourceExists("BATTLE_MODELS", mesh)){
+        LOG_WARNING("Effect model '" + mesh + "' doesn't exist, reinstall the battle data.");
+        return "";
+    }
+    const std::string name = "fx_" + std::string(model) + "_" + std::to_string(next_effect_id_ ++);
+    const float s = ATTACK_SCALE * scale;
+    EntityManager::getSingleton().AddEntity(
+      name, mesh, Ogre::Vector3(x, y, z), Ogre::Degree(0), Ogre::Vector3(s, s, s),
+      Ogre::Quaternion(1, 1, 0, 0), -1
+    );
+    // Effect meshes have no animations, and battle entities look for "xx_00" by default.
+    Entity* entity = EntityManager::getSingleton().GetEntity(name);
+    if (entity != nullptr) entity->ScriptSetDefaultAnimation("Idle");
+    return name;
+}
+
+void BattleManager::ScriptRemoveEffectModel(const char* name){
+    EntityManager::getSingleton().RemoveBattleEntity(name);
 }
 
 void BattleManager::AddCamera(

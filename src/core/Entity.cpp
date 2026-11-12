@@ -300,6 +300,19 @@ void Entity::setScale(const Ogre::Vector3 &scale) {
     model_root_node_->setScale(scale);
 }
 
+void Entity::ScriptSetScale(const float x, const float y, const float z){
+    setScale(Ogre::Vector3(x, y, z));
+}
+
+void Entity::ScriptSetModelRotation(const float x, const float y, const float z){
+    assert(model_node_);
+    model_node_->setOrientation(
+      Ogre::Quaternion(Ogre::Degree(z), Ogre::Vector3::UNIT_Z)
+      * Ogre::Quaternion(Ogre::Degree(y), Ogre::Vector3::UNIT_Y)
+      * Ogre::Quaternion(Ogre::Degree(x), Ogre::Vector3::UNIT_X)
+    );
+}
+
 void Entity::SetIndex(const int index){
     assert(model_root_node_);
     index_ = index;

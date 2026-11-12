@@ -12,6 +12,13 @@ set(INSTALLER_SOURCE_FILES
     DiskImage.cpp
     FieldDataInstaller.cpp
     FieldTextWriter.cpp
+    InstallLayout.cpp
+    InstallLog.cpp
+    InstallOptions.cpp
+    ExternalTools.cpp
+    InstallVerifier.cpp
+    VideoFiles.cpp
+    MovieCamera.cpp
     KernelDataInstaller.cpp
     MainWindow.cpp
     MediaDataInstaller.cpp
@@ -123,6 +130,7 @@ endif()
 
 # Generate v-gears-installer executable.
 add_executable (v-gears-installer ${INSTALLER_SOURCE_FILES} ${UIS} ${MOCS} ${RCC_SOURCES})
+target_compile_definitions(v-gears-installer PRIVATE VGEARS_INSTALLER_VERSION="${PROJECT_VERSION}")
 SET_PROPERTY(TARGET v-gears-installer PROPERTY FOLDER "build/v-gears-installer")
 if (APPLE)
     target_link_libraries(v-gears-installer "-framework CoreFoundation -framework Cocoa -framework IOKit")

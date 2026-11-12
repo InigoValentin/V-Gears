@@ -14,6 +14,7 @@
  */
 
 #pragma once
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -154,6 +155,30 @@ struct DiskImage{
          * @return True if the disk image is valid, false otherwise.
          */
         bool const isValid();
+
+        /**
+         * Checks if the disk image is a PC game disk (1, 2 or 3). They only have the videos of the game, so they
+         * can't be installed like the install disk: use {@see extractVideos}.
+         */
+        bool const isVideoDisk();
+
+        /**
+         * Extracts the videos of a game disk.
+         *
+         * They are written to "<output_dir>/video/" with lower case names. Videos that already exist with the same
+         * size (several disks have the same ones) are skipped.
+         *
+         * @param[in] output_dir Directory where the game data is installed (ending with '/').
+         * @param[in] progress Receives the progress [0-100].
+         * @param[in] log Receives messages. Those that start with "[ERROR]" are problems.
+         * @param[out] extracted Number of videos copied. Optional.
+         * @param[out] skipped Number of videos that were already installed. Optional.
+         * @return True if every video was extracted.
+         */
+        bool extractVideos(
+          const std::string& output_dir, const std::function<void(float)>& progress,
+          const std::function<void(const std::string&)>& log, int* extracted = nullptr, int* skipped = nullptr
+        );
 
         /**
          * Gets the error message for the disk image.

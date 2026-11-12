@@ -123,6 +123,31 @@ UiWidget* UiManager::GetWidget(const Ogre::String& name){
 
 UiWidget* UiManager::ScriptGetWidget(const char* name){return GetWidget(Ogre::String(name));}
 
+void UiManager::SetWindowColours(
+  const float r1, const float g1, const float b1, const float r2, const float g2, const float b2,
+  const float r3, const float g3, const float b3, const float r4, const float g4, const float b4
+){
+    const float colours[12] = {r1, g1, b1, r2, g2, b2, r3, g3, b3, r4, g4, b4};
+    for (int i = 0; i < 12; ++ i) window_colours_[i] = colours[i];
+    window_colours_set_ = true;
+    for (unsigned int i = 0; i < widgets_.size(); ++ i) ApplyWindowColours(widgets_[i]);
+}
+
+void UiManager::ApplyWindowColours(UiWidget* widget){
+    if (widget == nullptr || window_colours_set_ == false) return;
+    if (widget->IsWindowBackground()){
+        widget->SetColours(
+          window_colours_[0], window_colours_[1], window_colours_[2],
+          window_colours_[3], window_colours_[4], window_colours_[5],
+          window_colours_[6], window_colours_[7], window_colours_[8],
+          window_colours_[9], window_colours_[10], window_colours_[11]
+        );
+    }
+    for (unsigned int i = 0; i < widget->GetNumberOfChildren(); ++ i){
+        ApplyWindowColours(widget->GetChild(i));
+    }
+}
+
 void UiManager::renderQueueStarted(
   Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation
 ){

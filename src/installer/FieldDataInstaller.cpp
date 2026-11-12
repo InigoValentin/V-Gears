@@ -19,6 +19,7 @@
 #include <QtCore/QDir>
 #include "DiskImage.h"
 #include "FieldDataInstaller.h"
+#include "ModelMaterials.h"
 #include "TexFile.h"
 #include "common/File.h"
 #include "data/VGearsMapListFile.h"
@@ -157,7 +158,7 @@ bool FieldDataInstaller::IsTestField(const Ogre::String& resource_name){
 }
 
 void FieldDataInstaller::CreateDir(const std::string& path){
-    QString target = QString::fromStdString(output_dir_ + path);
+    QString target = QString::fromStdString(data_dir_ + path);
     QDir dir(target);
     if (!dir.mkpath(".")) throw std::runtime_error("Failed to mkpath");
 }
@@ -190,7 +191,7 @@ bool FieldDataInstaller::CollectSpawnPoints(
         );
     }
     catch (const ::DecompilerException& ex){
-        std::cerr << "CollectSpawnPoints: decompiler failed for " << field->getName()
+        std::cerr << "[WARNING] CollectSpawnPoints: decompiler failed for " << field->getName()
           << ": " << ex.what() << std::endl;
                 return false;
     }
@@ -233,7 +234,7 @@ FieldDataInstaller::FieldDataInstaller(
     const DiskImage& disk_image, const std::string output_dir,
     std::function<void(std::string)> log_output_line
 ):
-    disk_image_(disk_image), output_dir_(output_dir),
+    disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "data/"),
     write_output_line_(log_output_line)
 {}
 
@@ -272,9 +273,18 @@ void FieldDataInstaller::CollectSpawnAndScaleFactors(int field_index){
                 }
                 catch (const std::exception& exception){
                         failed_fields_.push_back(resource_name);
-                        std::cerr << "CollectSpawnAndScaleFactors: skipped " << resource_name
+                        std::cerr << "[WARNING] CollectSpawnAndScaleFactors: skipped " << resource_name
                             << " after error: " << exception.what() << std::endl;
                 }
+    }
+}
+
+void FieldDataInstaller::LoadInstalledFields(){
+    converted_map_list_.clear();
+    for (const std::string& name : map_list_){
+        if (boost::filesystem::exists(data_dir_ + FIELD_MAPS_DIR + "/" + name + "/map.xml")){
+            converted_map_list_.push_back(name);
+        }
     }
 }
 
@@ -328,7 +338,7 @@ void FieldDataInstaller::Write(int field_index){
 
 void FieldDataInstaller::WriteEnd(){
     doc_->LinkEndChild(element_.release());
-    doc_->SaveFile(output_dir_ + "/fields/_fields.xml");
+    doc_->SaveFile(data_dir_ + "/fields/_fields.xml");
 }
 
 std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){
@@ -354,6 +364,11 @@ std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){
         out.close();
         //field_model_file_list_->push_back(f.file_name);
     }
+    // Ogre indexes a resource location when it is added, so files written afterwards are not found until the
+    // location is registered again. On a clean install the folder was empty when it was first added.
+    Ogre::ResourceGroupManager& res_mgr = Ogre::ResourceGroupManager::getSingleton();
+    res_mgr.removeResourceLocation(output_dir_ + "temp/char/", "FFVII");
+    res_mgr.addResourceLocation(output_dir_ + "temp/char/", "FileSystem", "FFVII", true, true);
     for (auto it = used_models_and_anims_.map.begin(); it != used_models_and_anims_.map.end(); it ++){
         models.push_back(it->first);
     }
@@ -391,14 +406,21 @@ void FieldDataInstaller::ConvertModels(std::string model_name){
                             animated_bounds.getCenter().length() + animated_bounds.getHalfSize().length()
                         ));
         }
-        ExportMesh(output_dir_ + FIELD_MODELS_DIR + "/", mesh);
+        ExportMesh(data_dir_ + FIELD_MODELS_DIR + "/", mesh);
+        // Models can share a skeleton name with different bones. Drop the model (and its skeleton and mesh) so the
+        // next one doesn't reuse them.
+        VGears::HRCFileManager::GetSingleton().remove(model->first, "FFVII");
     }
     catch (const Ogre::Exception& ex){
-        //write_output_line_("[ERROR] Ogre exception converting model " + model->first + ": " + ex.what());
+        if (VGears::HRCFileManager::GetSingleton().resourceExists(model->first, "FFVII"))
+            VGears::HRCFileManager::GetSingleton().remove(model->first, "FFVII");
+        write_output_line_("[ERROR] Ogre exception converting model " + model->first + ": " + ex.what());
         std::cerr << "[ERROR] Ogre exception converting model " << model->first <<": " << ex.what() << std::endl;
     }
     catch (const std::exception& ex){
-        //write_output_line_("[ERROR] Exception converting model " + model->first + ": " + ex.what());
+        if (VGears::HRCFileManager::GetSingleton().resourceExists(model->first, "FFVII"))
+            VGears::HRCFileManager::GetSingleton().remove(model->first, "FFVII");
+        write_output_line_("[ERROR] Exception converting model " + model->first + ": " + ex.what());
         std::cerr << "[ERROR] Exception converting model " << model->first << ": " << ex.what() << std::endl;
     }
 }
@@ -409,6 +431,7 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
     // TODO: Share function with pc model exporter
     VGears::String base_mesh_name;
     VGears::StringUtil::splitFull(mesh->getName(), base_mesh_name);
+    MakeMaterialsUnique(mesh, base_mesh_name);
     Ogre::MeshSerializer mesh_serializer;
     Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
     Ogre::SkeletonSerializer skeleton_serializer;
@@ -418,7 +441,6 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
     Ogre::Mesh::SubMeshIterator it(mesh->getSubMeshIterator());
     Ogre::MaterialSerializer mat_ser;
     size_t i(0);
-    std::set<std::string> textures;
     while (it.hasMoreElements()){
         Ogre::SubMesh *sub_mesh(it.getNext());
         Ogre::MaterialPtr mat(Ogre::MaterialManager::getSingleton().getByName(sub_mesh->getMaterialName()));
@@ -436,6 +458,16 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
                             ){
                                 Ogre::TextureUnitState* unit = pass->getTextureUnitState(texture_unit_num);
                                 if (unit && unit->getTextureName().empty() == false){
+                                    // Materials are shared by name across all model types, so this one may have
+                                    // already been converted for a battle model (its texture is then a png in
+                                    // another folder). There is nothing to convert in that case.
+                                    if (!boost::filesystem::exists(output_dir_ + "temp/char/" + unit->getTextureName())){
+                                        write_output_line_(
+                                          "[WARNING] Texture " + unit->getTextureName() + " of model " + base_mesh_name
+                                          + " not found; skipping it."
+                                        );
+                                        continue;
+                                    }
                                     // Convert the texture from .tex to .png.
                                     TexFile tex(output_dir_ + "temp/char/" + unit->getTextureName());
 
@@ -445,17 +477,16 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
                                     VGears::StringUtil::splitBase(unit->getTextureName(), base_name);
                                     unit->setTextureName(base_mesh_name + "_" + base_name + ".png");
 
-                                    tex.SavePng(output_dir_ + FIELD_MODELS_DIR + "/" + base_name + ".png", 0);
+                                    tex.SavePng(data_dir_ + FIELD_MODELS_DIR + "/" + base_name + ".png", 0);
                                     // Copy subtexture (xxxx.png) to model_xxxx.png
                                     // TODO: obtain the "data" folder
                                     // programatically.
                                     boost::filesystem::copy_file(
-                                        output_dir_ + FIELD_MODELS_DIR + "/" + base_name + ".png",
-                                        output_dir_ + FIELD_MODELS_DIR + "/"
+                                        data_dir_ + FIELD_MODELS_DIR + "/" + base_name + ".png",
+                                        data_dir_ + FIELD_MODELS_DIR + "/"
                                         + base_mesh_name + "_" + base_name + ".png",
                                       boost::filesystem::copy_options::overwrite_existing
                                     );
-                                    textures.insert(unit->getTextureName());
                                 }
                             }
                         }
@@ -471,21 +502,6 @@ void FieldDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPt
         ++ i;
     }
     mat_ser.exportQueued(outdir + base_mesh_name + VGears::EXT_MATERIAL);
-    for (auto& texture_name : textures){
-        std::string tex_name = texture_name.c_str();
-        try{
-            Ogre::TexturePtr texture_ptr = Ogre::TextureManager::getSingleton().load(tex_name, "FFVIITextures");
-            //Ogre::TexturePtr texture_ptr = Ogre::TextureManager::getSingleton().load(tex_name, "FFVII");
-            Ogre::Image image;
-            texture_ptr->convertToImage(image);
-            Ogre::String base_name;
-            VGears::StringUtil::splitBase(texture_name, base_name);
-            image.save(outdir + base_mesh_name + "_" + base_name + ".png");
-        }
-        catch (std::exception const& ex){
-            std::cerr << "[ERROR] Exception: " << ex.what() << std::endl;
-        }
-    }
 }
 
 float FieldDataInstaller::GetFieldScaleFactor(size_t field_id){
@@ -540,10 +556,10 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
         decompiled = FieldDecompiler::Decompile(
           field->getName(), raw_field_data, formatter, gateway_script_data, FieldScriptHeader()
         );
-        std::ofstream script_file(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/script.lua");
+        std::ofstream script_file(data_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/script.lua");
         if (script_file.is_open()){
             script_file << decompiled.luaScript;
-            field_text_writer_.Begin(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/text.xml");
+            field_text_writer_.Begin(data_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/text.xml");
             try{field_text_writer_.Write(raw_field_data, field->getName());}
             catch (const std::out_of_range& ex){
                 write_output_line_("[ERROR] Failed to read texts from field " + field->getName() + ": " + ex.what());
@@ -791,12 +807,12 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
 
         doc.LinkEndChild(element.release());
 
-        doc.SaveFile(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/map.xml");
+        doc.SaveFile(data_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/map.xml");
         const VGears::PaletteFilePtr& pal = field->GetPalette();
         const VGears::BackgroundFilePtr& bg = field->GetBackground();
         std::unique_ptr<Ogre::Image> bg_image(bg->CreateImage(pal));
         bg_image->encode("png");
-        bg_image->save(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/tiles.png");
+        bg_image->save(data_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/tiles.png");
         {
             TiXmlDocument bg_doc;
             std::unique_ptr<TiXmlElement> bg_element(new TiXmlElement("background2d"));
@@ -890,7 +906,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                 //}
             }
             bg_doc.LinkEndChild(bg_element.release());
-            bg_doc.SaveFile(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/bg.xml");
+            bg_doc.SaveFile(data_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/bg.xml");
         }
     }
     {
@@ -911,7 +927,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             wmesh_element->LinkEndChild(xml_element.release());
         }
         doc.LinkEndChild(wmesh_element.release());
-        doc.SaveFile(output_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/wm.xml");
+        doc.SaveFile(data_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/wm.xml");
     }
     converted_map_list_.push_back(field->getName());
 }

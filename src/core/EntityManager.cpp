@@ -259,7 +259,8 @@ void EntityManager::UpdateField(){
                             speed = entity_[i]->GetMoveWalkSpeed();
                             // TODO: Set as a constant.
                             // Or even better, as a configurable variable.
-                            if (player_run_ == true) speed *= 4;
+                            // The run key inverts the default movement.
+                            if (player_run_ != player_default_run_) speed *= 4;
                         }
                         else speed = entity_[i]->GetMoveAutoSpeed();
                         float remaining_time = Timer::getSingleton().GetGameTimeDelta();
@@ -323,6 +324,9 @@ void EntityManager::UpdateField(){
     background_2d_.Update();
     // This can start a battle and change the module, so it's the last thing to do.
     UpdateEncounters(walked);
+    // The movie follows the speed of the game, so the scenes that are timed with it stay in sync.
+    // Its sound doesn't, so at any other speed they drift apart.
+    movie_player_.Update(Timer::getSingleton().GetGameTimeDelta());
     screen_fade_.Update(Timer::getSingleton().GetGameTimeDelta());
 }
 
@@ -439,6 +443,22 @@ void EntityManager::AddBattleEntity(
     entity->ScriptSetDefaultAnimation(anim.c_str());
 
 
+}
+
+void EntityManager::RemoveBattleEntity(const Ogre::String& name){
+    if (module_ != Module::BATTLE) return;
+    for (auto it = battle_entity_.begin(); it != battle_entity_.end(); ++ it){
+        Entity* entity = *it;
+        if (entity->GetName() != name) continue;
+        ScriptManager::getSingleton().RemoveEntity(ScriptManager::BATTLE, name);
+        battle_entity_.erase(it);
+        // The entity is not deleted, as its destructor would destroy the model again, like in
+        // ClearBattle.
+        Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(name);
+        scene_node_->removeAndDestroyChild("Battle_" + name);
+        entity->ReleaseResources();
+        return;
+    }
 }
 
 Entity* EntityManager::GetBackground3D() const{
@@ -597,6 +617,8 @@ bool EntityManager::IsWorldPositionBlocked(
 Background2D* EntityManager::GetBackground2D(){return &background_2d_;}
 
 ScreenFade* EntityManager::GetScreenFade(){return &screen_fade_;}
+
+MoviePlayer* EntityManager::GetMoviePlayer(){return &movie_player_;}
 
 void EntityManager::AddEntity(
   const Ogre::String& name, const Ogre::String& file_name,
@@ -773,6 +795,8 @@ void EntityManager::ScriptPlayerLock(const bool lock){
 
 bool EntityManager::IsPlayerLocked() const{return player_lock_;}
 
+void EntityManager::SetPlayerDefaultRun(const bool run){player_default_run_ = run;}
+
 void EntityManager::SetPlayerMoveRotation(const Ogre::Radian rotation){
     if (IsBattleModule()){
         LOG_WARNING("Tried to set player move rotation the EntityManager is in battle mode.");
@@ -915,14 +939,16 @@ bool EntityManager::IsKeyOn(unsigned int key_code){
     // Some scene where the player can't move but must press a button?
     if (player_lock_) return false;
     // The key code of the scripts is a mask of the pad buttons, and the check is true if any of
-    // them is pressed. Translate each to its key. For example 32 is "Circle/Action", the space bar.
-    // TODO: Get values from config.lua
-    static const struct{unsigned int mask; int key;} KEYS[] = {
-      {4, OIS::KC_PGUP}, {8, OIS::KC_PGDOWN}, {32, OIS::KC_SPACE}, {64, OIS::KC_ESCAPE},
-      {4096, OIS::KC_UP}, {8192, OIS::KC_RIGHT}, {16384, OIS::KC_DOWN}, {32768, OIS::KC_LEFT}
+    // them is pressed. Translate each to its game event (see bind_game_event in config.cfg), so
+    // the keys chosen in the controller settings are the ones that count. For example 32 is
+    // "Circle/Action", the OK button.
+    static const struct{unsigned int mask; const char* event;} BUTTONS[] = {
+      {1, "L2"}, {2, "R2"}, {4, "L1"}, {8, "R1"}, {16, "MENU"}, {32, "CONFIRM"}, {64, "CANCEL"},
+      {128, "EXTRA"}, {256, "SELECT"}, {2048, "START"},
+      {4096, "Up"}, {8192, "Right"}, {16384, "Down"}, {32768, "Left"}
     };
-    for (const auto& entry : KEYS)
-        if ((key_code & entry.mask) && InputManager::getSingleton().IsButtonPressed(entry.key))
+    for (const auto& entry : BUTTONS)
+        if ((key_code & entry.mask) && InputManager::getSingleton().IsGameEventPressed(entry.event))
             return true;
     return false;
 }

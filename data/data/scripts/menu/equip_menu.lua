@@ -111,7 +111,7 @@ UiContainer.EquipMenu = {
                 elseif button == Config.CONTROLS.DOWN then
                     audio_manager:play_sound("Cursor")
                     -- Move one position down only if there is a next item
-                    if #(list) <= self.list_item_selected + 1 then
+                    if #(list) <= self.list_item_selected then
                         return 0
                     end
                     self.list_item_selected = self.list_item_selected + 1
@@ -150,11 +150,11 @@ UiContainer.EquipMenu = {
                     -- Equip the seleced item
                     local item_id = nil
                     if self.selecting_slot == Inventory.ITEM_TYPE.WEAPON then
-                        item_id = self.avail_weapons[self.list_item_selected + 1]
+                        item_id = self.avail_weapons[self.list_item_selected]
                     elseif self.selecting_slot == Inventory.ITEM_TYPE.ARMOR then
-                        item_id = self.avail_armors[self.list_item_selected + 1]
+                        item_id = self.avail_armors[self.list_item_selected]
                     elseif self.selecting_slot == Inventory.ITEM_TYPE.ACCESSORY then
-                        item_id = self.avail_accessories[self.list_item_selected + 1]
+                        item_id = self.avail_accessories[self.list_item_selected]
                     end
                     if Characters.equip(self.char_id, item_id) == false then
                         audio_manager:play_sound("Error")
@@ -258,8 +258,8 @@ UiContainer.EquipMenu = {
             return false
         end
         for i = 1, self.list_position_total do
-            if #(list) >= i + self.list_first_visible then
-                local name = Game.Items[list[i + self.list_first_visible]].name
+            if #(list) >= i + self.list_first_visible - 1 then
+                local name = Game.Items[list[i + self.list_first_visible - 1]].name
                 ui_manager:get_widget("EquipMenu.Container.List.Item" .. tostring(i)):set_text(name)
             else
                 ui_manager:get_widget("EquipMenu.Container.List.Item" .. tostring(i)):set_text("")
@@ -274,8 +274,10 @@ UiContainer.EquipMenu = {
         self.avail_weapons = {}
         self.avail_armors = {}
         self.avail_accessories = {}
-        for _, item in ipairs(Inventory) do
-            if item.item ~= nil then
+        -- The inventory can have empty slots in between, so ipairs() can't be used.
+        for slot = 1, MAX_INVENTORY_SLOTS do
+            local item = Inventory[slot]
+            if item ~= nil and item.item ~= nil then
                 local item_type = Game.Items[item.item].type
                 if item_type == Inventory.ITEM_TYPE.WEAPON or item_type == Inventory.ITEM_TYPE.ARMOR or item_type == Inventory.ITEM_TYPE.ACCESSORY then
                     local equip = Game.Items[item.item].users
@@ -338,13 +340,13 @@ UiContainer.EquipMenu = {
         else
             -- Selecting from the list
             if self.selecting_slot == Inventory.ITEM_TYPE.WEAPON then
-                item = Game.Items[self.avail_weapons[self.list_item_selected + 1]]
+                item = Game.Items[self.avail_weapons[self.list_item_selected]]
                 type = Inventory.ITEM_TYPE.WEAPON
             elseif self.selecting_slot == Inventory.ITEM_TYPE.ARMOR then
-                item = Game.Items[self.avail_armors[self.list_item_selected + 1]]
+                item = Game.Items[self.avail_armors[self.list_item_selected]]
                 type = Inventory.ITEM_TYPE.ARMOR
             elseif self.selecting_slot == Inventory.ITEM_TYPE.ACCESSORY then
-                item = Game.Items[self.avail_accessories[self.list_item_selected + 1]]
+                item = Game.Items[self.avail_accessories[self.list_item_selected]]
                 type = Inventory.ITEM_TYPE.ACCESSORY
             end
         end
@@ -358,6 +360,10 @@ UiContainer.EquipMenu = {
         -- If accessory, hide all details and return
         if type == Inventory.ITEM_TYPE.ACCESSORY then
             ui_manager:get_widget("EquipMenu.Container.SlotsEmpty"):set_visible(true)
+            return 0
+        end
+        if item == nil then
+            -- Nothing to show details for (e.g. empty slot).
             return 0
         end
         ui_manager:get_widget("EquipMenu.Container.SlotsEmpty"):set_visible(false)
@@ -397,10 +403,10 @@ UiContainer.EquipMenu = {
         local item
         local cur_item
         if self.selecting_slot == Inventory.ITEM_TYPE.WEAPON then
-            item = Game.Items[self.avail_weapons[self.list_item_selected + 1]]
+            item = Game.Items[self.avail_weapons[self.list_item_selected]]
             cur_item = Game.Items[Characters[self.char_id].weapon.id]
         elseif self.selecting_slot == Inventory.ITEM_TYPE.ARMOR then
-            item = Game.Items[self.avail_armors[self.list_item_selected + 1]]
+            item = Game.Items[self.avail_armors[self.list_item_selected]]
             cur_item = Game.Items[Characters[self.char_id].armor.id]
         end
         ui_manager:get_widget("EquipMenu.Container.Stats.AtkDif"):set_visible(false)
@@ -508,6 +514,7 @@ UiContainer.EquipMenu = {
         ui_manager:get_widget("EquipMenu"):set_visible(false)
         UiContainer.current_menu = "main"
         UiContainer.current_submenu = ""
+        UiContainer.resume_menu("main")
         return 0;
     end,
 }

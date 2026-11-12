@@ -158,6 +158,9 @@ void UiTextArea::Update(){
 }
 
 void UiTextArea::Render(){
+    // Scripts that run after the widgets update (like the battle) can change the text or the
+    // position of a widget in the same frame it is drawn, so the geometry is refreshed here.
+    if (update_transformation_ == true && visible_ == true) UpdateTransformation();
     if (update_transformation_ == false && visible_ == true){
         if (render_operation_.vertexData->vertexCount != 0){
             auto render_parameters = render_system_->getFixedFunctionParams(

@@ -109,6 +109,24 @@ class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
         );
 
         /**
+         * Places the camera where the camera of a movie is, to draw the models over it. The field
+         * camera is kept, and the scroll of the background doesn't move the camera until
+         * {@see EndMovieCamera}.
+         *
+         * @param[in] position Camera coordinates.
+         * @param[in] orientation Camera rotation.
+         * @param[in] fov Vertical field of view.
+         */
+        void SetMovieCamera(
+          const Ogre::Vector3& position, const Ogre::Quaternion& orientation, const Ogre::Radian& fov
+        );
+
+        /**
+         * Puts the camera of the field back, with its scroll.
+         */
+        void EndMovieCamera();
+
+        /**
          * Starts the battle camera
          *
          * Saves the position and orientation of the current camera to return once the battle is
@@ -311,5 +329,10 @@ class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
          * The camera scroll.
          */
         Ogre::Vector2 d2_scroll_;
+
+        /**
+         * Whether the camera is the one of a movie.
+         */
+        bool movie_camera_ = false;
 };
 

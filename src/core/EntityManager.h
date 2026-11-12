@@ -25,6 +25,7 @@
 #include "EntityTrigger.h"
 #include "Event.h"
 #include "Manager.h"
+#include "MoviePlayer.h"
 #include "ScreenFade.h"
 #include "Walkmesh.h"
 
@@ -130,6 +131,16 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void ClearBattle() override;
 
         /**
+         * Removes a battle entity, for example one made for a visual effect.
+         *
+         * If the manager is not in the battle module, or the entity doesn't exist, it will do
+         * nothing.
+         *
+         * @param[in] name Entity name.
+         */
+        void RemoveBattleEntity(const Ogre::String& name);
+
+        /**
          * Clears all world map information in the entity manager.
          *
          * It clears the background, the walkmesh, any pending actions and all the world entities.
@@ -167,6 +178,13 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @return The screen fade.
          */
         ScreenFade* GetScreenFade();
+
+        /**
+         * Retrieves the movie player.
+         *
+         * @return The movie player.
+         */
+        MoviePlayer* GetMoviePlayer();
 
         /**
          * Adds an entity to the manager.
@@ -368,6 +386,17 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @param[in] lock True to lock, false to unlock.
          */
         void ScriptPlayerLock(const bool lock);
+
+        /**
+         * Sets if the player moves running by default.
+         *
+         * If true, the player runs unless the run key is held, which makes it walk. If false (the
+         * default), the player walks unless the run key is held. To be called from Lua scripts
+         * (movement setting of the config menu).
+         *
+         * @param[in] run True to run by default, false to walk by default.
+         */
+        void SetPlayerDefaultRun(const bool run);
 
         /**
          * Checks if the player movement is locked.
@@ -771,6 +800,11 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         Background2D background_2d_;
 
         /**
+         * The movie player. It has to be created before the screen fade, which is drawn over it.
+         */
+        MoviePlayer movie_player_;
+
+        /**
          * The coloured fade of the screen. It has to be created after the background, because the
          * fade must be drawn over it.
          */
@@ -826,6 +860,11 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * Applies only for manual movement.
          */
         bool player_run_;
+
+        /**
+         * Indicates if the player runs by default, and the run key makes it walk instead.
+         */
+        bool player_default_run_ = false;
 
         /**
          * List of triggers.

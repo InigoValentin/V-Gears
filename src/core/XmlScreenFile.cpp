@@ -131,6 +131,10 @@ void XmlScreenFile::LoadScreenRecursive(
                         Ogre::Vector3 colour = GetVector3(node, "colour", Ogre::Vector3(1, 1, 1));
                         widget2->SetColour(colour.x, colour.y, colour.z);
                     }
+                    if (GetBool(node, "window_background", false) == true){
+                        widget2->SetWindowBackground(true);
+                        UiManager::getSingleton().ApplyWindowColours(widget2);
+                    }
                     float alpha = GetFloat(node, "alpha", 1);
                     widget2->SetAlpha(alpha);
                     Ogre::String align = GetString(node, "align");

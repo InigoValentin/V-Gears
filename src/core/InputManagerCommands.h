@@ -117,8 +117,28 @@ void CmdBindGameEvent(const Ogre::StringVector& params){
     }
 }
 
+/**
+ * Replaces all the keys bound to a game event.
+ *
+ * @param[in] params Parameters. Exactly three are required. The first one is the command name and
+ * it's not evaluated here. The second one is the game event, and the third one the keys separated
+ * by commas (a combination of keys is joined with '+'). Used by the controller settings file.
+ */
+void CmdSetGameEventKeys(const Ogre::StringVector& params){
+    if (params.size() != 3){
+        Console::getSingleton().AddTextToOutput(
+          "Usage: /set_game_event_keys \"<game event>\" \"<key1>[,<key2>...]\""
+        );
+        return;
+    }
+    InputManager::getSingleton().ScriptSetGameEventKeys(params[1].c_str(), params[2].c_str());
+}
+
 // TODO: Move this to InpuManager.cpp?
 void InputManager::InitCmd(){
+    ConfigCmdHandler::getSingleton().AddCommand(
+      "set_game_event_keys", "Replace the keys of a game event", "", CmdSetGameEventKeys, NULL
+    );
     ConfigCmdHandler::getSingleton().AddCommand(
       "bind", "Bind command to keys", "", CmdBind, NULL
     );

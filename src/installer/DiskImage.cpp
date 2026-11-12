@@ -20,6 +20,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include "DiskImage.h"
+#include "VideoFiles.h"
 #include <QtCore/qstring.h>
 #include <QtCore/qdir.h>
 #include <QtCore/qdiriterator.h>
@@ -134,9 +135,10 @@ DiskImage::DiskImage(std::string path) : DiskImage() {
             region = REGION_NORTH_AMERICA;
             language = LANGUAGE_ENGLISH;
             disk = DISK_1;
-            supported = false;
-            valid = false;
-            error_message = "To install from a PC release disk, use the install disk instead.";
+            // The game disks only have the videos; the rest of the game is installed from the install disk.
+            supported = true;
+            valid = true;
+            error_message = "";
             warning_message = "";
             return true;
         }
@@ -147,9 +149,10 @@ DiskImage::DiskImage(std::string path) : DiskImage() {
             region = REGION_NORTH_AMERICA;
             language = LANGUAGE_ENGLISH;
             disk = DISK_2;
-            supported = false;
-            valid = false;
-            error_message = "To install from a PC release disk, use the install disk instead.";
+            // The game disks only have the videos; the rest of the game is installed from the install disk.
+            supported = true;
+            valid = true;
+            error_message = "";
             warning_message = "";
             return true;
         }
@@ -160,9 +163,10 @@ DiskImage::DiskImage(std::string path) : DiskImage() {
             region = REGION_NORTH_AMERICA;
             language = LANGUAGE_ENGLISH;
             disk = DISK_3;
-            supported = false;
-            valid = false;
-            error_message = "To install from a PC release disk, use the install disk instead.";
+            // The game disks only have the videos; the rest of the game is installed from the install disk.
+            supported = true;
+            valid = true;
+            error_message = "";
             warning_message = "";
             return true;
         }
@@ -997,6 +1001,119 @@ const std::string DiskImage::getErrorMessage(){
 const std::string DiskImage::getWarningMessage(){
     return warning_message;
 };
+
+bool const DiskImage::isVideoDisk(){
+    return valid && platform == PLATFORM_PC && (disk == DISK_1 || disk == DISK_2 || disk == DISK_3);
+}
+
+bool DiskImage::extractVideos(
+  const std::string& output_dir, const std::function<void(float)>& progress,
+  const std::function<void(const std::string&)>& log, int* extracted, int* skipped
+){
+    if (extracted) *extracted = 0;
+    if (skipped) *skipped = 0;
+    const std::string video_dir = output_dir + "video/";
+    if (!QDir().mkpath(QString::fromStdString(video_dir))){
+        log("[ERROR] Could not create " + video_dir);
+        return false;
+    }
+
+    // First pass: which movies the disk has, and their total size, to report the progress.
+    uint64_t total_bytes = 0;
+    {
+        struct archive* a = archive_read_new();
+        archive_read_support_format_all(a);
+        archive_read_support_filter_all(a);
+        if (archive_read_open_filename(a, path.c_str(), 10240) != ARCHIVE_OK){
+            log("[ERROR] Could not open the disk image: " + std::string(archive_error_string(a)));
+            archive_read_free(a);
+            return false;
+        }
+        struct archive_entry* entry;
+        while (archive_read_next_header(a, &entry) == ARCHIVE_OK){
+            const char* entry_path = archive_entry_pathname(entry);
+            if (entry_path && archive_entry_filetype(entry) == AE_IFREG && VideoFiles::IsMovie(entry_path))
+                total_bytes += archive_entry_size(entry);
+        }
+        archive_read_free(a);
+    }
+    if (total_bytes == 0){
+        log("[ERROR] The disk image has no videos.");
+        return false;
+    }
+
+    // Second pass: copy them.
+    struct archive* a = archive_read_new();
+    archive_read_support_format_all(a);
+    archive_read_support_filter_all(a);
+    if (archive_read_open_filename(a, path.c_str(), 10240) != ARCHIVE_OK){
+        log("[ERROR] Could not open the disk image: " + std::string(archive_error_string(a)));
+        archive_read_free(a);
+        return false;
+    }
+    bool ok = true;
+    uint64_t done_bytes = 0;
+    struct archive_entry* entry;
+    while (archive_read_next_header(a, &entry) == ARCHIVE_OK){
+        const char* entry_path = archive_entry_pathname(entry);
+        std::string name;
+        if (!entry_path || archive_entry_filetype(entry) != AE_IFREG || !VideoFiles::IsMovie(entry_path, &name)) continue;
+        const uint64_t size = archive_entry_size(entry);
+        const std::string destination = video_dir + name;
+
+        // Several disks have the same videos: skip the ones that are already there.
+        struct stat existing;
+        if (stat(destination.c_str(), &existing) == 0 && static_cast<uint64_t>(existing.st_size) == size){
+            if (skipped) ++ *skipped;
+            done_bytes += size;
+            progress(100.0f * done_bytes / total_bytes);
+            continue;
+        }
+
+        // Written under a temporary name so an interrupted copy is never taken for a video.
+        const std::string partial = destination + ".part";
+        std::ofstream out(partial, std::ios::binary | std::ios::trunc);
+        if (!out){
+            log("[ERROR] Could not write " + destination);
+            ok = false;
+            continue;
+        }
+        const void* buffer;
+        size_t length;
+        la_int64_t offset;
+        bool file_ok = true;
+        while (true){
+            const int r = archive_read_data_block(a, &buffer, &length, &offset);
+            if (r == ARCHIVE_EOF) break;
+            if (r < ARCHIVE_OK){
+                log("[ERROR] Could not read " + name + ": " + archive_error_string(a));
+                file_ok = false;
+                break;
+            }
+            out.seekp(offset);
+            out.write(static_cast<const char*>(buffer), length);
+            done_bytes += length;
+            progress(100.0f * std::min<uint64_t>(done_bytes, total_bytes) / total_bytes);
+        }
+        out.close();
+        if (!file_ok || !out){
+            std::remove(partial.c_str());
+            ok = false;
+            continue;
+        }
+        std::remove(destination.c_str());
+        if (std::rename(partial.c_str(), destination.c_str()) != 0){
+            log("[ERROR] Could not create " + destination);
+            ok = false;
+            continue;
+        }
+        log("Extracted " + name);
+        if (extracted) ++ *extracted;
+    }
+    archive_read_free(a);
+    progress(100);
+    return ok;
+}
 
 std::string const DiskImage::getContentPath() {
     return content_path;

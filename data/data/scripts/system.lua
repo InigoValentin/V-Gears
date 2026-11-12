@@ -120,9 +120,6 @@ set_party = function(character1, character2, character3)
     Party[1] = character1
     Party[2] = character2
     Party[3] = character3
-    Party[1] = character1
-    Party[2] = character2
-    Party[3] = character3
     export_party_members()
 end
 
@@ -145,19 +142,19 @@ add_party_character = function(character)
         print("Tried add to party invalid character \"" .. character .. "\".");
         return
     end
-    if Characters[character].party_lock == true then
+    if Characters[character].locked == true then
         print("Tried add to party locked character \"" .. character .. "\".");
         return
     end
     -- Check if character already in party
-    for x = 1, 3 do
+    for i = 1, 3 do
         if Party[i] == character then
             print("Character \"" .. character .. "\" already in party.");
             return
         end
     end
     -- Try to add in first free slot.
-    for x = 1, 3 do
+    for i = 1, 3 do
         if Party[i] == nil then
             Party[i] = character
             export_party_members()
@@ -174,11 +171,11 @@ remove_party_character = function(character)
         print("Tried remove from party invalid character \"" .. character .. "\".");
         return
     end
-    if Characters[character].party_lock == true then
+    if Characters[character].locked == true then
         print("Tried remove from party locked character \"" .. character .. "\".");
         return
     end
-    for x = 1, 3 do
+    for i = 1, 3 do
         if Party[i] == character then
             Party[i] = nil
             export_party_members()
@@ -197,7 +194,7 @@ set_party_lock = function(character, lock)
         print("Tried set/unset party lock to invalid character \"" .. character .. "\".");
         return
     end
-    Characters[character].party_lock = lock;
+    Characters[character].locked = lock;
 end
 
 --- Checks if a character is locked in the party.
@@ -210,7 +207,7 @@ get_party_lock = function(character)
         print("Tried get party lock from invalid character \"" .. character .. "\".");
         return false
     end
-    return Characters[character].party_lock
+    return Characters[character].locked
 end
 
 --- Enables or disables a character is the PHS.
@@ -224,7 +221,7 @@ set_character_enable = function(character, enable)
         print("Tried enable/disable invalid character \"" .. character .. "\".");
         return
     end
-    Characters[character].enable = enable;
+    Characters[character].enabled = enable;
 end
 
 --- Checks if a character is enabled in the PHS.
@@ -238,7 +235,7 @@ get_character_enable = function(character)
         print("Tried get enabled from invalid character \"" .. character .. "\".");
         return false
     end
-    return Characters[character].enable;
+    return Characters[character].enabled;
 end
 
 --- Adds items to the inventory.
@@ -447,9 +444,10 @@ Characters.recalculate_stats = function(id)
     stats.lck.total = stats.lck.base
     stats.hp.max = stats.hp.base
     stats.mp.max = stats.mp.base
-    -- Weapon bonus. HP and MP are percents of base, the rest absolutes.
+    -- Weapon bonus. HP and MP are percents of base, the rest absolutes. The stats are keyed by name,
+    -- so they are walked with pairs (ipairs only walks the array part and found nothing).
     local weapon = Game.Items[Characters[id].weapon.id]
-    for stat, value in ipairs(weapon.stats) do
+    for stat, value in pairs(weapon.stats or {}) do
         if stat == "str" then
             stats.str.total = stats.str.total + value
         elseif stat == "vit" then
@@ -470,7 +468,7 @@ Characters.recalculate_stats = function(id)
     end
     -- Armor bonus. HP and MP are percents of bsae, the rest absolutes.
     local armor = Game.Items[Characters[id].armor.id]
-    for stat, value in ipairs(armor.stats) do
+    for stat, value in pairs(armor.stats or {}) do
         if stat == "str" then
             stats.str.total = stats.str.total + value
         elseif stat == "vit" then
@@ -492,7 +490,7 @@ Characters.recalculate_stats = function(id)
     -- Accesory bonus
     local accessory = Game.Items[Characters[id].accessory]
     if (accessory ~= nil) then
-        for stat, value in ipairs(armor.stats) do
+        for stat, value in pairs(accessory.stats or {}) do
             if stat == "str" then
                 stats.str.total = stats.str.total + value
             elseif stat == "vit" then
@@ -519,12 +517,12 @@ Characters.recalculate_stats = function(id)
             table.insert(materias, Game.Materia[Characters[id].weapon.materia[m].id])
         end
         if Characters[id].armor.materia[m] ~= nil then
-            table.insert(materias, Game.Materia[Characters[id].weapon.materia[m].id])
+            table.insert(materias, Game.Materia[Characters[id].armor.materia[m].id])
         end
     end
     -- Get materia bonuses. All are percents of base.
     for _, materia in ipairs(materias) do
-        for stat, value in ipairs(materia.stats) do
+        for stat, value in pairs(materia.stats or {}) do
             if stat == "str" then
                 stats.str.total = stats.str.total + (value * stats.str.base / 100)
             elseif stat == "vit" then
@@ -625,6 +623,21 @@ Characters.recalculate_stats = function(id)
     Characters[id].stats = stats
 end
 
+--- Sends the materia that doesn't fit in a piece of equipment back to the materia inventory.
+--
+-- @param char_id ID of the character.
+-- @param part "weapon" or "armor".
+-- @param slots Number of materia slots the equipment will have. Slots are 0-7 in the character.
+Characters.remove_excess_materia = function(char_id, part, slots)
+    local materia = Characters[char_id][part].materia
+    for m = slots, 7 do
+        if materia[m] ~= nil then
+            Materia.add(materia[m].id, materia[m].ap)
+            materia[m] = nil
+        end
+    end
+end
+
 --- Equips an item on a character.
 --
 -- Works for weapons, armors and accessories. If there is a previously equiped item, it
@@ -644,15 +657,15 @@ Characters.equip = function(char_id, item_id)
         print("Tried to equip item on wrong character: " .. tostring(char_id))
         return false
     elseif Game.Items[item_id] == nil then
-        print("Tried to equip invalid item: " .. tostring(character))
+        print("Tried to equip invalid item: " .. tostring(item_id))
         return false
     elseif Inventory.get_item_quantity(item_id) < 1 then
-        print("Tried to equip item not in inventory: " .. item_id .. " (" .. Game.Items[item.id].name .. ")")
+        print("Tried to equip item not in inventory: " .. item_id .. " (" .. Game.Items[item_id].name .. ")")
         return false
     end
     local type = Game.Items[item_id].type
     if type ~= Inventory.ITEM_TYPE.WEAPON and type ~= Inventory.ITEM_TYPE.ARMOR and type ~= Inventory.ITEM_TYPE.ACCESSORY then
-        print("Tried to equip non-equipable item: " .. item_id .. " (" .. Game.Items[item.id].name .. ")")
+        print("Tried to equip non-equipable item: " .. item_id .. " (" .. Game.Items[item_id].name .. ")")
         return false
     end
     local equipable = false
@@ -663,7 +676,7 @@ Characters.equip = function(char_id, item_id)
         end
     end
     if equipable == false then
-        print("Tried to equip item " .. tostring(item_id) .. " (" .. Game.Items[item.id].name .. ") on a non valid character: " .. tostring(char_id) .. " (" .. Characters[char_id].name .. ")")
+        print("Tried to equip item " .. tostring(item_id) .. " (" .. Game.Items[item_id].name .. ") on a non valid character: " .. tostring(char_id) .. " (" .. Characters[char_id].name .. ")")
         return false
     end
 
@@ -677,25 +690,13 @@ Characters.equip = function(char_id, item_id)
         Inventory.remove_item(item_id, 1)
     elseif type == Inventory.ITEM_TYPE.WEAPON then
         -- Weapon. Remove excess materia, send previuos one to the inventory.
-        for m = 0, 7 do
-            if Characters[char_id].weapon.materia[i] ~= nil and #(Game.Items[item_id].slots) < m then
-                -- Materia to inventory
-                Materia.add(Characters[char_id].weapon.materia[i].id, Characters[char_id].weapon.materia[i].ap)
-                Characters[char_id].weapon.materia[i] = nil
-            end
-        end
+        Characters.remove_excess_materia(char_id, "weapon", #(Game.Items[item_id].slots))
         Inventory.add_item(Characters[char_id].weapon.id, 1)
         Characters[char_id].weapon.id = item_id
         Inventory.remove_item(item_id, 1)
     elseif type == Inventory.ITEM_TYPE.ARMOR then
         -- Armor. Remove excess materia, send previuos one to the inventory.
-        for m = 0, 7 do
-            if Characters[char_id].armor.materia[i] ~= nil and #(Game.Items[item_id].slots) < m then
-                -- Materia to inventory
-                Materia.add(Characters[char_id].armor.materia[i].id, Characters[char_id].armor.materia[i].ap)
-                Characters[char_id].armor.materia[i] = nil
-            end
-        end
+        Characters.remove_excess_materia(char_id, "armor", #(Game.Items[item_id].slots))
         Inventory.add_item(Characters[char_id].armor.id, 1)
         Characters[char_id].armor.id = item_id
         Inventory.remove_item(item_id, 1)
@@ -723,7 +724,7 @@ end
 Materia.add = function(id, ap)
     local ap = ap or 0
     if Game.Materia[id] == nil then
-        print("Tried to add invalid materia \"" .. item .. "\".");
+        print("Tried to add invalid materia \"" .. tostring(id) .. "\".");
         return
     end
     -- TODO Cap AP?

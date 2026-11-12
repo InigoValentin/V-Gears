@@ -1,7 +1,7 @@
 font FFVIIFont
 {
     type image
-    source system/courier_new_9_75.png
+    source courier_new_9_75.png
 
     glyph u32 0.015625 0.125 0.046875 0.1875
     glyph u33 0.078125 0.125 0.109375 0.1875
@@ -233,7 +233,7 @@ font FFVIIFont
 font CourierNew
 {
     type image
-    source system/courier_new_9_75.png
+    source courier_new_9_75.png
 
     glyph u32 0.015625 0.125 0.046875 0.1875
     glyph u33 0.078125 0.125 0.109375 0.1875

@@ -601,6 +601,9 @@ set(VGEARS_SOURCE_FILES
     core/Background2DAnimation.cpp
     core/Background2D.cpp
     core/ScreenFade.cpp
+    core/MovieCameraFrame.cpp
+    core/MoviePlayer.cpp
+    core/MovieState.cpp
     core/ScreenFadeState.cpp
     core/BattleManager.cpp
     core/CameraManager.cpp

@@ -87,18 +87,11 @@ void ScriptManager::Input(const VGears::Event& event){
     if (
       (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
       && (
+        // Only the keys that scripts read by themselves reach them as raw keys: the letters and the
+        // space bar, to type in the name menu and for the debug keys of the battle. Everything else
+        // goes through the game events of config.cfg, so it can be remapped.
         // TODO: Do this the other way: block keys NOT TO pass to scripts.
-        event.param1 == OIS::KC_RETURN
-        || event.param1 == OIS::KC_ESCAPE
-        || event.param1 == OIS::KC_SPACE
-        || event.param1 == OIS::KC_LCONTROL
-        || event.param1 == OIS::KC_LEFT
-        || event.param1 == OIS::KC_RIGHT
-        || event.param1 == OIS::KC_DOWN
-        || event.param1 == OIS::KC_UP
-        || event.param1 == OIS::KC_PGUP
-        || event.param1 == OIS::KC_PGDOWN
-        || event.param1 == OIS::KC_BACK
+        event.param1 == OIS::KC_SPACE
         || event.param1 == OIS::KC_A || event.param1 == OIS::KC_B || event.param1 == OIS::KC_C
         || event.param1 == OIS::KC_D || event.param1 == OIS::KC_E || event.param1 == OIS::KC_F
         || event.param1 == OIS::KC_G || event.param1 == OIS::KC_H || event.param1 == OIS::KC_I

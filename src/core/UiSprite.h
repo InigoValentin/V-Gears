@@ -86,6 +86,10 @@ class UiSprite : public UiWidget{
          */
         void SetImage(const char* image) override;
 
+        void SetImageRegion(const float u1, const float v1, const float u2, const float v2) override;
+
+        void SetAdditive(const bool additive) override;
+
         /**
          * Sets the vertex shader for the sprite.
          *
@@ -141,6 +145,11 @@ class UiSprite : public UiWidget{
          * The render operation.
          */
         Ogre::RenderOperation render_operation_;
+
+        /**
+         * Part of the image that is drawn: left, top, right and bottom, from 0 to 1.
+         */
+        float image_region_[4] = {0.0f, 0.0f, 1.0f, 1.0f};
 
         /**
          * The vertex buffer.

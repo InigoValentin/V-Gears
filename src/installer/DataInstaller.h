@@ -75,16 +75,6 @@ class DataInstaller{
             bool videos;
 
             /**
-             * Option to enable calls to the ffmpeg executable.
-             */
-            bool ffmpeg;
-
-            /**
-             * Option to enable calls to the timidity executable
-             */
-            bool timidity;
-
-            /**
              * Option to install field maps.
              */
             bool fields;
@@ -159,13 +149,13 @@ class DataInstaller{
         const float CalcProgress();
 
         /**
-         * Creates a directory in the outputh path.
+         * Creates a directory in the data path (<installation dir>/data/).
          *
-         * @param[in] dir Path of the directory to create, relative to the
-         * output path.
+         * @param[in] dir Path of the directory to create, relative to the data path.
+         * @param[in] in_root True to make the path relative to the installation dir instead.
          * @throws std::runtime_error If the directory can't be created.
          */
-        void CreateDir(const std::string& dir);
+        void CreateDir(const std::string& dir, bool in_root = false);
 
         /**
          * Creates all directories required for the installation.
@@ -273,6 +263,16 @@ class DataInstaller{
              * Converts 3D spell models.
              */
             SPELL_MODELS_CONVERT,
+
+            /**
+             * Extracts the meshes and textures of the battle effects.
+             */
+            EFFECT_MODELS_INIT,
+
+            /**
+             * Converts the battle effect meshes.
+             */
+            EFFECT_MODELS_CONVERT,
 
             /**
              * Parses item and materia prices from ff7.exe.
@@ -466,6 +466,13 @@ class DataInstaller{
         InstallationSteps installation_state_ = IDLE;
 
         /**
+         * Gets the name of the part of the installation a step belongs to.
+         *
+         * @param[in] state An installation step.
+         */
+        static const char* StepGroup(int state);
+
+        /**
          * Substeps in the current installation step.
          */
         int substeps_;
@@ -496,6 +503,16 @@ class DataInstaller{
          * The path to the directory where to save the V-Gears data.
          */
         std::string output_dir_;
+
+        /**
+         * Directory where the game data is installed (<install dir>/data/).
+         */
+        std::string data_dir_;
+
+        /**
+         * Name of the part of the installation being done, used to report problems per part.
+         */
+        const char* current_group_ = nullptr;
 
         /**
          * Advanced options.

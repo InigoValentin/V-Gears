@@ -287,6 +287,32 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
 
 
         /**
+         * Adds a mesh of a visual effect to the battle scene.
+         *
+         * The meshes come from the installer, in models/battle/effects. The entity can be moved,
+         * scaled and blended from the scripts, and should be removed with
+         * {@see ScriptRemoveEffectModel} when the effect ends.
+         *
+         * @param[in] model Model name, without path or extension, like "magic_faira_1".
+         * @param[in] x Position, X coordinate.
+         * @param[in] y Position, Y coordinate.
+         * @param[in] z Position, Z coordinate.
+         * @param[in] scale Scale, relative to the size of attack models. 1 is the original size.
+         * @return Name of the new entity, empty if it couldn't be created.
+         */
+        std::string ScriptAddEffectModel(
+          const char* model, const float x, const float y, const float z, const float scale
+        );
+
+        /**
+         * Removes an effect mesh added with {@see ScriptAddEffectModel}.
+         *
+         * @param[in] name Name of the entity.
+         */
+        void ScriptRemoveEffectModel(const char* name);
+
+
+        /**
          * Sets the battle layout.
          *
          * @param[in] layout The battle layout. {@see LAYOUT}. When one of the unknowns is
@@ -535,6 +561,12 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         );
 
     private:
+
+        /**
+         * Counter to give names to effect entities.
+         */
+        unsigned int next_effect_id_ = 0;
+
 
         /**
          * Loads the party members into the battle.

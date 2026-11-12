@@ -4,7 +4,7 @@
 If you are runind Debian (or derivates), you can install the required dependencies by running as root
 
 ```bash
-apt install g++ cmake libqt5widgets5 qtbase5-dev zlib1g-dev libogre-1.12-dev libois-dev libvorbis-dev libboost-dev libboost-program-options-dev libboost-test-dev libboost-filesystem-dev libboost-thread-dev libopenal-dev libtinyxml-dev libluajit-5.1-dev
+apt install g++ cmake libqt5widgets5 qtbase5-dev zlib1g-dev libarchive-dev libogre-1.12-dev libois-dev libvorbis-dev libboost-dev libboost-program-options-dev libboost-test-dev libboost-filesystem-dev libboost-thread-dev libopenal-dev libtinyxml-dev libluajit-5.1-dev
 ```
 
 ## Deterministic fallbacks
@@ -43,9 +43,25 @@ If you want to speed it up a bit (it can take several minutes, depending on your
 Once the build process finishes, you u sholh have the following files (from the project directory):
 
 - `build/bin/v-gears`, the engine executable.
-- `build/bin/v-gears-launcher`, the data installer.
+- `build/bin/v-gears-installer`, the data installer.
 
-Both the engine and the installer are a little pesky about from where they are launched, so before trying to run them, keep reading.
+The engine must be launched from the installation directory (the installer starts it from there for you), so before trying to run it, keep reading.
+
+## Run the tests (optional)
+
+The tests are not built by default. To build and run the tests of the installer logic (the option rules, the installation layout, the verifier, the log and the tool finder), which don't need the rest of the engine:
+
+```bash
+mkdir build-tests;
+cd build-tests;
+cmake ../ -DBUILD_TESTS=ON;
+make v-gears-installer-tests;
+./bin/v-gears-installer-tests
+```
+
+## Optional programs
+
+To convert the sound effects and the music, the installer uses FFmpeg and TiMidity. They are not needed to build V-Gears, only to install the data. See the [data installation guide](INSTALL_DATA.md "Install Data").
 
 ## Next steps
 
