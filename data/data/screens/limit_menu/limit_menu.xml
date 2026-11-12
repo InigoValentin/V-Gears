@@ -1,0 +1,83 @@
+<screen name="LimitMenu" script="scripts/menu/limit_menu.lua" visible="false">
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Character" width="100%" height="70" visible="true">
+            <prototype name="Window" />
+            <sprite name="Portrait" image="other/choco.png" x="10" y="12" width="42" height="48" visible="true" />
+            <widget name="Data" x="66" y="14" width="100%-66" height="100%-14" visible="true">
+                <prototype name="MenuCharacterData" />
+            </widget>
+            <text_area name="LimitLbl" text_name="LimitMenuLimitLevel" x="181" y="12" font="FFVIIFont" visible="true" />
+            <text_area name="LimitLevel" x="242" y="14" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="LimitLevelBar" image="icons/menu_bar.png" x="196" y="26" width="56" height="8" visible="true" />
+            <sprite name="LimitLinePart1" x="197" y="27" width="25" height="3" colours="0.5 0.5 0.5, 0.5 0.5 0.5, 0.5 0.125 0.31, 0.5 0.125 0.31" alpha="0.8" visible="false" />
+            <sprite name="LimitLinePart2" x="197" y="30" width="25" height="3" colours="0.5 0.125 0.31, 0.5 0.125 0.31, 0 0 0, 0 0 0" alpha="0.8" visible="false" />
+            <widget name="Modes" x="0" y="44" width="100%" height="14" visible="true">
+                <text_area name="Set" text_name="LimitMenuSet" x="197" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Check" text_name="LimitMenuCheck" x="245" y="0" font="FFVIIFont" visible="true" />
+                <sprite name="Cursor" image="icons/cursor.png" x="170" y="1" width="24" height="17" visible="true">
+                    <animation name="Position1" length="0" x="0:170" />
+                    <animation name="Position2" length="0" x="0:218" />
+                </sprite>
+            </widget>
+        </widget>
+        <widget name="Title" x="100%-70" y="0" width="70" height="22" visible="true">
+            <prototype name="Window" />
+            <text_area name="Title" text_name="LimitMenuTitle" x="12" y="5" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Help" x="0" y="70" width="100%" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Help" x="16" y="6" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Body" x="0" y="94" width="100%" height="100%-94" visible="true">
+            <prototype name="Window" />
+            <widget name="Level1" x="28" y="30" width="120" height="40" visible="true">
+                <text_area name="Lbl" x="0" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Tech1" x="11" y="13" font="FFVIIFont" visible="true" />
+                <text_area name="Tech2" x="11" y="26" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="Level2" x="200" y="30" width="120" height="40" visible="true">
+                <text_area name="Lbl" x="0" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Tech1" x="11" y="13" font="FFVIIFont" visible="true" />
+                <text_area name="Tech2" x="11" y="26" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="Level3" x="28" y="100" width="120" height="40" visible="true">
+                <text_area name="Lbl" x="0" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Tech1" x="11" y="13" font="FFVIIFont" visible="true" />
+                <text_area name="Tech2" x="11" y="26" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="Level4" x="200" y="100" width="120" height="40" visible="true">
+                <text_area name="Lbl" x="0" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Tech1" x="11" y="13" font="FFVIIFont" visible="true" />
+                <text_area name="Tech2" x="11" y="26" font="FFVIIFont" visible="true" />
+            </widget>
+            <sprite name="LevelCursor" image="icons/cursor.png" x="-2" y="28" width="24" height="17" visible="false">
+                <animation name="Position1" length="0" x="0:-2" y="0:28" />
+                <animation name="Position2" length="0" x="0:170" y="0:28" />
+                <animation name="Position3" length="0" x="0:-2" y="0:98" />
+                <animation name="Position4" length="0" x="0:170" y="0:98" />
+            </sprite>
+            <sprite name="TechCursor" image="icons/cursor.png" x="9" y="40" width="24" height="17" visible="false">
+                <animation name="Position1" length="0" x="0:9" y="0:40" />
+                <animation name="Position2" length="0" x="0:9" y="0:53" />
+                <animation name="Position3" length="0" x="0:181" y="0:40" />
+                <animation name="Position4" length="0" x="0:181" y="0:53" />
+                <animation name="Position5" length="0" x="0:9" y="0:110" />
+                <animation name="Position6" length="0" x="0:9" y="0:123" />
+                <animation name="Position7" length="0" x="0:181" y="0:110" />
+                <animation name="Position8" length="0" x="0:181" y="0:123" />
+            </sprite>
+        </widget>
+        <widget name="Confirm" x="78" y="46" width="164" height="82" visible="false">
+            <prototype name="Window" />
+            <text_area name="Line1" text_name="LimitMenuConfirm1" x="8" y="7" font="FFVIIFont" visible="true" />
+            <text_area name="Line2" text_name="LimitMenuConfirm2" x="8" y="21" font="FFVIIFont" visible="true" />
+            <text_area name="Line3" text_name="LimitMenuConfirm3" x="8" y="35" font="FFVIIFont" visible="true" />
+            <text_area name="Yes" text_name="Yes" x="70" y="54" font="FFVIIFont" visible="true" />
+            <text_area name="No" text_name="No" x="70" y="66" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="icons/cursor.png" x="44" y="55" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:43" />
+                <animation name="Position2" length="0" y="0:55" />
+            </sprite>
+        </widget>
+    </widget>
+</screen>

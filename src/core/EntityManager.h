@@ -378,6 +378,17 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void ScriptPlayerLock(const bool lock);
 
         /**
+         * Sets if the player moves running by default.
+         *
+         * If true, the player runs unless the run key is held, which makes it walk. If false (the
+         * default), the player walks unless the run key is held. To be called from Lua scripts
+         * (movement setting of the config menu).
+         *
+         * @param[in] run True to run by default, false to walk by default.
+         */
+        void SetPlayerDefaultRun(const bool run);
+
+        /**
          * Checks if the player movement is locked.
          *
          * @return True if it is locked.
@@ -839,6 +850,11 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * Applies only for manual movement.
          */
         bool player_run_;
+
+        /**
+         * Indicates if the player runs by default, and the run key makes it walk instead.
+         */
+        bool player_default_run_ = false;
 
         /**
          * List of triggers.

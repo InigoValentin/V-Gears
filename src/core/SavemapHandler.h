@@ -252,7 +252,25 @@ class SavemapHandler : public Ogre::Singleton<SavemapHandler>{
          * @param[in] value Setting value.
          * @todo Does nothing, implement when settings are working.
          */
-        void SetSetting(const unsigned int key, const unsigned int value);
+        void SetSetting(const char* key, const int value);
+
+        /**
+         * Checks if a saved savemap has a setting.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] key Name of the setting.
+         * @return True if the slot has the setting. False if it doesn't, or the slot is invalid.
+         */
+        bool IsSlotSettingSet(const unsigned int slot, const char* key);
+
+        /**
+         * Gets a setting from a saved savemap.
+         *
+         * @param[in] slot The slot to read from.
+         * @param[in] key Name of the setting.
+         * @return The value of the setting, or 0 if the slot doesn't have it.
+         */
+        int GetSlotSetting(const unsigned int slot, const char* key);
 
         /**
          * Sets a character basic information in the current savemap.
@@ -606,16 +624,6 @@ class SavemapHandler : public Ogre::Singleton<SavemapHandler>{
          * string.
          */
         std::string GetSlotLocationName(const unsigned int slot);
-
-        /**
-         * Retrieves a setting from a saved savemap.
-         *
-         * @param[in] slot The slot to read from.
-         * @param[in] key Setting key.
-         * @return The setting value.
-         * @todo Implement and document properly.
-         */
-        int GetSlotSetting(const unsigned int slot, const unsigned int key);
 
         /**
          * Retrieves the char ID of a character from a saved savemap.

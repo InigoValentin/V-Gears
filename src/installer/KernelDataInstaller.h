@@ -2562,6 +2562,8 @@ class KernelDataInstaller{
          * Attacks read from the kernel.
          */
         std::vector<AttackData> attacks_;
+        /** Limit techniques (attack IDs 128 and up). Only name and description are filled. */
+        std::vector<AttackData> limit_attacks_;
 
         /**
          * Character info read from the kernel.

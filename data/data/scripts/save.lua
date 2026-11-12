@@ -14,7 +14,8 @@ end
 -- @param force If false, exisiting game data will not be overwritten if control keys are different.
 save_game = function(slot, force)
     savemap_manager:set_control_key(ControlKey)
-    savemap_manager:set_window_colours(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12) -- TODO Actual data
+    -- Settings of the config menu, and the colours of the windows.
+    UiContainer.ConfigMenu:save_settings()
     savemap_manager:set_money(Inventory.money)
     savemap_manager:set_game_time(123456) -- TODO Actual data
     savemap_manager:set_countdown_time(0) -- TODO Actual data
@@ -35,7 +36,7 @@ save_game = function(slot, force)
             if Materia[i].id == Materia.ENEMY_SKILL_ID then
                 for s = 1, 24 do
                     if Materia[i].skills[s] == true then
-                        savemap_manager:set_e_skill_materia(i - 1, s, true)
+                        savemap_manager:set_e_skill_materia(i - 1, s - 1, true)
                     end
                 end
             end
@@ -46,7 +47,6 @@ save_game = function(slot, force)
     local x, y, z = player:get_position()
 
     savemap_manager:set_location(x, y, z, player:get_move_triangle_id(), player:get_rotation(), System["MapChanger"].current_map_name, System["MapChanger"].location_name) -- TODO Actual data
-    -- TODO Settings, when implemented
     for i = 0, 11 do
         if Characters[i] ~= nil and Characters[i].char_id ~= nil then
             local c = Characters[i]
@@ -63,23 +63,17 @@ save_game = function(slot, force)
                 savemap_manager:set_character_limit_learned(i, l - 1, 0, c.limit.learned[l][1], c.limit.uses[l])
                 savemap_manager:set_character_limit_learned(i, l - 1, 1, c.limit.learned[l][2], c.limit.uses[l])
             end
-            for m = 0, 8 do
-                if c.weapon.materia[m] ~= nil then
-                    savemap_manager:set_character_materia(i, true, m, c.weapon.materia[m].id, c.weapon.materia[m].ap)
-                    if c.weapon.materia[m].id == Materia.ENEMY_SKILL_ID then
-                        for s = 1, 24 do
-                            if c.weapon.materia[m].skills[s] == true then
-                                savemap_manager:set_character_e_skill_materie(i, true, m, s, true)
-                            end
-                        end
-                    end
-                end
-                if c.armor[m] ~= nil then
-                    savemap_manager:set_character_materia(i, false, m, c.armor.materia[m].id, c.weapon.materia[m].ap)
-                    if c.weapon.materia[m].id == Materia.ENEMY_SKILL_ID then
-                        for s = 1, 24 do
-                            if c.armor.materia[m].skills[s] == true then
-                                savemap_manager:set_character_e_skill_materie(i, true, m, s, true)
+            for m = 0, 7 do
+                for _, part in ipairs({"weapon", "armor"}) do
+                    local is_weapon = (part == "weapon")
+                    local materia = c[part].materia[m]
+                    if materia ~= nil then
+                        savemap_manager:set_character_materia(i, is_weapon, m, materia.id, materia.ap)
+                        if materia.id == Materia.ENEMY_SKILL_ID then
+                            for s = 1, 24 do
+                                if materia.skills[s] == true then
+                                    savemap_manager:set_character_e_skill_materia(i, is_weapon, m, s - 1, true)
+                                end
                             end
                         end
                     end
@@ -99,7 +93,97 @@ save_game = function(slot, force)
     savemap_manager:save(slot, force or true)
 end
 
---- Laods a game.
+--- Loads the characters from a saved game. Everything save_game saves of them.
+--
+-- The characters that already exist are updated in place, so the data that isn't saved stays.
+--
+-- @param slot The slot to load (0-15).
+local function load_characters(slot)
+    -- The savemap has room for 11 characters.
+    for c = 0, 10 do
+        if savemap_manager:get_slot_character_char_id(slot, c) ~= -1 then
+            local character = Characters[c] or {}
+            Characters[c] = character
+            character.char_id = savemap_manager:get_slot_character_char_id(slot, c)
+            character.name = savemap_manager:get_slot_character_name(slot, c)
+            character.level = savemap_manager:get_slot_character_level(slot, c)
+            character.enabled = savemap_manager:is_slot_character_enabled(slot, c)
+            character.locked = savemap_manager:is_slot_character_locked(slot, c)
+            character.kills = savemap_manager:get_slot_character_kills(slot, c)
+            character.back_row = savemap_manager:is_slot_character_back_row(slot, c)
+            character.exp = savemap_manager:get_slot_character_exp(slot, c)
+            character.exp_to_next = savemap_manager:get_slot_character_exp_to_next(slot, c)
+
+            -- Stats: strength, vitality, magic, spirit, dexterity and luck, then HP and MP.
+            character.stats = character.stats or {}
+            local stat_names = { "str", "vit", "mag", "spr", "dex", "lck" }
+            for index, name in ipairs(stat_names) do
+                character.stats[name] = {
+                    base = savemap_manager:get_slot_character_stat_base(slot, c, index - 1),
+                    bonus = savemap_manager:get_slot_character_stat_extra(slot, c, index - 1),
+                    total = 0,
+                }
+            end
+            -- For HP and MP the "extra" value is the current one. The maximum is calculated.
+            character.stats.hp = {
+                current = savemap_manager:get_slot_character_stat_extra(slot, c, 6),
+                base = savemap_manager:get_slot_character_stat_base(slot, c, 6),
+                max = 65535,
+            }
+            character.stats.mp = {
+                current = savemap_manager:get_slot_character_stat_extra(slot, c, 7),
+                base = savemap_manager:get_slot_character_stat_base(slot, c, 7),
+                max = 65535,
+            }
+
+            -- Limit breaks. Levels are 0-3 in the savemap, and 1-4 in the game.
+            character.limit = {
+                current = savemap_manager:get_slot_character_limit_level(slot, c),
+                bar = savemap_manager:get_slot_character_limit_bar(slot, c),
+                learned = {},
+                uses = {},
+            }
+            for l = 1, 4 do
+                character.limit.learned[l] = {
+                    [1] = savemap_manager:is_slot_character_limit_learned(slot, c, l - 1, 0),
+                    [2] = savemap_manager:is_slot_character_limit_learned(slot, c, l - 1, 1),
+                }
+                character.limit.uses[l] = savemap_manager:get_slot_character_limit_uses(slot, c, l - 1)
+            end
+
+            -- Equipment and its materia (slots 0-7).
+            local accessory = savemap_manager:get_slot_character_accessory_id(slot, c)
+            character.accessory = (accessory >= 0) and accessory or nil
+            character.weapon = { id = savemap_manager:get_slot_character_weapon_id(slot, c), materia = {} }
+            character.armor = { id = savemap_manager:get_slot_character_armor_id(slot, c), materia = {} }
+            for _, part in ipairs({ "weapon", "armor" }) do
+                local is_weapon = (part == "weapon")
+                for m = 0, 7 do
+                    local id = savemap_manager:get_slot_character_materia_id(slot, c, is_weapon, m)
+                    if id >= 0 then
+                        local materia = { id = id, ap = savemap_manager:get_slot_character_materia_ap(slot, c, is_weapon, m) }
+                        if id == Materia.ENEMY_SKILL_ID then
+                            materia.ap = 0
+                            materia.skills = {}
+                            for s = 1, 24 do
+                                materia.skills[s] = savemap_manager:get_slot_character_materia_e_skill_learned(slot, c, is_weapon, m, s - 1)
+                            end
+                        end
+                        character[part].materia[m] = materia
+                    end
+                end
+            end
+
+            -- TODO: Status
+            character.status = {}
+            Characters.recalculate_stats(c)
+        end
+    end
+end
+
+--- Loads a game.
+--
+-- It loads everything save_game saves, and then goes to the field where the game was saved.
 --
 -- @param slot The slot to load (0-15).
 load_game = function(slot)
@@ -109,7 +193,8 @@ load_game = function(slot)
             Banks[b][a] = savemap_manager:get_slot_data(slot, b, a)
         end
     end
-    -- TODO: Window colours
+    -- Settings of the config menu, and the colours of the windows.
+    UiContainer.ConfigMenu:load_settings(slot)
     Inventory.money = savemap_manager:get_slot_money(slot)
     -- TODO: Game time
     -- TODO: Countdown
@@ -119,25 +204,27 @@ load_game = function(slot)
             Party[p] = nil
         end
     end
-    for i = 0, MAX_INVENTORY_SLOTS do
-        Inventory[i] = {item = 0, quantity = 0}
-        Inventory[i].quantity = savemap_manager:get_slot_item_at_pos_qty(slot, i)
-        if Inventory[i].quantity > 0 then
-            Inventory[i].id = savemap_manager:get_slot_item_at_pos_id(slot, i)
+    -- The inventory and the materia are 1-based in the game, and 0-based in the savemap.
+    for i = 1, MAX_INVENTORY_SLOTS do
+        local quantity = savemap_manager:get_slot_item_at_pos_qty(slot, i - 1)
+        if quantity > 0 then
+            Inventory[i] = {
+                item = savemap_manager:get_slot_item_at_pos_id(slot, i - 1),
+                quantity = quantity,
+            }
         else
             Inventory[i] = nil
         end
     end
-    for i = 0, MAX_MATERIA_SLOTS do
-        Materia[i] = {id = -1, ap = 0}
-        Materia[i].id = savemap_manager:get_slot_materia_at_pos_id(slot, i)
-        if Materia[i].id >= 0 then
-            Materia[i].ap = savemap_manager:get_slot_materia_at_pos_ap(slot, i)
-            if Materia[i].id == Materia.ENEMY_SKILL_ID then
+    for i = 1, MAX_MATERIA_SLOTS do
+        local id = savemap_manager:get_slot_materia_at_pos_id(slot, i - 1)
+        if id >= 0 then
+            Materia[i] = { id = id, ap = savemap_manager:get_slot_materia_at_pos_ap(slot, i - 1) }
+            if id == Materia.ENEMY_SKILL_ID then
                 Materia[i].ap = 0
                 Materia[i].skills = {}
                 for s = 1, 24 do
-                    Materia[i].skills[s] = savemap_manager:is_slot_materia_at_pos_e_skill_learned(slot, i, s - 1)
+                    Materia[i].skills[s] = savemap_manager:is_slot_materia_at_pos_e_skill_learned(slot, i - 1, s - 1)
                 end
             end
         else
@@ -145,122 +232,11 @@ load_game = function(slot)
         end
     end
     -- TODO: Stash (same as materia)
-    for i = 0, MAX_KEY_SLOTS do
-        Inventory.key[i] = savemap_manager:get_slot_key_item(slot, i)
+    for i = 1, MAX_KEY_SLOTS do
+        Inventory.key[i] = savemap_manager:get_slot_key_item(slot, i - 1)
     end
-    -- Characters
-    for c = 0, 11 do
-        Characters[c].char_id = savemap_manager:get_slot_character_char_id(slot, c)
-        if Characters[c].char_id == -1 then
-            Characters[c] = nil
-        else
-            Characters[c] = {}
-            Characters[c].name = savemap_manager:get_slot_character_name(slot, c)
-            Characters[c].level = savemap_manager:get_slot_character_level(slot, c)
-            Characters[c].enabled = savemap_manager:is_slot_character_enabled(slot, c)
-            Characters[c].locked = savemap_manager:is_slot_character_locked(slot, c)
-            Characters[c].kills = savemap_manager:get_slot_character_kills(slot, c)
-            Characters[c].back_row = savemap_manager:is_slot_character_back_row(slot, c)
-            Characters[c].exp = savemap_manager:get_slot_character_exp(slot, c)
-            Characters[c].exp_to_next = savemap_manager:get_slot_character_exp_to_next(slot, c)
-            Characters[c].stats = {}
-            Characters[c].stats.str = {
-                base = savemap_manager:get_slot_character_stat_base(slot, c, 0),
-                bonus = savemap_manager:get_slot_character_stat_extra(slot, c, 0),
-                total = 0
-            }
-            Characters[c].stats.vit = {
-                base = savemap_manager:get_slot_character_stat_base(slot, c, 1),
-                bonus = savemap_manager:get_slot_character_stat_extra(slot, c, 1),
-                total = 0
-            }
-            Characters[c].stats.mag = {
-                base = savemap_manager:get_slot_character_stat_base(slot, c, 2),
-                bonus = savemap_manager:get_slot_character_stat_extra(slot, c, 2),
-                total = 0
-            }
-            Characters[c].stats.spr = {
-                base = savemap_manager:get_slot_character_stat_base(slot, c, 3),
-                bonus = savemap_manager:get_slot_character_stat_extra(slot, c, 3),
-                total = 0
-            }
-            Characters[c].stats.dex = {
-                base = savemap_manager:get_slot_character_stat_base(slot, c, 4),
-                bonus = savemap_manager:get_slot_character_stat_extra(slot, c, 4),
-                total = 0
-            }
-            Characters[c].stats.lck = {
-                base = savemap_manager:get_slot_character_stat_base(slot, c, 5),
-                bonus = savemap_manager:get_slot_character_stat_extra(slot, c, 5),
-                total = 0
-            }
-            Characters[c].stats.hp = {
-                current = savemap_manager:get_slot_character_stat_extra(slot, c, 6),
-                base = savemap_manager:get_slot_character_stat_base(slot, c, 6),
-                max = 65535
-            }
-            Characters[c].stats.mp = {
-                current = savemap_manager:get_slot_character_stat_extra(slot, c, 7),
-                base = savemap_manager:get_slot_character_stat_base(slot, c, 7),
-                max = 65535
-            }
-            Characters[c].limit = {}
-            Characters[c].limit.current = savemap_manager:get_slot_character_limit_level(slot, c)
-            Characters[c].limit.bar = savemap_manager:get_slot_character_limit_bar(slot, c)
-            Characters[c].limit.learned = {}
-            Characters[c].limit.uses = {}
-            for l = 1, 4 do
-                Characters[c].limit.learned[l] = {
-                    [1] = savemap_manager:is_slot_character_limit_learned(slot, c, l, 0),
-                    [2] = savemap_manager:is_slot_character_limit_learned(slot, c, l, 1)
-                }
-                Characters[c].limit.uses[l] = savemap_manager:get_slot_character_limit_uses(slot, c, l)
-            end
-            Characters[c].accessory = savemap_manager:get_slot_character_accessory_id(slot, c)
-            Characters[c].weapon = {}
-            Characters[c].armor = {}
-            Characters[c].weapon.id = savemap_manager:get_slot_character_weapon_id(slot, c)
-            Characters[c].armor.id = savemap_manager:get_slot_character_armor_id(slot, c)
-            Characters[c].weapon.materia = {}
-            Characters[c].armor.materia = {}
-            for i = 0, 8 do
-                Characters[c].weapon.materia[i] = {id = -1, ap = 0}
-                Characters[c].armor.materia[i] = {id = -1, ap = 0}
-                Characters[c].weapon.materia[i].id = savemap_manager:get_slot_character_materia_id(slot, c, true, i)
-                Characters[c].armor.materia[i].id = savemap_manager:get_slot_character_materia_id(slot, c, false, i)
-                if Characters[c].weapon.materia[i].id >= 0 then
-                    Characters[c].weapon.materia[i].ap = savemap_manager:get_slot_character_materia_ap(slot, i, true, i)
-                    if Characters[c].weapon.materia[i].id == Materia.ENEMY_SKILL_ID then
-                        Characters[c].weapon.materia[i].ap = 0
-                        Characters[c].weapon.materia[i].skills = {}
-                        for s = 1, 24 do
-                            Characters[c].weapon.materia[i].skills[s] = savemap_manager:is_slot_character_materia_e_skill_learned(slot, i, c, true, s - 1)
-                        end
-                    end
-                else
-                    Characters[c].weapon.materia[i] = nil
-                end
-                if Characters[c].armor.materia[i].id >= 0 then
-                    Characters[c].armor.materia[i].ap = savemap_manager:get_slot_character_materia_ap(slot, i, false, i)
-                    if Characters[c].armor.materia[i].id == Materia.ENEMY_SKILL_ID then
-                        Characters[c].armor.materia[i].ap = 0
-                        Characters[c].armor.materia[i].skills = {}
-                        for s = 1, 24 do
-                            Characters[c].armor.materia[i].skills[s] = savemap_manager:is_slot_character_materia_e_skill_learned(slot, i, c, false, s - 1)
-                        end
-                    end
-                else
-                    Characters[c].armor.materia[i] = nil
-                end
-            end
-            -- TODO: Status
-            Characters[c].status = {}
-            Characters.recalculate_stats(c)
-        end
-
-    end
+    load_characters(slot)
     export_character_names()
-    -- TODO: Settings
     -- TODO: Location
     -- TODO: Update character stats
     -- TODO: Handle world map when implemented

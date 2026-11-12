@@ -60,11 +60,9 @@
     <text name="ItemMenuOrder">Order</text>
     <text name="ItemMenuKey">Key Items</text>
     <text name="ItemMenuStatus">Status</text>
-    <text name="ItemMenuOrder">Order</text>
     <text name="ItemMenuLimit">Limit</text>
     <text name="ItemMenuConfig">Config</text>
     <text name="ItemMenuPHS">PHS</text>
-    <text name="MainMenuSave">Save</text>
     <text name="ItemMenuOrder1">Custom</text>
     <text name="ItemMenuOrder2">Field</text>
     <text name="ItemMenuOrder3">Battle</text>
@@ -137,4 +135,118 @@
     <text name="BattleUiTime">TIME</text>
     <text name="GameOverText">GAME OVER</text>
     <text name="BattleUiDebugExit">Debug: Press 'K' to end battle.</text>
+
+    <text name="StatusMenuStr"><colour value="0 0.8 1">Strength</colour></text>
+    <text name="StatusMenuDex"><colour value="0 0.8 1">Dexterity</colour></text>
+    <text name="StatusMenuVit"><colour value="0 0.8 1">Vitality</colour></text>
+    <text name="StatusMenuMag"><colour value="0 0.8 1">Magic</colour></text>
+    <text name="StatusMenuSpr"><colour value="0 0.8 1">Spirit</colour></text>
+    <text name="StatusMenuLck"><colour value="0 0.8 1">Luck</colour></text>
+    <text name="StatusMenuAttack"><colour value="0 0.8 1">Attack</colour></text>
+    <text name="StatusMenuAttackPct"><colour value="0 0.8 1">Attack%</colour></text>
+    <text name="StatusMenuDefense"><colour value="0 0.8 1">Defense</colour></text>
+    <text name="StatusMenuDefensePct"><colour value="0 0.8 1">Defense%</colour></text>
+    <text name="StatusMenuMagicAtk"><colour value="0 0.8 1">Magic atk</colour></text>
+    <text name="StatusMenuMagicDef"><colour value="0 0.8 1">Magic def</colour></text>
+    <text name="StatusMenuMagicDefPct"><colour value="0 0.8 1">Magic def%</colour></text>
+    <text name="StatusMenuExp"><colour value="0 0.8 1">EXP:</colour></text>
+    <text name="StatusMenuNextLevel"><colour value="0 0.8 1">next level:</colour></text>
+    <text name="StatusMenuLimitLevel"><colour value="0 0.8 1">Limit level:</colour></text>
+    <text name="StatusMenuElement"><colour value="0 0.8 1">Element</colour></text>
+    <text name="StatusMenuEffect"><colour value="0 0.8 1">Effect</colour></text>
+    <text name="StatusMenuAttackGroup"><colour value="0 0.8 1">Attack</colour></text>
+    <text name="StatusMenuHalve"><colour value="0 0.8 1">Halve</colour></text>
+    <text name="StatusMenuInvalid"><colour value="0 0.8 1">Invalid</colour></text>
+    <text name="StatusMenuAbsorb"><colour value="0 0.8 1">Absorb</colour></text>
+    <text name="StatusMenuDefend"><colour value="0 0.8 1">Defend</colour></text>
+    <text name="LimitMenuTitle">Limit</text>
+    <text name="LimitMenuSet">Set</text>
+    <text name="LimitMenuCheck">Check</text>
+    <text name="LimitMenuLimitLevel">Limit level</text>
+    <text name="LimitMenuConfirm1">To change BREAK LEVEL,</text>
+    <text name="LimitMenuConfirm2">it will begin from Limit Point 0.</text>
+    <text name="LimitMenuConfirm3">Change BREAK LEVEL?</text>
+    <text name="QuitMenuLine1">Any unsaved progress will be lost.</text>
+    <text name="QuitMenuLine2">Do you really want to quit the game?</text>
+    <text name="PhsMenuTitle">PHS</text>
+    <text name="PhsMenuHelp">Please make a party of three.</text>
+    <text name="ConfigMenuTitle">Config</text>
+    <text name="ConfigMenuLabelWindowColor"><colour value="0 0.8 1">Window color</colour></text>
+    <text name="ConfigMenuLabelSound"><colour value="0 0.8 1">Sound</colour></text>
+    <text name="ConfigMenuLabelController"><colour value="0 0.8 1">Controller</colour></text>
+    <text name="ConfigMenuLabelCursor"><colour value="0 0.8 1">Cursor</colour></text>
+    <text name="ConfigMenuLabelAtb"><colour value="0 0.8 1">ATB</colour></text>
+    <text name="ConfigMenuLabelBattleSpeed"><colour value="0 0.8 1">Battle speed</colour></text>
+    <text name="ConfigMenuLabelBattleMessage"><colour value="0 0.8 1">Battle message</colour></text>
+    <text name="ConfigMenuLabelFieldMessage"><colour value="0 0.8 1">Field message</colour></text>
+    <text name="ConfigMenuLabelMovement"><colour value="0 0.8 1">Movement</colour></text>
+    <text name="ConfigMenuLabelCameraAngle"><colour value="0 0.8 1">Camera angle</colour></text>
+    <text name="ConfigMenuLabelMagicOrder"><colour value="0 0.8 1">Magic order</colour></text>
+    <text name="ConfigMenuInitial">Initial</text>
+    <text name="ConfigMenuMemory">Memory</text>
+    <text name="ConfigMenuActive">Active</text>
+    <text name="ConfigMenuRecommended">Recommended</text>
+    <text name="ConfigMenuWait">Wait</text>
+    <text name="ConfigMenuFast">Fast</text>
+    <text name="ConfigMenuSlow">Slow</text>
+    <text name="ConfigMenuAuto">Auto</text>
+    <text name="ConfigMenuFix">Fix</text>
+    <text name="ConfigMenuWalk">Walk</text>
+    <text name="ConfigMenuRun">Run</text>
+    <text name="ConfigMenuMagicNo">No.</text>
+    <text name="ConfigMenuMagicOrder1">restore attack indirect</text>
+    <text name="ConfigMenuMagicOrder2">restore indirect attack</text>
+    <text name="ConfigMenuMagicOrder3">attack restore indirect</text>
+    <text name="ConfigMenuMagicOrder4">attack indirect restore</text>
+    <text name="ConfigMenuMagicOrder5">indirect restore attack</text>
+    <text name="ConfigMenuMagicOrder6">indirect attack restore</text>
+    <text name="ConfigMenuHelp1">Select colors for each corner of the window</text>
+    <text name="ConfigMenuHelp2">Choose the sound settings</text>
+    <text name="ConfigMenuHelp3">Choose the controller settings</text>
+    <text name="ConfigMenuHelp4">Choose whether the cursor starts at the top or remembers its last position</text>
+    <text name="ConfigMenuHelp5">Choose how time flows in battle: Active, Recommended or Wait</text>
+    <text name="ConfigMenuHelp6">Set the speed of the battles</text>
+    <text name="ConfigMenuHelp7">Set how fast battle messages are displayed</text>
+    <text name="ConfigMenuHelp8">Set how fast field messages are displayed</text>
+    <text name="ConfigMenuHelp9">Choose whether the character walks or runs</text>
+    <text name="ConfigMenuHelp10">Choose automatic or fixed camera angle in battle</text>
+    <text name="ConfigMenuHelp11">Set the order of the magic menu</text>
+    <text name="ConfigMenuColourRed"><colour value="0 0.8 1">Red</colour></text>
+    <text name="ConfigMenuColourGreen"><colour value="0 0.8 1">Green</colour></text>
+    <text name="ConfigMenuColourBlue"><colour value="0 0.8 1">Blue</colour></text>
+    <text name="ConfigMenuSoundMusic"><colour value="0 0.8 1">Music</colour></text>
+    <text name="ConfigMenuSoundEffects"><colour value="0 0.8 1">Effects</colour></text>
+    <text name="ConfigMenuActiveOff"><colour value="0.45 0.45 0.35">Active</colour></text>
+    <text name="ConfigMenuAutoOff"><colour value="0.45 0.45 0.35">Auto</colour></text>
+    <text name="ConfigMenuFixOff"><colour value="0.45 0.45 0.35">Fix</colour></text>
+    <text name="ConfigMenuInitialOff"><colour value="0.45 0.45 0.35">Initial</colour></text>
+    <text name="ConfigMenuMemoryOff"><colour value="0.45 0.45 0.35">Memory</colour></text>
+    <text name="ConfigMenuRecommendedOff"><colour value="0.45 0.45 0.35">Recommended</colour></text>
+    <text name="ConfigMenuRunOff"><colour value="0.45 0.45 0.35">Run</colour></text>
+    <text name="ConfigMenuWaitOff"><colour value="0.45 0.45 0.35">Wait</colour></text>
+    <text name="ConfigMenuWalkOff"><colour value="0.45 0.45 0.35">Walk</colour></text>
+    <text name="ConfigMenuControlDefault"><colour value="0 0.8 1">Default settings</colour></text>
+    <text name="ConfigMenuControlUp"><colour value="0 0.8 1">Up</colour></text>
+    <text name="ConfigMenuControlDown"><colour value="0 0.8 1">Down</colour></text>
+    <text name="ConfigMenuControlLeft"><colour value="0 0.8 1">Left</colour></text>
+    <text name="ConfigMenuControlRight"><colour value="0 0.8 1">Right</colour></text>
+    <text name="ConfigMenuControlOk"><colour value="0 0.8 1">OK</colour></text>
+    <text name="ConfigMenuControlCancel"><colour value="0 0.8 1">Cancel</colour></text>
+    <text name="ConfigMenuControlMenu"><colour value="0 0.8 1">Menu</colour></text>
+    <text name="ConfigMenuControlExtra"><colour value="0 0.8 1">Extra</colour></text>
+    <text name="ConfigMenuControlSelect"><colour value="0 0.8 1">Select</colour></text>
+    <text name="ConfigMenuControlStart"><colour value="0 0.8 1">Start</colour></text>
+    <text name="ConfigMenuControlL1"><colour value="0 0.8 1">L1</colour></text>
+    <text name="ConfigMenuControlR1"><colour value="0 0.8 1">R1</colour></text>
+    <text name="ConfigMenuControlRun"><colour value="0 0.8 1">Run</colour></text>
+    <text name="ConfigMenuHelp12">Press the new key for this action. Esc cancels</text>
+    <text name="MagicMenuTitle">Magic</text>
+    <text name="MagicMenuMagic">Magic</text>
+    <text name="MagicMenuSummon">Summon</text>
+    <text name="MagicMenuESkill">E.Skill</text>
+    <text name="MagicMenuAddedAbility"><colour value="0 0.8 1">Added-Ability</colour></text>
+    <text name="MagicMenuNothing">Nothing.</text>
+    <text name="MagicMenuMpNeeded"><colour value="0 0.8 1">MP needed</colour></text>
+    <text name="MagicMenuUses"><colour value="0 0.8 1">Uses</colour></text>
+    <text name="StatusMenuTitle">Status</text>
 </texts>

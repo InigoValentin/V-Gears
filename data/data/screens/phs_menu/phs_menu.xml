@@ -1,0 +1,99 @@
+<screen name="PhsMenu" script="scripts/menu/phs_menu.lua" visible="false">
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Help" x="0" y="0" width="100%-81" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Help" text_name="PhsMenuHelp" x="12" y="6" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Title" x="100%-81" y="0" width="81" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Title" text_name="PhsMenuTitle" x="24" y="6" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Party" x="0" y="24" width="180" height="100%-24" visible="true">
+            <prototype name="Window" />
+            <widget name="Slot1" x="0" y="20" width="100%" height="64" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="16" y="0" width="42" height="48" visible="true" />
+                <widget name="Data" x="64" y="2" width="100%-64" height="100%-2" visible="true">
+                    <prototype name="MenuCharacterData" />
+                </widget>
+            </widget>
+            <widget name="Slot2" x="0" y="33%+20" width="100%" height="64" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="16" y="0" width="42" height="48" visible="true" />
+                <widget name="Data" x="64" y="2" width="100%-64" height="100%-2" visible="true">
+                    <prototype name="MenuCharacterData" />
+                </widget>
+            </widget>
+            <widget name="Slot3" x="0" y="66%+20" width="100%" height="64" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="16" y="0" width="42" height="48" visible="true" />
+                <widget name="Data" x="64" y="2" width="100%-64" height="100%-2" visible="true">
+                    <prototype name="MenuCharacterData" />
+                </widget>
+            </widget>
+        </widget>
+        <widget name="Info" x="180" y="24" width="100%-180" height="56" visible="true">
+            <prototype name="Window" />
+            <widget name="Character" x="0" y="0" width="100%" height="100%" visible="false">
+                <widget name="Data" x="30" y="6" width="100%-30" height="100%-6" visible="true">
+                    <prototype name="MenuCharacterData" />
+                </widget>
+            </widget>
+        </widget>
+        <widget name="Reserve" x="180" y="80" width="100%-180" height="100%-80" visible="true">
+            <prototype name="Window" />
+            <widget name="Slot1" x="20" y="10" width="44" height="58" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="0" y="0" width="42" height="56" visible="true" />
+            </widget>
+            <widget name="Slot2" x="80" y="10" width="44" height="58" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="0" y="0" width="42" height="56" visible="true" />
+            </widget>
+            <widget name="Slot3" x="140" y="10" width="44" height="58" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="0" y="0" width="42" height="56" visible="true" />
+            </widget>
+            <widget name="Slot4" x="20" y="76" width="44" height="58" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="0" y="0" width="42" height="56" visible="true" />
+            </widget>
+            <widget name="Slot5" x="80" y="76" width="44" height="58" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="0" y="0" width="42" height="56" visible="true" />
+            </widget>
+            <widget name="Slot6" x="140" y="76" width="44" height="58" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="0" y="0" width="42" height="56" visible="true" />
+            </widget>
+            <widget name="Slot7" x="20" y="142" width="44" height="58" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="0" y="0" width="42" height="56" visible="true" />
+            </widget>
+            <widget name="Slot8" x="80" y="142" width="44" height="58" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="0" y="0" width="42" height="56" visible="true" />
+            </widget>
+            <widget name="Slot9" x="140" y="142" width="44" height="58" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="0" y="0" width="42" height="56" visible="true" />
+            </widget>
+        </widget>
+        <sprite name="Held" image="icons/cursor.png" x="-4" y="56" width="24" height="17" alpha="0.6" visible="false">
+            <animation name="Position1" length="0" x="0:-4" y="0:56" />
+            <animation name="Position2" length="0" x="0:-4" y="0:33%+48" />
+            <animation name="Position3" length="0" x="0:-4" y="0:66%+40" />
+            <animation name="Position4" length="0" x="0:178" y="0:106" />
+            <animation name="Position5" length="0" x="0:238" y="0:106" />
+            <animation name="Position6" length="0" x="0:298" y="0:106" />
+            <animation name="Position7" length="0" x="0:178" y="0:172" />
+            <animation name="Position8" length="0" x="0:238" y="0:172" />
+            <animation name="Position9" length="0" x="0:298" y="0:172" />
+            <animation name="Position10" length="0" x="0:178" y="0:238" />
+            <animation name="Position11" length="0" x="0:238" y="0:238" />
+            <animation name="Position12" length="0" x="0:298" y="0:238" />
+        </sprite>
+        <sprite name="Cursor" image="icons/cursor.png" x="-4" y="56" width="24" height="17" visible="true">
+            <animation name="Position1" length="0" x="0:-4" y="0:56" />
+            <animation name="Position2" length="0" x="0:-4" y="0:33%+48" />
+            <animation name="Position3" length="0" x="0:-4" y="0:66%+40" />
+            <animation name="Position4" length="0" x="0:178" y="0:106" />
+            <animation name="Position5" length="0" x="0:238" y="0:106" />
+            <animation name="Position6" length="0" x="0:298" y="0:106" />
+            <animation name="Position7" length="0" x="0:178" y="0:172" />
+            <animation name="Position8" length="0" x="0:238" y="0:172" />
+            <animation name="Position9" length="0" x="0:298" y="0:172" />
+            <animation name="Position10" length="0" x="0:178" y="0:238" />
+            <animation name="Position11" length="0" x="0:238" y="0:238" />
+            <animation name="Position12" length="0" x="0:298" y="0:238" />
+        </sprite>
+    </widget>
+</screen>

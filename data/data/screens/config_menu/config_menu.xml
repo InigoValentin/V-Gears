@@ -1,0 +1,298 @@
+<screen name="ConfigMenu" script="scripts/menu/config_menu.lua" visible="false">
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Help" x="0" y="0" width="100%-97" height="26" visible="true">
+            <prototype name="Window" />
+            <text_area name="H1" text_name="ConfigMenuHelp1" x="16" y="7" font="FFVIIFont" visible="true" />
+            <text_area name="H2" text_name="ConfigMenuHelp2" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H3" text_name="ConfigMenuHelp3" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H4" text_name="ConfigMenuHelp4" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H5" text_name="ConfigMenuHelp5" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H6" text_name="ConfigMenuHelp6" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H7" text_name="ConfigMenuHelp7" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H8" text_name="ConfigMenuHelp8" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H9" text_name="ConfigMenuHelp9" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H10" text_name="ConfigMenuHelp10" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H11" text_name="ConfigMenuHelp11" x="16" y="7" font="FFVIIFont" visible="false" />
+            <text_area name="H12" text_name="ConfigMenuHelp12" x="16" y="7" font="FFVIIFont" visible="false" />
+        </widget>
+        <widget name="Title" x="100%-97" y="0" width="97" height="26" visible="true">
+            <prototype name="Window" />
+            <text_area name="Title" text_name="ConfigMenuTitle" x="16" y="7" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Body" x="0" y="26" width="100%" height="100%-26" visible="true">
+            <prototype name="Window" />
+            <widget name="WindowColor" x="0" y="18" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelWindowColor" x="29" y="0" font="FFVIIFont" visible="true" />
+                <widget name="Preview" x="170" y="-12" width="67" height="26" visible="true">
+                    <prototype name="WindowPreview" />
+                </widget>
+            </widget>
+            <widget name="Sound" x="0" y="39" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelSound" x="29" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="Controller" x="0" y="60" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelController" x="29" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="CursorMode" x="0" y="81" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelCursor" x="29" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Opt1On" text_name="ConfigMenuInitial" x="167" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Opt1Off" text_name="ConfigMenuInitialOff" x="167" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Opt2On" text_name="ConfigMenuMemory" x="240" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Opt2Off" text_name="ConfigMenuMemoryOff" x="240" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="Atb" x="0" y="102" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelAtb" x="29" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Opt1On" text_name="ConfigMenuActive" x="167" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Opt1Off" text_name="ConfigMenuActiveOff" x="167" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Opt2On" text_name="ConfigMenuRecommended" x="220" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Opt2Off" text_name="ConfigMenuRecommendedOff" x="220" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Opt3On" text_name="ConfigMenuWait" x="326" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Opt3Off" text_name="ConfigMenuWaitOff" x="326" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="BattleSpeed" x="0" y="123" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelBattleSpeed" x="29" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="FastLbl" text_name="ConfigMenuFast" x="158" y="0" font="FFVIIFont" visible="true" />
+                <sprite name="Bar" x="190" y="2" width="150" height="10" colour="0.12 0.12 0.3" visible="true" />
+                <sprite name="Handle" x="190" y="0" width="8" height="14" colour="0.75 0.75 0.75" visible="true">
+                    <animation name="Position0" length="0" x="0:190" />
+                    <animation name="Position1" length="0" x="0:204" />
+                    <animation name="Position2" length="0" x="0:218" />
+                    <animation name="Position3" length="0" x="0:233" />
+                    <animation name="Position4" length="0" x="0:247" />
+                    <animation name="Position5" length="0" x="0:261" />
+                    <animation name="Position6" length="0" x="0:275" />
+                    <animation name="Position7" length="0" x="0:289" />
+                    <animation name="Position8" length="0" x="0:304" />
+                    <animation name="Position9" length="0" x="0:318" />
+                    <animation name="Position10" length="0" x="0:332" />
+                </sprite>
+                <text_area name="SlowLbl" text_name="ConfigMenuSlow" x="343" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="BattleMessage" x="0" y="144" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelBattleMessage" x="29" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="FastLbl" text_name="ConfigMenuFast" x="158" y="0" font="FFVIIFont" visible="true" />
+                <sprite name="Bar" x="190" y="2" width="150" height="10" colour="0.12 0.12 0.3" visible="true" />
+                <sprite name="Handle" x="190" y="0" width="8" height="14" colour="0.75 0.75 0.75" visible="true">
+                    <animation name="Position0" length="0" x="0:190" />
+                    <animation name="Position1" length="0" x="0:204" />
+                    <animation name="Position2" length="0" x="0:218" />
+                    <animation name="Position3" length="0" x="0:233" />
+                    <animation name="Position4" length="0" x="0:247" />
+                    <animation name="Position5" length="0" x="0:261" />
+                    <animation name="Position6" length="0" x="0:275" />
+                    <animation name="Position7" length="0" x="0:289" />
+                    <animation name="Position8" length="0" x="0:304" />
+                    <animation name="Position9" length="0" x="0:318" />
+                    <animation name="Position10" length="0" x="0:332" />
+                </sprite>
+                <text_area name="SlowLbl" text_name="ConfigMenuSlow" x="343" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="FieldMessage" x="0" y="165" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelFieldMessage" x="29" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="FastLbl" text_name="ConfigMenuFast" x="158" y="0" font="FFVIIFont" visible="true" />
+                <sprite name="Bar" x="190" y="2" width="150" height="10" colour="0.12 0.12 0.3" visible="true" />
+                <sprite name="Handle" x="190" y="0" width="8" height="14" colour="0.75 0.75 0.75" visible="true">
+                    <animation name="Position0" length="0" x="0:190" />
+                    <animation name="Position1" length="0" x="0:204" />
+                    <animation name="Position2" length="0" x="0:218" />
+                    <animation name="Position3" length="0" x="0:233" />
+                    <animation name="Position4" length="0" x="0:247" />
+                    <animation name="Position5" length="0" x="0:261" />
+                    <animation name="Position6" length="0" x="0:275" />
+                    <animation name="Position7" length="0" x="0:289" />
+                    <animation name="Position8" length="0" x="0:304" />
+                    <animation name="Position9" length="0" x="0:318" />
+                    <animation name="Position10" length="0" x="0:332" />
+                </sprite>
+                <text_area name="SlowLbl" text_name="ConfigMenuSlow" x="343" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="Movement" x="0" y="186" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelMovement" x="29" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Opt1On" text_name="ConfigMenuWalk" x="167" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Opt1Off" text_name="ConfigMenuWalkOff" x="167" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Opt2On" text_name="ConfigMenuRun" x="240" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Opt2Off" text_name="ConfigMenuRunOff" x="240" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="CameraAngle" x="0" y="207" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelCameraAngle" x="29" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Opt1On" text_name="ConfigMenuAuto" x="167" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Opt1Off" text_name="ConfigMenuAutoOff" x="167" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Opt2On" text_name="ConfigMenuFix" x="240" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Opt2Off" text_name="ConfigMenuFixOff" x="240" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="MagicOrder" x="0" y="228" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuLabelMagicOrder" x="29" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="No" text_name="ConfigMenuMagicNo" x="150" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Number" x="180" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="Order1" text_name="ConfigMenuMagicOrder1" x="195" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Order2" text_name="ConfigMenuMagicOrder2" x="195" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Order3" text_name="ConfigMenuMagicOrder3" x="195" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Order4" text_name="ConfigMenuMagicOrder4" x="195" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Order5" text_name="ConfigMenuMagicOrder5" x="195" y="0" font="FFVIIFont" visible="false" />
+                <text_area name="Order6" text_name="ConfigMenuMagicOrder6" x="195" y="0" font="FFVIIFont" visible="false" />
+            </widget>
+        </widget>
+        <sprite name="CornerCursor" image="icons/cursor.png" x="146" y="28" width="24" height="17" visible="false">
+            <animation name="Position1" length="0" x="0:146" y="0:33" />
+            <animation name="Position2" length="0" x="0:210" y="0:33" />
+            <animation name="Position3" length="0" x="0:146" y="0:52" />
+            <animation name="Position4" length="0" x="0:210" y="0:52" />
+        </sprite>
+        <widget name="ColourWindow" x="130" y="68" width="210" height="88" visible="false">
+            <prototype name="Window" />
+            <widget name="Red" x="0" y="12" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuColourRed" x="26" y="0" font="FFVIIFont" visible="true" />
+                <sprite name="Bar" x="70" y="3" width="100" height="8" colour="0.55 0.12 0.12" visible="true" />
+                <sprite name="Handle" x="70" y="0" width="8" height="14" colour="0.85 0.85 0.85" visible="true" />
+                <text_area name="Value" x="178" y="2" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Green" x="0" y="36" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuColourGreen" x="26" y="0" font="FFVIIFont" visible="true" />
+                <sprite name="Bar" x="70" y="3" width="100" height="8" colour="0.12 0.45 0.12" visible="true" />
+                <sprite name="Handle" x="70" y="0" width="8" height="14" colour="0.85 0.85 0.85" visible="true" />
+                <text_area name="Value" x="178" y="2" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Blue" x="0" y="60" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuColourBlue" x="26" y="0" font="FFVIIFont" visible="true" />
+                <sprite name="Bar" x="70" y="3" width="100" height="8" colour="0.15 0.15 0.65" visible="true" />
+                <sprite name="Handle" x="70" y="0" width="8" height="14" colour="0.85 0.85 0.85" visible="true" />
+                <text_area name="Value" x="178" y="2" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <sprite name="Cursor" image="icons/cursor.png" x="0" y="9" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:9" />
+                <animation name="Position2" length="0" y="0:33" />
+                <animation name="Position3" length="0" y="0:57" />
+            </sprite>
+        </widget>
+        <widget name="SoundWindow" x="130" y="66" width="210" height="64" visible="false">
+            <prototype name="Window" />
+            <widget name="Music" x="0" y="12" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuSoundMusic" x="26" y="0" font="FFVIIFont" visible="true" />
+                <sprite name="Bar" x="80" y="3" width="100" height="8" colour="0.15 0.15 0.45" visible="true" />
+                <sprite name="Handle" x="80" y="0" width="8" height="14" colour="0.85 0.85 0.85" visible="true">
+                    <animation name="Position0" length="0" x="0:80" />
+                    <animation name="Position1" length="0" x="0:103" />
+                    <animation name="Position2" length="0" x="0:126" />
+                    <animation name="Position3" length="0" x="0:149" />
+                    <animation name="Position4" length="0" x="0:172" />
+                </sprite>
+            </widget>
+            <widget name="Effects" x="0" y="36" width="100%" height="16" visible="true">
+                <text_area name="Label" text_name="ConfigMenuSoundEffects" x="26" y="0" font="FFVIIFont" visible="true" />
+                <sprite name="Bar" x="80" y="3" width="100" height="8" colour="0.15 0.15 0.45" visible="true" />
+                <sprite name="Handle" x="80" y="0" width="8" height="14" colour="0.85 0.85 0.85" visible="true">
+                    <animation name="Position0" length="0" x="0:80" />
+                    <animation name="Position1" length="0" x="0:103" />
+                    <animation name="Position2" length="0" x="0:126" />
+                    <animation name="Position3" length="0" x="0:149" />
+                    <animation name="Position4" length="0" x="0:172" />
+                </sprite>
+            </widget>
+            <sprite name="Cursor" image="icons/cursor.png" x="0" y="9" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:9" />
+                <animation name="Position2" length="0" y="0:33" />
+            </sprite>
+        </widget>
+        <widget name="ControllerWindow" x="60" y="36" width="290" height="250" visible="false">
+            <prototype name="Window" />
+            <widget name="RowDefault" x="0" y="10" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlDefault" x="26" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowUp" x="0" y="26" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlUp" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowDown" x="0" y="42" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlDown" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowLeft" x="0" y="58" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlLeft" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowRight" x="0" y="74" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlRight" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowOk" x="0" y="90" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlOk" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowCancel" x="0" y="106" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlCancel" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowMenu" x="0" y="122" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlMenu" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowExtra" x="0" y="138" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlExtra" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowSelect" x="0" y="154" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlSelect" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowStart" x="0" y="170" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlStart" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowL1" x="0" y="186" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlL1" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowR1" x="0" y="202" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlR1" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <widget name="RowRun" x="0" y="218" width="100%" height="14" visible="true">
+                <text_area name="Label" text_name="ConfigMenuControlRun" x="26" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Keys" x="150" y="0" font="FFVIIFont" visible="true" />
+            </widget>
+            <sprite name="Cursor" image="icons/cursor.png" x="0" y="7" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:7" />
+                <animation name="Position2" length="0" y="0:23" />
+                <animation name="Position3" length="0" y="0:39" />
+                <animation name="Position4" length="0" y="0:55" />
+                <animation name="Position5" length="0" y="0:71" />
+                <animation name="Position6" length="0" y="0:87" />
+                <animation name="Position7" length="0" y="0:103" />
+                <animation name="Position8" length="0" y="0:119" />
+                <animation name="Position9" length="0" y="0:135" />
+                <animation name="Position10" length="0" y="0:151" />
+                <animation name="Position11" length="0" y="0:167" />
+                <animation name="Position12" length="0" y="0:183" />
+                <animation name="Position13" length="0" y="0:199" />
+                <animation name="Position14" length="0" y="0:215" />
+                <animation name="Blink1" length="0.1" y="0:7" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink2" length="0.1" y="0:23" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink3" length="0.1" y="0:39" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink4" length="0.1" y="0:55" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink5" length="0.1" y="0:71" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink6" length="0.1" y="0:87" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink7" length="0.1" y="0:103" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink8" length="0.1" y="0:119" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink9" length="0.1" y="0:135" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink10" length="0.1" y="0:151" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink11" length="0.1" y="0:167" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink12" length="0.1" y="0:183" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink13" length="0.1" y="0:199" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+                <animation name="Blink14" length="0.1" y="0:215" alpha="0:1, 0.04:1, 0.05:0, 0.09:0, 0.1:1" />
+            </sprite>
+        </widget>
+        <sprite name="Cursor" image="icons/cursor.png" x="-1" y="46" width="24" height="17" visible="true">
+            <animation name="Position1" length="0" y="0:46" />
+            <animation name="Position2" length="0" y="0:66" />
+            <animation name="Position3" length="0" y="0:88" />
+            <animation name="Position4" length="0" y="0:108" />
+            <animation name="Position5" length="0" y="0:130" />
+            <animation name="Position6" length="0" y="0:150" />
+            <animation name="Position7" length="0" y="0:172" />
+            <animation name="Position8" length="0" y="0:192" />
+            <animation name="Position9" length="0" y="0:214" />
+            <animation name="Position10" length="0" y="0:234" />
+            <animation name="Position11" length="0" y="0:256" />
+        </sprite>
+    </widget>
+</screen>

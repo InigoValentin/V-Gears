@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <algorithm>
 #include <iostream>
 #include <list>
 #include <boost/thread.hpp>
@@ -218,6 +219,21 @@ void AudioManager::ScriptPlaySounds(
     ScriptPlaySound(name1);
 }
 
+void AudioManager::ScriptSetMusicVolume(const float volume){
+    if (!initialized_) return;
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    music_.SetGain(volume);
+    battle_music_.SetGain(volume);
+    // The audio of the movies follows the music volume.
+    movie_.SetGain(volume);
+}
+
+void AudioManager::ScriptSetSoundVolume(const float volume){
+    if (!initialized_) return;
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    fx_.SetGain(volume);
+}
+
 void AudioManager::MusicStop(){
     boost::recursive_mutex::scoped_lock lock(update_mutex_);
     music_.Stop();
@@ -371,6 +387,7 @@ void AudioManager::Player::Play(const Ogre::String &file){
     alGenBuffers(channel_buffer_number_, buffers);
     // Set source parameters
     alSourcei(source_, AL_LOOPING, AL_FALSE);
+    alSourcef(source_, AL_GAIN, gain_);
     // Fill buffers
     for (int i = 0; i < channel_buffer_number_; ++ i){
         ALsizei buffer_size = FillBuffer();
@@ -390,6 +407,12 @@ void AudioManager::Player::Play(const Ogre::String &file){
     }
     // Start playback
     alSourcePlay(source_);
+}
+
+void AudioManager::Player::SetGain(const float gain){
+    boost::recursive_mutex::scoped_lock lock(*update_mutex_);
+    gain_ = std::max(0.0f, std::min(1.0f, gain));
+    if (!file_.empty() && alIsSource(source_)) alSourcef(source_, AL_GAIN, gain_);
 }
 
 void AudioManager::Player::Stop(){

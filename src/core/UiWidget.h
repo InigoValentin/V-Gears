@@ -503,6 +503,23 @@ class UiWidget{
         );
 
         /**
+         * Marks the widget as the background of a window.
+         *
+         * Window backgrounds all share the colours the player chooses in the config menu, see
+         * UiManager::SetWindowColours.
+         *
+         * @param[in] background True to mark it as a window background.
+         */
+        void SetWindowBackground(const bool background);
+
+        /**
+         * Checks if the widget is the background of a window.
+         *
+         * @return True if the widget is a window background.
+         */
+        bool IsWindowBackground() const;
+
+        /**
          * Sets the widget transparency.
          *
          * @param[in] a Alpha value (0 opaque, 255 fully transparent).
@@ -603,6 +620,11 @@ class UiWidget{
          * Indicates if the widget is visible.
          */
         bool visible_;
+
+        /**
+         * Indicates if the widget is the background of a window, which uses the window colours.
+         */
+        bool window_background_ = false;
 
         /**
          * Top-left corner colour.

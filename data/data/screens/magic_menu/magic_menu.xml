@@ -1,0 +1,149 @@
+<screen name="MagicMenu" script="scripts/menu/magic_menu.lua" visible="false">
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Character" x="0" y="0" width="100%-98" height="94" visible="true">
+            <prototype name="Window" />
+            <sprite name="Portrait" image="other/choco.png" x="11" y="20" width="53" height="58" visible="true" />
+            <widget name="Data" x="68" y="28" width="100%-68" height="100%-28" visible="true">
+                <prototype name="MenuCharacterData" />
+            </widget>
+            <widget name="Added" x="158" y="14" width="150" height="40" visible="false">
+                <text_area name="Label" text_name="MagicMenuAddedAbility" x="0" y="0" font="FFVIIFont" visible="true" />
+                <text_area name="Value" text_name="MagicMenuNothing" x="13" y="20" font="FFVIIFont" visible="true" />
+            </widget>
+        </widget>
+        <widget name="Title" x="100%-98" y="0" width="98" height="27" visible="true">
+            <prototype name="Window" />
+            <text_area name="Title" text_name="MagicMenuTitle" x="24" y="7" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Side" x="100%-98" y="27" width="98" height="67" visible="true">
+            <prototype name="Window" />
+            <widget name="Options" x="0" y="0" width="100%" height="100%" visible="true">
+                <text_area name="Magic" text_name="MagicMenuMagic" x="34" y="8" font="FFVIIFont" visible="true" />
+                <text_area name="Summon" text_name="MagicMenuSummon" x="34" y="25" font="FFVIIFont" visible="true" />
+                <text_area name="ESkill" text_name="MagicMenuESkill" x="34" y="42" font="FFVIIFont" visible="true" />
+                <sprite name="Cursor" image="icons/cursor.png" x="8" y="6" width="24" height="17" visible="true">
+                    <animation name="Position1" length="0" y="0:6" />
+                    <animation name="Position2" length="0" y="0:23" />
+                    <animation name="Position3" length="0" y="0:40" />
+                </sprite>
+            </widget>
+            <widget name="Cost" x="0" y="0" width="100%" height="100%" visible="false">
+                <text_area name="MpLabel" text_name="MagicMenuMpNeeded" x="14" y="6" font="FFVIIFont" visible="true" />
+                <text_area name="MpValue" x="40" y="20" font="FFVIIMenuDigits" visible="true" />
+                <widget name="Uses" x="0" y="0" width="100%" height="100%" visible="false">
+                    <text_area name="Label" text_name="MagicMenuUses" x="30" y="34" font="FFVIIFont" visible="true" />
+                    <text_area name="Value" x="40" y="48" font="FFVIIMenuDigits" visible="true" />
+                </widget>
+            </widget>
+        </widget>
+        <widget name="Help" x="0" y="94" width="100%" height="26" visible="true">
+            <prototype name="Window" />
+            <text_area name="Help" x="16" y="7" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="List" x="0" y="120" width="100%" height="100%-120" visible="true">
+            <prototype name="Window" />
+            <sprite name="ScrollBg" x="100%-12" y="2" width="10" height="100%-6" colour="0.2 0.2 0.2" alpha="0.8" visible="true" />
+            <sprite name="Scroll" x="100%-11" y="3" width="8" height="18" colour="0.7 0.7 0.7" visible="true" />
+            <text_area name="R1C1" x="24" y="6" font="FFVIIFont" visible="true" />
+            <text_area name="R1C2" x="112" y="6" font="FFVIIFont" visible="true" />
+            <text_area name="R1C3" x="200" y="6" font="FFVIIFont" visible="true" />
+            <text_area name="R1C4" x="288" y="6" font="FFVIIFont" visible="true" />
+            <text_area name="R2C1" x="24" y="23" font="FFVIIFont" visible="true" />
+            <text_area name="R2C2" x="112" y="23" font="FFVIIFont" visible="true" />
+            <text_area name="R2C3" x="200" y="23" font="FFVIIFont" visible="true" />
+            <text_area name="R2C4" x="288" y="23" font="FFVIIFont" visible="true" />
+            <text_area name="R3C1" x="24" y="40" font="FFVIIFont" visible="true" />
+            <text_area name="R3C2" x="112" y="40" font="FFVIIFont" visible="true" />
+            <text_area name="R3C3" x="200" y="40" font="FFVIIFont" visible="true" />
+            <text_area name="R3C4" x="288" y="40" font="FFVIIFont" visible="true" />
+            <text_area name="R4C1" x="24" y="57" font="FFVIIFont" visible="true" />
+            <text_area name="R4C2" x="112" y="57" font="FFVIIFont" visible="true" />
+            <text_area name="R4C3" x="200" y="57" font="FFVIIFont" visible="true" />
+            <text_area name="R4C4" x="288" y="57" font="FFVIIFont" visible="true" />
+            <text_area name="R5C1" x="24" y="74" font="FFVIIFont" visible="true" />
+            <text_area name="R5C2" x="112" y="74" font="FFVIIFont" visible="true" />
+            <text_area name="R5C3" x="200" y="74" font="FFVIIFont" visible="true" />
+            <text_area name="R5C4" x="288" y="74" font="FFVIIFont" visible="true" />
+            <text_area name="R6C1" x="24" y="91" font="FFVIIFont" visible="true" />
+            <text_area name="R6C2" x="112" y="91" font="FFVIIFont" visible="true" />
+            <text_area name="R6C3" x="200" y="91" font="FFVIIFont" visible="true" />
+            <text_area name="R6C4" x="288" y="91" font="FFVIIFont" visible="true" />
+            <text_area name="R7C1" x="24" y="108" font="FFVIIFont" visible="true" />
+            <text_area name="R7C2" x="112" y="108" font="FFVIIFont" visible="true" />
+            <text_area name="R7C3" x="200" y="108" font="FFVIIFont" visible="true" />
+            <text_area name="R7C4" x="288" y="108" font="FFVIIFont" visible="true" />
+            <text_area name="R8C1" x="24" y="125" font="FFVIIFont" visible="true" />
+            <text_area name="R8C2" x="112" y="125" font="FFVIIFont" visible="true" />
+            <text_area name="R8C3" x="200" y="125" font="FFVIIFont" visible="true" />
+            <text_area name="R8C4" x="288" y="125" font="FFVIIFont" visible="true" />
+            <text_area name="R9C1" x="24" y="142" font="FFVIIFont" visible="true" />
+            <text_area name="R9C2" x="112" y="142" font="FFVIIFont" visible="true" />
+            <text_area name="R9C3" x="200" y="142" font="FFVIIFont" visible="true" />
+            <text_area name="R9C4" x="288" y="142" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="icons/cursor.png" x="-2" y="4" width="24" height="17" visible="false">
+                <animation name="Position1-1" length="0" x="0:-2" y="0:4" />
+                <animation name="Position1-2" length="0" x="0:86" y="0:4" />
+                <animation name="Position1-3" length="0" x="0:174" y="0:4" />
+                <animation name="Position1-4" length="0" x="0:262" y="0:4" />
+                <animation name="Position2-1" length="0" x="0:-2" y="0:21" />
+                <animation name="Position2-2" length="0" x="0:86" y="0:21" />
+                <animation name="Position2-3" length="0" x="0:174" y="0:21" />
+                <animation name="Position2-4" length="0" x="0:262" y="0:21" />
+                <animation name="Position3-1" length="0" x="0:-2" y="0:38" />
+                <animation name="Position3-2" length="0" x="0:86" y="0:38" />
+                <animation name="Position3-3" length="0" x="0:174" y="0:38" />
+                <animation name="Position3-4" length="0" x="0:262" y="0:38" />
+                <animation name="Position4-1" length="0" x="0:-2" y="0:55" />
+                <animation name="Position4-2" length="0" x="0:86" y="0:55" />
+                <animation name="Position4-3" length="0" x="0:174" y="0:55" />
+                <animation name="Position4-4" length="0" x="0:262" y="0:55" />
+                <animation name="Position5-1" length="0" x="0:-2" y="0:72" />
+                <animation name="Position5-2" length="0" x="0:86" y="0:72" />
+                <animation name="Position5-3" length="0" x="0:174" y="0:72" />
+                <animation name="Position5-4" length="0" x="0:262" y="0:72" />
+                <animation name="Position6-1" length="0" x="0:-2" y="0:89" />
+                <animation name="Position6-2" length="0" x="0:86" y="0:89" />
+                <animation name="Position6-3" length="0" x="0:174" y="0:89" />
+                <animation name="Position6-4" length="0" x="0:262" y="0:89" />
+                <animation name="Position7-1" length="0" x="0:-2" y="0:106" />
+                <animation name="Position7-2" length="0" x="0:86" y="0:106" />
+                <animation name="Position7-3" length="0" x="0:174" y="0:106" />
+                <animation name="Position7-4" length="0" x="0:262" y="0:106" />
+                <animation name="Position8-1" length="0" x="0:-2" y="0:123" />
+                <animation name="Position8-2" length="0" x="0:86" y="0:123" />
+                <animation name="Position8-3" length="0" x="0:174" y="0:123" />
+                <animation name="Position8-4" length="0" x="0:262" y="0:123" />
+                <animation name="Position9-1" length="0" x="0:-2" y="0:140" />
+                <animation name="Position9-2" length="0" x="0:86" y="0:140" />
+                <animation name="Position9-3" length="0" x="0:174" y="0:140" />
+                <animation name="Position9-4" length="0" x="0:262" y="0:140" />
+            </sprite>
+        </widget>
+        <widget name="Targets" x="0" y="0" width="50%" height="100%" visible="false">
+            <prototype name="Window" />
+            <widget name="Slot1" x="0" y="14" width="100%" height="64" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="20" y="0" width="42" height="48" visible="true" />
+                <widget name="Data" x="68" y="2" width="100%-68" height="100%-2" visible="true">
+                    <prototype name="MenuCharacterData" />
+                </widget>
+            </widget>
+            <widget name="Slot2" x="0" y="33%+14" width="100%" height="64" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="20" y="0" width="42" height="48" visible="true" />
+                <widget name="Data" x="68" y="2" width="100%-68" height="100%-2" visible="true">
+                    <prototype name="MenuCharacterData" />
+                </widget>
+            </widget>
+            <widget name="Slot3" x="0" y="66%+14" width="100%" height="64" visible="true">
+                <sprite name="Portrait" image="other/choco.png" x="20" y="0" width="42" height="48" visible="true" />
+                <widget name="Data" x="68" y="2" width="100%-68" height="100%-2" visible="true">
+                    <prototype name="MenuCharacterData" />
+                </widget>
+            </widget>
+            <sprite name="Cursor" image="icons/cursor.png" x="-2" y="26" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:26" />
+                <animation name="Position2" length="0" y="0:33%+26" />
+                <animation name="Position3" length="0" y="0:66%+26" />
+            </sprite>
+        </widget>
+    </widget>
+</screen>

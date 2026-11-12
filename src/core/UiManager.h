@@ -140,6 +140,40 @@ class UiManager :
         UiWidget* ScriptGetWidget(const char* name);
 
         /**
+         * Sets the colours of the background of every window.
+         *
+         * They are applied to all the existing window backgrounds (widgets marked with
+         * UiWidget::SetWindowBackground), and to the ones created later.
+         *
+         * @param[in] r1 Red component for the top-left corner (0-1).
+         * @param[in] g1 Green component for the top-left corner (0-1).
+         * @param[in] b1 Blue component for the top-left corner (0-1).
+         * @param[in] r2 Red component for the top-right corner (0-1).
+         * @param[in] g2 Green component for the top-right corner (0-1).
+         * @param[in] b2 Blue component for the top-right corner (0-1).
+         * @param[in] r3 Red component for the bottom-right corner (0-1).
+         * @param[in] g3 Green component for the bottom-right corner (0-1).
+         * @param[in] b3 Blue component for the bottom-right corner (0-1).
+         * @param[in] r4 Red component for the bottom-left corner (0-1).
+         * @param[in] g4 Green component for the bottom-left corner (0-1).
+         * @param[in] b4 Blue component for the bottom-left corner (0-1).
+         */
+        void SetWindowColours(
+          const float r1, const float g1, const float b1,
+          const float r2, const float g2, const float b2,
+          const float r3, const float g3, const float b3,
+          const float r4, const float g4, const float b4
+        );
+
+        /**
+         * Applies the window colours to a widget if it is a window background, and to its
+         * children. Does nothing until the colours have been set.
+         *
+         * @param[in] widget The widget.
+         */
+        void ApplyWindowColours(UiWidget* widget);
+
+        /**
          * Updates the render queue.
          *
          * @param[in] queueGroupId The queue group ID.
@@ -200,4 +234,15 @@ class UiManager :
          * List of widgets.
          */
         std::vector<UiWidget*> widgets_;
+
+        /**
+         * Colours of the windows (RGB of the top-left, top-right, bottom-right and bottom-left
+         * corners). Only used if window_colours_set_.
+         */
+        float window_colours_[12];
+
+        /**
+         * Indicates if the window colours were set.
+         */
+        bool window_colours_set_ = false;
 };

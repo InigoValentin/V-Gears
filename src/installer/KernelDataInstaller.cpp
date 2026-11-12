@@ -176,7 +176,11 @@ int KernelDataInstaller::ReadAttacks(){
     File attacks_desc_file = kernel_.ExtractGZip(KERNEL_ATTACK_DESCRIPTIONS);
     int attack_count = 0;
 
-    for (int i = 0; i < 128; i ++){
+    limit_attacks_.clear();
+
+    // The kernel has data for 128 attacks, but names and descriptions for 256. The last 128 are the
+    // limit break techniques, which the characters refer to by ID (128 and up).
+    for (int i = 0; i < 256; i ++){
 
         AttackData data;
         int name_offset;
@@ -225,6 +229,20 @@ int KernelDataInstaller::ReadAttacks(){
             desc_offset ++;
         }
         boost::replace_all(data.description, "\"", "'");
+
+        // Limit techniques only have name and description. Both start with control codes, drop
+        // everything before the first letter.
+        if (i >= 128){
+            for (std::string* text : {&data.name, &data.description}){
+                size_t first = text->find_first_of(
+                  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+                if (first == std::string::npos) text->clear();
+                else text->erase(0, first);
+            }
+            data.id = i;
+            limit_attacks_.push_back(data);
+            continue;
+        }
 
         // Read data from the item data section.
         data.accuracy = attacks_file.readU8();
@@ -355,6 +373,13 @@ void KernelDataInstaller::WriteAttacks(std::string file_name){
               << ", chance = " << attack.status.chance << "}, ";
         }
         file << "}\n}\n";
+    }
+    // Limit techniques: only name and description are known.
+    for (AttackData attack : limit_attacks_){
+        file << "Game.Attacks[" << attack.id << "] = {\n"
+          << "    name = \"" << attack.name << "\",\n"
+          << "    description = \"" << attack.description << "\"\n"
+          << "}\n";
     }
     file.close();
 }
@@ -1007,7 +1032,7 @@ void KernelDataInstaller::WriteWeapons(std::string file_name){
         file << "},\n    stats = {";
         for (StatBonus s : weapon.stat_bonus){
             file << "\n        " << GetBasicStatName(s.stat) << " = "
-              << static_cast<int>(s.stat) << ",";
+              << static_cast<int>(s.bonus) << ",";
         }
         if (weapon.stat_bonus.size() > 0) file << "\n    },\n";
         else file << "},\n";
@@ -1200,7 +1225,7 @@ void KernelDataInstaller::WriteArmors(std::string file_name){
         file << "},\n    stats = {";
         for (StatBonus s : armor.stat_bonus){
             file << "\n        " << GetBasicStatName(s.stat) << " = "
-              << static_cast<int>(s.stat) << ",";
+              << static_cast<int>(s.bonus) << ",";
         }
         if (armor.stat_bonus.size() > 0) file << "\n    },\n";
         else file << "},\n";
@@ -1395,11 +1420,16 @@ void KernelDataInstaller::WriteAccessories(std::string file_name){
         file
           << "},\n"
           << "    elements = {";
-        for (int s : accessory.elements) file << s << ", ";
+        // Elements and their resistance mode (0 absorbs, 1 nullifies, 2 halves), as in armors.
+        for (int s : accessory.elements){
+            file << "\n        {id = " << s << ", mode = "
+              << static_cast<int>(accessory.element_defense_mode) << "},";
+        }
+        if (accessory.elements.size() > 0) file << "\n    ";
         file << "},\n    stats = {";
         for (StatBonus s : accessory.stat_bonus){
             file << "\n        " << GetBasicStatName(s.stat) << " = "
-              << static_cast<int>(s.stat) << ",";
+              << static_cast<int>(s.bonus) << ",";
         }
         if (accessory.stat_bonus.size() > 0) file << "\n    },\n";
         else file << "},\n";

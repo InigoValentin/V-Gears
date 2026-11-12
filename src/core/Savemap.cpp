@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <boost/filesystem.hpp>
 #include <string>
 #include <iostream>
 #include <algorithm>
@@ -139,11 +140,12 @@ void Savemap::operator = (const Savemap &to_copy){
     control_ = to_copy.control_;
     for (int i = 0; i < 4; i ++){
         window_colours_[i][0] = to_copy.window_colours_[i][0];
-        window_colours_[i][1] = to_copy.window_colours_[i][0];
-        window_colours_[i][2] = to_copy.window_colours_[i][0];
+        window_colours_[i][1] = to_copy.window_colours_[i][1];
+        window_colours_[i][2] = to_copy.window_colours_[i][2];
     }
     for (int i = 0; i < 11; i ++) characters_[i] = to_copy.characters_[i];
     for (int i = 0; i < 3; i ++) party_[i] = to_copy.party_[i];
+    settings_ = to_copy.settings_;
 }
 
 void Savemap::SetData(const unsigned int bank, const unsigned int address, const int value){
@@ -253,8 +255,13 @@ void Savemap::SetLocation(
     location_.name = name;
 }
 
-void Savemap::SetSetting(const unsigned int key, const unsigned int value){
-    // TODO : Implements when settings are working.
+void Savemap::SetSetting(const std::string& key, const int value){settings_[key] = value;}
+
+bool Savemap::HasSetting(const std::string& key) const{return settings_.count(key) > 0;}
+
+int Savemap::GetSetting(const std::string& key) const{
+    const auto it = settings_.find(key);
+    return (it == settings_.end()) ? 0 : it->second;
 }
 
 void Savemap::SetCharacterInfo(
@@ -339,14 +346,14 @@ void Savemap::SetCharacterMateria(
 ){
     if (id < MAX_CHARACTERS && slot < MAX_EQUIP_SLOTS){
         if (weapon){
-            characters_[id].weapon.materia[slot].id = id;
+            characters_[id].weapon.materia[slot].id = materia;
             characters_[id].weapon.materia[slot].ap = ap;
             characters_[id].weapon.materia[slot].enemy_skill = false;
             for (int i = 0; i < MAX_ENEMY_SKILLS; i ++)
                 characters_[id].weapon.materia[slot].enemy_skill_learned[i] = false;
         }
         else{
-            characters_[id].armor.materia[slot].id = id;
+            characters_[id].armor.materia[slot].id = materia;
             characters_[id].armor.materia[slot].ap = ap;
             characters_[id].armor.materia[slot].enemy_skill = false;
             for (int i = 0; i < MAX_ENEMY_SKILLS; i ++)
@@ -484,11 +491,6 @@ int Savemap::GetLocationAngle(){return location_.angle;}
 std::string Savemap::GetLocationField(){return location_.field;}
 
 std::string Savemap::GetLocationName(){return location_.name;}
-
-int Savemap::GetSetting(const unsigned int key){
-    // TODO: Implement.
-    return 0;
-}
 
 int Savemap::GetCharacterCharId(const unsigned int id){
     if (id >= MAX_CHARACTERS) return -1;
@@ -790,8 +792,8 @@ void Savemap::Write(int slot, std::string file_name){
                         enemy_skill->SetAttribute("learned", true);
                         enemy_skills->LinkEndChild(enemy_skill.release());
                     }
-                    materia->LinkEndChild(enemy_skills.release());
                 }
+                materia->LinkEndChild(enemy_skills.release());
             }
             materias->LinkEndChild(materia.release());
         }
@@ -804,8 +806,8 @@ void Savemap::Write(int slot, std::string file_name){
         if (materia_stash_[i].id >= 0){
             std::unique_ptr<TiXmlElement> materia(new TiXmlElement("Materia"));
             materia->SetAttribute("slot", i);
-            materia->SetAttribute("id", materia_[i].id);
-            materia->SetAttribute("ap", materia_[i].ap);
+            materia->SetAttribute("id", materia_stash_[i].id);
+            materia->SetAttribute("ap", materia_stash_[i].ap);
             if (materia_stash_[i].enemy_skill){
                 materia->SetAttribute("enemy_skill", true);
                 std::unique_ptr<TiXmlElement> enemy_skills(new TiXmlElement("EnemySkill"));
@@ -816,15 +818,25 @@ void Savemap::Write(int slot, std::string file_name){
                         enemy_skill->SetAttribute("learned", true);
                         enemy_skills->LinkEndChild(enemy_skill.release());
                     }
-                    materia->LinkEndChild(enemy_skills.release());
                 }
+                materia->LinkEndChild(enemy_skills.release());
             }
             stash->LinkEndChild(materia.release());
         }
     }
     container->LinkEndChild(stash.release());
 
-    // TODO: Settings
+    // Settings (config menu). The window colours are saved apart.
+    if (!settings_.empty()){
+        std::unique_ptr<TiXmlElement> settings(new TiXmlElement("Settings"));
+        for (const auto& setting : settings_){
+            std::unique_ptr<TiXmlElement> element(new TiXmlElement("Setting"));
+            element->SetAttribute("name", setting.first);
+            element->SetAttribute("value", setting.second);
+            settings->LinkEndChild(element.release());
+        }
+        container->LinkEndChild(settings.release());
+    }
 
     // Characters
     std::unique_ptr<TiXmlElement> characters(new TiXmlElement("Characters"));
@@ -935,8 +947,8 @@ void Savemap::Write(int slot, std::string file_name){
                             enemy_skill->SetAttribute("learned", true);
                             character_weapon_enemy_skills->LinkEndChild(enemy_skill.release());
                         }
-                        materia->LinkEndChild(character_weapon_enemy_skills.release());
                     }
+                    materia->LinkEndChild(character_weapon_enemy_skills.release());
                 }
                 character_weapon_materia->LinkEndChild(materia.release());
             }
@@ -966,8 +978,8 @@ void Savemap::Write(int slot, std::string file_name){
                             enemy_skill->SetAttribute("learned", true);
                             character_armor_enemy_skills->LinkEndChild(enemy_skill.release());
                         }
-                        materia->LinkEndChild(character_armor_enemy_skills.release());
                     }
+                    materia->LinkEndChild(character_armor_enemy_skills.release());
                 }
                 character_armor_materia->LinkEndChild(materia.release());
             }
@@ -1006,7 +1018,14 @@ void Savemap::Write(int slot, std::string file_name){
 
     // Save
     xml.LinkEndChild(container.release());
-    xml.SaveFile(file_name);
+    // The folder of the saved games may not exist yet (a fresh installation): create it, or the
+    // game would not be saved.
+    const boost::filesystem::path path(file_name);
+    if (path.has_parent_path()){
+        boost::system::error_code error;
+        boost::filesystem::create_directories(path.parent_path(), error);
+    }
+    if (!xml.SaveFile(file_name)) LOG_ERROR("Can't write the saved game \"" + file_name + "\".");
     slot_ = slot;
     return;
 
@@ -1052,49 +1071,67 @@ void Savemap::Read(std::string file_name){
                     if (position == "top_left"){
                         colour = -1;
                         colour_elm->QueryIntAttribute("red", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[0][0] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[0][0] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("green", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[0][1] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[0][1] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("blue", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[0][2] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[0][2] = colour;
                     }
                     else if (position == "top_right"){
                         colour = -1;
                         colour_elm->QueryIntAttribute("red", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[1][0] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[1][0] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("green", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[1][1] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[1][1] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("blue", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[1][2] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[1][2] = colour;
                     }
                     else if (position == "bottom_right"){
                         colour = -1;
                         colour_elm->QueryIntAttribute("red", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[2][0] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[2][0] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("green", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[2][1] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[2][1] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("blue", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[2][2] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[2][2] = colour;
                     }
-                    else if (position == "bottol_left"){
+                    else if (position == "bottom_left"){
                         colour = -1;
                         colour_elm->QueryIntAttribute("red", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[3][0] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[3][0] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("green", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[3][1] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[3][1] = colour;
                         colour = -1;
                         colour_elm->QueryIntAttribute("blue", &colour);
-                        if (colour >= 0 && colour < MAX_COLOUR) window_colours_[3][2] = colour;
+                        if (colour >= 0 && colour <= MAX_COLOUR) window_colours_[3][2] = colour;
                     }
                 }
                 colour_node = colour_node->NextSibling();
+            }
+        }
+        else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "Settings"){
+            TiXmlNode* setting_node = node->FirstChild();
+            while (setting_node != nullptr){
+                if (
+                  setting_node->Type() == TiXmlNode::TINYXML_ELEMENT
+                  && setting_node->ValueStr() == "Setting"
+                ){
+                    std::string name;
+                    int value = 0;
+                    TiXmlElement* setting_elm = setting_node->ToElement();
+                    if (
+                      setting_elm->QueryStringAttribute("name", &name) == TIXML_SUCCESS
+                      && setting_elm->QueryIntAttribute("value", &value) == TIXML_SUCCESS
+                    ) settings_[name] = value;
+                }
+                setting_node = setting_node->NextSibling();
             }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "Money"){
@@ -1201,10 +1238,10 @@ void Savemap::Read(std::string file_name){
                     materia_elm->QueryIntAttribute("slot", &slot);
                     materia_elm->QueryIntAttribute("id", &id);
                     materia_elm->QueryIntAttribute("ap", &ap);
-                    materia_elm->QueryIntAttribute("enemy_skill", &ap);
+                    materia_elm->QueryIntAttribute("enemy_skill", &eskill);
                     if (
                       slot >= 0 && slot < MAX_MATERIA_SLOTS && id >= -1
-                      && ap >= 0 && (eskill == 0 | eskill == 1)
+                      && ap >= 0 && (eskill == 0 || eskill == 1)
                     ){
                         materia_[slot].id = id;
                         materia_[slot].ap = ap;
@@ -1230,10 +1267,10 @@ void Savemap::Read(std::string file_name){
                     materia_elm->QueryIntAttribute("slot", &slot);
                     materia_elm->QueryIntAttribute("id", &id);
                     materia_elm->QueryIntAttribute("ap", &ap);
-                    materia_elm->QueryIntAttribute("enemy_skill", &ap);
+                    materia_elm->QueryIntAttribute("enemy_skill", &eskill);
                     if (
                       slot >= 0 && slot < MAX_STASH_SLOTS && id >= -1
-                      && ap >= 0 && (eskill == 0 | eskill == 1)
+                      && ap >= 0 && (eskill == 0 || eskill == 1)
                     ){
                         materia_stash_[slot].id = id;
                         materia_stash_[slot].ap = ap;
@@ -1441,19 +1478,19 @@ void Savemap::Read(std::string file_name){
                                           && mat_node->ValueStr() == "Materia"
                                         ){
                                             int slot = -1;
-                                            int id = -2;
+                                            int materia_id = -2;
                                             int ap = -1;
                                             int eskill = 0;
                                             TiXmlElement* mat_elm = mat_node->ToElement();
                                             mat_elm->QueryIntAttribute("slot", &slot);
-                                            mat_elm->QueryIntAttribute("id", &id);
+                                            mat_elm->QueryIntAttribute("id", &materia_id);
                                             mat_elm->QueryIntAttribute("ap", &ap);
-                                            mat_elm->QueryIntAttribute("enemy_skill", &ap);
+                                            mat_elm->QueryIntAttribute("enemy_skill", &eskill);
                                             if (
-                                              slot >= 0 && slot < MAX_EQUIP_SLOTS && id >= -1
-                                              && ap >= 0 && (eskill == 0 | eskill == 1)
+                                              slot >= 0 && slot < MAX_EQUIP_SLOTS && materia_id >= -1
+                                              && ap >= 0 && (eskill == 0 || eskill == 1)
                                             ){
-                                                characters_[id].weapon.materia[slot].id = id;
+                                                characters_[id].weapon.materia[slot].id = materia_id;
                                                 characters_[id].weapon.materia[slot].ap = ap;
                                                 characters_[id].weapon.materia[slot].enemy_skill
                                                   = (eskill == 1);
@@ -1483,19 +1520,19 @@ void Savemap::Read(std::string file_name){
                                           && mat_node->ValueStr() == "Materia"
                                         ){
                                             int slot = -1;
-                                            int id = -2;
+                                            int materia_id = -2;
                                             int ap = -1;
                                             int eskill = 0;
                                             TiXmlElement* mat_elm = mat_node->ToElement();
                                             mat_elm->QueryIntAttribute("slot", &slot);
-                                            mat_elm->QueryIntAttribute("id", &id);
+                                            mat_elm->QueryIntAttribute("id", &materia_id);
                                             mat_elm->QueryIntAttribute("ap", &ap);
-                                            mat_elm->QueryIntAttribute("enemy_skill", &ap);
+                                            mat_elm->QueryIntAttribute("enemy_skill", &eskill);
                                             if (
-                                              slot >= 0 && slot < MAX_EQUIP_SLOTS && id >= -1
-                                              && ap >= 0 && (eskill == 0 | eskill == 1)
+                                              slot >= 0 && slot < MAX_EQUIP_SLOTS && materia_id >= -1
+                                              && ap >= 0 && (eskill == 0 || eskill == 1)
                                             ){
-                                                characters_[id].armor.materia[slot].id = id;
+                                                characters_[id].armor.materia[slot].id = materia_id;
                                                 characters_[id].armor.materia[slot].ap = ap;
                                                 characters_[id].armor.materia[slot].enemy_skill
                                                   = (eskill == 1);

@@ -262,6 +262,14 @@ UiContainer.BattleUi = {
     --- Current position for the cursor in the command window.
     cursor_command = 1,
 
+    --- Last command chosen by each party member (position in the command window), by party slot.
+    -- Used when the cursor memory is on.
+    memory_command = {},
+
+    --- Last position chosen by each party member in the lists (magic, summon, item), by party slot
+    -- and list kind: {first = first visible entry, cursor = row of the cursor}.
+    memory_list = {},
+
     --- Current position for the cursor in the list window.
     cursor_list = 1,
 
@@ -302,7 +310,8 @@ UiContainer.BattleUi = {
     --- Handles button events.
     --
     -- For the current submenu, handles directional keys, enter and escape events.
-    -- @param button Pressed button string key. "Up", "Left", "Enter" and "Escape" are handled.
+    -- @param button Game event (the directions, OK, cancel...) or, for the debug keys, the name of
+    -- the key.
     -- @param event Trigger event. Normally, "Press".
     on_button = function(self, button, event)
         if self.active == false then do return 0 end end
@@ -336,7 +345,7 @@ UiContainer.BattleUi = {
         if self.window_state == "command" then
             local command_count = #self.party[self.current_character_window].command
             local cursor = ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor")
-            if button == "Down" then
+            if button == Config.CONTROLS.DOWN then
                 if self.cursor_command < 4 then
                     -- If on the first three ones, always alow to go down to reach "Item"
                     self.cursor_command = self.cursor_command + 1
@@ -358,7 +367,7 @@ UiContainer.BattleUi = {
                     cursor:set_default_animation("Position" .. tostring(self.cursor_command))
                     audio_manager:play_sound("Cursor")
                 end
-            elseif button == "Up" then
+            elseif button == Config.CONTROLS.UP then
                 if self.cursor_command == 1 then
                     -- If on "Attack, always go to item
                     self.cursor_command = 4
@@ -382,7 +391,7 @@ UiContainer.BattleUi = {
                     cursor:set_default_animation("Position" .. tostring(self.cursor_command))
                     audio_manager:play_sound("Cursor")
                 end
-            elseif button == "Left" then
+            elseif button == Config.CONTROLS.LEFT then
                 if command_count > 4 then
                     if self.cursor_command > 4 then
                         self.cursor_command = self.cursor_command - 4
@@ -396,7 +405,7 @@ UiContainer.BattleUi = {
                         audio_manager:play_sound("Cursor")
                     end
                 end
-            elseif button == "Right" then
+            elseif button == Config.CONTROLS.RIGHT then
                 if command_count > 4 then
                     self.cursor_command = self.cursor_command + 4
                     if self.cursor_command > command_count then
@@ -417,6 +426,7 @@ UiContainer.BattleUi = {
                 audio_manager:play_sound("Cursor")
                 self:show_commands(self.command_queue[1])
             elseif button == Config.ACTIONS.CONFIRM then
+                self.memory_command[self.current_character_window] = self.cursor_command
                 -- Check if a menu must be shown
                 local cmd = Game.Commands[self.party[self.current_character_window].command[self.cursor_command]]
                 if cmd.menu == Battle.Menu.NONE then print("DIRECT COMMAND")
@@ -440,7 +450,7 @@ UiContainer.BattleUi = {
             if button == Config.ACTIONS.CANCEL then
                 audio_manager:play_sound("Cursor")
                 self:close_list()
-            elseif button == "Down" then
+            elseif button == Config.CONTROLS.DOWN then
                 if total <=  self.cursor_list + self.first_list - 1 then do return 0 end end
                 if self.cursor_list < 4 then
                     -- Move cursor down
@@ -453,7 +463,7 @@ UiContainer.BattleUi = {
                     self.first_list = self.first_list + 1
                     self:repopulate_list()
                 end
-            elseif button == "Up" then
+            elseif button == Config.CONTROLS.UP then
                 if self.cursor_list == 1 and self.first_list == 1 then do return 0 end end
                 if self.cursor_list > 1 then
                     -- Move cursor up
@@ -474,7 +484,7 @@ UiContainer.BattleUi = {
             if button == Config.ACTIONS.CANCEL then
                 audio_manager:play_sound("Cursor")
                 self:close_target()
-            elseif button == "Up" then
+            elseif button == Config.CONTROLS.UP then
                 if self.cursor_target_h == 2 then
                     -- Allies cursor, never scroll. Go un up or to the bottom
                     self.cursor_target_v = self.cursor_target_v - 1
@@ -517,7 +527,7 @@ UiContainer.BattleUi = {
                         end
                     end
                 end
-            elseif button == "Down" then
+            elseif button == Config.CONTROLS.DOWN then
                 if self.cursor_target_h == 2 then
                     -- Allies cursor, never scroll. Go un up or to the bottom
                     self.cursor_target_v = self.cursor_target_v + 1
@@ -560,7 +570,7 @@ UiContainer.BattleUi = {
                         end
                     end
                 end
-            elseif button == "Left" then
+            elseif button == Config.CONTROLS.LEFT then
                 if self.target_options.fixed_row == 0 and self.target_options.toggle_multiple == 0 then
                     -- If both rows are present and multiple toggling is not available...
                     if self.cursor_target_h == 2 then
@@ -600,7 +610,7 @@ UiContainer.BattleUi = {
                     elseif prev_mode == Battle.TargetType.SINGLE then self.target_type = Battle.TargetType.GROUP
                     end
                 end
-            elseif button == "Right" then
+            elseif button == Config.CONTROLS.RIGHT then
                 if self.target_options.fixed_row == 0 and self.target_options.toggle_multiple == 0 then
                     -- If both rows are present and multiple toggling is not available...
                     if self.cursor_target_h == 1 then
@@ -2671,6 +2681,14 @@ UiContainer.BattleUi = {
             self.first_list = 1
             self.current_list = kind
             self.list_entries = self:build_list_entries(kind)
+            -- Start where the list was left, if the cursor memory is on.
+            if UiContainer.cursor_memory() then
+                local remembered = (self.memory_list[self.current_character_window] or {})[kind]
+                if remembered ~= nil and remembered.first + remembered.cursor - 1 <= #self.list_entries then
+                    self.first_list = remembered.first
+                    self.cursor_list = remembered.cursor
+                end
+            end
             self:populate_list()
             self.window_state = "list"
             ui_manager:get_widget("BattleUi.Container.Bottom.List"):set_visible(true)
@@ -2693,8 +2711,17 @@ UiContainer.BattleUi = {
         end
     end,
 
+    --- Remembers the position of the cursor in the current list, for the cursor memory.
+    remember_list = function(self)
+        local slot = self.current_character_window
+        if self.current_list == "none" or slot == nil then return end
+        self.memory_list[slot] = self.memory_list[slot] or {}
+        self.memory_list[slot][self.current_list] = { first = self.first_list, cursor = self.cursor_list }
+    end,
+
     --- Closes the currently opened list
     close_list = function(self)
+        self:remember_list()
         self.current_list = "none"
         self.window_state = "command"
         ui_manager:get_widget("BattleUi.Container.Bottom.List"):set_visible(false)
@@ -2708,6 +2735,7 @@ UiContainer.BattleUi = {
         local entry = nil
         if self.window_state == "list" then entry = self.list_entries[self.cursor_list + self.first_list - 1] end
         if entry == nil then do return end end
+        self:remember_list()
         -- Spells, summons and items that can't be used (not enough MP, no summons left...).
         if not entry.enabled then
             audio_manager:play_sound("Error")
@@ -3168,6 +3196,11 @@ UiContainer.BattleUi = {
         ui_manager:get_widget("BattleUi.Container.Bottom.Commands"):set_visible(false)
         ui_manager:get_widget("BattleUi.Container.Bottom.Commands"):set_width(60 * (1 + math.floor(total_commands / 4)))
         ui_manager:get_widget("BattleUi.Container.Bottom.Commands"):set_visible(true)
+        -- Start at the command chosen last time, if the cursor memory is on.
+        if UiContainer.cursor_memory() then
+            local remembered = self.memory_command[party_id]
+            if remembered ~= nil and remembered <= total_commands then self.cursor_command = remembered end
+        end
         -- Set and show cursor
         ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_default_animation("Position" .. tostring(self.cursor_command))
         ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cursor"):set_visible(true)
