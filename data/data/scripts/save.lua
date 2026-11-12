@@ -204,6 +204,8 @@ load_game = function(slot)
             Party[p] = nil
         end
     end
+    -- The battles and dialogs read the party from the text manager.
+    export_party_members()
     -- The inventory and the materia are 1-based in the game, and 0-based in the savemap.
     for i = 1, MAX_INVENTORY_SLOTS do
         local quantity = savemap_manager:get_slot_item_at_pos_qty(slot, i - 1)

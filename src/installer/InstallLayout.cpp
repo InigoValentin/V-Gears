@@ -26,7 +26,7 @@ namespace InstallLayout{
           "audio/musics", "audio/sounds", "fields", "fonts", "gamedata", "gamedata/enemy", "gamedata/attack",
           "gamedata/formation", "images/icons", "images/other", "images/characters", "images/fonts", "images/reels",
           "images/window", "screens", "scripts", "scripts/battle_models", "system", "texts", "models/fields",
-          "models/battle/characters", "models/battle/scenes", "models/battle/enemies", "models/battle/attacks",
+          "models/battle/characters", "models/battle/scenes", "models/battle/enemies", "models/battle/attacks", "models/battle/effects",
           "models/world/terrain/0", "models/world/terrain/1", "models/world/terrain/2", "models/world/elements",
           "world/0", "world/1", "world/2", "wm"
         };
@@ -34,7 +34,7 @@ namespace InstallLayout{
     }
 
     const std::vector<std::string>& TempSubdirs(){
-        static const std::vector<std::string> dirs = {"char", "battle_models", "world_models", "spell_models", "wm"};
+        static const std::vector<std::string> dirs = {"char", "battle_models", "world_models", "spell_models", "effects", "wm"};
         return dirs;
     }
 

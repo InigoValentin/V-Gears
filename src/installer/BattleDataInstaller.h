@@ -129,6 +129,36 @@ class BattleDataInstaller{
         unsigned int ConvertSpellModel();
 
         /**
+         * Extracts the assets of the battle effects of magic.lgp: meshes, textures and sprite files.
+         *
+         * Effects are in folders of the archive, and files of different folders can have the same
+         * name. Each file is saved with the folder as a prefix, so the names are unique, and an
+         * effect model list is made with the meshes that can be converted.
+         * {@see InitializeSpellModels} must be called before.
+         *
+         * @return The number of effect models to convert.
+         */
+        unsigned int InitializeEffectModels();
+
+        /**
+         * Converts an effect model to an Ogre mesh and its textures to PNG.
+         *
+         * @return The total number of converted effect models.
+         */
+        unsigned int ConvertEffectModel();
+
+        /**
+         * Writes the list of the converted effect models to gamedata/effects.lua.
+         */
+        void WriteEffectModels();
+
+        /**
+         * Converts the textures of the effects and writes the sprite frame lists to
+         * gamedata/effect_sprites.lua. Called by {@see WriteEffectModels}.
+         */
+        void WriteEffectSprites();
+
+        /**
          * Writes enemy data to files.
          */
         void WriteEnemies();
@@ -525,6 +555,42 @@ class BattleDataInstaller{
          * File names for the files in {@see magic_lgp_files_}.
          */
         std::vector<std::string> magic_lgp_file_names_;
+
+        /**
+         * Folders for the files in {@see magic_lgp_files_}, empty for files in the archive root.
+         */
+        std::vector<std::string> magic_lgp_file_folders_;
+
+        /**
+         * A static mesh of a battle effect.
+         */
+        struct EffectModel{
+
+            /**
+             * Name of the model, unique: folder and name of the original rsd file.
+             */
+            std::string name;
+
+            /**
+             * Names of the textures, with the same prefix as the model.
+             */
+            std::vector<std::string> textures;
+
+            /**
+             * True if the model was converted.
+             */
+            bool converted = false;
+        };
+
+        /**
+         * The effect models.
+         */
+        std::vector<EffectModel> effect_models_;
+
+        /**
+         * The next effect model to convert.
+         */
+        size_t next_effect_to_convert_ = 0;
 
         /**
          * Next model to process;

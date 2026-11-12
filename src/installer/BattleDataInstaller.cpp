@@ -18,6 +18,10 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <map>
+#include <set>
+#include <cctype>
 #include <algorithm>
 #include <zlib.h>
 #include <tinyxml.h>
@@ -111,7 +115,10 @@ unsigned int BattleDataInstaller::InitializeSpellModels(){
     battle_lgp_files_.clear();
     battle_lgp_file_names_.clear();
     battle_models_.clear();
-    // Open battle.lgp
+    magic_lgp_files_.clear();
+    magic_lgp_file_names_.clear();
+    magic_lgp_file_folders_.clear();
+    // Open magic.lgp
     File magic_lgp_file(*disk_image_.filePath("data/battle/magic.lgp"));
     // Also, open it as a LGP archive.
     VGears::LGPArchive magic_lgp(*disk_image_.filePath("data/battle/magic.lgp"), "LGP");
@@ -124,6 +131,7 @@ unsigned int BattleDataInstaller::InitializeSpellModels(){
             File m_lgp_file(&magic_lgp_file, f.data_offset, f.data_size);
             magic_lgp_files_.push_back(m_lgp_file);
             magic_lgp_file_names_.push_back(f.file_name);
+            magic_lgp_file_folders_.push_back(f.folder);
         }
     }
     return magic_lgp_files_.size();
@@ -592,6 +600,258 @@ unsigned int BattleDataInstaller::ConvertSpellModel(){
     }
     next_model_to_convert_ ++;
     return next_model_to_convert_;
+}
+
+namespace{
+
+/**
+ * Makes a name that is safe to use in files and Ogre resources: lower case letters, numbers and
+ * underscores.
+ */
+std::string EffectSafeName(std::string name){
+    for (char& c : name){
+        c = std::tolower(static_cast<unsigned char>(c));
+        if (!std::isalnum(static_cast<unsigned char>(c)) && c != '_') c = '_';
+    }
+    return name;
+}
+
+/**
+ * Gets the name without the extension, in lower case.
+ */
+std::string EffectStem(const std::string& file_name){
+    std::string stem = file_name.substr(0, file_name.find_last_of('.'));
+    std::transform(stem.begin(), stem.end(), stem.begin(), [](unsigned char c){return std::tolower(c);});
+    return stem;
+}
+
+/**
+ * Gets the name of a texture in a rsd file, without the extension, in lower case.
+ */
+std::string EffectRsdValue(const std::string& line){
+    size_t equal = line.find('=');
+    if (equal == std::string::npos) return "";
+    std::string value = line.substr(equal + 1);
+    while (!value.empty() && std::isspace(static_cast<unsigned char>(value.back()))) value.pop_back();
+    while (!value.empty() && std::isspace(static_cast<unsigned char>(value.front()))) value.erase(0, 1);
+    return EffectStem(value);
+}
+
+}
+
+unsigned int BattleDataInstaller::InitializeEffectModels(){
+    effect_models_.clear();
+    next_effect_to_convert_ = 0;
+    const std::string dir = output_dir_ + "temp/effects/";
+    // Index the files by folder and name.
+    std::map<std::pair<std::string, std::string>, size_t> index;
+    for (size_t f = 0; f < magic_lgp_files_.size(); f ++){
+        std::string name = magic_lgp_file_names_[f];
+        std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c){return std::tolower(c);});
+        index[{magic_lgp_file_folders_[f], name}] = f;
+    }
+    // Folder key: the effect folder, "common" for the root.
+    auto key_of = [](const std::string& folder){
+        if (folder.empty()) return std::string("common");
+        std::string key = folder;
+        const std::string prefix = "ff7/data/battle/";
+        if (key.compare(0, prefix.size(), prefix) == 0) key = key.substr(prefix.size());
+        return EffectSafeName(key);
+    };
+    // Finds a file in the folder of the model, or in the archive root.
+    auto find = [&](const std::string& folder, const std::string& name, std::string& found_folder){
+        auto it = index.find({folder, name});
+        if (it != index.end()){found_folder = folder; return it->second;}
+        it = index.find({"", name});
+        if (it != index.end()){found_folder = ""; return it->second;}
+        return static_cast<size_t>(-1);
+    };
+    std::set<std::string> written;
+    auto write = [&](size_t f, const std::string& name){
+        if (written.insert(name).second) magic_lgp_files_[f].WriteFile(dir + name);
+    };
+    for (size_t f = 0; f < magic_lgp_files_.size(); f ++){
+        std::string rsd_name = magic_lgp_file_names_[f];
+        if (rsd_name.size() < 4 || EffectSafeName(rsd_name.substr(rsd_name.size() - 4)) != "_rsd") continue;
+        const std::string& folder = magic_lgp_file_folders_[f];
+        // Parse the rsd.
+        File& rsd_file = magic_lgp_files_[f];
+        rsd_file.SetOffset(0);
+        std::string content;
+        for (size_t b = 0; b < rsd_file.GetFileSize(); b ++) content += static_cast<char>(rsd_file.readU8());
+        std::string ply;
+        std::vector<std::string> tex;
+        std::istringstream lines(content);
+        std::string line;
+        while (std::getline(lines, line)){
+            std::string upper = line;
+            std::transform(upper.begin(), upper.end(), upper.begin(), [](unsigned char c){return std::toupper(c);});
+            if (upper.compare(0, 4, "PLY=") == 0) ply = EffectRsdValue(line);
+            else if (upper.compare(0, 4, "TEX[") == 0) tex.push_back(EffectRsdValue(line));
+        }
+        if (ply.empty()) continue;
+        std::string p_folder;
+        size_t p_index = find(folder, ply + ".p", p_folder);
+        if (p_index == static_cast<size_t>(-1)) continue;
+        const std::string key = key_of(folder);
+        EffectModel model;
+        model.name = key + "_" + EffectSafeName(EffectStem(rsd_name));
+        const std::string p_name = key_of(p_folder) + "_" + EffectSafeName(ply) + ".p";
+        write(p_index, p_name);
+        std::string rsd = "@RSD940102\nPLY=" + p_name.substr(0, p_name.size() - 2) + ".PLY\n";
+        rsd += "MAT=" + model.name + ".MAT\nGRP=" + model.name + ".GRP\n";
+        std::vector<std::string> tex_names;
+        for (const std::string& t : tex){
+            std::string t_folder;
+            size_t t_index = find(folder, t + ".tex", t_folder);
+            if (t_index == static_cast<size_t>(-1)) continue;
+            const std::string t_name = key_of(t_folder) + "_" + EffectSafeName(t) + ".tex";
+            write(t_index, t_name);
+            tex_names.push_back(t_name);
+        }
+        rsd += "NTEX=" + std::to_string(tex_names.size()) + "\n";
+        for (size_t t = 0; t < tex_names.size(); t ++){
+            rsd += "TEX[" + std::to_string(t) + "]=" + tex_names[t].substr(0, tex_names[t].size() - 4) + ".TIM\n";
+        }
+        model.textures = tex_names;
+        std::ofstream(dir + model.name + ".rsd") << rsd;
+        // A model with a single bone, with the mesh.
+        std::ofstream(dir + model.name + ".hrc")
+          << ":HEADER_BLOCK 2\n:SKELETON " << model.name << "\n:BONES 1\n\nbone0\nroot\n0.000000\n1 "
+          << model.name << "\n\n";
+        effect_models_.push_back(model);
+    }
+    res_mgr_->removeResourceLocation(dir, "FFVII");
+    res_mgr_->addResourceLocation(dir, "FileSystem", "FFVII", true, true);
+    return effect_models_.size();
+}
+
+unsigned int BattleDataInstaller::ConvertEffectModel(){
+    if (next_effect_to_convert_ >= effect_models_.size()) return effect_models_.size();
+    EffectModel& model = effect_models_[next_effect_to_convert_];
+    try{
+        VGears::HRCFileManager::GetSingleton().load(model.name + ".hrc", "FFVII");
+        Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(model.name + ".mesh", "FFVII"));
+        ExportMesh("effects/", mesh);
+        for (const std::string& texture : model.textures){
+            const std::string path = data_dir_ + "models/battle/effects/"
+              + texture.substr(0, texture.size() - 4) + ".png";
+            if (boost::filesystem::exists(path)) continue;
+            try{
+                TexFile tex(output_dir_ + "temp/effects/" + texture);
+                tex.SavePng(path);
+            }
+            catch (const std::exception& ex){
+                // Many of the original textures are dummies.
+                std::cerr << "[WARNING] Error converting effect texture " << texture << ": " << ex.what() << std::endl;
+            }
+        }
+        model.converted = true;
+    }
+    catch (const Ogre::Exception& ex){
+        std::cerr << "[WARNING] Could not convert effect model " << model.name << ": " << ex.what() << std::endl;
+    }
+    catch (const std::exception& ex){
+        std::cerr << "[WARNING] Could not convert effect model " << model.name << ": " << ex.what() << std::endl;
+    }
+    next_effect_to_convert_ ++;
+    return next_effect_to_convert_;
+}
+
+void BattleDataInstaller::WriteEffectModels(){
+    std::ofstream file(data_dir_ + "gamedata/effects.lua");
+    file << "-- Meshes of the battle effects, extracted from magic.lgp. Names are the folder of the effect\n"
+         << "-- and the original file, for example magic_faira_1. Meshes are in models/battle/effects.\n"
+         << "Game.EffectModels = {\n";
+    for (const EffectModel& model : effect_models_){
+        if (model.converted) file << "    \"" << model.name << "\",\n";
+    }
+    file << "}\n";
+    WriteEffectSprites();
+}
+
+void BattleDataInstaller::WriteEffectSprites(){
+    // The sprite files (.s) are lists of quads of a sprite sheet, after an 8 byte header ("# " and
+    // the number of frames). Layout found by comparing files, not documented. A quad has:
+    //   flags (4 bytes, plus 4 if the second 16 bit value is not 0),
+    //   draw offset X and Y, signed 16 bit, normally half of the size (centered),
+    //   position of the quad in the texture, U and V, 16 bit,
+    //   4 unknown bytes,
+    //   size of the quad in the texture, width and height in bytes (twice).
+    // Textures are converted too, with the name of the effect folder as a prefix (common_ for the
+    // archive root), to images/battle_fx, so they can be used as images of sprites.
+    const std::string key_prefix = "ff7/data/battle/";
+    auto key_of = [&](std::string folder){
+        if (folder.empty()) return std::string("common");
+        if (folder.compare(0, key_prefix.size(), key_prefix) == 0) folder = folder.substr(key_prefix.size());
+        return EffectSafeName(folder);
+    };
+    std::ofstream file(data_dir_ + "gamedata/effect_sprites.lua");
+    file << "-- Frames of the sprite files of magic.lgp. Game.EffectSprites[name] is a list of frames with\n"
+         << "-- the position (u, v) and size (w, h) in the texture, in pixels, the offset to draw it\n"
+         << "-- (ox, oy) and the flags. The names are the folder and the file, like common_iyashi.\n"
+         << "-- Textures are in images/battle_fx, like common_iyashi00.png.\n"
+         << "Game.EffectSprites = Game.EffectSprites or {}\n";
+    const std::string dir = output_dir_ + "temp/effects/";
+    boost::filesystem::create_directories(data_dir_ + "images/battle_fx/");
+    for (size_t f = 0; f < magic_lgp_files_.size(); f ++){
+        const std::string& name = magic_lgp_file_names_[f];
+        if (name.size() < 3) continue;
+        std::string ext = name.substr(name.find_last_of('.') + 1);
+        std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c){return std::tolower(c);});
+        const std::string key = key_of(magic_lgp_file_folders_[f]);
+        if (ext == "tex"){
+            const std::string stem = EffectSafeName(EffectStem(name));
+            const std::string path = data_dir_ + "images/battle_fx/" + key + "_" + stem + ".png";
+            if (boost::filesystem::exists(path)) continue;
+            try{
+                magic_lgp_files_[f].WriteFile(dir + key + "_" + stem + ".tex");
+                TexFile tex(dir + key + "_" + stem + ".tex");
+                tex.SavePng(path);
+            }
+            catch (const std::exception& ex){
+                // Many of the original textures are dummies.
+            }
+        }
+        else if (ext == "s"){
+            File& sprite_file = magic_lgp_files_[f];
+            const size_t size = sprite_file.GetFileSize();
+            if (size < 8) continue;
+            sprite_file.SetOffset(0);
+            std::vector<unsigned char> bytes(size);
+            for (size_t b = 0; b < size; b ++) bytes[b] = sprite_file.readU8();
+            // Only the files with the header of sprite lists.
+            if (bytes[0] != 0x23 || bytes[1] != 0x20) continue;
+            // Each quad has 4 bytes of flags, 4 more if the second 16 bit value is not 0, and then 16
+            // bytes of data. The header count is of frames, not quads, so it's not used.
+            struct Quad{int ox, oy, u, v, w, h;};
+            std::vector<Quad> quads;
+            size_t p = 8;
+            bool valid = true;
+            while (p < size){
+                if (p + 4 > size){valid = false; break;}
+                const bool extra = (bytes[p + 2] | (bytes[p + 3] << 8)) != 0;
+                const size_t q = p + 4 + (extra ? 4 : 0);
+                if (q + 16 > size){valid = false; break;}
+                Quad quad;
+                quad.ox = static_cast<int16_t>(bytes[q] | (bytes[q + 1] << 8));
+                quad.oy = static_cast<int16_t>(bytes[q + 2] | (bytes[q + 3] << 8));
+                quad.u = bytes[q + 4] | (bytes[q + 5] << 8);
+                quad.v = bytes[q + 6] | (bytes[q + 7] << 8);
+                quad.w = bytes[q + 12];
+                quad.h = bytes[q + 13];
+                quads.push_back(quad);
+                p = q + 16;
+            }
+            if (!valid || quads.empty()) continue;
+            file << "Game.EffectSprites[\"" << key << "_" << EffectSafeName(EffectStem(name)) << "\"] = {\n";
+            for (const Quad& quad : quads){
+                file << "    {u = " << quad.u << ", v = " << quad.v << ", w = " << quad.w << ", h = " << quad.h
+                     << ", ox = " << quad.ox << ", oy = " << quad.oy << "},\n";
+            }
+            file << "}\n";
+        }
+    }
 }
 
 void BattleDataInstaller::WriteEnemies(){

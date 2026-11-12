@@ -44,6 +44,7 @@ DataInstaller::DataInstaller(
     step_weight_[IDLE] = 0;
     step_weight_[BATTLE_MODELS_CONVERT] = 2;
     step_weight_[SPELL_MODELS_CONVERT] = 2;
+    step_weight_[EFFECT_MODELS_CONVERT] = 2;
     step_weight_[MEDIA_IMAGES] = 3;
     step_weight_[MEDIA_SOUNDS] = 8;
     step_weight_[MEDIA_MUSICS] = 9;
@@ -204,7 +205,20 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case SPELL_MODELS_CONVERT:
             cur_substep_ = battle_installer_->ConvertSpellModel();
-            if (cur_substep_ >= substeps_) installation_state_ = KERNEL_PRICES;
+            if (cur_substep_ >= substeps_) installation_state_ = EFFECT_MODELS_INIT;
+            return CalcProgress();
+        case EFFECT_MODELS_INIT:
+            write_output_line_("Extracting battle effects...", 2, true);
+            substeps_ = battle_installer_->InitializeEffectModels();
+            cur_substep_ = 0;
+            installation_state_ = EFFECT_MODELS_CONVERT;
+            return CalcProgress();
+        case EFFECT_MODELS_CONVERT:
+            cur_substep_ = battle_installer_->ConvertEffectModel();
+            if (cur_substep_ >= substeps_){
+                battle_installer_->WriteEffectModels();
+                installation_state_ = KERNEL_PRICES;
+            }
             return CalcProgress();
         case KERNEL_PRICES:
             // Skip kernel data if option is set.

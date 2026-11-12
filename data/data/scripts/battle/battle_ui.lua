@@ -2448,7 +2448,6 @@ UiContainer.BattleUi = {
         -- Spells, summons, items and enemy attacks show their names.
         if action.attack_id ~= nil or action.item_id ~= nil then
             ui_manager:get_widget("BattleUi.Container.Message.Name"):set_text(attack.name)
-            UiContainer.BattleFx:cast(attack, actor_side, action.actor)
         end
         current.pending = 1
         local played = self:play_script(

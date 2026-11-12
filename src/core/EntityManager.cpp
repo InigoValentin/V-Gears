@@ -445,6 +445,22 @@ void EntityManager::AddBattleEntity(
 
 }
 
+void EntityManager::RemoveBattleEntity(const Ogre::String& name){
+    if (module_ != Module::BATTLE) return;
+    for (auto it = battle_entity_.begin(); it != battle_entity_.end(); ++ it){
+        Entity* entity = *it;
+        if (entity->GetName() != name) continue;
+        ScriptManager::getSingleton().RemoveEntity(ScriptManager::BATTLE, name);
+        battle_entity_.erase(it);
+        // The entity is not deleted, as its destructor would destroy the model again, like in
+        // ClearBattle.
+        Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(name);
+        scene_node_->removeAndDestroyChild("Battle_" + name);
+        entity->ReleaseResources();
+        return;
+    }
+}
+
 Entity* EntityManager::GetBackground3D() const{
     if (IsFieldModule()){
         LOG_WARNING("Tried to retrieve a 3D background while the EntityManager is in field mode.");

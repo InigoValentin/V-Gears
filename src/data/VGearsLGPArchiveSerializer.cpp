@@ -31,6 +31,7 @@ namespace VGears{
         ReadUInt32(stream, file_count);
         FileList& files(dest->GetFiles());
         ReadVector(stream, files, file_count);
+        ReadFolders(stream, files);
         FileList::iterator it(files.begin());
         FileList::const_iterator it_end(files.end());
         while (it != it_end){
@@ -39,6 +40,30 @@ namespace VGears{
             ReadUInt32(stream, it->data_size);
             it->data_offset = stream->tell();
             ++ it;
+        }
+    }
+
+    void LGPArchiveSerializer::ReadFolders(Ogre::DataStreamPtr &stream, FileList& files){
+        // After the file table there's a lookup table of 30 * 30 entries, then the conflict tables.
+        // Each conflict table lists the folders where files of the same name are, with the index
+        // of the file in the file table.
+        static const size_t LOOKUP_TABLE_SIZE = 30 * 30 * 4;
+        static const size_t FOLDER_NAME_LENGTH = 128;
+        if (stream->size() < stream->tell() + LOOKUP_TABLE_SIZE + 2) return;
+        stream->skip(LOOKUP_TABLE_SIZE);
+        uint16 table_count(0);
+        ReadUInt16(stream, table_count);
+        for (uint16 t = 0; t < table_count; ++ t){
+            if (stream->eof()) return;
+            uint16 entry_count(0);
+            ReadUInt16(stream, entry_count);
+            for (uint16 e = 0; e < entry_count; ++ e){
+                if (stream->size() < stream->tell() + FOLDER_NAME_LENGTH + 2) return;
+                String folder(readString(stream, FOLDER_NAME_LENGTH));
+                uint16 index(0);
+                ReadUInt16(stream, index);
+                if (index < files.size()) files[index].folder = folder;
+            }
         }
     }
 

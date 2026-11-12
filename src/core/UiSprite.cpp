@@ -82,6 +82,19 @@ void UiSprite::SetImage(const Ogre::String& image){
 
 void UiSprite::SetImage(const char* image){SetImage(Ogre::String(image));}
 
+void UiSprite::SetImageRegion(const float u1, const float v1, const float u2, const float v2){
+    image_region_[0] = u1;
+    image_region_[1] = v1;
+    image_region_[2] = u2;
+    image_region_[3] = v2;
+    UpdateGeometry();
+}
+
+void UiSprite::SetAdditive(const bool additive){
+    Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);
+    pass->setSceneBlending(additive ? Ogre::SBT_ADD : Ogre::SBT_TRANSPARENT_ALPHA);
+}
+
 void UiSprite::SetVertexShader(const Ogre::String& shader){
     Ogre::Pass* pass = material_->getTechnique(0)->getPass(0);
     pass->setVertexProgram(shader, true);
@@ -142,8 +155,8 @@ void UiSprite::UpdateGeometry(){
     *write_iterator ++ = colour_1_.g;
     *write_iterator ++ = colour_1_.b;
     *write_iterator ++ = colour_1_.a;
-    *write_iterator ++ = 0;
-    *write_iterator ++ = 0;
+    *write_iterator ++ = image_region_[0];
+    *write_iterator ++ = image_region_[1];
 
     *write_iterator ++ = new_x2;
     *write_iterator ++ = new_y2;
@@ -152,8 +165,8 @@ void UiSprite::UpdateGeometry(){
     *write_iterator ++ = colour_2_.g;
     *write_iterator ++ = colour_2_.b;
     *write_iterator ++ = colour_2_.a;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 0;
+    *write_iterator ++ = image_region_[2];
+    *write_iterator ++ = image_region_[1];
 
     *write_iterator ++ = new_x3;
     *write_iterator ++ = new_y3;
@@ -162,8 +175,8 @@ void UiSprite::UpdateGeometry(){
     *write_iterator ++ = colour_3_.g;
     *write_iterator ++ = colour_3_.b;
     *write_iterator ++ = colour_3_.a;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
+    *write_iterator ++ = image_region_[2];
+    *write_iterator ++ = image_region_[3];
 
     *write_iterator ++ = new_x1;
     *write_iterator ++ = new_y1;
@@ -172,8 +185,8 @@ void UiSprite::UpdateGeometry(){
     *write_iterator ++ = colour_1_.g;
     *write_iterator ++ = colour_1_.b;
     *write_iterator ++ = colour_1_.a;
-    *write_iterator ++ = 0;
-    *write_iterator ++ = 0;
+    *write_iterator ++ = image_region_[0];
+    *write_iterator ++ = image_region_[1];
 
     *write_iterator ++ = new_x3;
     *write_iterator ++ = new_y3;
@@ -182,8 +195,8 @@ void UiSprite::UpdateGeometry(){
     *write_iterator ++ = colour_3_.g;
     *write_iterator ++ = colour_3_.b;
     *write_iterator ++ = colour_3_.a;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
+    *write_iterator ++ = image_region_[2];
+    *write_iterator ++ = image_region_[3];
 
     *write_iterator ++ = new_x4;
     *write_iterator ++ = new_y4;
@@ -192,8 +205,8 @@ void UiSprite::UpdateGeometry(){
     *write_iterator ++ = colour_4_.g;
     *write_iterator ++ = colour_4_.b;
     *write_iterator ++ = colour_4_.a;
-    *write_iterator ++ = 0;
-    *write_iterator ++ = 1;
+    *write_iterator ++ = image_region_[0];
+    *write_iterator ++ = image_region_[3];
 
     render_operation_.vertexData->vertexCount = 6;
     vertex_buffer_->unlock();

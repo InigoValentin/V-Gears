@@ -300,6 +300,57 @@ class Entity{
         virtual void setScale(const Ogre::Vector3 &scale);
 
         /**
+         * Sets the entity scale from a script.
+         *
+         * @param[in] x Scale on the X axis.
+         * @param[in] y Scale on the Y axis.
+         * @param[in] z Scale on the Z axis.
+         */
+        void ScriptSetScale(const float x, const float y, const float z);
+
+        /**
+         * Rotates the model of the entity relative to the entity itself, for example to tilt the
+         * mesh of a visual effect. It doesn't change the direction the entity faces.
+         *
+         * @param[in] x Rotation around the X axis of the model, in degrees.
+         * @param[in] y Rotation around the Y axis of the model, in degrees.
+         * @param[in] z Rotation around the Z axis of the model, in degrees.
+         */
+        void ScriptSetModelRotation(const float x, const float y, const float z);
+
+        /**
+         * Blend modes for entities used as visual effects.
+         */
+        enum EffectBlend{
+            /** Normal drawing. */
+            BLEND_NORMAL = 0,
+            /** Colours are added to the ones behind, for fire, light and so on. */
+            BLEND_ADDITIVE = 1,
+            /** Standard transparency. */
+            BLEND_ALPHA = 2,
+        };
+
+        /**
+         * Sets how the entity is blended with the scene. Meant for visual effects.
+         *
+         * @param[in] blend The blend mode, one of {@see EffectBlend}.
+         */
+        virtual void ScriptSetBlend(const int blend){}
+
+        /**
+         * Sets the entity opacity. Needs a blend mode other than normal. For additive blend it
+         * scales the brightness.
+         *
+         * @param[in] alpha Opacity between 0 and 1.
+         */
+        virtual void ScriptSetAlpha(const float alpha){}
+
+        /**
+         * Frees the resources that were created for the entity, before it is removed.
+         */
+        virtual void ReleaseResources(){}
+
+        /**
          * Sets the entity index in the field.
          *
          * @param[in] index Index of the entity.

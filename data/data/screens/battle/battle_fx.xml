@@ -1,72 +1,52 @@
 <screen name="BattleFx" script="screens/battle/battle_fx.lua" visible="false">
-    <!-- Battle visual effects: a screen flash, a pool of particles and a pool of floating numbers. -->
+    <!-- Battle visual effects: a screen flash, a pool of animated sprites and a pool of floating numbers. -->
     <sprite name="Flash" x="0" y="0" width="100%" height="100%" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P1" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P2" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P3" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P4" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P5" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P6" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P7" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P8" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P9" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P10" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P11" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P12" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P13" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P14" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P15" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P16" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P17" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P18" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P19" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P20" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P21" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P22" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P23" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P24" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P25" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P26" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P27" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P28" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P29" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P30" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P31" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P32" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P33" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P34" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P35" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P36" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P37" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P38" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P39" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P40" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P41" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P42" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P43" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P44" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P45" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P46" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P47" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P48" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P49" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P50" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P51" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P52" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P53" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P54" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P55" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P56" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P57" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P58" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P59" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <sprite name="P60" x="0" y="0" width="8" height="8" colour="1 1 1" alpha="0" visible="false" />
-    <text_area name="N1" x="0" y="0" scale="1.4 1.4" font="FFVIIFont" visible="false" />
-    <text_area name="N2" x="0" y="0" scale="1.4 1.4" font="FFVIIFont" visible="false" />
-    <text_area name="N3" x="0" y="0" scale="1.4 1.4" font="FFVIIFont" visible="false" />
-    <text_area name="N4" x="0" y="0" scale="1.4 1.4" font="FFVIIFont" visible="false" />
-    <text_area name="N5" x="0" y="0" scale="1.4 1.4" font="FFVIIFont" visible="false" />
-    <text_area name="N6" x="0" y="0" scale="1.4 1.4" font="FFVIIFont" visible="false" />
-    <text_area name="N7" x="0" y="0" scale="1.4 1.4" font="FFVIIFont" visible="false" />
-    <text_area name="N8" x="0" y="0" scale="1.4 1.4" font="FFVIIFont" visible="false" />
+    <sprite name="S1" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S2" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S3" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S4" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S5" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S6" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S7" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S8" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S9" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S10" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S11" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S12" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S13" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S14" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S15" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S16" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S17" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S18" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S19" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S20" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S21" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S22" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S23" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S24" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S25" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S26" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S27" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S28" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S29" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S30" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S31" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S32" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S33" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S34" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S35" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S36" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S37" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S38" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S39" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <sprite name="S40" x="0" y="0" width="32" height="32" colour="1 1 1" alpha="0" visible="false" />
+    <text_area name="N1" x="0" y="0" width="400" height="60" scale="1.4 1.4" font="FFVIIFont" visible="false" />
+    <text_area name="N2" x="0" y="0" width="400" height="60" scale="1.4 1.4" font="FFVIIFont" visible="false" />
+    <text_area name="N3" x="0" y="0" width="400" height="60" scale="1.4 1.4" font="FFVIIFont" visible="false" />
+    <text_area name="N4" x="0" y="0" width="400" height="60" scale="1.4 1.4" font="FFVIIFont" visible="false" />
+    <text_area name="N5" x="0" y="0" width="400" height="60" scale="1.4 1.4" font="FFVIIFont" visible="false" />
+    <text_area name="N6" x="0" y="0" width="400" height="60" scale="1.4 1.4" font="FFVIIFont" visible="false" />
+    <text_area name="N7" x="0" y="0" width="400" height="60" scale="1.4 1.4" font="FFVIIFont" visible="false" />
+    <text_area name="N8" x="0" y="0" width="400" height="60" scale="1.4 1.4" font="FFVIIFont" visible="false" />
 </screen>

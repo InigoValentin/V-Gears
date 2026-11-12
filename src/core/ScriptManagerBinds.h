@@ -132,6 +132,10 @@ void ScriptManager::InitBinds(){
       "set_talkable", &Entity::SetTalkable,
       "is_talkable", &Entity::IsTalkable,
       "set_visible", &Entity::SetVisible,
+      "set_scale", &Entity::ScriptSetScale,
+      "set_model_rotation", &Entity::ScriptSetModelRotation,
+      "set_blend", &Entity::ScriptSetBlend,
+      "set_alpha", &Entity::ScriptSetAlpha,
       "is_visible", &Entity::IsVisible,
       "set_move_auto_speed", &Entity::SetMoveAutoSpeed,
       "get_move_auto_speed", &Entity::GetMoveAutoSpeed,
@@ -170,6 +174,9 @@ void ScriptManager::InitBinds(){
     BindYielding(entity_type, "offset_sync", &Entity::ScriptOffsetSync);
     BindYielding(entity_type, "turn_sync", &Entity::ScriptTurnSync);
     BindYielding(entity_type, "animation_sync", &Entity::ScriptAnimationSync);
+    entity_type["BLEND_NORMAL"] = Entity::BLEND_NORMAL;
+    entity_type["BLEND_ADDITIVE"] = Entity::BLEND_ADDITIVE;
+    entity_type["BLEND_ALPHA"] = Entity::BLEND_ALPHA;
     entity_type["NONE"] = AT_NONE;
     entity_type["LINEAR"] = AT_LINEAR;
     entity_type["SMOOTH"] = AT_SMOOTH;
@@ -221,6 +228,8 @@ void ScriptManager::InitBinds(){
       "get_enemy_count", &BattleManager::ScriptGetEnemyCount,
       "get_enemy", &BattleManager::ScriptGetEnemy,
       "add_attack_model", &BattleManager::ScriptAddAttackModel,
+      "add_effect_model", &BattleManager::ScriptAddEffectModel,
+      "remove_effect_model", &BattleManager::ScriptRemoveEffectModel,
       "has_attack", &BattleManager::HasAttackData,
       "set_camera", &BattleManager::ScriptSetCamera,
       "get_layout", &BattleManager::ScriptGetLayout,
@@ -552,7 +561,9 @@ void ScriptManager::InitBinds(){
       "get_height", &UiWidget::ScriptGetHeight,
       "set_height", sol::overload(&UiWidget::ScriptSetHeight, &UiWidget::SetHeight),
       "set_text", &UiWidget::SetText,
-      "set_image", &UiWidget::SetImage
+      "set_image", &UiWidget::SetImage,
+      "set_image_region", &UiWidget::SetImageRegion,
+      "set_additive", &UiWidget::SetAdditive
     );
     sol::table ui_widget_type = lua["UiWidget"];
     BindYielding(ui_widget_type, "animation_sync", &UiWidget::ScriptAnimationSync);

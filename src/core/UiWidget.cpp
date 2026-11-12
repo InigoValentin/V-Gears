@@ -583,6 +583,10 @@ void UiWidget::SetText(const char* text){}
 
 void UiWidget::SetImage(const char* image){}
 
+void UiWidget::SetImageRegion(const float u1, const float v1, const float u2, const float v2){}
+
+void UiWidget::SetAdditive(const bool additive){}
+
 float UiWidget::ScriptGetWidth(){return width_;}
 
 void UiWidget::ScriptSetWidth(float width){

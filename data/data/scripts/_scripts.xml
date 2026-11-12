@@ -7,6 +7,7 @@
     <script file="gamedata/attacks.lua" />
     <script file="gamedata/characters.lua" />
     <script file="gamedata/commands.lua" />
+    <script file="gamedata/effect_sprites.lua" />
     <script file="gamedata/growth.lua" />
     <script file="gamedata/items.lua" />
     <script file="gamedata/key_items.lua" />

@@ -66,6 +66,12 @@ class EntityModel : public Entity{
 
         Ogre::Entity* GetModel();
 
+        virtual void ScriptSetBlend(const int blend);
+
+        virtual void ScriptSetAlpha(const float alpha);
+
+        virtual void ReleaseResources();
+
         /**
          * Plays an animation of the model.
          *
@@ -110,5 +116,15 @@ class EntityModel : public Entity{
          * The current animation state.
          */
         Ogre::AnimationState* animation_current_;
+
+        /**
+         * Blend mode of the model, one of {@see Entity::EffectBlend}.
+         */
+        int blend_ = Entity::BLEND_NORMAL;
+
+        /**
+         * Materials created to give this model its own blending, so they are removed with it.
+         */
+        std::vector<Ogre::String> own_materials_;
 };
 

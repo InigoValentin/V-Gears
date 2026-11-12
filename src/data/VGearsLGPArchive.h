@@ -171,6 +171,15 @@ namespace VGears{
                 String file_name;
 
                 /**
+                 * Folder the file is in, empty if it's at the root of the archive.
+                 *
+                 * Several files can have the same name if they're in different folders. The
+                 * folder comes from the conflict tables of the archive, and has the form
+                 * "ff7/data/battle/magic/fire".
+                 */
+                String folder;
+
+                /**
                  * The file offset from the beginning of the archive.
                  */
                 uint32 file_offset;

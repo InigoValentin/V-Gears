@@ -131,6 +131,16 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void ClearBattle() override;
 
         /**
+         * Removes a battle entity, for example one made for a visual effect.
+         *
+         * If the manager is not in the battle module, or the entity doesn't exist, it will do
+         * nothing.
+         *
+         * @param[in] name Entity name.
+         */
+        void RemoveBattleEntity(const Ogre::String& name);
+
+        /**
          * Clears all world map information in the entity manager.
          *
          * It clears the background, the walkmesh, any pending actions and all the world entities.

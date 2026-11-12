@@ -545,6 +545,27 @@ class UiWidget{
         virtual void SetImage(const char* image);
 
         /**
+         * Sets which part of the image of the widget is drawn.
+         *
+         * Only sprites do something. Used to draw frames of a sprite sheet.
+         *
+         * @param[in] u1 Left side, from 0 to 1.
+         * @param[in] v1 Top side, from 0 to 1.
+         * @param[in] u2 Right side, from 0 to 1.
+         * @param[in] v2 Bottom side, from 0 to 1.
+         */
+        virtual void SetImageRegion(const float u1, const float v1, const float u2, const float v2);
+
+        /**
+         * Sets if the widget is drawn adding its colours to the ones behind, for light effects.
+         *
+         * Only sprites do something.
+         *
+         * @param[in] additive True for additive blending, false for the normal transparency.
+         */
+        virtual void SetAdditive(const bool additive);
+
+        /**
          * Retrieves the absolute width of the widget.
          *
          * Doesn't consider percentages.

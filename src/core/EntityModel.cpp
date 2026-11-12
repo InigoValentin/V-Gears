@@ -14,7 +14,13 @@
  */
 
 #include <iostream>
+#include <algorithm>
 #include <OgreEntity.h>
+#include <OgreSubEntity.h>
+#include <OgreMaterialManager.h>
+#include <OgreResourceGroupManager.h>
+#include <OgreTechnique.h>
+#include <OgrePass.h>
 #include <OgreRoot.h>
 #include "core/EntityModel.h"
 #include "core/EntityManager.h"
@@ -74,6 +80,87 @@ unsigned int EntityModel::GetAnimationCount() const{
 }
 
 Ogre::Entity* EntityModel::GetModel(){return model_;}
+
+void EntityModel::ScriptSetBlend(const int blend){
+    if (blend == blend_) return;
+    blend_ = blend;
+    for (unsigned int s = 0; s < model_->getNumSubEntities(); ++ s){
+        Ogre::SubEntity* sub_entity = model_->getSubEntity(s);
+        // Materials are shared among all the entities of a mesh, so use one of its own.
+        Ogre::MaterialPtr material = sub_entity->getMaterial();
+        if (std::find(own_materials_.begin(), own_materials_.end(), material->getName()) == own_materials_.end()){
+            const Ogre::String own_name = material->getName() + "/" + name_;
+            Ogre::MaterialPtr own = Ogre::MaterialManager::getSingleton().getByName(own_name, material->getGroup());
+            if (own == nullptr) own = material->clone(own_name);
+            own_materials_.push_back(own_name);
+            sub_entity->setMaterial(own);
+            material = own;
+        }
+        for (unsigned short t = 0; t < material->getNumTechniques(); ++ t){
+            Ogre::Technique* technique = material->getTechnique(t);
+            for (unsigned short p = 0; p < technique->getNumPasses(); ++ p){
+                Ogre::Pass* pass = technique->getPass(p);
+                switch (blend){
+                    case BLEND_ADDITIVE:
+                        pass->setSceneBlending(Ogre::SBT_ADD);
+                        pass->setDepthWriteEnabled(false);
+                        pass->setLightingEnabled(false);
+                        break;
+                    case BLEND_ALPHA:
+                        pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+                        pass->setDepthWriteEnabled(false);
+                        pass->setLightingEnabled(false);
+                        break;
+                    default:
+                        pass->setSceneBlending(Ogre::SBT_REPLACE);
+                        pass->setDepthWriteEnabled(true);
+                }
+            }
+        }
+    }
+}
+
+void EntityModel::ScriptSetAlpha(const float alpha){
+    if (blend_ == BLEND_NORMAL) return;
+    const float a = std::max(0.0f, std::min(1.0f, alpha));
+    for (unsigned int s = 0; s < model_->getNumSubEntities(); ++ s){
+        Ogre::MaterialPtr material = model_->getSubEntity(s)->getMaterial();
+        for (unsigned short t = 0; t < material->getNumTechniques(); ++ t){
+            Ogre::Technique* technique = material->getTechnique(t);
+            for (unsigned short p = 0; p < technique->getNumPasses(); ++ p){
+                Ogre::Pass* pass = technique->getPass(p);
+                for (unsigned short u = 0; u < pass->getNumTextureUnitStates(); ++ u){
+                    Ogre::TextureUnitState* unit = pass->getTextureUnitState(u);
+                    if (blend_ == BLEND_ADDITIVE){
+                        // The colour is added, so less brightness is less opacity.
+                        unit->setColourOperationEx(
+                          Ogre::LBX_MODULATE, Ogre::LBS_TEXTURE, Ogre::LBS_MANUAL,
+                          Ogre::ColourValue::White, Ogre::ColourValue(a, a, a)
+                        );
+                    }
+                    else{
+                        unit->setAlphaOperation(
+                          Ogre::LBX_MODULATE, Ogre::LBS_TEXTURE, Ogre::LBS_MANUAL, 1.0f, a
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+void EntityModel::ReleaseResources(){
+    // The materials are used by the model, so make it use none before removing them.
+    for (const Ogre::String& name : own_materials_){
+        // The group is not known here (the material has the one of the original), so search all.
+        Ogre::MaterialManager& manager = Ogre::MaterialManager::getSingleton();
+        Ogre::MaterialPtr material = manager.getByName(
+          name, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME
+        );
+        if (material != nullptr) manager.remove(material);
+    }
+    own_materials_.clear();
+}
 
 void EntityModel::PlayAnimation(
   const Ogre::String& animation, Entity::AnimationState state,

@@ -265,6 +265,16 @@ class DataInstaller{
             SPELL_MODELS_CONVERT,
 
             /**
+             * Extracts the meshes and textures of the battle effects.
+             */
+            EFFECT_MODELS_INIT,
+
+            /**
+             * Converts the battle effect meshes.
+             */
+            EFFECT_MODELS_CONVERT,
+
+            /**
              * Parses item and materia prices from ff7.exe.
              */
             KERNEL_PRICES,

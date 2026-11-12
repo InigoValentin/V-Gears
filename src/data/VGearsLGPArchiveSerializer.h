@@ -66,6 +66,14 @@ namespace VGears{
         protected:
 
             /**
+             * Reads the folders of the files, from the conflict tables after the file table.
+             *
+             * @param[in] stream The contents of the LGP archive, positioned after the file table.
+             * @param[in,out] files The files of the archive. Their folder is set.
+             */
+            void ReadFolders(Ogre::DataStreamPtr &stream, FileList& files);
+
+            /**
              * Reads an archive header and sets the instance data.
              *
              * @param[in] stream The contents of the LGP archive.
