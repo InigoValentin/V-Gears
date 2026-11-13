@@ -2,7 +2,7 @@ Source: v-gears
 Section: games
 Priority: extra
 Maintainer: Iñigo Valentin <i@inigovalentin.com>
-Build-Depends: debhelper(>= 7.0.50~),libogre-1.12-dev, libtinyxml-dev, cmake, cdbs, libois-dev, libboost-program-options-dev, libboost-filesystem-dev, libvorbis-dev, libopenal-dev, libboost-test-dev, zlib1g-dev, libarchive-dev, libqt5core5a, libqt5widgets5, libluajit-5.1-dev
+Build-Depends: debhelper(>= 7.0.50~),libogre-1.12-dev, libtinyxml-dev, cmake, cdbs, libois-dev, libboost-program-options-dev, libboost-filesystem-dev, libvorbis-dev, libopenal-dev, libboost-test-dev, zlib1g-dev, libarchive-dev, libqt5core5a, libqt5widgets5, qtbase5-dev, libboost-dev, libboost-thread-dev, libluajit-5.1-dev
 Standards-Version: 3.9.5
 Homepage: https://v-gears.inigovalentin.com
 Vcs-Git: https://github.com/InigoValentin/V-Gears.git
@@ -11,5 +11,6 @@ Vcs-Git: https://github.com/InigoValentin/V-Gears.git
 Package: v-gears
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: ffmpeg, timidity
 Description: A Free Final Fantasy VII Engine
  A Free Replacement for the Final Fantasy VII Engine.

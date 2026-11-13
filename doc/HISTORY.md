@@ -32,7 +32,7 @@ A couple of months later, Halkun resigned as project leader<sup>[5](#####[5]])</
 
 ---
 
-##2007 - 2012 The Project Continues.
+## 2007 - 2012 The Project Continues.
 
 Still, the project kept on growing and advancing. Akari was still doing most of the contributions, and took an unofficial role of project leader. Over the years, the engine was playable, and Final Fantasy VII could, to an extent, actually be played on Q-Gears. Work was getting done, new things were being implemented, corners were being polished.
 
@@ -42,7 +42,7 @@ Eventually, it seems Akari himself started loosing interest in the project. The 
 
 ---
 
-##2015 - A New Hope.
+## 2015 - A New Hope.
 
 The project, seemingly dead, received a new impulse in 2015, thanks to paulsapps<sup>[6](#####[6]])</sup>. He was not, as far as I'm aware, a member of Qhimm Forums, but he took an interest on the project. He modernized the codebase, fixed many errors, and more importantly, developed a series of very usefull tools, the most remarkable one being SUDM<sup>[7](#####[7]])</sup>, which allowed to easily import data to Q-Gears and to reimplement field scripts.
 
@@ -50,7 +50,7 @@ That same year, apparently paulsapps started it's own fork of Q-Gears: 7-Gears<s
 
 ---
 
-##2022 - V-Gears.
+## 2022 - V-Gears.
 
 2022 is when I<sup>[9](#####[8]])</sup> found out about Q-Gears. I really loved the idea, and it made me sad that the project had died. So I started reading, trying to understand the code base and the ins and outs of the game. 
 
@@ -60,7 +60,9 @@ The next step was to modernize the code base. I made some fixes here and there, 
 
 Then, I set out to do what I thougth was the number one priority, and fix what I personally thing was one of the main reasons the project had died: The lack of documentation. Slowly but steadly, I went through the entire code base, documenting every class, every function, every piece of code. I added whatever documents I had about the game formats and files. I added a project history, a usefull README, building instructions...
 
-As of yet, I have added no new functionalities to the engine itself.
+For a while, I added no new functionalities to the engine itself. That changed after the cleanup was done. Since then V-Gears has gained, among other things, a rewritten data installer (with ISO reading, verification, and FFmpeg / TiMidity detection), playback of the original videos, a shared menu library with most of the game menus, saving and loading of games and settings, and a battle system with the original battle data, models, animations and spell effects.
+
+<!-- TODO(review): the history above is a short summary of versions 0.1 to 0.3.0; expand or reword it in your own voice. -->
 
 ---
 
@@ -76,13 +78,13 @@ And maybe, one day we can play our favourite game over an engine called Somethin
 
 ### References:
 
-#####[1] Halkun profile on Qhimm Forums: [https://forums.qhimm.com/index.php?action=profile;u=109](https://forums.qhimm.com/index.php?action=profile;u=109)
-#####[2] Q-Gears presentation post on Qhimm Forums: [https://forums.qhimm.com/index.php?topic=5556.0](https://forums.qhimm.com/index.php?topic=5556.0)
-#####[3] Akari profile on Qhimm Forums: [https://forums.qhimm.com/index.php?action=profile;u=1266](https://forums.qhimm.com/index.php?action=profile;u=1266)
-#####[4] Akari's fork announcement on Qhimm Forums: [https://forums.qhimm.com/index.php?topic=6829.0](https://forums.qhimm.com/index.php?topic=6829.0)
-#####[5] Halkun's resignation: [https://forums.qhimm.com/index.php?topic=6963.0](https://forums.qhimm.com/index.php?topic=6963.0)
-#####[6] paulsapps's profile on GitHub: [https://github.com/paulsapps](https://github.com/paulsapps)
-#####[7] SUDM repository on GitHub: [https://github.com/paulsapps/SUDM/](https://github.com/paulsapps/SUDM/)
-#####[8] 7-Gears repository on GitHub: [https://github.com/paulsapps/7-Gears](https://github.com/paulsapps/7-Gears)
-#####[9] Iñigo Valentin's profile on GitHub: [https://github.com/InigoValentin](https://github.com/InigoValentin)
-#####[9] V-Gears repository on GitHub: [https://github.com/InigoValentin/V-Gears](https://github.com/InigoValentin/V-Gears)
+##### [1] Halkun profile on Qhimm Forums: [https://forums.qhimm.com/index.php?action=profile;u=109](https://forums.qhimm.com/index.php?action=profile;u=109)
+##### [2] Q-Gears presentation post on Qhimm Forums: [https://forums.qhimm.com/index.php?topic=5556.0](https://forums.qhimm.com/index.php?topic=5556.0)
+##### [3] Akari profile on Qhimm Forums: [https://forums.qhimm.com/index.php?action=profile;u=1266](https://forums.qhimm.com/index.php?action=profile;u=1266)
+##### [4] Akari's fork announcement on Qhimm Forums: [https://forums.qhimm.com/index.php?topic=6829.0](https://forums.qhimm.com/index.php?topic=6829.0)
+##### [5] Halkun's resignation: [https://forums.qhimm.com/index.php?topic=6963.0](https://forums.qhimm.com/index.php?topic=6963.0)
+##### [6] paulsapps's profile on GitHub: [https://github.com/paulsapps](https://github.com/paulsapps)
+##### [7] SUDM repository on GitHub: [https://github.com/paulsapps/SUDM/](https://github.com/paulsapps/SUDM/)
+##### [8] 7-Gears repository on GitHub: [https://github.com/paulsapps/7-Gears](https://github.com/paulsapps/7-Gears)
+##### [9] Iñigo Valentin's profile on GitHub: [https://github.com/InigoValentin](https://github.com/InigoValentin)
+##### [10] V-Gears repository on GitHub: [https://github.com/InigoValentin/V-Gears](https://github.com/InigoValentin/V-Gears)

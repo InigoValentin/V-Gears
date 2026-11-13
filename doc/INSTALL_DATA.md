@@ -8,9 +8,9 @@ If you also want the videos, you need the ISO images of the PC game disks 1, 2 a
 
 ## FFmpeg and TiMidity
 
-The installer converts the sound effects and the music to `.ogg` files with two external programs:
+The installer converts the sound effects, the music and the videos with two external programs (the videos only need FFmpeg):
 
-- [FFmpeg](https://ffmpeg.org/download.html "FFmpeg") converts the sound effects and encodes the music.
+- [FFmpeg](https://ffmpeg.org/download.html "FFmpeg") converts the sound effects, encodes the music and converts the videos.
 - [TiMidity](https://timidity.sourceforge.net/#download "TiMidity") plays the original MIDI music so FFmpeg can encode it. Only the music needs it.
 
 You don't have to configure anything if they are installed. The installer looks for them, in this order:
@@ -26,7 +26,7 @@ If a program that the installation needs is missing, the installer tells you bef
 - **Locate…** the program in your system.
 - **Get it…**: open its download page.
 - **Check again**, for when you have just installed it.
-- **Continue without** it. The rest is installed normally, and the sound effects, the music, or both are left out. The extracted `.wav` and `.mid` files stay in `~/.v-gears/data/audio/`, and the indexes only list the files that exist.
+- **Continue without** it. The rest is installed normally, and the sound effects, the music, the videos, or any of them, are left out. The extracted `.wav` and `.mid` files stay in `~/.v-gears/data/audio/`, and the indexes only list the files that exist.
 - **Cancel** the installation.
 
 To add the missing audio later, install the programs and run the installer again with only the sound effects and the music selected (the *Media only* option, or *Custom*).
@@ -63,7 +63,15 @@ When it finishes:
 
 The videos are not on the install disk, but on the PC game disks 1, 2 and 3. To get them, run the installer once for each disk: select the disk's ISO as the data source and the same installation directory, and click 'Install data'. The installer detects a game disk, extracts only its videos to `<installation directory>/data/video/` and doesn't touch anything else. Several disks have the same videos, so those already installed are skipped. Unlike the full installation, it can be repeated with the same installer window.
 
-The videos are copied as they are (AVI files with the Duck TrueMotion 2 codec, which FFmpeg can decode). V-Gears doesn't play them yet.
+The engine can't decode the original AVI files (Duck TrueMotion 2 codec), so the installer uses FFmpeg to convert each video to a folder of JPEG frames, an `.ogg` sound track (if the video has sound) and a `movie.xml` with the frame count and frame rate. Movies that carry camera data for the field background also get a `camera.cam` file. They are played by the engine's movie player, which draws the frames and plays the sound. FFmpeg is therefore needed to install the videos.
+
+<!-- TODO(review): confirm the exact output layout under data/video/ (folder per movie, file names) after a fresh install, and which movies play in game. -->
+
+## Battle data
+
+The battle installation extracts the battle scenes, enemy and formation data, the attacks, the field and world map encounter tables, and the battle models and animations. It also extracts the visual assets of the spell effects (`magic.lgp`): the meshes and textures of the effects and the sprite lists, which the battle scripts use to recreate the original spell effects. If you installed before these were added, run the installer again with the battle options selected (*Battle* preset or *Custom*) to get them.
+
+<!-- TODO(review): list of spells with effects (currently the Fire, Ice, Bolt and Cure families) and the reinstall requirement should be re-checked against the current state of battle_fx.lua. -->
 
 ## Advanced options
 
