@@ -1,13 +1,11 @@
 [Desktop Entry]
-Categories=Application;Game;
-Encoding=UTF-8
-Exec=sh -c "cd ~/.v-gears && exec /usr/games/v-gears"
-#Path=/usr/share/v-gears
-GenericName=V Gears
-Icon=v-gears.png
-Name=V Gears
-StartupNotify=true
-Terminal=false
 Type=Application
-Version=0.21
-X-KDE-SubstituteUID=false
+Version=1.0
+Name=V-Gears
+GenericName=V-Gears
+Comment=Free Final Fantasy VII engine
+Exec=v-gears
+Icon=v-gears
+Terminal=false
+StartupNotify=true
+Categories=Game;RolePlaying;

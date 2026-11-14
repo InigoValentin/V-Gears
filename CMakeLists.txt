@@ -78,6 +78,9 @@ else()
     set(VGEARS_LUAJIT_LIBRARIES ${VGEARS_LUAJIT_LIBRARY})
 endif()
 
+# Where each part is installed. Set before src/, whose install rules use it.
+include(InstallDirs)
+
 # Build v-gears (and, if requested, the installer).
 add_subdirectory(src)
 
@@ -87,21 +90,5 @@ if(BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-# Install Linux desktop integration assets for the installer so desktop shells
-# can map the running window to its icon.
-if(UNIX AND NOT APPLE AND BUILD_INSTALLER)
-    install(
-        FILES ${CMAKE_SOURCE_DIR}/v-gears-installer.desktop
-        DESTINATION share/applications
-    )
-    install(
-        FILES ${CMAKE_SOURCE_DIR}/v-gears-installer.png
-        DESTINATION share/icons/hicolor/256x256/apps
-    )
-    install(
-        FILES ${CMAKE_SOURCE_DIR}/v-gears-installer.png
-        DESTINATION share/pixmaps
-    )
-endif()
-
-# TODO: Generate Installer (.msi, .deb, .appImage...)
+# Install rules for the data, documentation and desktop files, and the packages.
+include(Packaging)

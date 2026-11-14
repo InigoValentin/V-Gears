@@ -37,6 +37,9 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QStorageInfo>
 #include <chrono>
+#include <OgrePrerequisites.h>
+#include "common/DataDirectory.h"
+#include "common/OgrePlugins.h"
 #include "DataInstaller.h"
 #include "ExternalTools.h"
 #include "InstallLayout.h"
@@ -96,78 +99,39 @@ static bool installer_created = false;
  * @return Path of the folder, or an empty string if it can't be found.
  */
 static QString FindGameDataDir(){
-    const QString app = QCoreApplication::applicationDirPath();
-    const QStringList candidates = {
-      app + "/data", app + "/../data", app + "/../../data", app + "/../share/v-gears",
-      "/usr/share/v-gears", QDir::currentPath() + "/data", QDir::currentPath() + "/../data"
-    };
-    for (const QString& c : candidates)
-        if (QDir(c + "/data").exists() && QFile::exists(c + "/plugins.cfg")) return QDir::cleanPath(c);
-    return QString();
+    // The same places the game copies its files from when the data directory is empty, then the current directory.
+    std::vector<boost::filesystem::path> candidates = VGears::DataDirectory::TemplateCandidates(
+      boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString())
+    );
+    candidates.emplace_back((QDir::currentPath() + "/data").toStdString());
+    candidates.emplace_back((QDir::currentPath() + "/../data").toStdString());
+    const boost::filesystem::path found = VGears::DataDirectory::FindTemplate(candidates, boost::filesystem::path());
+    return found.empty() ? QString() : QDir::cleanPath(QString::fromStdString(found.string()));
 }
 
-/**
- * Directories where the system's Ogre plugins are usually installed.
- */
-static const QStringList kSystemPluginDirs = {
-  "/usr/lib/x86_64-linux-gnu/OGRE", "/usr/lib/OGRE", "/usr/lib64/OGRE", "/usr/local/lib/OGRE",
-  "/usr/lib/aarch64-linux-gnu/OGRE"
-};
+#ifndef VGEARS_OGRE_PLUGIN_DIR
+#define VGEARS_OGRE_PLUGIN_DIR ""
+#endif
 
 /**
- * Gets the names of the plugins enabled in a plugins.cfg file.
- */
-static QStringList ListOgrePlugins(const QString& cfg_path){
-    QStringList plugins;
-    QFile cfg(cfg_path);
-    if (!cfg.open(QIODevice::ReadOnly | QIODevice::Text)) return plugins;
-    while (!cfg.atEnd()){
-        const QString line = QString::fromUtf8(cfg.readLine()).trimmed();
-        if (line.startsWith("Plugin=") && !line.mid(7).trimmed().isEmpty()) plugins << line.mid(7).trimmed();
-    }
-    return plugins;
-}
-
-/**
- * Finds a plugin library in a directory.
+ * Names of the plugins in the plugins.cfg of a folder that the game won't find.
  *
- * @return Directory-relative file names of the library (it can have several names), empty if not found.
- */
-static QStringList FindPluginFiles(const QString& dir, const QString& name){
-    return QDir(dir).entryList({name + ".so*", name + ".dll", name + ".dylib"}, QDir::Files);
-}
-
-/**
- * Names of the plugins in the plugins.cfg of a folder that are neither in it nor in the system's Ogre folders.
+ * The game looks for them in the same places (see VGears::OgrePlugins::SearchDirectories), so they don't need to be
+ * copied to the installation directory.
  */
 static QStringList MissingOgrePlugins(const QString& source_dir){
+    namespace bfs = boost::filesystem;
     QStringList missing;
-    for (const QString& name : ListOgrePlugins(source_dir + "/plugins.cfg")){
-        bool found = !FindPluginFiles(source_dir, name).isEmpty();
-        for (const QString& dir : kSystemPluginDirs) found = found || !FindPluginFiles(dir, name).isEmpty();
-        if (!found) missing << name;
-    }
-    return missing;
-}
-
-/**
- * Copies the Ogre plugins listed in the installation's plugins.cfg that are not already present there (for example
- * the stock plugins shipped with the system's Ogre) from the system's Ogre plugin directory.
- *
- * @return Names of the plugins that couldn't be found anywhere.
- */
-static QStringList CopyMissingOgrePlugins(const QString& install_dir){
-    QStringList missing;
-    for (const QString& name : ListOgrePlugins(install_dir + "plugins.cfg")){
-        if (!FindPluginFiles(install_dir, name).isEmpty()) continue;
-        bool found = false;
-        for (const QString& dir : kSystemPluginDirs){
-            for (const QString& f : FindPluginFiles(dir, name)){
-                if (QFile::copy(dir + "/" + f, install_dir + f)) found = true;
-            }
-            if (found) break;
-        }
-        if (!found) missing << name;
+    const bfs::path dir(source_dir.toStdString());
+    VGears::OgrePlugins::Config config;
+    if (!VGears::OgrePlugins::ReadConfig(dir / "plugins.cfg", config)) return missing;
+    const std::vector<bfs::path> directories = VGears::OgrePlugins::SearchDirectories(
+      dir, config.folder, bfs::path(QCoreApplication::applicationDirPath().toStdString()), VGEARS_OGRE_PLUGIN_DIR
+    );
+    const std::string version = std::to_string(OGRE_VERSION_MAJOR) + "." + std::to_string(OGRE_VERSION_MINOR) + "."
+      + std::to_string(OGRE_VERSION_PATCH);
+    for (const std::string& name : config.plugins){
+        if (VGears::OgrePlugins::Find(name, directories, version).empty()) missing << QString::fromStdString(name);
     }
     return missing;
 }
@@ -500,7 +464,8 @@ void MainWindow::LaunchGame(const QString& dir){
     settings_->setValue("VGearsEXE", exe);
     // The game runs from the installation directory, where it finds its data.
     QStringList args;
-    args << QString("--resources-file=%1/resources.cfg").arg(dir) << QString("--config-file=%1/v-gears.cfg").arg(dir)
+    args << QString("--data-dir=%1").arg(dir)
+         << QString("--resources-file=%1/resources.cfg").arg(dir) << QString("--config-file=%1/v-gears.cfg").arg(dir)
          << QString("--plugins-file=%1/plugins.cfg").arg(dir);
     if (!QProcess::startDetached(exe, args, dir)){
         QMessageBox::critical(this, tr("Launch game"), tr("Could not start %1.").arg(exe));
@@ -751,19 +716,11 @@ void MainWindow::on_btn_data_run_clicked(){
                 );
                 return;
             }
-            const QStringList missing_plugins = CopyMissingOgrePlugins(output);
-            if (!missing_plugins.isEmpty()){
-                QMessageBox::critical(
-                  this, tr("Missing Ogre plugins"),
-                  tr("These Ogre plugins are not in the installation directory nor in the system:\n\n%1")
-                    .arg(missing_plugins.join(", "))
-                );
-                return;
-            }
             main_window_->data_log->append(tr("Data files copied."));
         }
-        // The installer's Ogre setup loads plugins.cfg, resources.cfg and the render plugin from the working
-        // directory (and writes install.log there), so run from the installation directory.
+        // The installer's Ogre setup loads plugins.cfg and resources.cfg from the working directory (and writes
+        // install.log there), so run from the installation directory. The plugins themselves are looked for in the
+        // same places as the game does (see VGears::OgrePlugins::SearchDirectories).
         if (!QFile::exists(output + "plugins.cfg") || !QFile::exists(output + "resources.cfg")){
             QMessageBox::critical(
               this, tr("Missing configuration files"),

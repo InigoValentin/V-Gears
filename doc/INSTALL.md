@@ -12,11 +12,12 @@ The data installer can do this for you: enable "Copy V-Gears data files" in its 
   ├── field_models_and_animation_metadata.xml
   ├── plugins.cfg
   ├── plugins_d.cfg
-  ├── RenderSystem_GL.so.1.12.10
   ├── resources.cfg
   └── resources_d.cfg
 ```
-3. Whenever you want to launch V-Gears or the V-Gears data installer, it must be done from this directory.
+3. If you used a directory other than `~/.v-gears/`, start V-Gears from it, or pass it with `--data-dir` (see [Run V-Gears](RUN.md "Run V-Gears")).
+
+If you skip these steps, V-Gears copies the files to `~/.v-gears/` itself the first time it runs.
 
 ## Next steps
 

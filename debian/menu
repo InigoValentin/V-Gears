@@ -1,3 +1,0 @@
-?package(v-gears):needs="x11" section="Games/Toys"\
-  title="v-gears" command="sh -c 'cd ~/.v-gears && exec /usr/games/v-gears'"
-  
