@@ -14,7 +14,9 @@
  */
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <algorithm>
 #include <stdexcept>
+#include <unordered_set>
 #include "FieldCodeGenerator.h"
 #include "FieldDisassembler.h"
 #include "FieldEngine.h"
@@ -113,6 +115,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
 
     for (auto function = functions_with_bodies.begin(); function != functions_with_bodies.end(); ++ function){
 
+        const size_t first_line_of_function = lines_.size();
         OnBeforeStartFunction(function->first);
         auto signature = ConstructFuncSignature(function->first);
         AddOutputLine(signature, false, true);
@@ -129,6 +132,31 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
             }
         }
 
+        // Lua can't jump into a block. If a jump from outside of the body of a conditional lands
+        // in the middle of it, the conditional is written as a jump over its body instead of a
+        // block, so the label ends up where every jump can see it.
+        std::unordered_set<const Instruction*> flattened;
+        for (auto cond = function->second.begin(); cond != function->second.end(); ++ cond){
+            if (!(*cond)->IsCondJump()) continue;
+            const uint32 start = (*cond)->GetAddress();
+            const uint32 end = (*cond)->GetDestAddress();
+            // The target has to be in the function to have a label.
+            const bool target_in_function = std::any_of(
+              function->second.begin(), function->second.end(),
+              [end](const InstPtr& i){return i->GetAddress() == end;}
+            );
+            if (!target_in_function) continue;
+            for (auto jump = function->second.begin(); jump != function->second.end(); ++ jump){
+                if (!(*jump)->IsUncondJump()) continue;
+                const uint32 destination = (*jump)->GetDestAddress();
+                const uint32 origin = (*jump)->GetAddress();
+                if (destination > start && destination < end && (origin < start || origin >= end)){
+                    flattened.insert(cond->get());
+                    break;
+                }
+            }
+        }
+
         // Implemented instructions.
 
         // Some conditional jumps point to an address outside the function (i.e the starting
@@ -141,7 +169,7 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
                 bool needs_label = false;
                 bool needs_new_line = false;
                 for (auto origin = label->second.begin(); origin != label->second.end(); ++ origin){
-                    if ((*origin)->IsCondJump()){
+                    if ((*origin)->IsCondJump() && flattened.count(origin->get()) == 0){
                         ends_needed --;
                         AddOutputLine("end", true, false);
                         needs_new_line = true;
@@ -157,7 +185,13 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
             //    AddOutputLine("end -- end if", true, false);
             //    end_needed = false;
             //}
-            if ((*instruction)->IsCondJump()){
+            if ((*instruction)->IsCondJump() && flattened.count(instruction->get()) != 0){
+                AddOutputLine((
+                  boost::format("if not (%s) then goto label_0x%X end")
+                    % stack.Pop()->GetString() % (*instruction)->GetDestAddress()
+                ).str());
+            }
+            else if ((*instruction)->IsCondJump()){
                 ends_needed ++;
                 AddOutputLine((boost::format("if (%s) then") % stack.Pop()->GetString()).str(), false, true);
                 // If the next instruction is the last in the function, mark the next pass to
@@ -192,6 +226,20 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
             if ("on_update" == function->first.name) AddOutputLine(ON_UPDATE_FINISHED_STATEMENT);
             AddOutputLine("do return 0 end", false, false);
         }
+        // A goto to a label that isn't in the function can't be compiled, and the whole script
+        // would fail to load. It can't continue where it was told to, so it ends the script.
+        {
+            std::unordered_set<std::string> emitted_labels;
+            for (size_t i = first_line_of_function; i < lines_.size(); ++ i)
+                if (lines_[i].line.rfind("::label_0x", 0) == 0) emitted_labels.insert(lines_[i].line);
+            for (size_t i = first_line_of_function; i < lines_.size(); ++ i){
+                const std::string prefix = "goto label_0x";
+                if (lines_[i].line.rfind(prefix, 0) != 0) continue;
+                const std::string label = "::" + lines_[i].line.substr(5) + "::";
+                if (emitted_labels.count(label) == 0)
+                    lines_[i].line = "do return 0 end -- was: " + lines_[i].line + " (not in this function)";
+            }
+        }
         OnEndFunction(function->first);
     }
 
@@ -224,7 +272,7 @@ void FieldCodeGenerator::OnStartFunction(const Function& func){
     if (meta_data.GetEntityName() == "Director" && func.name == "on_start"){
         // TODO: Don't hardcode Cloud, Use the one from the previous level,
         AddOutputLine("-- HACK: Set default playable entity an ensure the camera follows it.");
-        AddOutputLine("entity_manager:set_player_entity(\"Cloud\")");
+        AddOutputLine("place_player_at_map_entry(\"Cloud\")");
         AddOutputLine("background2d:autoscroll_to_entity(entity_manager:get_entity(\"Cloud\"))\n");
     }
     // Don't run on_update again once it has reached its end.
@@ -255,7 +303,34 @@ void FieldCodeGenerator::OnEndFunction(const Function& function){
     AddOutputLine("end,", true, false);
     // End class?
     FunctionMetaData meta_data(function.metadata);
-    if (meta_data.IsEnd()) AddOutputLine("}\n\n\n", true, false);
+    if (meta_data.IsEnd()){
+        AddOutputLine("}\n", true, false);
+        // The scripts of the entity that have the same code as other of its scripts.
+        for (const auto& alias : static_cast<FieldEngine*>(engine_)->GetFunctionAliases()){
+            if (alias.entity_name != meta_data.GetEntityName()) continue;
+            const std::string container = "EntityContainer[\"" + alias.entity_name + "\"]";
+            const std::string alias_name
+              = formatter_.GetFriendlyFunctionName(alias.entity_name, alias.alias);
+            const std::string target_name
+              = formatter_.GetFriendlyFunctionName(alias.entity_name, alias.target);
+            // The events of a line don't run while it is off, as in the functions of their own.
+            if (
+              alias.alias == "on_approach" || alias.alias == "on_cross" || alias.alias == "on_near"
+              || alias.alias == "on_near_once" || alias.alias == "on_leave"
+            ){
+                AddOutputLine(
+                  container + "." + alias_name + " = function(self, ...)", false, true
+                );
+                AddOutputLine("if self.on ~= nil and self.on == false then", false, true);
+                AddOutputLine("return 0");
+                AddOutputLine("end", true, false);
+                AddOutputLine("return " + container + "." + target_name + "(self, ...)");
+                AddOutputLine("end", true, false);
+            }
+            else AddOutputLine(container + "." + alias_name + " = " + container + "." + target_name);
+        }
+        AddOutputLine("\n\n");
+    }
     else AddOutputLine("\n");
 }
 

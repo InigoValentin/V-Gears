@@ -63,18 +63,19 @@ void XmlBackground2DFile::Load(){
                 if (blending_str == "add") blending = VGears::B_ADD;
                 else if (blending_str == "subtract") blending = VGears::B_SUBTRACT;
                 else blending = VGears::B_ALPHA;
-                Ogre::Vector4 distance = Ogre::Vector4(0, 0, -depth, 1);
-                Ogre::Vector4 res
-                  = CameraManager::getSingleton().GetCurrentCamera()
-                    ->getProjectionMatrixWithRSDepth() * distance;
-                res = res / res.w;
+                const float buffer_depth = Background2D::TileDepthToBuffer(
+                  depth,
+                  CameraManager::getSingleton().GetCurrentCamera()->getProjectionMatrixWithRSDepth()
+                );
                 // Tiles that belong to a scripted area are only drawn while a script turns on
                 // the state they belong to.
                 const int area = GetInt(node, "area", 0);
                 const int state = GetInt(node, "state", 0);
+                // The layer of the original background the tile is from.
+                const int layer = GetInt(node, "layer", 0);
                 background->AddTile(
                   static_cast<int>(destination.x), static_cast<int>(destination.y),
-                  width, height, res.z, uv.x, uv.y, uv.z, uv.w, blending, area, state
+                  width, height, buffer_depth, uv.x, uv.y, uv.z, uv.w, blending, area, state, layer
                 );
                 TiXmlNode* node2 = node->FirstChild();
                 while (node2 != nullptr){

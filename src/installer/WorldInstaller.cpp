@@ -899,7 +899,7 @@ bool WorldInstaller::GenerateScripts(
                         const int16 triangle = static_cast<int16>(raw_triangle);
                         const uint8 direction = field_table_data[offset + 8];
                         const float direction_degrees
-                            = 360.0f * static_cast<float>(direction) / 255.0f;
+                            = 360.0f * static_cast<float>(direction) / 256.0f;
                         const size_t table_id = record_index + 1;
                         script_file << "System.WorldMap.field_table[" << table_id << "]"
                             << " = System.WorldMap.field_table[" << table_id << "] or {}\n"

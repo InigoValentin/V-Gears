@@ -243,6 +243,11 @@ void Entity::ScriptSetPosition(const float x, const float y, const float z){
     move_triangle_id_ = -1;
 }
 
+void Entity::ScriptSetPositionXY(const float x, const float y){
+    SetPosition(Ogre::Vector3(x, y, GetPosition().z));
+    move_triangle_id_ = -1;
+}
+
   void Entity::ScriptMoveBy(const float x, const float y, const float z){
     SetPosition(GetPosition() + Ogre::Vector3(x, y, z));
     move_triangle_id_ = -1;

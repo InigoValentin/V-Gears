@@ -185,6 +185,23 @@ class UiManager :
           bool& skipThisInvocation
         );
 
+        /**
+         * Draws the widgets when the overlay queue ends.
+         *
+         * The screen fade and the movies are drawn when the overlay queue starts, and the order
+         * the listeners are called in is the order they were added in. The UI was added first,
+         * so it was drawn before them, and they were drawn over the dialogs. At the end of the
+         * queue it is drawn over all of them.
+         *
+         * @param[in] queueGroupId The queue group ID.
+         * @param[in] invocation Unused.
+         * @param[in] repeatThisInvocation Unused.
+         */
+        void renderQueueEnded(
+          Ogre::uint8 queueGroupId, const Ogre::String& invocation,
+          bool& repeatThisInvocation
+        );
+
     private:
 
         /**

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <boost/format.hpp>
@@ -46,8 +47,10 @@ void FieldCondJumpInstruction::ProcessInst(
           || opcode_ == OPCODES::IFKEYON
           || opcode_ == OPCODES::IFKEYOFF
         ){
-            if (param >= 1024) param = param ^ 1024;
-            if (param >= 512) param = param ^ 512;
+            // XOR only if the bit is set, to clear it. Testing with >= added them to the keys
+            // that had a bigger value, such as 32768.
+            if (param & 1024) param = param ^ 1024;
+            if (param & 512) param = param ^ 512;
         }
         ValuePtr v = new UnquotedStringValue(func_name + "(" + std::to_string(param) + ")");
         stack.Push(v);
@@ -55,12 +58,25 @@ void FieldCondJumpInstruction::ProcessInst(
     }
     std::string op;
     uint32 type = params_[4]->GetUnsigned();
-    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
-    );
-    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
-    );
+    // The values of the signed comparisons (IFSW) are signed words: 65504 is -32. The ones of the
+    // unsigned comparisons, and the addresses of the variables, are not.
+    const bool is_signed = opcode_ == OPCODES::IFSW || opcode_ == OPCODES::IFSWL;
+    const auto& source = is_signed
+      ? FieldCodeGenerator::FormatValueOrVariable(
+          cg->GetFormatter(), params_[0]->GetUnsigned(),
+          static_cast<int>(static_cast<int16_t>(params_[2]->GetUnsigned() & 0xFFFF))
+        )
+      : FieldCodeGenerator::FormatValueOrVariable(
+          cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
+        );
+    const auto& destination = is_signed
+      ? FieldCodeGenerator::FormatValueOrVariable(
+          cg->GetFormatter(), params_[1]->GetUnsigned(),
+          static_cast<int>(static_cast<int16_t>(params_[3]->GetUnsigned() & 0xFFFF))
+        )
+      : FieldCodeGenerator::FormatValueOrVariable(
+          cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
+        );
 
     switch (type){
         case 0: op = "=="; break;
@@ -69,10 +85,20 @@ void FieldCondJumpInstruction::ProcessInst(
         case 3: op = "<"; break;
         case 4: op = ">="; break;
         case 5: op = "<="; break;
-        // TODO: FIX those, use the new binary functions.
-        case 6: op = "&"; break;
-        case 7: op = "^"; break;
-        case 8: op = "|"; break;
+        // The game runs on LuaJIT (Lua 5.1), where there are no operators for the bits, and a
+        // number is always true, even if it is 0. These are true if the result isn't zero.
+        case 6:
+        case 7:
+        case 8:
+            {
+                const std::string function
+                  = (type == 6) ? "bit_and" : ((type == 7) ? "bit_xor" : "bit_or");
+                ValuePtr v = new UnquotedStringValue(
+                  function + "(" + source + ", " + destination + ") ~= 0"
+                );
+                stack.Push(v);
+            }
+            return;
         case 9:
             {
                 op = "get_bank_bit(" + params_[0]->GetString() + ", " + params_[2]->GetString()

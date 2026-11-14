@@ -35,6 +35,17 @@
 /**
  * Entity manager singleton.
  */
+/**
+ * Priority of the script that runs when the player presses OK in front of an entity.
+ *
+ * It has to run before the scripts that fields leave running on an entity (the loops that play an
+ * animation, requested with priority 5 or 6), or the entity could not be talked to. But it can't
+ * be the highest: a script of the same entity that is requested with a higher priority (3 or
+ * smaller) has to be able to run while the talk script waits for it, as in the scenes where a
+ * talk script asks its own entity to do something and waits for it to start.
+ */
+static const int INTERACT_SCRIPT_PRIORITY = 4;
+
 template<>EntityManager *Ogre::Singleton<EntityManager>::msSingleton = nullptr;
 
 ConfigVar cv_debug_grid("debug_grid", "Draw debug grid", "false");
@@ -182,7 +193,7 @@ void EntityManager::Input(const VGears::Event& event){
                       ScriptManager::ENTITY, entity_triggers_[i]->GetName()
                     );
                     bool added = ScriptManager::getSingleton().ScriptRequest(
-                      scr_entity, "on_interact", 1, "", "", false, false
+                      scr_entity, "on_interact", INTERACT_SCRIPT_PRIORITY, "", "", false, false
                     );
                     if (added == false){
                         LOG_WARNING(
@@ -193,10 +204,6 @@ void EntityManager::Input(const VGears::Event& event){
                 }
             }
         }
-        // Rotate move vector to field move rotation
-        Ogre::Quaternion q1;
-        q1.FromAngleAxis(player_move_rotation_, Ogre::Vector3::UNIT_Z);
-        player_move_ = q1 * player_move_;
     }
 }
 
@@ -210,9 +217,36 @@ void EntityManager::UpdateField(){
     if (player_entity_ != nullptr && player_move_ != Ogre::Vector3::ZERO){
         Entity::State state = player_entity_->GetState();
         if (state == Entity::WALKMESH || state == Entity::NONE){
-            player_move_
-              *= player_entity_->GetMoveWalkSpeed() * Timer::getSingleton().GetGameTimeDelta();
-            player_entity_->SetMovePosition(player_entity_->GetPosition() + player_move_);
+            // The directional keys are relative to the screen. Rotate them to the field's move
+            // rotation here, once per frame. This can't be done in Input, which runs once for each
+            // event, so the rotation would be applied several times when there is more than one
+            // event in the frame (diagonals, running, ...). player_move_ stays as the raw input,
+            // which is what ladders need.
+            // A scripted walk of an entity that isn't the player keeps the last triangle when it
+            // goes over an edge, so the stored triangle can be far from the position. Reattach to
+            // the walkmesh before moving manually, otherwise every move would be blocked.
+            const int current_triangle = player_entity_->GetMoveTriangleId();
+            bool in_current_triangle = false;
+            if (current_triangle >= 0 && current_triangle < walkmesh_.GetNumberOfTriangles()){
+                const Ogre::Vector3 position = player_entity_->GetPosition();
+                const Ogre::Vector3 A = walkmesh_.GetA(current_triangle);
+                const Ogre::Vector3 B = walkmesh_.GetB(current_triangle);
+                const Ogre::Vector3 C = walkmesh_.GetC(current_triangle);
+                in_current_triangle = Ogre::Math::pointInTri2D(
+                  Ogre::Vector2(position.x, position.y), Ogre::Vector2(A.x, A.y),
+                  Ogre::Vector2(B.x, B.y), Ogre::Vector2(C.x, C.y)
+                );
+            }
+            if (!in_current_triangle) SetEntityOnWalkmesh(player_entity_);
+
+            Ogre::Quaternion rotation;
+            rotation.FromAngleAxis(player_move_rotation_, Ogre::Vector3::UNIT_Z);
+            // Normalized, so diagonals aren't faster than straight moves.
+            Ogre::Vector3 input = player_move_;
+            input.normalise();
+            const Ogre::Vector3 walk_move = rotation * input
+              * (player_entity_->GetMoveWalkSpeed() * Timer::getSingleton().GetGameTimeDelta());
+            player_entity_->SetMovePosition(player_entity_->GetPosition() + walk_move);
             player_entity_->SetState(Entity::WALKMESH);
         }
 
@@ -740,10 +774,16 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
     }
     for (unsigned int i = 0; i < entity_.size(); ++ i){
         if (entity_[i]->GetName() == name){
+            // A script can read the walkmesh triangle of the player right after this, so if it was
+            // placed by position the triangle has to be known. Done before it's the player entity
+            // so that the entity not being on the walkmesh yet isn't logged as an error.
+            if (entity_[i]->GetMoveTriangleId() == -1) SetEntityOnWalkmesh(entity_[i]);
+            LOG_TRIVIAL("Player entity set to '" + std::string(name) + "'.");
             player_entity_ = entity_[i];
-            // Also, make is solid, visible, and non-talkable.
-            entity_[i]->SetSolid(true);
-            entity_[i]->SetVisible(true);
+            // Also, make it non-talkable. Visibility and solidity are left to the scripts, as in
+            // the original game: some fields use hidden helper entities (like the 'camera') as
+            // the player entity to scroll the screen, and they must stay invisible and
+            // non-solid. When the player moves manually, UpdateField makes it solid anyway.
             entity_[i]->SetTalkable(false);
         }
     }
@@ -934,10 +974,10 @@ void EntityManager::SetEncounterRate(float rate){
 }
 
 bool EntityManager::IsKeyOn(unsigned int key_code){
-    // If the player is locked, always false.
-    // TODO: Maybe this will interfere with something down the road?
-    // Some scene where the player can't move but must press a button?
-    if (player_lock_) return false;
+    // The keys are read even if the player is locked: scenes lock the player and still ask for a
+    // button, as the minigames that need to be pressed at the right time do. The scripts that
+    // must not read the keys at some point (while a message is open, for example) have their own
+    // flag for it. The triggers that check keys aren't run while the player is locked.
     // The key code of the scripts is a mask of the pad buttons, and the check is true if any of
     // them is pressed. Translate each to its game event (see bind_game_event in config.cfg), so
     // the keys chosen in the controller settings are the ones that count. For example 32 is
@@ -1119,6 +1159,14 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed, const
         angle = (direction.x < 0) ? Ogre::Degree(360) - angle : angle;
         entity->SetRotation(Ogre::Degree(angle));
     }
+    // A scripted walk (also of the player entity, while a scene has it locked) must end, or the
+    // scene waiting for it would never go on. Several scripts place solid entities next to where
+    // another one has to walk to, so they don't block it: only the walkmesh does. A manual move
+    // of the player is never scripted.
+    // The same goes for the points around the end of the step: they are there for the player and
+    // NPCs to slide along walls, and a destination next to an edge of the walkmesh would never be
+    // reached. The end point itself is still checked.
+    const bool check_probes = !scripted_move;
     float solid = (entity->IsSolid() == true) ? entity->GetSolidRadius() : 0.01f;
 
     // For not playable entities, be a bit more lenient with solid collisions.
@@ -1150,10 +1198,10 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed, const
         end_point2.x = end_point.x + rotation.x;
         end_point2.y = end_point.y + rotation.y;
         // Check_triangle.
-        first_triangle_check = WalkmeshBorderCross(entity, end_point2, direction);
+        first_triangle_check = check_probes && WalkmeshBorderCross(entity, end_point2, direction);
         entity->SetMoveTriangleId(current_triangle);
         // Model check.
-        first_entity_check = CheckSolidCollisions(entity, end_point2);
+        first_entity_check = check_probes && CheckSolidCollisions(entity, end_point2);
 
         // 2nd check.
         // Rotate move_vector +45.
@@ -1168,10 +1216,10 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed, const
         end_point2.x = end_point.x + rotation.x;
         end_point2.y = end_point.y + rotation.y;
         // Check triangle.
-        second_triangle_check = WalkmeshBorderCross(entity, end_point2, direction);
+        second_triangle_check = check_probes && WalkmeshBorderCross(entity, end_point2, direction);
         entity->SetMoveTriangleId(current_triangle);
         // Model check.
-        second_entity_check = CheckSolidCollisions(entity, end_point2);
+        second_entity_check = check_probes && CheckSolidCollisions(entity, end_point2);
 
         // 3rd check.
         rotation.x = direction.x;
@@ -1182,10 +1230,10 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed, const
         end_point2.x = end_point.x + rotation.x;
         end_point2.y = end_point.y + rotation.y;
         // Check triangle.
-        third_triangle_check = WalkmeshBorderCross(entity, end_point2, direction);
+        third_triangle_check = check_probes && WalkmeshBorderCross(entity, end_point2, direction);
         entity->SetMoveTriangleId(current_triangle);
         // Model check.
-        third_entity_check = CheckSolidCollisions(entity, end_point2);
+        third_entity_check = check_probes && CheckSolidCollisions(entity, end_point2);
 
         // Check condition and modify move_vector.
         if (
@@ -1329,7 +1377,11 @@ bool EntityManager::WalkmeshBorderCross(
     }
     int current_triangle = entity->GetMoveTriangleId();
     if (current_triangle == -1) return true;
-    const bool free_walk = !WalkmeshEdgeBlocks(entity == player_entity_, entity->IsScriptedMove());
+    // While a scene has the player locked, the scene walks the player like any other character,
+    // and it can lead over the edge of the walkmesh.
+    const bool free_walk = !WalkmeshEdgeBlocks(
+      entity == player_entity_ && !player_lock_, entity->IsScriptedMove()
+    );
     Ogre::Vector2 pos = Ogre::Vector2(position.x, position.y);
     for (;;){
         Ogre::Vector3 A3 = walkmesh_.GetA(current_triangle);
@@ -1597,7 +1649,7 @@ void EntityManager::CheckEntityInteract(){
           ScriptManager::ENTITY, name
         );
         bool added = ScriptManager::getSingleton().ScriptRequest(
-          scr_entity, "on_interact", 1, "", "", false, false
+          scr_entity, "on_interact", INTERACT_SCRIPT_PRIORITY, "", "", false, false
         );
         if (added == false){
             LOG_WARNING("Script 'on_interact' for entity '" +  name + "' doesn't exist.");
@@ -1680,7 +1732,15 @@ void EntityManager::SetNextLinearStep(Entity* entity){
         }
     }
     else is_move = true;
-    if (is_move == true){
+    if (is_move == true && (end - start).length() < 0.0001f){
+        // Start and end are the same place, so there is nothing to walk. Dividing by the time to
+        // cross the line (zero) would give a NaN position. Just finish the move.
+        entity->UnsetLinear();
+        if (to_end == true) entity->SetMoveTriangleId(entity->GetLinearDestTriangle());
+        SetEntityOnWalkmesh(entity);
+        entity->SetPosition(to_end ? end : start);
+    }
+    else if (is_move == true){
         Ogre::Vector3 position;
         if (to_end == true){
             Ogre::Vector3 end_start = end - start;
@@ -1695,7 +1755,11 @@ void EntityManager::SetNextLinearStep(Entity* entity){
               ? std::max(position.y, end.y) : std::min(position.y, end.y);
             position.z = (end_start.z < 0)
               ? std::max(position.z, end.z) : std::min(position.z, end.z);
-            if (position == end){
+            // Compared with a tolerance: if the entity starts a bit off the end in one of the
+            // axes (the entry points are written with a few digits only), that axis could move
+            // less than the precision of a float per frame and never be exactly equal.
+            if ((position - end).length() < 0.0001f){
+                position = end;
                 entity->UnsetLinear();
                 entity->SetMoveTriangleId(entity->GetLinearDestTriangle());
                 SetEntityOnWalkmesh(entity);
@@ -1714,7 +1778,8 @@ void EntityManager::SetNextLinearStep(Entity* entity){
               ? std::max(position.y, start.y) : std::min(position.y, start.y);
             position.z = (end_start.z < 0)
               ? std::max(position.z, start.z) : std::min(position.z, start.z);
-            if (position == start){
+            if ((position - start).length() < 0.0001f){
+                position = start;
                 entity->UnsetLinear();
                 SetEntityOnWalkmesh(entity);
             }

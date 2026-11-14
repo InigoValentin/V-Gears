@@ -692,7 +692,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                     first_entity_point = position;
                 }
                 xml_entity_point->SetAttribute("position", Ogre::StringConverter::toString(position));
-                const float rotation = (360.0f * static_cast<float>(gateway.dir)) / 255.0f;
+                const float rotation = (360.0f * static_cast<float>(gateway.dir)) / 256.0f;
                 xml_entity_point->SetAttribute("rotation", std::to_string(rotation));
                 element->LinkEndChild(xml_entity_point.release());
             }
@@ -847,7 +847,9 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             );
             // Write out the *_BG.XML data.
             auto& layers = bg->GetLayers();
+            int layer_index = -1;
             for (const auto& layer : layers){
+                ++ layer_index;
                 // TODO: Should only the tiles to construct enabled layers be outputted?
                 //  if (layer.enabled){
 
@@ -889,6 +891,8 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                     // TODO: Should probably throw to fail conversion:
                     else blending_str = "unknown";
                     xml_element->SetAttribute("blending", blending_str);
+                    // The layer is needed by the scripts that scroll them at their own speed.
+                    xml_element->SetAttribute("layer", layer_index);
                     // Sprites in an area the script controls (BGON, BGOFF, BGCLR) are drawn only
                     // while it turns on one of their layers. The rest are always drawn.
                     if (
