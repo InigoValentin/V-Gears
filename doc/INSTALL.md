@@ -2,7 +2,7 @@
 
 ## Manual installation
 
-The data installer can do this for you: enable "Copy V-Gears data files" in its advanced options and it copies the `data/` folder of the repository to the installation directory. To do it by hand:
+The data installer can do this for you: enable "Copy V-Gears data files" in its advanced options and it copies the `data/` folder of the repository (`share/v-gears/` in an installed package) to the installation directory. To do it by hand:
 
 1. Create a folder for V-Gears data, outside the project. In Linux-based systems, it's recommended to use `~/.v-gears/`.
 2. Copy all the contents of the `data/` folder of the repository to the newly created directory. It should end up like this:

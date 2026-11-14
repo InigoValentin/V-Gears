@@ -23,6 +23,7 @@ Note that, while these are actual screenshots of V-Gears, none of the images, sp
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png" alt="Transparency" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/transparent_dialogs.png "Transparency")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/timers.png" alt="Timers" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/timers.png "Timers")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/choices.png" alt="Choices" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/choices.png "Choices")|
 
 ### Battle:
+<!-- TODO(review): update the battle screenshots and the GIF: new battle UI, floating damage numbers and the spell effects (Fire, Ice, Bolt, Cure) from v0.3.0. -->
 |**Battle UI**|**Battle Flow**|
 |--|--|
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/battle.png" alt="Battle UI" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/battle.png "Battle UI")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/battle.gif" alt="Battle Flow" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/battle.gif "Battle Flow")|
@@ -36,7 +37,10 @@ Note that, while these are actual screenshots of V-Gears, none of the images, sp
 |**Materia**|||
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/materia_menu.png" alt="Materia Menu" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/materia_menu.png "Materia Menu")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/save_menu.png" alt="Save Menu" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/save_menu.png "Save Menu")||
 
+<!-- TODO(review): add screenshots of the new menus: Status, Magic, Limit, PHS, Config and Quit. The Save menu image sits in the Materia row; check the layout. -->
+
 ### Installer:
+<!-- TODO(review): the installer has changed (presets, audio tool detection, Verify install, Launch game, battle options). Update both screenshots. -->
 |**Installer**|**Advanced**|
 |--|--|
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/installer.png" alt="Installer" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/installer.png "Installer")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/installer_advanced.png" alt="Advanced options" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/installer_advanced.png "Advanced options")|
@@ -53,18 +57,21 @@ Well, let's call it a work in progress... of a work in progress.
 |**<span style='color:#22aa22;'>Things that work</span>**|**<span style='color:#aa2222;'>Things that don't</span>**|
 |:--:|:--:|
 |A few field maps|Most field maps|
-|Some menus|Some other menus|
-|Sound (mostly)|Battle mechanics.|
-|Saving / Loading|The world map, also in general|
-|Timers|Minigames|
-| |Party switching|
-| |Shops|
+|Most menus (main, items, equip, materia, status, magic, limit, PHS, config, save, quit)|Some other menus|
+|Sound (mostly)|Battle mechanics (they are only partly implemented)|
+|Videos|The world map, also in general|
+|Saving / Loading, and settings|Minigames|
+|Timers|Party switching|
+|Battles, with the original data, models, animations and some spell effects|Shops|
 | |Alternate controllable characters|
 | |Many other things|
+
+<!-- TODO(review): this table is my reading of the commits up to v0.3.0 (menus overhaul, video playback, battle data and effects). Check each row against the actual state of the game. -->
 
 
 If the question was "How deep into the game can I play?", then the answer is
 
+<!-- TODO(review): check whether the furthest point you can reach has changed with the latest versions, and update this screenshot and the text below it. -->
 [<img src="https://v-gears.inigovalentin.com/img/screenshot/max_progress.png" alt="Max progress" width="450"/>](https://v-gears.inigovalentin.com/img/screenshot/max_progress.png "Max progress")
 
 Until there. Whitout cheats, and without using the developer console, it's not possible to get to the next wagon. The dialogs start looping there.
