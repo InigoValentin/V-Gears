@@ -127,6 +127,11 @@ void Background2D::Update(){
         SetScroll(pending_scroll_);
     }
     UpdateShake(Timer::getSingleton().GetGameTimeDelta());
+    // The layers that scroll by themselves.
+    for (int layer = 0; layer < LAYER_COUNT; ++ layer){
+        layer_scroll_offset_[layer][0] += layer_scroll_speed_[layer][0] * Timer::getSingleton().GetGameTimeDelta();
+        layer_scroll_offset_[layer][1] += layer_scroll_speed_[layer][1] * Timer::getSingleton().GetGameTimeDelta();
+    }
     for (unsigned int i = 0; i < animation_played_.size(); ++ i){
         for (unsigned int j = 0; j < animations_.size(); ++ j){
             if (animations_[j]->GetName() == animation_played_[i].name){
@@ -623,6 +628,25 @@ void Background2D::SetRange(const int min_x, const int min_y, const int max_x, c
     calculateScreenScale();
 }
 
+float Background2D::TileDepthToBuffer(const float depth, const Ogre::Matrix4& projection){
+    Ogre::Vector4 result = projection * Ogre::Vector4(0, 0, -depth, 1);
+    result /= result.w;
+    // Starting from this depth the projected values are too close to each other for the depth
+    // buffer to tell them apart.
+    const float far_group_start = 127.0f;
+    if (depth >= far_group_start){
+        Ogre::Vector4 start = projection * Ogre::Vector4(0, 0, -far_group_start, 1);
+        start /= start.w;
+        // The depth of the render system goes from -1 to 1 (OpenGL), so between the start of the
+        // group and the far plane there are about 1.4e-5 to use. With 1e-5 per unit of depth,
+        // tiles whose depths differ by 0.06 (127.938 and 128) end up several steps of a 24 bit
+        // depth buffer apart, and the biggest depth used (128) is still in front of the far plane.
+        const float far_group_step = 0.00001f;
+        return std::min(start.z + (depth - far_group_start) * far_group_step, 0.9999995f);
+    }
+    return result.z;
+}
+
 void Background2D::AddTile(const VGears::Tile& tile){
     // TODO: move depth calculation to flevelBackgroundLoader maybe? and let
     // Backgorund2D only handle 0 <= depth <= 1 or so?
@@ -630,13 +654,10 @@ void Background2D::AddTile(const VGears::Tile& tile){
     Ogre::Real depth(0.0001f);
     if (tile.depth >= 1){
         if (tile.depth < 4095){
-            const Ogre::Matrix4 &cam_projection(
+            depth = TileDepthToBuffer(
+              tile.depth,
               CameraManager::getSingleton().GetCurrentCamera()->getProjectionMatrixWithRSDepth()
             );
-            Ogre::Vector4 res(0, 0, -tile.depth, 1);
-            res = cam_projection * res;
-            res /= res.w;
-            depth = res.z;
         }
         else depth = 0.9999f;
     }
@@ -667,7 +688,7 @@ void Background2D::virtualScreenToWorldSpace(Ogre::Vector2& pos) const{
 void Background2D::AddTile(
   const int x, const int y, const int width, const int height, const float depth, const float u1,
   const float v1, const float u2, const float v2, const Blending blending, const int area,
-  const int state
+  const int state, const int layer
 ){
     Ogre::RenderOperation render_op;
     Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
@@ -697,6 +718,16 @@ void Background2D::AddTile(
           + Ogre::StringConverter::toString(max_vertex_count / TILE_VERTEX_COUNT) + " tiles."
         );
         return;
+    }
+    // Keep where the tiles of each layer are in the buffer.
+    {
+        const int buffer = (blending == VGears::B_ALPHA) ? 0 : ((blending == VGears::B_ADD) ? 1 : 2);
+        const int clamped = (layer < 0) ? 0 : ((layer >= LAYER_COUNT) ? LAYER_COUNT - 1 : layer);
+        if (last_layer_[buffer] > clamped) layers_contiguous_[buffer] = false;
+        if (clamped > last_layer_[buffer]) last_layer_[buffer] = clamped;
+        LayerRange& range = layer_ranges_[buffer][clamped];
+        if (range.count == 0) range.first = render_op.vertexData->vertexCount;
+        range.count += TILE_VERTEX_COUNT;
     }
     Tile tile;
     tile.x = x;
@@ -901,23 +932,98 @@ void Background2D::renderQueueEnded(
         render_system_->_setViewMatrix(view);
         rs_params->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view);
         render_system_->applyFixedFunctionParams(rs_params, Ogre::GPV_GLOBAL);
-        if (alpha_render_op_.vertexData->vertexCount != 0){
-            scene_manager_->_setPass(alpha_material_->getTechnique(0)->getPass(0), true, false);
-            render_system_->_render(alpha_render_op_);
-        }
-        if (add_render_op_.vertexData->vertexCount != 0){
-            scene_manager_->_setPass(add_material->getTechnique(0)->getPass(0), true, false);
-            render_system_->_render(add_render_op_);
-        }
-        if(subtract_render_op_.vertexData->vertexCount != 0){
-            scene_manager_->_setPass(subtract_material_->getTechnique(0)->getPass(0), true, false);
-            render_system_->_render(subtract_render_op_);
-        }
+        RenderBuffer(0, alpha_render_op_, alpha_material_, rs_params, width, height);
+        RenderBuffer(1, add_render_op_, add_material, rs_params, width, height);
+        RenderBuffer(2, subtract_render_op_, subtract_material_, rs_params, width, height);
+    }
+}
 
+void Background2D::ResetLayers(){
+    for (int buffer = 0; buffer < 3; ++ buffer){
+        for (int layer = 0; layer < LAYER_COUNT; ++ layer) layer_ranges_[buffer][layer] = LayerRange();
+        last_layer_[buffer] = -1;
+        layers_contiguous_[buffer] = true;
+    }
+    for (int layer = 0; layer < LAYER_COUNT; ++ layer){
+        layer_parallax_[layer][0] = layer_parallax_[layer][1] = 1.0f;
+        layer_scroll_speed_[layer][0] = layer_scroll_speed_[layer][1] = 0.0f;
+        layer_scroll_offset_[layer][0] = layer_scroll_offset_[layer][1] = 0.0f;
+    }
+}
+
+bool Background2D::HasLayerScroll() const{
+    for (int layer = 0; layer < LAYER_COUNT; ++ layer){
+        if (
+          layer_parallax_[layer][0] != 1.0f || layer_parallax_[layer][1] != 1.0f
+          || layer_scroll_speed_[layer][0] != 0.0f || layer_scroll_speed_[layer][1] != 0.0f
+        ) return true;
+    }
+    return false;
+}
+
+void Background2D::ScriptSetLayerParallax(const int layer, const int distance){
+    if (layer < 0 || layer >= LAYER_COUNT) return;
+    const float ratio = static_cast<float>(distance) / 4096.0f;
+    layer_parallax_[layer][0] = ratio;
+    layer_parallax_[layer][1] = ratio;
+}
+
+void Background2D::ScriptSetLayerScroll(const int layer, const int x, const int y){
+    if (layer < 0 || layer >= LAYER_COUNT) return;
+    // 1/256 of a pixel of the original screen for each frame, at 30 frames per second. The
+    // virtual screen is 3 times as big as the one of the original game.
+    const float to_virtual_pixels_per_second = 30.0f * 3.0f / 256.0f;
+    layer_scroll_speed_[layer][0] = static_cast<float>(x) * to_virtual_pixels_per_second;
+    layer_scroll_speed_[layer][1] = static_cast<float>(y) * to_virtual_pixels_per_second;
+}
+
+void Background2D::RenderBuffer(
+  const int buffer, Ogre::RenderOperation& render_op, const Ogre::MaterialPtr& material,
+  Ogre::GpuProgramParametersPtr& rs_params, const float width, const float height
+){
+    if (render_op.vertexData->vertexCount == 0) return;
+    const unsigned int total = render_op.vertexData->vertexCount;
+    const bool by_layer = layers_contiguous_[buffer] && HasLayerScroll();
+    if (!by_layer){
+        // The view the layers of other buffers could have left.
+        Ogre::Matrix4 view;
+        view.makeTrans(Ogre::Vector3(position_real_.x / width, -position_real_.y / height, 0));
+        render_system_->_setViewMatrix(view);
+        rs_params->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view);
+        render_system_->applyFixedFunctionParams(rs_params, Ogre::GPV_GLOBAL);
+        scene_manager_->_setPass(material->getTechnique(0)->getPass(0), true, false);
+        render_system_->_render(render_op);
+        return;
+    }
+    for (int layer = 0; layer < LAYER_COUNT; ++ layer){
+        const LayerRange& range = layer_ranges_[buffer][layer];
+        if (range.count == 0) continue;
+        // The scroll of the background, changed by the parallax of the layer, plus the one it has
+        // by itself. The scroll by itself is in pixels of the virtual screen.
+        const Ogre::Vector2 by_itself(
+          layer_scroll_offset_[layer][0] * screen_scale_,
+          layer_scroll_offset_[layer][1] * screen_scale_
+        );
+        Ogre::Matrix4 view;
+        view.makeTrans(Ogre::Vector3(
+          (position_real_.x * layer_parallax_[layer][0] + by_itself.x) / width,
+          -(position_real_.y * layer_parallax_[layer][1] + by_itself.y) / height, 0
+        ));
+        // TODO This is deprecated, but if not done , the background image disappears.
+        render_system_->_setViewMatrix(view);
+        rs_params->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view);
+        render_system_->applyFixedFunctionParams(rs_params, Ogre::GPV_GLOBAL);
+        scene_manager_->_setPass(material->getTechnique(0)->getPass(0), true, false);
+        render_op.vertexData->vertexStart = range.first;
+        render_op.vertexData->vertexCount = range.count;
+        render_system_->_render(render_op);
+        render_op.vertexData->vertexStart = 0;
+        render_op.vertexData->vertexCount = total;
     }
 }
 
 void Background2D::CreateVertexBuffers(){
+    ResetLayers();
     alpha_max_vertex_count_ = 2048 * TILE_VERTEX_COUNT;
     alpha_render_op_.vertexData = new Ogre::VertexData;
     alpha_render_op_.vertexData->vertexStart = 0;

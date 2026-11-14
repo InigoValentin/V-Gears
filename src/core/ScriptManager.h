@@ -296,6 +296,14 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
         );
 
         /**
+         * Removes a script of an entity.
+         *
+         * @param[in] entity Entity whose script to remove.
+         * @param[in] index Position of the script in the queue of the entity.
+         */
+        void RemoveEntityScript(ScriptEntity& entity, const size_t index);
+
+        /**
          * Removes the top script of an entity.
          *
          * The entity must be in one of the currently active modules for it's script to be removed.

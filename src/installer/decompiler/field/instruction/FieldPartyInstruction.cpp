@@ -49,8 +49,18 @@ void FieldPartyInstruction::ProcessInst(
         case OPCODES::DMTRA: code_gen->WriteTodo(md.GetEntityName(), "DMTRA"); break;
         case OPCODES::CMTRA: code_gen->WriteTodo(md.GetEntityName(), "CMTRA"); break;
         case OPCODES::GETPC: code_gen->WriteTodo(md.GetEntityName(), "GETPC"); break;
-        case OPCODES::PRTYP: code_gen->WriteTodo(md.GetEntityName(), "PRTYP"); break;
-        case OPCODES::PRTYM: code_gen->WriteTodo(md.GetEntityName(), "PRTYM"); break;
+        case OPCODES::PRTYP:
+            // Adds a character to the party, in the first free place.
+            code_gen->AddOutputLine(
+              (boost::format("add_party_character(%1%)") % params_[0]->GetString()).str()
+            );
+            break;
+        case OPCODES::PRTYM:
+            // Removes a character from the party.
+            code_gen->AddOutputLine(
+              (boost::format("remove_party_character(%1%)") % params_[0]->GetString()).str()
+            );
+            break;
         case OPCODES::PRTYE: ProcessPRTYE(code_gen); break;
         case OPCODES::MMBUD: ProcessMMBUD(code_gen); break;
         case OPCODES::MMBLK: ProcessMMBLK(code_gen); break;
@@ -63,38 +73,32 @@ void FieldPartyInstruction::ProcessInst(
     }
 }
 
-void FieldPartyInstruction::ProcessGOLDU(CodeGenerator* code_gen){
-    if (params_[0]->GetUnsigned() == 0){
-        // Add by constant amount, params 1-4 are a dword with the amount.
-        // Quick and dirty hex operation:
-        long amount = params_[1]->GetUnsigned() + params_[2]->GetUnsigned() * 256
-          + params_[3]->GetUnsigned() * 256 * 256 + params_[4]->GetUnsigned() * 256 * 256 * 256;
-        code_gen->AddOutputLine((boost::format("Inventory.add_money(%1%)") % amount).str());
-    }
-    else{
-        // Add by variable amount, param 0 is bank and 1 is address. 2-4 are zeroes, ignored.
-        code_gen->AddOutputLine((
-          boost::format("Inventory.add_money(Banks[%1%][%2%])")
-            % params_[0]->GetUnsigned() % params_[1]->GetUnsigned()
-        ).str());
+namespace{
+    /**
+     * Writes the amount of gil of a GOLDU or GOLDD.
+     *
+     * The opcode is read as a byte of two nibbles (two parameters, the bank is the first) followed
+     * by four bytes. With a bank of zero, the four bytes are the amount, as a little endian dword.
+     * Otherwise, the first of the four bytes is the address in the bank, and the rest are zeroes.
+     */
+    std::string GilAmount(const std::vector<ValuePtr>& params){
+        if (params[0]->GetUnsigned() == 0){
+            const long amount = params[2]->GetUnsigned() + params[3]->GetUnsigned() * 256
+              + params[4]->GetUnsigned() * 256 * 256 + params[5]->GetUnsigned() * 256 * 256 * 256;
+            return std::to_string(amount);
+        }
+        return (
+          boost::format("Banks[%1%][%2%]") % params[0]->GetUnsigned() % params[2]->GetUnsigned()
+        ).str();
     }
 }
 
+void FieldPartyInstruction::ProcessGOLDU(CodeGenerator* code_gen){
+    code_gen->AddOutputLine("Inventory.add_money(" + GilAmount(params_) + ")");
+}
+
 void FieldPartyInstruction::ProcessGOLDD(CodeGenerator* code_gen){
-    if (params_[0]->GetUnsigned() == 0){
-        // Add by constant amount, params 1-4 are a dword with the amount.
-        // Quick and dirty hex operation:
-        long amount = params_[1]->GetUnsigned() + params_[2]->GetUnsigned() * 256
-          + params_[3]->GetUnsigned() * 256 * 256 + params_[4]->GetUnsigned() * 256 * 256 * 256;
-        code_gen->AddOutputLine((boost::format("Inventory.add_money(%1%)") % amount).str());
-    }
-    else{
-        // Add by variable amount, param 0 is bank and 1 is address. 2-4 are zeroes, ignored.
-        code_gen->AddOutputLine((
-          boost::format("Inventory.add_money(Banks[%1%][%2%])")
-            % params_[0]->GetUnsigned() % params_[1]->GetUnsigned()
-        ).str());
-    }
+    code_gen->AddOutputLine("Inventory.remove_money(" + GilAmount(params_) + ")");
 }
 
 void FieldPartyInstruction::ProcessSTITM(CodeGenerator* code_gen){

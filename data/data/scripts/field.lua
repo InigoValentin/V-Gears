@@ -52,34 +52,45 @@ dispatch_menu = function(menu_id, parameter)
     end
 end
 
+--- Makes an entity the player entity and places it where the previous map sent it to.
+--
+-- This is the entry point of the map (when it came from another field) or the field entry of the
+-- world map. Fields that don't have a PC opcode for the player need it too, or the player would
+-- stay at the origin of the field, out of its walkmesh.
+--
+-- @param entity_name The name of the entity that the player controls.
+place_player_at_map_entry = function(entity_name)
+    if System.MapChanger.point_name ~= "" then
+        local point = entity_manager:get_entity_point(System.MapChanger.point_name)
+        if point ~= nil then
+            local x, y, z = point:get_position()
+            local rotation = point:get_rotation()
+            local player = entity_manager:get_entity(entity_name)
+            player:set_position(x, y, z)
+            player:set_rotation(rotation)
+            player:set_solid(true)
+            player:set_visible(true)
+        end
+    end
+
+    entity_manager:set_player_entity(entity_name)
+    local world_map_entry = System.MapChanger.world_map_entry
+    if world_map_entry then
+        entity_manager:place_player_at_field_entry(
+            world_map_entry.x, world_map_entry.y,
+            world_map_entry.triangle, world_map_entry.direction
+        )
+        System.MapChanger.world_map_entry = nil
+    end
+end
+
 --- Assigns an entity to a playable character.
 --
 -- @param entity_name The entity name.
 -- @param character_id Id of the character to assign.
 set_entity_to_character = function(entity_name, character_id)
     if character_id == Party[1] and entity_name ~= "" then
-        if System.MapChanger.point_name ~= "" then
-            local point = entity_manager:get_entity_point(System.MapChanger.point_name)
-            if point ~= nil then
-                local x, y, z = point:get_position()
-                local rotation = point:get_rotation()
-                local player = entity_manager:get_entity(entity_name)
-                player:set_position(x, y, z)
-                player:set_rotation(rotation)
-                player:set_solid(true)
-                player:set_visible(true)
-            end
-        end
-
-        entity_manager:set_player_entity(entity_name)
-        local world_map_entry = System.MapChanger.world_map_entry
-        if world_map_entry then
-            entity_manager:place_player_at_field_entry(
-                world_map_entry.x, world_map_entry.y,
-                world_map_entry.triangle, world_map_entry.direction
-            )
-            System.MapChanger.world_map_entry = nil
-        end
+        place_player_at_map_entry(entity_name)
     end
     entity_manager:set_entity_to_character(entity_name, character_id)
 end
@@ -225,6 +236,25 @@ axyzi = function(bx, by, bz, bt, id, ax, ay, az, at, scale)
     Banks[by][ay] = math.floor(y * scale)
     Banks[bz][az] = math.floor(z * scale)
     Banks[bt][at] = t
+    return 0
+end
+
+--- Stores the X and Y position of an entity in two variables.
+--
+-- @param bx Bank for X.
+-- @param by Bank for Y.
+-- @param id Index of the entity in the field.
+-- @param ax Address at which to store the X coordinate.
+-- @param ay Address at which to store the Y coordinate.
+-- @param scale Map scale to multiply values
+getaxy = function(bx, by, id, ax, ay, scale)
+    local entity = entity_manager:get_entity_from_index(id)
+    if entity == nil then
+        do return end
+    end
+    local x, y = entity:get_position()
+    Banks[bx][ax] = math.floor(x * scale)
+    Banks[by][ay] = math.floor(y * scale)
     return 0
 end
 

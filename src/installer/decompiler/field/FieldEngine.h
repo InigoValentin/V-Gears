@@ -311,6 +311,36 @@ class FieldEngine : public Engine{
         );
 
         /**
+         * A function of an entity that is the same code as another function of it.
+         *
+         * Several scripts of an entity can start at the same address in the original game, so the
+         * code is only written once, and the rest of them are names for it.
+         */
+        struct FunctionAlias{
+            std::string entity_name;
+            std::string alias;
+            std::string target;
+        };
+
+        /**
+         * Adds a function that is another name for a function of the same entity.
+         *
+         * @param[in] entity_name Name of the entity.
+         * @param[in] alias Name of the new function.
+         * @param[in] target Name of the function that has the code.
+         */
+        void AddFunctionAlias(
+          const std::string& entity_name, const std::string& alias, const std::string& target
+        );
+
+        /**
+         * Retrieves the functions that are another name for other function.
+         *
+         * @return The aliases.
+         */
+        const std::vector<FunctionAlias>& GetFunctionAliases() const{return function_aliases_;}
+
+        /**
          * Marks an entity as a line.
          *
          * @param[in] entity_index Index of the entity.
@@ -402,6 +432,11 @@ class FieldEngine : public Engine{
          * The entity index map for the field.
          */
         std::map<size_t, Entity> entity_index_map_;
+
+        /**
+         * Functions that are another name for other functions.
+         */
+        std::vector<FunctionAlias> function_aliases_;
 
         /**
          * The map scale factor.

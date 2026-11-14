@@ -5,7 +5,7 @@
     <char name="#" x="36" y="0" width="12" height="12" pre="0" post="-2" />
     <char name="$" x="48" y="0" width="12" height="12" pre="0" post="-5" />
     <char name="%" x="60" y="0" width="12" height="12" pre="0" post="-2" />
-    <char name="&" x="72" y="0" width="12" height="12" pre="0" post="-3" />
+    <char name="&amp;" x="72" y="0" width="12" height="12" pre="0" post="-3" />
     <char name="'" x="84" y="0" width="12" height="12" pre="0" post="-9" />
     <char name="(" x="96" y="0" width="12" height="12" pre="2" post="-4" />
     <char name=")" x="108" y="0" width="12" height="12" pre="2" post="-4" />
@@ -27,7 +27,7 @@
     <char name="9" x="48" y="12" width="12" height="12" pre="0" post="-4" />
     <char name=":" x="60" y="12" width="12" height="12" pre="2" post="-9" />
     <char name=";" x="72" y="12" width="12" height="12" pre="0" post="-8" />
-    <char name="<" x="84" y="12" width="12" height="12" pre="0" post="-5" />
+    <char name="&lt;" x="84" y="12" width="12" height="12" pre="0" post="-5" />
     <char name="=" x="96" y="12" width="12" height="12" pre="0" post="-4" />
     <char name=">" x="108" y="12" width="12" height="12" pre="0" post="-5" />
     <char name="?" x="120" y="12" width="12" height="12" pre="0" post="-6" />

@@ -223,6 +223,13 @@ struct MessageData{
     bool translucent;
 
     /**
+     * The script that set the mode of the message, as "entity/function", or empty if the mode is
+     * the default one. The mode is used by the messages that script opens, and set back to the
+     * default when another script opens one.
+     */
+    std::string mode_owner;
+
+    /**
      * Indicates if the window is for a timer.
      */
     bool timer;
@@ -458,6 +465,13 @@ class DialogsManager : public Manager, public Ogre::Singleton<DialogsManager>{
          * @param[in] id ID of the message to close.
          */
         void HideMessage(const int id);
+
+        /**
+         * Sets the mode of a message (see {@see SetMode}) back to the default one.
+         *
+         * @param[in] id The ID of the message.
+         */
+        void ResetMessageMode(const int id);
 
         /**
          * Retrieves a message Id from it's name.

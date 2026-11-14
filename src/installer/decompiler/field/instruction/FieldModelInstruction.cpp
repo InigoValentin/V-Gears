@@ -101,7 +101,11 @@ void FieldModelInstruction::ProcessInst(
         case OPCODES::PGTDR: code_gen->WriteTodo(md.GetEntityName(), "PGTDR"); break;
         case OPCODES::PXYZI: code_gen->WriteTodo(md.GetEntityName(), "PXYZI"); break;
         case OPCODES::TLKON: ProcessTLKON(code_gen, md.GetEntityName()); break;
-        case OPCODES::PC: ProcessPC(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
+        case OPCODES::PC:
+            // The character is the one in the opcode. The one of CHAR is the model of the field's
+            // list, and it is not the same for all (for Aeris it is 1, and she is character 3).
+            ProcessPC(code_gen, md.GetEntityName(), params_[0]->GetUnsigned());
+            break;
         case OPCODES::opCodeCHAR: ProcessCHAR(code_gen, md.GetEntityName()); break;
         case OPCODES::DFANM: ProcessDFANM(code_gen, md.GetEntityName(), md.GetCharacterId()); break;
         case OPCODES::ANIME1:
@@ -109,7 +113,7 @@ void FieldModelInstruction::ProcessInst(
             break;
         case OPCODES::VISI: ProcessVISI(code_gen, md.GetEntityName()); break;
         case OPCODES::XYZI: ProcessXYZI(code_gen, md.GetEntityName()); break;
-        case OPCODES::XYI: code_gen->WriteTodo(md.GetEntityName(), "XYI"); break;
+        case OPCODES::XYI: ProcessXYI(code_gen, md.GetEntityName()); break;
         case OPCODES::XYZ: code_gen->WriteTodo(md.GetEntityName(), "XYZ"); break;
         case OPCODES::MOVE: ProcessMOVE(code_gen, md.GetEntityName()); break;
         case OPCODES::CMOVE: code_gen->WriteTodo(md.GetEntityName(), "CMOVE"); break;
@@ -135,7 +139,7 @@ void FieldModelInstruction::ProcessInst(
         case OPCODES::TURN: code_gen->WriteTodo(md.GetEntityName(), "TURN"); break;
         case OPCODES::DIRA: ProcessDIRA(code_gen, md.GetEntityName(), eng); break;
         case OPCODES::GETDIR: code_gen->WriteTodo(md.GetEntityName(), "GETDIR"); break;
-        case OPCODES::GETAXY: code_gen->WriteTodo(md.GetEntityName(), "GETAXY"); break;
+        case OPCODES::GETAXY: ProcessGETAXY(code_gen); break;
         case OPCODES::GETAI: ProcessGETAI(code_gen, eng); break;
         case OPCODES::ANIM_2:
             ProcessANIM_2(code_gen, md.GetEntityName(), md.GetCharacterId());
@@ -455,6 +459,29 @@ void FieldModelInstruction::ProcessXYZI(CodeGenerator* code_gen, const std::stri
     ).str());
 }
 
+void FieldModelInstruction::ProcessXYI(CodeGenerator* code_gen, const std::string& entity){
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->GetScaleFactor();
+    // Constants are already scaled by the formatter, but values read from a bank (usually stored
+    // by AXYZI) are in field units, so they need to be scaled here.
+    const auto format_coordinate = [&](uint32 bank, int16 value){
+        const auto& formatted = FieldCodeGenerator::FormatValueOrVariable(
+          cg->GetFormatter(), bank, value, FieldCodeGenerator::ValueType::Float, scale
+        );
+        if (bank == 0) return formatted;
+        return "(" + formatted + ") / " + std::to_string(scale);
+    };
+    const auto x = format_coordinate(params_[0]->GetUnsigned(), params_[4]->GetSigned());
+    const auto y = format_coordinate(params_[1]->GetUnsigned(), params_[5]->GetSigned());
+    const auto& triangle_id = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[6]->GetUnsigned()
+    );
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:set_position_xy(%2%, %3%) -- triangle ID %4%")
+      % entity % x % y % triangle_id
+    ).str());
+}
+
 void FieldModelInstruction::ProcessMOVE(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
@@ -691,6 +718,18 @@ void FieldModelInstruction::ProcessAXYZI(CodeGenerator* code_gen){
     ).str());
 }
 
+void FieldModelInstruction::ProcessGETAXY(CodeGenerator* code_gen){
+    // Stores the X and Y of an entity (given by its index in the field) in two variables, in
+    // field units. The script of a line, for example, keeps looking at where the player is.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->GetScaleFactor();
+    code_gen->AddOutputLine((
+      boost::format("getaxy(%1%, %2%, %3%, %4%, %5%, %6%)")
+      % params_[0]->GetSigned() % params_[1]->GetSigned() % params_[2]->GetSigned()
+      % params_[3]->GetSigned() % params_[4]->GetSigned() % scale
+    ).str());
+}
+
 void FieldModelInstruction::ProcessLADER(
   CodeGenerator* code_gen, const std::string& entity, int char_id
 ){
@@ -753,8 +792,10 @@ void FieldModelInstruction::ProcessSLIDR(CodeGenerator* code_gen, const std::str
 }
 
 void FieldModelInstruction::ProcessSOLID(CodeGenerator* code_gen, const std::string& entity){
+    // Lines (triggers) can run this opcode too, but they don't have a model to make solid, so
+    // the entity may not exist in the script.
     code_gen->AddOutputLine((
-      boost::format("self.%1%:set_solid(%2%)")
+      boost::format("if self.%1% ~= nil then self.%1%:set_solid(%2%) end")
       % entity % FieldCodeGenerator::FormatInvertedBool(params_[0]->GetUnsigned())
     ).str());
 }

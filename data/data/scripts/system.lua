@@ -362,13 +362,13 @@ end
 -- destination addresses to place two two-byte values into. Address 1 takes the lower two bytes of
 -- the gil amount, while address 2 takes the higher two bytes.
 --
--- @param b1 First destination bank.
--- @param b2 Second destination address.
--- @param a1 First destination bank.
--- @param a2 Second destination address.
-Inventory.money_to_2_banks = function(b1, b2, a1, a2)
-    Banks[b1][a1] = math.floor(Inventory.money / 65535)
-    Banks[b2][a2] = math.floor(Inventory.money % 65535) - math.floor(Inventory.money / 65535)
+-- @param b1 Bank of the first destination (lower two bytes).
+-- @param b2 Bank of the second destination (higher two bytes).
+-- @param a1 Address in the first bank.
+-- @param a2 Address in the second bank.
+Inventory.money_to_banks = function(b1, b2, a1, a2)
+    Banks[b1][a1] = Inventory.money % 65536
+    Banks[b2][a2] = math.floor(Inventory.money / 65536)
 end
 
 --- Sorts the items in the inventory.

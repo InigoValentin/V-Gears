@@ -116,6 +116,7 @@ void ScriptManager::InitBinds(){
     lua.new_usertype<Entity>(
       "Entity",
       "set_position", &Entity::ScriptSetPosition,
+      "set_position_xy", &Entity::ScriptSetPositionXY,
       "move_by", &Entity::ScriptMoveBy,
       "get_position", &Entity::ScriptGetPosition,
       "get_name", &Entity::GetName,
@@ -466,6 +467,8 @@ void ScriptManager::InitBinds(){
       "area_off", &Background2D::ScriptAreaOff,
       "area_clear", &Background2D::ScriptAreaClear,
       "shake", &Background2D::ScriptShake,
+      "set_layer_parallax", &Background2D::ScriptSetLayerParallax,
+      "set_layer_scroll", &Background2D::ScriptSetLayerScroll,
       "play_animation_looped", &Background2D::ScriptPlayAnimationLooped,
       "play_animation_once", &Background2D::ScriptPlayAnimationOnce
     );

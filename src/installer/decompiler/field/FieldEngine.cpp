@@ -213,6 +213,12 @@ void FieldEngine::AddEntityFunction(
     }
 }
 
+void FieldEngine::AddFunctionAlias(
+  const std::string& entity_name, const std::string& alias, const std::string& target
+){
+    function_aliases_.push_back(FunctionAlias{entity_name, alias, target});
+}
+
 void FieldEngine::MarkEntityAsLine(
   size_t entity_index, bool line, std::vector<float> point_a, std::vector<float> point_b
 ){

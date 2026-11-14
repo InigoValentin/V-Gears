@@ -226,6 +226,12 @@ class Entity{
         void ScriptSetPosition(const float x, const float y, const float z);
 
         /**
+         * Sets the X and Y position from a script, keeping Z and the visibility, solidity and
+         * talkability of the entity. The walkmesh triangle is looked up again on the next move.
+         */
+        void ScriptSetPositionXY(const float x, const float y);
+
+        /**
          * Moves the entity by the specified position offset.
          *
          * @param[in] x X coordinate offset.

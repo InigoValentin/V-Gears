@@ -101,7 +101,10 @@ void DialogsManager::UpdateDebug(){}
 void DialogsManager::OnResize(){}
 
 void DialogsManager::ClearField(){
-    for (unsigned int i = 0; i < messages_.size(); ++ i) HideMessage(i);
+    for (unsigned int i = 0; i < messages_.size(); ++ i){
+        HideMessage(i);
+        ResetMessageMode(i);
+    }
 }
 
 void DialogsManager::ClearBattle(){
@@ -109,7 +112,10 @@ void DialogsManager::ClearBattle(){
 }
 
 void DialogsManager::ClearWorld(){
-    for (unsigned int i = 0; i < messages_.size(); ++ i) HideMessage(i);
+    for (unsigned int i = 0; i < messages_.size(); ++ i){
+        HideMessage(i);
+        ResetMessageMode(i);
+    }
 }
 
 void DialogsManager::ScriptSetMapName(const char* text_id){
@@ -133,6 +139,11 @@ void DialogsManager::OpenDialog(const char* d_name, int x, int y, int w, int h){
           "dialog_open: dialog '" + Ogre::String(d_name) + "' already created. Close it first."
         );
         return;
+    }
+    // The mode is for the script that set it. When another one opens the window it is the default.
+    if (!data->mode_owner.empty()){
+        const ScriptId script = ScriptManager::getSingleton().GetCurrentScriptId();
+        if (data->mode_owner != script.entity + "/" + script.function) ResetMessageMode(id);
     }
     data->x = x;
     data->y = y;
@@ -238,6 +249,10 @@ void DialogsManager::SetMode(const char* d_name, const int bg, const bool closea
         return;
     }
     messages_[id]->closeable = closeable;
+    {
+        const ScriptId script = ScriptManager::getSingleton().GetCurrentScriptId();
+        messages_[id]->mode_owner = script.entity + "/" + script.function;
+    }
     switch (bg){
         case 1:
             messages_[id]->visible = false;
@@ -366,7 +381,14 @@ void DialogsManager::HideMessage(const int id){
     for (unsigned int i = 0; i < messages_[id]->sync.size(); ++ i)
         ScriptManager::getSingleton().ContinueScriptExecution(messages_[id]->sync[i]);
     messages_[id]->sync.clear();
-    // Reset mode.
+    // The mode (WMODE) is not reset here: it is kept for the script that set it, so one that is
+    // set once is used by all the messages that script opens, as in the scenes that show several
+    // texts over a black screen, with no window. See OpenDialog. It is also reset when the
+    // field changes.
+}
+
+void DialogsManager::ResetMessageMode(const int id){
+    messages_[id]->mode_owner.clear();
     messages_[id]->closeable = true;
     messages_[id]->visible = true;
     messages_[id]->translucent = false;
