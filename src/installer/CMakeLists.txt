@@ -169,9 +169,8 @@ if(OGRE_LIBRARIES)
 endif()
 
 
-# Install v-gears-installer.
-if(WIN32 OR APPLE)
-    install(TARGETS v-gears-installer DESTINATION .)
-else()
-    install(TARGETS v-gears-installer RUNTIME DESTINATION bin)
-endif()
+# Install v-gears-installer (see CMake/InstallDirs.cmake).
+install(
+    TARGETS v-gears-installer
+    RUNTIME DESTINATION ${VGEARS_INSTALL_BINDIR} BUNDLE DESTINATION ${VGEARS_INSTALL_BINDIR}
+)

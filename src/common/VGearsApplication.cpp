@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <cstdlib>
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -21,6 +22,8 @@
 #include <OgreLogManager.h>
 #include <OgreConfigDialog.h>
 #include "common/VGearsApplication.h"
+#include "common/DataDirectory.h"
+#include "common/OgrePlugins.h"
 #include "VGearsGameState.h"
 #include "data/VGearsAFileManager.h"
 #include "data/VGearsBackgroundFileManager.h"
@@ -43,6 +46,13 @@
  * Application singleton.
  */
 template<> VGears::Application* Ogre::Singleton<VGears::Application>::msSingleton = nullptr;
+
+/**
+ * Directory with the Ogre plugins, found when V-Gears was built. Set by CMake (VGEARS_OGRE_PLUGIN_DIR).
+ */
+#ifndef VGEARS_OGRE_PLUGIN_DIR
+#define VGEARS_OGRE_PLUGIN_DIR ""
+#endif
 
 namespace VGears{
 
@@ -67,6 +77,11 @@ namespace VGears{
     const char* Application::CLI_RESOURCES_FILE_DESCRIPTION(
       "path to config file containing available resources"
     );
+    const char* Application::CLI_DATA_DIR("data-dir");
+    const char* Application::CLI_DATA_DIR_DESCRIPTION(
+      "Directory with the game data and configuration, where saves and logs are written. "
+      "Defaults to $VGEARS_DATA_DIR, the current directory if it has the V-Gears files, or ~/.v-gears"
+    );
 
     Application::Application(int argc, char *argv[]): _argc(argc), _argv(argv){}
 
@@ -81,9 +96,9 @@ namespace VGears{
             if (!processCommandLine(_argc, _argv)) return false;
         }
 
-        _root = std::make_unique<Ogre::Root>(
-          plugins_filename_, config_filename_, log_filename_
-        );
+        // No plugins file is passed to Ogre: the plugins are looked for in several places, see loadPlugins.
+        _root = std::make_unique<Ogre::Root>("", config_filename_, log_filename_);
+        loadPlugins();
         _overlay_system = std::make_unique<Ogre::OverlaySystem>();
 
         Ogre::Log* default_log(
@@ -117,6 +132,43 @@ namespace VGears{
         loadResourcesConfig();
         initComponents();
         return true;
+    }
+
+    void Application::loadPlugins(){
+        const bfs::path plugins_file(bfs::absolute(bfs::path(plugins_filename_)));
+        OgrePlugins::Config config;
+        if (!OgrePlugins::ReadConfig(plugins_file, config))
+            throw std::runtime_error("The Ogre plugins file can't be read: " + plugins_file.string());
+        const std::vector<bfs::path> directories(OgrePlugins::SearchDirectories(
+          plugins_file.parent_path(), config.folder,
+          DataDirectory::ExecutableDirectory(_argc > 0 && _argv ? _argv[0] : nullptr), VGEARS_OGRE_PLUGIN_DIR
+        ));
+        const String ogre_version(
+          std::to_string(OGRE_VERSION_MAJOR) + "." + std::to_string(OGRE_VERSION_MINOR) + "."
+          + std::to_string(OGRE_VERSION_PATCH)
+        );
+        for (const String& name : config.plugins){
+            const bfs::path file(OgrePlugins::Find(name, directories, ogre_version));
+            if (file.empty()){
+                String searched;
+                for (const bfs::path& directory : directories) searched += "\n  " + directory.string();
+                throw std::runtime_error(
+                  "The Ogre plugin " + name + " (listed in " + plugins_file.string() + ") was not found in:"
+                  + searched
+                );
+            }
+            Ogre::LogManager::getSingleton().logMessage("Loading Ogre plugin " + file.string());
+            try{
+                _root->loadPlugin(file.string());
+            }
+            catch (const Ogre::Exception& e){
+                // The exception can point to strings of the plugin library, which is unloaded when the root is
+                // destroyed, before the exception is caught in main. Copy the message now.
+                throw std::runtime_error(
+                  "The Ogre plugin " + file.string() + " could not be loaded: " + e.getFullDescription()
+                );
+            }
+        }
     }
 
     void Application::loadResourcesConfig(){
@@ -187,6 +239,10 @@ namespace VGears{
               , bpo::value< String >()->default_value(resources_filename)
               , CLI_RESOURCES_FILE_DESCRIPTION
            )
+            (  CLI_DATA_DIR
+              , bpo::value< String >()
+              , CLI_DATA_DIR_DESCRIPTION
+           )
             ;
         bpo::variables_map vm;
         bpo::store(bpo::command_line_parser(argc, argv).options(generic).run(), vm);
@@ -196,11 +252,44 @@ namespace VGears{
         }
 
         bpo::notify(vm);
-        config_filename_ = vm[CLI_CONFIG_FILE].as<String>();
-        log_filename_ = vm[CLI_LOG_FILE].as<String>();
-        plugins_filename_ = vm[CLI_PLUGINS_FILE].as<String>();
-        resources_filename_ = vm[CLI_RESOURCES_FILE].as<String>();
 
+        // The game changes into the data directory, so the files given in the command line are made absolute first.
+        // The default ones are left relative, to be found in the data directory.
+        const bfs::path start_directory(bfs::current_path());
+        auto file_option = [&](const char* name) -> String{
+            const String value(vm[name].as<String>());
+            if (vm[name].defaulted() || value.empty()) return value;
+            return bfs::absolute(bfs::path(value), start_directory).lexically_normal().string();
+        };
+        config_filename_ = file_option(CLI_CONFIG_FILE);
+        log_filename_ = file_option(CLI_LOG_FILE);
+        plugins_filename_ = file_option(CLI_PLUGINS_FILE);
+        resources_filename_ = file_option(CLI_RESOURCES_FILE);
+
+        String requested_directory;
+        if (vm.count(CLI_DATA_DIR)) requested_directory = vm[CLI_DATA_DIR].as<String>();
+        else if (const char* env = std::getenv(DataDirectory::ENV_DATA_DIR)) requested_directory = env;
+        const DataDirectory::Resolution data_directory(DataDirectory::Resolve(
+          requested_directory, start_directory, DataDirectory::DefaultDirectory(),
+          DataDirectory::TemplateCandidates(DataDirectory::ExecutableDirectory(argv[0]))
+        ));
+        if (!data_directory.error.empty()){
+            std::cerr << "V-Gears can't start: " << data_directory.error << std::endl;
+            return false;
+        }
+        if (data_directory.seeded){
+            std::cout << "Copied " << data_directory.copied_files << " V-Gears files from "
+              << data_directory.template_directory.string() << " to " << data_directory.directory.string()
+              << ". Run v-gears-installer to add the data of the original game." << std::endl;
+        }
+        boost::system::error_code ec;
+        bfs::current_path(data_directory.directory, ec);
+        if (ec){
+            std::cerr << "V-Gears can't start: can't use the data directory " << data_directory.directory.string()
+              << ": " << ec.message() << std::endl;
+            return false;
+        }
+        std::cout << "Data directory: " << data_directory.directory.string() << std::endl;
         return true;
     }
 

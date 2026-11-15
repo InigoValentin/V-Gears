@@ -1,7 +1,7 @@
 # Minimum required CMake and project declaration
 cmake_minimum_required(VERSION 3.5)
 # Enable both C and CXX languages so C and C++ toolchains are configured.
-project(V-Gears VERSION 0.3.0 LANGUAGES C CXX)
+project(V-Gears VERSION 0.3.2 LANGUAGES C CXX)
 
 # Provide a central common include for project-wide policies and defaults.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
@@ -78,6 +78,9 @@ else()
     set(VGEARS_LUAJIT_LIBRARIES ${VGEARS_LUAJIT_LIBRARY})
 endif()
 
+# Where each part is installed. Set before src/, whose install rules use it.
+include(InstallDirs)
+
 # Build v-gears (and, if requested, the installer).
 add_subdirectory(src)
 
@@ -87,21 +90,5 @@ if(BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-# Install Linux desktop integration assets for the installer so desktop shells
-# can map the running window to its icon.
-if(UNIX AND NOT APPLE AND BUILD_INSTALLER)
-    install(
-        FILES ${CMAKE_SOURCE_DIR}/v-gears-installer.desktop
-        DESTINATION share/applications
-    )
-    install(
-        FILES ${CMAKE_SOURCE_DIR}/v-gears-installer.png
-        DESTINATION share/icons/hicolor/256x256/apps
-    )
-    install(
-        FILES ${CMAKE_SOURCE_DIR}/v-gears-installer.png
-        DESTINATION share/pixmaps
-    )
-endif()
-
-# TODO: Generate Installer (.msi, .deb, .appImage...)
+# Install rules for the data, documentation and desktop files, and the packages.
+include(Packaging)

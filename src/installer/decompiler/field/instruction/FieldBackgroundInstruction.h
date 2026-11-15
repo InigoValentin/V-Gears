@@ -41,6 +41,10 @@ class FieldBackgroundInstruction : public KernelCallInstruction{
 
     private:
 
+        void ProcessBGPDH(CodeGenerator* code_gen);
+
+        void ProcessBGSCR(CodeGenerator* code_gen);
+
         void ProcessBGON(CodeGenerator* code_gen, FieldEngine& engine);
         void ProcessBGOFF(CodeGenerator* code_gen, FieldEngine& engine);
         void ProcessBGCLR(CodeGenerator* code_gen, FieldEngine& engine);

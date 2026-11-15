@@ -151,6 +151,12 @@ void UiManager::ApplyWindowColours(UiWidget* widget){
 void UiManager::renderQueueStarted(
   Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation
 ){
+    // The widgets are drawn when the queue ends. See renderQueueEnded.
+}
+
+void UiManager::renderQueueEnded(
+  Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation
+){
     if (queueGroupId == Ogre::RENDER_QUEUE_OVERLAY){
         Ogre::Root::getSingletonPtr()->getRenderSystem()->clearFrameBuffer(Ogre::FBT_DEPTH);
         for (unsigned int i = 0; i < widgets_.size(); ++ i) widgets_[i]->Render();

@@ -87,7 +87,7 @@ end
 --   get_item_quantity(item)
 --   add_money(amount)
 --   remove_money(amount)
---   money_to_2_banks(b1, b2, a1, a2)
+--   money_to_banks(b1, b2, a1, a2)
 --   sort(criteria)
 Inventory = {}
 Inventory.money = 0

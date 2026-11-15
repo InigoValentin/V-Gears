@@ -1,5 +1,0 @@
-v-gears.desktop /usr/share/applications
-v-gears.png /usr/share/pixmaps
-v-gears-installer.desktop /usr/share/applications
-v-gears-installer.png /usr/share/pixmaps
-data/* /usr/share/v-gears

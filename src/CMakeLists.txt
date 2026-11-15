@@ -593,6 +593,8 @@ set(VGEARS_SOURCE_FILES
     common/FinalFantasy7/FF7NameLookup.cpp
     common/LzsFile.cpp
     common/TypeDefine.cpp
+    common/DataDirectory.cpp
+    common/OgrePlugins.cpp
     common/VGearsApplication.cpp
     common/VGearsManualObject.cpp
     common/VGearsResource.cpp
@@ -839,6 +841,18 @@ if(_test_removed_count GREATER 0)
     message(STATUS "Removed ${_test_removed_count} decompiler test source(s) from libvgears")
 endif()
 
+# Directory with the system's Ogre plugins (RenderSystem_GL, Codec_STBI...). V-Gears looks for the plugins listed in
+# plugins.cfg there after the data directory and the directory of the executable (see common/OgrePlugins.h).
+# Packagers can set it, for example -DVGEARS_OGRE_PLUGIN_DIR=/usr/lib/x86_64-linux-gnu/OGRE.
+set(_vgears_default_plugin_dir "")
+if(OGRE_PLUGIN_DIR)
+    set(_vgears_default_plugin_dir "${OGRE_PLUGIN_DIR}")
+elseif(PKG_CONFIG_FOUND)
+    pkg_get_variable(_vgears_default_plugin_dir OGRE plugindir)
+endif()
+set(VGEARS_OGRE_PLUGIN_DIR "${_vgears_default_plugin_dir}" CACHE PATH "Directory of the Ogre plugins")
+message(STATUS "Ogre plugin directory: ${VGEARS_OGRE_PLUGIN_DIR}")
+
 add_library(libvgears STATIC ${VGEARS_SOURCE_FILES})
 target_sources(libvgears PRIVATE installer/SfxDump.c)
 # Ensure generated ui headers are created before compiling libvgears
@@ -877,6 +891,7 @@ if(DEFINED _GENERATED_UI_TARGET)
 endif()
     target_link_libraries(libvgears PUBLIC ${VGEARS_LUAJIT_LIBRARIES})
 target_compile_definitions(libvgears PUBLIC TIXML_USE_STL)
+target_compile_definitions(libvgears PUBLIC VGEARS_OGRE_PLUGIN_DIR="${VGEARS_OGRE_PLUGIN_DIR}")
 if(NOT MSVC)
     target_compile_options(libvgears PRIVATE -fPIC)
 endif()
@@ -923,8 +938,6 @@ endforeach()
 
 add_executable(v-gears ${VGEARS_SOURCE_FILES})
 SET_PROPERTY(TARGET v-gears PROPERTY FOLDER "build/v-gears")
-set(CPACK_PACKAGE_EXECUTABLES v-gears "v-gears")
-set(CPACK_WIX_PROGRAM_MENU_FOLDER "VGears")
 if(APPLE)
     target_link_libraries(v-gears "-framework CoreFoundation -framework Cocoa -framework IOKit" ${ois_lib})
 endif()
@@ -941,6 +954,22 @@ set(VGEARS_LIBRARIES
     ${OGGVORBIS_LIBRARIES}
     ${OGRE_LIBRARIES}
 )
+
+# Boost 1.70 and newer ship CMake config files that create the Boost::<component> targets. Use them if the search
+# above found nothing. Note that, outside MinGW, that search doesn't run: the if(MINGW) block near the top of this file
+# is never closed where it should be, and it covers all the library detection down to the source list.
+# Boost.System and Boost.Chrono are optional: System is header-only in recent versions.
+if(NOT BOOST_LINK_LIBS)
+    find_package(Boost CONFIG QUIET COMPONENTS program_options filesystem thread OPTIONAL_COMPONENTS system chrono)
+    foreach(_comp IN ITEMS program_options filesystem thread system chrono)
+        if(TARGET Boost::${_comp})
+            list(APPEND BOOST_LINK_LIBS Boost::${_comp})
+        endif()
+    endforeach()
+    if(BOOST_LINK_LIBS)
+        message(STATUS "Found Boost ${Boost_VERSION} (CMake config): ${BOOST_LINK_LIBS}")
+    endif()
+endif()
 
 # Ensure we have something for Boost; if BOOST_LINK_LIBS is empty, inject
 # generic `-lboost_*` flags directly so the system linker will attempt to
@@ -1035,18 +1064,14 @@ if(UNIX)
     target_compile_definitions(v-gears PRIVATE POSIX)
 endif()
 target_compile_definitions(v-gears PRIVATE TIXML_USE_STL)
+target_compile_definitions(v-gears PRIVATE VGEARS_OGRE_PLUGIN_DIR="${VGEARS_OGRE_PLUGIN_DIR}")
 if(NOT MSVC)
     target_compile_options(v-gears PRIVATE -fPIC)
 endif()
 
 
-# Install v-gears.
-# TODO: Fix routes for installation
-if(WIN32 OR APPLE)
-    install(TARGETS v-gears DESTINATION .)
-else()
-    install(TARGETS v-gears RUNTIME DESTINATION ./games)
-endif()
+# Install v-gears (see CMake/InstallDirs.cmake).
+install(TARGETS v-gears RUNTIME DESTINATION ${VGEARS_INSTALL_BINDIR} BUNDLE DESTINATION ${VGEARS_INSTALL_BINDIR})
 
 
 # If installer build is enabled, ensure Qt includes/links are available for the

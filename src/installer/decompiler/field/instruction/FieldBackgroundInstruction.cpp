@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <boost/format.hpp>
@@ -30,8 +31,8 @@ void FieldBackgroundInstruction::ProcessInst(
     FunctionMetaData md(func.metadata);
     //std::cout << "Background opcode: " << opcode_ << "\n";
     switch (opcode_){
-        case OPCODES::BGPDH: code_gen->WriteTodo(md.GetEntityName(), "BGPDH");break;
-        case OPCODES::BGSCR: code_gen->WriteTodo(md.GetEntityName(), "BGSCR"); break;
+        case OPCODES::BGPDH: ProcessBGPDH(code_gen); break;
+        case OPCODES::BGSCR: ProcessBGSCR(code_gen); break;
         case OPCODES::MPPAL: code_gen->WriteTodo(md.GetEntityName(), "MPPAL"); break;
         case OPCODES::BGON: ProcessBGON(code_gen, static_cast<FieldEngine&>(*engine)); break;
         case OPCODES::BGOFF: ProcessBGOFF(code_gen, static_cast<FieldEngine&>(*engine)); break;
@@ -54,6 +55,41 @@ void FieldBackgroundInstruction::ProcessInst(
               md.GetEntityName(), address_, opcode_
             ));
     }
+}
+
+void FieldBackgroundInstruction::ProcessBGPDH(CodeGenerator* code_gen){
+    // Parallax distance of a background layer. The layer is a value, and the distance can be a
+    // value or a variable (the bank is the first nibble).
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto& distance = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), static_cast<int>(
+        static_cast<int16_t>(params_[3]->GetUnsigned() & 0xFFFF)
+      )
+    );
+    code_gen->AddOutputLine((
+      boost::format("background2d:set_layer_parallax(%1%, %2%)") % params_[2]->GetUnsigned()
+        % distance
+    ).str());
+}
+
+void FieldBackgroundInstruction::ProcessBGSCR(CodeGenerator* code_gen){
+    // Speed at which a background layer scrolls by itself, on each axis. The layer is a value. X
+    // and Y can be values or variables, with the bank in the first and second nibbles.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), static_cast<int>(
+        static_cast<int16_t>(params_[3]->GetUnsigned() & 0xFFFF)
+      )
+    );
+    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), static_cast<int>(
+        static_cast<int16_t>(params_[4]->GetUnsigned() & 0xFFFF)
+      )
+    );
+    code_gen->AddOutputLine((
+      boost::format("background2d:set_layer_scroll(%1%, %2%, %3%)") % params_[2]->GetUnsigned()
+        % x % y
+    ).str());
 }
 
 void FieldBackgroundInstruction::ProcessBGON(CodeGenerator* code_gen, FieldEngine& engine){

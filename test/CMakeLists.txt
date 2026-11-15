@@ -281,8 +281,13 @@ target_link_libraries(v-gears-tests
 add_test(NAME v-gears-tests COMMAND v-gears-tests)
 
 
-# Tests of the installer logic that doesn't need the rest of the engine (layout, option rules, verifier, log).
+# Tests of the installer logic that doesn't need the rest of the engine (layout, option rules, verifier, log), and of
+# the data directory lookup shared by the game and the installer.
 add_executable(v-gears-installer-tests
+    common/DataDirectory.cpp
+    common/OgrePlugins.cpp
+    ${CMAKE_SOURCE_DIR}/src/common/DataDirectory.cpp
+    ${CMAKE_SOURCE_DIR}/src/common/OgrePlugins.cpp
     installer/InstallLogic.cpp
     installer/ExternalTools.cpp
     installer/MovieCamera.cpp
@@ -296,4 +301,5 @@ add_executable(v-gears-installer-tests
 )
 SET_PROPERTY(TARGET v-gears-installer-tests PROPERTY FOLDER "build/v-gears-test")
 target_link_libraries(v-gears-installer-tests ${_test_qt_libs} ${Boost_LIBRARIES})
+target_compile_definitions(v-gears-installer-tests PRIVATE VGEARS_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 add_test(NAME v-gears-installer-tests COMMAND v-gears-installer-tests)

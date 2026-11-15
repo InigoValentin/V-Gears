@@ -230,6 +230,32 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] y_amplitude Amplitude of the bounces in the Y axis, in original screen pixels.
          * @param[in] y_frames Frames between bounces in the Y axis.
          */
+        /**
+         * Sets the parallax of a background layer, from the distance the scripts give it.
+         *
+         * The layer scrolls at the speed of the background multiplied by the distance divided by
+         * 4096 (the distance of the layers that don't move with it is 4096), so a layer far away
+         * moves less than the foreground. That relation comes from the values the field scripts
+         * use and has not been verified against the original game.
+         *
+         * @param[in] layer Layer of the background, from 0 to 3.
+         * @param[in] distance Parallax distance of the layer.
+         */
+        void ScriptSetLayerParallax(const int layer, const int distance);
+
+        /**
+         * Sets the speed a background layer scrolls by itself, on top of the scroll of the
+         * background.
+         *
+         * The speeds are given in 1/256 of a pixel of the original screen for each frame of the
+         * original game (30 per second). That unit has not been verified against the original game.
+         *
+         * @param[in] layer Layer of the background, from 0 to 3.
+         * @param[in] x Speed on the X axis.
+         * @param[in] y Speed on the Y axis.
+         */
+        void ScriptSetLayerScroll(const int layer, const int x, const int y);
+
         void ScriptShake(
           const int type, const int x_amplitude, const int x_frames, const int y_amplitude,
           const int y_frames
@@ -363,7 +389,7 @@ class Background2D : public Ogre::RenderQueueListener{
         void AddTile(
           const int x, const int y, const int width, const int height, const float depth,
           const float u1, const float v1, const float u2, const float v2, const Blending blending,
-          const int area = 0, const int state = 0
+          const int area = 0, const int state = 0, const int layer = 0
         );
 
         /**
@@ -389,6 +415,22 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] tile The tile to add.
          */
         void AddTile(const VGears::Tile& tile);
+
+        /**
+         * Converts the depth of a tile to the value that is written to the depth buffer.
+         *
+         * The depth is projected with the camera. The tiles that are the farthest (the background
+         * layers) are at depths so close to each other (as 127.938 and 128) that their projected
+         * values are closer than what the depth buffer can tell apart, and the order they are
+         * drawn in decided what was in front. For them the order is kept with a linear mapping
+         * right behind all the rest of what is drawn.
+         *
+         * @param[in] depth Depth of the tile.
+         * @param[in] projection Projection matrix of the camera, with the depth range of the
+         * render system.
+         * @return The value for the depth buffer.
+         */
+        static float TileDepthToBuffer(const float depth, const Ogre::Matrix4& projection);
 
         /**
          * Updates the UV vector of a tile
@@ -765,6 +807,76 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Alpha blending render operation.
          */
+        /**
+         * The number of layers of a background.
+         */
+        static const int LAYER_COUNT = 4;
+
+        /**
+         * Part of a vertex buffer that has the tiles of a layer.
+         */
+        struct LayerRange{
+            LayerRange(): first(0), count(0){}
+            unsigned int first;
+            unsigned int count;
+        };
+
+        /**
+         * The tiles of each layer in the buffers of alpha, add and subtract tiles. They are only
+         * used if the tiles of a layer are together, which is how the installer writes them.
+         */
+        LayerRange layer_ranges_[3][LAYER_COUNT];
+
+        /**
+         * The last layer a tile has been added to for each buffer.
+         */
+        int last_layer_[3];
+
+        /**
+         * If the tiles of the layers of each buffer are together, one layer after the other.
+         */
+        bool layers_contiguous_[3];
+
+        /**
+         * Scroll of each layer relative to the one of the background.
+         */
+        float layer_parallax_[LAYER_COUNT][2];
+
+        /**
+         * Speed at which each layer scrolls by itself, in pixels of the virtual screen per second.
+         */
+        float layer_scroll_speed_[LAYER_COUNT][2];
+
+        /**
+         * Distance each layer has scrolled by itself, in pixels of the virtual screen.
+         */
+        float layer_scroll_offset_[LAYER_COUNT][2];
+
+        /**
+         * Sets the layers to the state they have when a background is loaded.
+         */
+        void ResetLayers();
+
+        /**
+         * If any layer is not scrolled as the background is.
+         */
+        bool HasLayerScroll() const;
+
+        /**
+         * Draws the tiles of a buffer, each layer scrolled as it has to be.
+         *
+         * @param[in] buffer Buffer to draw: 0 for alpha, 1 for add and 2 for subtract.
+         * @param[in,out] render_op What to draw.
+         * @param[in] material Material to draw it with.
+         * @param[in] rs_params Parameters of the render system.
+         * @param[in] width Width of the viewport.
+         * @param[in] height Height of the viewport.
+         */
+        void RenderBuffer(
+          const int buffer, Ogre::RenderOperation& render_op, const Ogre::MaterialPtr& material,
+          Ogre::GpuProgramParametersPtr& rs_params, const float width, const float height
+        );
+
         Ogre::RenderOperation alpha_render_op_;
 
         /**

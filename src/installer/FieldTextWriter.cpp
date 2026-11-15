@@ -65,7 +65,17 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
         logger_->Log("[ERROR exception]");
         logger_->Log("</dialog>\n");
     }
-    const u16 dialogCount = GetU16LE(offset_to_sector + offset_to_dialogs);
+    u16 dialogCount = GetU16LE(offset_to_sector + offset_to_dialogs);
+    // The first string comes right after the table of offsets, so its offset says how many strings
+    // there are. A field with 256 of them has a count that doesn't fit (it is read as 0), and the
+    // field would have no texts at all.
+    if (offset_to_sector + offset_to_dialogs + 0x03 < data_.size()){
+        const u16 first_offset = GetU16LE(offset_to_sector + offset_to_dialogs + 0x02);
+        if (first_offset >= 0x02 && (first_offset % 2) == 0){
+            const u16 count_from_table = (first_offset - 0x02) / 2;
+            if (count_from_table > dialogCount) dialogCount = count_from_table;
+        }
+    }
     for (u16 i = 0; i <dialogCount; ++ i){
         // gGt offset of string data.
         u32 offset = offset_to_sector + offset_to_dialogs + GetU16LE(
@@ -271,7 +281,7 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
                 }
                 else if (temp2 == 0xDC){
                     AddText(dialog);
-                    logger_->Log("<pause_ok >");
+                    logger_->Log("<pause_ok />");
                 }
                 else if (temp2 == 0xDD){
                     u16 wait = GetU16LE(offset + 1);

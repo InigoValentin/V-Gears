@@ -118,6 +118,9 @@ namespace VGears{
             /**
              * Processes command line arguments.
              *
+             * It also decides the data directory, copies the V-Gears files there if it has none (see
+             * {@see DataDirectory::Resolve}) and makes it the working directory.
+             *
              * @param[in] argc Number of command line arguments.
              * @param[in] argv List of command line arguments.
              * @return True if all arguments were successfully processed, false
@@ -130,6 +133,15 @@ namespace VGears{
              * manager
              */
             void registerArchiveFactories(void);
+
+            /**
+             * Loads the Ogre plugins listed in the plugins file.
+             *
+             * Each plugin is looked for in the directories given by {@see OgrePlugins::SearchDirectories}.
+             *
+             * @throws std::runtime_error If the plugins file can't be read or a plugin is not found.
+             */
+            void loadPlugins(void);
 
             /**
              * Loads the resource configuration from  the file.
@@ -222,6 +234,16 @@ namespace VGears{
              * String for the command line help text.
              */
             static const char* CLI_RESOURCES_FILE_DESCRIPTION;
+
+            /**
+             * String for the command line arguments.
+             */
+            static const char* CLI_DATA_DIR;
+
+            /**
+             * String for the command line help text.
+             */
+            static const char* CLI_DATA_DIR_DESCRIPTION;
 
             /**
              * Number of arguments assed by command line.

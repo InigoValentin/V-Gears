@@ -128,6 +128,12 @@ void FieldDisassembler::DoDisassemble(){
         }
         // Only parse each script one.
         std::set<uint16> parsed_scripts;
+        // The first script that has each entry point, and the scripts that repeat it.
+        std::map<uint16, size_t> first_script_with_entry_point;
+        std::vector<std::pair<size_t, size_t>> repeated_scripts;
+        // The unused scripts at the end of an entity point to its last script, as the ones that
+        // are empty point to the one after them. Those are not names for it.
+        const uint16 last_script_entry_point = header_.entity_scripts[entity_number].back();
         std::vector<ScriptInfo> script_info;
         // Collect the scripts to parse
         for (
@@ -136,12 +142,27 @@ void FieldDisassembler::DoDisassemble(){
             uint16 script_entry_point = header_.entity_scripts[entity_number][script_index];
             // If this scripts entry point is already parsed, don't do it again as it means
             // two scripts have the same entry, which only seems to be true for "empty" scripts.
-            if (parsed_scripts.find(script_entry_point) != std::end(parsed_scripts)) continue;
-            parsed_scripts.insert(script_entry_point);
             const uint32 next_script_entry_point = GetEndOfScriptOffset(
               script_entry_point, entity_number, script_index
             );
             const uint32 script_size = next_script_entry_point - script_entry_point;
+            if (parsed_scripts.find(script_entry_point) != std::end(parsed_scripts)){
+                // It is the same code as another script. If it is more than a return it has to
+                // be a name for it, or the event that starts it would be lost. For example, a
+                // line that starts a scene when it is crossed does it with the same code as when
+                // OK is pressed.
+                const size_t first = first_script_with_entry_point[script_entry_point];
+                if (script_size > 1 && first > 0 && script_index > 0){
+                    const bool unused_tail = script_entry_point == last_script_entry_point;
+                    // Only the events of a line can be one of the unused ones: they have a name
+                    // (they are checked below, when it is known that the entity is a line).
+                    if (!unused_tail || script_index <= 6)
+                        repeated_scripts.push_back(std::make_pair(script_index, first));
+                }
+                continue;
+            }
+            parsed_scripts.insert(script_entry_point);
+            first_script_with_entry_point[script_entry_point] = script_index;
             if (script_size > 0){
                 ScriptInfo info = {script_entry_point, next_script_entry_point, script_index};
                 script_info.push_back(info);
@@ -153,6 +174,35 @@ void FieldDisassembler::DoDisassemble(){
             DisassembleIndivdualScript(
               entity_name, entity_number, it->index, it->entry_point, it->next_entry_point, is_start, is_end
             );
+        }
+        // Name the repeated scripts, now that it is known if the entity is a line.
+        for (const auto& repeated : repeated_scripts){
+            const bool is_line = engine_->EntityIsLine(entity_number);
+            // The slots of an entity that is not a line don't have a name, only the ones of a
+            // line do. The ones in the unused tail are kept only if they have one.
+            if (
+              header_.entity_scripts[entity_number][repeated.first]
+                == header_.entity_scripts[entity_number].back()
+              && !(is_line && repeated.first <= 6)
+            ) continue;
+            std::string alias = "script_" + std::to_string(repeated.first);
+            if (repeated.first == 1) alias = "on_interact";
+            else if (is_line){
+                switch (repeated.first){
+                    case 2: alias = "on_approach"; break;
+                    case 3: alias = "on_cross"; break;
+                    case 4: alias = "on_near"; break;
+                    case 5: alias = "on_near_once"; break;
+                    case 6: alias = "on_leave"; break;
+                    default: break;
+                }
+            }
+            std::string target;
+            try{target = engine_->EntityByIndex(entity_number).FunctionByIndex(repeated.second);}
+            catch (const DecompilerException&){continue;}
+            if (alias == target) continue;
+            engine_->AddEntityFunction(entity_name, entity_number, alias, repeated.first);
+            engine_->AddFunctionAlias(entity_name, alias, target);
         }
     }
 }
