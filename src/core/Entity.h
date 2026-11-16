@@ -352,6 +352,25 @@ class Entity{
         virtual void ScriptSetAlpha(const float alpha){}
 
         /**
+         * Puts an image on the model, for the effect meshes that have no texture in the files because
+         * the code of the original effect chooses it. Call it before {@see ScriptSetAlpha}.
+         *
+         * @param[in] texture Name of the image, a resource of the battle models or of the images.
+         */
+        virtual void ScriptSetTexture(const char* texture){}
+
+        /**
+         * Gets the position in the scene of a bone of the skeleton of the model, for the effects that
+         * start from a part of a creature. Bones are called bone0, bone1...
+         *
+         * @param[in] bone Number of the bone.
+         * @return X, Y and Z in the scene (0, 0, 0 if there is no such bone).
+         */
+        virtual std::tuple<float, float, float> ScriptGetBonePosition(const int bone){
+            return std::make_tuple(0.0f, 0.0f, 0.0f);
+        }
+
+        /**
          * Frees the resources that were created for the entity, before it is removed.
          */
         virtual void ReleaseResources(){}
@@ -1162,6 +1181,16 @@ class Entity{
         void ScriptSetDefaultAnimation(const char* animation);
 
         /**
+         * Hides the debug information of the entity (see the config variable debug_entity).
+         *
+         * For entities that are created in large numbers while the game runs, like the meshes of
+         * the effects of the battles, so they don't fill the debug text of the screen.
+         *
+         * @param[in] hidden True to not show any debug information.
+         */
+        void SetDebugHidden(const bool hidden);
+
+        /**
          * Adds the entity's animation to the sync queue.
          *
          * @return Always -1.
@@ -1540,6 +1569,11 @@ class Entity{
          * Indicates if the entity is a line.
          */
         bool is_line_;
+
+        /**
+         * Indicates if the debug information of the entity is never shown.
+         */
+        bool debug_hidden_;
 
 };
 

@@ -76,7 +76,8 @@ Entity::Entity(const Ogre::String& name, Ogre::SceneNode* node):
   animation_play_type_(Entity::PLAY_LOOPED),
   is_character_(false),
   character_id_(-1),
-  is_line_(false)
+  is_line_(false),
+  debug_hidden_(false)
 {
     model_root_node_ = scene_node_->createChildSceneNode();
     model_node_ = model_root_node_->createChildSceneNode();
@@ -128,8 +129,10 @@ void Entity::Update() {
     }
 }
 
+void Entity::SetDebugHidden(const bool hidden){debug_hidden_ = hidden;}
+
 void Entity::UpdateDebug(){
-    int debug = cv_debug_entity.GetI();
+    int debug = debug_hidden_ ? 0 : cv_debug_entity.GetI();
     direction_node_->setVisible(debug > 0);
     solid_collision_node_->setVisible(debug > 0 && solid_);
     talk_collision_node_->setVisible(debug > 0 && talkable_);

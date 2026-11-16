@@ -17,11 +17,14 @@
 #include <algorithm>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
+#include <OgreBone.h>
+#include <OgreSkeletonInstance.h>
 #include <OgreMaterialManager.h>
 #include <OgreResourceGroupManager.h>
 #include <OgreTechnique.h>
 #include <OgrePass.h>
 #include <OgreRoot.h>
+#include <OgreTextureManager.h>
 #include "core/EntityModel.h"
 #include "core/EntityManager.h"
 #include "core/Logger.h"
@@ -81,21 +84,61 @@ unsigned int EntityModel::GetAnimationCount() const{
 
 Ogre::Entity* EntityModel::GetModel(){return model_;}
 
+Ogre::MaterialPtr EntityModel::OwnMaterial(Ogre::SubEntity* sub_entity){
+    Ogre::MaterialPtr material = sub_entity->getMaterial();
+    if (std::find(own_materials_.begin(), own_materials_.end(), material->getName()) == own_materials_.end()){
+        const Ogre::String own_name = material->getName() + "/" + name_;
+        Ogre::MaterialPtr own = Ogre::MaterialManager::getSingleton().getByName(own_name, material->getGroup());
+        if (own == nullptr) own = material->clone(own_name);
+        own_materials_.push_back(own_name);
+        sub_entity->setMaterial(own);
+        material = own;
+    }
+    return material;
+}
+
+void EntityModel::ScriptSetTexture(const char* texture){
+    const Ogre::String image(texture);
+    Ogre::String group;
+    if (Ogre::ResourceGroupManager::getSingleton().resourceExists("BATTLE_MODELS", image)) group = "BATTLE_MODELS";
+    else if (Ogre::ResourceGroupManager::getSingleton().resourceExists("IMAGES", image)) group = "IMAGES";
+    else{
+        LOG_WARNING("Image '" + image + "' for the model '" + name_ + "' doesn't exist.");
+        return;
+    }
+    Ogre::TexturePtr loaded = Ogre::TextureManager::getSingleton().load(image, group);
+    for (unsigned int s = 0; s < model_->getNumSubEntities(); ++ s){
+        Ogre::MaterialPtr material = OwnMaterial(model_->getSubEntity(s));
+        for (unsigned short t = 0; t < material->getNumTechniques(); ++ t){
+            Ogre::Technique* technique = material->getTechnique(t);
+            for (unsigned short p = 0; p < technique->getNumPasses(); ++ p){
+                Ogre::Pass* pass = technique->getPass(p);
+                pass->removeAllTextureUnitStates();
+                pass->createTextureUnitState()->setTexture(loaded);
+                pass->setLightingEnabled(false);
+            }
+        }
+    }
+}
+
+std::tuple<float, float, float> EntityModel::ScriptGetBonePosition(const int bone){
+    Ogre::SkeletonInstance* skeleton = model_->getSkeleton();
+    const Ogre::String name = "bone" + std::to_string(bone);
+    if (skeleton == nullptr || !skeleton->hasBone(name)) return std::make_tuple(0.0f, 0.0f, 0.0f);
+    // Bring the skeleton to the current frame of the animation.
+    model_->_updateAnimation();
+    const Ogre::Vector3 position
+      = model_->_getParentNodeFullTransform() * skeleton->getBone(name)->_getDerivedPosition();
+    return std::make_tuple(position.x, position.y, position.z);
+}
+
 void EntityModel::ScriptSetBlend(const int blend){
     if (blend == blend_) return;
     blend_ = blend;
     for (unsigned int s = 0; s < model_->getNumSubEntities(); ++ s){
         Ogre::SubEntity* sub_entity = model_->getSubEntity(s);
         // Materials are shared among all the entities of a mesh, so use one of its own.
-        Ogre::MaterialPtr material = sub_entity->getMaterial();
-        if (std::find(own_materials_.begin(), own_materials_.end(), material->getName()) == own_materials_.end()){
-            const Ogre::String own_name = material->getName() + "/" + name_;
-            Ogre::MaterialPtr own = Ogre::MaterialManager::getSingleton().getByName(own_name, material->getGroup());
-            if (own == nullptr) own = material->clone(own_name);
-            own_materials_.push_back(own_name);
-            sub_entity->setMaterial(own);
-            material = own;
-        }
+        Ogre::MaterialPtr material = OwnMaterial(sub_entity);
         for (unsigned short t = 0; t < material->getNumTechniques(); ++ t){
             Ogre::Technique* technique = material->getTechnique(t);
             for (unsigned short p = 0; p < technique->getNumPasses(); ++ p){

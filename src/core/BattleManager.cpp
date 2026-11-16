@@ -18,7 +18,11 @@
 #include <iostream>
 #include <cmath>
 #include <OgreEntity.h>
+#include <OgreMaterialManager.h>
 #include <OgreRoot.h>
+#include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
+#include <OgreTextureManager.h>
 #include <OgreResourceGroupManager.h>
 #include <OgreViewport.h>
 #include "FF7Character.h"
@@ -96,6 +100,7 @@ void BattleManager::ClearField(){
 }
 
 void BattleManager::ClearBattle(){
+    ClearDynamicMeshes();
     formation_id_ = -1;
     next_formation_id_ = -1;
     // TODO location_ = null;
@@ -299,12 +304,16 @@ std::string BattleManager::ScriptAddEffectModel(
         LOG_ERROR("Tried to add an effect model, but the BattleManager is not in battle mode.");
         return "";
     }
-    const std::string mesh = "effects/" + std::string(model) + ".mesh";
+    // Names with a folder (like attacks/cyvadat for a summon) are used as they are.
+    const std::string mesh = std::string(model).find('/') != std::string::npos
+      ? std::string(model) + ".mesh" : "effects/" + std::string(model) + ".mesh";
     if (!Ogre::ResourceGroupManager::getSingleton().resourceExists("BATTLE_MODELS", mesh)){
         LOG_WARNING("Effect model '" + mesh + "' doesn't exist, reinstall the battle data.");
         return "";
     }
-    const std::string name = "fx_" + std::string(model) + "_" + std::to_string(next_effect_id_ ++);
+    std::string clean_name = model;
+    for (char& c : clean_name) if (c == '/') c = '_';
+    const std::string name = "fx_" + clean_name + "_" + std::to_string(next_effect_id_ ++);
     const float s = ATTACK_SCALE * scale;
     EntityManager::getSingleton().AddEntity(
       name, mesh, Ogre::Vector3(x, y, z), Ogre::Degree(0), Ogre::Vector3(s, s, s),
@@ -312,12 +321,114 @@ std::string BattleManager::ScriptAddEffectModel(
     );
     // Effect meshes have no animations, and battle entities look for "xx_00" by default.
     Entity* entity = EntityManager::getSingleton().GetEntity(name);
-    if (entity != nullptr) entity->ScriptSetDefaultAnimation("Idle");
+    if (entity != nullptr){
+        entity->ScriptSetDefaultAnimation("Idle");
+        // There are lots of them, they would fill the debug text of the screen.
+        entity->SetDebugHidden(true);
+    }
     return name;
 }
 
 void BattleManager::ScriptRemoveEffectModel(const char* name){
     EntityManager::getSingleton().RemoveBattleEntity(name);
+}
+
+std::string BattleManager::ScriptCreateDynamicMesh(const char* texture, const int blend){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to create a dynamic mesh, but the BattleManager is not in battle mode.");
+        return "";
+    }
+    Ogre::SceneManager* scene = Ogre::Root::getSingleton().getSceneManager("Scene");
+    const std::string name = "dyn_mesh_" + std::to_string(next_effect_id_ ++);
+    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(name, "BATTLE_MODELS");
+    Ogre::Pass* pass = material->getTechnique(0)->getPass(0);
+    pass->setLightingEnabled(false);
+    pass->setCullingMode(Ogre::CULL_NONE);
+    switch (blend){
+        case 1:
+            pass->setSceneBlending(Ogre::SBT_ADD);
+            pass->setDepthWriteEnabled(false);
+            break;
+        case 2:
+            pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+            pass->setDepthWriteEnabled(false);
+            break;
+        default:
+            pass->setSceneBlending(Ogre::SBT_REPLACE);
+            pass->setDepthWriteEnabled(true);
+    }
+    const std::string image = texture;
+    if (!image.empty()){
+        // The image can be in the battle models or in the images of the UI.
+        std::string group = "";
+        if (Ogre::ResourceGroupManager::getSingleton().resourceExists("BATTLE_MODELS", image)) group = "BATTLE_MODELS";
+        else if (Ogre::ResourceGroupManager::getSingleton().resourceExists("IMAGES", image)) group = "IMAGES";
+        if (group.empty()){
+            LOG_WARNING("Image '" + image + "' of a dynamic mesh doesn't exist.");
+        }
+        else{
+            Ogre::TextureUnitState* unit = pass->createTextureUnitState();
+            unit->setTexture(Ogre::TextureManager::getSingleton().load(image, group));
+            unit->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
+        }
+    }
+    DynamicMesh mesh;
+    mesh.object = scene->createManualObject(name);
+    mesh.object->setDynamic(true);
+    mesh.material = name;
+    scene->getRootSceneNode()->createChildSceneNode(name)->attachObject(mesh.object);
+    dynamic_meshes_[name] = mesh;
+    return name;
+}
+
+void BattleManager::ScriptSetDynamicMesh(const char* name, std::vector<float> vertices){
+    auto found = dynamic_meshes_.find(name);
+    if (found == dynamic_meshes_.end()) return;
+    DynamicMesh& mesh = found->second;
+    size_t count = vertices.size() / 9;
+    count -= count % 3;
+    if (count == 0){
+        if (mesh.filled){
+            mesh.object->clear();
+            mesh.filled = false;
+        }
+        return;
+    }
+    if (mesh.filled) mesh.object->beginUpdate(0);
+    else mesh.object->begin(mesh.material, Ogre::RenderOperation::OT_TRIANGLE_LIST, "BATTLE_MODELS");
+    for (size_t i = 0; i < count; ++ i){
+        const float* v = &vertices[9 * i];
+        mesh.object->position(v[0], v[1], v[2]);
+        mesh.object->textureCoord(v[3], v[4]);
+        mesh.object->colour(v[5], v[6], v[7], v[8]);
+    }
+    mesh.object->end();
+    mesh.filled = true;
+}
+
+void BattleManager::ScriptRemoveDynamicMesh(const char* name){
+    auto found = dynamic_meshes_.find(name);
+    if (found == dynamic_meshes_.end()) return;
+    Ogre::SceneManager* scene = Ogre::Root::getSingleton().getSceneManager("Scene");
+    scene->getRootSceneNode()->removeAndDestroyChild(found->first);
+    scene->destroyManualObject(found->second.object);
+    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().getByName(found->second.material, "BATTLE_MODELS");
+    if (material != nullptr) Ogre::MaterialManager::getSingleton().remove(material);
+    dynamic_meshes_.erase(found);
+}
+
+void BattleManager::ClearDynamicMeshes(){
+    while (!dynamic_meshes_.empty()) ScriptRemoveDynamicMesh(dynamic_meshes_.begin()->first.c_str());
+}
+
+void BattleManager::ScriptSetCameraPosition(
+  const float x, const float y, const float z,
+  const float look_x, const float look_y, const float look_z
+){
+    if (module_ != Module::BATTLE) return;
+    CameraManager::getSingleton().SetBattleCameraUpright(
+      Ogre::Vector3(x, y, z), Ogre::Vector3(look_x, look_y, look_z)
+    );
 }
 
 void BattleManager::AddCamera(
@@ -504,6 +615,17 @@ int BattleManager::ScriptSetCamera(const int index){
         );
     }
     return camera_.size();
+}
+
+std::tuple<float, float, float, float, float, float> BattleManager::ScriptGetCamera(const int index){
+    if (index < 0 || index >= static_cast<int>(camera_.size())){
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    }
+    const BattleCamera& camera = camera_.at(index);
+    return std::make_tuple(
+      camera.location.x, camera.location.y, camera.location.z,
+      camera.orientation.x, camera.orientation.y, camera.orientation.z
+    );
 }
 
 void BattleManager::SetInitialCamera(const unsigned int id){

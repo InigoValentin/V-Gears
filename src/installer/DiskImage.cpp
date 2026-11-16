@@ -938,6 +938,7 @@ std::unique_ptr<std::string> DiskImage::filePath(std::string file_path) {
     if (requested_segments.isEmpty()) {
         return nullptr;
     }
+    std::unique_ptr<std::string> fuzzy_match;
     QDirIterator it(base_dir, QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         const QString file_full_path = it.next();
@@ -948,18 +949,30 @@ std::unique_ptr<std::string> DiskImage::filePath(std::string file_path) {
         }
 
         bool all_segments_match = true;
+        bool exact = true;
         const int offset = actual_segments.size() - requested_segments.size();
         for (int i = 0; i < requested_segments.size(); ++i) {
             if (!segment_matches(requested_segments[i], actual_segments[offset + i])) {
                 all_segments_match = false;
                 break;
             }
+            if (requested_segments[i] != actual_segments[offset + i]) {
+                exact = false;
+            }
         }
         if (all_segments_match) {
-            return std::make_unique<std::string>(QFileInfo(file_full_path).absoluteFilePath().toStdString());
+            const std::string found = QFileInfo(file_full_path).absoluteFilePath().toStdString();
+            // A file with the same name wins. The names that only begin the same way (like FF7INST.EXE
+            // for ff7.exe) are used only if there is no other one.
+            if (exact) {
+                return std::make_unique<std::string>(found);
+            }
+            if (!fuzzy_match) {
+                fuzzy_match = std::make_unique<std::string>(found);
+            }
         }
     }
-    return nullptr;
+    return fuzzy_match;
 }
 
 const std::string DiskImage::getPath(){

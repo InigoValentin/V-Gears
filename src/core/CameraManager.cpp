@@ -229,6 +229,29 @@ void CameraManager::SetBattleCamera(const Ogre::Vector3 position, const Ogre::Ve
     camera_->move(Ogre::Vector3(0, 0, -4));
 }
 
+void CameraManager::SetBattleCameraUpright(
+  const Ogre::Vector3 position, const Ogre::Vector3 look_at
+){
+    Ogre::Vector3 direction = look_at - position;
+    if (direction.squaredLength() < 1e-10f) return;
+    direction.normalise();
+    // Camera axes: X to the right, Y up and Z backwards, with the Z axis of the scene up.
+    Ogre::Vector3 right = direction.crossProduct(Ogre::Vector3::UNIT_Z);
+    // Looking straight up or down: any side is the right one.
+    if (right.squaredLength() < 1e-8f) right = Ogre::Vector3::UNIT_X;
+    right.normalise();
+    const Ogre::Vector3 up = right.crossProduct(direction);
+    camera_->resetFrustumExtents();
+    camera_->setFOVy(Ogre::Radian(Ogre::Math::PI / 4.0f));
+    camera_->setPosition(position);
+    camera_->setOrientation(Ogre::Quaternion(right, up, -direction));
+    // Compensation of the battle UI, like the other battle cameras. They move the camera 4 units
+    // down at about 60 units from the scene, so it's proportional to the distance here, because
+    // the cameras of the effects go from very far to very close.
+    const float distance = (look_at - position).length();
+    camera_->move(Ogre::Vector3(0, 0, -0.066f * distance));
+}
+
 void CameraManager::EndBattleCamera(){
     /*std::cout << "CAMERA BATTLE END: " << camera_->getPosition().x << ", "
       << camera_->getPosition().y << ", " << camera_->getPosition().z << ", "

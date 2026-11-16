@@ -137,6 +137,8 @@ void ScriptManager::InitBinds(){
       "set_model_rotation", &Entity::ScriptSetModelRotation,
       "set_blend", &Entity::ScriptSetBlend,
       "set_alpha", &Entity::ScriptSetAlpha,
+      "set_texture", &Entity::ScriptSetTexture,
+      "get_bone_position", &Entity::ScriptGetBonePosition,
       "is_visible", &Entity::IsVisible,
       "set_move_auto_speed", &Entity::SetMoveAutoSpeed,
       "get_move_auto_speed", &Entity::GetMoveAutoSpeed,
@@ -233,6 +235,11 @@ void ScriptManager::InitBinds(){
       "remove_effect_model", &BattleManager::ScriptRemoveEffectModel,
       "has_attack", &BattleManager::HasAttackData,
       "set_camera", &BattleManager::ScriptSetCamera,
+      "set_camera_position", &BattleManager::ScriptSetCameraPosition,
+      "get_camera", &BattleManager::ScriptGetCamera,
+      "create_dynamic_mesh", &BattleManager::ScriptCreateDynamicMesh,
+      "set_dynamic_mesh", &BattleManager::ScriptSetDynamicMesh,
+      "remove_dynamic_mesh", &BattleManager::ScriptRemoveDynamicMesh,
       "get_layout", &BattleManager::ScriptGetLayout,
       "get_attack", [](BattleManager& manager, const int id, sol::this_state state) -> sol::object{
           sol::state_view view(state);

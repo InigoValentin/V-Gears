@@ -15,6 +15,11 @@
 
 #pragma once
 
+#include <map>
+#include <string>
+#include <tuple>
+#include <vector>
+#include <OgreManualObject.h>
 #include <OgreSingleton.h>
 #include "Enemy.h"
 #include "Event.h"
@@ -293,7 +298,8 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          * scaled and blended from the scripts, and should be removed with
          * {@see ScriptRemoveEffectModel} when the effect ends.
          *
-         * @param[in] model Model name, without path or extension, like "magic_faira_1".
+         * @param[in] model Model name, without path or extension, like "magic_faira_1". A name
+         * with a folder, like "attacks/cyvadat" for a summon, is looked for in models/battle.
          * @param[in] x Position, X coordinate.
          * @param[in] y Position, Y coordinate.
          * @param[in] z Position, Z coordinate.
@@ -310,6 +316,38 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          * @param[in] name Name of the entity.
          */
         void ScriptRemoveEffectModel(const char* name);
+
+        /**
+         * Creates a mesh that the scripts fill with triangles, for the effects that are made of
+         * geometry calculated every frame (like the ground of some summons).
+         *
+         * Use {@see ScriptSetDynamicMesh} to give it triangles and {@see ScriptRemoveDynamicMesh}
+         * to remove it. The meshes that are left are removed when the battle ends.
+         *
+         * @param[in] texture Image to put on the triangles, a name of a resource (like
+         * effects/common_rock_c.png in the battle models, or battle_fx/common_graund.png in the
+         * images). Empty for no texture.
+         * @param[in] blend 0 for opaque triangles, 1 for additive blending and 2 for alpha blending.
+         * @return Name of the mesh, empty if it couldn't be created.
+         */
+        std::string ScriptCreateDynamicMesh(const char* texture, const int blend);
+
+        /**
+         * Sets the triangles of a mesh, replacing the previous ones.
+         *
+         * @param[in] name Name of the mesh.
+         * @param[in] vertices Vertices of the triangles, 9 numbers each, 3 vertices per triangle:
+         * x, y, z (scene position), u, v (position in the texture, 0 to 1), and r, g, b, a (colour,
+         * 0 to 1). Empty to show nothing.
+         */
+        void ScriptSetDynamicMesh(const char* name, std::vector<float> vertices);
+
+        /**
+         * Removes a mesh created with {@see ScriptCreateDynamicMesh}.
+         *
+         * @param[in] name Name of the mesh.
+         */
+        void ScriptRemoveDynamicMesh(const char* name);
 
 
         /**
@@ -550,6 +588,33 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         int ScriptSetCamera(const int index);
 
         /**
+         * Gets the position of a camera of the formation and the point it looks at.
+         *
+         * @param index Index of the camera.
+         * @return X, Y and Z of the position and of the point it looks at, all zero if the camera
+         * doesn't exist.
+         */
+        std::tuple<float, float, float, float, float, float> ScriptGetCamera(const int index);
+
+        /**
+         * Places the battle camera at any position, for the cameras of the effects.
+         *
+         * Use {@see ScriptSetCamera} to go back to one of the cameras of the formation.
+         * To be called from Lua scripts.
+         *
+         * @param[in] x Camera position, X coordinate.
+         * @param[in] y Camera position, Y coordinate.
+         * @param[in] z Camera position, Z coordinate.
+         * @param[in] look_x Point the camera looks at, X coordinate.
+         * @param[in] look_y Point the camera looks at, Y coordinate.
+         * @param[in] look_z Point the camera looks at, Z coordinate.
+         */
+        void ScriptSetCameraPosition(
+          const float x, const float y, const float z,
+          const float look_x, const float look_y, const float look_z
+        );
+
+        /**
          * Adds a camera for the next battle.
          *
          * @param[in] id Camera ID.
@@ -566,6 +631,25 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          * Counter to give names to effect entities.
          */
         unsigned int next_effect_id_ = 0;
+
+        /**
+         * A mesh made of triangles that change, with the data needed to destroy it.
+         */
+        struct DynamicMesh{
+            Ogre::ManualObject* object = nullptr;
+            Ogre::String material;
+            bool filled = false;
+        };
+
+        /**
+         * The meshes made by {@see ScriptCreateDynamicMesh}, by name.
+         */
+        std::map<std::string, DynamicMesh> dynamic_meshes_;
+
+        /**
+         * Destroys all the meshes made by {@see ScriptCreateDynamicMesh}.
+         */
+        void ClearDynamicMeshes();
 
 
         /**

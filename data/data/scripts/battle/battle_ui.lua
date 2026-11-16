@@ -17,7 +17,9 @@ BattleAnimations = {
     -- 18, the root height goes from 673 to 58), 13 and 14 are the run away.
     player = {attack_script = 20, hurt_script = 5, death_script = 7, victory_script = 12, escape_script = 13,
         -- Script 29 (17 and 30 are the same): ready the weapon, incantation and release.
-        magic_script = 29},
+        magic_script = 29,
+        -- Script 30 is the same as 29 with the pink aura of the enemy skills.
+        eskill_script = 30},
     models = {},
 }
 
@@ -772,6 +774,10 @@ UiContainer.BattleUi = {
         UiContainer.BattleFx:update(now)
         self:update_hides(now)
         self:update_action(now)
+        -- The camera of the attacks.
+        if self.action_executing ~= true then BattleCameraController:stop() end
+        local ok, err = pcall(BattleCameraController.update, BattleCameraController, delta)
+        if not ok then print("Battle camera: " .. tostring(err)) BattleCameraController:stop(false) end
         -- Held ATBs start to fill after some time.
         if (self.party_hold or self.enemy_hold) and now - self.hold_start > self.HOLD_TIME then
             self:release_hold()
@@ -2411,7 +2417,9 @@ UiContainer.BattleUi = {
         end
         local script = action.script
         if script == nil and actor_side == Battle.TargetGroup.PARTY then
-            script = self:get_script_number(actor_side, action.actor, (action.attack_id ~= nil or action.item_id ~= nil) and "magic" or "attack")
+            local script_type = (action.attack_id ~= nil or action.item_id ~= nil) and "magic" or "attack"
+            if action.command == Characters.E_SKILL_COMMAND and action.attack_id ~= nil then script_type = "eskill" end
+            script = self:get_script_number(actor_side, action.actor, script_type)
         end
         -- Using things costs something. If it can't be paid anymore, the action fizzles.
         local function fizzle(message)
@@ -2449,16 +2457,69 @@ UiContainer.BattleUi = {
         if action.attack_id ~= nil or action.item_id ~= nil then
             ui_manager:get_widget("BattleUi.Container.Message.Name"):set_text(attack.name)
         end
-        current.pending = 1
+        -- Summons play their own sequence after the cast pose, and the hit lands during it.
+        local summon = action.attack_id ~= nil and UiContainer.BattleFx:has_summon(attack.id)
+        local summon_started = false
+        local function start_summon()
+            if summon_started then do return end end
+            summon_started = true
+            UiContainer.BattleFx:play_summon(
+              attack, actor_side, action.actor, action.target_group, current.targets,
+              function() self:apply_action_hit() end,
+              function() current.pending = current.pending - 1 end
+            )
+        end
+        current.pending = summon and 2 or 1
+        -- The aura of the caster.
+        if action.attack_id ~= nil and actor_side == Battle.TargetGroup.PARTY then
+            local ok, err = pcall(function()
+                UiContainer.BattleFx:start_aura(UiContainer.BattleFx:aura_kind(action, summon), actor_side, action.actor)
+            end)
+            if not ok then print("Battle aura: " .. tostring(err)) end
+        end
+        -- The camera of the attack (summons have their own).
+        if not summon and (action.attack_id ~= nil) then
+            local single, multiple
+            if attack.animation ~= nil then single, multiple = attack.animation.camera_single, attack.animation.camera_multiple end
+            local kernel = attack.id ~= nil and Game.Attacks[attack.id] or nil
+            if single == nil and kernel ~= nil and kernel.camera ~= nil then single, multiple = kernel.camera.single, kernel.camera.multiple end
+            -- The camera of the attack of an enemy overrides the one of the attack.
+            if actor_side == Battle.TargetGroup.ENEMIES then
+                local source = battle_manager:get_enemy(action.actor - 1)
+                for slot = 0, source:get_attack_count() - 1 do
+                    if source:get_attack(slot) == action.attack_id then
+                        local camera = source:get_camera_for_attack(slot)
+                        if camera ~= nil and camera >= 0 and camera < 0xffff then single, multiple = camera, camera end
+                        break
+                    end
+                end
+            end
+            local ok, err = pcall(function()
+                return BattleCameraController:start(actor_side, action.actor, action.target_group, current.targets, single, multiple)
+            end)
+            if not ok then print("Battle camera: " .. tostring(err)) end
+        end
         local played = self:play_script(
           actor_side, action.actor, script, false,
-          function() self:apply_action_hit() end,
-          function() current.pending = current.pending - 1 end,
+          function()
+              if summon then start_summon() else self:apply_action_hit() end
+          end,
+          function()
+              current.pending = current.pending - 1
+              -- A script without a hit mark still ends with the summon.
+              if summon then start_summon() end
+          end,
           current.targets[1] ~= nil and {side = action.target_group, index = current.targets[1]} or nil
         )
         if not played then
-            -- Nothing to play for the attacker: the hit lands right away.
-            current.pending = 0
+            if summon then
+                -- Nothing to play for the attacker: the summon starts right away.
+                current.pending = 1
+                start_summon()
+            else
+                -- Nothing to play for the attacker: the hit lands right away.
+                current.pending = 0
+            end
         end
         self:update_action(timer:get_game_time_total())
     end,
@@ -2672,6 +2733,7 @@ UiContainer.BattleUi = {
         local kind = nil
         if list == Battle.Menu.MAGIC then kind = "magic"
         elseif list == Battle.Menu.SUMMON then kind = "summon"
+        elseif list == Battle.Menu.E_SKILL then kind = "eskill"
         elseif list == Battle.Menu.ITEM then kind = "item"
         end
         if kind ~= nil then
@@ -2693,8 +2755,6 @@ UiContainer.BattleUi = {
             ui_manager:get_widget("BattleUi.Container.Bottom.List"):set_visible(true)
             cursor:set_default_animation("Position" .. tostring(self.cursor_list))
             cursor:set_visible(true)
-        elseif (list == Battle.Menu.E_SKILL) then
-            print("Show e. skill list: Not implemented")
         elseif (list == Battle.Menu.THROW) then
             print("Show throw list: Not implemented")
         elseif (list == Battle.Menu.LIMIT) then
@@ -2884,6 +2944,15 @@ UiContainer.BattleUi = {
             for _, spell in ipairs(member.magic) do
                 local data = Game.Attacks[spell.id]
                 table.insert(entries, {name = data.name, attack_id = spell.id, enabled = data.mp <= stats.mp.current})
+            end
+        elseif kind == "eskill" then
+            -- The enemy skills learned with the equipped materia.
+            local learned = Characters.get_abilities(member.character).e_skill
+            for _, id in ipairs(learned) do
+                local data = Game.Attacks[id]
+                if data ~= nil then
+                    table.insert(entries, {name = data.name, attack_id = id, enabled = data.mp <= stats.mp.current})
+                end
             end
         elseif kind == "summon" then
             for _, summon in ipairs(member.summon) do

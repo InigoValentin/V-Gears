@@ -185,6 +185,17 @@ class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
         void SetBattleCamera(const Ogre::Vector3 position, const Ogre::Vector3 orientation);
 
         /**
+         * Sets the battle camera, always with the Z axis of the scene pointing up.
+         *
+         * {@see SetBattleCamera} is only upright for cameras looking toward negative X, so this
+         * one is for the cameras of the effects, that can look anywhere.
+         *
+         * @param[in] position Camera position.
+         * @param[in] look_at Point the camera looks at.
+         */
+        void SetBattleCameraUpright(const Ogre::Vector3 position, const Ogre::Vector3 look_at);
+
+        /**
          * Projects a point of the scene into the coordinates of the UI.
          *
          * To be called from Lua scripts. UI units are the ones used by the UI widgets: 720 units

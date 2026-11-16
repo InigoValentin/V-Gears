@@ -70,6 +70,10 @@ class EntityModel : public Entity{
 
         virtual void ScriptSetAlpha(const float alpha);
 
+        virtual void ScriptSetTexture(const char* texture);
+
+        virtual std::tuple<float, float, float> ScriptGetBonePosition(const int bone);
+
         virtual void ReleaseResources();
 
         /**
@@ -101,6 +105,12 @@ class EntityModel : public Entity{
         virtual void UpdateAnimation(const float delta);
 
     private:
+
+        /**
+         * Gets the material of a part of the model that only this model uses, making it from the shared
+         * one the first time.
+         */
+        Ogre::MaterialPtr OwnMaterial(Ogre::SubEntity* sub_entity);
 
         /**
          * Constructor.
