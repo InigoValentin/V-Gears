@@ -74,6 +74,10 @@ class EntityModel : public Entity{
 
         virtual std::tuple<float, float, float> ScriptGetBonePosition(const int bone);
 
+        virtual bool ScriptAttachModel(
+          const char* model, const int bone, const float rx, const float ry, const float rz
+        );
+
         virtual void ReleaseResources();
 
         /**
@@ -121,6 +125,16 @@ class EntityModel : public Entity{
          * The model.
          */
         Ogre::Entity* model_;
+
+        /**
+         * Model attached to a bone of the skeleton (a weapon), nullptr if there is none.
+         */
+        Ogre::Entity* attached_model_ = nullptr;
+
+        /**
+         * Resource group of the model, to load the attached models from.
+         */
+        Ogre::String resource_group_;
 
         /**
          * The current animation state.

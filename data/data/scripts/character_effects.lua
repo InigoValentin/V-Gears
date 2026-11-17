@@ -37,6 +37,9 @@ local function materia_level(definition, ap)
     return math.max(level, 1)
 end
 
+--- Materia level (1-based) for an amount of AP, see {@see Characters.get_linked_slots}.
+Characters.get_materia_level = materia_level
+
 --- Mode an Elemental materia gives to armor, by materia level.
 local function elemental_armor_mode(level)
     if level >= 3 then return Characters.ELEMENT_MODE.ABSORB end
@@ -54,16 +57,27 @@ end
 
 --- Gets the materia linked to a slot.
 --
+-- Slots are linked in pairs: 1-2, 3-4, 5-6 and 7-8. A pair is linked if the first slot has a 1 in the
+-- slots of the item (the menus draw the link the same way).
+--
 -- @param item The weapon or armor definition.
 -- @param slot Slot of the item, 1-8.
 -- @return List of slots (1-8) linked to it.
 local function linked_slots(item, slot)
     local linked = {}
-    -- slots[n] == 1 means that slot n is linked to slot n + 1.
-    if item.slots[slot] == 1 and #(item.slots) > slot then table.insert(linked, slot + 1) end
-    if slot > 1 and item.slots[slot - 1] == 1 then table.insert(linked, slot - 1) end
+    local first = (slot % 2 == 1) and slot or slot - 1
+    if item.slots[first] == 1 and #(item.slots) > first then
+        table.insert(linked, slot == first and first + 1 or first)
+    end
     return linked
 end
+
+--- Gets the slots linked to a slot of a weapon or armor.
+--
+-- @param item The weapon or armor definition.
+-- @param slot Slot of the item, 1-8.
+-- @return List of slots (1-8).
+Characters.get_linked_slots = linked_slots
 
 --- Applies the link materia (Elemental, Added Effect) of a weapon or armor.
 local function apply_link_materia(char_id, part, result)

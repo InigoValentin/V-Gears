@@ -139,6 +139,12 @@ void ScriptManager::InitBinds(){
       "set_alpha", &Entity::ScriptSetAlpha,
       "set_texture", &Entity::ScriptSetTexture,
       "get_bone_position", &Entity::ScriptGetBonePosition,
+      "attach_model", sol::overload(
+        [](Entity& entity, const char* model, const int bone){
+            return entity.ScriptAttachModel(model, bone, 0.0f, 0.0f, 0.0f);
+        },
+        &Entity::ScriptAttachModel
+      ),
       "is_visible", &Entity::IsVisible,
       "set_move_auto_speed", &Entity::SetMoveAutoSpeed,
       "get_move_auto_speed", &Entity::GetMoveAutoSpeed,
@@ -333,7 +339,10 @@ void ScriptManager::InitBinds(){
       "get_model_prefix", &Enemy::ScriptGetModelPrefix,
       "get_model", &Enemy::GetModel,
       "get_drop_id", &Enemy::ScriptGetDropId,
-      "get_drop_rate", &Enemy::ScriptGetDropRate
+      "get_drop_rate", &Enemy::ScriptGetDropRate,
+      "get_steal_count", &Enemy::ScriptGetStealCount,
+      "get_steal_id", &Enemy::ScriptGetStealId,
+      "get_steal_rate", &Enemy::ScriptGetStealRate
       // TODO: Implement cover flags.
       // TODO: Implement immunities
       // TODO: Implement elements

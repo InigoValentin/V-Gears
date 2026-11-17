@@ -391,6 +391,19 @@ void ScriptManager::RunString(const Ogre::String& lua){
     }
 }
 
+float ScriptManager::EvaluateNumber(const Ogre::String& expression, const float default_value){
+    const int pre_eval_index = lua_gettop(lua_state_);
+    float result = default_value;
+    if (luaL_dostring(lua_state_, ("return " + expression).c_str()) != 0){
+        LOG_ERROR("ScriptManager::EvaluateNumber error: " + Ogre::String(lua_tostring(lua_state_, -1)));
+    }
+    else if (lua_gettop(lua_state_) > pre_eval_index && lua_isnumber(lua_state_, -1)){
+        result = static_cast<float>(lua_tonumber(lua_state_, -1));
+    }
+    lua_settop(lua_state_, pre_eval_index);
+    return result;
+}
+
 void ScriptManager::RunFile(const Ogre::String& file){
     if (luaL_dofile(lua_state_, ("./data/" + file).c_str()) == 1)
         LOG_ERROR(Ogre::String(lua_tostring(lua_state_, -1)));

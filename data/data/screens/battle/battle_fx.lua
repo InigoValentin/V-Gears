@@ -1438,6 +1438,30 @@ UiContainer.BattleFx = {
         t.camera_used = true
     end,
 
+    --- Ticks the party takes to fade out when a summon starts, and to fade in when it ends.
+    PARTY_FADE_OUT = 10,
+    PARTY_FADE_IN = 12,
+
+    --- Sets how visible the party members (and the weapons they hold) are.
+    --
+    -- Dead members stay as they are. At full opacity the normal drawing is restored.
+    set_party_alpha = function(self, alpha)
+        local party = UiContainer.BattleUi.party
+        for i = 1, Party.MAX do
+            local entity = party[i] ~= nil and UiContainer.BattleUi:get_entity(Battle.TargetGroup.PARTY, i) or nil
+            if entity ~= nil then
+                if alpha >= 1 or party[i].dead then
+                    -- Full opacity first (it only counts while the blend is not the normal one).
+                    entity:set_alpha(1)
+                    entity:set_blend(Entity.BLEND_NORMAL)
+                else
+                    entity:set_blend(Entity.BLEND_ALPHA)
+                    entity:set_alpha(alpha)
+                end
+            end
+        end
+    end,
+
     --- Advances the summons. The hit and the end are always called, even if the creature couldn't
     -- be shown, so the battle doesn't wait for them.
     update_timelines = function(self, dt)
@@ -1446,6 +1470,17 @@ UiContainer.BattleFx = {
             t.age = t.age + dt
             local tick = t.age * self.SUMMON_TPS
             local def = t.def
+            -- The party fades out while the summon is on and comes back when it ends.
+            if t.party_faded ~= false then
+                local fade_in_start = def.total - self.PARTY_FADE_IN
+                local alpha
+                if tick < fade_in_start then alpha = math.max(0, 1 - tick / self.PARTY_FADE_OUT)
+                else alpha = math.min(1, (tick - fade_in_start) / self.PARTY_FADE_IN) end
+                local ok, err = pcall(self.set_party_alpha, self, alpha)
+                if not ok then print("Party fade failed: " .. tostring(err)) end
+                t.party_faded = ok
+                if ok then t.party_touched = true end
+            end
             -- The creature is there from appear to leave, fading in and out.
             if tick >= def.appear and tick < def.leave then
                 if t.entity == nil and not t.creature_failed then
@@ -1493,6 +1528,7 @@ UiContainer.BattleFx = {
                 t.on_hit()
             end
             if tick >= def.total then
+                if t.party_touched then pcall(self.set_party_alpha, self, 1) end
                 if not t.hit_done then t.hit_done = true t.on_hit() end
                 if t.entity_name ~= nil then battle_manager:remove_effect_model(t.entity_name) end
                 if t.camera_used then self:restore_camera() end
@@ -1509,6 +1545,7 @@ UiContainer.BattleFx = {
     --- Removes the summons in progress, without finishing them.
     clear_timelines = function(self)
         for _, t in ipairs(self.timelines) do
+            if t.party_touched then pcall(self.set_party_alpha, self, 1) end
             if t.entity_name ~= nil then battle_manager:remove_effect_model(t.entity_name) end
             if t.camera_used then pcall(self.restore_camera, self) end
             pcall(self.remove_meshes, self, t)

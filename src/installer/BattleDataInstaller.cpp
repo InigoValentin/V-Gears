@@ -22,6 +22,8 @@
 #include <map>
 #include <set>
 #include <cctype>
+#include <cstdio>
+#include <cstdlib>
 #include <algorithm>
 #include <zlib.h>
 #include <tinyxml.h>
@@ -463,8 +465,60 @@ unsigned int BattleDataInstaller::ProcessSpellModel(){
     return next_model_to_process_;
 }
 
+namespace{
+
+/**
+ * Files of magic.lgp (without extension) with the animations of the limit breaks of each model of the party.
+ * The animation files have the format of the animations of the models, with 8 animations for the skeleton of
+ * the character (the animations 44 to 51 of the model, which are empty in battle.lgp) and 8 for its weapon.
+ * The files are in the order of the techniques of the character (limit level 1 first and second, level 2, ...):
+ * the table that ff7.exe uses to load them (at 0x7b7b58) has them in groups of 7 by character.
+ */
+const std::map<std::string, std::vector<std::string>>& LimitAnimationFiles(){
+    static const std::vector<std::string> cloud = {"blaver", "kyou", "limcl2", "limcl6", "limcl3", "limcl7", "limcl4"};
+    static const std::vector<std::string> barret = {"hvshot", "limbr5", "limbr2", "limbr6", "limbr3", "limbr7", "limbr4"};
+    static const std::map<std::string, std::vector<std::string>> files = {
+        {"rt", cloud}, {"si", cloud},
+        {"ru", {"limfast"}}, // Tifa.
+        {"rv", {"iyash", "limea5", "limea2", "limea6", "limea3", "kodo", "limea4"}}, // Aerith.
+        {"rw", {"limsled", "limrd5", "limsled", "limrd6", "limrd3", "limrd7", "limrd4"}}, // Red XIII.
+        {"rx", {"limyf1", "limyf5", "limyf2", "limyf6", "limyf3", "limyf7", "limyf4"}}, // Yuffie.
+        {"ry", {"dice"}}, // Cait Sith.
+        {"rz", {"limcd1", "limcd5", "limcd2", "limcd6", "limcd3", "limcd7", "limcd4"}}, // Cid.
+        {"sb", barret}, {"sc", barret}, {"sd", barret}, {"se", barret},
+    };
+    return files;
+}
+
+}
+
 unsigned int BattleDataInstaller::ConvertBattleModelsInit(){
     next_model_to_convert_ = 0;
+    // The animations of the limit breaks are in magic.lgp. Take the ones of the party to the folder of the battle
+    // models, so they are converted with them.
+    try{
+        std::set<std::string> wanted;
+        for (const auto& entry : LimitAnimationFiles()){
+            for (const std::string& tag : entry.second) wanted.insert(tag + ".a00");
+        }
+        File magic_lgp_file(*disk_image_.filePath("data/battle/magic.lgp"));
+        VGears::LGPArchive magic_lgp(*disk_image_.filePath("data/battle/magic.lgp"), "LGP");
+        magic_lgp.open(*disk_image_.filePath("data/battle/magic.lgp"), true);
+        magic_lgp.load();
+        VGears::LGPArchive::FileList file_list = magic_lgp.GetFiles();
+        for (int i = 0; i < file_list.size(); i ++){
+            VGears::LGPArchive::FileEntry f = file_list.at(i);
+            std::string name = f.file_name;
+            std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+            if (wanted.count(name) == 0) continue;
+            if (f.data_offset + f.data_size > magic_lgp_file.GetFileSize()) continue;
+            File limit_file(&magic_lgp_file, f.data_offset, f.data_size);
+            limit_file.WriteFile(output_dir_ + "temp/battle_models/limit_" + name);
+        }
+    }
+    catch (const std::exception& ex){
+        std::cerr << "[ERROR] Exception reading the limit animations: " << ex.what() << std::endl;
+    }
     return battle_models_.size();
 }
 
@@ -504,9 +558,58 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
             for (std::string file_name : a_files) model.a.push_back(file_name);
         }
 
+        // Limit breaks of the party: their animations are in files of magic.lgp. Each one is added to the model with
+        // the names <model>_<file>_00 to _07, which replace the empty animations 44 to 51 for that limit.
+        if (info.is_player){
+            auto limits = LimitAnimationFiles().find(model.id);
+            if (limits != LimitAnimationFiles().end()){
+                std::set<std::string> converted;
+                for (const std::string& tag : limits->second){
+                    if (!converted.insert(tag).second) continue;
+                    std::string limit_path = output_dir_ + "temp/battle_models/limit_" + tag + ".a00";
+                    if (!std::ifstream(limit_path).good()) continue;
+                    try{
+                        File limit_file(limit_path);
+                        DaFile limit_da(limit_file);
+                        std::vector<std::string> limit_files = limit_da.GenerateAFiles(
+                          model.id + "_" + tag, output_dir_ + "temp/battle_models/"
+                        );
+                        for (const std::string& file_name : limit_files){
+                            // Only the animations of the skeleton (0 to 7), not the ones of the weapon.
+                            size_t dot = file_name.find_last_of('.');
+                            int number = std::atoi(file_name.substr(dot - 2, 2).c_str());
+                            if (number < 8) model.a.push_back(file_name);
+                        }
+                    }
+                    catch (const std::exception& ex){
+                        std::cerr << "[ERROR] Exception reading the limit animation " << tag << ": " << ex.what() << std::endl;
+                    }
+                }
+            }
+        }
+
         if ("" != model.script){ // Skip non scripted models
-            AbFile ab(File(output_dir_ + "temp/battle_models/" + model.script), info.is_enemy);
+            // Only the models of the party have the 74 scripts (the limits are the ones from 60 up). The other
+            // ones (enemies and the rest of the models with scripts) have 32.
+            AbFile ab(File(output_dir_ + "temp/battle_models/" + model.script), !info.is_player);
             ab.GenerateScripts(model.id + "_" + info.name_normal, data_dir_ + "scripts/battle_models/");
+        }
+
+        // Playable characters hold their weapons in battle (but Red XIII, who has none). Each one is a
+        // polygon file by itself, named <id>c<k..z>, so make a model for each with a single bone.
+        std::vector<std::pair<std::string, std::string>> weapons; // Polygon file, mesh name.
+        if (info.is_player && model.id != "rw"){
+            for (std::string p : model.p){
+                if (p.length() < 4 || p[2] != 'c' || p[3] < 'k' || p[3] > 'z') continue;
+                char number[8];
+                std::snprintf(number, sizeof(number), "%02d", p[3] - 'k');
+                const std::string weapon_name = model.id + "_" + info.name_normal + "_weapon_" + number;
+                std::ofstream hrc(output_dir_ + "temp/battle_models/" + weapon_name + ".hrc");
+                hrc << ":HEADER_BLOCK 2\n:SKELETON " << weapon_name << "\n:BONES 1\n\nbone0\nroot\n0.000000\n1 "
+                    << p.substr(0, 4) << "\n\n";
+                hrc.close();
+                weapons.push_back(std::make_pair(p, weapon_name));
+            }
         }
 
         // Reload the resources for the newly created hrc and rsd.
@@ -532,6 +635,16 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
             a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
         }
         ExportMesh(path, mesh);
+        for (const auto& weapon : weapons){
+            try{
+                VGears::HRCFileManager::GetSingleton().load(weapon.second + ".hrc", "FFVII");
+                Ogre::MeshPtr weapon_mesh(Ogre::MeshManager::getSingleton().load(weapon.second + ".mesh", "FFVII"));
+                ExportMesh(path, weapon_mesh);
+            }
+            catch (const Ogre::Exception& ex){
+                std::cerr << "[ERROR] Ogre exception converting weapon " << weapon.second << ": " << ex.what() << std::endl;
+            }
+        }
     }
     catch (const Ogre::Exception& ex){
         std::cerr << "[ERROR] Ogre exception converting battle model " << model.hrc <<": " << ex.what() << std::endl;

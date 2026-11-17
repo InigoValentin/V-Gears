@@ -371,6 +371,22 @@ class Entity{
         }
 
         /**
+         * Attaches another model to a bone of this entity's skeleton, like the weapon a battle character
+         * holds. A previously attached model is replaced.
+         *
+         * @param[in] model Mesh file of the model to attach, a resource of the same group as the entity.
+         *     An empty name only removes the attached model.
+         * @param[in] bone Number of the bone to attach the model to (-1 for the last bone of the skeleton).
+         * @param[in] rx Extra rotation of the model around its own X axis, in degrees.
+         * @param[in] ry Extra rotation around its Y axis, in degrees.
+         * @param[in] rz Extra rotation around its Z axis, in degrees.
+         * @return True if the model was attached or removed.
+         */
+        virtual bool ScriptAttachModel(
+          const char* model, const int bone, const float rx, const float ry, const float rz
+        ){return false;}
+
+        /**
          * Frees the resources that were created for the entity, before it is removed.
          */
         virtual void ReleaseResources(){}

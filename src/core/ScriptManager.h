@@ -237,6 +237,15 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
         void RunString(const Ogre::String& lua);
 
         /**
+         * Evaluates a lua expression that returns a number.
+         *
+         * @param[in] expression Lua expression, like "Party.get_encounter_modifier()".
+         * @param[in] default_value Value to return if the expression fails or is not a number.
+         * @return The value of the expression.
+         */
+        float EvaluateNumber(const Ogre::String& expression, const float default_value);
+
+        /**
          * Runs a lua file.
          *
          * No errors are handled, and nothing is returned

@@ -42,7 +42,11 @@ unsigned int AbFile::GenerateScripts(std::string model_id, std::string path) con
 
 void AbFile::Read(){
     ab_file_.SetOffset(0x68); // 104 / 0x68 is the first script index.
-    int total = is_enemy_ ? 74 : 32; // 32 for enemies, 74 for characters.
+    // 32 scripts for enemies, 74 for characters (their table of offsets ends where the first script starts:
+    // 0x68 + 74 * 4 = 400 in the files of the party). The scripts 60 and up are the ones of the limits. This
+    // was the other way around before, so the characters only had 32 scripts and the limits had no animation.
+    // The parameter is true for everything that is not a model of the party (it was only for enemies).
+    int total = is_enemy_ ? 32 : 74;
     for (int a = 0; a < total; a ++){
         scripts_.push_back(DecompileScript(ab_file_.readU16LE()));
         ab_file_.readU16LE(); // Offset are 16 bits, in 32 bit blocks. 3rd and 4th bytes discarded.

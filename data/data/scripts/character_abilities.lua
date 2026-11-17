@@ -91,6 +91,62 @@ Characters.get_abilities = function(char_id)
     return result
 end
 
+--- Gets what the independent materia (Long Range, Mega All, Counter Attack, Cover, Pre-Emptive, EXP
+-- Plus and Gil Plus) of a character do in battle.
+--
+-- @param char_id ID of the character.
+-- @return A table: long_range (boolean), mega_all (times per battle, 0 if none), counter_attack and
+-- cover (chance in percent, 0 if none), preemptive (percent points added to the chance of a pre-emptive
+-- attack), exp_plus and gil_plus (multipliers, 1 if none), and encounter (multiplier of the random
+-- encounters of the field, from Enemy Away and Enemy Lure).
+Characters.get_independent = function(char_id)
+    local result = {
+        long_range = false, mega_all = 0, counter_attack = 0, cover = 0, preemptive = 0,
+        exp_plus = 1, gil_plus = 1, encounter = 1,
+    }
+    local character = Characters[char_id]
+    if character == nil then return result end
+    for _, part in ipairs({ "weapon", "armor" }) do
+        for slot = 0, 7 do
+            local equipped = character[part].materia[slot]
+            local materia = (equipped ~= nil) and Game.Materia[equipped.id] or nil
+            if materia ~= nil and materia.type == Materia.TYPE.INDEPENDENT and materia.ability ~= nil then
+                local level = math.max(1, get_materia_level(materia, equipped.ap or 0))
+                local param = materia.ability.param or {}
+                -- The parameter of the level, or the last one if the materia has more levels.
+                local value = param[level] or param[#param] or 0
+                local id = materia.ability.id
+                if id == Materia.ABILITY.LONG_RANGE then result.long_range = true
+                elseif id == Materia.ABILITY.MEGA_ALL then result.mega_all = math.max(result.mega_all, value)
+                elseif id == Materia.ABILITY.COUNTER_ATTACK then result.counter_attack = math.max(result.counter_attack, value)
+                elseif id == Materia.ABILITY.COVER then result.cover = math.max(result.cover, value)
+                elseif id == Materia.ABILITY.PREEMPTIVE then result.preemptive = result.preemptive + value
+                -- The parameters of EXP Plus and Gil Plus are sixteenths: 24 is x1.5 and 32 is x2.
+                -- Enemy Away halves the encounters (a quarter when mastered) and Enemy Lure doubles them (x4).
+                -- TODO: Unverified, the parameters are 7 and 14.
+                elseif id == Materia.ABILITY.ENCOUNTER_DOWN then result.encounter = result.encounter * 0.5 ^ (value / 7)
+                elseif id == Materia.ABILITY.ENCOUNTER_UP then result.encounter = result.encounter * 2 ^ (value / 7)
+                elseif id == Materia.ABILITY.EXP_PLUS then result.exp_plus = math.max(result.exp_plus, value / 16)
+                elseif id == Materia.ABILITY.MONEY_PLUS then result.gil_plus = math.max(result.gil_plus, value / 16)
+                end
+            end
+        end
+    end
+    return result
+end
+
+--- Gets the multiplier of the random encounters of the field that the party causes with its Enemy Away and
+-- Enemy Lure materia (1 if it has none). The engine asks for it in every encounter check.
+Party.get_encounter_modifier = function()
+    local modifier = 1
+    for slot = 1, Party.MAX do
+        if Party[slot] ~= nil and Characters[Party[slot]] ~= nil then
+            modifier = modifier * Characters.get_independent(Party[slot]).encounter
+        end
+    end
+    return modifier
+end
+
 --- Status of death (see BattleStatus). The characters with no HP are dead.
 local STATUS_DEATH = 0
 

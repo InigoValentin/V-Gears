@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <vector>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
 #include <OgreBone.h>
@@ -25,6 +26,7 @@
 #include <OgrePass.h>
 #include <OgreRoot.h>
 #include <OgreTextureManager.h>
+#include <OgreHardwarePixelBuffer.h>
 #include "core/EntityModel.h"
 #include "core/EntityManager.h"
 #include "core/Logger.h"
@@ -51,6 +53,7 @@ EntityModel::EntityModel(
     }
     }
     scene_manager = Ogre::Root::getSingleton().getSceneManager("Scene");
+    resource_group_ = res_group;
     model_ = scene_manager->createEntity(name_, file_name, res_group);
     model_->setVisible(false);
     PlayAnimation(animation_default_, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1);
@@ -58,6 +61,7 @@ EntityModel::EntityModel(
 }
 
 EntityModel::~EntityModel(){
+    ScriptAttachModel("", -1, 0.0f, 0.0f, 0.0f);
     Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(model_);
 }
 
@@ -66,7 +70,10 @@ void EntityModel::Update(){
     Entity::Update();
 }
 
-void EntityModel::SetVisible(const bool visible){model_->setVisible(visible);}
+void EntityModel::SetVisible(const bool visible){
+    model_->setVisible(visible);
+    if (attached_model_ != nullptr) attached_model_->setVisible(visible);
+}
 
 bool EntityModel::IsVisible() const{return model_->isVisible();}
 
@@ -132,11 +139,61 @@ std::tuple<float, float, float> EntityModel::ScriptGetBonePosition(const int bon
     return std::make_tuple(position.x, position.y, position.z);
 }
 
+bool EntityModel::ScriptAttachModel(
+  const char* model, const int bone, const float rx, const float ry, const float rz
+){
+    Ogre::SceneManager* scene_manager = Ogre::Root::getSingleton().getSceneManager("Scene");
+    if (attached_model_ != nullptr){
+        model_->detachObjectFromBone(attached_model_);
+        scene_manager->destroyEntity(attached_model_);
+        attached_model_ = nullptr;
+    }
+    const Ogre::String file(model);
+    if (file.empty()) return true;
+    Ogre::SkeletonInstance* skeleton = model_->getSkeleton();
+    if (skeleton == nullptr){
+        LOG_WARNING("The model '" + name_ + "' has no skeleton to attach '" + file + "' to.");
+        return false;
+    }
+    // Bones are called bone0, bone1... and the skeleton also has a root bone.
+    const int bone_number = (bone >= 0) ? bone : static_cast<int>(skeleton->getNumBones()) - 2;
+    const Ogre::String bone_name = "bone" + std::to_string(bone_number);
+    if (!skeleton->hasBone(bone_name)){
+        LOG_WARNING("The model '" + name_ + "' has no bone '" + bone_name + "'.");
+        return false;
+    }
+    if (!Ogre::ResourceGroupManager::getSingleton().resourceExists(resource_group_, file)){
+        LOG_WARNING("The model '" + file + "' to attach to '" + name_ + "' doesn't exist.");
+        return false;
+    }
+    attached_model_ = scene_manager->createEntity(name_ + "/" + bone_name + "/" + file, file, resource_group_);
+    // The vertices of an exported model already include the orientation of the root of its skeleton, the
+    // same one the bone of this skeleton has. Undo it, or it would be applied twice.
+    Ogre::Quaternion offset = Ogre::Quaternion::IDENTITY;
+    Ogre::SkeletonInstance* attached_skeleton = attached_model_->getSkeleton();
+    if (attached_skeleton != nullptr && attached_skeleton->hasBone("root")){
+        offset = attached_skeleton->getBone("root")->getOrientation().Inverse();
+    }
+    // Extra rotation around the axes of the model itself (the ones of the original files).
+    const Ogre::Quaternion extra
+      = Ogre::Quaternion(Ogre::Degree(rx), Ogre::Vector3::UNIT_X)
+      * Ogre::Quaternion(Ogre::Degree(ry), Ogre::Vector3::UNIT_Y)
+      * Ogre::Quaternion(Ogre::Degree(rz), Ogre::Vector3::UNIT_Z);
+    offset = extra * offset;
+    model_->attachObjectToBone(bone_name, attached_model_, offset);
+    attached_model_->setVisible(model_->isVisible());
+    return true;
+}
+
 void EntityModel::ScriptSetBlend(const int blend){
     if (blend == blend_) return;
     blend_ = blend;
-    for (unsigned int s = 0; s < model_->getNumSubEntities(); ++ s){
-        Ogre::SubEntity* sub_entity = model_->getSubEntity(s);
+    // The model held in a bone (a weapon) is drawn like the body.
+    std::vector<Ogre::Entity*> entities {model_};
+    if (attached_model_ != nullptr) entities.push_back(attached_model_);
+    for (Ogre::Entity* entity : entities)
+    for (unsigned int s = 0; s < entity->getNumSubEntities(); ++ s){
+        Ogre::SubEntity* sub_entity = entity->getSubEntity(s);
         // Materials are shared among all the entities of a mesh, so use one of its own.
         Ogre::MaterialPtr material = OwnMaterial(sub_entity);
         for (unsigned short t = 0; t < material->getNumTechniques(); ++ t){
@@ -163,15 +220,38 @@ void EntityModel::ScriptSetBlend(const int blend){
     }
 }
 
+/**
+ * Gets a texture of one white pixel, for the parts that have no texture (they only have the colours of
+ * the vertices), so a texture unit can give them an opacity.
+ */
+static Ogre::TexturePtr GetWhiteTexture(){
+    const Ogre::String name = "vgears_white_1x1";
+    Ogre::TextureManager& manager = Ogre::TextureManager::getSingleton();
+    Ogre::TexturePtr texture = manager.getByName(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    if (texture != nullptr) return texture;
+    texture = manager.createManual(
+      name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, 1, 1, 0, Ogre::PF_BYTE_RGBA
+    );
+    unsigned char pixel[4] = {255, 255, 255, 255};
+    Ogre::PixelBox box(Ogre::Box(0, 0, 1, 1), Ogre::PF_BYTE_RGBA, pixel);
+    texture->getBuffer()->blitFromMemory(box);
+    return texture;
+}
+
 void EntityModel::ScriptSetAlpha(const float alpha){
     if (blend_ == BLEND_NORMAL) return;
     const float a = std::max(0.0f, std::min(1.0f, alpha));
-    for (unsigned int s = 0; s < model_->getNumSubEntities(); ++ s){
-        Ogre::MaterialPtr material = model_->getSubEntity(s)->getMaterial();
+    std::vector<Ogre::Entity*> entities {model_};
+    if (attached_model_ != nullptr) entities.push_back(attached_model_);
+    for (Ogre::Entity* entity : entities)
+    for (unsigned int s = 0; s < entity->getNumSubEntities(); ++ s){
+        Ogre::MaterialPtr material = entity->getSubEntity(s)->getMaterial();
         for (unsigned short t = 0; t < material->getNumTechniques(); ++ t){
             Ogre::Technique* technique = material->getTechnique(t);
             for (unsigned short p = 0; p < technique->getNumPasses(); ++ p){
                 Ogre::Pass* pass = technique->getPass(p);
+                // Parts with only vertex colours have no texture unit to change, so give them a white one.
+                if (pass->getNumTextureUnitStates() == 0) pass->createTextureUnitState()->setTexture(GetWhiteTexture());
                 for (unsigned short u = 0; u < pass->getNumTextureUnitStates(); ++ u){
                     Ogre::TextureUnitState* unit = pass->getTextureUnitState(u);
                     if (blend_ == BLEND_ADDITIVE){
