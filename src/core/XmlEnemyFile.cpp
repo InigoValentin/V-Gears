@@ -84,7 +84,11 @@ void XmlEnemyFile::LoadEnemy(Enemy& enemy){
         else if (
           node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "manipulate"
         ){
-            // TODO
+            // Attacks that can be used when the enemy is manipulated. No attacks means it can't be.
+            for (TiXmlNode* node_atk = node->FirstChild(); node_atk != nullptr; node_atk = node_atk->NextSibling()){
+                if (node_atk->Type() != TiXmlNode::TINYXML_ELEMENT || node_atk->ValueStr() != "attack") continue;
+                enemy.AddManipulateAttack(GetInt(node_atk, "id"));
+            }
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "ai"){
             // AI scripts, as hexadecimal bytecode.

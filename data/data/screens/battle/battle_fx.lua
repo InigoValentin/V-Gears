@@ -1583,6 +1583,62 @@ UiContainer.BattleFx = {
         return true
     end,
 
+    --- Models of the thrown things (the shuriken of the effects of magic.lgp).
+    THROW_MESH = "common_shuriken01",
+    THROW_TIME = 0.9,
+    THROW_SIZE = 14,
+
+    --- A thing flies from the thrower to the targets, spinning.
+    --
+    -- @param on_hit Called when it arrives to the first target.
+    -- @param on_end Called when it has finished.
+    play_throw = function(self, side, actor, target_group, targets, mesh, delay, on_hit, on_end)
+        local from = UiContainer.BattleUi:get_entity(side, actor)
+        local list = {}
+        for _, index in ipairs(targets or {}) do
+            local to = UiContainer.BattleUi:get_entity(target_group, index)
+            if to ~= nil then list[#list + 1] = to end
+        end
+        if from == nil or #list == 0 or not self.models_available then
+            on_hit()
+            on_end()
+            return
+        end
+        local x0, y0, z0 = from:get_position()
+        z0 = z0 + 1.2
+        local hit, arrived = false, 0
+        -- Weapons are models of the characters, bigger than the ones of the effects.
+        local is_weapon = mesh ~= nil and string.find(mesh, "characters/", 1, true) ~= nil
+        -- One thing flies to each target.
+        for _, to in ipairs(list) do
+            local x1, y1, z1 = to:get_position()
+            z1 = z1 + 1.0
+            local landed = false
+            self:spawn_piece({
+                mesh = mesh or self.THROW_MESH, x = x0, y = y0, z = z0, blend = Entity.BLEND_NORMAL, rx = 90,
+                life = self.THROW_TIME, delay = delay or 0,
+                update = function(piece, u, entity)
+                    -- A small arc.
+                    local arc = math.sin(u * math.pi) * 0.6
+                    entity:set_position(x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, z0 + (z1 - z0) * u + arc)
+                    local size = is_weapon and 0.0039 or self.THROW_SIZE * self.MODEL_UNIT
+                    entity:set_scale(size, size, size)
+                    -- It flies straight, without spinning.
+                    if is_weapon then entity:set_model_rotation(0, 0, 0)
+                    else entity:set_model_rotation(90, 90, 0) end
+                    entity:set_alpha(1)
+                    if u >= 1 and not landed then
+                        landed = true
+                        -- The hit lands when the first one arrives, it ends with the last.
+                        if not hit then hit = true on_hit() end
+                        arrived = arrived + 1
+                        if arrived == #list then on_end() end
+                    end
+                end,
+            })
+        end
+    end,
+
     --- Shows the effects screen and clears everything.
     show = function(self)
         self:clear()
@@ -1617,7 +1673,7 @@ UiContainer.BattleFx = {
         -- Spells: JO_P02, grows and pulses.
         [0] = {texture = "battle_fx/common_jo_b02.png", tint = {1, 1, 1}, radius = 10, base = 10, height = 20},
         -- Limits: JO_P01, a flare that is narrow at the bottom.
-        [1] = {texture = "battle_fx/common_jo_b03.png", tint = {1, 1, 1}, radius = 10, base = 4.5, height = 11},
+        [1] = {texture = "battle_fx/common_jo_b03.png", tint = {1, 1, 1}, radius = 10, base = 4.5, height = 28.5},
         -- Enemy skills: JO_P03, shrinks toward the caster.
         [2] = {texture = "battle_fx/common_jo_b04.png", tint = {1, 1, 1}, radius = 10, base = 10, height = 20},
         -- Summons: JO_P02 with sparkles.
