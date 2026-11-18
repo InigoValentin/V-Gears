@@ -34,23 +34,33 @@ class InstallLog::Tee : public std::streambuf{
         /**
          * Writes directly to the original stream, without capturing it.
          */
-        void WriteOriginal(const std::string& text){original_->sputn(text.data(), text.size());}
+        void WriteOriginal(const std::string& text){
+            std::lock_guard<std::mutex> lock(mutex_);
+            original_->sputn(text.data(), text.size());
+        }
 
     protected:
 
         int_type overflow(int_type c) override{
             if (c == traits_type::eof()) return traits_type::not_eof(c);
-            original_->sputc(static_cast<char>(c));
-            if (c == '\n'){
-                std::string line;
-                line.swap(line_);
-                if (!line.empty()) log_.AddCaptured(line);
+            // The streams are written from several threads (Ogre's worker threads, the audio conversions), so
+            // the line buffer and the original buffer are only touched with the lock. The line is sent to the
+            // log without it, since the log may write to the streams again.
+            std::string line;
+            {
+                std::lock_guard<std::mutex> lock(mutex_);
+                original_->sputc(static_cast<char>(c));
+                if (c == '\n') line.swap(line_);
+                else line_ += static_cast<char>(c);
             }
-            else line_ += static_cast<char>(c);
+            if (!line.empty()) log_.AddCaptured(line);
             return c;
         }
 
-        int sync() override{return original_->pubsync();}
+        int sync() override{
+            std::lock_guard<std::mutex> lock(mutex_);
+            return original_->pubsync();
+        }
 
     private:
 
@@ -58,6 +68,7 @@ class InstallLog::Tee : public std::streambuf{
         InstallLog& log_;
         std::streambuf* original_;
         std::string line_;
+        std::mutex mutex_;
 };
 
 InstallLog::InstallLog(): counts_{0, 0, 0}{}

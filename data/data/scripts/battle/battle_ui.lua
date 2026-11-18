@@ -2188,6 +2188,29 @@ UiContainer.BattleUi = {
     -- @param index Index in the party or enemy list.
     -- @return A table with level, str (attack), def, mag, mdef, hp, hp_max, mp.
     get_combat_stats = function(self, side, index)
+        local stats = self:get_base_combat_stats(side, index)
+        local mods = self:get_combatant(side, index).stat_mods
+        if mods ~= nil then
+            for kind, percent in pairs(mods) do
+                if stats[kind] ~= nil then stats[kind] = stats[kind] + math.floor(stats[kind] * percent / 100) end
+            end
+        end
+        return stats
+    end,
+
+    --- Changes a stat modifier of a combatant, a percentage (-100 to 100) of its stat as in ff7.exe (0x5c7e55).
+    -- The modifiers last until the end of the battle.
+    --
+    -- @param kind Stat: str, mag, def, mdef, eva or dex.
+    -- @param delta Percentage added to the modifier.
+    change_stat_mod = function(self, side, index, kind, delta)
+        local combatant = self:get_combatant(side, index)
+        combatant.stat_mods = combatant.stat_mods or {}
+        combatant.stat_mods[kind] = math.max(-100, math.min(100, (combatant.stat_mods[kind] or 0) + delta))
+    end,
+
+    --- Gets the stats of a combatant without the modifiers of the limits. See {@see get_combat_stats}.
+    get_base_combat_stats = function(self, side, index)
         if side == Battle.TargetGroup.PARTY then
             local char = Characters[self.party[index].character]
             local stats = char.stats
@@ -2708,7 +2731,7 @@ UiContainer.BattleUi = {
     -- The limits of the kernel data that only heal, restore, or give and cure statuses are built from their
     -- data (ff7.exe, ids 128 to 183): formula 2 with modifier 2 is statuses only, 2 with modifier 4 heals a
     -- fraction (power / 32) of the maximum HP, and 0 with modifier 8 restores everything. The ones in
-    -- SPECIAL_LIMITS are done by hand. TODO: The additional effects of the data (Red XIII's 22 and 23) are ignored.
+    -- SPECIAL_LIMITS are done by hand. Additional effects 22 and 23 (Red XIII) change stat modifiers of the user.
     --
     -- @param id Attack ID of the technique.
     get_special_limit = function(self, id)
@@ -2724,6 +2747,14 @@ UiContainer.BattleUi = {
         }
         if f == 2 and m == 4 then special.heal_fraction = k.power end
         if f == 0 and m == 8 then special.full = true end
+        -- Additional effects 22 (evade) and 23 (strength) change a stat modifier of the user by (modifier - 100) percent.
+        local additional = k.additional
+        if additional ~= nil and additional.modifier ~= nil then
+            local kinds = {[22] = "eva", [23] = "str"}
+            if kinds[additional.effect] ~= nil then
+                special.user_mods = {{kind = kinds[additional.effect], delta = additional.modifier - 100}}
+            end
+        end
         for _, entry in ipairs(k.status or {}) do
             if entry.mode == 1 then table.insert(special.cures, entry.status)
             else table.insert(special.statuses, entry.status) end
@@ -2754,6 +2785,9 @@ UiContainer.BattleUi = {
             applied = true
             local group = special.target == "enemies" and Battle.TargetGroup.ENEMIES or Battle.TargetGroup.PARTY
             -- Curing Death (Pulse of Life) reaches the dead allies too.
+            for _, mod in ipairs(special.user_mods or {}) do
+                self:change_stat_mod(Battle.TargetGroup.PARTY, index, mod.kind, mod.delta)
+            end
             local targets = current.targets
             for _, id in ipairs(special.cures or {}) do
                 if id == BattleStatus.DEATH and group == Battle.TargetGroup.PARTY then
