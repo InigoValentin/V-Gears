@@ -65,7 +65,7 @@ Characters[0].armor.materia = {
     [3] = {id = 26, ap = 120000},  -- MP Turbo
     [4] = {id = 53, ap = 100000},  -- Restore
     [5] = {id = 35, ap = 200000},  -- Quadra Magic
-    [6] = {id = 52, ap = 100000},  -- Lightning
+    [6] = {id = 39, ap = 100000},  -- Throw mastered: Coin (Tifa has Throw level 1)
 }
 -- Attack commands to test: Double Cut gives 2x-Cut (AP below 100000) or 4x-Cut (100000 or more), and Slash-All
 -- gives Slash-All (AP below 130000) or Flash (130000 or more). Cloud has Double Cut (4x-Cut) paired with Steal
@@ -86,7 +86,7 @@ Characters[3].armor.materia = {}
 -- Time 65 (Haste, Slow, Stop), Destruct 68 (DeBarrier, DeSpell, Death). Cloud already has Barrier
 -- (62) in his armor.
 Characters[0].weapon.materia[2] = {id = 36, ap = 100000} -- Steal (mastered: Mug). Use ap = 0 for plain Steal.
-Characters[0].weapon.materia[3] = {id = 37, ap = 100000} -- Sense
+Characters[0].weapon.materia[3] = {id = 41, ap = 0} -- Deathblow (D.blow), instead of Sense (37)
 Characters[2].armor.materia[2] = {id = 68, ap = 100000}
 Characters[2].armor.materia[3] = {id = 57, ap = 100000}
 -- Limit bars to test the Limit command: everybody has the first limit and a bar of about 85% (217 of 255).
@@ -102,6 +102,26 @@ Characters[0].limit.current = 4
 Characters[0].limit.learned[4] = Characters[0].limit.learned[4] or {}
 Characters[0].limit.learned[4][1] = true
 Characters[0].limit.bar = 255
+-- One kill from limit level 2 (120 kills): the first enemy he defeats teaches him Blade Beam.
+Characters[0].kills = 119
+-- Barret (Mindblow) and Red XIII (Lunatic High): limit level 1 with the two techniques and a full bar. The ids
+-- are in begin_menu.lua option 7 (party Barret, Red XIII, Aerith). Their other levels: Barret 2 Grenade Bomb and
+-- Hammerblow, 3 Satellite Beam; Red XIII 2 Blood Fang and Stardust Ray, 3 Howling Moon (on himself) and Earth Rave.
+for _, c in ipairs({1, 4}) do
+    Characters[c].limit.current = 1
+    Characters[c].limit.learned[1] = Characters[c].limit.learned[1] or {}
+    Characters[c].limit.learned[1][1] = true
+    Characters[c].limit.learned[1][2] = true
+    Characters[c].limit.bar = 255
+    Characters[c].stats.hp.current = 99999
+    Characters[c].stats.mp.current = 99999
+end
+-- Aerith: limit level 3 (Planet Protector and Pulse of Life), with a full bar.
+Characters[3].limit.current = 3
+Characters[3].limit.learned[3] = Characters[3].limit.learned[3] or {}
+Characters[3].limit.learned[3][1] = true
+Characters[3].limit.learned[3][2] = true
+Characters[3].limit.bar = 255
 -- Summons: Choco/Mog 74, Shiva 75, Ifrit 76, Ramuh 77, Titan 78, Odin 79, Leviathan 80, Bahamut 81,
 -- Kjata 82, Alexander 83, Phoenix 84, Neo Bahamut 85, Hades 86, Typhoon 87, Bahamut ZERO 88,
 -- Knights of Round 89, Master Summon 90. They cost between 14 and 250 MP.
@@ -116,7 +136,7 @@ for i = 1, 24 do -- E. Skill list
     end
 end
 Characters[2].weapon.materia[2] = {id = 77, ap = 100000} -- Ramuh
-Characters[2].weapon.materia[3] = {id = 74, ap = 100000} -- Choco/Mog
+Characters[2].weapon.materia[3] = {id = 40, ap = 0} -- Morph, instead of Choco/Mog (74)
 Characters[2].weapon.materia[4] = {id = 14, ap = 130000} -- Slash-All (Flash)
 Characters[2].weapon.materia[6] = {id = 16, ap = 40000} -- Cover (100%: takes the attacks for allies with critical HP)
 Characters[2].armor.materia[4] = {id = 39, ap = 0} -- Throw (level 1; mastered it is Coin)
@@ -124,7 +144,9 @@ Characters[3].weapon.materia[0] = {id = 39, ap = 100000} -- Throw mastered: Aeri
 -- Double commands: Aerith W-Magic (with Fire and Restore to cast), Tifa W-Item, Cloud W-Summon (instead of Mega All, with Shiva).
 Characters[3].weapon.materia[1] = {id = 19, ap = 100000} -- W-Magic
 Characters[3].armor.materia[0] = {id = 49, ap = 100000} -- Fire
-Characters[3].armor.materia[1] = {id = 53, ap = 100000} -- Restore
+Characters[3].armor.materia[1] = {id = 53, ap = 100000}
+Characters[3].armor.materia[2] = {id = 43, ap = 0} -- Mime
+Characters[2].weapon.materia[5] = {id = 42, ap = 0} -- Manipulate
 Characters[2].armor.materia[5] = {id = 21, ap = 100000} -- W-Item
 Characters[0].weapon.materia[5] = {id = 20, ap = 100000} -- W-Summon
 Inventory.add_item(129, 3) -- Mythril Saber (to throw)

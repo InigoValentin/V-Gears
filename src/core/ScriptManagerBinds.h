@@ -342,13 +342,19 @@ void ScriptManager::InitBinds(){
       "get_drop_rate", &Enemy::ScriptGetDropRate,
       "get_steal_count", &Enemy::ScriptGetStealCount,
       "get_steal_id", &Enemy::ScriptGetStealId,
-      "get_steal_rate", &Enemy::ScriptGetStealRate
+      "get_steal_rate", &Enemy::ScriptGetStealRate,
+      "get_morph", [](const Enemy& enemy){return static_cast<int>(enemy.GetMorph());},
+      "get_manip_count", [](const Enemy& enemy){return static_cast<int>(enemy.GetManipulateAttacks().size());},
+      "get_manip_attack", [](const Enemy& enemy, const int index){
+          const std::vector<unsigned int> attacks = enemy.GetManipulateAttacks();
+          if (index < 0 || index >= static_cast<int>(attacks.size())) return -1;
+          return static_cast<int>(attacks[index]);
+      }
       // TODO: Implement cover flags.
       // TODO: Implement immunities
       // TODO: Implement elements
       // TODO: Implement stealable items
       // TODO: Implement manipulability status and attacks.
-      // TODO: Implement morph item
     );
 
     // Commands for the audio manager.
