@@ -703,6 +703,8 @@ UiContainer.MateriaMenu = {
                 Characters[self.char_id].armor.materia[equip_slot] = nil
             end
         end
+        -- The materia change the stats, and the current HP and MP can't be over the new maximums.
+        Characters.recalculate_stats(self.char_id)
         -- Reload character data and list.
         self.populate_equip(self)
         self.populate_list(self)

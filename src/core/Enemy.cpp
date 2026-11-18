@@ -307,6 +307,18 @@ float Enemy::ScriptGetDropRate(const unsigned int index) const{
     return drop_[index].rate;
 }
 
+int Enemy::ScriptGetStealCount() const{return steal_.size();}
+
+int Enemy::ScriptGetStealId(const unsigned int index) const{
+    if (index >= steal_.size()) return -1;
+    return steal_[index].id;
+}
+
+float Enemy::ScriptGetStealRate(const unsigned int index) const{
+    if (index >= steal_.size()) return 0.0f;
+    return steal_[index].rate;
+}
+
 int Enemy::ScriptGetCameraForAttack(const unsigned int index){
     if (index >= attacks_.size()) return -1;
     return attacks_[index].camera;

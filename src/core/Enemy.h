@@ -661,6 +661,35 @@ class Enemy{
         int ScriptGetDropCount() const;
 
         /**
+         * Retrieves the number of items that can be stolen from the enemy.
+         *
+         * To be used from Lua scripts.
+         *
+         * @return The number of stealable items.
+         */
+        int ScriptGetStealCount() const;
+
+        /**
+         * Retrieves the ID of a stealable item.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Steal index, must be lower than reported by {@see ScriptGetStealCount}.
+         * @return The item ID, -1 if the index is not valid.
+         */
+        int ScriptGetStealId(const unsigned int index) const;
+
+        /**
+         * Retrieves the steal rate of a stealable item.
+         *
+         * To be used from Lua scripts.
+         *
+         * @param[in] index Steal index, must be lower than reported by {@see ScriptGetStealCount}.
+         * @return The steal rate, between 0 and 1. 0 if the index is not valid.
+         */
+        float ScriptGetStealRate(const unsigned int index) const;
+
+        /**
          * Retrieves the animation script of an attack.
          *
          * To be used from Lua scripts.

@@ -1276,6 +1276,9 @@ class KernelDataInstaller{
              */
             bool useable_menu;
 
+            /** Whether the item can be thrown (Throw command). */
+            bool throwable;
+
             /**
              * Target selection mode.
              *
@@ -1802,6 +1805,9 @@ class KernelDataInstaller{
              */
             bool useable_menu;
 
+            /** Whether the item can be thrown (Throw command). */
+            bool throwable;
+
             /**
              * The weapon battle model index.
              *
@@ -1952,6 +1958,9 @@ class KernelDataInstaller{
              * True if the bit 4 in {@see restrict_raw} is 0.
              */
             bool useable_menu;
+
+            /** Whether the item can be thrown (Throw command). */
+            bool throwable;
 
             /**
              * The weapon battle model index.

@@ -552,6 +552,18 @@ Characters.recalculate_stats = function(id)
     stats.hp.max = math.floor(stats.hp.max)
     stats.mp.max = math.floor(stats.mp.max)
 
+    -- HP<->MP materia swap the maximum HP and MP. TODO: Unverified: its levels (it is done at any level).
+    for _, materia in ipairs(materias) do
+        if materia ~= nil and materia.type == Materia.TYPE.INDEPENDENT and materia.ability ~= nil
+          and materia.ability.id == Materia.ABILITY.HP_MP then
+            stats.hp.max, stats.mp.max = stats.mp.max, stats.hp.max
+            break
+        end
+    end
+    -- The current values can't be over the maximums.
+    if stats.hp.current ~= nil then stats.hp.current = math.min(stats.hp.current, math.max(1, stats.hp.max)) end
+    if stats.mp.current ~= nil then stats.mp.current = math.min(stats.mp.current, math.max(0, stats.mp.max)) end
+
     if stats.str.total < 1 then
         stats.str.total = 1
     end
@@ -608,8 +620,6 @@ Characters.recalculate_stats = function(id)
     if stats.meva < 1 then
         stats.meva = 1
     end
-
-    -- TODO: If HP<->MP materia, invert values.
 
     -- Cap current HP/MP
     if stats.hp.current > stats.hp.max then
@@ -703,6 +713,8 @@ Characters.equip = function(char_id, item_id)
     else
         return false
     end
+    -- The stats change with the equipment (and the maximum HP and MP, so the current ones may have to be capped).
+    Characters.recalculate_stats(char_id)
     return true
 end
 

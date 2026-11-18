@@ -17,6 +17,7 @@
 #include <tinyxml.h>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include "DiskImage.h"
 #include "KernelDataInstaller.h"
 #include "common/FinalFantasy7/FF7NameLookup.h"
@@ -178,6 +179,16 @@ int KernelDataInstaller::ReadAttacks(){
 
     limit_attacks_.clear();
 
+    // Limit data, from ff7.exe (file offset of the table at 0x910d94, in the .data section).
+    const int LIMIT_TABLE_OFFSET = 0x910d94 - 0x7b0000 + 0x3ae000;
+    std::unique_ptr<File> exe_file;
+    try{
+        exe_file.reset(new File(exe_path_));
+    }
+    catch (...){
+        std::cerr << "[WARNING] Can't read the data of the limits from ff7.exe." << std::endl;
+    }
+
     // The kernel has data for 128 attacks, but names and descriptions for 256. The last 128 are the
     // limit break techniques, which the characters refer to by ID (128 and up).
     for (int i = 0; i < 256; i ++){
@@ -232,6 +243,16 @@ int KernelDataInstaller::ReadAttacks(){
 
         // Limit techniques only have name and description. Both start with control codes, drop
         // everything before the first letter.
+        // The data of the limits that the characters use (128 to 183) is not in the kernel: it is a table of
+        // attack records, with the same format, in the data of ff7.exe (0x910d94, indexed by the limit ID minus
+        // 128; found from the code that ff7.exe uses to load the limits of a character, 0x5c9524).
+        File* source = &attacks_file;
+        bool limit_from_exe = false;
+        if (i >= 128 && i <= 183 && exe_file != nullptr){
+            exe_file->SetOffset(LIMIT_TABLE_OFFSET + (i - 128) * 0x1c);
+            source = exe_file.get();
+            limit_from_exe = true;
+        }
         if (i >= 128){
             for (std::string* text : {&data.name, &data.description}){
                 size_t first = text->find_first_of(
@@ -240,30 +261,32 @@ int KernelDataInstaller::ReadAttacks(){
                 else text->erase(0, first);
             }
             data.id = i;
-            limit_attacks_.push_back(data);
-            continue;
+            if (!limit_from_exe){
+                limit_attacks_.push_back(data);
+                continue;
+            }
         }
 
         // Read data from the item data section.
-        data.accuracy = attacks_file.readU8();
-        data.impact_effect = attacks_file.readU8();
-        data.hurt_anim = attacks_file.readU8();
-        data.unknown = attacks_file.readU8();
-        data.mp = attacks_file.readU16LE();
-        data.sound = attacks_file.readU16LE();
-        data.camera_single = attacks_file.readU16LE();
-        data.camera_multiple = attacks_file.readU16LE();
-        data.target_raw = attacks_file.readU8();
-        data.effect = attacks_file.readU8();
-        data.damage_raw = attacks_file.readU8();
-        data.power = attacks_file.readU8();
-        data.condition_raw = attacks_file.readU8();
-        data.status_change_raw = attacks_file.readU8();
-        data.additional_effects_raw = attacks_file.readU8();
-        data.additional_effects_mod_raw = attacks_file.readU8();
-        data.status_raw = attacks_file.readU32LE();
-        data.element_raw = attacks_file.readU16LE();
-        data.special_raw = attacks_file.readU16LE();
+        data.accuracy = source->readU8();
+        data.impact_effect = source->readU8();
+        data.hurt_anim = source->readU8();
+        data.unknown = source->readU8();
+        data.mp = source->readU16LE();
+        data.sound = source->readU16LE();
+        data.camera_single = source->readU16LE();
+        data.camera_multiple = source->readU16LE();
+        data.target_raw = source->readU8();
+        data.effect = source->readU8();
+        data.damage_raw = source->readU8();
+        data.power = source->readU8();
+        data.condition_raw = source->readU8();
+        data.status_change_raw = source->readU8();
+        data.additional_effects_raw = source->readU8();
+        data.additional_effects_mod_raw = source->readU8();
+        data.status_raw = source->readU32LE();
+        data.element_raw = source->readU16LE();
+        data.special_raw = source->readU16LE();
 
         // Derive data from the read data.
         data.id = i;
@@ -355,6 +378,8 @@ void KernelDataInstaller::WriteAttacks(std::string file_name){
           << "    dmg_formula = " << static_cast<int>(attack.damage_formula) << ",\n"
           << "    dmg_modifier = " << static_cast<int>(attack.damage_modifier) << ",\n"
           << "    power = " << static_cast<int>(attack.power) << ",\n"
+          << "    additional = {effect = " << static_cast<int>(attack.additional_effects_raw)
+          << ", modifier = " << static_cast<int>(attack.additional_effects_mod_raw) << "},\n"
           << "    restore = " << attack.restore_type << ",\n"
           << "    target = {selectable = " << attack.target.selection_enabled
           << ", default_enemy = " << attack.target.default_enemy
@@ -678,6 +703,7 @@ int KernelDataInstaller::ReadItems(){
         data.sellable = !(data.restrict_raw & (1 << 0));
         data.useable_battle = !(data.restrict_raw & (2 << 0));
         data.useable_menu = !(data.restrict_raw & (4 << 0));
+        data.throwable = !(data.restrict_raw & (8 << 0));
         if (data.target_raw == (data.target_raw | 0x01)) data.target.selection_enabled = true;
         else data.target.selection_enabled = false;
         if (data.target_raw == (data.target_raw | 0x02)) data.target.default_enemy = true;
@@ -696,9 +722,12 @@ int KernelDataInstaller::ReadItems(){
         else data.target.random = false;
         data.damage_formula = data.damage_raw >> 4; // Upper nybble.
         data.damage_modifier = data.damage_raw & 15; // Lower nybble.
-        data.status.chance = 63 - (data.status_change_raw ^ 63); // Out of 63;
-        if (data.status_change_raw == (data.status_change_raw | 0x00000080)) data.status.mode = TOGGLE;
-        else if (data.status_change_raw == (data.status_change_raw | 0x00000040)) data.status.mode = CURE;
+        // Status byte: the lower 6 bits are the chance out of 63, and the upper bits the mode (0x80
+        // toggles the statuses, 0x40 cures them, otherwise they are inflicted). The old formula
+        // wrapped around for cure and toggle items, so Antidote, Hyper... lost their statuses.
+        data.status.chance = data.status_change_raw & 0x3F;
+        if ((data.status_change_raw & 0x80) != 0) data.status.mode = TOGGLE;
+        else if ((data.status_change_raw & 0x40) != 0) data.status.mode = CURE;
         else data.status.mode = INFLICT;
         switch (data.condition_raw){
             case 0: data.restore_type = RESTORE_HP; break;
@@ -706,45 +735,13 @@ int KernelDataInstaller::ReadItems(){
             case 2: data.restore_type = RESTORE_STATUS; break;
             default: data.restore_type = RESTORE_NONE;
         }
-
-
         // In KERNEL.BIN, items that don't induce statuses actually have all statuses marked, and
-        // a chance of 255. If it's the case, skip statuses altogether.
-        if (data.status.chance <= 64){
-            // TODO: Im fairly sure that this can be done with a single-line loop...
-            // ... but I don't know how
-            if (data.status_raw == (data.status_raw | 0x00000001)) data.status.status.push_back(DEATH);
-            if (data.status_raw == (data.status_raw | 0x00000002)) data.status.status.push_back(NEAR_DEATH);
-            if (data.status_raw == (data.status_raw | 0x00000004)) data.status.status.push_back(SLEEP);
-            if (data.status_raw == (data.status_raw | 0x00000008)) data.status.status.push_back(POISONED);
-            if (data.status_raw == (data.status_raw | 0x00000010)) data.status.status.push_back(SADNESS);
-            if (data.status_raw == (data.status_raw | 0x00000020)) data.status.status.push_back(FURY);
-            if (data.status_raw == (data.status_raw | 0x00000040)) data.status.status.push_back(CONFU);
-            if (data.status_raw == (data.status_raw | 0x00000080)) data.status.status.push_back(SILENCE);
-            if (data.status_raw == (data.status_raw | 0x00000100)) data.status.status.push_back(HASTE);
-            if (data.status_raw == (data.status_raw | 0x00000200)) data.status.status.push_back(SLOW);
-            if (data.status_raw == (data.status_raw | 0x00000400)) data.status.status.push_back(STOP);
-            if (data.status_raw == (data.status_raw | 0x00000800)) data.status.status.push_back(FROG);
-            if (data.status_raw == (data.status_raw | 0x00001000)) data.status.status.push_back(SMALL);
-            if (data.status_raw == (data.status_raw | 0x00002000)) data.status.status.push_back(SLOW_NUMB);
-            if (data.status_raw == (data.status_raw | 0x00004000)) data.status.status.push_back(PETRIFY);
-            if (data.status_raw == (data.status_raw | 0x00008000)) data.status.status.push_back(REGEN);
-            if (data.status_raw == (data.status_raw | 0x00010000)) data.status.status.push_back(BARRIER);
-            if (data.status_raw == (data.status_raw | 0x00020000)) data.status.status.push_back(M_BARRIER);
-            if (data.status_raw == (data.status_raw | 0x00040000)) data.status.status.push_back(REFLECT);
-            if (data.status_raw == (data.status_raw | 0x00080000)) data.status.status.push_back(DUAL);
-            if (data.status_raw == (data.status_raw | 0x00100000)) data.status.status.push_back(SHIELD);
-            if (data.status_raw == (data.status_raw | 0x00200000)) data.status.status.push_back(D_SENTENCE);
-            if (data.status_raw == (data.status_raw | 0x00400000)) data.status.status.push_back(MANIPULATE);
-            if (data.status_raw == (data.status_raw | 0x00800000)) data.status.status.push_back(BERSERK);
-            if (data.status_raw == (data.status_raw | 0x01000000)) data.status.status.push_back(PEERLESS);
-            if (data.status_raw == (data.status_raw | 0x02000000)) data.status.status.push_back(PARALYSIS);
-            if (data.status_raw == (data.status_raw | 0x04000000)) data.status.status.push_back(DARKNESS);
-            if (data.status_raw == (data.status_raw | 0x08000000)) data.status.status.push_back(DUAL_DRAIN);
-            if (data.status_raw == (data.status_raw | 0x10000000)) data.status.status.push_back(DEATH_FORCE);
-            if (data.status_raw == (data.status_raw | 0x20000000)) data.status.status.push_back(RESIST);
-            if (data.status_raw == (data.status_raw | 0x40000000)) data.status.status.push_back(LUCKY_GIRL);
-            if (data.status_raw == (data.status_raw | 0x80000000)) data.status.status.push_back(IMPRISONED);
+        // a chance of 255. If it's the case, skip statuses altogether. The status IDs are the bit
+        // positions of the original game (4 sadness, 5 fury...).
+        if (data.status_change_raw != 0xFF && data.status_raw != 0xFFFFFFFF){
+            for (int bit = 0; bit < 32; bit ++){
+                if ((data.status_raw & (1u << bit)) != 0) data.status.status.push_back(bit);
+            }
         }
 
         // Get elements
@@ -791,7 +788,7 @@ void KernelDataInstaller::WriteItems(std::string file_name){
           << "    sell = " << item.sellable << ",\n"
           << "    battle = " << item.useable_battle << ",\n"
           << "    menu = " << item.useable_menu << ",\n"
-          << "    throw = 0,\n"
+          << "    throw = " << item.throwable << ",\n"
           << "    effect = " << static_cast<int>(item.effect) << ",\n"
           << "    dmg_formula = " << static_cast<int>(item.damage_formula) << ",\n"
           << "    dmg_modifier = " << static_cast<int>(item.damage_modifier) << ",\n"
@@ -1130,6 +1127,7 @@ int KernelDataInstaller::ReadArmors(){
         data.sellable = !(data.restrict_raw & (1 << 0));
         data.useable_battle = !(data.restrict_raw & (2 << 0));
         data.useable_menu = !(data.restrict_raw & (4 << 0));
+        data.throwable = !(data.restrict_raw & (8 << 0));
         if (data.equip_raw == (data.equip_raw | 0x0001)) data.equip.push_back(0);
         if (data.equip_raw == (data.equip_raw | 0x0002)) data.equip.push_back(1);
         if (data.equip_raw == (data.equip_raw | 0x0004)) data.equip.push_back(2);
@@ -1203,7 +1201,7 @@ void KernelDataInstaller::WriteArmors(std::string file_name){
           << "    sell = " << armor.sellable << ",\n"
           << "    battle = " << armor.useable_battle << ",\n"
           << "    menu = " << armor.useable_menu << ",\n"
-          << "    throw = 0,\n"
+          << "    throw = " << armor.throwable << ",\n"
           << "    defense = {physical = " << static_cast<int>(armor.defense) << ", magical = "
           << static_cast<int>(armor.m_defense) << "},\n"
           << "    evasion = {physical = " << static_cast<int>(armor.evasion) << ", magical = "
@@ -1313,6 +1311,7 @@ int KernelDataInstaller::ReadAccessories(){
         data.sellable = !(data.restrict_raw & (1 << 0));
         data.useable_battle = !(data.restrict_raw & (2 << 0));
         data.useable_menu = !(data.restrict_raw & (4 << 0));
+        data.throwable = !(data.restrict_raw & (8 << 0));
         if (data.status_raw == (data.status_raw | 0x00000001)) data.status.push_back(DEATH);
         if (data.status_raw == (data.status_raw | 0x00000002)) data.status.push_back(NEAR_DEATH);
         if (data.status_raw == (data.status_raw | 0x00000004)) data.status.push_back(SLEEP);
@@ -1410,7 +1409,7 @@ void KernelDataInstaller::WriteAccessories(std::string file_name){
           << "    sell = " << accessory.sellable << ",\n"
           << "    battle = " << accessory.useable_battle << ",\n"
           << "    menu = " << accessory.useable_menu << ",\n"
-          << "    throw = 0,\n"
+          << "    throw = " << accessory.throwable << ",\n"
           << "    special_effect = {";
         if (accessory.effect != 0XFF) file << static_cast<int>(accessory.effect);
         file

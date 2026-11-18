@@ -943,7 +943,10 @@ void EntityManager::UpdateEncounters(const bool walked){
     encounter_distance_ += Timer::getSingleton().GetGameTimeDelta() * 30.0f;
     while (encounter_distance_ >= ENCOUNTER_CHECK_FRAMES){
         encounter_distance_ -= ENCOUNTER_CHECK_FRAMES;
-        encounter_accumulator_ += static_cast<int>(ENCOUNTER_STEP_VALUE * multiplier * 256.0f) / rate;
+        // Enemy Away and Enemy Lure materia change the rate of the party (see Party.get_encounter_modifier).
+        const float materia_multiplier
+          = ScriptManager::getSingleton().EvaluateNumber("Party.get_encounter_modifier()", 1.0f);
+        encounter_accumulator_ += static_cast<int>(ENCOUNTER_STEP_VALUE * multiplier * materia_multiplier * 256.0f) / rate;
         const int roll = std::rand() % 256 * 256;
         if (cv_debug_encounters.GetB()){
             LOG_TRIVIAL(

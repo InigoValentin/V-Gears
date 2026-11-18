@@ -153,6 +153,8 @@ Materia.ABILITY = {
     PREEMPTIVE = 103,
     ENC_DOWN = 107,
     ENC_UP = 108,
+    ENCOUNTER_DOWN = 107,
+    ENCOUNTER_UP = 108,
     ENC_CHOCOBO = 109
 }
 
@@ -166,8 +168,8 @@ Materia.LINK = {
     SNEAK_ATTACK = 86,
     FINAL_ATTACK = 87,
     MP_TURBO = 88,
-    MP_TURBO = 89,
-    MP_TURBO = 90,
+    MP_ABSORB = 89,
+    HP_ABSORB = 90,
     ADDED_CUT = 92,
     STEAL_AS_WELL = 93,
     ELEMENTAL = 94,

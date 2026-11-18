@@ -22,12 +22,17 @@
 #include <map>
 #include <set>
 #include <cctype>
+#include <cstdio>
+#include <cstdlib>
 #include <algorithm>
 #include <zlib.h>
 #include <tinyxml.h>
 #include <boost/filesystem.hpp>
 #include <OgreMesh.h>
 #include "BattleDataInstaller.h"
+#include "BattleCameraScripts.h"
+#include "ExeEffectCameras.h"
+#include "ExeEffectMeshes.h"
 #include "ModelMaterials.h"
 #include "TexFile.h"
 #include "data/VGearsHRCFileManager.h"
@@ -460,8 +465,60 @@ unsigned int BattleDataInstaller::ProcessSpellModel(){
     return next_model_to_process_;
 }
 
+namespace{
+
+/**
+ * Files of magic.lgp (without extension) with the animations of the limit breaks of each model of the party.
+ * The animation files have the format of the animations of the models, with 8 animations for the skeleton of
+ * the character (the animations 44 to 51 of the model, which are empty in battle.lgp) and 8 for its weapon.
+ * The files are in the order of the techniques of the character (limit level 1 first and second, level 2, ...):
+ * the table that ff7.exe uses to load them (at 0x7b7b58) has them in groups of 7 by character.
+ */
+const std::map<std::string, std::vector<std::string>>& LimitAnimationFiles(){
+    static const std::vector<std::string> cloud = {"blaver", "kyou", "limcl2", "limcl6", "limcl3", "limcl7", "limcl4"};
+    static const std::vector<std::string> barret = {"hvshot", "limbr5", "limbr2", "limbr6", "limbr3", "limbr7", "limbr4"};
+    static const std::map<std::string, std::vector<std::string>> files = {
+        {"rt", cloud}, {"si", cloud},
+        {"ru", {"limfast"}}, // Tifa.
+        {"rv", {"iyash", "limea5", "limea2", "limea6", "limea3", "kodo", "limea4"}}, // Aerith.
+        {"rw", {"limsled", "limrd5", "limsled", "limrd6", "limrd3", "limrd7", "limrd4"}}, // Red XIII.
+        {"rx", {"limyf1", "limyf5", "limyf2", "limyf6", "limyf3", "limyf7", "limyf4"}}, // Yuffie.
+        {"ry", {"dice"}}, // Cait Sith.
+        {"rz", {"limcd1", "limcd5", "limcd2", "limcd6", "limcd3", "limcd7", "limcd4"}}, // Cid.
+        {"sb", barret}, {"sc", barret}, {"sd", barret}, {"se", barret},
+    };
+    return files;
+}
+
+}
+
 unsigned int BattleDataInstaller::ConvertBattleModelsInit(){
     next_model_to_convert_ = 0;
+    // The animations of the limit breaks are in magic.lgp. Take the ones of the party to the folder of the battle
+    // models, so they are converted with them.
+    try{
+        std::set<std::string> wanted;
+        for (const auto& entry : LimitAnimationFiles()){
+            for (const std::string& tag : entry.second) wanted.insert(tag + ".a00");
+        }
+        File magic_lgp_file(*disk_image_.filePath("data/battle/magic.lgp"));
+        VGears::LGPArchive magic_lgp(*disk_image_.filePath("data/battle/magic.lgp"), "LGP");
+        magic_lgp.open(*disk_image_.filePath("data/battle/magic.lgp"), true);
+        magic_lgp.load();
+        VGears::LGPArchive::FileList file_list = magic_lgp.GetFiles();
+        for (int i = 0; i < file_list.size(); i ++){
+            VGears::LGPArchive::FileEntry f = file_list.at(i);
+            std::string name = f.file_name;
+            std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+            if (wanted.count(name) == 0) continue;
+            if (f.data_offset + f.data_size > magic_lgp_file.GetFileSize()) continue;
+            File limit_file(&magic_lgp_file, f.data_offset, f.data_size);
+            limit_file.WriteFile(output_dir_ + "temp/battle_models/limit_" + name);
+        }
+    }
+    catch (const std::exception& ex){
+        std::cerr << "[ERROR] Exception reading the limit animations: " << ex.what() << std::endl;
+    }
     return battle_models_.size();
 }
 
@@ -501,9 +558,58 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
             for (std::string file_name : a_files) model.a.push_back(file_name);
         }
 
+        // Limit breaks of the party: their animations are in files of magic.lgp. Each one is added to the model with
+        // the names <model>_<file>_00 to _07, which replace the empty animations 44 to 51 for that limit.
+        if (info.is_player){
+            auto limits = LimitAnimationFiles().find(model.id);
+            if (limits != LimitAnimationFiles().end()){
+                std::set<std::string> converted;
+                for (const std::string& tag : limits->second){
+                    if (!converted.insert(tag).second) continue;
+                    std::string limit_path = output_dir_ + "temp/battle_models/limit_" + tag + ".a00";
+                    if (!std::ifstream(limit_path).good()) continue;
+                    try{
+                        File limit_file(limit_path);
+                        DaFile limit_da(limit_file);
+                        std::vector<std::string> limit_files = limit_da.GenerateAFiles(
+                          model.id + "_" + tag, output_dir_ + "temp/battle_models/"
+                        );
+                        for (const std::string& file_name : limit_files){
+                            // Only the animations of the skeleton (0 to 7), not the ones of the weapon.
+                            size_t dot = file_name.find_last_of('.');
+                            int number = std::atoi(file_name.substr(dot - 2, 2).c_str());
+                            if (number < 8) model.a.push_back(file_name);
+                        }
+                    }
+                    catch (const std::exception& ex){
+                        std::cerr << "[ERROR] Exception reading the limit animation " << tag << ": " << ex.what() << std::endl;
+                    }
+                }
+            }
+        }
+
         if ("" != model.script){ // Skip non scripted models
-            AbFile ab(File(output_dir_ + "temp/battle_models/" + model.script), info.is_enemy);
+            // Only the models of the party have the 74 scripts (the limits are the ones from 60 up). The other
+            // ones (enemies and the rest of the models with scripts) have 32.
+            AbFile ab(File(output_dir_ + "temp/battle_models/" + model.script), !info.is_player);
             ab.GenerateScripts(model.id + "_" + info.name_normal, data_dir_ + "scripts/battle_models/");
+        }
+
+        // Playable characters hold their weapons in battle (but Red XIII, who has none). Each one is a
+        // polygon file by itself, named <id>c<k..z>, so make a model for each with a single bone.
+        std::vector<std::pair<std::string, std::string>> weapons; // Polygon file, mesh name.
+        if (info.is_player && model.id != "rw"){
+            for (std::string p : model.p){
+                if (p.length() < 4 || p[2] != 'c' || p[3] < 'k' || p[3] > 'z') continue;
+                char number[8];
+                std::snprintf(number, sizeof(number), "%02d", p[3] - 'k');
+                const std::string weapon_name = model.id + "_" + info.name_normal + "_weapon_" + number;
+                std::ofstream hrc(output_dir_ + "temp/battle_models/" + weapon_name + ".hrc");
+                hrc << ":HEADER_BLOCK 2\n:SKELETON " << weapon_name << "\n:BONES 1\n\nbone0\nroot\n0.000000\n1 "
+                    << p.substr(0, 4) << "\n\n";
+                hrc.close();
+                weapons.push_back(std::make_pair(p, weapon_name));
+            }
         }
 
         // Reload the resources for the newly created hrc and rsd.
@@ -529,6 +635,16 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
             a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
         }
         ExportMesh(path, mesh);
+        for (const auto& weapon : weapons){
+            try{
+                VGears::HRCFileManager::GetSingleton().load(weapon.second + ".hrc", "FFVII");
+                Ogre::MeshPtr weapon_mesh(Ogre::MeshManager::getSingleton().load(weapon.second + ".mesh", "FFVII"));
+                ExportMesh(path, weapon_mesh);
+            }
+            catch (const Ogre::Exception& ex){
+                std::cerr << "[ERROR] Ogre exception converting weapon " << weapon.second << ": " << ex.what() << std::endl;
+            }
+        }
     }
     catch (const Ogre::Exception& ex){
         std::cerr << "[ERROR] Ogre exception converting battle model " << model.hrc <<": " << ex.what() << std::endl;
@@ -768,16 +884,64 @@ void BattleDataInstaller::WriteEffectModels(){
     }
     file << "}\n";
     WriteEffectSprites();
+    WriteEffectCameras();
+    WriteEffectMeshes();
+    WriteBattleCameras();
+}
+
+void BattleDataInstaller::WriteBattleCameras(){
+    // The scripts of the cameras of the battles (see BattleCameraScripts.h).
+    std::map<int, BattleCameraScripts::Set> sets;
+    for (int i = 0; i < 3; ++ i){
+        const std::string name = "data/battle/camdat" + std::to_string(i) + ".bin";
+        auto path = const_cast<DiskImage&>(disk_image_).filePath(name);
+        BattleCameraScripts::Set set;
+        if (path != nullptr && BattleCameraScripts::ReadFile(*path, set)) sets[i] = set;
+        else std::cerr << "[WARNING] Can't read " << name << "." << std::endl;
+    }
+    std::ofstream file(data_dir_ + "gamedata/battle_cameras.lua");
+    BattleCameraScripts::WriteLua(file, sets);
+}
+
+void BattleDataInstaller::WriteEffectMeshes(){
+    // The meshes of the effects that are in the data of ff7.exe, like the ground of Ifrit and the
+    // mountain of Ramuh (see ExeEffectMeshes.h). Names are the address of the block in the executable.
+    std::map<uint32_t, ExeEffectMeshes::Mesh> meshes;
+    auto exe_path = const_cast<DiskImage&>(disk_image_).filePath("ff7.exe");
+    if (exe_path == nullptr || !ExeEffectMeshes::Extract(*exe_path, meshes)){
+        std::cerr << "[WARNING] Can't read the meshes of the effects from ff7.exe." << std::endl;
+    }
+    std::ofstream file(data_dir_ + "gamedata/effect_meshes.lua");
+    ExeEffectMeshes::WriteLua(file, meshes);
+}
+
+void BattleDataInstaller::WriteEffectCameras(){
+    // The scripts of the cameras are in the data of ff7.exe, and are found from the code that
+    // uses them. Names are the address of the script in memory.
+    std::map<uint32_t, std::vector<int16_t>> scripts;
+    auto exe_path = const_cast<DiskImage&>(disk_image_).filePath("ff7.exe");
+    if (exe_path == nullptr || !ExeEffectCameras::Extract(*exe_path, scripts)){
+        std::cerr << "[WARNING] Can't read the camera scripts of the effects from ff7.exe." << std::endl;
+    }
+    std::ofstream file(data_dir_ + "gamedata/effect_cameras.lua");
+    file << "-- Camera scripts of the battle effects, read from ff7.exe. Game.EffectCameras[name] is a list\n"
+         << "-- of 16 bit words, with the address of the script in the executable as the name (like\n"
+         << "-- 0x8ae268). See scripts/battle/effect_camera.lua for the format.\n"
+         << "Game.EffectCameras = Game.EffectCameras or {}\n";
+    for (const auto& script : scripts){
+        file << "Game.EffectCameras[\"0x" << std::hex << script.first << std::dec << "\"] = {";
+        for (size_t i = 0; i < script.second.size(); ++ i){
+            if (i % 16 == 0) file << "\n    ";
+            file << script.second[i] << ", ";
+        }
+        file << "\n}\n";
+    }
 }
 
 void BattleDataInstaller::WriteEffectSprites(){
-    // The sprite files (.s) are lists of quads of a sprite sheet, after an 8 byte header ("# " and
-    // the number of frames). Layout found by comparing files, not documented. A quad has:
-    //   flags (4 bytes, plus 4 if the second 16 bit value is not 0),
-    //   draw offset X and Y, signed 16 bit, normally half of the size (centered),
-    //   position of the quad in the texture, U and V, 16 bit,
-    //   4 unknown bytes,
-    //   size of the quad in the texture, width and height in bytes (twice).
+    // The sprite files (.s) are lists of frames, and every frame a list of quads of a sprite sheet (see
+    // the layout below). They are written twice: all the quads one after the other (the first format,
+    // used by the Cure effect) and the frames with their quads (effect_animations.lua).
     // Textures are converted too, with the name of the effect folder as a prefix (common_ for the
     // archive root), to images/battle_fx, so they can be used as images of sprites.
     const std::string key_prefix = "ff7/data/battle/";
@@ -792,6 +956,13 @@ void BattleDataInstaller::WriteEffectSprites(){
          << "-- (ox, oy) and the flags. The names are the folder and the file, like common_iyashi.\n"
          << "-- Textures are in images/battle_fx, like common_iyashi00.png.\n"
          << "Game.EffectSprites = Game.EffectSprites or {}\n";
+    // (The list has the quads of all the frames in order, with the position of the corner as ox, oy.)
+    std::ofstream animations(data_dir_ + "gamedata/effect_animations.lua");
+    animations << "-- Frames of the sprite files (.SPT) of magic.lgp. Game.EffectAnimations[name] is a list of frames and\n"
+               << "-- every frame a list of quads: {x, y, u, v, w, h}, with the position of the corner and the size of the\n"
+               << "-- quad in units of 8 of the effect, and the place in the texture in pixels. The names are the folder\n"
+               << "-- and the file, like common_houden_2.\n"
+               << "Game.EffectAnimations = Game.EffectAnimations or {}\n";
     const std::string dir = output_dir_ + "temp/effects/";
     boost::filesystem::create_directories(data_dir_ + "images/battle_fx/");
     for (size_t f = 0; f < magic_lgp_files_.size(); f ++){
@@ -822,34 +993,58 @@ void BattleDataInstaller::WriteEffectSprites(){
             for (size_t b = 0; b < size; b ++) bytes[b] = sprite_file.readU8();
             // Only the files with the header of sprite lists.
             if (bytes[0] != 0x23 || bytes[1] != 0x20) continue;
-            // Each quad has 4 bytes of flags, 4 more if the second 16 bit value is not 0, and then 16
-            // bytes of data. The header count is of frames, not quads, so it's not used.
-            struct Quad{int ox, oy, u, v, w, h;};
-            std::vector<Quad> quads;
+            // After the header (the two characters, and the number of frames as a 32 bit value, at 4)
+            // there are the frames. Each one has two 16 bit values, the second is the number of quads,
+            // and then 20 bytes for every quad: flags (4 bytes), the position of the corner (x and y,
+            // 16 bits), the place in the texture (u and v, 16 bits), 4 more bytes, and the width
+            // (8 bits, twice) and the height (8 bits, twice). Positions and sizes are in units of 8 of
+            // the effect. Layout found in the code that draws them (0x598a7a), and all the files of
+            // magic.lgp end exactly where their last frame ends.
+            struct Quad{int x, y, u, v, w, h;};
+            std::vector<std::vector<Quad>> frames;
+            const uint32_t frame_count = bytes[4] | (bytes[5] << 8) | (bytes[6] << 16) | (static_cast<uint32_t>(bytes[7]) << 24);
             size_t p = 8;
             bool valid = true;
-            while (p < size){
+            for (uint32_t fr = 0; fr < frame_count && valid; ++ fr){
                 if (p + 4 > size){valid = false; break;}
-                const bool extra = (bytes[p + 2] | (bytes[p + 3] << 8)) != 0;
-                const size_t q = p + 4 + (extra ? 4 : 0);
-                if (q + 16 > size){valid = false; break;}
-                Quad quad;
-                quad.ox = static_cast<int16_t>(bytes[q] | (bytes[q + 1] << 8));
-                quad.oy = static_cast<int16_t>(bytes[q + 2] | (bytes[q + 3] << 8));
-                quad.u = bytes[q + 4] | (bytes[q + 5] << 8);
-                quad.v = bytes[q + 6] | (bytes[q + 7] << 8);
-                quad.w = bytes[q + 12];
-                quad.h = bytes[q + 13];
-                quads.push_back(quad);
-                p = q + 16;
+                const int count = static_cast<int16_t>(bytes[p + 2] | (bytes[p + 3] << 8));
+                p += 4;
+                if (count < 0 || p + static_cast<size_t>(count) * 20 > size){valid = false; break;}
+                std::vector<Quad> quads;
+                for (int q = 0; q < count; ++ q, p += 20){
+                    Quad quad;
+                    quad.x = static_cast<int16_t>(bytes[p + 4] | (bytes[p + 5] << 8));
+                    quad.y = static_cast<int16_t>(bytes[p + 6] | (bytes[p + 7] << 8));
+                    quad.u = static_cast<int16_t>(bytes[p + 8] | (bytes[p + 9] << 8));
+                    quad.v = static_cast<int16_t>(bytes[p + 10] | (bytes[p + 11] << 8));
+                    quad.w = bytes[p + 16];
+                    quad.h = bytes[p + 18];
+                    quads.push_back(quad);
+                }
+                frames.push_back(quads);
             }
-            if (!valid || quads.empty()) continue;
-            file << "Game.EffectSprites[\"" << key << "_" << EffectSafeName(EffectStem(name)) << "\"] = {\n";
-            for (const Quad& quad : quads){
-                file << "    {u = " << quad.u << ", v = " << quad.v << ", w = " << quad.w << ", h = " << quad.h
-                     << ", ox = " << quad.ox << ", oy = " << quad.oy << "},\n";
+            if (!valid || p != size || frames.empty()) continue;
+            const std::string sprite_name = key + "_" + EffectSafeName(EffectStem(name));
+            // All the quads one after the other, for the effects that pick them by number.
+            file << "Game.EffectSprites[\"" << sprite_name << "\"] = {\n";
+            for (const std::vector<Quad>& quads : frames){
+                for (const Quad& quad : quads){
+                    file << "    {u = " << quad.u << ", v = " << quad.v << ", w = " << quad.w << ", h = " << quad.h
+                         << ", ox = " << quad.x << ", oy = " << quad.y << "},\n";
+                }
             }
             file << "}\n";
+            // The frames, with their quads.
+            animations << "Game.EffectAnimations[\"" << sprite_name << "\"] = {\n";
+            for (const std::vector<Quad>& quads : frames){
+                animations << "    {";
+                for (size_t q = 0; q < quads.size(); ++ q){
+                    animations << (q > 0 ? ", " : "") << "{" << quads[q].x << ", " << quads[q].y << ", " << quads[q].u << ", "
+                               << quads[q].v << ", " << quads[q].w << ", " << quads[q].h << "}";
+                }
+                animations << "},\n";
+            }
+            animations << "}\n";
         }
     }
 }

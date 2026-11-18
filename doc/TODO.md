@@ -23,3 +23,12 @@ First step: play the scene with log level 3 and look at the time between the `di
 1/256 of a pixel per frame, sign of the speed) has not been checked against the original game. The far
 layer of mds5_4 has no such opcodes and still scrolls with the rest, and it is not known why it should
 not.
+
+## Battle: special limits
+
+Not done yet (kernel data in ff7.exe, ids 170-176, see `get_special_limit` in `battle_ui.lua`):
+
+- Cait Sith's Slots and Dice (additional effects 8 and 15, formula 6 with power 255): they need a small
+  interactive piece and the random effects of the reels.
+- Vincent's transformations (additional effect 3 with modifiers 0 to 3): they change the model, the
+  stats and the commands during the battle.

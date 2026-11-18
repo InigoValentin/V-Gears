@@ -137,6 +137,14 @@ void ScriptManager::InitBinds(){
       "set_model_rotation", &Entity::ScriptSetModelRotation,
       "set_blend", &Entity::ScriptSetBlend,
       "set_alpha", &Entity::ScriptSetAlpha,
+      "set_texture", &Entity::ScriptSetTexture,
+      "get_bone_position", &Entity::ScriptGetBonePosition,
+      "attach_model", sol::overload(
+        [](Entity& entity, const char* model, const int bone){
+            return entity.ScriptAttachModel(model, bone, 0.0f, 0.0f, 0.0f);
+        },
+        &Entity::ScriptAttachModel
+      ),
       "is_visible", &Entity::IsVisible,
       "set_move_auto_speed", &Entity::SetMoveAutoSpeed,
       "get_move_auto_speed", &Entity::GetMoveAutoSpeed,
@@ -233,6 +241,11 @@ void ScriptManager::InitBinds(){
       "remove_effect_model", &BattleManager::ScriptRemoveEffectModel,
       "has_attack", &BattleManager::HasAttackData,
       "set_camera", &BattleManager::ScriptSetCamera,
+      "set_camera_position", &BattleManager::ScriptSetCameraPosition,
+      "get_camera", &BattleManager::ScriptGetCamera,
+      "create_dynamic_mesh", &BattleManager::ScriptCreateDynamicMesh,
+      "set_dynamic_mesh", &BattleManager::ScriptSetDynamicMesh,
+      "remove_dynamic_mesh", &BattleManager::ScriptRemoveDynamicMesh,
       "get_layout", &BattleManager::ScriptGetLayout,
       "get_attack", [](BattleManager& manager, const int id, sol::this_state state) -> sol::object{
           sol::state_view view(state);
@@ -326,13 +339,22 @@ void ScriptManager::InitBinds(){
       "get_model_prefix", &Enemy::ScriptGetModelPrefix,
       "get_model", &Enemy::GetModel,
       "get_drop_id", &Enemy::ScriptGetDropId,
-      "get_drop_rate", &Enemy::ScriptGetDropRate
+      "get_drop_rate", &Enemy::ScriptGetDropRate,
+      "get_steal_count", &Enemy::ScriptGetStealCount,
+      "get_steal_id", &Enemy::ScriptGetStealId,
+      "get_steal_rate", &Enemy::ScriptGetStealRate,
+      "get_morph", [](const Enemy& enemy){return static_cast<int>(enemy.GetMorph());},
+      "get_manip_count", [](const Enemy& enemy){return static_cast<int>(enemy.GetManipulateAttacks().size());},
+      "get_manip_attack", [](const Enemy& enemy, const int index){
+          const std::vector<unsigned int> attacks = enemy.GetManipulateAttacks();
+          if (index < 0 || index >= static_cast<int>(attacks.size())) return -1;
+          return static_cast<int>(attacks[index]);
+      }
       // TODO: Implement cover flags.
       // TODO: Implement immunities
       // TODO: Implement elements
       // TODO: Implement stealable items
       // TODO: Implement manipulability status and attacks.
-      // TODO: Implement morph item
     );
 
     // Commands for the audio manager.
