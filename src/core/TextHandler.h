@@ -104,6 +104,19 @@ class TextHandler : public Ogre::Singleton<TextHandler>{
         TiXmlNode* GetDialog(const Ogre::String& name, float &width, float& height) const;
 
         /**
+         * Gets the plain text of a dialog node. The tags that don't hold text, such as the colour,
+         * are skipped (their content is kept), and the character tags are replaced by the name of
+         * the character.
+         *
+         * @param[in] node The node of the dialog.
+         * @param[in] character_name Gives the name of a character from its ID.
+         * @return The text.
+         */
+        static std::string ExtractText(
+          const TiXmlNode* node, const std::function<std::string(int)>& character_name
+        );
+
+        /**
          * Retrieves a dialog text by name.
          *
          * @param[in] name Text name or identifier.

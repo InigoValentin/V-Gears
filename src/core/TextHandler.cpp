@@ -83,15 +83,34 @@ TiXmlNode* TextHandler::GetDialog(const Ogre::String& name, float &width, float&
     return NULL;
 }
 
-std::string TextHandler::GetDialogText(const std::string name){
-    std::string text = "";
-    for (unsigned int i = 0; i < dialogs_.size(); ++ i){
-        if (dialogs_[i].name == name){
-            text = dialogs_[i].node->FirstChild()->ToText()->Value();
-            break;
+std::string TextHandler::ExtractText(
+  const TiXmlNode* node, const std::function<std::string(int)>& character_name
+){
+    std::string text;
+    if (node == nullptr) return text;
+    for (const TiXmlNode* child = node->FirstChild(); child; child = child->NextSibling()){
+        if (child->ToText() != nullptr){
+            text += child->ToText()->Value();
+        }
+        else if (child->ToElement() != nullptr){
+            if (child->ValueStr() == "character"){
+                int id = -1;
+                if (child->ToElement()->QueryIntAttribute("id", &id) == TIXML_SUCCESS)
+                    text += character_name(id);
+            }
+            else text += ExtractText(child, character_name);
         }
     }
     return text;
+}
+
+std::string TextHandler::GetDialogText(const std::string name){
+    for (unsigned int i = 0; i < dialogs_.size(); ++ i){
+        if (dialogs_[i].name == name){
+            return ExtractText(dialogs_[i].node, [this](int id){return GetCharacterName(id);});
+        }
+    }
+    return "";
 }
 void TextHandler::UnloadTexts(){
     for (unsigned int i = 0; i < texts_.size(); ++ i) delete texts_[i].node;
@@ -102,7 +121,7 @@ void TextHandler::UnloadTexts(){
 
 std::string TextHandler::GetCharacterName(int id){
     if (id >= 0 && id < 11) return character_names_[id];
-    else return std::string("UNKNOWN_CHAR_" + id);
+    else return "UNKNOWN_CHAR_" + std::to_string(id);
 }
 
 std::string TextHandler::GetPartyCharacterName(int position){

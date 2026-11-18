@@ -282,8 +282,11 @@ void FieldCodeGenerator::OnStartFunction(const Function& func){
         AddOutputLine("end", true, false);
     }
     // For lines, exit if they are off.
-    if (func.name == "on_approach" || func.name == "on_cross" || func.name == "on_near" || func.name == "on_leave"){
-        AddOutputLine("if self.on ~= nill and self.on == false then", false, true);
+    if (
+      func.name == "on_approach" || func.name == "on_cross" || func.name == "on_near"
+      || func.name == "on_near_once" || func.name == "on_leave"
+    ){
+        AddOutputLine("if self.on ~= nil and self.on == false then", false, true);
         AddOutputLine("return 0");
         AddOutputLine("end", true, false);
     }

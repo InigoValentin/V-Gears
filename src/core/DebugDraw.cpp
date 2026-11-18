@@ -419,6 +419,11 @@ void DebugDraw::renderQueueEnded(
 ){
     if (queueGroupId == Ogre::RENDER_QUEUE_OVERLAY){
         render_system_->clearFrameBuffer(Ogre::FBT_DEPTH);
+        // The text and the quads are given in screen coordinates. The background leaves its scroll
+        // in the view matrix, so without this they would move with it, but not at the same speed.
+        render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
+        render_system_->_setViewMatrix(Ogre::Matrix4::IDENTITY);
+        render_system_->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
         auto render_params= render_system_->getFixedFunctionParams(Ogre::TVC_NONE, Ogre::FOG_NONE);
         render_params->setConstant(
           Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY

@@ -144,6 +144,38 @@ BOOST_AUTO_TEST_CASE(TestFieldDecompilerNonWaitingAnimationsDontWait){
     BOOST_CHECK(output.find("animation_sync") == std::string::npos);
 }
 
+BOOST_AUTO_TEST_CASE(TestFieldDecompilerEventsOfALineDoNotRunWhileItIsOff){
+    // An entity whose script 5 (on_near_once) is its own code, and the other scripts share another.
+    std::vector<unsigned char> script(104, 0);
+    script[0] = 0x02;
+    script[1] = 0x05;
+    script[2] = 1;
+    script[9] = 2;
+    script[32] = 'D';
+    script[33] = 'o';
+    script[34] = 'o';
+    script[35] = 'r';
+    for (size_t index = 0; index < 32; ++index) script[40 + index * 2] = 104;
+    // The code of each script comes after the previous one. The first one has a LINE, which makes
+    // the entity a line, and its scripts the events of one.
+    script[40 + 5 * 2] = 118;
+    for (size_t index = 6; index < 32; ++index) script[40 + index * 2] = 119;
+    script.push_back(0xD0); // LINE, with six values of two bytes
+    for (int i = 0; i < 12; ++i) script.push_back(0);
+    script.push_back(0); // RET of the first scripts
+    script.push_back(0); // RET of on_near_once
+    script.push_back(0); // RET of the last scripts
+    script[4] = static_cast<unsigned char>(script.size());
+    script[5] = static_cast<unsigned char>(script.size() >> 8);
+    FieldScriptFormatter formatter;
+    const std::string output = FieldDecompiler::Decompile("synthetic", script, formatter).luaScript;
+    const size_t function = output.find("on_near_once = function(self)");
+    BOOST_REQUIRE(function != std::string::npos);
+    const size_t guard = output.find("if self.on ~= nil and self.on == false then", function);
+    const size_t body = output.find("--[[", function);
+    BOOST_CHECK(guard != std::string::npos && guard < body);
+}
+
 BOOST_AUTO_TEST_CASE(TestFieldDecompilerMovaWalksToTheEntityAndWaits){
     FieldScriptFormatter formatter;
     // MOVA 0: the only entity of the synthetic field.
