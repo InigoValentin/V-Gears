@@ -46,3 +46,21 @@ const InstPtr WorldCodeGenerator::FindLastCall(){
 }
 
 void WorldCodeGenerator::ProcessSpecialMetadata(const InstPtr inst, char c, int pos){}
+
+void WorldCodeGenerator::ProcessUnstructuredCondJump(InstVec& insts, const InstPtr inst){
+    // "Jump if false" pops the condition, and jumps when it is false.
+    const std::string condition = WorldEngine::AsCondition(stack_.Pop());
+    const uint32 dst_addr = inst->GetDestAddress();
+    if (is_label_pass_){
+        for (auto& i : insts){
+            if (i->GetAddress() == dst_addr){
+                i->SetLabelRequired(true);
+                break;
+            }
+        }
+    }
+    // The jump is taken when the condition is false: "not not x" is "x".
+    const std::string jump_if = condition.compare(0, 4, "not ") == 0
+      ? condition.substr(4) : "not " + condition;
+    AddOutputLine("if " + jump_if + " then " + target_lang_->Goto(dst_addr) + " end");
+}

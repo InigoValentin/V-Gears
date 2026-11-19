@@ -90,12 +90,24 @@ void WorldDisassembler::DoDisassemble(){
         this->stream_->Seek(code_offset);
         this->address_ = this->stream_->GetPosition();
         bool end = false;
+        // The farthest address that a jump of the script goes to. A return doesn't end the script
+        // while a jump goes after it.
+        uint32 farthest_jump_target = 0;
         for (;;){
             if (end) break;
             uint32 full_opcode = 0;
             uint16 opcode = this->stream_->ReadU16();
             std::string opcode_prefix;
-            if (opcode == 0x203) end = true;
+            if (opcode == 0x200 || opcode == 0x201){
+                const auto parameter_position = this->stream_->GetPosition();
+                const uint16 target = this->stream_->ReadU16();
+                this->stream_->Seek(parameter_position);
+                // Same address as the instruction addresses before they are divided by 2.
+                farthest_jump_target = std::max<uint32>(
+                  farthest_jump_target, (0x200 + target) * 2
+                );
+            }
+            if (opcode == 0x203) end = this->address_ >= farthest_jump_target;
             if (opcode >= 0x204 && opcode < 0x300)
                 ParseOpcode(opcode, "reset stack", new WorldKernelCallInstruction(), 0, "");
             else{
@@ -123,6 +135,9 @@ void WorldDisassembler::DoDisassemble(){
                         break;
                     case 0x11c:
                         ParseOpcode(opcode, "push word from bank 0", new WorldLoadBankInstruction(), 2, "w");
+                        break;
+                    case 0x11d:
+                        ParseOpcode(opcode, "push word from bank 1", new WorldLoadBankInstruction(), 2, "w");
                         break;
                     case 0x114:
                         ParseOpcode(opcode, "push bit from bank 0", new WorldLoadBankInstruction(), 2, "w");
@@ -152,6 +167,9 @@ void WorldDisassembler::DoDisassemble(){
                         );
                         break;
 
+                    case 0x01b:
+                        ParseOpcode(opcode, "push unknown 1b", new WorldSubStackInstruction(), 2, "");
+                        break;
                     case 0x061:
                         ParseOpcode(opcode, "push greater", new WorldSubStackInstruction(), 2, "");
                         break;
@@ -196,6 +214,15 @@ void WorldDisassembler::DoDisassemble(){
                         break;
                     case 0x015:
                         ParseOpcode(opcode, "push neg", new WorldSubStackInstruction(), 2, "");
+                        break;
+                    case 0x31b:
+                        ParseOpcode(opcode, "unknown 31b", new WorldKernelCallInstruction(), 0, "");
+                        break;
+                    case 0x33c:
+                        ParseOpcode(opcode, "unknown 33c", new WorldKernelCallInstruction(), 0, "");
+                        break;
+                    case 0x355:
+                        ParseOpcode(opcode, "unknown 355", new WorldKernelCallInstruction(), 0, "");
                         break;
                     case 0x320:
                         ParseOpcode(opcode, "unknown 320", new WorldKernelCallInstruction(), 0, "");

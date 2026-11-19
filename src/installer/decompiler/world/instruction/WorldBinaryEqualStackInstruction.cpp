@@ -28,6 +28,7 @@
 void WorldBinaryEqualStackInstruction::ProcessInst(
     Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
-    code_gen_data_ = "==";
-    BinaryOpStackInstruction::ProcessInst(function, stack, engine, code_gen);
+    const ValuePtr right = stack.Pop();
+    const ValuePtr left = stack.Pop();
+    stack.Push(new WorldEngine::BoolValue("(" + left->GetString() + " == " + right->GetString() + ")"));
 }

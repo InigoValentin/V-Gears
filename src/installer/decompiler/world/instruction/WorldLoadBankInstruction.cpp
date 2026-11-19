@@ -26,4 +26,19 @@
 
 void WorldLoadBankInstruction::ProcessInst(
   Function &function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
-){stack.Push(new WorldEngine::BankValue("Read(" + params_[0]->GetString() + ")"));}
+){
+    // The game variables are at the savemap from 0xBA4 (the story counter is the word at 0): the
+    // opcode says if the address is of a byte, a word (0x11c) or a bit (0x114). The second bank
+    // (0x119, 0x11d) is the memory of the script and the "special" ones (0x11b, 0x117) are the
+    // values that the engine gives to the script (how the world was entered...): they have the same
+    // addresses as the game variables, but are not them.
+    std::string function_name = "Read";
+    switch (GetOpcode()){
+        case 0x11c: function_name = "ReadWord"; break;
+        case 0x114: function_name = "ReadBit"; break;
+        case 0x119: case 0x11d: function_name = "ReadLocal"; break;
+        case 0x11b: case 0x117: function_name = "ReadSpecial"; break;
+        default: break;
+    }
+    stack.Push(new WorldEngine::BankValue(function_name + "(" + params_[0]->GetString() + ")"));
+}

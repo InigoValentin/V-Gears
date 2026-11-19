@@ -131,16 +131,11 @@ EntityContainer["WorldMapHighwind"].board = function(self)
 end
 EntityContainer["WorldMapHighwind"].unboard = function(self)
     if not is_unboarding_terrain_allowed(self) then
-        show_vehicle_error("The Highwind cannot be unboarded on this terrain.")
         return false
     end
+    -- The module lands the Highwind on the ground, wherever it was flying.
     if not world_map_module:unboard_vehicle(self.entity_name) then
         return false
-    end
-
-    local vehicle_entity = entity_manager:get_entity(self.entity_name)
-    if vehicle_entity then
-        vehicle_entity:move_by(0, -self.rise_amount, 0)
     end
     return true
 end
@@ -181,7 +176,6 @@ EntityContainer["WorldMapBuggy"].board = function(self)
 end
 EntityContainer["WorldMapBuggy"].unboard = function(self)
     if not is_unboarding_terrain_allowed(self) then
-        show_vehicle_error("The Buggy cannot be unboarded on this terrain.")
         return false
     end
     return world_map_module:unboard_vehicle(self.entity_name)
@@ -242,7 +236,6 @@ EntityContainer["WorldMapChocobo"].board = function(self)
 end
 EntityContainer["WorldMapChocobo"].unboard = function(self)
     if not is_unboarding_terrain_allowed(self) then
-        show_vehicle_error("The Chocobo cannot be unboarded on this terrain.")
         return false
     end
     return world_map_module:unboard_vehicle(self.entity_name)
@@ -276,7 +269,6 @@ EntityContainer["WorldMapSubmarine"].board = function(self)
 end
 EntityContainer["WorldMapSubmarine"].unboard = function(self)
     if not is_unboarding_terrain_allowed(self) then
-        show_vehicle_error("The Submarine cannot be unboarded on this terrain.")
         return false
     end
     return world_map_module:unboard_vehicle(self.entity_name)
@@ -312,7 +304,6 @@ EntityContainer["WorldMapTinyBronco"].board = function(self)
 end
 EntityContainer["WorldMapTinyBronco"].unboard = function(self)
     if not is_unboarding_terrain_allowed(self) then
-        show_vehicle_error("The Tiny Bronco cannot be unboarded on this terrain.")
         return false
     end
     return world_map_module:unboard_vehicle(self.entity_name)

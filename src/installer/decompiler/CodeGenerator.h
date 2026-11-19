@@ -198,6 +198,18 @@ class CodeGenerator {
         void ProcessCondJumpInst(const InstPtr inst);
 
         /**
+         * Processes a conditional jump that is not part of an if or a loop, because the graph was
+         * not analyzed. The default does nothing, so the condition is dropped.
+         *
+         * A generator that wants these jumps overrides it to output the jump with its condition
+         * and to mark the destination label as required.
+         *
+         * @param[in] insts All the instructions of the script.
+         * @param[in] inst The jump.
+         */
+        virtual void ProcessUnstructuredCondJump(InstVec& insts, const InstPtr inst);
+
+        /**
          * Indents a string according to the current indentation level.
          *
          * @param[in] s The string to indent.

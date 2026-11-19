@@ -30,6 +30,9 @@
     <script file="scripts/field.lua" />
     <script file="scripts/worldmap/triangle_triggers.lua" />
     <script file="scripts/worldmap/vehicles.lua" />
+    <script file="scripts/worldmap/world_model_table.lua" />
+    <script file="scripts/worldmap/world_vm.lua" />
+    <script file="scripts/worldmap/script_stubs.lua" />
     <script file="scripts/battle_ai.lua" />
     <script file="scripts/battle/battle_ai_vm.lua" />
     <script file="scripts/battle/battle_camera.lua" />

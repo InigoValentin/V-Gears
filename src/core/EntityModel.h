@@ -63,6 +63,7 @@ class EntityModel : public Entity{
         virtual float GetAnimationLength(const Ogre::String& animation) const;
 
         virtual unsigned int GetAnimationCount() const;
+        virtual Ogre::String GetAnimationName(const unsigned int index) const;
 
         Ogre::Entity* GetModel();
 
@@ -100,6 +101,32 @@ class EntityModel : public Entity{
          * @param[in] animation The name of the animation to resume.
          */
         virtual void PlayAnimationContinue(const Ogre::String& animation);
+
+        /**
+         * Stops the animation that is playing, and leaves the model in its bind pose.
+         */
+        void StopAnimation();
+
+        /**
+         * Shows the first frame of an animation and keeps it still. Calling it again with the same
+         * animation does nothing. {@see UnfreezeAnimation()} makes it play.
+         *
+         * @param[in] animation The name of the animation.
+         */
+        void PlayAnimationPaused(const Ogre::String& animation);
+
+        /**
+         * Makes an animation that was paused with {@see PlayAnimationPaused()} play again.
+         */
+        void UnfreezeAnimation();
+
+        /**
+         * Gets if the model has an animation.
+         *
+         * @param[in] animation The name of the animation.
+         * @return True if it has it.
+         */
+        bool HasAnimation(const Ogre::String& animation) const;
 
         /**
          * Updates the animation.
@@ -140,6 +167,9 @@ class EntityModel : public Entity{
          * The current animation state.
          */
         Ogre::AnimationState* animation_current_;
+
+        /// True while {@see PlayAnimationPaused()} keeps the animation still.
+        bool animation_frozen_ = false;
 
         /**
          * Blend mode of the model, one of {@see Entity::EffectBlend}.

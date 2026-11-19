@@ -726,6 +726,26 @@ const Ogre::String& Entity::GetCurrentAnimationName() const{return animation_cur
 
 Entity::AnimationState Entity::GetAnimationState() const{return animation_state_;}
 
+Ogre::String Entity::GetAnimationName(const unsigned int) const{return "";}
+
+void Entity::ScriptPlayAnimationIndex(const unsigned int index){
+    const Ogre::String name = GetAnimationName(index);
+    if (name.empty()){
+        LOG_ERROR("There is no animation number " + std::to_string(index) + ".");
+        return;
+    }
+    PlayAnimation(name, Entity::REQUESTED_ANIMATION, Entity::PLAY_DEFAULT, 0, -1);
+}
+
+void Entity::ScriptSetDefaultAnimationIndex(const unsigned int index){
+    const Ogre::String name = GetAnimationName(index);
+    if (name.empty()){
+        LOG_ERROR("There is no animation number " + std::to_string(index) + ".");
+        return;
+    }
+    animation_default_ = name;
+}
+
 void Entity::ScriptPlayAnimation(const char* name){
     PlayAnimation(Ogre::String(name), Entity::REQUESTED_ANIMATION, Entity::PLAY_DEFAULT, 0, -1);
 }

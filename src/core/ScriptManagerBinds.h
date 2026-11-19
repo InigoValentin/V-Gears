@@ -174,7 +174,10 @@ void ScriptManager::InitBinds(){
       ),
       "get_animation_length", &Entity::ScriptGetAnimationLength,
       "get_animation_count", &Entity::GetAnimationCount,
-      "set_default_animation", &Entity::ScriptSetDefaultAnimation
+      "get_animation_name", &Entity::GetAnimationName,
+      "play_animation_index", &Entity::ScriptPlayAnimationIndex,
+      "set_default_animation", &Entity::ScriptSetDefaultAnimation,
+      "set_default_animation_index", &Entity::ScriptSetDefaultAnimationIndex
     );
     sol::table entity_type = lua["Entity"];
     BindYielding(entity_type, "move_sync", &Entity::ScriptMoveSync);
@@ -626,14 +629,24 @@ void ScriptManager::InitBinds(){
     // Commands to initiate modules
     lua.new_usertype<VGears::WorldmapModule>(
       "world_map_module",
-      "init", &VGears::WorldmapModule::Init,
+      "init", sol::overload(
+        [](VGears::WorldmapModule& module){module.Init(0);},
+        [](VGears::WorldmapModule& module, const int map_id){module.Init(map_id);}
+      ),
       "suspend", &VGears::WorldmapModule::Suspend,
       "clear_vehicle_terrains", &VGears::WorldmapModule::ClearVehicleTerrains,
       "add_vehicle_terrain", &VGears::WorldmapModule::AddVehicleTerrain,
       "get_terrain_type_under_entity", &VGears::WorldmapModule::GetTerrainTypeUnderEntity,
       "get_terrain_triangle_under_entity", &VGears::WorldmapModule::GetTerrainTriangleUnderEntity,
       "unboard_vehicle", &VGears::WorldmapModule::UnboardVehicle,
-      "set_encounters_locked", &VGears::WorldmapModule::SetEncountersLocked
+      "set_encounters_locked", &VGears::WorldmapModule::SetEncountersLocked,
+      "set_model_orientation", &VGears::WorldmapModule::SetModelOrientation,
+      "set_model_offset", &VGears::WorldmapModule::SetModelOffset,
+      "set_entity_altitude", &VGears::WorldmapModule::SetEntityAltitude,
+      "enter", &VGears::WorldmapModule::Enter,
+      "set_spawn", &VGears::WorldmapModule::SetSpawn,
+      "set_vehicle_hidden", &VGears::WorldmapModule::SetVehicleHidden,
+      "add_world_model", &VGears::WorldmapModule::AddWorldModelFromScript
     );
 
     // Register all command handlers

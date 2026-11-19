@@ -366,7 +366,13 @@ System["MapChanger"] = {
         if self.map_name ~= "" then
             player_lock(true) -- disable menu and pc movement while load map
             script:request_end_sync(Script.UI, "Fade", "fade_out", 0)
-            map(self.map_name)
+            -- The fields go to the world map as "wm<n>", n being the FIELD.TBL record of the exit.
+            local world_record = tonumber(string.match(self.map_name, "^wm(%d+)$"))
+            if world_record then
+                enter_world_map(world_record, self.point_name)
+            else
+                map(self.map_name)
+            end
             player_lock(false) -- enable menu and pc movement after load map
             self.current_map_name = self.map_name
             self.map_name = ""

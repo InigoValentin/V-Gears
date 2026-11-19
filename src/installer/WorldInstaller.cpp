@@ -31,6 +31,8 @@
 #include "data/VGearsLGPArchive.h"
 #include "data/WorldMapWalkmesh.h"
 #include "data/VGearsHRCFileManager.h"
+#include "data/VGearsAFileManager.h"
+#include "WorldModelTable.h"
 #include "data/FF7Data.h"
 #include "decompiler/ControlFlow.h"
 #include "decompiler/DecompilerException.h"
@@ -401,17 +403,25 @@ void WorldInstaller::ProcessModels(){
             auto mesh_name = VGears::NameLookup::model(hrc_base_name) + ".mesh";
             Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(mesh_name, "FFVII"));
             Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
-            // TODO: a files??
-            /*for (std::string anim : model.a){
-                VGears::AFileManager &afl_mgr(VGears::AFileManager::GetSingleton());
-                Ogre::String a_base_name;
-                VGears::StringUtil::splitBase(anim, a_base_name);
-                VGears::AFilePtr a
-                  = afl_mgr.load(a_base_name + ".a", "FFVII").staticCast<VGears::AFile>();
-                // Convert the FF7 name to a more readable name set in the meta data.
-                VGears::StringUtil::splitBase(anim, base_name);
-                a->AddTo(skeleton, VGears::NameLookup::Animation(base_name));
-            }*/
+            // The animations of the model, from the tables of ff7.exe (see WorldModelTable.h). Their names
+            // are the ones of the A files, in lower case.
+            for (const WorldModelTable::Model& model : WorldModelTable::MODELS){
+                if (hrc_base_name != model.hrc) continue;
+                for (unsigned int i = 0; i < model.animation_count; ++ i){
+                    const std::string animation_file = std::string(model.animations[i]) + ".a";
+                    try{
+                        VGears::AFilePtr a = VGears::AFileManager::GetSingleton().load(
+                          animation_file, "FFVII"
+                        ).staticCast<VGears::AFile>();
+                        a->AddTo(skeleton, model.animations[i]);
+                    }
+                    catch (const std::exception& ex){
+                        std::cerr << "[ERROR] Exception converting animation " << animation_file << " of world model "
+                          << file_name << ": " << ex.what() << std::endl;
+                    }
+                }
+                break;
+            }
             ExportMesh(data_dir_ + "models/world/", mesh);
             // Models can share a skeleton name with different bones (also with field models), so drop this one
             // (with its skeleton and mesh) before converting the next.
@@ -868,6 +878,24 @@ bool WorldInstaller::GenerateScripts(
                     << " = System.WorldMap.triangle_functions[" << mesh_index << "] or {}\n"
                     << "System.WorldMap.triangle_functions[" << mesh_index << "]["
                     << static_cast<unsigned int>(mesh_function_id) << "] = " << function_index << "\n";
+        }
+
+        // The functions that run when an entity of a type is created, and for the other events of the
+        // entities. The type is in the bits 8 to 13 of the type of the function, and the event in the low byte.
+        script_file << "System.WorldMap.entity_functions = {}\n";
+        for (size_t function_index = 0; function_index < generated_functions.size(); ++function_index){
+                if (!generated_functions[function_index]) continue;
+                const size_t type_offset = function_index * 4;
+                if (type_offset + 1 >= event_data.size()) continue;
+                const uint16 function_type = static_cast<uint16>(event_data[type_offset])
+                    | static_cast<uint16>(event_data[type_offset + 1] << 8);
+                if ((function_type >> 14) != 1) continue;
+                const unsigned int entity_type = (function_type >> 8) & 0x3F;
+                const unsigned int event = function_type & 0xFF;
+                script_file << "System.WorldMap.entity_functions[" << entity_type << "] = "
+                    << "System.WorldMap.entity_functions[" << entity_type << "] or {}\n"
+                    << "System.WorldMap.entity_functions[" << entity_type << "][" << event << "] = "
+                    << function_index << "\n";
         }
 
         script_file << "System.WorldMap.field_table = {}\n";

@@ -115,9 +115,22 @@ ARGUMENT_ORDER CodeGenerator::GetBinaryOrder(){return bin_order_;}
 
 void CodeGenerator::ProcessInst(Function& function, InstVec& insts, const InstPtr inst){
     inst->ProcessInst(function, stack_, engine_, this);
-    if (inst->IsCondJump()) ProcessCondJumpInst(inst);
+    if (inst->IsCondJump()){
+        switch (cur_group_->type){
+            case GROUP_TYPE_IF:
+            case GROUP_TYPE_WHILE:
+            case GROUP_TYPE_DO_WHILE:
+                ProcessCondJumpInst(inst);
+                break;
+            default:
+                ProcessUnstructuredCondJump(insts, inst);
+                break;
+        }
+    }
     else if (inst->IsUncondJump()) ProcessUncondJumpInst(function, insts, inst);
 }
+
+void CodeGenerator::ProcessUnstructuredCondJump(InstVec&, const InstPtr){}
 
 void CodeGenerator::ProcessUncondJumpInst(Function& function, InstVec& insts, const InstPtr inst){
     switch (cur_group_->type){

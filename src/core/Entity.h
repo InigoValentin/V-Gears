@@ -550,6 +550,28 @@ class Entity{
         virtual unsigned int GetAnimationCount() const;
 
         /**
+         * Gets the name of an animation by its position, in the order they were added to the model.
+         *
+         * @param[in] index Position of the animation, starting at 0.
+         * @return The name, empty if there is no such animation.
+         */
+        virtual Ogre::String GetAnimationName(const unsigned int index) const;
+
+        /**
+         * Plays, looped, the animation at a position (see GetAnimationName).
+         *
+         * @param[in] index Position of the animation, starting at 0.
+         */
+        void ScriptPlayAnimationIndex(const unsigned int index);
+
+        /**
+         * Sets the default animation to the one at a position (see GetAnimationName).
+         *
+         * @param[in] index Position of the animation, starting at 0.
+         */
+        void ScriptSetDefaultAnimationIndex(const unsigned int index);
+
+        /**
          * Retrieves the duration of an animation.
          *
          * To be called from Lua scripts.
