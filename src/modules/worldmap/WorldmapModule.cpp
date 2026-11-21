@@ -40,6 +40,11 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreLogManager.h>
 #include <OgreTextureManager.h>
+#include "common/VGearsApplication.h"
+#include <Overlay/OgreOverlay.h>
+#include <Overlay/OgreOverlayContainer.h>
+#include <Overlay/OgreOverlayManager.h>
+#include <Overlay/OgrePanelOverlayElement.h>
 #include <OgreMaterialManager.h>
 #include <OgreResourceGroupManager.h>
 #include "data/VGearsTexFile.h"
@@ -386,8 +391,29 @@ namespace VGears {
         {278, "wod-e2", 32, 32, 64, 224},
         {279, "wood", 64, 64, 192, 0},
         {280, "wood_d", 64, 64, 192, 160},
-        {281, "wtrk", 32, 64, 64, 96}
+        {281, "wtrk", 32, 64, 64, 96},
+        // The ids 282-293 (ff7.exe table of u, v at 0x95b9f0) are the ones that WM2 uses (its ids + 282).
+        {282, "cltr", 128, 128, 0, 0},
+        {283, "lake_a", 128, 256, 0, 0},
+        {284, "rock", 256, 256, 0, 0},
+        {285, "scave", 256, 256, 0, 0},
+        {286, "ssand", 256, 256, 0, 0},
+        {287, "swall02", 256, 256, 0, 0},
+        {288, "sng01", 128, 128, 128, 0},
+        {289, "sng02", 128, 128, 128, 0},
+        {290, "hokola01", 64, 64, 0, 0},
+        {291, "hokola02", 64, 64, 0, 128},
+        {292, "snwfldl", 64, 64, 0, 64},
+        {293, "snwfld2", 64, 64, 0, 192}
     };
+
+    /**
+     * The ids of the textures of WM2 and WM3 start after the ones of WM0 in the table of the game:
+     * WM2 uses 0-7 as 282-289 and WM3 0-3 as 290-293 (checked with the ranges of their UVs).
+     */
+    static uint16 GetTextureIdOffset(const uint8 map_id){
+        return map_id == 1 ? 282 : (map_id == 2 ? 290 : 0);
+    }
 
     static const char* WORLD_MAP_RESOURCE_GROUP = "WORLD_MAP";
 
@@ -401,7 +427,6 @@ namespace VGears {
         case WalkType::WASTELAND:
         case WalkType::SNOW:
         case WalkType::RIVERSIDE:
-        case WalkType::CLIFF:
         case WalkType::COREL_BRIDGE:
         case WalkType::WUTAI_BRIDGE:
         case WalkType::HILL_SIDE:
@@ -510,6 +535,19 @@ namespace VGears {
 
     /// Rotation speed of the camera with L1 and R1, in radians per second.
     static const float CAMERA_ROTATION_SPEED = 1.5f;
+
+    /// Snow map (WM3): the camera turns by itself after this many seconds (random in the range) ...
+    static const float SNOW_CAMERA_MIN_WAIT = 6.0f;
+    static const float SNOW_CAMERA_MAX_WAIT = 12.0f;
+    /// ... by this many degrees (random in the range, to any side), at the speed of the manual rotation.
+    static const float SNOW_CAMERA_MIN_DEGREES = 30.0f;
+    static const float SNOW_CAMERA_MAX_DEGREES = 160.0f;
+    /// Snow map (WM3): how many poles can exist at the same time.
+    static const size_t SNOW_MAX_POLES = 4;
+
+    /** Distances (from the camera, 1 map block = 2 units) where the black fog of WM2 starts and is total. */
+    static const float UNDERWATER_FOG_START = 2.0f;
+    static const float UNDERWATER_FOG_END = 6.0f;
 
     /// Turning speed of the flying vehicles, in radians per second.
     static const float FLIGHT_TURN_SPEED = 1.5f;
@@ -670,9 +708,8 @@ namespace VGears {
       }
     };
 
-    static TexturePtr LoadWorldMapTexture(uint16 texture_id){
-        const std::string texture_name
-          = std::string(textures[texture_id].name) + ".tex";
+    static TexturePtr LoadWorldMapTexture(const std::string& name){
+        const std::string texture_name = name + ".tex";
         Ogre::DataStreamPtr stream
           = ResourceGroupManager::getSingleton().openResource(
               texture_name, WORLD_MAP_RESOURCE_GROUP, nullptr, true
@@ -685,7 +722,7 @@ namespace VGears {
           tex_file.GetImageData()
         );
         TexturePtr texture = Ogre::TextureManager::getSingleton().createManual(
-          std::string("WorldMapTex_") + textures[texture_id].name,
+          std::string("WorldMapTex_") + name,
           ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D,
           image_data->width, image_data->height, 0, image_data->format, TU_STATIC
         );
@@ -696,6 +733,135 @@ namespace VGears {
         return texture;
     }
 
+
+    /**
+     * Animated textures (water, shores, rivers, waterfalls, swamps). The original game has sets of
+     * frames named by the first one plus a number (ff7.exe 0x95b880: fall1-8, riv_l1-4, ...). The
+     * triangles use the first frame, and the material of it shows the frames in turn.
+     */
+    struct AnimatedTextureSet{
+        const char* prefix;
+        int frames;
+    };
+
+    static const AnimatedTextureSet ANIMATED_TEXTURES[] = {
+        {"we_s", 8}, {"fall", 8}, {"uf", 4}, {"lst", 4}, {"sst", 4}, {"rm", 4}, {"ds", 4}, {"sh", 4},
+        {"ssee", 4}, {"riv_l", 4}, {"ds_s", 4}, {"sh_s", 4}, {"sse_s", 4}, {"swp", 4}, {"dsee", 4},
+        {"shlm_", 4}, {"des0", 4}, {"edes0", 4}, {"rivs", 4}
+    };
+
+    /** Seconds that each frame of the animated textures lasts (the original timing is not known). */
+    static const float ANIMATED_TEXTURE_FRAME_SECONDS = 0.125f;
+
+    static void AnimateWorldMapTextures(const float delta_time){
+        static float elapsed = 0;
+        static long last_step = -1;
+        elapsed += delta_time;
+        const long step = static_cast<long>(elapsed / ANIMATED_TEXTURE_FRAME_SECONDS);
+        if (step == last_step) return;
+        last_step = step;
+        for (const AnimatedTextureSet& set : ANIMATED_TEXTURES){
+            MaterialPtr material = Ogre::MaterialManager::getSingleton().getByName(
+              std::string("WorldMap_") + set.prefix + "1"
+            );
+            if (material.isNull()) continue;
+            const std::string frame_name = std::string(set.prefix) + std::to_string(step % set.frames + 1);
+            const std::string texture_name = std::string("WorldMapTex_") + frame_name;
+            try{
+                if (!Ogre::TextureManager::getSingleton().resourceExists(texture_name)){
+                    if (!ResourceGroupManager::getSingleton().resourceExists(
+                      WORLD_MAP_RESOURCE_GROUP, frame_name + ".tex"
+                    )) continue;
+                    LoadWorldMapTexture(frame_name);
+                }
+                material->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(texture_name);
+            }
+            catch (const Ogre::Exception&){}
+        }
+    }
+
+
+    /**
+     * The blizzard of WM3: two layers of the unused textures snow4 (cloud mist) and snow5 (dark blotches)
+     * drift over the screen at different speeds. How the original draws it is not known.
+     */
+    struct SnowLayer{
+        const char* texture;
+        float alpha;
+        float scroll_u;
+        float scroll_v;
+        float tiles_x;
+        float tiles_y;
+    };
+
+    static const SnowLayer SNOW_LAYERS[] = {
+        // The same texture three times, with other size, speed and direction (the opacities add up).
+        {"snow4", 0.28f, 0.030f, 0.150f, 0.6f, 0.45f},
+        {"snow4", 0.22f, -0.070f, 0.240f, 0.5f, 0.4f},
+        {"snow4", 0.18f, 0.105f, 0.345f, 0.8f, 0.6f}
+        // HIDDEN: {"snow5", 0.30f, -0.015f, 0.090f, 1.0f, 0.75f}
+    };
+
+    static void SetSnowOverlay(const bool visible){
+        Ogre::OverlayManager& manager = Ogre::OverlayManager::getSingleton();
+        Ogre::Overlay* overlay = manager.getByName("WorldMapSnow");
+        if (overlay == nullptr){
+            if (!visible) return;
+            // The engine doesn't draw the overlays of Ogre unless its system listens to the scene.
+            Ogre::OverlaySystem* overlay_system = VGears::Application::getSingleton().GetOverlaySystem();
+            if (overlay_system != nullptr){
+                Root::getSingleton().getSceneManager("Scene")->addRenderQueueListener(overlay_system);
+            }
+            overlay = manager.create("WorldMapSnow");
+            overlay->setZOrder(100);
+            int index = 0;
+            for (const SnowLayer& layer : SNOW_LAYERS){
+                // The same texture can be in several layers: the materials and panels are by index.
+                const std::string name = std::string("WorldMapSnow_") + std::to_string(index) + "_" + layer.texture;
+                try{
+                    if (!Ogre::TextureManager::getSingleton().resourceExists(std::string("WorldMapTex_") + layer.texture)){
+                        LoadWorldMapTexture(layer.texture);
+                    }
+                }
+                catch (const Ogre::Exception& exception){
+                    LogManager::getSingleton().logMessage(
+                      "Failed to load the snow texture " + std::string(layer.texture) + ": " + exception.getDescription()
+                    );
+                    continue;
+                }
+                MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
+                  name, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
+                );
+                Pass* pass = material->getTechnique(0)->getPass(0);
+                pass->setLightingEnabled(false);
+                pass->setDepthCheckEnabled(false);
+                pass->setDepthWriteEnabled(false);
+                pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+                Ogre::TextureUnitState* unit = pass->createTextureUnitState(std::string("WorldMapTex_") + layer.texture);
+                unit->setTextureAddressingMode(Ogre::TextureUnitState::TAM_WRAP);
+                unit->setAlphaOperation(Ogre::LBX_MODULATE, Ogre::LBS_TEXTURE, Ogre::LBS_MANUAL, 1.0f, layer.alpha);
+                unit->setScrollAnimation(layer.scroll_u, layer.scroll_v);
+                Ogre::PanelOverlayElement* panel = static_cast<Ogre::PanelOverlayElement*>(
+                  manager.createOverlayElement("Panel", name + "_panel")
+                );
+                panel->setMetricsMode(Ogre::GMM_RELATIVE);
+                panel->setPosition(0.0f, 0.0f);
+                panel->setDimensions(1.0f, 1.0f);
+                panel->setMaterialName(name);
+                panel->setTiling(layer.tiles_x, layer.tiles_y);
+                overlay->add2D(panel);
+                ++index;
+            }
+        }
+        if (visible) overlay->show();
+        else overlay->hide();
+        LogManager::getSingleton().logMessage(
+          std::string("World map snow overlay ") + (visible ? "shown" : "hidden") + ", layers: "
+          + std::to_string(overlay->get2DElements().size())
+        );
+    }
+
+
     static MaterialPtr LoadTextureMaterial(uint16 texture_id){
         const std::string material_name
           = std::string("WorldMap_") + textures[texture_id].name;
@@ -703,7 +869,7 @@ namespace VGears {
           = Ogre::MaterialManager::getSingleton().getByName(material_name);
         // The textures and materials are kept when a map is replaced, and the maps share them.
         if (material.isNull()){
-            TexturePtr texture = LoadWorldMapTexture(texture_id);
+            TexturePtr texture = LoadWorldMapTexture(textures[texture_id].name);
             material = Ogre::MaterialManager::getSingleton().create(
               material_name, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
             );
@@ -837,8 +1003,13 @@ namespace VGears {
           ->createChildSceneNode("WorldMapTerrain");
       }
       world_map_node_->setVisible(true);
-        const std::vector<VGears::WorldmapFileSerializer::Block> blocks
+        std::vector<VGears::WorldmapFileSerializer::Block> blocks
           = LoadWorldMap("WM" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id_]) + ".MAP");
+        if (GetTextureIdOffset(map_id_) != 0){
+          for (auto& block : blocks) for (auto& mesh : block.meshes) for (auto& triangle : mesh.triangles){
+            triangle.TextureInfo += GetTextureIdOffset(map_id_);
+          }
+        }
         const size_t texture_count = sizeof(textures) / sizeof(textures[0]);
         // WM0 has extra blocks after the 9x7 grid: the alternate shapes of the story progress.
         const size_t base_block_count = map_id_ == 0
@@ -971,6 +1142,8 @@ namespace VGears {
             texture_object.second->end();
             world_map_node_->attachObject(texture_object.second);
         }
+
+        BuildTerrainIndex();
 
         const float map_center_x = space * (origin_x_ * 4.0f + grid_width_ * 2.0f);
         const float map_center_z = space * (origin_y_ * 4.0f + grid_height_ * 2.0f);
@@ -1255,13 +1428,73 @@ namespace VGears {
         }
     }
 
+    void WorldmapModule::BuildTerrainIndex(){
+        terrain_grid_.clear();
+        terrain_grid_columns_ = 0;
+        terrain_grid_rows_ = 0;
+        if (terrain_triangles_.empty()) return;
+        float min_x = std::numeric_limits<float>::max(), min_z = min_x;
+        float max_x = -min_x, max_z = -min_x;
+        for (const TerrainTriangle& triangle : terrain_triangles_){
+            for (const Ogre::Vector3& vertex : triangle.vertices){
+                min_x = std::min(min_x, vertex.x); max_x = std::max(max_x, vertex.x);
+                min_z = std::min(min_z, vertex.z); max_z = std::max(max_z, vertex.z);
+            }
+        }
+        // A cell is as big as a mesh of the map (a triangle almost always touches only one).
+        terrain_grid_cell_ = From16BitFixedPoint(8182);
+        terrain_grid_min_x_ = min_x;
+        terrain_grid_min_z_ = min_z;
+        terrain_grid_columns_ = static_cast<int>((max_x - min_x) / terrain_grid_cell_) + 1;
+        terrain_grid_rows_ = static_cast<int>((max_z - min_z) / terrain_grid_cell_) + 1;
+        terrain_grid_.resize(static_cast<size_t>(terrain_grid_columns_) * terrain_grid_rows_);
+        // The tolerance of the search (a point a little outside of the edge still counts).
+        const float margin = 0.01f;
+        for (size_t i = 0; i < terrain_triangles_.size(); ++i){
+            const TerrainTriangle& triangle = terrain_triangles_[i];
+            float t_min_x = triangle.vertices[0].x, t_max_x = t_min_x;
+            float t_min_z = triangle.vertices[0].z, t_max_z = t_min_z;
+            for (const Ogre::Vector3& vertex : triangle.vertices){
+                t_min_x = std::min(t_min_x, vertex.x); t_max_x = std::max(t_max_x, vertex.x);
+                t_min_z = std::min(t_min_z, vertex.z); t_max_z = std::max(t_max_z, vertex.z);
+            }
+            const int column_0 = std::max(0, static_cast<int>(std::floor((t_min_x - margin - min_x) / terrain_grid_cell_)));
+            const int column_1 = std::min(terrain_grid_columns_ - 1, static_cast<int>(std::floor((t_max_x + margin - min_x) / terrain_grid_cell_)));
+            const int row_0 = std::max(0, static_cast<int>(std::floor((t_min_z - margin - min_z) / terrain_grid_cell_)));
+            const int row_1 = std::min(terrain_grid_rows_ - 1, static_cast<int>(std::floor((t_max_z + margin - min_z) / terrain_grid_cell_)));
+            for (int row = row_0; row <= row_1; ++row){
+                for (int column = column_0; column <= column_1; ++column){
+                    terrain_grid_[static_cast<size_t>(row) * terrain_grid_columns_ + column].push_back(static_cast<uint32>(i));
+                }
+            }
+        }
+        size_t entries = 0;
+        for (const auto& cell : terrain_grid_) entries += cell.size();
+        LogManager::getSingleton().logMessage(
+          "World map terrain index: " + std::to_string(terrain_triangles_.size()) + " triangles in "
+          + std::to_string(terrain_grid_columns_) + "x" + std::to_string(terrain_grid_rows_) + " cells, "
+          + std::to_string(entries) + " entries"
+        );
+    }
+
     bool WorldmapModule::FindWalkableSurface(
       const Ogre::Vector3& position, Ogre::Vector3& surface, bool grass_only,
-      bool require_walkable, uint8* walkability_type, size_t* triangle_index
+      bool require_walkable, uint8* walkability_type, size_t* triangle_index, bool use_index
     ) const{
         bool found = false;
         Ogre::Real closest_height_distance = std::numeric_limits<Ogre::Real>::max();
-        for (size_t i = 0; i < terrain_triangles_.size(); ++i){
+        // Only the triangles of the cell of the position (the index is in ascending order, so the result
+        // is the same as with all of them).
+        const std::vector<uint32>* cell_triangles = nullptr;
+        if (use_index && !terrain_grid_.empty()){
+            const int column = static_cast<int>(std::floor((position.x - terrain_grid_min_x_) / terrain_grid_cell_));
+            const int row = static_cast<int>(std::floor((position.z - terrain_grid_min_z_) / terrain_grid_cell_));
+            if (column < 0 || row < 0 || column >= terrain_grid_columns_ || row >= terrain_grid_rows_) return false;
+            cell_triangles = &terrain_grid_[static_cast<size_t>(row) * terrain_grid_columns_ + column];
+        }
+        const size_t candidate_count = cell_triangles != nullptr ? cell_triangles->size() : terrain_triangles_.size();
+        for (size_t candidate = 0; candidate < candidate_count; ++candidate){
+            const size_t i = cell_triangles != nullptr ? (*cell_triangles)[candidate] : candidate;
             const TerrainTriangle& triangle = terrain_triangles_[i];
             if (grass_only
               && triangle.walkability_type != VGears::WorldmapFileSerializer::GRASS){
@@ -1540,6 +1773,19 @@ namespace VGears {
         if (entity_name != nullptr) hidden_vehicles_.insert(entity_name);
     }
 
+    void WorldmapModule::SetSpeed(const char* name, const float speed){
+        if (name != nullptr && speed > 0.0f) speeds_[name] = speed;
+    }
+
+    void WorldmapModule::SetCamera(const char* name, const float distance, const float pitch_degrees){
+        if (name != nullptr && distance > 0.0f) camera_settings_[name] = {distance, pitch_degrees};
+    }
+
+    float WorldmapModule::GetSpeed(const char* name, const float default_speed) const{
+        const auto speed = speeds_.find(name);
+        return speed == speeds_.end() ? default_speed : speed->second;
+    }
+
     void WorldmapModule::SetSpawn(const char* entity_name, const float x, const float z){
         if (entity_name == nullptr) return;
         spawn_overrides_[entity_name] = Ogre::Vector2(x, z);
@@ -1673,7 +1919,9 @@ namespace VGears {
               Ogre::Math::Sin(Ogre::Radian(flight_heading_)), 0.0f,
               Ogre::Math::Cos(Ogre::Radian(flight_heading_))
             );
-            requested_position += direction * From16BitFixedPoint(8182) * 0.45f * 2.0f * delta_time;
+            requested_position += direction * delta_time * GetSpeed(
+              highwind ? "highwind" : "submarine", From16BitFixedPoint(8182) * 0.45f * 2.0f
+            );
         }
 
         // The terrain below. If the vehicle can't go there, it stays but can still go up or down.
@@ -1699,6 +1947,18 @@ namespace VGears {
         if (forward) EnterTriangle(terrain_triangles_[triangle_index]);
     }
 
+    /// Name of a vehicle in the scripts (WorldMapSettings).
+    static const char* GetVehicleScriptName(const WorldmapModule::VehicleType vehicle){
+        switch (vehicle){
+            case WorldmapModule::VehicleType::CHOCOBO: return "chocobo";
+            case WorldmapModule::VehicleType::BUGGY: return "buggy";
+            case WorldmapModule::VehicleType::HIGHWIND: return "highwind";
+            case WorldmapModule::VehicleType::SUBMARINE: return "submarine";
+            case WorldmapModule::VehicleType::TINY_BRONCO: return "tiny_bronco";
+            default: return "walk";
+        }
+    }
+
     void WorldmapModule::TriggerTriangleFunction(const TerrainTriangle& triangle){
         ScriptEntity* world_map_script
           = ScriptManager::getSingleton().GetScriptEntityByName(
@@ -1707,6 +1967,11 @@ namespace VGears {
         if (world_map_script == nullptr) return;
 
         const int mesh_index = triangle.mesh_y * WORLD_MAP_SCRIPT_MESH_STRIDE + triangle.mesh_x;
+        // What the function can know about who entered the triangle (see WorldVM.can_enter).
+        ScriptManager::getSingleton().RunString(
+          std::string("System.WorldMap.vehicle = \"") + GetVehicleScriptName(current_vehicle_)
+          + "\"; System.WorldMap.landing = " + (landing_trigger_ ? "true" : "false")
+        );
         ScriptManager::getSingleton().ScriptRequest(
           world_map_script, "on_triangle_enter", 1,
           std::to_string(mesh_index), std::to_string(triangle.function_id - 3), false, false
@@ -1783,6 +2048,14 @@ namespace VGears {
             if (!FindWalkableSurface(vehicle_position, ground, false, false)) return false;
             if (vehicle_position.y - ground.y > HIGHWIND_MAX_LANDING_HEIGHT) return false;
             vehicle_entity->SetPosition(Ogre::Vector3(vehicle_position.x, ground.y, vehicle_position.z));
+            // Landing on the terrain of the northern cave enters it (the function of the triangle runs).
+            uint8 landing_terrain = 0;
+            size_t landing_triangle = 0;
+            if (FindWalkableSurface(vehicle_position, ground, false, false, &landing_terrain, &landing_triangle)
+              && landing_terrain == VGears::WorldmapFileSerializer::NORTHERND_CAVE
+              && terrain_triangles_[landing_triangle].function_id >= 3){
+              landing_after_unboard_ = &terrain_triangles_[landing_triangle];
+            }
           }
           player_entity_->SetPosition(surface);
           // The boarding scripts hide Cloud and make him non-solid.
@@ -1791,6 +2064,14 @@ namespace VGears {
           vehicle_entity->SetTalkable(true);
           entity_manager.ScriptSetPlayerEntity("WorldMapCloud");
           ClearVehicleTerrains();
+          if (landing_after_unboard_ != nullptr){
+            // The Highwind is what entered (the vehicle of the trigger).
+            current_vehicle_ = VehicleType::HIGHWIND;
+            landing_trigger_ = true;
+            TriggerTriangleFunction(*landing_after_unboard_);
+            landing_trigger_ = false;
+            landing_after_unboard_ = nullptr;
+          }
           current_vehicle_ = VehicleType::ON_FOOT;
           return true;
         }
@@ -1799,6 +2080,7 @@ namespace VGears {
 
     bool WorldmapModule::frameStarted(const Ogre::FrameEvent& event){
       if (!initialized_ || player_entity_ == nullptr || paused_for_battle_) return true;
+      AnimateWorldMapTextures(event.timeSinceLastFrame);
 
       // Diving or surfacing: the submarine moves by itself and the screen fades.
       if (transition_stage_ != TransitionStage::NONE){
@@ -1833,6 +2115,25 @@ namespace VGears {
         return true;
       }
 
+        // The music of the map (WorldMusic in world_music.lua): when the vehicle changes and every half second.
+        music_timer_ += event.timeSinceLastFrame;
+        if (music_timer_ >= 0.5f || music_vehicle_ != current_vehicle_){
+          music_timer_ = 0.0f;
+          music_vehicle_ = current_vehicle_;
+          const char* music_vehicle = "walk";
+          switch (current_vehicle_){
+            case VehicleType::CHOCOBO: music_vehicle = "chocobo"; break;
+            case VehicleType::BUGGY: music_vehicle = "buggy"; break;
+            case VehicleType::HIGHWIND: music_vehicle = "highwind"; break;
+            case VehicleType::SUBMARINE: music_vehicle = "submarine"; break;
+            case VehicleType::TINY_BRONCO: music_vehicle = "tiny_bronco"; break;
+            default: break;
+          }
+          ScriptManager::getSingleton().RunString(
+            "if WorldMusic then WorldMusic.update(" + std::to_string(map_id_) + ", \"" + music_vehicle + "\") end"
+          );
+        }
+
         const bool highwind_active = active_entity == highwind_entity_;
       const bool vehicle_active = current_vehicle_ != VehicleType::ON_FOOT;
         const bool cancel_pressed = InputManager::getSingleton().IsGameEventPressed("CANCEL");
@@ -1856,6 +2157,12 @@ namespace VGears {
         const bool confirm_pressed = InputManager::getSingleton().IsGameEventPressed("CONFIRM");
         const bool dive_pressed = confirm_pressed && !confirm_was_pressed_;
         confirm_was_pressed_ = confirm_pressed;
+        if (
+          dive_pressed && map_id_ == 2 && active_entity == player_entity_
+          && !EntityManager::getSingleton().IsPlayerLocked()
+        ){
+            PlaceSnowPole();
+        }
         if (
           dive_pressed && map_id_ == 0 && active_entity == submarine_entity_
           && !EntityManager::getSingleton().IsPlayerLocked()
@@ -1883,8 +2190,12 @@ namespace VGears {
         // L1 and R1 rotate the camera around the active entity.
         {
             InputManager& camera_input = InputManager::getSingleton();
-            if (camera_input.IsGameEventPressed("L1")) camera_yaw_ -= CAMERA_ROTATION_SPEED * event.timeSinceLastFrame;
-            if (camera_input.IsGameEventPressed("R1")) camera_yaw_ += CAMERA_ROTATION_SPEED * event.timeSinceLastFrame;
+            // The camera of the snow map (WM3) can't be moved by hand: it turns by itself.
+            if (map_id_ == 2) UpdateSnowCamera(event.timeSinceLastFrame);
+            else{
+                if (camera_input.IsGameEventPressed("L1")) camera_yaw_ -= CAMERA_ROTATION_SPEED * event.timeSinceLastFrame;
+                if (camera_input.IsGameEventPressed("R1")) camera_yaw_ += CAMERA_ROTATION_SPEED * event.timeSinceLastFrame;
+            }
             if (camera_yaw_ > Ogre::Math::PI) camera_yaw_ -= Ogre::Math::TWO_PI;
             else if (camera_yaw_ < -Ogre::Math::PI) camera_yaw_ += Ogre::Math::TWO_PI;
         }
@@ -1908,8 +2219,18 @@ namespace VGears {
           // The movement is relative to the camera.
           movement = Ogre::Quaternion(Ogre::Radian(camera_yaw_), Ogre::Vector3::UNIT_Y) * movement;
             const Ogre::Vector3 current_position = active_entity->GetPosition();
-          const Ogre::Real speed = From16BitFixedPoint(8182) * 0.45f
-            * (vehicle_active ? 2.0f : 1.0f);
+          const char* speed_name = "walk";
+          switch (current_vehicle_){
+            case VehicleType::CHOCOBO: speed_name = "chocobo"; break;
+            case VehicleType::BUGGY: speed_name = "buggy"; break;
+            case VehicleType::HIGHWIND: speed_name = "highwind"; break;
+            case VehicleType::SUBMARINE: speed_name = "submarine"; break;
+            case VehicleType::TINY_BRONCO: speed_name = "tiny_bronco"; break;
+            default: break;
+          }
+          const Ogre::Real speed = GetSpeed(
+            speed_name, From16BitFixedPoint(8182) * 0.45f * (vehicle_active ? 2.0f : 1.0f)
+          );
           Ogre::Vector3 requested_position = current_position
             + movement * speed * event.timeSinceLastFrame;
           Ogre::Vector3 surface;
@@ -1963,9 +2284,24 @@ namespace VGears {
           = active_entity->GetPosition() + Ogre::Vector3(0, active_entity->GetHeight() * 0.5f, 0);
         // The camera of a flying vehicle stays behind it. L1 and R1 rotate it from there.
         const float yaw = camera_yaw_ + (flight_active_ ? flight_heading_ + Ogre::Math::PI : 0.0f);
+        // The camera of the entity: distance and angle over the ground (the default one is the offset 1.5, 2.25).
+        const char* camera_name = "walk";
+        if (map_id_ == 1) camera_name = "submarine_underwater";
+        else if (active_entity == chocobo_entity_) camera_name = "chocobo";
+        else if (active_entity == buggy_entity_) camera_name = "buggy";
+        else if (active_entity == highwind_entity_) camera_name = "highwind";
+        else if (active_entity == submarine_entity_) camera_name = "submarine";
+        else if (active_entity == tiny_bronco_entity_) camera_name = "tiny_bronco";
+        float distance = std::sqrt(1.5f * 1.5f + 2.25f * 2.25f);
+        float pitch = std::atan2(1.5f, 2.25f);
+        const auto camera_settings = camera_settings_.find(camera_name);
+        if (camera_settings != camera_settings_.end()){
+          distance = camera_settings->second.distance;
+          pitch = Ogre::Math::DegreesToRadians(camera_settings->second.pitch_degrees);
+        }
         const Ogre::Vector3 camera_offset
           = Ogre::Quaternion(Ogre::Radian(yaw), Ogre::Vector3::UNIT_Y)
-            * Ogre::Vector3(0.0f, 1.5f, 2.25f);
+            * Ogre::Vector3(0.0f, distance * std::sin(pitch), distance * std::cos(pitch));
         Ogre::Camera* camera = CameraManager::getSingleton().GetCurrentCamera();
         const Ogre::Vector3 desired_position = target + camera_offset;
         if (snap_to_player){
@@ -2102,6 +2438,9 @@ namespace VGears {
     void WorldmapModule::ResumeAfterBattle(){
         paused_for_battle_ = false;
         encounter_frames_ = 0;
+        // The battle had its own music: the one of the map starts again.
+        music_timer_ = 1.0f;
+        ScriptManager::getSingleton().RunString("if WorldMusic then WorldMusic.reset() end");
         if (world_map_node_ != nullptr) world_map_node_->setVisible(true);
         if (player_entity_ != nullptr) UpdateCamera(0, true);
     }
@@ -2157,6 +2496,7 @@ namespace VGears {
         }
       }
       terrain_triangles_.clear();
+      terrain_grid_.clear();
       encounter_records_.clear();
       // The entities of the old map (player, vehicles, models and scripts).
       EntityManager::getSingleton().ClearWorld();
@@ -2185,6 +2525,9 @@ namespace VGears {
         EntityManager::getSingleton().SetWorldModule();
         DialogsManager::getSingleton().SetWorldModule();
         world_map_node_->setVisible(true);
+        // The music starts again (a field or a battle had its own).
+        music_timer_ = 1.0f;
+        ScriptManager::getSingleton().RunString("if WorldMusic then WorldMusic.reset() end");
         CreatePlayer();
         Root::getSingleton().addFrameListener(this);
         frame_listener_attached_ = true;
@@ -2200,6 +2543,24 @@ namespace VGears {
       EntityManager::getSingleton().SetWorldModule();
       DialogsManager::getSingleton().SetWorldModule();
       CreateWorldMap(Root::getSingleton().getSceneManager("Scene"));
+      // Underwater (WM2): everything fades to black with the distance to the camera.
+      if (map_id_ == 1){
+        Root::getSingleton().getSceneManager("Scene")->setFog(
+          Ogre::FOG_LINEAR, Ogre::ColourValue::Black, 0.0f, UNDERWATER_FOG_START, UNDERWATER_FOG_END
+        );
+      }
+      else Root::getSingleton().getSceneManager("Scene")->setFog(Ogre::FOG_NONE);
+      // Snow map (WM3): it always snows.
+      SetSnowOverlay(map_id_ == 2);
+      // The music of the map starts in the first frame.
+      music_timer_ = 1.0f;
+      ScriptManager::getSingleton().RunString("if WorldMusic then WorldMusic.reset() end");
+      snow_poles_.clear();
+      snow_pole_counter_ = 0;
+      // The button that was used to get here (a menu, a field) must not count as the first pole.
+      confirm_was_pressed_ = InputManager::getSingleton().IsGameEventPressed("CONFIRM");
+      snow_camera_remaining_ = 0.0f;
+      snow_camera_timer_ = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_WAIT, SNOW_CAMERA_MAX_WAIT);
       ScriptManager::getSingleton().RunFile(
         "scripts/worldmap/wm" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id_]) + ".lua"
       );
@@ -2226,11 +2587,44 @@ namespace VGears {
       frame_listener_attached_ = true;
     }
 
+    void WorldmapModule::UpdateSnowCamera(Ogre::Real delta_time){
+      if (snow_camera_remaining_ == 0.0f){
+        snow_camera_timer_ -= delta_time;
+        if (snow_camera_timer_ > 0.0f) return;
+        const float degrees = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_DEGREES, SNOW_CAMERA_MAX_DEGREES);
+        const float direction = Ogre::Math::UnitRandom() < 0.5f ? -1.0f : 1.0f;
+        snow_camera_remaining_ = direction * Ogre::Math::DegreesToRadians(degrees);
+        snow_camera_timer_ = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_WAIT, SNOW_CAMERA_MAX_WAIT);
+      }
+      const float step = std::min(std::abs(snow_camera_remaining_), CAMERA_ROTATION_SPEED * delta_time);
+      const float signed_step = snow_camera_remaining_ < 0.0f ? -step : step;
+      camera_yaw_ += signed_step;
+      snow_camera_remaining_ -= signed_step;
+      if (std::abs(snow_camera_remaining_) < 0.0001f) snow_camera_remaining_ = 0.0f;
+    }
+
+    void WorldmapModule::PlaceSnowPole(){
+      if (player_entity_ == nullptr) return;
+      // The oldest pole goes away when there is no room for another one.
+      while (snow_poles_.size() >= SNOW_MAX_POLES){
+        EntityManager::getSingleton().RemoveWorldMapEntity(snow_poles_.front());
+        snow_poles_.pop_front();
+      }
+      const Ogre::Vector3 position = player_entity_->GetPosition();
+      const std::string name = "snowpole_" + std::to_string(snow_pole_counter_++);
+      // The model and scale of the snow poles of the game (WorldMapModels: djc, 0x300).
+      AddWorldModelFromScript(name.c_str(), "djc", position.x, position.z, 0x300, 0, 0.0f, 0.0f, 0.0f);
+      if (EntityManager::getSingleton().GetEntity("WorldMap" + name) != nullptr){
+        snow_poles_.push_back("WorldMap" + name);
+      }
+    }
+
     void WorldmapModule::Suspend(){
       if (!frame_listener_attached_) return;
       Root::getSingleton().removeFrameListener(this);
       frame_listener_attached_ = false;
       if (world_map_node_ != nullptr) world_map_node_->setVisible(false);
+      SetSnowOverlay(false);
       player_entity_ = nullptr;
       highwind_entity_ = nullptr;
       buggy_entity_ = nullptr;

@@ -645,6 +645,8 @@ void ScriptManager::InitBinds(){
       "set_entity_altitude", &VGears::WorldmapModule::SetEntityAltitude,
       "enter", &VGears::WorldmapModule::Enter,
       "set_spawn", &VGears::WorldmapModule::SetSpawn,
+      "set_speed", &VGears::WorldmapModule::SetSpeed,
+      "set_camera", &VGears::WorldmapModule::SetCamera,
       "set_vehicle_hidden", &VGears::WorldmapModule::SetVehicleHidden,
       "add_world_model", &VGears::WorldmapModule::AddWorldModelFromScript
     );

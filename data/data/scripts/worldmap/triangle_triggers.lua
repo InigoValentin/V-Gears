@@ -61,6 +61,11 @@ System.WorldMap = {
         local world_function = function_index
           and self["world_function_" .. tostring(function_index)]
         if world_function then
+            -- A place can only be entered by the vehicles that the settings say (WorldMapSettings.entry).
+            local record = WorldVM and WorldVM.find_field_entry(world_function)
+            if record and not WorldVM.can_enter(record, self.vehicle, self.landing) then
+                return
+            end
             world_function(self)
         else
             print(

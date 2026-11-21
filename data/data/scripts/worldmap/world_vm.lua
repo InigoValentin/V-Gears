@@ -156,6 +156,41 @@ WorldVM.get_spawn = function(model_type)
     }
 end
 
+--- Which field a function of a trigger enters (EnterFieldScene), without doing anything else of what it
+-- does: it runs it as something that only looks (it undoes the writes to the variables).
+-- @param script_function The function (world_function_N).
+-- @return The FIELD.TBL record that it enters, nil if it doesn't enter one.
+WorldVM.find_field_entry = function(script_function)
+    local previous = EnterFieldScene
+    local record = nil
+    EnterFieldScene = function(field_table_id)
+        record = record or tonumber(field_table_id)
+        return 0
+    end
+    WorldVM.run_sandboxed(function()
+        pcall(script_function, System.WorldMap)
+    end)
+    EnterFieldScene = previous
+    return record
+end
+
+--- If a vehicle can enter a place (WorldMapSettings.entry).
+-- @param record FIELD.TBL record of the place.
+-- @param vehicle walk, chocobo, buggy, tiny_bronco, highwind or submarine.
+-- @param landing True if the Highwind has just landed.
+-- @return True if it can.
+WorldVM.can_enter = function(record, vehicle, landing)
+    if vehicle == nil or vehicle == "walk" then return true end
+    local entry = WorldMapSettings and WorldMapSettings.entry
+    if not entry then return true end
+    if entry.exempt and entry.exempt[record] then return true end
+    if vehicle == "highwind" then
+        return landing == true and entry.highwind_landing ~= nil and entry.highwind_landing[record] == true
+    end
+    local allowed = entry.allowed and entry.allowed[vehicle]
+    return allowed ~= nil and allowed[record] == true
+end
+
 --- Creates the models that the scripts place in a map.
 -- @param map_id Map of the module (0 WM0, 1 WM2, 2 WM3).
 WorldVM.place_models = function(map_id)
@@ -252,6 +287,16 @@ end
 -- @param map_id Map of the module (0 WM0, 1 WM2, 2 WM3).
 WorldVM.prepare = function(map_id)
     WorldVM.apply_debug_variables()
+    -- The speeds of walking and of each vehicle (world_settings.lua).
+    if WorldMapSettings and WorldMapSettings.speed then
+        for name, speed in pairs(WorldMapSettings.speed) do world_map_module:set_speed(name, speed) end
+    end
+    -- The distance and the angle of the camera for walking and for each vehicle.
+    if WorldMapSettings and WorldMapSettings.camera then
+        for name, camera in pairs(WorldMapSettings.camera) do
+            world_map_module:set_camera(name, camera.distance, camera.pitch)
+        end
+    end
     System.WorldMap.specials = {}
     -- The arrival of a real field exit has priority over the spawn points of the debug data.
     local real_arrival = System.WorldMap.arrival

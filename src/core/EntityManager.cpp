@@ -495,6 +495,21 @@ void EntityManager::RemoveBattleEntity(const Ogre::String& name){
     }
 }
 
+void EntityManager::RemoveWorldMapEntity(const Ogre::String& name){
+    if (!IsWorldModule()) return;
+    for (auto it = entity_.begin(); it != entity_.end(); ++ it){
+        Entity* entity = *it;
+        if (entity->GetName() != name) continue;
+        if (entity == player_entity_) return;
+        ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, name);
+        entity_.erase(it);
+        // The destructor of the model destroys it.
+        delete entity;
+        scene_node_->removeAndDestroyChild("Model_" + name);
+        return;
+    }
+}
+
 Entity* EntityManager::GetBackground3D() const{
     if (IsFieldModule()){
         LOG_WARNING("Tried to retrieve a 3D background while the EntityManager is in field mode.");

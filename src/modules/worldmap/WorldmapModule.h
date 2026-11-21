@@ -18,6 +18,7 @@
 #include <OgreFrameListener.h>
 #include <OgreSingleton.h>
 #include <OgreVector3.h>
+#include <deque>
 #include <map>
 #include <set>
 #include <vector>
@@ -119,6 +120,13 @@ namespace VGears {
              * @param[in] z Position in Z, in world units.
              */
             void SetSpawn(const char* entity_name, const float x, const float z);
+            /// Sets a movement speed (world units per second) by name: walk, chocobo, buggy, tiny_bronco,
+            /// highwind or submarine (WorldMapSettings.speed in world_settings.lua).
+            void SetSpeed(const char* name, const float speed);
+            /// Sets the camera of a vehicle by name (the ones of the speeds, and submarine_underwater for the
+            /// submarine of WM2): distance to the vehicle in world units and angle over the ground in degrees
+            /// (WorldMapSettings.camera in world_settings.lua).
+            void SetCamera(const char* name, const float distance, const float pitch_degrees);
 
             /**
              * Hides a vehicle of the overworld that the story hasn't given yet: it is not visible,
@@ -233,12 +241,20 @@ namespace VGears {
                             Ogre::Real explicit_scale = 0.0f
                         );
             void UpdateCamera(Ogre::Real delta_time, bool snap_to_player);
+            /// Snow map (WM3): the camera turns by itself every few seconds.
+            void UpdateSnowCamera(Ogre::Real delta_time);
+            /// Snow map (WM3): puts a pole where the player is (only 4 poles exist, the oldest goes away).
+            void PlaceSnowPole();
             bool FindWalkableSurface(
                             const Ogre::Vector3& position, Ogre::Vector3& surface,
                             bool grass_only = false, bool require_walkable = true,
                             uint8* walkability_type = nullptr,
-                            size_t* triangle_index = nullptr
+                            size_t* triangle_index = nullptr,
+                            bool use_index = true
             ) const;
+            /// Groups the triangles of the terrain by the cell of a grid they touch, so the search of the
+            /// triangle under a position only checks a few of them.
+            void BuildTerrainIndex();
             bool IsActiveTerrainAllowed(uint8 walkability_type) const;
             /**
              * Runs the function of a triangle when it is entered, if it changed.
@@ -322,6 +338,13 @@ namespace VGears {
             bool paused_for_battle_;
 
             std::vector<TerrainTriangle> terrain_triangles_;
+            /// Indices of the triangles (ascending) that touch each cell of the grid, row by row.
+            std::vector<std::vector<uint32>> terrain_grid_;
+            float terrain_grid_min_x_ = 0.0f;
+            float terrain_grid_min_z_ = 0.0f;
+            float terrain_grid_cell_ = 1.0f;
+            int terrain_grid_columns_ = 0;
+            int terrain_grid_rows_ = 0;
             Ogre::SceneManager* scene_manager_;
             Ogre::SceneNode* world_map_node_;
             EntityModel* player_entity_;
@@ -357,6 +380,29 @@ namespace VGears {
             bool frame_listener_attached_;
             bool cancel_was_pressed_;
             bool confirm_was_pressed_;
+            /// True while the function of a triangle is triggered by the landing of the Highwind.
+            bool landing_trigger_ = false;
+            /// Triangle of the northern cave that the Highwind has just landed on (a trigger waiting).
+            const TerrainTriangle* landing_after_unboard_ = nullptr;
+            /// Seconds since the music was checked, and the vehicle it was checked with.
+            float music_timer_ = 1.0f;
+            VehicleType music_vehicle_ = VehicleType::ON_FOOT;
+            /// Speeds set by the scripts, by name (the ones that are not set use the default ones).
+            std::map<std::string, float> speeds_;
+            float GetSpeed(const char* name, float default_speed) const;
+            struct CameraSettings{
+                float distance;
+                float pitch_degrees;
+            };
+            /// Cameras set by the scripts, by name (the ones that are not set use the default one).
+            std::map<std::string, CameraSettings> camera_settings_;
+            /// Snow map: seconds until the next automatic turn of the camera.
+            float snow_camera_timer_ = 0.0f;
+            /// Snow map: radians left of the turn that is going on, with the sign of its direction.
+            float snow_camera_remaining_ = 0.0f;
+            /// Snow map: the poles that exist (names of the entities), the oldest first.
+            std::deque<std::string> snow_poles_;
+            unsigned int snow_pole_counter_ = 0;
             enum class TransitionStage{
                 /// No animation going on.
                 NONE,

@@ -32,3 +32,17 @@ Not done yet (kernel data in ff7.exe, ids 170-176, see `get_special_limit` in `b
   interactive piece and the random effects of the reels.
 - Vincent's transformations (additional effect 3 with modifiers 0 to 3): they change the model, the
   stats and the commands during the battle.
+
+## World map: culling of the terrain geometry
+
+The terrain of WM0 is built as one `ManualObject` per texture for the whole map (`CreateWorldMap`), so
+its bounding box is the whole map and Ogre never culls it: every frame draws all of its ~142,000
+triangles in ~320 batches, however little of it the camera sees. With the entity debug off it runs at
+about 110-140 fps in the tests. The search of the triangle under a position was the bigger problem and
+is solved (spatial grid, `BuildTerrainIndex`).
+
+Not planned for now. If it is needed: build the geometry per block or mesh (one object per mesh and
+texture), so the frustum culling skips the ones that are out of view, and measure the number of batches
+afterwards, because it can grow. Loading and unloading blocks around the player is the next step after
+that, but the whole map fits in memory, so it should only be for the load time. The 6 alternate blocks of
+WM0 (story shapes) are not loaded now and would have to be handled.

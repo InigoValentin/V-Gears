@@ -141,6 +141,15 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void RemoveBattleEntity(const Ogre::String& name);
 
         /**
+         * Removes a world map entity (like a pole that was added while playing).
+         *
+         * If the manager is not in the world module, or the entity doesn't exist, it will do nothing.
+         *
+         * @param[in] name Entity name.
+         */
+        void RemoveWorldMapEntity(const Ogre::String& name);
+
+        /**
          * Clears all world map information in the entity manager.
          *
          * It clears the background, the walkmesh, any pending actions and all the world entities.
