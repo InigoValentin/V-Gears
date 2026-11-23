@@ -20,6 +20,15 @@ Never push, force anything, or delete branches without the explicit
 confirmation in step 8. Stop and report on any failure instead of working
 around it.
 
+## Requirements
+
+- `gh` (GitHub CLI) installed and logged in (`gh auth status`), for step 9.
+  Check it in the preflight; if missing, warn the user (the release can still be
+  cut, but step 9 can't run).
+- Git push access to all the configured remotes.
+- Build dependencies for `v-gears` and `v-gears-installer` and `cpack` (see
+  `doc/BUILD.md`).
+
 ## 1. Preflight
 
 Run these checks in order.
@@ -31,13 +40,15 @@ Run these checks in order.
 - `git status --porcelain` must be empty. If there are any uncommitted changes
   (modified, staged or untracked files), list them, warn the user, and stop.
   The user must commit or stash first. Do not stash or commit on their behalf.
-- `git fetch --all --tags`, then check `develop` is not behind `origin/develop`.
+- `git fetch --all --tags`, then check `develop` is not behind its upstream
+  (`git rev-list --count develop..@{u}` must be 0).
 - The tag `vX.Y.Z` and branch `release/vX.Y.Z` must not already exist.
 - The new version must be greater than the current one in `CMakeLists.txt`
   (`project(V-Gears VERSION ...)`).
 
 **Warning** (tell the user and ask whether to continue):
 
+- `gh auth status` fails or `gh` is missing (see Requirements): step 9 can't run.
 - Unmerged feature branches. List local and remote branches not yet merged into
   `develop`: `git branch -a --no-merged develop`, ignoring `master`, `HEAD`
   aliases and `develop` itself. For each one show the name and the number of
@@ -154,9 +165,11 @@ If a merge conflicts, stop and show the conflicts. Don't resolve silently.
 
 ## 8. Push (requires confirmation)
 
-Show the user `git log --oneline --graph -8 --all` and the tag, then ask which
-remotes to push to. Remotes configured: `origin`, `github`, `inigovalentin`.
-Push only the ones the user confirms:
+Show the user `git log --oneline --graph -8 --all` and the tag, and list the
+remotes with `git remote -v`. Ask for confirmation to push to **all available
+remotes**, then push to each one in turn. If a push to a remote fails (for
+example it asks for credentials), report it, keep going with the others, and
+don't try to work around it.
 
 ```
 git push <remote> master develop vX.Y.Z
@@ -166,10 +179,10 @@ Never use `--force`. Pushing publishes the tag; it can't be cleanly undone.
 
 ## 9. GitHub release (ask first)
 
-Pushing the tag to `github` does **not** create a GitHub Release by itself: it
+Pushing the tag to a GitHub remote does **not** create a GitHub Release by itself: it
 only makes the tag visible. This step creates the Release object from the
 existing tag `vX.Y.Z` and uploads the package files to it. It needs the tag to
-already be on the `github` remote (step 8) and `gh` to be authenticated
+already be on the GitHub remote (step 8) and `gh` to be authenticated
 (`gh auth status`).
 
 Ask the user to confirm, then:
