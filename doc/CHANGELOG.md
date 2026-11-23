@@ -1,5 +1,53 @@
 # Changelog
 
+## 0.3.5
+
+Changes since 0.3.4. Most of the work is in the world map module, which now runs the original world scripts, and in the field module and its installer.
+
+### World map
+
+**Story and scripts**
+- The world script decompiler handles more opcodes (0x11d, 0x31b, 0x33c, 0x355, 0x01b), and fixes `Write(Read(N), v)` stores and address collisions between local, byte, word and bit banks. The scripts of the animated world models now decompile correctly.
+- The world memory shares the field memory banks, so the story counter and the vehicle flags set by the field scripts are visible to the world scripts.
+- The world situation (Midgar era, cannon destroyed, Ultimate Weapon killed...) is chosen from the story and flags instead of a debug value.
+- Vehicles the story has not given yet are hidden; the positions in the scripts are used as spawns.
+- Scenery models are placed from the world scripts. New bindings `get_animation_name`, `play_animation_index` and `set_default_animation_index`.
+- Entering from a field: the world script selects the map and the player spawn; the player appears at the exit point set by the field script. `vehicles.lua` is reloaded on entering the world and on returning from a field.
+- The installer writes the world map exit locations.
+
+**Settings**
+- New `world_settings.lua`: speed and camera (distance and pitch) per vehicle, walking speed, music tracks and overrides, and town entry rules.
+- Music depends on the vehicle and on the story progress.
+- Towns can only be entered under the conditions of each vehicle.
+
+**Visuals and mechanics**
+- Animated water textures in WM0.
+- Fog in WM2, and WM2/WM3 texture mapping fixed with the texture table.
+- WM3: snow overlay, camera behaviour and poles.
+- Cliff terrain can't be walked on foot.
+- Faster search of the triangle under a position (spatial grid).
+
+### Field
+
+**Decompiler and installer**
+- Entities without a model (Director, AD, MES) are handled, so the model opcodes are harmless on them; names that aren't valid Lua identifiers are skipped.
+- `LSTMP` fixed: the previous field id is stored from each script header, and a destination in bank 0 is guarded.
+- Scripts that fall through into the next one now call it explicitly.
+- New opcodes `PREQ`, `PRQSW`, `PRQEW` (`party_request`) and `CKITM` (key item check).
+- The Director uses the entity named "cloud" for `place_player_at_map_entry` and autoscroll.
+- Text colour tags left open at the end of a dialog are closed.
+
+**Engine**
+- Background palettes (`BackgroundPalette`): the palette opcodes repaint the tiles of the animated palettes (for example waterfalls).
+- Background scrolling: scripted scrolls are not clamped, scrolls that follow an entity are clamped to the range.
+- Changing the player entity moves the autoscroll to the new player and copies the position of the previous one if the new one has none.
+- Single-frame animations are held, and a running offset is cancelled by `AT_NONE`.
+- Additive screen fade (type 6) fixed.
+- Timer dialog windows: rendering and padding.
+- Movies without a sound file are skipped quietly. `play_sounds` takes optional arguments.
+- `field.lua`: `party_request` helper; fixed the map change race that erased a request made in the first frame of a field.
+- `system.lua`: `NullEntity`; `Timer` updates the dialog.
+
 ## 0.3.4
 
 Changes since 0.3.2. Most of the work is in the battle module, which now uses data extracted from the original game for cameras, effects and rules.
