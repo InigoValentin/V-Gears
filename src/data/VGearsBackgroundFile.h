@@ -354,6 +354,47 @@ namespace VGears{
             Ogre::Image* CreateImage(const PaletteFilePtr &palette);
 
             /**
+             * A tile of the image that uses an 8 bit palette, with its indexes, so it can be
+             * painted again when a script changes the palette (palette animations).
+             *
+             * Filled by CreateImage.
+             */
+            struct PaletteTile{
+
+                /**
+                 * Position of the tile in the image.
+                 */
+                uint16 x;
+                uint16 y;
+
+                /**
+                 * Size of the tile.
+                 */
+                uint16 width;
+                uint16 height;
+
+                /**
+                 * Palette page the tile uses.
+                 */
+                uint16 palette_page;
+
+                /**
+                 * True if the first color of the page is transparent.
+                 */
+                bool first_color_hidden;
+
+                /**
+                 * Palette indexes of the pixels, row by row.
+                 */
+                std::vector<uint8> indexes;
+            };
+
+            /**
+             * Retrieves the tiles that use palettes, as of the last call to CreateImage.
+             */
+            const std::vector<PaletteTile>& GetPaletteTiles() const{return palette_tiles_;}
+
+            /**
              * Adds all sprites to the background.
              *
              * @param[in] sprites The list of sprites to add.
@@ -408,6 +449,11 @@ namespace VGears{
              * The color palette.
              */
             std::array<uint8, PALETTE_ENTRY_COUNT> palette_;
+
+            /**
+             * Tiles that use palettes, see GetPaletteTiles.
+             */
+            std::vector<PaletteTile> palette_tiles_;
 
             /**
              * The background pages.

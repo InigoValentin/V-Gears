@@ -48,6 +48,50 @@ class WorldEngine : public Engine{
         };
 
         /**
+         * A value that is a Lua boolean, the result of a comparison or a logic operation.
+         *
+         * The script machine only has numbers, and in Lua 0 is true, so a boolean can't be used as
+         * a number nor a number as a condition without a conversion. This value prints as the
+         * number that the machine has (1 or 0), and has the condition for the places that want a
+         * boolean.
+         */
+        class BoolValue : public VarValue{
+
+            public:
+
+                /**
+                 * Constructor.
+                 *
+                 * @param[in] condition Lua expression that is a boolean.
+                 */
+                explicit BoolValue(std::string condition);
+
+                /**
+                 * Prints the value as a number.
+                 *
+                 * @param[out] output The stream to write to.
+                 * @return The stream used for output.
+                 */
+                virtual std::ostream& Print(std::ostream &output) const override;
+
+                /**
+                 * Retrieves the Lua boolean expression.
+                 *
+                 * @return The expression.
+                 */
+                std::string Condition() const;
+        };
+
+        /**
+         * Gets a value as a Lua boolean expression: a boolean as it is, and a number as "different
+         * from 0".
+         *
+         * @param[in] value The value.
+         * @return The expression.
+         */
+        static std::string AsCondition(const ValuePtr& value);
+
+        /**
          * Constructor.
          *
          * @param[in] script_number The script number.

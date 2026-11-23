@@ -80,6 +80,11 @@ namespace VGears{
             Ogre::RenderWindow* getRenderWindow(void);
 
             /**
+             * The overlay system (it must be added to a scene manager as a render queue listener to draw overlays).
+             */
+            Ogre::OverlaySystem* GetOverlaySystem(){return _overlay_system.get();}
+
+            /**
              * Retrieves the Ogre resources file name.
              *
              * @return Ogre resource configuration file name.

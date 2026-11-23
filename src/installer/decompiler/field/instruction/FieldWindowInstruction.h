@@ -100,6 +100,8 @@ class FieldWindowInstruction : public KernelCallInstruction{
          */
         void ProcessASK(CodeGenerator* code_gen, const std::string& script_name);
 
+        void ProcessMPARA(CodeGenerator* code_gen);
+
         void ProcessMPNAM(CodeGenerator* code_gen, const std::string& script_name);
 
 

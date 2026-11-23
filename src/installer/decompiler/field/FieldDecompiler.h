@@ -41,6 +41,11 @@ class FieldDecompiler: public Decompiler{
             std::string name;
 
             /**
+             * Index of the line entity in the field.
+             */
+            uint index = 0;
+
+            /**
              * First point of the line.
              */
             std::vector<float> point_a;
@@ -107,6 +112,18 @@ class FieldDecompiler: public Decompiler{
              * If so, it is not known which areas it controls, and any of them might be.
              */
             bool background_areas_dynamic = false;
+
+            /**
+             * Palette pages the script changes (palette animations).
+             */
+            std::set<int> palette_pages;
+
+            /**
+             * Whether the script picks palette pages from variables.
+             *
+             * If so, it is not known which palettes it changes, and any of them might be.
+             */
+            bool palette_pages_dynamic = false;
         };
 
         /**

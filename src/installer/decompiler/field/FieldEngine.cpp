@@ -184,6 +184,7 @@ std::vector<FieldDecompiler::Line> FieldEngine::GetLineList() const{
         if (entity.second.IsLine() == true){
             FieldDecompiler::Line line;
             line.name = entity.second.GetName();
+            line.index = entity.second.GetIndex();
             line.point_a = entity.second.GetLinePointA();
             line.point_b = entity.second.GetLinePointB();
             lines.push_back(line);
@@ -201,6 +202,15 @@ const std::set<int>& FieldEngine::GetBackgroundAreas() const{return background_a
 
 bool FieldEngine::BackgroundAreasAreDynamic() const{return background_areas_dynamic_;}
 
+void FieldEngine::AddPalettePage(int page){
+    if (page < 0) palette_pages_dynamic_ = true;
+    else palette_pages_.insert(page);
+}
+
+const std::set<int>& FieldEngine::GetPalettePages() const{return palette_pages_;}
+
+bool FieldEngine::PalettePagesAreDynamic() const{return palette_pages_dynamic_;}
+
 void FieldEngine::AddEntityFunction(
   const std::string& entity_name, size_t entity_index, const std::string& func_name, size_t func_index
 ){
@@ -217,6 +227,19 @@ void FieldEngine::AddFunctionAlias(
   const std::string& entity_name, const std::string& alias, const std::string& target
 ){
     function_aliases_.push_back(FunctionAlias{entity_name, alias, target});
+}
+
+void FieldEngine::AddFunctionFallThrough(
+  const std::string& entity_name, const std::string& function, const std::string& target
+){
+    function_fall_through_[entity_name + "/" + function] = target;
+}
+
+std::string FieldEngine::GetFunctionFallThrough(
+  const std::string& entity_name, const std::string& function
+) const{
+    const auto it = function_fall_through_.find(entity_name + "/" + function);
+    return it == function_fall_through_.end() ? "" : it->second;
 }
 
 void FieldEngine::MarkEntityAsLine(

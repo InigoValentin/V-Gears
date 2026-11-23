@@ -50,9 +50,9 @@ void FieldControlFlowInstruction::ProcessInst(
         case OPCODES::REQ: ProcessREQ(code_gen, eng); break;
         case OPCODES::REQSW: ProcessREQSW(code_gen, eng); break;
         case OPCODES::REQEW: ProcessREQEW(code_gen, eng); break;
-        case OPCODES::PREQ: code_gen->WriteTodo(md.GetEntityName(), "PREQ"); break;
-        case OPCODES::PRQSW: code_gen->WriteTodo(md.GetEntityName(), "PRQSW"); break;
-        case OPCODES::PRQEW: code_gen->WriteTodo(md.GetEntityName(), "PRQEW"); break;
+        case OPCODES::PREQ: ProcessPartyRequest(code_gen, "request"); break;
+        case OPCODES::PRQSW: ProcessPartyRequest(code_gen, "start_sync"); break;
+        case OPCODES::PRQEW: ProcessPartyRequest(code_gen, "end_sync"); break;
         case OPCODES::RETTO: ProcessRETTO(code_gen); break;
         case OPCODES::WAIT: ProcessWAIT(code_gen); break;
         default:
@@ -60,6 +60,20 @@ void FieldControlFlowInstruction::ProcessInst(
               md.GetEntityName(), address_, opcode_
             ));
     }
+}
+
+void FieldControlFlowInstruction::ProcessPartyRequest(
+  CodeGenerator* code_gen, const std::string& mode
+){
+    // Operands: the character (the one given to the PC opcode of the entity), the priority and the
+    // index of the script. The entity is the one of that character, which is known when running.
+    const auto script_index = params_[2]->GetUnsigned();
+    const std::string script_name
+      = (script_index == 1) ? "on_interact" : "script_" + std::to_string(script_index);
+    code_gen->AddOutputLine((
+      boost::format("party_request(%1%, \"%2%\", %3%, \"%4%\")")
+      % params_[0]->GetSigned() % script_name % params_[1]->GetUnsigned() % mode
+    ).str());
 }
 
 void FieldControlFlowInstruction::ProcessREQ(

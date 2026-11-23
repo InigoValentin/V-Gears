@@ -78,7 +78,7 @@ void FieldModuleInstruction::ProcessInst(
         case OPCODES::BTRLD: code_gen->WriteTodo(md.GetEntityName(), "BTRLD"); break;
         case OPCODES::BTLTB: code_gen->WriteTodo(md.GetEntityName(), "BTLTB"); break;
         case OPCODES::MAPJUMP: ProcessMAPJUMP(code_gen, func); break;
-        case OPCODES::LSTMP: code_gen->WriteTodo(md.GetEntityName(), "LSTMP"); break;
+        case OPCODES::LSTMP: ProcessLSTMP(code_gen); break;
         case OPCODES::BATTLE: ProcessBATTLE(code_gen); break;
         case OPCODES::BTLON: ProcessBTLON(code_gen); break;
         case OPCODES::BTLMD: ProcessBTLMD(code_gen); break;
@@ -100,6 +100,23 @@ void FieldModuleInstruction::ProcessInst(
               md.GetEntityName(), address_, opcode_
             ));
     }
+}
+
+void FieldModuleInstruction::ProcessLSTMP(CodeGenerator* code_gen){
+    // Stores the ID of the field the player comes from (see the header of the scripts).
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    // Bank 0 is not a variable (some fields use it with no destination): nothing to store.
+    if (params_[0]->GetUnsigned() * 16 + params_[1]->GetUnsigned() == 0){
+        code_gen->AddOutputLine("-- LSTMP without a destination");
+        return;
+    }
+    code_gen->AddOutputLine((
+      boost::format("%1% = Data.PreviousFieldId or 0")
+      % FieldCodeGenerator::FormatValueOrVariable(
+        cg->GetFormatter(), params_[0]->GetUnsigned() * 16 + params_[1]->GetUnsigned(),
+        params_[2]->GetUnsigned()
+      )
+    ).str());
 }
 
 void FieldModuleInstruction::ProcessBATTLE(CodeGenerator* code_gen){

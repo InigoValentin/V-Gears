@@ -94,7 +94,11 @@ void FieldModelInstruction::ProcessInst(
         case (OPCODES::KAWAI << 8) | OPCODES_KAWAI::RESET:
             code_gen->WriteTodo(md.GetEntityName(), "RESET");
             break;
-        case OPCODES::KAWIW: code_gen->WriteTodo(md.GetEntityName(), "KAWIW"); break;
+        case OPCODES::KAWIW:
+            // Waits for the last KAWAI operation (eyes, light, transparency...) to end. Those
+            // operations are not implemented, so there is nothing to wait for.
+            code_gen->AddOutputLine("-- KAWIW: no KAWAI operation to wait for");
+            break;
         case OPCODES::PMOVA: code_gen->WriteTodo(md.GetEntityName(), "PMOVA"); break;
         case OPCODES::PDIRA: code_gen->WriteTodo(md.GetEntityName(), "PDIRA"); break;
         case OPCODES::PTURA: code_gen->WriteTodo(md.GetEntityName(), "PTURA"); break;
@@ -114,9 +118,9 @@ void FieldModelInstruction::ProcessInst(
         case OPCODES::VISI: ProcessVISI(code_gen, md.GetEntityName()); break;
         case OPCODES::XYZI: ProcessXYZI(code_gen, md.GetEntityName()); break;
         case OPCODES::XYI: ProcessXYI(code_gen, md.GetEntityName()); break;
-        case OPCODES::XYZ: code_gen->WriteTodo(md.GetEntityName(), "XYZ"); break;
+        case OPCODES::XYZ: ProcessXYZ(code_gen, md.GetEntityName()); break;
         case OPCODES::MOVE: ProcessMOVE(code_gen, md.GetEntityName()); break;
-        case OPCODES::CMOVE: code_gen->WriteTodo(md.GetEntityName(), "CMOVE"); break;
+        case OPCODES::CMOVE: ProcessCMOVE(code_gen, md.GetEntityName()); break;
         case OPCODES::MOVA: ProcessMOVA(code_gen, md.GetEntityName(), eng); break;
         case OPCODES::TURA: ProcessTURA(code_gen, md.GetEntityName(), eng); break;
         case OPCODES::ANIMW: ProcessANIMW(code_gen, md.GetEntityName()); break;
@@ -327,9 +331,9 @@ void FieldModelInstruction::ProcessTALKR(CodeGenerator* code_gen, const std::str
         );
     }
     else{
-        // A variable: the scale is not applied yet.
+        // A variable: FormatValueOrVariable already scales it.
         code_gen->AddOutputLine(
-          "self." + entity + ":set_talk_radius((" + range_value + ") / " + std::to_string(scale) + ")"
+          "self." + entity + ":set_talk_radius(" + range_value + ")"
         );
     }
 }
@@ -459,17 +463,36 @@ void FieldModelInstruction::ProcessXYZI(CodeGenerator* code_gen, const std::stri
     ).str());
 }
 
+void FieldModelInstruction::ProcessXYZ(CodeGenerator* code_gen, const std::string& entity){
+    // Like XYZI, but without a triangle: the entity is placed on the walkmesh when it moves.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->GetScaleFactor();
+    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[4]->GetSigned(),
+      FieldCodeGenerator::ValueType::Float, scale
+    );
+    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[5]->GetSigned(),
+      FieldCodeGenerator::ValueType::Float, scale
+    );
+    const auto& z = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[6]->GetSigned(),
+      FieldCodeGenerator::ValueType::Float, scale
+    );
+    code_gen->AddOutputLine((
+      boost::format("self.%1%:set_position(%2%, %3%, %4%)") % entity % x % y % z
+    ).str());
+}
+
 void FieldModelInstruction::ProcessXYI(CodeGenerator* code_gen, const std::string& entity){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     const float scale = 128.0f * cg->GetScaleFactor();
-    // Constants are already scaled by the formatter, but values read from a bank (usually stored
-    // by AXYZI) are in field units, so they need to be scaled here.
+    // Constants and values read from a bank (usually stored by AXYZI, in field units) are scaled
+    // by the formatter.
     const auto format_coordinate = [&](uint32 bank, int16 value){
-        const auto& formatted = FieldCodeGenerator::FormatValueOrVariable(
+        return FieldCodeGenerator::FormatValueOrVariable(
           cg->GetFormatter(), bank, value, FieldCodeGenerator::ValueType::Float, scale
         );
-        if (bank == 0) return formatted;
-        return "(" + formatted + ") / " + std::to_string(scale);
     };
     const auto x = format_coordinate(params_[0]->GetUnsigned(), params_[4]->GetSigned());
     const auto y = format_coordinate(params_[1]->GetUnsigned(), params_[5]->GetSigned());
@@ -497,6 +520,29 @@ void FieldModelInstruction::ProcessMOVE(CodeGenerator* code_gen, const std::stri
       (boost::format("self.%1%:move_to_position(%2%, %3%)") % entity % x % y).str()
     );
     code_gen->AddOutputLine((boost::format("self.%1%:move_sync()") % entity).str());
+}
+
+void FieldModelInstruction::ProcessCMOVE(CodeGenerator* code_gen, const std::string& entity){
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const float scale = 128.0f * cg->GetScaleFactor();
+    const auto& x = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetSigned(),
+      FieldCodeGenerator::ValueType::Float, scale
+    );
+    const auto& y = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetSigned(),
+      FieldCodeGenerator::ValueType::Float, scale
+    );
+    // Like MOVE, but the entity doesn't play its walk animation and doesn't turn to the
+    // direction of the move (a sliding door, for example).
+    code_gen->AddOutputLine((boost::format("self.%1%:move_auto_animation(false)") % entity).str());
+    code_gen->AddOutputLine((boost::format("self.%1%:move_auto_rotation(false)") % entity).str());
+    code_gen->AddOutputLine(
+      (boost::format("self.%1%:move_to_position(%2%, %3%)") % entity % x % y).str()
+    );
+    code_gen->AddOutputLine((boost::format("self.%1%:move_sync()") % entity).str());
+    code_gen->AddOutputLine((boost::format("self.%1%:move_auto_rotation(true)") % entity).str());
+    code_gen->AddOutputLine((boost::format("self.%1%:move_auto_animation(true)") % entity).str());
 }
 
 void FieldModelInstruction::ProcessFMOVE(CodeGenerator* code_gen, const std::string& entity){

@@ -8,7 +8,7 @@ UiContainer.BeginMenu = UiContainer.Menu.new{
     --- Cursor over the entries.
     cursor = UiContainer.Cursor.new{
         widget = "BeginMenu.Container.Cursor",
-        total = 7,
+        total = 9,
     },
 
     --- Run when the menu is created.
@@ -96,7 +96,27 @@ UiContainer.BeginMenu = UiContainer.Menu.new{
             world_map_module:init()
         end,
 
-        -- 6: Start map.
+        -- 6: World map 1 (WM2).
+        function(self)
+            set_party(0, 2, 3)
+            script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
+            console("camera_free true")
+            console("debug_entity 2")
+            MenuSettings.pause_available = true
+            world_map_module:init(1)
+        end,
+
+        -- 7: World map 2 (WM3).
+        function(self)
+            set_party(0, 2, 3)
+            script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
+            console("camera_free true")
+            console("debug_entity 2")
+            MenuSettings.pause_available = true
+            world_map_module:init(2)
+        end,
+
+        -- 8: Start map.
         function(self)
             load_field_map_request("startmap", "")
             console("camera_free false")
@@ -105,7 +125,7 @@ UiContainer.BeginMenu = UiContainer.Menu.new{
             MenuSettings.pause_available = true
         end,
 
-        -- 7: Test battle.
+        -- 9: Test battle.
         function(self)
             --load_field_map_request("startmap", "")
             console("camera_free false")

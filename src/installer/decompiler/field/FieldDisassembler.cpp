@@ -243,6 +243,25 @@ void FieldDisassembler::AddFunc(
         while (stream_->GetPosition() != next_script_entry_point + section_pointers_size_)
             is_line = ReadOpCodesToPositionOrReturn(next_script_entry_point + section_pointers_size_, point_a, point_b);
     }
+    // A script that doesn't end with a return runs into the code of the script that starts where it
+    // ends (the question of ealin_2 is asked by a script that goes on in the one that handles the
+    // answer).
+    if (script_index > 0 && !to_return_only && !engine_->EntityIsLine(entity_index)){
+        const bool ends = last_opcode_ == OPCODES::RET || last_opcode_ == OPCODES::JMPF
+          || last_opcode_ == OPCODES::JMPFL || last_opcode_ == OPCODES::JMPB
+          || last_opcode_ == OPCODES::JMPBL;
+        if (!ends){
+            const auto& entries = header_.entity_scripts[entity_index];
+            for (size_t i = 1; i < entries.size(); ++ i){
+                if (entries[i] != next_script_entry_point || i == script_index) continue;
+                const std::string target = (i == 1) ? "on_interact" : "script_" + std::to_string(i);
+                engine_->AddFunctionFallThrough(
+                  entity_name, func_name.empty() ? func->name : func_name, target
+                );
+                break;
+            }
+        }
+    }
     // Read metadata, mark start and/or end.
     std::string meta_data;
     if (is_start && is_end) meta_data = "start_end_";
@@ -352,6 +371,7 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
     while (stream_->GetPosition() < end_pos){
 
         uint8 opcode = stream_->ReadU8();
+        last_opcode_ = opcode;
         uint32 full_opcode = 0;
         full_opcode = (full_opcode << 8) + opcode;
         switch (opcode){

@@ -32,5 +32,21 @@ void WorldStoreInstruction::ProcessInst(
     // If the bank address is from a load bank instruction, then only
     // the bank address is needed, not what's *at* the bank address.
     ValuePtr bank_addr = stack.Pop();
-    code_gen->AddOutputLine("Write(" + bank_addr->GetString() + ", " + value + ");");
+    // The destination is pushed with a load instruction, but what is written is the variable that it
+    // names, not the one whose address is the value of that variable: Read(12) is Write(12, ...).
+    std::string address = bank_addr->GetString();
+    std::string function_name = "Write";
+    if (dynamic_cast<WorldEngine::BankValue*>(bank_addr.get()) != nullptr && address.back() == ')'){
+        // ReadX(n) is the variable that is written, WriteX(n, value).
+        static const char* const kinds[] = {"Word", "Bit", "Local", "Special", ""};
+        for (const char* kind : kinds){
+            const std::string prefix = std::string("Read") + kind + "(";
+            if (address.compare(0, prefix.size(), prefix) == 0){
+                function_name = std::string("Write") + kind;
+                address = address.substr(prefix.size(), address.size() - prefix.size() - 1);
+                break;
+            }
+        }
+    }
+    code_gen->AddOutputLine(function_name + "(" + address + ", " + value + ");");
 }

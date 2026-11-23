@@ -349,7 +349,23 @@ void ScriptManager::Update(const ScriptManager::Type type){
                         script_entity_[i].queue[script_index].wait = false;
                 }
             
-                if (!yielded) break;
+                if (!yielded){
+                    // The scripts of an entity don't wait for each other in the original game. If
+                    // the first one is waiting (for another script to end, for example) and a
+                    // script that someone waits to start (request_start_sync) is queued behind
+                    // it, that script has to start, or the two would wait for each other forever
+                    // (the lines of mrkt3 do this with Aerith).
+                    bool start_waited_script = false;
+                    for (size_t next = script_index + 1; next < script_entity_[i].queue.size(); ++ next){
+                        const QueueScript& queued = script_entity_[i].queue[next];
+                        if (!queued.yield && !queued.wait && !queued.paused_scripts_start.empty()){
+                            script_index = next - 1;
+                            start_waited_script = true;
+                            break;
+                        }
+                    }
+                    if (!start_waited_script) break;
+                }
             }
         }
     }

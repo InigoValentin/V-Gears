@@ -37,6 +37,9 @@ void XmlBackground2DFile::Load(){
     Ogre::String image = GetString(node, "image", "");
     if (image != ""){
         background->SetImage(image);
+        // The palettes that the scripts animate.
+        const Ogre::String palette = GetString(node, "palette", "");
+        if (palette != "") background->SetPalette(palette);
         Ogre::Quaternion range = GetQuaternion(
           node, "range", Ogre::Quaternion(-100000, -100000, 100000, 100000)
         );

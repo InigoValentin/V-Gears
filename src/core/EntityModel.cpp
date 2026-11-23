@@ -89,6 +89,12 @@ unsigned int EntityModel::GetAnimationCount() const{
     return states->getAnimationStates().size();
 }
 
+Ogre::String EntityModel::GetAnimationName(const unsigned int index) const{
+    Ogre::SkeletonInstance* skeleton = model_->getSkeleton();
+    if (skeleton == nullptr || index >= skeleton->getNumAnimations()) return "";
+    return skeleton->getAnimation(index)->getName();
+}
+
 Ogre::Entity* EntityModel::GetModel(){return model_;}
 
 Ogre::MaterialPtr EntityModel::OwnMaterial(Ogre::SubEntity* sub_entity){
@@ -306,6 +312,7 @@ void EntityModel::PlayAnimation(
           (start == -1) ? animation_current_->getLength() : start
         );
         animation_end_time_ = (end == -1) ? animation_current_->getLength() : end;
+        animation_hold_ = (start != -1 && start == end) ? 1.0f / 30.0f : 0.0f;
         animation_state_ = state;
         animation_play_type_ = play_type;
     }
@@ -336,8 +343,39 @@ void EntityModel::PlayAnimationContinue(const Ogre::String& animation){
     }
 }
 
+void EntityModel::StopAnimation(){
+    if (animation_current_ != nullptr){
+        animation_current_->setEnabled(false);
+        animation_current_ = nullptr;
+    }
+    animation_current_name_.clear();
+}
+
+void EntityModel::PlayAnimationPaused(const Ogre::String& animation){
+    if (!HasAnimation(animation)) return;
+    if (animation_frozen_ && animation_current_name_ == animation) return;
+    PlayAnimation(animation, Entity::AUTO_ANIMATION, Entity::PLAY_LOOPED, 0, -1);
+    animation_speed_ = 0.0f;
+    animation_frozen_ = true;
+}
+
+void EntityModel::UnfreezeAnimation(){
+    if (!animation_frozen_) return;
+    animation_speed_ = 1.0f;
+    animation_frozen_ = false;
+}
+
+bool EntityModel::HasAnimation(const Ogre::String& animation) const{
+    return model_->getAllAnimationStates() != nullptr
+      && model_->getAllAnimationStates()->hasAnimationState(animation);
+}
+
 void EntityModel::UpdateAnimation(const float delta){
     if (animation_current_ != nullptr){
+        if (animation_hold_ > 0.0f){
+            animation_hold_ -= delta;
+            if (animation_hold_ > 0.0f) return;
+        }
         float delta_mod = delta * animation_speed_;
         bool stop_check
           = (animation_current_->hasEnded() == true)

@@ -602,6 +602,7 @@ set(VGEARS_SOURCE_FILES
     core/AudioManager.cpp
     core/Background2DAnimation.cpp
     core/Background2D.cpp
+    core/BackgroundPalette.cpp
     core/ScreenFade.cpp
     core/MovieCameraFrame.cpp
     core/MoviePlayer.cpp

@@ -39,6 +39,21 @@ static bool TryParseInteger(const std::string& value, int& parsed_value){
   }
 }
 
+void FieldWindowInstruction::ProcessMPARA(CodeGenerator* code_gen){
+    // Gives a value to a variable code of the dialogs of a window. The parameters are the bank
+    // (in the two nibbles of the first byte), the window, the number of the variable code in the
+    // text and the value, or its address if the bank is not zero.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const uint32 bank = params_[0]->GetUnsigned() * 16 + params_[1]->GetUnsigned();
+    const auto& value = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), bank, params_[4]->GetUnsigned()
+    );
+    code_gen->AddOutputLine((
+      boost::format("dialog:set_variable(\"%1%\", \"var%2%\", tostring(%3%))")
+      % params_[2]->GetUnsigned() % params_[3]->GetUnsigned() % value
+    ).str());
+}
+
 void FieldWindowInstruction::ProcessInst(
   Function& func, ValueStack&, Engine* engine, CodeGenerator *code_gen
 ){
@@ -53,8 +68,8 @@ void FieldWindowInstruction::ProcessInst(
         case OPCODES::WNUMB: code_gen->WriteTodo(md.GetEntityName(), "WNUMB"); break;
         case OPCODES::STTIM: ProcessSTTIM(code_gen); break;
         case OPCODES::MESSAGE: ProcessMESSAGE(code_gen, eng.GetScriptName()); break;
-        case OPCODES::MPARA: code_gen->WriteTodo(md.GetEntityName(), "MPARA"); break;
-        case OPCODES::MPRA2: code_gen->WriteTodo(md.GetEntityName(), "MPRA2"); break;
+        case OPCODES::MPARA: ProcessMPARA(code_gen); break;
+        case OPCODES::MPRA2: ProcessMPARA(code_gen); break;
         case OPCODES::MPNAM: ProcessMPNAM(code_gen, eng.GetScriptName()); break;
         case OPCODES::ASK: ProcessASK(code_gen, eng.GetScriptName()); break;
         case OPCODES::MENU: ProcessMENU(code_gen); break;

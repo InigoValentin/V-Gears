@@ -394,6 +394,11 @@ class FieldDataInstaller{
         void CollectSpawnAndScaleFactors(int field_index);
 
         /**
+         * Writes the coordinates of the exits to the world map (scripts/worldmap/world_arrivals.lua).
+         */
+        void WriteWorldArrivals();
+
+        /**
          * Converts FFVII PC fields to V-Gears format.
          *
          * @param[in] field_index Index of the field to collect from. Must be
@@ -461,7 +466,7 @@ class FieldDataInstaller{
          *
          * @return Lua code to put at the beginning of a field script.
          */
-        static std::string FieldScriptHeader();
+        static std::string FieldScriptHeader(const int field_id = -1);
 
     private:
 

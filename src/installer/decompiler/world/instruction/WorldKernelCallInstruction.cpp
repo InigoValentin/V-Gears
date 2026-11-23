@@ -30,7 +30,8 @@ void WorldKernelCallInstruction::ProcessInst(
 ){
     std::string func;
     switch (opcode_){
-        case 0x203: func = "return;"; break;
+        // A return can be in the middle of a function, and Lua only allows it at the end of a block.
+        case 0x203: func = "do return end"; break;
         case 0x317: func = "TriggerBattle(" + stack.Pop()->GetString() + ");"; break;
         case 0x324:
             // x, y, w, h
@@ -140,33 +141,39 @@ void WorldKernelCallInstruction::ProcessInst(
                 std::string type = stack.Pop()->GetString();
                 std::string comment = "-- ";
                 try{
+                    // The names come from the model tables of ff7.exe, see WorldModelTable.h.
                     switch (std::stoi(type)){
                         case 0: comment += "Cloud"; break;
-                        case 1: comment += "Tifa?"; break;
-                        case 2: comment += "Cid?"; break;
-                        case 3: comment += "Ultimate Weapon"; break;
-                        case 4: comment += "Unknown"; break;
-                        case 5: comment += "Unknown"; break;
-                        case 6: comment += "Unknown"; break;
-                        case 7: comment += "Unknown"; break;
-                        case 8: comment += "Unknown"; break;
-                        case 9: comment += "Unknown"; break;
-                        case 10: comment += "Unknown"; break;
-                        case 11: comment += "Highwind"; break;
-                        case 12: comment += "Unknown"; break;
+                        case 1: comment += "Tifa"; break;
+                        case 2: comment += "Cid"; break;
+                        case 3: comment += "Highwind"; break;
+                        case 4: comment += "Chocobo"; break;
+                        case 5: comment += "Tiny Bronco"; break;
+                        case 6: comment += "Buggy"; break;
+                        case 7: comment += "Cannon"; break;
+                        case 8: comment += "Warship"; break;
+                        case 9: comment += "Tail"; break;
+                        case 10: comment += "Diamond Weapon"; break;
+                        case 11: comment += "Ultimate Weapon"; break;
+                        case 12: comment += "Condor"; break;
                         case 13: comment += "Submarine"; break;
-                        case 14: comment += "Unknown"; break;
-                        case 15: comment += "Unknown"; break;
-                        case 16: comment += "Unknown"; break;
-                        case 17: comment += "Unknown"; break;
-                        case 18: comment += "Unknown"; break;
-                        case 19: comment += "Chocobo"; break;
-                        case 20: comment += "Unknown"; break;
-                        case 21: comment += "Unknown"; break;
-                        case 22: comment += "Unknown"; break;
-                        case 23: comment += "Unknown"; break;
-                        case 24: comment += "Unknown"; break;
-                        case 25: comment += "Unknown"; break;
+                        case 14: comment += "Gold Saucer"; break;
+                        case 15: comment += "Rocket"; break;
+                        case 16: comment += "Rocket Base"; break;
+                        case 17: comment += "Gernika"; break;
+                        case 18: comment += "Underwater mark"; break;
+                        case 19: comment += "Chocobo (2)"; break;
+                        case 20: comment += "Midgar cannon"; break;
+                        case 21: comment += "Snowpole 1"; break;
+                        case 22: comment += "Snowpole 2"; break;
+                        case 23: comment += "Snowpole 3"; break;
+                        case 24: comment += "Barrier"; break;
+                        case 25: comment += "Rock"; break;
+                        case 26: comment += "Coral key"; break;
+                        case 27: comment += "Sea object"; break;
+                        case 28: comment += "Submarine (2)"; break;
+                        case 29: comment += "Ruby Weapon"; break;
+                        case 30: comment += "Emerald Weapon"; break;
                         default: comment += "??"; break;
                     }
                 }

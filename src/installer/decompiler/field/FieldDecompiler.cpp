@@ -55,5 +55,7 @@ FieldDecompiler::DecompiledScript FieldDecompiler::Decompile(
     for (auto line : engine.GetLineList()) ds.lines.push_back(line);
     ds.background_areas = engine.GetBackgroundAreas();
     ds.background_areas_dynamic = engine.BackgroundAreasAreDynamic();
+    ds.palette_pages = engine.GetPalettePages();
+    ds.palette_pages_dynamic = engine.PalettePagesAreDynamic();
     return ds;
 }

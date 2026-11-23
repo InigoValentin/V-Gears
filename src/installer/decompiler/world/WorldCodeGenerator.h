@@ -56,6 +56,18 @@ class WorldCodeGenerator : public CodeGenerator{
          */
         virtual void ProcessSpecialMetadata(const InstPtr inst, char c, int pos);
 
+        /**
+         * Outputs a jump if false as "if not (condition) then goto label end".
+         *
+         * The scripts of the world map are not analyzed into ifs and loops, so every conditional
+         * jump is a goto. A label is valid in Lua if it is in the same block, and the generated
+         * functions are flat.
+         *
+         * @param[in] insts All the instructions of the script.
+         * @param[in] inst The jump.
+         */
+        virtual void ProcessUnstructuredCondJump(InstVec& insts, const InstPtr inst) override;
+
     protected:
 
         bool OutputOnlyRequiredLabels() const override;

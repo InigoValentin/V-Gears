@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <boost/filesystem.hpp>
 #include <algorithm>
 #include <iostream>
 #include <list>
@@ -172,6 +173,12 @@ void AudioManager::ScriptPlayMusicOnce(const char* name){
     }
 }
 
+bool AudioManager::ScriptIsMusicPlaying(){
+    if (!initialized_) return false;
+    boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    return (module_ == Module::BATTLE ? battle_music_ : music_).IsPlaying();
+}
+
 void AudioManager::EndBattleMusic(){
     if (!initialized_) return;
     boost::recursive_mutex::scoped_lock lock(update_mutex_);
@@ -195,6 +202,11 @@ void AudioManager::SoundPlay(const Ogre::String& name){
 void AudioManager::MoviePlay(const Ogre::String& file){
     if (!initialized_) return;
     boost::recursive_mutex::scoped_lock lock(update_mutex_);
+    // Some movies have no sound: nothing to play, and it is not an error.
+    if (!boost::filesystem::exists(file.c_str())){
+        LOG_TRIVIAL("The movie \"" + file + "\" has no sound.");
+        return;
+    }
     movie_.SetLoop(-1);
     movie_.Play(file);
 }
@@ -521,6 +533,11 @@ ALsizei AudioManager::Player::FillBuffer(){
     }
     while (finished == false);
     return read;
+}
+
+bool AudioManager::Player::IsPlaying(){
+    boost::recursive_mutex::scoped_lock lock(*update_mutex_);
+    return !file_.empty();
 }
 
 float AudioManager::Player::GetPosition(){

@@ -28,5 +28,6 @@
 void WorldNoOutputInstruction::ProcessInst(
   Function& function, ValueStack &stack, Engine *engine, CodeGenerator *code_gen
 ){
-    // TODO
+    // The opcode is "reset stack": what was pushed and not used by the previous statement is gone.
+    while (!stack.IsEmpty()) stack.Pop();
 }

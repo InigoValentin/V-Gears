@@ -30,6 +30,20 @@
 
 WorldEngine::BankValue::BankValue(std::string name) : VarValue(name){}
 
+WorldEngine::BoolValue::BoolValue(std::string condition) : VarValue(condition){}
+
+std::ostream& WorldEngine::BoolValue::Print(std::ostream& output) const{
+    return output << "(" << name_ << " and 1 or 0)";
+}
+
+std::string WorldEngine::BoolValue::Condition() const{return name_;}
+
+std::string WorldEngine::AsCondition(const ValuePtr& value){
+    const BoolValue* boolean = dynamic_cast<const BoolValue*>(value.get());
+    if (boolean != nullptr) return boolean->Condition();
+    return "(" + value->GetString() + " ~= 0)";
+}
+
 WorldEngine::WorldEngine(int script_number) : script_number_(script_number){SetOutputStackEffect(true);}
 
 std::unique_ptr<Disassembler> WorldEngine::GetDisassembler(InstVec &insts){

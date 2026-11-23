@@ -45,6 +45,10 @@ System = {
     end
 }
 
+--- Stands for the model of the script entities that have none: the opcodes that move or hide a
+-- model are run by them in the original game and do nothing. Any method called on it is ignored.
+NullEntity = setmetatable({}, {__index = function() return function() end end})
+
 Timer = {
     -- TODO When the game clock is implemented, dont use FPS, call this every second.
     FPS = 250,
@@ -69,6 +73,7 @@ Timer = {
     set = function(time)
         Timer.time = tonumber(time)
         Timer.frames = Timer.FPS
+        dialog:update_timer(Timer.time)
         Banks[1][20]--[[timer_hours]] = math.floor(Timer.time / 3600)
         Banks[1][21]--[[timer_minutes]] = math.floor(Timer.time / 60) % 60
         Banks[1][22]--[[timer_seconds]] = Timer.time % 60
@@ -109,6 +114,20 @@ export_party_members = function()
         c3 = Party[3]
     end
     text_manager:set_party(c1, c2, c3)
+end
+
+--- Restores the HP and MP of every character, also the ones that are not in the party, and clears
+-- their status (MHMMX).
+restore_all_characters = function()
+    for id, character in pairs(Characters) do
+        if type(id) == "number" and type(character) == "table" and character.stats ~= nil
+          and character.stats.hp ~= nil and character.stats.mp ~= nil then
+            Characters.recalculate_stats(id)
+            character.stats.hp.current = character.stats.hp.max
+            character.stats.mp.current = character.stats.mp.max
+            character.status = {}
+        end
+    end
 end
 
 --- Sets the current party.
@@ -236,6 +255,27 @@ get_character_enable = function(character)
         return false
     end
     return Characters[character].enabled;
+end
+
+--- Checks if a character is in the current party (IFPRTYQ).
+--
+-- @param character ID of the character to check.
+-- @return True if the character is in one of the party slots.
+IFPRTYQ = function(character)
+    for i = 1, 3 do
+        if Party[i] == character then return true end
+    end
+    return false
+end
+
+--- Checks if a character is available as a party member (IFMEMBQ).
+--
+-- A character is available when it is enabled in the PHS, whether it is in the party or not.
+--
+-- @param character ID of the character to check.
+-- @return True if the character is enabled.
+IFMEMBQ = function(character)
+    return Characters[character] ~= nil and Characters[character].enabled == true
 end
 
 --- Adds items to the inventory.
@@ -779,6 +819,16 @@ end
 Party.steal_materia = function()
     -- TODO: Implement.
     -- TODO: How is this reversed?
+end
+
+--- Integer division of the field scripts (DIV, DIV2).
+--
+-- @param a Dividend.
+-- @param b Divisor. The result is the dividend if it is zero.
+-- @return The integer part of a / b.
+function math_div(a, b)
+    if b == 0 then return a end
+    return math.floor(a / b)
 end
 
 --- Implementation of OR bit operation.

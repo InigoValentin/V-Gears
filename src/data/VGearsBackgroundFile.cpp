@@ -102,6 +102,7 @@ namespace VGears{
     Ogre::Image* BackgroundFile::CreateImage(const PaletteFilePtr &palette){
         assert(palette != nullptr);
         SpritePtrList sprites;
+        palette_tiles_.clear();
         AddAllSprites(sprites);
         size_t width(1024);
         size_t row_pitch(width);
@@ -220,6 +221,17 @@ namespace VGears{
                 if (sprite.palette_page < PALETTE_ENTRY_COUNT){
                     first_color_hidden = palette_[sprite.palette_page] > 0;
                 }
+                // Remember the tile, for the palette animations.
+                PaletteTile palette_tile;
+                palette_tile.x = dst_x;
+                palette_tile.y = dst_y;
+                palette_tile.width = sprite.width;
+                palette_tile.height = sprite.height;
+                palette_tile.palette_page = sprite.palette_page;
+                palette_tile.first_color_hidden = first_color_hidden;
+                palette_tile.indexes.assign(
+                  static_cast<size_t>(sprite.width) * sprite.height, 0
+                );
                 for (uint16 y(sprite.height); y --;){
                     for (uint16 x(sprite.width); x --;){
                         size_t data_index(
@@ -231,6 +243,9 @@ namespace VGears{
                               << data_index;
                         }
                         uint8 index(data_page.data.at(data_index));
+                        palette_tile.indexes[
+                          static_cast<size_t>(y) * sprite.width + x
+                        ] = index;
                         if (index >= palette_page.size()){
                             Ogre::LogManager::getSingleton().stream()
                               << "Error: palette page Index out of Bounds "
@@ -247,8 +262,22 @@ namespace VGears{
                         // Strange PC version behavior: empty colors are
                         // replaced by the first color and the first color is
                         // hidden by a flag.
-                        if (colour == Color::ZERO) colour = palette_page[0];
-                        if (index == 0 && first_color_hidden) colour.a = 0;
+                        const bool empty_color = (colour == Color::ZERO);
+                        if (empty_color) colour = palette_page[0];
+                        // A page whose first color is a bright marker (the yellow of mds6_2, the green
+                        // of mds5_1) uses it as the key of the hidden color: the empty entries that
+                        // took it are hidden too, or they would be painted with that color. When
+                        // the first color is a dark one, the empty entries are painted with it,
+                        // as the dithering of the ground of mds6_2 needs.
+                        const float marker_level = 24.0f / 31.0f;
+                        const bool bright_first_color = (
+                          palette_page[0].r >= marker_level || palette_page[0].g >= marker_level
+                          || palette_page[0].b >= marker_level
+                        );
+                        if (
+                          (index == 0 && first_color_hidden)
+                          || (empty_color && first_color_hidden && bright_first_color)
+                        ) colour.a = 0;
                         else if (
                           colour.a
                           && (colour.r != 0 || colour.g != 0 || colour.b != 0)
@@ -258,6 +287,9 @@ namespace VGears{
                         else colour.a = 1;
                         color[data_index] = colour.getAsARGB();
                     }
+                }
+                if (sprite.palette_page < palette->GetPages().size()){
+                    palette_tiles_.push_back(std::move(palette_tile));
                 }
             }
             // Source in the texture atlas is where it's just copied to.

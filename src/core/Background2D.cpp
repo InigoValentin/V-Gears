@@ -19,6 +19,8 @@
 #include <OgreException.h>
 #include <OgreViewport.h>
 #include <OgreTechnique.h>
+#include <OgreTextureManager.h>
+#include <OgreHardwarePixelBuffer.h>
 #include <algorithm>
 #include "core/Background2D.h"
 #include "core/CameraManager.h"
@@ -44,6 +46,7 @@ Background2D::Background2D():
   scroll_current_seconds_(0),
   scroll_target_entity_(nullptr),
   scroll_follow_target_(false),
+  free_scroll_(false),
   position_(Ogre::Vector2::ZERO),
   position_real_(Ogre::Vector2::ZERO),
   offset_(Ogre::Vector2::ZERO),
@@ -74,6 +77,10 @@ Background2D::Background2D():
     pass->setDepthCheckEnabled(true);
     pass->setDepthWriteEnabled(true);
     pass->setLightingEnabled(false);
+    // Additive tiles blend with what is behind. They don't write depth, or a tile in front (such as
+    // the light beams, at depth 0) would hide the additive tiles behind it, like the waterfall of
+    // eals_1.
+    pass->setDepthWriteEnabled(false);
     pass->setSceneBlending(Ogre::SBT_ADD);
     pass->setAlphaRejectFunction(Ogre::CMPF_GREATER);
     pass->setAlphaRejectValue(0);
@@ -91,6 +98,8 @@ Background2D::Background2D():
     pass->setDepthWriteEnabled(true);
     pass->setLightingEnabled(false);
     pass->setSceneBlending(Ogre::SBT_ADD);
+    // Like the additive tiles, they don't write depth.
+    pass->setDepthWriteEnabled(false);
     pass->setSceneBlendingOperation(Ogre::SBO_SUBTRACT);
     pass->setAlphaRejectFunction(Ogre::CMPF_LESS);
     pass->setAlphaRejectValue(0);
@@ -126,6 +135,7 @@ void Background2D::Update(){
         has_pending_scroll_ = false;
         SetScroll(pending_scroll_);
     }
+    UpdatePalette();
     UpdateShake(Timer::getSingleton().GetGameTimeDelta());
     // The layers that scroll by themselves.
     for (int layer = 0; layer < LAYER_COUNT; ++ layer){
@@ -402,6 +412,64 @@ void Background2D::ScriptAreaClear(const int area){
     RefreshArea(area);
 }
 
+void Background2D::SetPalette(const Ogre::String& name){
+    if (palette_.Load(name)){
+        palette_image_loaded_ = false;
+        Ogre::LogManager::getSingleton().stream() << "Background2D: palette file loaded " << name;
+    }
+}
+
+void Background2D::ScriptPaletteStore(int page, int slot, int count){
+    palette_.Store(page, slot, count);
+}
+
+void Background2D::ScriptPaletteLoad(int slot, int page, int count){
+    palette_.Load(slot, page, count);
+}
+
+void Background2D::ScriptPaletteCopy(int source, int destination, int count){
+    palette_.Copy(source, destination, count);
+}
+
+void Background2D::ScriptPaletteMultiply(
+  int source, int destination, int start, int count, int red, int green, int blue
+){
+    palette_.Multiply(source, destination, start, count, red, green, blue);
+}
+
+void Background2D::ScriptPaletteAdd(
+  int source, int destination, int red, int green, int blue, int count
+){
+    palette_.Add(source, destination, red, green, blue, count);
+}
+
+void Background2D::UpdatePalette(){
+    if (palette_.IsEmpty() || image_name_.empty()) return;
+    if (!palette_image_loaded_){
+        try{
+            palette_image_.load(
+              image_name_, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME
+            );
+        }
+        catch (const Ogre::Exception& e){
+            LOG_ERROR("Background palette: can't load image '" + image_name_ + "': " + e.what());
+            palette_.Clear();
+            return;
+        }
+        palette_image_loaded_ = true;
+    }
+    if (!palette_.Paint(palette_image_)) return;
+    Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName(image_name_);
+    if (!texture){
+        texture = Ogre::TextureManager::getSingleton().load(
+          image_name_, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME
+        );
+    }
+    if (texture){
+        texture->getBuffer()->blitFromMemory(palette_image_.getPixelBox());
+    }
+}
+
 void Background2D::Clear(){
     scroll_entity_ = nullptr;
     scroll_position_start_ = Ogre::Vector2::ZERO;
@@ -410,6 +478,7 @@ void Background2D::Clear(){
     scroll_current_seconds_ = 0;
     scroll_target_entity_ = nullptr;
     scroll_follow_target_ = false;
+    free_scroll_ = false;
     has_pending_scroll_ = false;
     position_ = Ogre::Vector2::ZERO;
     position_real_ = Ogre::Vector2::ZERO;
@@ -424,6 +493,8 @@ void Background2D::Clear(){
     animation_played_.clear();
     tiles_.clear();
     area_states_on_.clear();
+    palette_.Clear();
+    palette_image_loaded_ = false;
     shake_x_ = ShakeAxis();
     shake_y_ = ShakeAxis();
     shake_offset_ = Ogre::Vector2::ZERO;
@@ -431,7 +502,10 @@ void Background2D::Clear(){
     CreateVertexBuffers();
 }
 
-void Background2D::ScriptAutoScrollToEntity(Entity* entity){scroll_entity_ = entity;}
+void Background2D::ScriptAutoScrollToEntity(Entity* entity){
+    scroll_entity_ = entity;
+    free_scroll_ = false;
+}
 
 Entity* Background2D::GetAutoScrollEntity() const{return scroll_entity_;}
 
@@ -439,7 +513,10 @@ void Background2D::ScriptScrollToPlayer(const SCROLL_TYPE type, const float seco
     Entity* player = EntityManager::getSingleton().ScriptGetPlayerEntity();
     if (player == nullptr) return;
     scroll_entity_ = nullptr;
-    StartScroll(GetEntityScroll(player), type, seconds, player, type == Background2D::NONE);
+    // The camera follows the player when the scroll ends, whatever the transition: scenes end with
+    // SCRLC (scroll to the player) and give the control back without any other camera opcode, as
+    // the first visit of mrkt2 does.
+    StartScroll(GetEntityScroll(player), type, seconds, player, true);
 }
 
 void Background2D::ScriptScrollToEntity(
@@ -455,7 +532,7 @@ void Background2D::ScriptScrollToEntity(
 
 void Background2D::UpdateScrollTarget(){
     if (scroll_target_entity_ != nullptr)
-        scroll_position_end_ = ClampScroll(GetEntityScroll(scroll_target_entity_));
+        scroll_position_end_ = ClampToRange(GetEntityScroll(scroll_target_entity_));
 }
 
 const Ogre::Vector2 Background2D::GetEntityScroll(const Entity* entity) const{
@@ -483,12 +560,14 @@ void Background2D::StartScroll(
     scroll_target_entity_ = target_entity;
     scroll_follow_target_ = follow_target;
     if (type == Background2D::NONE || seconds <= 0){
+        // The camera that goes to an entity is limited to the background.
+        if (target_entity != nullptr) free_scroll_ = false;
         SetScroll(position);
         UnsetScroll();
         return;
     }
     scroll_position_start_ = position_;
-    scroll_position_end_ = ClampScroll(position);
+    scroll_position_end_ = (target_entity != nullptr) ? ClampToRange(position) : ClampScroll(position);
     scroll_type_ = type;
     scroll_seconds_ = seconds;
     scroll_current_seconds_ = 0;
@@ -502,6 +581,7 @@ void Background2D::ScriptScrollToPosition(
       + Ogre::StringConverter::toString(Ogre::Vector2(x, y)) + "'."
     );
     scroll_entity_ = nullptr;
+    free_scroll_ = true;
     if (type == Background2D::NONE || seconds <= 0){
         // The scripts set a position and then scroll from it to another one, in the same frame.
         // The camera is only moved at the end of the frame, so if another scroll comes first the
@@ -544,7 +624,10 @@ void Background2D::ScriptOffset(const float x, const float y){
 
 void Background2D::UnsetScroll(){
     scroll_type_ = Background2D::NONE;
-    if (scroll_follow_target_) scroll_entity_ = scroll_target_entity_;
+    if (scroll_follow_target_){
+        scroll_entity_ = scroll_target_entity_;
+        free_scroll_ = false;
+    }
     scroll_target_entity_ = nullptr;
     scroll_follow_target_ = false;
     for(unsigned int i = 0; i < scroll_sync_.size(); ++ i)
@@ -574,6 +657,10 @@ void Background2D::SetScroll(const Ogre::Vector2& position){
 }
 
 const Ogre::Vector2 Background2D::ClampScroll(const Ogre::Vector2& position) const{
+    return free_scroll_ ? position : ClampToRange(position);
+}
+
+const Ogre::Vector2 Background2D::ClampToRange(const Ogre::Vector2& position) const{
     Ogre::Vector2 clamped = position;
     Ogre::Vector3 pos_3d(position.x, position.y, 0);
     if (!range_.contains(pos_3d)){
@@ -602,6 +689,8 @@ const Ogre::Vector2 Background2D::GetScreenScroll() const{return GetScroll() * s
 
 void Background2D::SetImage(const Ogre::String& image){
     Ogre::LogManager::getSingleton().stream() << "Background2D::SetImage " << image;
+    image_name_ = image;
+    palette_image_loaded_ = false;
     Ogre::Pass* pass = alpha_material_->getTechnique(0)->getPass(0);
     Ogre::TextureUnitState* tex = pass->getTextureUnitState(0);
     tex->setTextureName(image);
@@ -1096,6 +1185,7 @@ void Background2D::load(const VGears::Background2DFilePtr& background){
     assert(background != nullptr);
     background->load();
     SetImage(background->GetTextureName());
+    if (!background->GetPaletteName().empty()) SetPalette(background->GetPaletteName());
     virtual_screen_size_ = background->GetClip();
     SetRange(background->GetRange());
     const Ogre::Vector3& position(background->GetPosition());

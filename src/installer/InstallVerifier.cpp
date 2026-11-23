@@ -163,7 +163,10 @@ VerifyResult VerifyInstallation(const std::string& root, const std::string& refe
 
     const std::string world = "World map";
     for (const char* file : {"WM0.MAP", "WM2.MAP", "WM3.MAP"}) check.File(world, std::string("data/wm/") + file);
-    check.File(world, "data/scripts/worldmap/wm0.lua");
+    // The scripts of the maps are decompiled by the installer, the other ones are copied from the
+    // V-Gears data folder.
+    for (const char* file : {"wm0.lua", "wm2.lua", "wm3.lua", "triangle_triggers.lua", "vehicles.lua", "script_stubs.lua"})
+        check.File(world, std::string("data/scripts/worldmap/") + file);
     check.File(world, "data/gamedata/world_encounters.xml");
     check.Files(world, "data/models/world/terrain/0", ".mesh", 1);
 

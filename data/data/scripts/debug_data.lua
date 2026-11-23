@@ -169,3 +169,44 @@ Materia.add(44)
 Materia.add(12)
 Materia.add(15, 2000)
 Materia.add(24)
+
+-- Where the entities of the overworld appear when it is loaded, in world units (x, z). Without this the
+-- game would use the spawn points of the story (not known yet), so they are all around the start of the
+-- test map, near Kalm. Remove an entry to use the default of that entity.
+WorldMapDebug = WorldMapDebug or {}
+WorldMapDebug.spawn = {
+    Cloud = {42.0, 36.5},
+    Chocobo = {42.5, 37.5},
+    Highwind = {43.0, 36.5},
+    Buggy = {42.0, 36.0},
+    Submarine = {41.5, 36.5},
+    TinyBronco = {42.0, 37.37},
+}
+
+-- Story of the overworld, for testing the models that depend on it. Without anything here the game
+-- takes the situation (the set of models of the map, 0 to 12) from the story, like the original does:
+-- the story counter (word 0 of the game variables, Banks[2][0] in the fields) and two flags (the bits
+-- 976 and 7220) give 0 the start (counter under 1000), 1 to 4 the Diamond Weapon (1000 to 1579; +1 with
+-- the bit 976, +2 from 1620 on), 5 to 8 the Ultimate Weapon and the Ruby Weapon (from 1580; +1 from
+-- 1620, +2 with the bit 7220). The situation can be forced for a map with WorldMapDebug.situation[map]
+-- (1 to 4 Diamond Weapon, with the Midgar cannon in 2 and 4 and the second Highwind in 3 and 4; 5 and
+-- 6 Ultimate Weapon; 7 and 8 Ruby Weapon; 11 the underwater map; 12 the snowstorm one).
+--
+-- The variables are the ones of the savemap that the world scripts read, and the fields write: they
+-- are written when the map is loaded. "word" and "byte" are by the address in bytes (the story counter
+-- is word 0), "bit" by the address in bits (the vehicles are the bits 1016 to 1021: 1016 the Buggy, 1018
+-- the Tiny Bronco, 1020 the Highwind, 1008 the Chocobo, 6787 and 6802 the Submarine, 6803 the Diamond
+-- Weapon appears) and "special" the values that the engine gives to the world (6 is the FIELD.TBL
+-- record of the exit by which the world was entered).
+--
+-- WorldMapDebug.arrival is that record, to test entering the world from a field exit: the vehicles
+-- and the player are where their scripts put them for it, except the ones with a spawn above.
+-- The map has to be loaded again to change any of this. Example: the story at 1400 with the Buggy, the
+-- Tiny Bronco and the Highwind.
+--WorldMapDebug.situation = {[0] = 3}
+--WorldMapDebug.arrival = 51
+WorldMapDebug.variables = {}
+--WorldMapDebug.variables = {
+--    word = {[0] = 1400},
+--    bit = {[1016] = 1, [1018] = 1, [1020] = 1},
+--}

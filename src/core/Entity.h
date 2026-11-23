@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <tuple>
 #include <OgreString.h>
 #include "EntityCollision.h"
@@ -99,6 +101,21 @@ enum LinearMovement{
 /**
  * Any entity in a field.
  */
+/**
+ * Arc cosine of a ratio, in radians, that never gives NaN.
+ *
+ * The cosine of the angle between two vectors can end up a bit over 1 or under -1 because of float
+ * rounding (for example when moving exactly along an axis), and acosf gives NaN then. A NaN
+ * rotation breaks the bounding box of the entity and Ogre asserts. A zero length vector gives 0.
+ *
+ * @param[in] dot The dot product of the vectors.
+ * @param[in] length_product The product of the lengths of the vectors.
+ */
+inline float SafeAcos(const float dot, const float length_product){
+    if (!(length_product > 0.0f)) return 0.0f;
+    return std::acos(std::max(-1.0f, std::min(1.0f, dot / length_product)));
+}
+
 class Entity{
 
     public:
@@ -548,6 +565,28 @@ class Entity{
          * @return The number of animations, 0 if the entity has no animations.
          */
         virtual unsigned int GetAnimationCount() const;
+
+        /**
+         * Gets the name of an animation by its position, in the order they were added to the model.
+         *
+         * @param[in] index Position of the animation, starting at 0.
+         * @return The name, empty if there is no such animation.
+         */
+        virtual Ogre::String GetAnimationName(const unsigned int index) const;
+
+        /**
+         * Plays, looped, the animation at a position (see GetAnimationName).
+         *
+         * @param[in] index Position of the animation, starting at 0.
+         */
+        void ScriptPlayAnimationIndex(const unsigned int index);
+
+        /**
+         * Sets the default animation to the one at a position (see GetAnimationName).
+         *
+         * @param[in] index Position of the animation, starting at 0.
+         */
+        void ScriptSetDefaultAnimationIndex(const unsigned int index);
 
         /**
          * Retrieves the duration of an animation.
@@ -1545,6 +1584,14 @@ class Entity{
          * @todo Understand and document.
          */
         float animation_end_time_;
+
+        /**
+         * Seconds left that the animation has to wait before it can end. A range of one frame
+         * (start and end equal) lasts a frame of the original game (1/30 s), not an update of the
+         * engine, so the scripts that play an animation frame by frame are not faster at a high
+         * frame rate.
+         */
+        float animation_hold_ = 0.0f;
 
         /**
          * Indicates if an automation must be played automatically.

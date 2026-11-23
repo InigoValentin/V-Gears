@@ -63,6 +63,7 @@ class FieldModuleInstruction : public KernelCallInstruction{
          *
          * @param[in,out] code_gen Code generator to append lines.
          */
+        void ProcessLSTMP(CodeGenerator* code_gen);
         void ProcessBATTLE(CodeGenerator* code_gen);
 
         /**

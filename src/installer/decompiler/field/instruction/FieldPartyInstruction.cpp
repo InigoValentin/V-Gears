@@ -36,7 +36,10 @@ void FieldPartyInstruction::ProcessInst(
         case OPCODES::GOLDD: ProcessGOLDD(code_gen); break;
         case OPCODES::HMPMAX1: code_gen->WriteTodo(md.GetEntityName(), "HMPMAX1"); break;
         case OPCODES::HMPMAX2: code_gen->WriteTodo(md.GetEntityName(), "HMPMAX2"); break;
-        case OPCODES::MHMMX: code_gen->WriteTodo(md.GetEntityName(), "MHMMX"); break;
+        case OPCODES::MHMMX:
+            // Full HP and MP of all the characters, and no status.
+            code_gen->AddOutputLine("restore_all_characters()");
+            break;
         case OPCODES::HMPMAX3: code_gen->WriteTodo(md.GetEntityName(), "HMPMAX3"); break;
         case OPCODES::MPU: code_gen->WriteTodo(md.GetEntityName(), "MPU"); break;
         case OPCODES::MPD: code_gen->WriteTodo(md.GetEntityName(), "MPD"); break;
@@ -128,9 +131,12 @@ void FieldPartyInstruction::ProcessDLITM(CodeGenerator* code_gen){
 }
 
 void FieldPartyInstruction::ProcessCKITM(CodeGenerator* code_gen){
+    // Operands: the bank of the destination (in the two nibbles of the first byte), the ID of the
+    // item and the address, in that bank, that receives how many of the item there are.
     code_gen->AddOutputLine((
       boost::format("Banks[%1%][%2%] = Inventory.get_item_quantity(%3%)")
-      % params_[0]->GetUnsigned() % params_[2]->GetUnsigned() % params_[1]->GetUnsigned()
+      % (params_[0]->GetUnsigned() * 16 + params_[1]->GetUnsigned()) % params_[3]->GetUnsigned()
+      % params_[2]->GetUnsigned()
     ).str());
 }
 

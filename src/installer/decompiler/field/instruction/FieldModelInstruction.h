@@ -158,6 +158,7 @@ class FieldModelInstruction : public KernelCallInstruction{
          * Processes a XYI opcode: sets the X and Y position of the entity (and its triangle).
          * Unlike XYZI, it doesn't change the visibility of the entity.
          */
+        void ProcessXYZ(CodeGenerator* code_gen, const std::string& entity);
         void ProcessXYI(CodeGenerator* code_gen, const std::string& entity);
 
         void ProcessMOVE(CodeGenerator* code_gen, const std::string& entity);
@@ -309,6 +310,7 @@ class FieldModelInstruction : public KernelCallInstruction{
          * @param[in,out] code_gen Code generator to append lines.
          * @param[in] entity Name of the entity.
          */
+        void ProcessCMOVE(CodeGenerator* code_gen, const std::string& entity);
         void ProcessFMOVE(CodeGenerator* code_gen, const std::string& entity);
 
         /**

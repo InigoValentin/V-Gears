@@ -95,7 +95,10 @@ bool ScreenFadeState::StartFade(
             Begin(BLEND_ADD, Standard(r, g, b), Black(), 1, 1, seconds, false);
             return true;
         case 6:
-            Begin(BLEND_NORMAL, Standard(r, g, b), Standard(r, g, b), 0, 1, seconds, true);
+            // The pair of type 5: the colour is added to the field little by little and kept. The
+            // scripts use the pair for flashes (5 after 6 with the same colour) and for the tint
+            // of the scenes that are told (a dark blue added to the field, not a screen of it).
+            Begin(BLEND_ADD, Black(), Standard(r, g, b), 1, 1, seconds, true);
             return true;
         case 7:
             Begin(BLEND_SUBTRACT, Inverse1(r, g, b), Inverse1(r, g, b), 1, 1, seconds, false);
