@@ -20,6 +20,7 @@
 
 #include <set>
 #include <string>
+#include <map>
 #include <vector>
 
 #include "FieldScriptFormatter.h"
@@ -291,6 +292,27 @@ class FieldEngine : public Engine{
         bool BackgroundAreasAreDynamic() const;
 
         /**
+         * Adds a palette the script changes (it loads colors into it).
+         *
+         * @param[in] page The palette page, or -1 if it is picked from a variable.
+         */
+        void AddPalettePage(int page);
+
+        /**
+         * Retrieves the palette pages the script changes.
+         *
+         * @return The page IDs.
+         */
+        const std::set<int>& GetPalettePages() const;
+
+        /**
+         * Checks if the script picks any palette page from a variable.
+         *
+         * @return True if it does.
+         */
+        bool PalettePagesAreDynamic() const;
+
+        /**
          * Retrieves all entities in the map.
          *
          * @return A map of entities, with the name and index.
@@ -332,6 +354,29 @@ class FieldEngine : public Engine{
         void AddFunctionAlias(
           const std::string& entity_name, const std::string& alias, const std::string& target
         );
+
+        /**
+         * Records that a function has no return and goes on in the code of another function of
+         * the same entity (the code of one script runs into the entry point of the next).
+         *
+         * @param[in] entity_name Name of the entity.
+         * @param[in] function Name of the function that doesn't end.
+         * @param[in] target Name of the function it goes on in.
+         */
+        void AddFunctionFallThrough(
+          const std::string& entity_name, const std::string& function, const std::string& target
+        );
+
+        /**
+         * Retrieves the name of the function a function goes on in, if it doesn't end.
+         *
+         * @param[in] entity_name Name of the entity.
+         * @param[in] function Name of the function.
+         * @return The name of the function it goes on in, empty if it ends.
+         */
+        std::string GetFunctionFallThrough(
+          const std::string& entity_name, const std::string& function
+        ) const;
 
         /**
          * Retrieves the functions that are another name for other function.
@@ -439,6 +484,11 @@ class FieldEngine : public Engine{
         std::vector<FunctionAlias> function_aliases_;
 
         /**
+         * Functions that go on in another one, by "entity/function".
+         */
+        std::map<std::string, std::string> function_fall_through_;
+
+        /**
          * The map scale factor.
          */
         float scale_factor_;
@@ -452,6 +502,16 @@ class FieldEngine : public Engine{
          * Whether the script picks any background area from a variable.
          */
         bool background_areas_dynamic_ = false;
+
+        /**
+         * Palette pages the script changes.
+         */
+        std::set<int> palette_pages_;
+
+        /**
+         * Whether the script picks any palette page from a variable.
+         */
+        bool palette_pages_dynamic_ = false;
 
         /**
          * The script name.

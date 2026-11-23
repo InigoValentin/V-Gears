@@ -16,6 +16,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 #include <QtCore/QCoreApplication>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include "installer/ExternalTools.h"
@@ -240,6 +241,19 @@ BOOST_AUTO_TEST_CASE(FfmpegArgumentsDontNeedQuoting){
 BOOST_AUTO_TEST_CASE(FfmpegReadsStdin){
     const std::vector<std::string> expected = {"-hide_banner", "-loglevel", "panic", "-y", "-i", "-", "out.ogg"};
     BOOST_CHECK(FfmpegStdinArguments("out.ogg") == expected);
+}
+
+BOOST_AUTO_TEST_CASE(FfmpegMidiRemovesTheSilenceAtTheEnd){
+    const std::vector<std::string> arguments = FfmpegMidiArguments("out.ogg");
+    // It reads the standard input and writes the file.
+    BOOST_CHECK(arguments.size() >= 3);
+    BOOST_CHECK(arguments.back() == "out.ogg");
+    BOOST_CHECK(std::find(arguments.begin(), arguments.end(), "-") != arguments.end());
+    // The filter reverses the audio, removes the silence at its start and reverses it again.
+    const auto filter = std::find(arguments.begin(), arguments.end(), "-af");
+    BOOST_REQUIRE(filter != arguments.end() && filter + 1 != arguments.end());
+    BOOST_CHECK(filter[1].find("areverse,silenceremove=") == 0);
+    BOOST_CHECK(filter[1].rfind(",areverse") == filter[1].size() - std::string(",areverse").size());
 }
 
 BOOST_AUTO_TEST_CASE(ShortVersions){

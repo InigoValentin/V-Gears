@@ -222,6 +222,7 @@ void ScriptManager::InitBinds(){
       "get_player_entity", &EntityManager::ScriptGetPlayerEntity,
       "unset_player_entity", &EntityManager::ScriptUnsetPlayerEntity,
       "player_lock", &EntityManager::ScriptPlayerLock,
+      "set_player_slip", &EntityManager::ScriptSetPlayerSlip,
       "is_player_locked", &EntityManager::IsPlayerLocked,
       "set_player_default_run", &EntityManager::SetPlayerDefaultRun,
       "random_encounters_on", &EntityManager::SetRandomEncounters,
@@ -368,11 +369,21 @@ void ScriptManager::InitBinds(){
         sol::resolve<void(const char*)>(&AudioManager::ScriptPlaySound),
         sol::resolve<void(const char*, const int)>(&AudioManager::ScriptPlaySound)
       ),
-      "play_sounds", &AudioManager::ScriptPlaySounds,
+      // The scripts pass nil for the sounds the opcode doesn't use.
+      "play_sounds", [](
+        AudioManager& audio, sol::optional<std::string> name1, sol::optional<std::string> name2,
+        sol::optional<std::string> name3, sol::optional<std::string> name4
+      ){
+          if (name1) audio.ScriptPlaySounds(
+            name1->c_str(), name2 ? name2->c_str() : "", name3 ? name3->c_str() : "",
+            name4 ? name4->c_str() : ""
+          );
+      },
       "get_track_id", &AudioManager::ScriptGetTrack,
       "get_battle_track_id", &AudioManager::ScriptGetBattleTrack,
       "set_battle_track_id", &AudioManager::ScriptSetBattleTrack,
       "play_music_once", &AudioManager::ScriptPlayMusicOnce,
+      "is_music_playing", &AudioManager::ScriptIsMusicPlaying,
       "set_music_volume", &AudioManager::ScriptSetMusicVolume,
       "set_sound_volume", &AudioManager::ScriptSetSoundVolume
     );
@@ -491,6 +502,11 @@ void ScriptManager::InitBinds(){
       "area_on", &Background2D::ScriptAreaOn,
       "area_off", &Background2D::ScriptAreaOff,
       "area_clear", &Background2D::ScriptAreaClear,
+      "palette_store", &Background2D::ScriptPaletteStore,
+      "palette_load", &Background2D::ScriptPaletteLoad,
+      "palette_copy", &Background2D::ScriptPaletteCopy,
+      "palette_multiply", &Background2D::ScriptPaletteMultiply,
+      "palette_add", &Background2D::ScriptPaletteAdd,
       "shake", &Background2D::ScriptShake,
       "set_layer_parallax", &Background2D::ScriptSetLayerParallax,
       "set_layer_scroll", &Background2D::ScriptSetLayerScroll,

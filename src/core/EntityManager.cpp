@@ -75,6 +75,16 @@ const unsigned int EntityManager::BATTLE_BACKGROUND_ID = 1000;
 
 const unsigned int EntityManager::WORLD_MAP_BACKGROUND_ID = 1001;
 
+float EntityManager::GetTriangleHeight(int triangle, float x, float y, float fallback) const{
+    if (IsBattleModule() || triangle < 0 || triangle >= walkmesh_.GetNumberOfTriangles())
+        return fallback;
+    const float height = PointElevation(
+      Ogre::Vector2(x, y), walkmesh_.GetA(triangle), walkmesh_.GetB(triangle),
+      walkmesh_.GetC(triangle)
+    );
+    return std::isfinite(height) ? height : fallback;
+}
+
 float EntityManager::PointElevation(
   const Ogre::Vector2& point, const Ogre::Vector3& a, const Ogre::Vector3& b, const Ogre::Vector3& c
 ){
@@ -128,7 +138,7 @@ Ogre::Degree EntityManager::GetDirectionToPoint(
     Ogre::Vector2 up(0.0f, -1.0f);
     Ogre::Vector2 dir(direction_point.x - current_point.x, direction_point.y - current_point.y);
     // Angle between vectors
-    Ogre::Degree angle(Ogre::Radian(acosf(dir.dotProduct(up) / (dir.length() * up.length()))));
+    Ogre::Degree angle(Ogre::Radian(SafeAcos(dir.dotProduct(up), dir.length() * up.length())));
     return (dir.x < 0) ? Ogre::Degree(360) - angle : angle;
 }
 
@@ -406,6 +416,12 @@ void EntityManager::AddFieldOrWorldMapEntity(
     entity->setScale(scale);
     entity->SetIndex(index);
     entity->setRootOrientation(root_orientation);
+    // The models of a field are visible, solid and talkable until a script changes it (VISI 0,
+    // SOLID 1, TLKON 1). Many entities, such as the doors of mds6_2 or the people of mrkt2, are
+    // never turned on by a script. Setting a position doesn't turn them on.
+    entity->SetVisible(true);
+    entity->SetSolid(true);
+    entity->SetTalkable(true);
     entity_.push_back(entity);
     ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, entity->GetName(), entity);
 }
@@ -539,6 +555,8 @@ void EntityManager::SetBackground3D(const Ogre::String& name, const Ogre::String
 }
 
 void EntityManager::UpdateDebug(){
+    // Only the world map fades the debug text with the distance to the camera.
+    DEBUG_DRAW.SetFadeEnabled(module_ == Module::WORLD);
     grid_->setVisible(cv_debug_grid.GetB());
     axis_->setVisible(cv_debug_axis.GetB());
     if (module_ == Module::BATTLE){
@@ -563,6 +581,7 @@ void EntityManager::ClearField(){
     walkmesh_.Clear();
     background_2d_.Clear();
     screen_fade_.Clear();
+    player_slip_ = true;
     DialogsManager::getSingleton().Clear();
     for (unsigned int i = 0; i < entity_.size(); ++ i){
         ScriptManager::getSingleton().RemoveEntity(ScriptManager::ENTITY, entity_[i]->GetName());
@@ -792,8 +811,22 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
             // A script can read the walkmesh triangle of the player right after this, so if it was
             // placed by position the triangle has to be known. Done before it's the player entity
             // so that the entity not being on the walkmesh yet isn't logged as an error.
+            if (entity_[i]->GetMoveTriangleId() == -1 && entity_[i]->GetPosition().isZeroLength()){
+                // A model that has no position of its own (the fields put the dressed Cloud away
+                // until a script makes it the player) takes the place of the previous player,
+                // which is where the field entry put the party, as in the original game.
+                if (player_entity_ != nullptr && player_entity_ != entity_[i]){
+                    entity_[i]->SetPosition(player_entity_->GetPosition());
+                    entity_[i]->SetRotation(player_entity_->GetRotation());
+                }
+            }
             if (entity_[i]->GetMoveTriangleId() == -1) SetEntityOnWalkmesh(entity_[i]);
             LOG_TRIVIAL("Player entity set to '" + std::string(name) + "'.");
+            // The camera that follows the player keeps following it when another entity takes over
+            // (Cloud and the dressed Cloud, for example); a camera that follows some other entity
+            // is left as it is.
+            if (player_entity_ != nullptr && background_2d_.GetAutoScrollEntity() == player_entity_)
+                background_2d_.ScriptAutoScrollToEntity(entity_[i]);
             player_entity_ = entity_[i];
             // Also, make it non-talkable. Visibility and solidity are left to the scripts, as in
             // the original game: some fields use hidden helper entities (like the 'camera') as
@@ -838,6 +871,8 @@ void EntityManager::ScriptUnsetPlayerEntity(){
     }
     player_entity_ = nullptr;
 }
+
+void EntityManager::ScriptSetPlayerSlip(const bool slip){player_slip_ = slip;}
 
 void EntityManager::ScriptPlayerLock(const bool lock){
     if (IsBattleModule()){
@@ -1008,6 +1043,12 @@ bool EntityManager::IsKeyOn(unsigned int key_code){
     for (const auto& entry : BUTTONS)
         if ((key_code & entry.mask) && InputManager::getSingleton().IsGameEventPressed(entry.event))
             return true;
+    // TODO: In the original game the button that makes the player run is the Cancel button (64),
+    // so scripts that check Cancel are checking if the player runs (the sneak out of ealin_2, for
+    // example). Here running has its own game event, "run", so it counts as Cancel too. Scripts
+    // that really want the Cancel button would see it pressed while running. Check which scripts
+    // need which, and maybe split them.
+    if ((key_code & 64) && InputManager::getSingleton().IsGameEventPressed("run")) return true;
     return false;
 }
 
@@ -1171,8 +1212,8 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed, const
     if (entity->GetMoveAutoRotation() == true){
         Ogre::Vector2 up(0.0f, -1.0f);
         // Angle between vectors
-        Ogre::Degree angle(Ogre::Radian(acosf(
-          direction.dotProduct(up) / (direction.length() * up.length())
+        Ogre::Degree angle(Ogre::Radian(SafeAcos(
+          direction.dotProduct(up), direction.length() * up.length()
         )));
         angle = (direction.x < 0) ? Ogre::Degree(360) - angle : angle;
         entity->SetRotation(Ogre::Degree(angle));
@@ -1330,6 +1371,8 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed, const
                 ){
                     // If not both left and right check failed
                     if (first_triangle_check == false || second_triangle_check == false){
+                        // With SLIP off the move is not turned along the wall: it stays blocked.
+                        if (!player_slip_) break;
                         if (first_triangle_check != false && second_triangle_check == false){
                             q1.FromAngleAxis(
                               Ogre::Radian(Ogre::Degree(-11.25f)), Ogre::Vector3::UNIT_Z
@@ -1684,8 +1727,8 @@ void EntityManager::SetNextOffsetStep(Entity* entity){
     current = (current > total) ? total : current;
     Ogre::Vector3 start = entity->GetOffsetPositionStart();
     Ogre::Vector3 end = entity->GetOffsetPositionEnd();
-    // TODO: Prevent division by 0:
-    float x = current / total;
+    // An offset of zero seconds is done at once. Dividing would give NaN.
+    float x = (total > 0.0f) ? current / total : 1.0f;
     if (std::isnan(x)) x = 0.0f;
     float smooth_modifier = (type == AT_SMOOTH) ? -2 * x * x * x + 3 * x * x : x;
     Ogre::Vector3 offset = start + (end - start) * smooth_modifier;
@@ -1703,8 +1746,9 @@ void EntityManager::SetNextTurnStep(Entity* entity){
     current = (current > total) ? total : current;
     Ogre::Degree start = entity->GetTurnDirectionStart();
     Ogre::Degree end = entity->GetTurnDirectionEnd();
-    // TODO: Prevent division by 0:
-    float x = current / total;
+    // A turn of zero seconds is done at once. Dividing would give NaN, and a NaN rotation breaks
+    // the bounding box of the entity.
+    float x = (total > 0.0f) ? current / total : 1.0f;
     float smooth_modifier = (type == AT_SMOOTH) ? -2 * x * x * x + 3 * x * x : x;
     Ogre::Degree rotation = start + (end - start) * smooth_modifier;
     entity->SetRotation(rotation);
@@ -1815,6 +1859,8 @@ void EntityManager::SetNextJumpStep(Entity* entity){
     float total = entity->GetJumpSeconds();
     float current = entity->GetJumpCurrentSeconds();
     current += Timer::getSingleton().GetGameTimeDelta();
+    // A jump of zero seconds lands at once, without dividing by zero.
+    if (total <= 0.0f) total = 0.0001f;
     current = (current > total) ? total : current;
     Ogre::Vector3 start_position = entity->GetJumpStart();
     Ogre::Vector3 end_position   = entity->GetJumpEnd();
@@ -1828,6 +1874,14 @@ void EntityManager::SetNextJumpStep(Entity* entity){
         entity->UnsetJump();
         entity->SetMoveTriangleId(entity->GetJumpDestTriangle());
         SetEntityOnWalkmesh(entity);
+        // The scripts set the animation of the jump as the default one (DFANM) and don't set it
+        // back, but the player stands normally after landing in the original game (the scene of
+        // mds6_2 where Cloud jumps down, for example). The scripts that do set it, do it after
+        // the jump, so they aren't affected.
+        if (entity == player_entity_){
+            entity->ScriptSetDefaultAnimation("Idle");
+            entity->PlayAnimationContinue("Idle");
+        }
     }
     else entity->SetJumpCurrentSeconds(current);
 }
@@ -1842,7 +1896,7 @@ void EntityManager::SetNextScrollStep(){
     current = (current > total) ? total : current;
     Ogre::Vector2 start = background_2d_.GetScrollPositionStart();
     Ogre::Vector2 end = background_2d_.GetScrollPositionEnd();
-    float x = current / total;
+    float x = (total > 0.0f) ? current / total : 1.0f;
     float smooth_modifier = (type == Background2D::SMOOTH) ? -2 * x * x * x + 3 * x * x : x;
     Ogre::Vector2 scroll = start + (end - start) * smooth_modifier;
     background_2d_.SetScroll(scroll);

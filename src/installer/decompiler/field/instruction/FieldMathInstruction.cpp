@@ -55,10 +55,14 @@ void FieldMathInstruction::ProcessInst(
         case OPCODES::MINUS2:
             ProcessPLUSx_MINUSx(code_gen, "-");
             break;
-        case OPCODES::MUL: code_gen->WriteTodo(md.GetEntityName(), "MUL"); break;
-        case OPCODES::MUL2: code_gen->WriteTodo(md.GetEntityName(), "MUL2"); break;
-        case OPCODES::DIV: code_gen->WriteTodo(md.GetEntityName(), "DIV"); break;
-        case OPCODES::DIV2: code_gen->WriteTodo(md.GetEntityName(), "DIV2"); break;
+        case OPCODES::MUL:
+        case OPCODES::MUL2:
+            ProcessPLUSx_MINUSx(code_gen, "*");
+            break;
+        case OPCODES::DIV:
+        case OPCODES::DIV2:
+            ProcessFunctionOfTwo(code_gen, "math_div");
+            break;
         case OPCODES::MOD:
             {
                 const uint32 source_bank = params_[0]->GetUnsigned();
@@ -76,13 +80,19 @@ void FieldMathInstruction::ProcessInst(
                 );
             }
         break;
-        case OPCODES::MOD2: code_gen->WriteTodo(md.GetEntityName(), "MOD2"); break;
-        case OPCODES::AND: code_gen->WriteTodo(md.GetEntityName(), "AND"); break;
-        case OPCODES::AND2: code_gen->WriteTodo(md.GetEntityName(), "AND2"); break;
-        case OPCODES::OR: code_gen->WriteTodo(md.GetEntityName(), "OR"); break;
-        case OPCODES::OR2: code_gen->WriteTodo(md.GetEntityName(), "OR2"); break;
-        case OPCODES::XOR: code_gen->WriteTodo(md.GetEntityName(), "XOR"); break;
-        case OPCODES::XOR2: code_gen->WriteTodo(md.GetEntityName(), "XOR2"); break;
+        case OPCODES::MOD2: ProcessPLUSx_MINUSx(code_gen, "%"); break;
+        case OPCODES::AND:
+        case OPCODES::AND2:
+            ProcessFunctionOfTwo(code_gen, "bit_and");
+            break;
+        case OPCODES::OR:
+        case OPCODES::OR2:
+            ProcessFunctionOfTwo(code_gen, "bit_or");
+            break;
+        case OPCODES::XOR:
+        case OPCODES::XOR2:
+            ProcessFunctionOfTwo(code_gen, "bit_xor");
+            break;
         case OPCODES::INC:
         case OPCODES::INC2:
             ProcessINCx_DECx(code_gen, "+");
@@ -207,7 +217,7 @@ void FieldMathInstruction::ProcessSaturatedDEC2(CodeGenerator* code_gen){
 void FieldMathInstruction::ProcessRDMSD(CodeGenerator* code_gen){
     // TODO: we don't have os.time...
     // TODO: RNG emulation?
-    code_gen->AddOutputLine("math.randomseed(os.time())");
+    code_gen->AddOutputLine("-- RDMSD: the random generator is seeded by the engine");
 }
 
 void FieldMathInstruction::ProcessSETBYTE_SETWORD(CodeGenerator* code_gen){
@@ -246,6 +256,19 @@ void FieldMathInstruction::ProcessPLUSx_MINUSx(CodeGenerator* code_gen, const st
     );
     // TODO: repect destination bank sizes and wraparound
     code_gen->AddOutputLine((boost::format("%1% = %1% %2% %3%") % lhs % op % rhs).str());
+}
+
+void FieldMathInstruction::ProcessFunctionOfTwo(CodeGenerator* code_gen, const std::string& function){
+    // The variable gets the result of a function (a bit operation, or a division) of its value and
+    // the value or variable of the second operand, as PLUS does with the sum.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto& lhs = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
+    );
+    const auto& rhs = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
+    );
+    code_gen->AddOutputLine((boost::format("%1% = %2%(%1%, %3%)") % lhs % function % rhs).str());
 }
 
 void FieldMathInstruction::ProcessINCx_DECx(CodeGenerator* code_gen, const std::string& op){

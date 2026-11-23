@@ -406,6 +406,14 @@ namespace VGears{
              */
             const std::array<Gateway, 12>& GetGateways() const{return trigger_data_->doors;}
 
+            /**
+             * Retrieves the list of background triggers (the lines that turn a background area on
+             * or off, such as the doors).
+             */
+            const std::array<Trigger, 12>& GetBackgroundTriggers() const{
+                return trigger_data_->triggers;
+            }
+
         protected:
 
             /**

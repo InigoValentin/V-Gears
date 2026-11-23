@@ -38,6 +38,7 @@ namespace VGears{
 
     void Background2DFile::unloadImpl(){
         texture_name_.clear();
+        palette_name_.clear();
         // GCC error:
         // error: no match for ‘operator=’ (operand types are ‘Ogre::Vector4’
         // {aka ‘Ogre::Vector<4, float>’} and ‘int’)
@@ -53,6 +54,10 @@ namespace VGears{
     void Background2DFile::SetTextureName(const String &texture_name){texture_name_ = texture_name;}
 
     String Background2DFile::GetTextureName() const{ return texture_name_;}
+
+    void Background2DFile::SetPaletteName(const String &palette_name){palette_name_ = palette_name;}
+
+    String Background2DFile::GetPaletteName() const{return palette_name_;}
 
     void Background2DFile::SetClip(const Ogre::Vector2 &clip){clip_ = clip;}
 

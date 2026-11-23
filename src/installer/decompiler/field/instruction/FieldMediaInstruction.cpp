@@ -44,8 +44,8 @@ void FieldMediaInstruction::ProcessInst(
         case OPCODES::MOVIE: ProcessMOVIE(code_gen); break;
         case OPCODES::MVIEF: ProcessMVIEF(code_gen); break;
         case OPCODES::FMUSC: code_gen->WriteTodo(md.GetEntityName(), "FMUSC"); break;
-        case OPCODES::CMUSC: code_gen->WriteTodo(md.GetEntityName(), "CMUSC"); break;
-        case OPCODES::CHMST: code_gen->WriteTodo(md.GetEntityName(), "CHMST"); break;
+        case OPCODES::CMUSC: ProcessCMUSC(code_gen); break;
+        case OPCODES::CHMST: ProcessCHMST(code_gen); break;
         default:
             code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_
@@ -82,6 +82,28 @@ void FieldMediaInstruction::ProcessBMUSC(CodeGenerator* code_gen){
     code_gen->AddOutputLine(
       (boost::format("audio_manager:set_battle_track_id(%1%)") % params_[0]->GetUnsigned()).str()
     );
+}
+
+void FieldMediaInstruction::ProcessCMUSC(CodeGenerator* code_gen){
+    // Changes the music to one of the tracks of the field. The parameters are the track, one that
+    // is always 0, the fade out, the fade in and three that are always 0.
+    code_gen->AddOutputLine((
+      boost::format("change_map_music(%1%, %2%, %3%)")
+      % params_[0]->GetUnsigned() % params_[2]->GetUnsigned() % params_[3]->GetUnsigned()
+    ).str());
+}
+
+void FieldMediaInstruction::ProcessCHMST(CodeGenerator* code_gen){
+    // Stores in a variable if there is music playing. The first parameter is the bank, in the
+    // two nibbles of the first byte, and the second one the address.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned() * 16 + params_[1]->GetUnsigned(),
+      params_[2]->GetUnsigned()
+    );
+    code_gen->AddOutputLine((
+      boost::format("%1% = audio_manager:is_music_playing() and 1 or 0") % destination
+    ).str());
 }
 
 void FieldMediaInstruction::ProcessMUSIC(CodeGenerator* code_gen){

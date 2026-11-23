@@ -103,6 +103,8 @@ void DebugDraw::SetFadeDistance(const float fade_s, const float fade_e){
     fade_end_square_ = fade_e * fade_e;
 }
 
+void DebugDraw::SetFadeEnabled(const bool enabled){fade_enabled_ = enabled;}
+
 void DebugDraw::SetTextAlignment(TextAlignment alignment){text_alignment_ = alignment;}
 
 void DebugDraw::Line(const float x1, const float y1, const float x2, const float y2){
@@ -401,9 +403,9 @@ void DebugDraw::Text(
         //  ->getRootSceneNode()->get->getPosition()
         //);
         //std::cout << "[DEBUG TEXT MODI]: " << dist_sq << "\n";
-        if (dist_sq < fade_end_square_){
+        if (!fade_enabled_ || dist_sq < fade_end_square_){
             float a
-              = (dist_sq > fade_start_square_)
+              = (fade_enabled_ && dist_sq > fade_start_square_)
                 ? (1.0f - (dist_sq - fade_start_square_) / (fade_end_square_ - fade_start_square_))
                 : 1.0f;
             Ogre::ColourValue colour = colour_;

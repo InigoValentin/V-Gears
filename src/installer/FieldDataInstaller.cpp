@@ -13,6 +13,8 @@
  * GNU General Public License for more details.
  */
 
+#include <cmath>
+#include <set>
 #include <string>
 #include <fstream>
 #include <algorithm>
@@ -39,8 +41,17 @@ int FieldDataInstaller::INACTIVE_GATEWAY_ID(32767);
 
 const std::vector<int> FieldDataInstaller::TEMPORARY_BANKS{5};
 
-std::string FieldDataInstaller::FieldScriptHeader(){
+std::string FieldDataInstaller::FieldScriptHeader(const int field_id){
     std::string header = "EntityContainer = {}\n\n";
+    if (field_id >= 0){
+        // LSTMP reads the ID of the field the player comes from. The field being left is the
+        // previous one, unless the field was just reloaded (after a battle, for example).
+        header += "-- The IDs of this field and of the previous one, for LSTMP.\n"
+          "if Data.FieldId ~= " + std::to_string(field_id) + " then\n"
+          "    Data.PreviousFieldId = Data.FieldId or 0\n"
+          "    Data.FieldId = " + std::to_string(field_id) + "\n"
+          "end\n\n";
+    }
     for (const int bank : TEMPORARY_BANKS){
         header += "-- Temporary variables start at zero in every field.\n"
           "for address = 0, Banks.SIZE do\n"
@@ -66,7 +77,7 @@ std::string FieldDataInstaller::CreateGateWayScript(
       "        return 0\n"
       "    end,\n\n"
       "    on_near = function(self, entity)\n"
-      "        if entity == \"Cloud\" then\n"
+      "        if entity ~= nil then\n"
       "            if not Data.DisableGateways then\n"
       "                load_field_map_request(\"" + target_map_name + "\", \"" + source_spawn_point_name + "\")\n"
       "            end\n"
@@ -77,6 +88,120 @@ std::string FieldDataInstaller::CreateGateWayScript(
       "        return 0\n"
       "    end,\n"
       "}\n\n";
+}
+
+namespace{
+    /**
+     * Checks if a background trigger is in use. Unused ones are all zeroes.
+     */
+    bool IsBackgroundTriggerUsed(const VGears::TriggersFile::Trigger& t){
+        for (const auto& v : t.trigger_line){
+            if (v.x != 0 || v.y != 0 || v.z != 0) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Creates the script of the entity of a background trigger.
+     *
+     * Behaviors: 0 on, 1 off, 2 on and off when away, 3 off and on when away, 4 and 5 the same as
+     * 2 and 3 (the original only reverts when the player leaves by the plus side of the line; here
+     * it is when the player leaves the line on any side).
+     */
+    std::string CreateBackgroundTriggerScript(
+      const std::string& name, const VGears::TriggersFile::Trigger& t
+    ){
+        const std::string area = std::to_string(t.background_parameter);
+        const std::string state = std::to_string(t.background_state);
+        const std::string on = "background2d:area_on(" + area + ", " + state + ")";
+        const std::string off = "background2d:area_off(" + area + ", " + state + ")";
+        std::string enter, leave;
+        switch (t.behavior){
+            case 0: enter = on; break;
+            case 1: enter = off; break;
+            case 2: case 4: enter = on; leave = off; break;
+            case 3: case 5: enter = off; leave = on; break;
+            default: break;
+        }
+        return
+          "\nEntityContainer[ \"" + name + "\" ] = {\n\n"
+          "    on_start = function(self)\n"
+          "        return 0\n"
+          "    end,\n\n"
+          "    on_approach = function(self, entity)\n"
+          "        if entity ~= nil then " + enter + " end\n"
+          "        return 0\n"
+          "    end,\n\n"
+          "    on_cross = function(self, entity)\n"
+          "        return 0\n"
+          "    end,\n\n"
+          "    on_near = function(self, entity)\n"
+          "        return 0\n"
+          "    end,\n\n"
+          "    on_leave = function(self, entity)\n"
+          "        if entity ~= nil then " + leave + " end\n"
+          "        return 0\n"
+          "    end,\n"
+          "}\n\n";
+    }
+}
+
+namespace{
+    /**
+     * Writes the data the engine needs to animate the palettes of a background.
+     *
+     * Format (little endian): "VGPL", u16 number of pages, u16 colors per page, the colors of the
+     * pages as the u16 values of the original game (5 bits per channel and the 0x8000 flag), u32
+     * number of tiles, and for each tile: u16 x, y, width, height in the image, u16 page, u8 first
+     * color hidden, and one byte per pixel with the palette index.
+     *
+     * @return True if the file was written. It is not when no tile uses an animated palette.
+     */
+    bool WritePaletteFile(
+      const std::string& path, const VGears::PaletteFilePtr& palette,
+      const std::vector<VGears::BackgroundFile::PaletteTile>& tiles,
+      const std::set<int>& pages, bool all_pages
+    ){
+        std::vector<const VGears::BackgroundFile::PaletteTile*> used;
+        for (const auto& tile : tiles){
+            if (all_pages || pages.count(tile.palette_page) > 0) used.push_back(&tile);
+        }
+        if (used.empty() || palette.isNull() || palette->GetPages().empty()) return false;
+        std::ofstream file(path, std::ios::binary);
+        if (!file.is_open()) return false;
+        auto write16 = [&file](uint16_t v){
+            const char bytes[2] = {static_cast<char>(v & 0xFF), static_cast<char>(v >> 8)};
+            file.write(bytes, 2);
+        };
+        const auto& palette_pages = palette->GetPages();
+        file.write("VGPL", 4);
+        write16(static_cast<uint16_t>(palette_pages.size()));
+        write16(static_cast<uint16_t>(palette_pages[0].size()));
+        for (const auto& page : palette_pages){
+            for (const auto& color : page){
+                const int r = static_cast<int>(std::lround(color.r * 31.0f));
+                const int g = static_cast<int>(std::lround(color.g * 31.0f));
+                const int b = static_cast<int>(std::lround(color.b * 31.0f));
+                write16(static_cast<uint16_t>(r | (g << 5) | (b << 10) | (color.a > 0.0f ? 0x8000 : 0)));
+            }
+        }
+        const uint32_t count = static_cast<uint32_t>(used.size());
+        write16(static_cast<uint16_t>(count & 0xFFFF));
+        write16(static_cast<uint16_t>(count >> 16));
+        for (const auto* tile : used){
+            write16(tile->x);
+            write16(tile->y);
+            write16(tile->width);
+            write16(tile->height);
+            write16(tile->palette_page);
+            file.put(tile->first_color_hidden ? 1 : 0);
+            file.write(
+              reinterpret_cast<const char*>(tile->indexes.data()),
+              static_cast<std::streamsize>(tile->indexes.size())
+            );
+        }
+        return true;
+    }
 }
 
 size_t FieldDataInstaller::GetFieldId(
@@ -578,6 +703,14 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             );
         }
     }
+    const auto& bg_triggers = triggers->GetBackgroundTriggers();
+    for (size_t i = 0; i < bg_triggers.size(); i ++){
+        if (IsBackgroundTriggerUsed(bg_triggers[i])){
+            gateway_script_data += CreateBackgroundTriggerScript(
+              "BgTrigger" + std::to_string(i), bg_triggers[i]
+            );
+        }
+    }
     const VGears::ModelListFilePtr& models = field->GetModelList();
     FieldDecompiler::DecompiledScript decompiled;
     FF7FieldScriptFormatter formatter(field->getName(), models, map_list_, spawn_points_);
@@ -587,7 +720,8 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
 
         // Decompile to LUA.
         decompiled = FieldDecompiler::Decompile(
-          field->getName(), raw_field_data, formatter, gateway_script_data, FieldScriptHeader()
+          field->getName(), raw_field_data, formatter, gateway_script_data,
+          FieldScriptHeader(static_cast<int>(GetFieldId(field->getName(), map_list_)))
         );
         std::ofstream script_file(data_dir_ + "/" + FIELD_MAPS_DIR + "/" + field->getName() + "/script.lua");
         if (script_file.is_open()){
@@ -731,6 +865,10 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             }
         }
 
+        // The entities (lines, scripts and models) must be in the order of the original field:
+        // the engine starts their scripts in that order, and some scripts depend on it (a script
+        // that clears the background areas has to start before the doors that set them).
+        std::vector<std::pair<uint, std::unique_ptr<TiXmlElement>>> ordered_entities;
         // Get lines. Add them to a list, so they aren't processed later as regular entities.
         std::vector<std::string> line_entities;
         const float line_scale = LINE_SCALE_FACTOR / GetFieldScaleFactor(this_field_id);
@@ -752,7 +890,7 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                 + " " + std::to_string(line.point_b[2] * line_scale)
             );
             xml_entity_trigger->SetAttribute("enabled", "true");
-            element->LinkEndChild(xml_entity_trigger.release());
+            ordered_entities.emplace_back(line.index, std::move(xml_entity_trigger));
         }
 
         // Get entities.
@@ -792,14 +930,19 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                 // translation seems to be inverted?
                 xml_entity_script->SetAttribute("scale", "0.03125 0.03125 0.03125");
                 xml_entity_script->SetAttribute("root_orientation", "0.7071067811865476 0.7071067811865476 0 0");
-                element->LinkEndChild(xml_entity_script.release());
+                ordered_entities.emplace_back(entity.index, std::move(xml_entity_script));
             }
             else{
                 std::unique_ptr<TiXmlElement> xml_entity_script(new TiXmlElement("entity_script"));
                 xml_entity_script->SetAttribute("name", entity.name);//it.first);
-                element->LinkEndChild(xml_entity_script.release());
+                ordered_entities.emplace_back(entity.index, std::move(xml_entity_script));
             }
         }
+        std::stable_sort(
+          ordered_entities.begin(), ordered_entities.end(),
+          [](const auto& a, const auto& b){return a.first < b.first;}
+        );
+        for (auto& ordered : ordered_entities) element->LinkEndChild(ordered.second.release());
         const float downscaler_this = 128.0f * GetFieldScaleFactor(this_field_id);
         for (size_t i = 0; i < gateways.size(); i ++){
             const VGears::TriggersFile::Gateway& gateway = gateways[i];
@@ -825,6 +968,31 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                 xml_entity_trigger->SetAttribute("enabled", "true");
                 element->LinkEndChild(xml_entity_trigger.release());
             }
+        }
+
+        // Background triggers (doors and similar that change tiles).
+        const auto& bg_triggers_xml = triggers->GetBackgroundTriggers();
+        for (size_t i = 0; i < bg_triggers_xml.size(); i ++){
+            const VGears::TriggersFile::Trigger& bg_trigger = bg_triggers_xml[i];
+            if (!IsBackgroundTriggerUsed(bg_trigger)) continue;
+            std::unique_ptr<TiXmlElement> xml_entity_trigger(new TiXmlElement("entity_trigger"));
+            xml_entity_trigger->SetAttribute("name", "BgTrigger" + std::to_string(i));
+            xml_entity_trigger->SetAttribute(
+              "point1",
+              Ogre::StringConverter::toString(Ogre::Vector3(
+                bg_trigger.trigger_line[0].x, bg_trigger.trigger_line[0].y,
+                bg_trigger.trigger_line[0].z
+              ) / downscaler_this)
+            );
+            xml_entity_trigger->SetAttribute(
+              "point2",
+              Ogre::StringConverter::toString(Ogre::Vector3(
+                bg_trigger.trigger_line[1].x, bg_trigger.trigger_line[1].y,
+                bg_trigger.trigger_line[1].z
+              ) / downscaler_this)
+            );
+            xml_entity_trigger->SetAttribute("enabled", "true");
+            element->LinkEndChild(xml_entity_trigger.release());
         }
 
         // Get music tracks
@@ -878,6 +1046,19 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
               std::to_string(BG_PSX_SCREEN_WIDTH * BG_SCALE_UP_FACTOR) + " "
               + std::to_string(BG_PSX_SCREEN_HEIGHT * BG_SCALE_UP_FACTOR)
             );
+            // The palette animations: the tiles of the palettes a script changes are painted again
+            // by the engine.
+            if (
+              !decompiled.palette_pages.empty() || decompiled.palette_pages_dynamic
+            ){
+                const std::string palette_name = field->getName() + "/palette.bin";
+                if (WritePaletteFile(
+                  data_dir_ + "/" + FIELD_MAPS_DIR + "/" + palette_name, pal, bg->GetPaletteTiles(),
+                  decompiled.palette_pages, decompiled.palette_pages_dynamic
+                )){
+                    bg_element->SetAttribute("palette", palette_name);
+                }
+            }
             // Write out the *_BG.XML data.
             auto& layers = bg->GetLayers();
             int layer_index = -1;
@@ -911,9 +1092,12 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                       + Ogre::StringConverter::toString(u1) + " " + Ogre::StringConverter::toString(v1)
                     );
                     // TODO: It works (on FFVII PC), but why this number?
-                    xml_element->SetAttribute(
-                      "depth", Ogre::StringConverter::toString(static_cast<float>(sprite.depth) * (0.03125f))
-                    );
+                    // The depth is a distance from the camera, so it has the scale of the field
+                    // like the position of the camera does. The far depths (the backgrounds, from
+                    // 127 on) are only an order and are kept.
+                    float tile_depth = static_cast<float>(sprite.depth) * (0.03125f);
+                    if (tile_depth < 127.0f) tile_depth /= GetFieldScaleFactor(this_field_id);
+                    xml_element->SetAttribute("depth", Ogre::StringConverter::toString(tile_depth));
                     // TODO: Copied from DatFile::AddTile.
                     // Add to common method.
                     Ogre::String blending_str = "";
@@ -926,15 +1110,12 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                     xml_element->SetAttribute("blending", blending_str);
                     // The layer is needed by the scripts that scroll them at their own speed.
                     xml_element->SetAttribute("layer", layer_index);
-                    // Sprites in an area the script controls (BGON, BGOFF, BGCLR) are drawn only
-                    // while it turns on one of their layers. The rest are always drawn.
-                    if (
-                      sprite.animation_id != 0
-                      && (
-                        decompiled.background_areas_dynamic
-                        || decompiled.background_areas.count(sprite.animation_id) > 0
-                      )
-                    ){
+                    // The sprites that belong to a group (animation_id) are drawn only while a
+                    // script (BGON) or a background trigger turns on one of their states. The
+                    // original game clears the state of every group when it loads a field, so a
+                    // group that nothing turns on is never drawn (the debris behind the doors of
+                    // mds6_2, for example).
+                    if (sprite.animation_id != 0){
                         xml_element->SetAttribute("area", static_cast<int>(sprite.animation_id));
                         xml_element->SetAttribute("state", static_cast<int>(sprite.animation_frame));
                     }

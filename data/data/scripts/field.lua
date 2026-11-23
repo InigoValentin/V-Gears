@@ -66,10 +66,14 @@ place_player_at_map_entry = function(entity_name)
             local x, y, z = point:get_position()
             local rotation = point:get_rotation()
             local player = entity_manager:get_entity(entity_name)
-            player:set_position(x, y, z)
-            player:set_rotation(rotation)
-            player:set_solid(true)
-            player:set_visible(true)
+            if player ~= nil then
+                player:set_position(x, y, z)
+                player:set_rotation(rotation)
+                player:set_solid(true)
+                player:set_visible(true)
+            else
+                print("place_player_at_map_entry: there is no entity '" .. entity_name .. "'.")
+            end
         end
     end
 
@@ -93,6 +97,20 @@ set_entity_to_character = function(entity_name, character_id)
         place_player_at_map_entry(entity_name)
     end
     entity_manager:set_entity_to_character(entity_name, character_id)
+    -- The model of a playable character is shown only if it is the leader of the party. The other
+    -- members are not drawn following the leader (join_party hides them too), and the scenes show
+    -- their models when they need them. Models are visible by default, so the ones of the
+    -- characters that are not the leader, such as Cid in mds6_1 or Aerith in mrkt2 after the
+    -- first scene, have to be hidden here. With no party at all (a new game that has not set it
+    -- yet) nothing is hidden.
+    if character_id ~= Party[1] and entity_name ~= "" and Party[1] ~= nil then
+        local entity = entity_manager:get_entity(entity_name)
+        if entity ~= nil then
+            entity:set_visible(false)
+            entity:set_solid(false)
+            entity:set_talkable(false)
+        end
+    end
 end
 
 --- Joins the party members in the field.
@@ -317,6 +335,29 @@ play_map_music = function(id)
     end
 end
 
+--- Changes the music of the field to one of its tracks (CMUSC).
+--
+-- The original opcode can fade the current music out and the new one in. Here the change is at once:
+-- a track that is changed without fades (the usual jingle of an inn) is played once, so the script
+-- that waits for the music to end (CHMST) goes on; one with fades is played looped.
+-- TODO: Implement the fades.
+--
+-- @param id ID of the track in the field.
+-- @param fade_out Fade out parameter of the original opcode (20 means no fade).
+-- @param fade_in Fade in parameter of the original opcode (0 means no fade).
+change_map_music = function(id, fade_out, fade_in)
+    local track_id = audio_manager:get_track_id(id)
+    if track_id == -1 then
+        print("Requested non-existent music track ID " .. tostring(id))
+        return
+    end
+    if fade_in == 0 then
+        audio_manager:play_music_once(tostring(track_id))
+    else
+        audio_manager:play_music(tostring(track_id))
+    end
+end
+
 --- Sets the map name
 --
 -- It's not set from a literal text, but from a dialog identifier.
@@ -364,18 +405,21 @@ System["MapChanger"] = {
     --- Jumps to a new map.
     ffvii_field = function(self)
         if self.map_name ~= "" then
+            local target = self.map_name
             player_lock(true) -- disable menu and pc movement while load map
             script:request_end_sync(Script.UI, "Fade", "fade_out", 0)
             -- The fields go to the world map as "wm<n>", n being the FIELD.TBL record of the exit.
-            local world_record = tonumber(string.match(self.map_name, "^wm(%d+)$"))
+            local world_record = tonumber(string.match(target, "^wm(%d+)$"))
             if world_record then
                 enter_world_map(world_record, self.point_name)
             else
-                map(self.map_name)
+                map(target)
             end
             player_lock(false) -- enable menu and pc movement after load map
-            self.current_map_name = self.map_name
-            self.map_name = ""
+            self.current_map_name = target
+            -- A field can ask for another change as soon as it starts (blin60_1 goes on to
+            -- blin60_2 at once). That request must not be erased here.
+            if self.map_name == target then self.map_name = "" end
             script:request_end_sync(Script.UI, "Fade", "fade_in", 0)
         end
         return 0
@@ -400,3 +444,27 @@ System["MapChanger"] = {
         return 0
     end,
 }
+
+
+--- Runs a script of the entity of a character (the PREQ, PRQSW and PRQEW opcodes).
+--
+-- @param character ID of the character, the one that the entity was given with the PC opcode.
+-- @param script_name Name of the script function.
+-- @param priority Priority of the script.
+-- @param mode "request" does not wait, "start_sync" waits for the script to start and "end_sync" for
+-- it to end.
+party_request = function(character, script_name, priority, mode)
+    local entity = entity_manager:get_entity_from_character_id(character)
+    if entity == nil then
+        print("party_request: there is no entity for the character " .. tostring(character) .. ".")
+        return
+    end
+    local name = entity:get_name()
+    if mode == "start_sync" then
+        script:request_start_sync(Script.ENTITY, name, script_name, priority)
+    elseif mode == "end_sync" then
+        script:request_end_sync(Script.ENTITY, name, script_name, priority)
+    else
+        script:request(Script.ENTITY, name, script_name, priority)
+    end
+end

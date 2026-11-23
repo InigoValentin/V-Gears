@@ -30,7 +30,13 @@ void FieldWalkmeshInstruction::ProcessInst(
     FunctionMetaData md(func.metadata);
     //std::cout << "WMesh opcode: " << opcode_ << "\n";
     switch (opcode_){
-        case OPCODES::SLIP: code_gen->WriteTodo(md.GetEntityName(), "SLIP"); break;
+        case OPCODES::SLIP:
+            // Lets the player slide along the walls or not.
+            code_gen->AddOutputLine(
+              (boost::format("entity_manager:set_player_slip(%1%)")
+                % FieldCodeGenerator::FormatBool(params_[0]->GetUnsigned())).str()
+            );
+            break;
         case OPCODES::UC: ProcessUC(code_gen); break;
         case OPCODES::IDLCK:
             // Triangle id, on or off

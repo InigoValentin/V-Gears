@@ -178,6 +178,8 @@ void DialogsManager::SetText(const char* d_name, const char* text){
         ShowMessage(id, data->x, data->y, data->w, data->h);
         messages_[id]->text_area->SetText(std::string("[ERROR string not found:] ") + text);
     }
+    // The text of a timer window is the time, not the text of the message.
+    if (static_cast<int>(id) == timer_window_id_) RenderTimer();
 }
 
 bool DialogsManager::ShowScriptMessage(const char* text){
@@ -212,6 +214,9 @@ void DialogsManager::SetNumeric(const char* d_name, const bool numeric, const bo
     }
     if (numeric){
         messages_[id]->text_area->SetFont("FFVIITimerFont");
+        // The digits are taller than the area left by the usual padding of a small window, and the
+        // text would overflow and not be shown.
+        messages_[id]->text_area->SetPadding(0, 0, 0, 0);
         if (timer){
             messages_[id]->numeric = false;
             messages_[id]->timer = true;
@@ -224,6 +229,7 @@ void DialogsManager::SetNumeric(const char* d_name, const bool numeric, const bo
     }
     else{
         messages_[id]->text_area->SetFont("FFVIIFont");
+        messages_[id]->text_area->SetPadding(3, 5, 3, 5);
         messages_[id]->numeric = false;
         messages_[id]->timer = false;
         timer_window_id_ = -1;
@@ -231,15 +237,17 @@ void DialogsManager::SetNumeric(const char* d_name, const bool numeric, const bo
 }
 
 void DialogsManager::UpdateTimer(const unsigned int seconds){
-    if (
-      timer_window_id_ != - 1 && timer_window_id_ < messages_.size() && seconds != timer_seconds_
-    ){
-        std::string m = std::to_string(seconds / 60);
-        while (m.size() < 2) m = "0" + m;
-        std::string s = std::to_string(seconds % 60);
-        while (s.size() < 2) s = "0" + s;
-        messages_[timer_window_id_]->text_area->SetText(m + ":" + s);
-    }
+    timer_seconds_ = seconds;
+    RenderTimer();
+}
+
+void DialogsManager::RenderTimer(){
+    if (timer_window_id_ == -1 || timer_window_id_ >= static_cast<int>(messages_.size())) return;
+    std::string m = std::to_string(timer_seconds_ / 60);
+    while (m.size() < 2) m = "0" + m;
+    std::string s = std::to_string(timer_seconds_ % 60);
+    while (s.size() < 2) s = "0" + s;
+    messages_[timer_window_id_]->text_area->SetText(m + ":" + s);
 }
 
 void DialogsManager::SetMode(const char* d_name, const int bg, const bool closeable){
@@ -349,15 +357,23 @@ void DialogsManager::ShowMessage(
 ){
     // Add 5 pixels, to compensate character width operation roundowns.
     int extra_width = width + 5;
-    // Handle error when dialog window cross border of limit area
+    // Handle error when dialog window cross border of limit area. The vertical check uses the
+    // height of the area (it used its width, so windows that went past the bottom were not moved
+    // back unless they were beyond 320).
     float la_percent_width, la_width;
     limit_area_->GetWidth(la_percent_width, la_width);
     float move_back_x = 0;
     if (x + extra_width > la_width) move_back_x = x + extra_width - la_width;
     float la_percent_height, la_height;
-    limit_area_->GetWidth(la_percent_height, la_height);
+    limit_area_->GetHeight(la_percent_height, la_height);
     float move_back_y = 0;
     if (y + height > la_height) move_back_y = y + height - la_height;
+    LOG_TRIVIAL(
+      "dialog window " + std::to_string(id) + ": requested (" + std::to_string(x) + ","
+      + std::to_string(y) + "," + std::to_string(width) + "," + std::to_string(height)
+      + "), shown at (" + std::to_string(x - move_back_x) + "," + std::to_string(y - move_back_y)
+      + ") in a limit area of " + std::to_string(la_width) + "x" + std::to_string(la_height)
+    );
     messages_[id]->widget->SetX(0, x - move_back_x);
     messages_[id]->widget->SetY(0, y - move_back_y);
     messages_[id]->widget->SetWidth(0, extra_width);

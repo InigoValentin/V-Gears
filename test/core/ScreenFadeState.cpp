@@ -104,15 +104,15 @@ BOOST_AUTO_TEST_CASE(TestScreenFadeStateInstantBlackAndNormalFade){
     BOOST_CHECK_CLOSE(fade.GetAlpha(), 1.0f, 0.01f);
     BOOST_CHECK_SMALL(fade.GetColour().r, 0.0001f);
 
-    // Type 6 covers the field with the colour little by little, and keeps it.
+    // Type 6 adds the colour to the field little by little, and keeps it.
     BOOST_REQUIRE(fade.StartFade(6, 255, 255, 255, 8));
-    BOOST_CHECK_EQUAL(fade.GetBlend(), ScreenFadeState::BLEND_NORMAL);
-    BOOST_CHECK_SMALL(fade.GetAlpha(), 0.0001f);
+    BOOST_CHECK_EQUAL(fade.GetBlend(), ScreenFadeState::BLEND_ADD);
+    BOOST_CHECK_SMALL(fade.GetColour().r, 0.0001f);
     fade.Advance(0.5f);
-    BOOST_CHECK_CLOSE(fade.GetAlpha(), 0.5f, 0.01f);
+    BOOST_CHECK_CLOSE(fade.GetColour().r, 0.5f, 0.01f);
     BOOST_CHECK(fade.Advance(0.5f));
     BOOST_CHECK(fade.IsVisible());
-    BOOST_CHECK_CLOSE(fade.GetAlpha(), 1.0f, 0.01f);
+    BOOST_CHECK_CLOSE(fade.GetColour().r, 1.0f, 0.01f);
 }
 
 BOOST_AUTO_TEST_CASE(TestScreenFadeStateNFade){

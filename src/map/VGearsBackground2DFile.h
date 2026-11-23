@@ -77,6 +77,20 @@ namespace VGears{
             virtual String GetTextureName() const;
 
             /**
+             * Sets the name of the file with the palettes that scripts animate (optional).
+             *
+             * @param[in] palette_name The resource name of the palette file, or empty.
+             */
+            virtual void SetPaletteName(const String &palette_name);
+
+            /**
+             * Retrieves the name of the palette file.
+             *
+             * @return The resource name of the palette file, or empty if there is none.
+             */
+            virtual String GetPaletteName() const;
+
+            /**
              * Sets the background range.
              *
              * @param[in] range Range vector.
@@ -182,6 +196,11 @@ namespace VGears{
              * The texture name.
              */
             String texture_name_;
+
+            /**
+             * The name of the palette file, empty if there is none.
+             */
+            String palette_name_;
 
             /**
              * The background clip.

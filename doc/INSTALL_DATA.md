@@ -13,6 +13,8 @@ The installer converts the sound effects, the music and the videos with two exte
 - [FFmpeg](https://ffmpeg.org/download.html "FFmpeg") converts the sound effects, encodes the music and converts the videos.
 - [TiMidity](https://timidity.sourceforge.net/#download "TiMidity") plays the original MIDI music so FFmpeg can encode it. Only the music needs it.
 
+The silence at the end of each music track (the reverberation that TiMidity renders after the last note) is removed when the music is encoded. The scripts that wait for a track to end, such as the jingle of the inns, would wait for it otherwise, and the files are smaller.
+
 You don't have to configure anything if they are installed. The installer looks for them, in this order:
 
 1. The program you chose with **Locate…**. The choice is remembered.

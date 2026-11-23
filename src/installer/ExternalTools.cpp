@@ -258,6 +258,16 @@ namespace ExternalTools{
         return FfmpegArguments("-", output);
     }
 
+    std::vector<std::string> FfmpegMidiArguments(const std::string& output){
+        // Below -50 dB is silence, and 0.3 seconds of it are kept so the end doesn't sound cut.
+        return {
+          "-hide_banner", "-loglevel", "panic", "-y", "-i", "-", "-af",
+          "areverse,silenceremove=start_periods=1:start_duration=0:start_threshold=-50dB"
+          ":start_silence=0.3:detection=peak,areverse",
+          output
+        };
+    }
+
     std::vector<std::string> TimidityArguments(const std::string& midi){
         return {"--quiet=3", midi, "-Ow", "-o", "-"};
     }
@@ -323,55 +333,71 @@ namespace ExternalTools{
         return true;
     }
 
+    namespace{
+        /**
+         * Renders a MIDI with TiMidity and encodes it with ffmpeg, without a shell.
+         */
+        bool RenderMidi(
+          const std::string& timidity, const std::string& ffmpeg,
+          const std::vector<std::string>& ffmpeg_arguments, const std::string& midi,
+          const std::string& output, std::string* error
+        ){
+            QProcess render;
+            QProcess encode;
+            // render | encode, without a shell.
+            render.setStandardOutputProcess(&encode);
+            render.setStandardErrorFile(QProcess::nullDevice());
+            encode.setStandardOutputFile(QProcess::nullDevice());
+            encode.setStandardErrorFile(QProcess::nullDevice());
+            const auto to_list = [](const std::vector<std::string>& arguments){
+                QStringList list;
+                for (const std::string& argument : arguments) list << QString::fromStdString(argument);
+                return list;
+            };
+            // The source is started first, as Qt documents for piped processes.
+            render.start(QString::fromStdString(timidity), to_list(TimidityArguments(midi)));
+            encode.start(QString::fromStdString(ffmpeg), to_list(ffmpeg_arguments));
+            const bool render_started = render.waitForStarted(10000);
+            const bool encode_started = encode.waitForStarted(10000);
+            bool ok = false;
+            std::string reason;
+            if (!render_started || !encode_started){
+                render.kill();
+                encode.kill();
+                render.waitForFinished(2000);
+                encode.waitForFinished(2000);
+                reason = std::string("could not start ") + (!render_started ? "timidity" : "ffmpeg");
+            }
+            else{
+                render.waitForFinished(-1);
+                encode.waitForFinished(-1);
+                if (render.exitStatus() != QProcess::NormalExit || render.exitCode() != 0)
+                    reason = "timidity failed with exit code " + std::to_string(render.exitCode());
+                else if (encode.exitStatus() != QProcess::NormalExit || encode.exitCode() != 0)
+                    reason = "ffmpeg failed with exit code " + std::to_string(encode.exitCode());
+                else ok = true;
+            }
+            boost::system::error_code ec;
+            if (ok && !(fs::file_size(output, ec) > 0 && !ec)){
+                ok = false;
+                reason = "no audio was produced";
+            }
+            if (!ok){
+                fs::remove(output, ec);
+                if (error) *error = reason;
+            }
+            return ok;
+        }
+    }
+
     bool ConvertMidiToOgg(
       const std::string& timidity, const std::string& ffmpeg, const std::string& midi, const std::string& output,
       std::string* error
     ){
-        QProcess render;
-        QProcess encode;
-        // render | encode, without a shell.
-        render.setStandardOutputProcess(&encode);
-        render.setStandardErrorFile(QProcess::nullDevice());
-        encode.setStandardOutputFile(QProcess::nullDevice());
-        encode.setStandardErrorFile(QProcess::nullDevice());
-        const auto to_list = [](const std::vector<std::string>& arguments){
-            QStringList list;
-            for (const std::string& argument : arguments) list << QString::fromStdString(argument);
-            return list;
-        };
-        // The source is started first, as Qt documents for piped processes.
-        render.start(QString::fromStdString(timidity), to_list(TimidityArguments(midi)));
-        encode.start(QString::fromStdString(ffmpeg), to_list(FfmpegStdinArguments(output)));
-        const bool render_started = render.waitForStarted(10000);
-        const bool encode_started = encode.waitForStarted(10000);
-        bool ok = false;
-        std::string reason;
-        if (!render_started || !encode_started){
-            render.kill();
-            encode.kill();
-            render.waitForFinished(2000);
-            encode.waitForFinished(2000);
-            reason = std::string("could not start ") + (!render_started ? "timidity" : "ffmpeg");
-        }
-        else{
-            render.waitForFinished(-1);
-            encode.waitForFinished(-1);
-            if (render.exitStatus() != QProcess::NormalExit || render.exitCode() != 0)
-                reason = "timidity failed with exit code " + std::to_string(render.exitCode());
-            else if (encode.exitStatus() != QProcess::NormalExit || encode.exitCode() != 0)
-                reason = "ffmpeg failed with exit code " + std::to_string(encode.exitCode());
-            else ok = true;
-        }
-        boost::system::error_code ec;
-        if (ok && !(fs::file_size(output, ec) > 0 && !ec)){
-            ok = false;
-            reason = "no audio was produced";
-        }
-        if (!ok){
-            fs::remove(output, ec);
-            if (error) *error = reason;
-        }
-        return ok;
+        // The silence at the end is removed. If that leaves nothing (a track that is all silence)
+        // the track is encoded as it is.
+        if (RenderMidi(timidity, ffmpeg, FfmpegMidiArguments(output), midi, output, error)) return true;
+        return RenderMidi(timidity, ffmpeg, FfmpegStdinArguments(output), midi, output, error);
     }
 
 }

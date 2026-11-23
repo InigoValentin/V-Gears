@@ -89,6 +89,8 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
         // Some maps have unclosed color tags.
         // Use this counter to close them at the end.
         int colour_opened = 0;
+        // Number of the next variable code of the dialog (see MPARA and MPRA2 in the scripts).
+        int variable_count = 0;
         for (unsigned char temp = 0x00;; ++ offset){
             temp = GetU8(offset);
             if (temp == 0xFF) break;
@@ -283,6 +285,13 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
                     AddText(dialog);
                     logger_->Log("<pause_ok />");
                 }
+                else if (temp2 == 0xDE){
+                    // A variable: a number that the script gives to the window (MPARA, MPRA2).
+                    // The codes of a dialog are numbered from zero, in the order they appear.
+                    AddText(dialog);
+                    logger_->Log("<variable name=\"var" + IntToString(variable_count) + "\" />");
+                    variable_count ++;
+                }
                 else if (temp2 == 0xDD){
                     u16 wait = GetU16LE(offset + 1);
                     ++ offset;
@@ -315,9 +324,11 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
                 }
             }
         }
+        // The text that was read last is still waiting to be written: it goes inside the colour
+        // that is open, so the closing tags come after it.
+        AddText(dialog);
         // Close unclosed color tags;
         for (; colour_opened > 0; colour_opened --) logger_->Log("</colour>");
-        AddText(dialog);
         logger_->Log("</dialog>\n\n");
         tag_open_ = false;
     }

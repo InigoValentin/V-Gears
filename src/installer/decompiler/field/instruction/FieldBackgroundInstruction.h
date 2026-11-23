@@ -49,9 +49,10 @@ class FieldBackgroundInstruction : public KernelCallInstruction{
         void ProcessBGOFF(CodeGenerator* code_gen, FieldEngine& engine);
         void ProcessBGCLR(CodeGenerator* code_gen, FieldEngine& engine);
         void ProcessSTPAL(CodeGenerator* code_gen);
-        void ProcessLDPAL(CodeGenerator* code_gen);
+        void ProcessLDPAL(CodeGenerator* code_gen, FieldEngine& engine);
         void ProcessCPPAL(CodeGenerator* code_gen);
         void ProcessADPAL(CodeGenerator* code_gen);
+        void ProcessMPPAL(CodeGenerator* code_gen);
         void ProcessMPPAL2(CodeGenerator* code_gen);
         void ProcessSTPLS(CodeGenerator* code_gen);
         void ProcessLDPLS(CodeGenerator* code_gen);

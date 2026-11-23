@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <cctype>
 #include <boost/algorithm/string/predicate.hpp>
 #include <algorithm>
 #include <stdexcept>
@@ -224,7 +225,17 @@ void FieldCodeGenerator::Generate(InstVec& insts, const Graph& graph){
         // Add missing return:
         if ("return 0" != lines_.at(lines_.size() - 1).line && "do return 0 end" != lines_.at(lines_.size() - 1).line){
             if ("on_update" == function->first.name) AddOutputLine(ON_UPDATE_FINISHED_STATEMENT);
-            AddOutputLine("do return 0 end", false, false);
+            // A function with no return goes on in the code of the next script.
+            FunctionMetaData fall_meta(function->first.metadata);
+            const std::string next = static_cast<FieldEngine*>(engine_)->GetFunctionFallThrough(
+              fall_meta.GetEntityName(), function->first.name
+            );
+            if (!next.empty())
+                AddOutputLine(
+                  "return EntityContainer[\"" + fall_meta.GetEntityName() + "\"]."
+                  + formatter_.GetFriendlyFunctionName(fall_meta.GetEntityName(), next) + "(self)"
+                );
+            else AddOutputLine("do return 0 end", false, false);
         }
         // A goto to a label that isn't in the function can't be compiled, and the whole script
         // would fail to load. It can't continue where it was told to, so it ends the script.
@@ -256,11 +267,24 @@ void FieldCodeGenerator::AddOutputLine(std::string line, bool unindent_before, b
 
 float FieldCodeGenerator::GetScaleFactor() const{return static_cast<FieldEngine*>(engine_)->GetScaleFactor();}
 
+// A name can be a field of a table written as "name = value" only if it is an identifier of Lua. The
+// entities of some fields have names such as "60f_1".
+static bool IsLuaIdentifier(const std::string& name){
+    if (name.empty() || std::isdigit(static_cast<unsigned char>(name[0]))) return false;
+    for (const char c : name)
+        if (!std::isalnum(static_cast<unsigned char>(c)) && c != '_') return false;
+    return true;
+}
+
 void FieldCodeGenerator::OnBeforeStartFunction(const Function& function){
     FunctionMetaData meta_data(function.metadata);
     if (meta_data.IsStart()){
         AddOutputLine("EntityContainer[\"" + meta_data.GetEntityName() + "\"] = {", false, true);
         if (meta_data.GetCharacterId() != -1) AddOutputLine(meta_data.GetEntityName() + " = nil,\n");
+        // Entities without a model (the Director and other helper scripts) still run the opcodes
+        // that move or hide a model, and they do nothing. Give them an object that ignores them.
+        else if (IsLuaIdentifier(meta_data.GetEntityName()))
+            AddOutputLine(meta_data.GetEntityName() + " = NullEntity,\n");
     }
     const auto comment = formatter_.GetFunctionComment(meta_data.GetEntityName(), function.name);
     if (!comment.empty()) AddOutputLine("-- " + comment);
@@ -271,9 +295,23 @@ void FieldCodeGenerator::OnStartFunction(const Function& func){
     FunctionMetaData meta_data(func.metadata);
     if (meta_data.GetEntityName() == "Director" && func.name == "on_start"){
         // TODO: Don't hardcode Cloud, Use the one from the previous level,
+        // The entity of Cloud is called "Cloud" in most fields, but not in all of them (md0 and
+        // sinbil_1 call it "CLOUD", for example).
+        std::string player_name = "Cloud";
+        for (auto& other : static_cast<FieldEngine*>(engine_)->functions){
+            FunctionMetaData other_meta(other.second.metadata);
+            std::string lower = other_meta.GetEntityName();
+            std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+            if (lower == "cloud"){
+                player_name = other_meta.GetEntityName();
+                break;
+            }
+        }
         AddOutputLine("-- HACK: Set default playable entity an ensure the camera follows it.");
-        AddOutputLine("place_player_at_map_entry(\"Cloud\")");
-        AddOutputLine("background2d:autoscroll_to_entity(entity_manager:get_entity(\"Cloud\"))\n");
+        AddOutputLine("place_player_at_map_entry(\"" + player_name + "\")");
+        AddOutputLine(
+          "background2d:autoscroll_to_entity(entity_manager:get_entity(\"" + player_name + "\"))\n"
+        );
     }
     // Don't run on_update again once it has reached its end.
     if (func.name == "on_update"){

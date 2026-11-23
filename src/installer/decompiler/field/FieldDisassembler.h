@@ -757,6 +757,11 @@ class FieldDisassembler : public Disassembler{
         int16 section_pointers_size_;
 
         /**
+         * The last opcode read by ReadOpCodesToPositionOrReturn.
+         */
+        uint8 last_opcode_ = 0xFF;
+
+        /**
          * The field header.
          */
         ScriptHeader header_;

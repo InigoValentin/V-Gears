@@ -466,7 +466,7 @@ class FieldDataInstaller{
          *
          * @return Lua code to put at the beginning of a field script.
          */
-        static std::string FieldScriptHeader();
+        static std::string FieldScriptHeader(const int field_id = -1);
 
     private:
 

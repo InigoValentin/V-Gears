@@ -115,6 +115,8 @@ class FieldMathInstruction : public StoreInstruction{
 
         void ProcessPLUSx_MINUSx(CodeGenerator* code_gen, const std::string& op);
 
+        void ProcessFunctionOfTwo(CodeGenerator* code_gen, const std::string& function);
+
         void ProcessINCx_DECx(CodeGenerator* code_gen, const std::string& op);
 
         void ProcessRANDOM(CodeGenerator* code_gen);

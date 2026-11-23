@@ -397,6 +397,27 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void ScriptPlayerLock(const bool lock);
 
         /**
+         * Sets if the player can slide along the walls (SLIP in the field scripts).
+         *
+         * When it is off, a move of the player that is blocked by a wall is not turned into a
+         * move along the wall. It is on by default and when a field is loaded.
+         *
+         * @param[in] slip True to let the player slide.
+         */
+        void ScriptSetPlayerSlip(const bool slip);
+
+        /**
+         * Retrieves the height of a point of a walkmesh triangle.
+         *
+         * @param[in] triangle The triangle.
+         * @param[in] x X coordinate of the point.
+         * @param[in] y Y coordinate of the point.
+         * @param[in] fallback Value returned if there is no such triangle.
+         * @return The height of the triangle at the point.
+         */
+        float GetTriangleHeight(int triangle, float x, float y, float fallback) const;
+
+        /**
          * Sets if the player moves running by default.
          *
          * If true, the player runs unless the run key is held, which makes it walk. If false (the
@@ -862,6 +883,11 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * Indicates if player control is locked.
          */
         bool player_lock_;
+
+        /**
+         * Indicates if the player slides along the walls (see ScriptSetPlayerSlip).
+         */
+        bool player_slip_ = true;
 
         /**
          * Indicates if the playable is being moved by running.

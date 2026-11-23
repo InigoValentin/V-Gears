@@ -267,6 +267,15 @@ class FieldCodeGenerator : public CodeGenerator{
           FieldScriptFormatter& formatter, uint32 bank, TValue value_or_address,
           ValueType type = ValueType::Integer, float scale = 1.0f
         ){
+            // The variables hold the values in the units of the original game, like the values
+            // written in the opcodes, so a float one has to be scaled the same way.
+            if (bank != 0 && type == ValueType::Float && scale != 1.0f){
+                return (
+                  boost::format("(%1% / %2%)")
+                  % FormatValueOrVariable(formatter, bank, value_or_address, ValueType::Integer)
+                  % scale
+                ).str();
+            }
             switch (bank){
                 case 0:
                     switch (type){

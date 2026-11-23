@@ -84,6 +84,9 @@ namespace VGears{
             );
         }
         dest->SetTextureName(texture_name);
+        String palette_name;
+        ReadAttribute(node, "palette", palette_name, String());
+        dest->SetPaletteName(palette_name);
         Ogre::Vector2 clip;
         ReadAttribute(node, "clip", clip, Ogre::Vector2(320, 240));
         dest->SetClip(clip);

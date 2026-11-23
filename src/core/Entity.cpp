@@ -236,10 +236,9 @@ void Entity::SetPosition(const Ogre::Vector3& position){scene_node_->setPosition
 void Entity::ScriptSetPosition(const float x, const float y, const float z){
     SetPosition(Ogre::Vector3(x, y, z));
 
-    // Make the entity solid, visible and talkable. TODO: Check if neccessary.
-    SetVisible(true);
-    SetSolid(true);
-    SetTalkable(true);
+    // The position doesn't change if the entity is visible, solid or talkable: the scripts hide an
+    // entity (VISI) and place it (XYZI) in any order, and the second one that shows it again would
+    // make, for example, the stand-in models (dea, dcl) of the scenes visible from the start.
 
     // If set from a script:
     // Reset walkmesh triangle to reattach entity to walkmesh again if needed.
@@ -517,8 +516,12 @@ void Entity::ScriptJumpToPosition(
   const float x, const float y, const float z, const float seconds, const int dest_triangle
 ){
     float new_z = z;
-    // If z not specified (-1), asume same Z.
-    if (z < 0) new_z = GetPosition().z;
+    // If z is not specified (-1) it is the height of the destination triangle, so the entity
+    // lands on the floor of the destination (jumping down a step, for example), and not at the
+    // height it jumps from.
+    if (z < 0) new_z = EntityManager::getSingleton().GetTriangleHeight(
+      dest_triangle, x, y, GetPosition().z
+    );
     Ogre::Vector3 jump_to(x, y, new_z);
     SetJump(jump_to, seconds, dest_triangle);
     LOG_TRIVIAL(
@@ -580,6 +583,9 @@ void Entity::ScriptOffsetToPosition(
     );
     Ogre::Vector3 position = Ogre::Vector3(x, y, z);
     if (type == AT_NONE){
+        // An instant offset replaces the one that is running, which must not go on moving the
+        // model afterwards (script_3 of ren in pillar_3 ends this way).
+        if (offset_type_ != AT_NONE) UnsetOffset();
         this->SetOffset(position);
         return;
     }
@@ -804,6 +810,6 @@ Ogre::Degree Entity::GetDirectionToEntity(Entity* entity) const{
     Ogre::Vector2 up(0.0f, -1.0f);
     Ogre::Vector2 dir(direction_point.x - current_point.x, direction_point.y - current_point.y);
     // Angle between vectors
-    Ogre::Degree angle(Ogre::Radian(acosf(dir.dotProduct(up) / (dir.length() * up.length()))));
+    Ogre::Degree angle(Ogre::Radian(SafeAcos(dir.dotProduct(up), dir.length() * up.length())));
     return (dir.x < 0) ? Ogre::Degree(360) - angle : angle;
 }

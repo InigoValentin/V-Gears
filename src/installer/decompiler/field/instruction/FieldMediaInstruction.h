@@ -45,6 +45,10 @@ class FieldMediaInstruction : public KernelCallInstruction{
 
         void ProcessBMUSC(CodeGenerator* code_gen);
 
+        void ProcessCMUSC(CodeGenerator* code_gen);
+
+        void ProcessCHMST(CodeGenerator* code_gen);
+
         void ProcessMUSIC(CodeGenerator* code_gen);
 
         void ProcessSOUND(CodeGenerator* code_gen);

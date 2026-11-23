@@ -343,6 +343,9 @@ class DialogsManager : public Manager, public Ogre::Singleton<DialogsManager>{
          */
         void UpdateTimer(const unsigned int seconds);
 
+        /// Writes the time of the timer in its window.
+        void RenderTimer();
+
         /**
          * Sets the window mode.
          *

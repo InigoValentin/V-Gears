@@ -312,6 +312,7 @@ void EntityModel::PlayAnimation(
           (start == -1) ? animation_current_->getLength() : start
         );
         animation_end_time_ = (end == -1) ? animation_current_->getLength() : end;
+        animation_hold_ = (start != -1 && start == end) ? 1.0f / 30.0f : 0.0f;
         animation_state_ = state;
         animation_play_type_ = play_type;
     }
@@ -371,6 +372,10 @@ bool EntityModel::HasAnimation(const Ogre::String& animation) const{
 
 void EntityModel::UpdateAnimation(const float delta){
     if (animation_current_ != nullptr){
+        if (animation_hold_ > 0.0f){
+            animation_hold_ -= delta;
+            if (animation_hold_ > 0.0f) return;
+        }
         float delta_mod = delta * animation_speed_;
         bool stop_check
           = (animation_current_->hasEnded() == true)

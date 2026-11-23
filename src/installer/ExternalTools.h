@@ -186,6 +186,20 @@ namespace ExternalTools{
     std::vector<std::string> FfmpegStdinArguments(const std::string& output);
 
     /**
+     * Arguments of ffmpeg to encode the audio of a rendered MIDI (from the standard input) and
+     * remove the silence at its end.
+     *
+     * TiMidity renders the reverberation tail of the last notes, and the track would end in several
+     * seconds of near silence. The scripts that wait for a track to end (the jingle of the inns)
+     * would wait for all of it. The silence is removed by reversing the audio, removing the
+     * silence at its start, and reversing it again.
+     *
+     * @param[in] output Path of the file to write.
+     * @return The arguments.
+     */
+    std::vector<std::string> FfmpegMidiArguments(const std::string& output);
+
+    /**
      * Arguments to render a MIDI file with TiMidity to a wav file written to the standard output.
      */
     std::vector<std::string> TimidityArguments(const std::string& midi);

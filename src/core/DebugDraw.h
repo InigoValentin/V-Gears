@@ -66,6 +66,16 @@ class DebugDraw : public Ogre::RenderQueueListener, public Ogre::Singleton<Debug
         void SetFadeDistance(const float fade_s, const float fade_e);
 
         /**
+         * Enables or disables the fading of the text with the distance to the camera.
+         *
+         * The fade distances are fixed, but the camera of a field can be far from everything (the
+         * Wall Market maps are 60 to 90 units from it), so the text would never be seen there.
+         *
+         * @param[in] enabled True to fade the text, false to always draw it.
+         */
+        void SetFadeEnabled(const bool enabled);
+
+        /**
          * Text alignment modes.
          */
         enum TextAlignment{
@@ -388,6 +398,11 @@ class DebugDraw : public Ogre::RenderQueueListener, public Ogre::Singleton<Debug
          * For text fading. The text fully fades at this distance.
          */
         float fade_end_square_;
+
+        /**
+         * If the text fades with the distance, see SetFadeEnabled.
+         */
+        bool fade_enabled_ = true;
 };
 
 /**

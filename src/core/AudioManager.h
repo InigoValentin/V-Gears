@@ -305,6 +305,15 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
         void ScriptPlayMusicOnce(const char* name);
 
         /**
+         * Checks if the music of the current module is playing.
+         *
+         * It is false when there is no music, or when a track that was played once has ended.
+         *
+         * @return True if music is playing.
+         */
+        bool ScriptIsMusicPlaying();
+
+        /**
          * Sets the volume of the music (field, battle and world tracks) and of the audio of the
          * movies.
          *
@@ -406,6 +415,13 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
                  * @todo Is this in seconds?
                  */
                 float GetPosition();
+
+                /**
+                 * Checks if the player has a track that has not ended.
+                 *
+                 * @return True if it is playing (or paused).
+                 */
+                bool IsPlaying();
 
             private:
 

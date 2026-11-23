@@ -75,6 +75,7 @@ class FieldControlFlowInstruction : public KernelCallInstruction{
          * @param[in,out] code_gen Code generator to append lines.
          * @param[in] engine The engine.
          */
+        void ProcessPartyRequest(CodeGenerator* code_gen, const std::string& mode);
         void ProcessREQ(CodeGenerator* code_gen, const FieldEngine& engine);
 
         /**

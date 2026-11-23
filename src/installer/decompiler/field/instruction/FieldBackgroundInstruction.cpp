@@ -33,14 +33,14 @@ void FieldBackgroundInstruction::ProcessInst(
     switch (opcode_){
         case OPCODES::BGPDH: ProcessBGPDH(code_gen); break;
         case OPCODES::BGSCR: ProcessBGSCR(code_gen); break;
-        case OPCODES::MPPAL: code_gen->WriteTodo(md.GetEntityName(), "MPPAL"); break;
+        case OPCODES::MPPAL: ProcessMPPAL(code_gen); break;
         case OPCODES::BGON: ProcessBGON(code_gen, static_cast<FieldEngine&>(*engine)); break;
         case OPCODES::BGOFF: ProcessBGOFF(code_gen, static_cast<FieldEngine&>(*engine)); break;
         case OPCODES::BGROL: code_gen->WriteTodo(md.GetEntityName(), "BGROL"); break;
         case OPCODES::BGROL2: code_gen->WriteTodo(md.GetEntityName(), "BGROL2"); break;
         case OPCODES::BGCLR: ProcessBGCLR(code_gen, static_cast<FieldEngine&>(*engine)); break;
         case OPCODES::STPAL: ProcessSTPAL(code_gen); break;
-        case OPCODES::LDPAL: ProcessLDPAL(code_gen); break;
+        case OPCODES::LDPAL: ProcessLDPAL(code_gen, static_cast<FieldEngine&>(*engine)); break;
         case OPCODES::CPPAL: ProcessCPPAL(code_gen); break;
         case OPCODES::RTPAL: code_gen->WriteTodo(md.GetEntityName(), "RTPAL"); break;
         case OPCODES::ADPAL: ProcessADPAL(code_gen); break;
@@ -131,33 +131,52 @@ void FieldBackgroundInstruction::ProcessBGCLR(CodeGenerator* code_gen, FieldEngi
     );
 }
 
+namespace{
+    /**
+     * Formats the number of colors of a palette opcode: the byte is the number minus one.
+     */
+    std::string PaletteCount(
+      FieldCodeGenerator* cg, uint32 bank, uint32 value
+    ){
+        if (bank == 0) return std::to_string(value + 1);
+        return "(" + FieldCodeGenerator::FormatValueOrVariable(cg->GetFormatter(), bank, value)
+          + " + 1)";
+    }
+}
+
+// The palette opcodes work on an array of palettes in memory (the "slots", 16 colors each) and on
+// the palettes of the background (the "pages"). They are implemented by the palette of the 2D
+// background, see BackgroundPalette. The meaning of the parameters and the arithmetic come from the
+// opcode handlers of ff7.exe.
+
 void FieldBackgroundInstruction::ProcessSTPAL(CodeGenerator* code_gen){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& page = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& slot = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
-    auto num_entries = params_[4]->GetUnsigned() + 1;
+    const auto count = params_[4]->GetUnsigned() + 1;
+    // Stores the first colors of a palette page in the array of palettes.
     code_gen->AddOutputLine((
-      boost::format("-- store palette %1% to position %2%, start CLUT index 0, %3% entries")
-      % source % destination % num_entries
+      boost::format("background2d:palette_store(%1%, %2%, %3%)") % page % slot % count
     ).str());
 }
 
-void FieldBackgroundInstruction::ProcessLDPAL(CodeGenerator* code_gen){
+void FieldBackgroundInstruction::ProcessLDPAL(CodeGenerator* code_gen, FieldEngine& engine){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& source = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& slot = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[2]->GetUnsigned()
     );
-    const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
+    const auto& page = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
-    auto num_entries = params_[4]->GetUnsigned() + 1;
+    engine.AddPalettePage(params_[1]->GetUnsigned() == 0 ? params_[3]->GetUnsigned() : -1);
+    const auto count = params_[4]->GetUnsigned() + 1;
+    // Loads the first colors of a palette page from the array of palettes.
     code_gen->AddOutputLine((
-      boost::format("-- load palette %2% from position %1%, start CLUT index 0, %3% entries")
-      % source % destination % num_entries
+      boost::format("background2d:palette_load(%1%, %2%, %3%)") % slot % page % count
     ).str());
 }
 
@@ -169,10 +188,9 @@ void FieldBackgroundInstruction::ProcessCPPAL(CodeGenerator* code_gen){
     const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
-    auto num_entries = params_[4]->GetUnsigned() + 1;
+    const auto count = params_[4]->GetUnsigned() + 1;
     code_gen->AddOutputLine((
-      boost::format("-- copy palette %1% to palette %2%, %3% entries")
-      % source % destination % num_entries
+      boost::format("background2d:palette_copy(%1%, %2%, %3%)") % source % destination % count
     ).str());
 }
 
@@ -193,12 +211,11 @@ void FieldBackgroundInstruction::ProcessADPAL(CodeGenerator* code_gen){
     const auto& b = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[2]->GetUnsigned(), params_[8]->GetUnsigned()
     );
-    auto num_entries = params_[11]->GetUnsigned() + 1;
+    const auto count = params_[11]->GetUnsigned() + 1;
+    // Adds a signed value to each 5 bit channel of the colors of a palette in the array.
     code_gen->AddOutputLine((
-      boost::format(
-        "-- add RGB(%3%, %4%, %5%) to %6% entries of palette stored at position %1%, "
-        "storing result in position %2%"
-      ) % source % destination % r % g % b % num_entries
+      boost::format("background2d:palette_add(%1%, %2%, %3%, %4%, %5%, %6%)")
+      % source % destination % r % g % b % count
     ).str());
 }
 
@@ -219,12 +236,37 @@ void FieldBackgroundInstruction::ProcessMPPAL2(CodeGenerator* code_gen){
     const auto& b = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[2]->GetUnsigned(), params_[8]->GetUnsigned()
     );
-    auto num_entries = params_[11]->GetUnsigned() + 1;
+    const auto count = params_[11]->GetUnsigned() + 1;
+    // Multiplies each channel of the colors of a palette in the array (64 is 1.0).
     code_gen->AddOutputLine((
-      boost::format(
-        "-- multiply RGB(%3%, %4%, %5%) by %6% entries of palette stored at position %1%, "
-        "storing result in position %2%"
-      ) % source % destination % r % g % b % num_entries).str());
+      boost::format("background2d:palette_multiply(%1%, %2%, 0, %6%, %3%, %4%, %5%)")
+      % source % destination % r % g % b % count
+    ).str());
+}
+
+void FieldBackgroundInstruction::ProcessMPPAL(CodeGenerator* code_gen){
+    // Like MPPAL2, but only from a start color. The banks are: start color, blue, green, red and
+    // the number of colors. The palettes in the array are always values.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto source = params_[6]->GetUnsigned();
+    const auto destination = params_[7]->GetUnsigned();
+    const auto& start = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[8]->GetUnsigned()
+    );
+    const auto& b = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[9]->GetUnsigned()
+    );
+    const auto& g = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[10]->GetUnsigned()
+    );
+    const auto& r = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[11]->GetUnsigned()
+    );
+    const auto count = PaletteCount(cg, params_[5]->GetUnsigned(), params_[12]->GetUnsigned());
+    code_gen->AddOutputLine((
+      boost::format("background2d:palette_multiply(%1%, %2%, %3%, %4%, %5%, %6%, %7%)")
+      % source % destination % start % count % r % g % b
+    ).str());
 }
 
 void FieldBackgroundInstruction::ProcessSTPLS(CodeGenerator* code_gen){

@@ -22,6 +22,7 @@
 #include <OgreRoot.h>
 #include "map/VGearsBackground2DFile.h"
 #include "Background2DAnimation.h"
+#include "BackgroundPalette.h"
 #include "Entity.h"
 #include "ScriptManager.h"
 
@@ -346,6 +347,26 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] image Image name.
          */
         void SetImage( const Ogre::String& image );
+
+        /**
+         * Loads the palettes of the image, if a script animates them.
+         *
+         * @param[in] name Resource name of the palette file (palette.bin of the field).
+         */
+        void SetPalette(const Ogre::String& name);
+
+        /**
+         * Palette opcodes of the scripts, see BackgroundPalette.
+         */
+        void ScriptPaletteStore(int page, int slot, int count);
+        void ScriptPaletteLoad(int slot, int page, int count);
+        void ScriptPaletteCopy(int source, int destination, int count);
+        void ScriptPaletteMultiply(
+          int source, int destination, int start, int count, int red, int green, int blue
+        );
+        void ScriptPaletteAdd(
+          int source, int destination, int red, int green, int blue, int count
+        );
 
         /**
          * Set the background scrolling range.
@@ -723,6 +744,11 @@ class Background2D : public Ogre::RenderQueueListener{
         const Ogre::Vector2 ClampScroll(const Ogre::Vector2& position) const;
 
         /**
+         * Limits a scroll position to the background range, always.
+         */
+        const Ogre::Vector2 ClampToRange(const Ogre::Vector2& position) const;
+
+        /**
          * Calculates the screen scale.
          *
          * The scale is calculated as the proportion between the viewport and
@@ -788,6 +814,31 @@ class Background2D : public Ogre::RenderQueueListener{
          * The layers that are on for each scripted area, as a bit mask.
          */
         std::map<int, unsigned int> area_states_on_;
+
+        /**
+         * Painting again of the tiles of the palettes the scripts animate.
+         */
+        void UpdatePalette();
+
+        /**
+         * The palettes the scripts animate.
+         */
+        BackgroundPalette palette_;
+
+        /**
+         * Name of the image of the background.
+         */
+        Ogre::String image_name_;
+
+        /**
+         * A copy of the image of the background, where the animated tiles are painted.
+         */
+        Ogre::Image palette_image_;
+
+        /**
+         * True if palette_image_ has the image.
+         */
+        bool palette_image_loaded_ = false;
 
         /**
          * The shake of the view in the X axis.
@@ -973,6 +1024,14 @@ class Background2D : public Ogre::RenderQueueListener{
          * Whether to keep following the target entity when the current scroll action ends.
          */
         bool scroll_follow_target_;
+
+        /**
+         * True while a script has moved the camera to a position. The original game doesn't limit
+         * those scrolls to the background, so a scene can show the empty space around it (the
+         * models of ealin_12 are moved there while the camera is away). The camera that follows
+         * an entity is always limited.
+         */
+        bool free_scroll_;
 
         /**
          * Position of an instant scroll that waits for the end of the frame.
