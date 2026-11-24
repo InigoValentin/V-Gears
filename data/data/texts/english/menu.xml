@@ -251,4 +251,16 @@
     <text name="MagicMenuMpNeeded"><colour value="0 0.8 1">MP needed</colour></text>
     <text name="MagicMenuUses"><colour value="0 0.8 1">Uses</colour></text>
     <text name="StatusMenuTitle">Status</text>
+    <text name="ShopMenuBuy">Buy</text>
+    <text name="ShopMenuSell">Sell</text>
+    <text name="ShopMenuExit">Exit</text>
+    <text name="ShopMenuPromptBuy">What would you like to buy?</text>
+    <text name="ShopMenuPromptSell">What would you like to sell?</text>
+    <text name="ShopMenuPromptQuantity">How many?</text>
+    <text name="ShopMenuTimes">x</text>
+    <text name="ShopMenuGil"><colour value="0 0.8 1">Gil</colour></text>
+    <text name="ShopMenuOwned"><colour value="0 0.8 1">Owned</colour></text>
+    <text name="ShopMenuEquipped"><colour value="0 0.8 1">Equipped</colour></text>
+    <text name="ShopMenuAtk"><colour value="0 0.8 1">A</colour></text>
+    <text name="ShopMenuDef"><colour value="0 0.8 1">D</colour></text>
 </texts>

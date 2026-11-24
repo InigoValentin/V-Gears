@@ -299,6 +299,24 @@ void CmdMap(const Ogre::StringVector& params){
 }
 
 /**
+ * Opens a shop, to test the shop menu by hand.
+ *
+ * @param[in] params Command parameters: the command name and the ID of the shop (0-79).
+ */
+void CmdShop(const Ogre::StringVector& params){
+    if (params.size() != 2){
+        Console::getSingleton().AddTextToOutput("Usage: /shop <shop_id>");
+        return;
+    }
+    // The scripts open shops with open_shop(), that waits for the menu to close and can only run
+    // in a script. Showing the menu directly doesn't need that.
+    ScriptManager::getSingleton().RunString(
+      "UiContainer.ShopMenu.shop_id = tonumber(\"" + params[1] + "\") or -1; "
+      "UiContainer.ShopMenu:show()"
+    );
+}
+
+/**
  * Loads a list of map names.
  *
  * @param[in] complete_params The map names will be loaded here.
@@ -485,6 +503,7 @@ void ConfigCmdHandler::InitCmd(){
     );
     AddCommand("set_log_level", "Set log messages level", "", CmdSetLogLevel, NULL);
     AddCommand("map", "Run game module", "", CmdMap, CmdMapCompletion);
+    AddCommand("shop", "Open a shop", "<shop_id>", CmdShop, NULL);
     AddCommand("resolution", "Change resolution", "", CmdResolution, CmdResolutionCompletition);
     AddCommand("screenshot", "Capture current screen content", "", CmdScreenshot, NULL);
     AddCommand("fade", "Start a screen fade", "<type> <r> <g> <b> <speed>", CmdFade, NULL);

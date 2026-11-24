@@ -196,6 +196,21 @@ class DebugDraw : public Ogre::RenderQueueListener, public Ogre::Singleton<Debug
         );
 
         /**
+         * Sets whether the overlay is drawn by whoever calls {@see RenderOverlay}, instead of when
+         * the overlay queue ends.
+         *
+         * The listeners are called in the order they were added, and this one was added before the
+         * menus. The menus take over the drawing of the overlay to draw the console over them.
+         * Moving this listener after the others instead breaks the drawing of the background.
+         */
+        void SetOverlayDrawnByUi(const bool drawn_by_ui);
+
+        /**
+         * Draws the overlay of the debug drawing: the lines, quads and text in screen space.
+         */
+        void RenderOverlay();
+
+        /**
          * Ends the render queue.
          *
          * @param[in] queueGroupId The group id of the queue to end.
@@ -209,6 +224,11 @@ class DebugDraw : public Ogre::RenderQueueListener, public Ogre::Singleton<Debug
         );
 
     private:
+        /**
+         * Is the overlay drawn by the UI, after the menus?
+         */
+        bool overlay_drawn_by_ui_ = false;
+
 
         /**
          * Creates a 2D line vertex buffer (2 vertices).
