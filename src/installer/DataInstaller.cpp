@@ -229,6 +229,7 @@ float DataInstaller::Progress(){
             }
             write_output_line_("Parsing item and materia prices...", 2, true);
             kernel_installer_->ReadPrices();
+            kernel_installer_->WriteShops(data_dir_ + "gamedata/shops.lua");
             installation_state_ = KERNEL_COMMANDS;
             return CalcProgress();
         case KERNEL_COMMANDS:
