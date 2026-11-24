@@ -186,6 +186,8 @@ UiContainer.NameMenu = {
         local name = Characters[id].name
         -- HACK: Hack for Ex-Soldier default. Can this be extracted from menu.lgp?
         if string.lower(name) == "ex-soldier" then return "Cloud" end
+        -- The initial data of the game only holds "Red" for him.
+        if id == 4 and string.lower(name) == "red" then return "Red XIII" end
         return name
     end,
 

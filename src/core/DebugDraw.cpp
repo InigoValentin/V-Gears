@@ -505,7 +505,7 @@ void DebugDraw::DestroyLineVertexBuffer(){
 }
 
 void DebugDraw::CreateLine3dVertexBuffer(){
-    line_3d_max_vertex_ = 1024 * 2;
+    line_3d_max_vertex_ = 8192 * 2;
     line_3d_render_operation_.vertexData = new Ogre::VertexData;
     line_3d_render_operation_.vertexData->vertexStart = 0;
     Ogre::VertexDeclaration* vertex_declaration

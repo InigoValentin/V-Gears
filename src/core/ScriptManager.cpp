@@ -118,6 +118,13 @@ void ScriptManager::Input(const VGears::Event& event){
 }
 
 void ScriptManager::Update(const ScriptManager::Type type){
+    // Remove the scripts that a request has replaced.
+    for (unsigned int i = 0; i < script_entity_.size(); ++ i){
+        if (script_entity_[i].type != type) continue;
+        for (size_t k = script_entity_[i].queue.size(); k --;){
+            if (script_entity_[i].queue[k].replaced) RemoveEntityScript(script_entity_[i], k);
+        }
+    }
     // Resort all queue. This will give correct info for debug draw.
     for (unsigned int i = 0; i < script_entity_.size(); ++ i){
         if (script_entity_[i].type == type){
@@ -739,6 +746,18 @@ bool ScriptManager::ScriptRequest(
             }
         }
 
+        // A script that is only polling (a loop that waits for a key or a flag, with no pause)
+        // is replaced by the request of one with a higher priority, as the scenes do to stop the
+        // loops of the keys (the mimic of the parade of junin1a).
+        if (function != "on_update" && function != "on_start" && function != "on_button"){
+            for (QueueScript& other : script_entity->queue){
+                if (
+                  other.priority > priority && other.yield && !other.wait
+                  && other.function != "on_update" && other.function != "on_start"
+                  && other.function != "on_button"
+                ) other.replaced = true;
+            }
+        }
         script_entity->queue.push_back(script);
         script_entity->resort = true;
         return true;

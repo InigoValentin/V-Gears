@@ -160,6 +160,9 @@ void ScreenFade::renderQueueStarted(
 ){
     if (queue_group_id != Ogre::RENDER_QUEUE_OVERLAY || !state_.IsVisible()) return;
     if (!EntityManager::getSingleton().IsFieldModule()) return;
+    // A movie that covers the screen is not under the fade: the scenes black the field and then
+    // play the movie (mtnvl2).
+    if (EntityManager::getSingleton().GetMoviePlayer()->IsDrawnOver()) return;
 
     Ogre::MaterialPtr material;
     switch (state_.GetBlend()){

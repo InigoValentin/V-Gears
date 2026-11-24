@@ -282,6 +282,16 @@ class UiTextArea : public UiWidget{
         void SetText(TiXmlNode* text);
 
         /**
+         * Writes a number in the text (WNUMB): it takes the place of the last run of spaces that
+         * is wide enough for it, aligned to the right. The texts of the number windows have those
+         * spaces for it ("Live TV Ratings              %").
+         *
+         * @param[in] number The digits of the number.
+         * @param[in] digits Width of the number.
+         */
+        void PutNumber(const std::string& number, const int digits);
+
+        /**
          * Removes the text from the text area.
          */
         void TextClear();
@@ -416,8 +426,19 @@ class UiTextArea : public UiWidget{
 
         /**
          * Creates a vertex buffer for the textarea.
+         *
+         * @param[in] letters Number of letters that fit in it.
          */
-        void CreateVertexBuffer();
+        void CreateVertexBuffer(const unsigned int letters = 1024);
+
+        /**
+         * Makes the vertex buffer bigger if the text doesn't fit (some dialogs of the fields have
+         * more than a thousand letters). The text areas start with a small one because there are
+         * hundreds of them.
+         *
+         * @param[in] letters Number of letters that are needed.
+         */
+        void GrowVertexBuffer(const unsigned int letters);
 
         /**
          * Destroys a vertex buffer for the textarea.

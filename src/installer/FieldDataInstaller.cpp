@@ -225,7 +225,6 @@ bool FieldDataInstaller::IsAFieldFile(const Ogre::String& resource_name){
 bool FieldDataInstaller::WillCrash(const Ogre::String& resource_name){
     if (
       resource_name == "bugin1a" // crashes in back ground image generation
-      || resource_name == "frcyo" // Hangs in decompliation
       || resource_name == "fr_e" // Background image crash
       || resource_name == "las4_2" // Background image crash
       || resource_name == "las4_3" // Background image crash
@@ -234,7 +233,6 @@ bool FieldDataInstaller::WillCrash(const Ogre::String& resource_name){
       || resource_name == "trnad_3" // Background image crash
       || resource_name == "bonevil2" // stof
       || resource_name == "coloin1" // boost::bad_format_string: format-string is ill-formed
-      || resource_name == "del3" // Segmentation fault.
       || resource_name == "elmin4_2" // boost::bad_format_string: format-string is ill-formed
     ) return true;
     return false;
@@ -1108,6 +1106,9 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                     // TODO: Should probably throw to fail conversion:
                     else blending_str = "unknown";
                     xml_element->SetAttribute("blending", blending_str);
+                    // Type 3 adds only a quarter of the colour of the tile: with all of it the
+                    // glows turn white (ujunon4).
+                    if (sprite.blending == 3) xml_element->SetAttribute("intensity", "0.25");
                     // The layer is needed by the scripts that scroll them at their own speed.
                     xml_element->SetAttribute("layer", layer_index);
                     // The sprites that belong to a group (animation_id) are drawn only while a

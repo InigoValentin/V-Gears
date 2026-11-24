@@ -509,6 +509,11 @@ void Background2D::ScriptAutoScrollToEntity(Entity* entity){
 
 Entity* Background2D::GetAutoScrollEntity() const{return scroll_entity_;}
 
+bool Background2D::HasScrollControl() const{
+    return scroll_entity_ != nullptr || scroll_target_entity_ != nullptr || free_scroll_
+      || has_pending_scroll_;
+}
+
 void Background2D::ScriptScrollToPlayer(const SCROLL_TYPE type, const float seconds){
     Entity* player = EntityManager::getSingleton().ScriptGetPlayerEntity();
     if (player == nullptr) return;
@@ -711,8 +716,16 @@ void Background2D::SetRange(const int min_x, const int min_y, const int max_x, c
       << "Background2D::SetRange " << min_x << " " << min_y << " " << max_x << " " << max_y;
     Ogre::Vector2 half_virtual_screen_size(virtual_screen_size_ / 2);
     half_virtual_screen_size /= screen_proportion_;
-    range_.setMaximum(max_x - half_virtual_screen_size.x , max_y - half_virtual_screen_size.y, 1);
-    range_.setMinimum(min_x + half_virtual_screen_size.x , min_y + half_virtual_screen_size.y, 0);
+    // The scroll is the opposite of the position of the center of the camera (the scripts give it
+    // like that, and the scene is moved, not the camera), so the limits of the camera are the
+    // opposite ones. It only shows in the fields whose range is not centered (nivl_b1): the
+    // camera went beyond the background.
+    range_.setMaximum(
+      -(min_x + half_virtual_screen_size.x), -(min_y + half_virtual_screen_size.y), 1
+    );
+    range_.setMinimum(
+      -(max_x - half_virtual_screen_size.x), -(max_y - half_virtual_screen_size.y), 0
+    );
     Ogre::LogManager::getSingleton().stream() << "Background2D::SetRange " << range_;
     calculateScreenScale();
 }
@@ -740,7 +753,10 @@ void Background2D::AddTile(const VGears::Tile& tile){
     // TODO: move depth calculation to flevelBackgroundLoader maybe? and let
     // Backgorund2D only handle 0 <= depth <= 1 or so?
     // Maybe just move the < 4095 part to flevel background loader?
-    Ogre::Real depth(0.0001f);
+    // The tiles that are less than one unit away (the pieces of a model that a script puts in,
+    // for example) are only a hair away from the camera, but they keep their order: all of them at
+    // the same depth made the tile that is drawn last cover the others, wherever it was.
+    Ogre::Real depth(0.0001f + std::max(tile.depth, 0.0f) * 0.00005f);
     if (tile.depth >= 1){
         if (tile.depth < 4095){
             depth = TileDepthToBuffer(
@@ -777,7 +793,7 @@ void Background2D::virtualScreenToWorldSpace(Ogre::Vector2& pos) const{
 void Background2D::AddTile(
   const int x, const int y, const int width, const int height, const float depth, const float u1,
   const float v1, const float u2, const float v2, const Blending blending, const int area,
-  const int state, const int layer
+  const int state, const int layer, const float intensity
 ){
     Ogre::RenderOperation render_op;
     Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
@@ -858,54 +874,54 @@ void Background2D::AddTile(
     *write_iterator ++ = new_x1;
     *write_iterator ++ = new_y1;
     *write_iterator ++ = depth;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
     *write_iterator ++ = 1;
     *write_iterator ++ = u1;
     *write_iterator ++ = v1;
     *write_iterator ++ = new_x2;
     *write_iterator ++ = new_y2;
     *write_iterator ++ = depth;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
     *write_iterator ++ = 1;
     *write_iterator ++ = u2;
     *write_iterator ++ = v1;
     *write_iterator ++ = new_x3;
     *write_iterator ++ = new_y3;
     *write_iterator ++ = depth;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
     *write_iterator ++ = 1;
     *write_iterator ++ = u2;
     *write_iterator ++ = v2;
     *write_iterator ++ = new_x1;
     *write_iterator ++ = new_y1;
     *write_iterator ++ = depth;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
     *write_iterator ++ = 1;
     *write_iterator ++ = u1;
     *write_iterator ++ = v1;
     *write_iterator ++ = new_x3;
     *write_iterator ++ = new_y3;
     *write_iterator ++ = depth;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
     *write_iterator ++ = 1;
     *write_iterator ++ = u2;
     *write_iterator ++ = v2;
     *write_iterator ++ = new_x4;
     *write_iterator ++ = new_y4;
     *write_iterator ++ = depth;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = 1;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
+    *write_iterator ++ = intensity;
     *write_iterator ++ = 1;
     *write_iterator ++ = u1;
     *write_iterator ++ = v2;
@@ -1113,7 +1129,9 @@ void Background2D::RenderBuffer(
 
 void Background2D::CreateVertexBuffers(){
     ResetLayers();
-    alpha_max_vertex_count_ = 2048 * TILE_VERTEX_COUNT;
+    // Some fields have more than 1600 tiles that add their colour (the fire and the light of las0_2,
+    // clsin2_1 and ujunon4), and more than 2500 tiles in all.
+    alpha_max_vertex_count_ = 4096 * TILE_VERTEX_COUNT;
     alpha_render_op_.vertexData = new Ogre::VertexData;
     alpha_render_op_.vertexData->vertexStart = 0;
     Ogre::VertexDeclaration* vertex_declaration = alpha_render_op_.vertexData->vertexDeclaration;
@@ -1130,7 +1148,7 @@ void Background2D::CreateVertexBuffers(){
     alpha_render_op_.vertexData->vertexBufferBinding->setBinding(0, alpha_vertex_buffer_);
     alpha_render_op_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
     alpha_render_op_.useIndexes = false;
-    add_max_vertex_count_ = 1024 * TILE_VERTEX_COUNT;
+    add_max_vertex_count_ = 4096 * TILE_VERTEX_COUNT;
     add_render_op_.vertexData = new Ogre::VertexData;
     add_render_op_.vertexData->vertexStart = 0;
     vertex_declaration = add_render_op_.vertexData->vertexDeclaration;
@@ -1147,7 +1165,7 @@ void Background2D::CreateVertexBuffers(){
     add_render_op_.vertexData->vertexBufferBinding->setBinding(0, add_vertex_buffer_);
     add_render_op_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
     add_render_op_.useIndexes = false;
-    subtract_max_vertex_count_ = 512 * TILE_VERTEX_COUNT;
+    subtract_max_vertex_count_ = 2048 * TILE_VERTEX_COUNT;
     subtract_render_op_.vertexData = new Ogre::VertexData;
     subtract_render_op_.vertexData->vertexStart = 0;
     vertex_declaration = subtract_render_op_.vertexData->vertexDeclaration;

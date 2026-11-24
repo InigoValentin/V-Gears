@@ -20,6 +20,7 @@
 #include <OgreStringConverter.h>
 #include "Console.h"
 #include "EntityManager.h"
+#include "ScriptManager.h"
 #include "Logger.h"
 #include "XmlMapFile.h"
 #include "XmlMapsFile.h"
@@ -292,11 +293,9 @@ void CmdMap(const Ogre::StringVector& params){
         Console::getSingleton().AddTextToOutput("Usage: /map [map_id]");
         return;
     }
-    EntityManager::getSingleton().Clear();
-    XmlMapsFile xml("./data/maps.xml");
-    Ogre::String file_name = xml.GetMapFileNameByName(params[1]);
-    XmlMapFile xml_map("./data/" + file_name);
-    xml_map.LoadMap();
+    // The same as the map function of the scripts (the old list of maps, ./data/maps.xml, doesn't
+    // exist: the fields are in ./data/fields/_fields.xml).
+    ScriptManager::getSingleton().RunString("map(\"" + params[1] + "\")");
 }
 
 /**
@@ -305,7 +304,7 @@ void CmdMap(const Ogre::StringVector& params){
  * @param[in] complete_params The map names will be loaded here.
  */
 void CmdMapCompletion(Ogre::StringVector& complete_params){
-    XmlMapsFile xml("./data/maps.xml");
+    XmlMapsFile xml("./data/fields/_fields.xml");
     xml.GetMapNames(complete_params);
 }
 
@@ -368,7 +367,7 @@ void CmdResolutionCompletition(Ogre::StringVector& complete_params){
  */
 void CmdScreenshot(const Ogre::StringVector& params){
     Ogre::RenderWindow* window = VGears::Application::getSingleton().getRenderWindow();
-    Ogre::String ret = window->writeContentsToTimestampedFile("screenshot_", ".tga");
+    Ogre::String ret = window->writeContentsToTimestampedFile("screenshot_", ".png");
     Console::getSingleton().AddTextToOutput("Screenshot " + ret + " saved.");
 }
 

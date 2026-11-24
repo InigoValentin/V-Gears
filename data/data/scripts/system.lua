@@ -142,6 +142,20 @@ set_party = function(character1, character2, character3)
     export_party_members()
 end
 
+--- Sets the party from three values (SPTYE), the ones that GTPYE stored: 254 and 255 are an empty
+-- place.
+--
+-- @param character1 The first member character ID, the party leader.
+-- @param character2 The second member character ID.
+-- @param character3 The third member character ID.
+set_party_from_values = function(character1, character2, character3)
+    local function id(value)
+        if value == nil or value >= 254 then return nil end
+        return value
+    end
+    set_party(id(character1), id(character2), id(character3))
+end
+
 --- Checks if a a character ID actually belongs to a character.
 --
 -- @param character The ID to check.
@@ -758,6 +772,28 @@ Characters.equip = function(char_id, item_id)
     return true
 end
 
+--- Takes the equipped materia off a character and puts it in the materia inventory (menu 17 of the
+-- field scripts: the "remove materia from other members" of the scenes with a fixed party).
+--
+-- @param id ID of the character.
+Characters.unequip_materia = function(id)
+    local character = Characters[id]
+    if character == nil then return end
+    local free = 1
+    for _, equipment in ipairs({character.weapon, character.armor}) do
+        for slot = 0, 7 do
+            local materia = equipment.materia[slot]
+            if materia ~= nil then
+                while free <= MAX_MATERIA_SLOTS and Materia[free] ~= nil do free = free + 1 end
+                if free > MAX_MATERIA_SLOTS then return end
+                Materia[free] = materia
+                equipment.materia[slot] = nil
+            end
+        end
+    end
+    Characters.recalculate_stats(id)
+end
+
 --- Removes all materia from a character.
 --
 -- @param id ID of the character to remove materia from.
@@ -811,8 +847,17 @@ Party.split_teams = function(number)
 end
 
 --- Displays a menu to choose a party of three.
+--
+-- The script that asks for it waits until the menu is closed.
 Party.choose_party = function()
-    -- TODO: Implement
+    -- The button that asked for the menu (Cancel) is still down: it would close the menu at once.
+    while entity_manager:is_key_on(64) do script:wait(0) end
+    UiContainer.PhsMenu.standalone = true
+    script:request_end_sync(Script.UI, "PhsMenu", "show", 0)
+    while UiContainer.current_menu == "phs" do script:wait(0) end
+    -- The button that closed the menu is still down: the script that asked for the menu would
+    -- read it as a new request (Cancel opens the menu).
+    while entity_manager:is_key_on(32 + 64) do script:wait(0) end
 end
 
 --- Special event. Removes all materia from the party, equipped and unequipped.

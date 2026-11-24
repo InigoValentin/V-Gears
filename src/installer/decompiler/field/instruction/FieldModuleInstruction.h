@@ -118,4 +118,12 @@ class FieldModuleInstruction : public KernelCallInstruction{
          * @param[in] func Function to get the spawn point from.
          */
         void ProcessMAPJUMP(CodeGenerator* code_gen, Function& func);
+
+        /**
+         * Starts a minigame, and goes on to a field when it ends.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] func Function to get the spawn point from.
+         */
+        void ProcessMINIGAME(CodeGenerator* code_gen, Function& func);
 };

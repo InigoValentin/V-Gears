@@ -211,6 +211,20 @@ EnterFieldScene = function(field_table_id, scenario)
     end
 
     System.MapChanger.world_map_entry = entry
+    -- Where the player was when entering the field: some exits (the chocobo records, such as the one
+    -- of sichi) place the player where he entered, and the scripts read it as the values 0, 1 (the
+    -- mesh) and 4 (the direction) that the engine gives them.
+    local player = entity_manager:get_player_entity()
+    if player ~= nil and WorldVM ~= nil then
+        local x, _, z = player:get_position()
+        System.WorldMap.entry_position = {
+            x = x,
+            z = z,
+            mesh_x = math.floor(x / WorldVM.MESH_SIZE),
+            mesh_y = math.floor(z / WorldVM.MESH_SIZE),
+            direction = math.floor(player:get_rotation() / 360 * 256) % 256,
+        }
+    end
     console("camera_free false")
     load_field_map_request(entry.field, "")
     return 0

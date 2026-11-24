@@ -65,7 +65,7 @@ void FieldWindowInstruction::ProcessInst(
         case OPCODES::WCLS: ProcessWCLSE(code_gen); break;
         case OPCODES::WSIZW: ProcessWSIZW(code_gen); break;
         case OPCODES::WSPCL: ProcessWSPCL(code_gen); break;
-        case OPCODES::WNUMB: code_gen->WriteTodo(md.GetEntityName(), "WNUMB"); break;
+        case OPCODES::WNUMB: ProcessWNUMB(code_gen); break;
         case OPCODES::STTIM: ProcessSTTIM(code_gen); break;
         case OPCODES::MESSAGE: ProcessMESSAGE(code_gen, eng.GetScriptName()); break;
         case OPCODES::MPARA: ProcessMPARA(code_gen); break;
@@ -99,6 +99,19 @@ void FieldWindowInstruction::ProcessWSIZW(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("dialog:dialog_open(\"%1%\", %2%, %3%, %4%, %5%) -- WSIZW")
       % windowId % x % y % width % height
+    ).str());
+}
+
+void FieldWindowInstruction::ProcessWNUMB(CodeGenerator* code_gen){
+    // Operands: the bank of the value (two nibbles), the window, the address of the value (a word
+    // of the bank) and the number of digits, with a byte that is zero between them.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const std::string value = FieldCodeGenerator::FormatValueOrVariable(
+      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[3]->GetUnsigned()
+    );
+    code_gen->AddOutputLine((
+      boost::format("dialog:set_number(\"%1%\", %2%, %3%)")
+      % params_[2]->GetUnsigned() % value % params_[5]->GetUnsigned()
     ).str());
 }
 
@@ -195,6 +208,11 @@ void FieldWindowInstruction::ProcessMENU(CodeGenerator* code_gen){
         case 0x0F: // Steal materia event.
             code_gen->AddOutputLine("Party.steal_materia()");
             break;
+        case 0x11: // Take the materia off a character.
+            code_gen->AddOutputLine(
+              (boost::format("Characters.unequip_materia(%1%)") % param).str()
+            );
+            break;
         case 0x12: // Remove materia from character.
             code_gen->AddOutputLine(
               (boost::format("Characters.remove_materia(%1%)") % param).str()
@@ -286,7 +304,7 @@ void FieldWindowInstruction::ProcessMPNAM(CodeGenerator* code_gen, const std::st
 
 void FieldWindowInstruction::ProcessMENU2(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
-      boost::format("-- field:menu_lock(%1%)")
+      boost::format("menu_lock(%1%)")
       % FieldCodeGenerator::FormatBool(params_[0]->GetUnsigned())
     ).str());
 }

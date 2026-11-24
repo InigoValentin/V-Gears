@@ -214,6 +214,8 @@ class FieldWindowInstruction : public KernelCallInstruction{
          *
          * @param[in,out] code_gen Code generator to append lines.
          */
+        void ProcessWNUMB(CodeGenerator* code_gen);
+
         void ProcessWSPCL(CodeGenerator* code_gen);
 
         /**

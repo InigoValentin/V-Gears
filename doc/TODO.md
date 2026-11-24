@@ -47,6 +47,10 @@ afterwards, because it can grow. Loading and unloading blocks around the player 
 that, but the whole map fits in memory, so it should only be for the load time. The 6 alternate blocks of
 WM0 (story shapes) are not loaded now and would have to be handled.
 
+## World map: the player keeps walking after entering a town.
+
+When the player enters a town (field) from the world map, the player model keeps playing its walk animation and moving in the direction it was heading on the world map. The field should start with the player standing still, and the stored movement or input state from the world map should be cleared on the transition. Not investigated yet; fix when we return to the world map module.
+
 ## Field: black corners of diagonal backgrounds (mds5_3)
 
 In mds5_3 the top-right (and bottom-left) corner of the screen can show black when the player walks
@@ -101,3 +105,17 @@ collides with several solid NPCs that stop around it (`CheckSolidCollisions`).
 The model of Ren was invisible. The probable cause (an instant `OFST` did not cancel a running smooth
 offset, so Ren stayed 4 units away) was fixed in `Entity::ScriptOffsetToPosition`, but it has not been
 tested in the game. Check the helicopter intro of pillar_3 and that Ren appears and jumps down.
+
+## World map: sichi can be entered more than once
+
+The entrance of sichi (FIELD.TBL record 32, trigger function `world_function_129` of `wm0.lua`) should work only once: the function checks `ReadBit(3707)` (the flag that the field sets when it is done) and `ReadSpecial(8)`. Every time the player reaches the entrance the field is entered again, so the story cannot go on. Not investigated: check that the world variables that the field scripts write (`ReadBit`/`WriteBit` use the savemap banks, see `triangle_triggers.lua`) are the same ones that the world scripts read, and that the bit 3707 is really set when leaving sichi. To go on in the meantime, use the console command `map psdun_2`.
+
+When the player leaves sichi he appears where he entered (the exit script puts him at the corner of the mesh, which is a mountain, so `WorldVM.prepare` uses the exact position saved by `EnterFieldScene`). The original game position for this exit is not known. The direction that is saved (special 4) is not used for the player.
+
+## World map: the boat scene after jundoc1a
+
+After the parade of Junon (field jundoc1a) a scene with a boat must happen in the world map, but the player is only taken outside Junon. Not investigated. Things to check: the exit of jundoc1a to the world map (`wm<n>` and its FIELD.TBL record, see `enter_world_map`), the story flags (`progress_game`) that the world scripts read to start the scene (`ReadSpecial(6)`, the record, and the vehicle scripts in `wm0.lua`), and whether the vehicle entities of the scene (the boat) are created by `WorldVM.prepare` for that record.
+
+## World map: the scripted event after shpin_3
+
+After the fight against Jenova·BIRTH in shpin_3 (and its scenes), a scripted event happens in the world map. It is not implemented (not investigated yet). Things to check: the exit of shpin_3 to the world map (the `wm<n>` it uses and the FIELD.TBL record, see `enter_world_map`), the story flag (`progress_game`) and the record that the world scripts read (`ReadSpecial(6)`) to start the event, and the entities, vehicles and scenery that the world script creates for it (see `WorldVM.prepare` and `wm0.lua`). The story flows through the other scripted world events as well (see the one after jundoc1a), so they may share the cause.

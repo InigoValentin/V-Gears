@@ -283,9 +283,18 @@ UiContainer.PhsMenu = UiContainer.Menu.new{
         end
     end,
 
+    --- Is the menu opened by a field script (change party) instead of by the main menu?
+    standalone = false,
+
     --- Opens the PHS menu.
     show = function(self)
         self:activate()
+        if self.standalone then
+            entity_manager:set_paused(true)
+            MenuSettings.pause_available = false
+            self.menu_was_available = MenuSettings.available
+            MenuSettings.available = false
+        end
         -- Empty slots may hold an invalid ID (e.g. -1). Leave them as nil.
         for slot = 1, PARTY_SLOTS do
             if Party[slot] ~= nil and Characters[Party[slot]] == nil then Party[slot] = nil end
@@ -307,7 +316,15 @@ UiContainer.PhsMenu = UiContainer.Menu.new{
     hide = function(self)
         self:compact_party()
         ui_manager:get_widget("PhsMenu"):set_visible(false)
-        self:deactivate()
+        if self.standalone then
+            self.standalone = false
+            self:deactivate("")
+            MenuSettings.available = self.menu_was_available
+            MenuSettings.pause_available = true
+            entity_manager:set_paused(false)
+        else
+            self:deactivate()
+        end
         return 0
     end,
 }

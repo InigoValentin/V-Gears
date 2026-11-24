@@ -298,6 +298,13 @@ WorldVM.prepare = function(map_id)
         end
     end
     System.WorldMap.specials = {}
+    -- Where the player entered the field that the world is entered from (EnterFieldScene).
+    local entry = System.WorldMap.entry_position
+    if entry then
+        System.WorldMap.specials[0] = entry.mesh_x
+        System.WorldMap.specials[1] = entry.mesh_y
+        System.WorldMap.specials[4] = entry.direction
+    end
     -- The arrival of a real field exit has priority over the spawn points of the debug data.
     local real_arrival = System.WorldMap.arrival
     local arrival = real_arrival or (WorldMapDebug and WorldMapDebug.arrival) or 0
@@ -314,6 +321,14 @@ WorldVM.prepare = function(map_id)
             .. (player and (" (the scripts of the record say " .. player.x .. ", " .. player.z .. ")") or ""))
         player = point
     elseif arrival ~= 0 then
+        -- The exits that place the player by the mesh that he entered from (the chocobo ones) put him at the
+        -- corner of that mesh, which can be a mountain: he appears where he entered.
+        if entry and entry.x and player
+            and math.abs(player.x - entry.mesh_x * WorldVM.MESH_SIZE) < 0.01
+            and math.abs(player.z - entry.mesh_y * WorldVM.MESH_SIZE) < 0.01 then
+            player = {x = entry.x, z = entry.z}
+            print("World map arrival: the player appears where he entered, " .. entry.x .. ", " .. entry.z)
+        end
         print("World map arrival: FIELD.TBL record " .. arrival .. (player
             and (", the player appears at " .. player.x .. ", " .. player.z)
             or ", the scripts don't place the player"))

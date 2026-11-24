@@ -211,6 +211,26 @@ void UiTextArea::SetPadding(
     padding_left_ = left;
 }
 
+void UiTextArea::PutNumber(const std::string& number, const int digits){
+    if (digits <= 0) return;
+    int run_end = -1;
+    for (size_t i = 0; i < text_.size();){
+        if (text_[i].char_code == ' '){
+            size_t j = i;
+            while (j < text_.size() && text_[j].char_code == ' ') ++ j;
+            if (static_cast<int>(j - i) >= digits) run_end = static_cast<int>(j);
+            i = j;
+        }
+        else ++ i;
+    }
+    if (run_end < 0) return;
+    std::string padded = number;
+    while (static_cast<int>(padded.size()) < digits) padded = " " + padded;
+    if (static_cast<int>(padded.size()) > digits) padded = padded.substr(padded.size() - digits);
+    for (int k = 0; k < digits; ++ k) text_[run_end - digits + k].char_code = padded[k];
+    update_transformation_ = true;
+}
+
 void UiTextArea::SetText(const char* text){
     // Don't call PrepareTextFromNode from here!
     // Use the non-recursive SetTextFromNode.
@@ -222,6 +242,7 @@ void UiTextArea::SetText(const char* text){
     SetTextFromNode(doc.RootElement(), colour_1_);
     text_state_ = TS_SHOW_TEXT;
     update_transformation_ = true;
+    GrowVertexBuffer(text_.size());
     if (text_.size() > max_letters_){
         text_.clear();
         LOG_ERROR(
@@ -260,6 +281,7 @@ void UiTextArea::SetText(TiXmlNode* text){
     PrepareTextFromNode(text, colour_1_);
     text_state_ = TS_SHOW_TEXT;
     update_transformation_ = true;
+    GrowVertexBuffer(text_.size());
     if (text_.size() > max_letters_){
         text_.clear();
         LOG_ERROR(
@@ -617,7 +639,8 @@ void UiTextArea::PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& c
                           = node->ToElement()->Attribute(Ogre::String("time"));
                         if (string != NULL){
                             TextChar new_char;
-                            new_char.pause_time = Ogre::StringConverter::parseReal(*string);
+                            // The time of the pause is in frames of the game (30 per second), as in the original game.
+                            new_char.pause_time = Ogre::StringConverter::parseReal(*string) / 30.0f;
                             text_.push_back(new_char);
                         }
                     }
@@ -783,7 +806,8 @@ void UiTextArea::SetTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colou
                       = node->ToElement()->Attribute(Ogre::String("time"));
                     if (string != NULL){
                         TextChar new_char;
-                        new_char.pause_time = Ogre::StringConverter::parseReal(*string);
+                        // The time of the pause is in frames of the game (30 per second), as in the original game.
+                        new_char.pause_time = Ogre::StringConverter::parseReal(*string) / 30.0f;
                         text_.push_back(new_char);
                     }
                 }
@@ -931,8 +955,17 @@ void UiTextArea::PrepareTextFromText(
     };
 }
 
-void UiTextArea::CreateVertexBuffer(){
-    max_letters_ = 1024;
+void UiTextArea::GrowVertexBuffer(const unsigned int letters){
+    const unsigned int LIMIT = 8192;
+    if (letters <= max_letters_ || letters > LIMIT || render_operation_.vertexData == nullptr) return;
+    unsigned int size = max_letters_ > 0 ? max_letters_ : 1024;
+    while (size < letters) size *= 2;
+    DestroyVertexBuffer();
+    CreateVertexBuffer(size);
+}
+
+void UiTextArea::CreateVertexBuffer(const unsigned int letters){
+    max_letters_ = letters;
     render_operation_.vertexData = new Ogre::VertexData;
     render_operation_.vertexData->vertexStart = 0;
     Ogre::VertexDeclaration* vertex_declaration = render_operation_.vertexData->vertexDeclaration;

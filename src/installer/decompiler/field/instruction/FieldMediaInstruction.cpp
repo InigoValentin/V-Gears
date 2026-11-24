@@ -35,7 +35,12 @@ void FieldMediaInstruction::ProcessInst(
         case OPCODES::MUSIC: ProcessMUSIC(code_gen); break;
         case OPCODES::SOUND: ProcessSOUND(code_gen); break;
         case OPCODES::AKAO: ProcessAKAO(code_gen); break;
-        case OPCODES::MUSVT: code_gen->WriteTodo(md.GetEntityName(), "MUSVT"); break;
+        case OPCODES::MUSVT:
+            // Music volume transition. Its use (the end of the parades of junin1a and jundoc1a)
+            // is to take the music out: the script waits (CHMST) for it to end. The fade is not
+            // known, so the music stops.
+            code_gen->AddOutputLine("audio_manager:stop_music()");
+            break;
         case OPCODES::MUSVM: code_gen->WriteTodo(md.GetEntityName(), "MUSVM"); break;
         case OPCODES::MULCK: ProcessMULCK(code_gen); break;
         case OPCODES::BMUSC: ProcessBMUSC(code_gen); break;

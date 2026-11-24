@@ -70,9 +70,20 @@ ControlKey = "";
 
 --- Playable characters
 Characters = {}
-for i = 1, 11 do
+for i = 1, 8 do
     Characters[i] = {}
 end
+-- Young Cloud (9) and Sephiroth (10) of the flashbacks share the slots of Cait Sith (6) and Vincent
+-- (7) in the savemap of the game, as in the original game: their data is in those slots.
+Characters[9] = nil
+Characters[10] = nil
+setmetatable(Characters, {
+    __index = function(characters, id)
+        if id == 9 then return rawget(characters, 6) end
+        if id == 10 then return rawget(characters, 7) end
+        return nil
+    end
+})
 
 --- The party inventory.
 --

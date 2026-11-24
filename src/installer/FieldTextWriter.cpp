@@ -272,8 +272,12 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
                 }
                 else if (temp2 == 0xD9){ // White, or back to normal.
                     AddText(dialog);
-                    logger_->Log("</colour>");
-                    colour_opened --;
+                    // Some texts close a colour that they never opened (sinin2_2), which would
+                    // break the XML.
+                    if (colour_opened > 0){
+                        logger_->Log("</colour>");
+                        colour_opened --;
+                    }
                 }
                 else if (temp2 == 0xDA){ // Flash (blink), global for a window.
                     // TODO: Implement
@@ -318,9 +322,15 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
                     dialog.push_back(ENGLISH_CHARS[temp]);
                 }
                 else{
+                    // 0xE3 and 0xE4 end the sentences of many dialogs. Their exact meaning is not
+                    // verified: they are written as a full stop and an exclamation mark.
+                    if (temp == 0xE3 && english == true) dialog.push_back('.');
+                    else if (temp == 0xE4 && english == true) dialog.push_back('!');
+                    else{
                     AddText(dialog);
                     if (temp == 0xa9) logger_->Log("..."); // TODO Verify.
                     else logger_->Log("[MISSING CHAR " + HexToString(temp, 2, '0') + "]");
+                    }
                 }
             }
         }

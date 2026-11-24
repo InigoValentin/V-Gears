@@ -66,7 +66,8 @@ struct QueueScript{
       state(NULL),
       seconds_to_wait(0),
       wait(false),
-      yield(false)
+      yield(false),
+      replaced(false)
     {}
 
     /**
@@ -93,6 +94,12 @@ struct QueueScript{
      * Function priority.
      */
     int priority;
+
+    /**
+     * A request with a higher priority (a smaller number) has replaced the script, which was a
+     * loop that was only polling something. It is removed in the next update.
+     */
+    bool replaced;
 
     /**
      * Current state.

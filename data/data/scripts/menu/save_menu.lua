@@ -34,6 +34,9 @@ UiContainer.SaveMenu = UiContainer.Menu.new{
         },
     },
 
+    --- Is the menu opened by a field script (a save point of a scene) instead of by the main menu?
+    standalone = false,
+
     --- Opens the save menu.
     --
     -- Populates and updates displayed data before opening.
@@ -48,6 +51,12 @@ UiContainer.SaveMenu = UiContainer.Menu.new{
             return 0
         end
         self:activate()
+        if self.standalone then
+            entity_manager:set_paused(true)
+            MenuSettings.pause_available = false
+            self.menu_was_available = MenuSettings.available
+            MenuSettings.available = false
+        end
         local loading = (self.operation == "load")
         local container = "SaveMenu.Container."
         ui_manager:get_widget(container .. "TopBar.DescSave"):set_visible(not loading)
@@ -115,7 +124,15 @@ UiContainer.SaveMenu = UiContainer.Menu.new{
     --- Hides the item menu and goes back to the main menu.
     hide = function(self)
         ui_manager:get_widget("SaveMenu"):set_visible(false)
-        self:deactivate(self.operation == "load" and "begin" or "main")
+        if self.standalone then
+            self.standalone = false
+            self:deactivate("")
+            MenuSettings.available = self.menu_was_available
+            MenuSettings.pause_available = true
+            entity_manager:set_paused(false)
+        else
+            self:deactivate(self.operation == "load" and "begin" or "main")
+        end
         savemap_manager:release()
         return 0;
     end,

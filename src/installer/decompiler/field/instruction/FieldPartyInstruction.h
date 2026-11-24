@@ -164,6 +164,22 @@ class FieldPartyInstruction : public KernelCallInstruction{
         void ProcessPRTYE(CodeGenerator* code_gen);
 
         /**
+         * Gives a materia to the party.
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] entity Name of the entity, for the unimplemented cases.
+         */
+        void ProcessSMTRA(CodeGenerator* code_gen, const std::string& entity);
+
+        /**
+         * Stores the party in variables (GTPYE) or sets it from them (SPTYE).
+         *
+         * @param[in,out] code_gen Code generator to append lines.
+         * @param[in] set True to set the party from the variables, false to store it in them.
+         */
+        void ProcessPartyVariables(CodeGenerator* code_gen, const bool set);
+
+        /**
          * Processes a MMBUD opcode: makes a character available or unavailable in the PHS.
          */
         void ProcessMMBUD(CodeGenerator* code_gen);

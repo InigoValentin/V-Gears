@@ -308,9 +308,13 @@ void EntityModel::PlayAnimation(
         // finishes, so any script waiting for it would wait forever.
         if (animation_current_->getLength() <= 0.0f) animation_current_->setLoop(false);
         animation_current_->setEnabled(true);
-        animation_current_->setTimePosition(
-          (start == -1) ? animation_current_->getLength() : start
-        );
+        // A pose at the very end of the animation (the dead soldiers of shpin_3, that hold the last
+        // frame) is shown as the first frame: past the last key, the interpolation goes on to the
+        // first one, as it does when it loops. The time stays a hair before the end.
+        float time = (start == -1) ? animation_current_->getLength() : start;
+        const float length = animation_current_->getLength();
+        if (length > 0.0f && time >= length) time = std::max(0.0f, length - 0.0005f);
+        animation_current_->setTimePosition(time);
         animation_end_time_ = (end == -1) ? animation_current_->getLength() : end;
         animation_hold_ = (start != -1 && start == end) ? 1.0f / 30.0f : 0.0f;
         animation_state_ = state;

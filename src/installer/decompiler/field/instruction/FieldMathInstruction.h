@@ -113,6 +113,13 @@ class FieldMathInstruction : public StoreInstruction{
          */
         void ProcessBITOFF(CodeGenerator* code_gen);
 
+        /**
+         * Checks if the opcode works on a byte variable, which wraps around at 256.
+         *
+         * @return True for PLUS, MINUS, MUL, INC and DEC (their word versions end in 2).
+         */
+        bool IsByteOperation() const;
+
         void ProcessPLUSx_MINUSx(CodeGenerator* code_gen, const std::string& op);
 
         void ProcessFunctionOfTwo(CodeGenerator* code_gen, const std::string& function);

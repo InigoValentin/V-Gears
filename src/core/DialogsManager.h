@@ -99,7 +99,8 @@ struct MessageData{
       visible(true),
       translucent(false),
       timer(false),
-      numeric(false)
+      numeric(false),
+      number_digits(0)
     {}
 
     /**
@@ -238,6 +239,17 @@ struct MessageData{
      * Indicates if the window background is for a number.
      */
     bool numeric;
+
+    /**
+     * Name of the text that the window shows, to write the number again when it changes.
+     */
+    std::string last_text;
+
+    /**
+     * The number that goes in the text (WNUMB) and the width of it. Zero digits is no number.
+     */
+    std::string number;
+    int number_digits;
 };
 
 /**
@@ -334,6 +346,16 @@ class DialogsManager : public Manager, public Ogre::Singleton<DialogsManager>{
          * for timer, the window will be used when calling {@see UpdateTimer}
          */
         void SetNumeric(const char* d_name, const bool numeric, const bool timer);
+
+        /**
+         * Sets the number of a number window (WNUMB). It is written in the spaces of the text, and
+         * it is updated at once if the window is showing it.
+         *
+         * @param[in] d_name Name of the dialog.
+         * @param[in] value The number.
+         * @param[in] digits Width of the number.
+         */
+        void SetNumber(const char* d_name, const int value, const int digits);
 
         /**
          * Updates the timer.
