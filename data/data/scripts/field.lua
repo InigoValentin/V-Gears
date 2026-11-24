@@ -357,7 +357,13 @@ end
 --
 -- @param id Shop ID.
 open_shop = function(id)
-    -- TODO: Implement
+    -- The button that talked to the shop (a script may read it) is down: wait for it, or it would
+    -- act in the menu.
+    while entity_manager:is_key_on(32 + 64) do script:wait(0) end
+    UiContainer.ShopMenu.shop_id = tonumber(id)
+    script:request_end_sync(Script.UI, "ShopMenu", "show", 0)
+    while UiContainer.current_menu == "shop" do script:wait(0) end
+    while entity_manager:is_key_on(32 + 64) do script:wait(0) end
 end
 
 --- Plays one of the tracks assigned to the field.
