@@ -166,6 +166,10 @@ namespace VGears {
             );
 
             void SetModelOrientation(const char* entity_name, const float x, const float y, const float z);
+            /// Turns a model of the scripts to a direction of the game (a full turn is 256).
+            void SetModelHeading(const char* entity_name, const float direction);
+            /// The direction of the game (0 to 255) that a model faces, 0 if it doesn't exist.
+            int GetModelHeading(const char* entity_name);
 
         private:
 

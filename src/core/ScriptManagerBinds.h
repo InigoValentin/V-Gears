@@ -662,6 +662,8 @@ void ScriptManager::InitBinds(){
       "unboard_vehicle", &VGears::WorldmapModule::UnboardVehicle,
       "set_encounters_locked", &VGears::WorldmapModule::SetEncountersLocked,
       "set_model_orientation", &VGears::WorldmapModule::SetModelOrientation,
+      "set_model_heading", &VGears::WorldmapModule::SetModelHeading,
+      "get_model_heading", &VGears::WorldmapModule::GetModelHeading,
       "set_model_offset", &VGears::WorldmapModule::SetModelOffset,
       "set_entity_altitude", &VGears::WorldmapModule::SetEntityAltitude,
       "enter", &VGears::WorldmapModule::Enter,

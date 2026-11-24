@@ -934,6 +934,9 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * Applies only for manual movement.
          */
         bool player_run_;
+        /// After entering a field from the world map, the walk keys that were held are ignored until
+        /// they are released, so the player starts standing still.
+        bool ignore_held_walk_ = false;
         /// Entities that the player is touching.
         std::set<const Entity*> entities_in_contact_;
         /// Last time that a script asked for the Start button.

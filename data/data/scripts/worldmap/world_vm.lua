@@ -64,6 +64,7 @@ WorldVM.get_situation = function(map_id)
     WorldVM.apply_debug_variables()
     local debug_situation = WorldMapDebug and WorldMapDebug.situation and WorldMapDebug.situation[map_id]
     if debug_situation then return debug_situation end
+    if map_id == 0 and WorldVM.is_scene_record(ReadSpecial(6)) then return 9 end
     if map_id == 0 then return WorldVM.get_story_situation() end
     return WorldVM.default_situation[map_id]
 end
@@ -89,6 +90,11 @@ SetActiveEntityMeshCoordinates = function(mesh_x, mesh_y)
         WorldVM.current.mesh_x = mesh_x
         WorldVM.current.mesh_y = mesh_y
     end
+    local scene = WorldVM.scene
+    if scene then
+        scene.mesh_x = mesh_x
+        scene.mesh_y = mesh_y
+    end
     return 0
 end
 
@@ -96,14 +102,82 @@ SetActiveEntityMeshCoordinatesInMesh = function(x, y)
     if WorldVM.current then
         WorldVM.current.in_x = x
         WorldVM.current.in_y = y
+        -- To get only the first position of a scene.
+        if WorldVM.current.stop_at_position then error(WorldVM.STOP) end
+    end
+    local scene = WorldVM.scene
+    if scene and scene.mesh_x then
+        scene.x = scene.mesh_x * WorldVM.MESH_SIZE + x / 4096
+        scene.z = scene.mesh_y * WorldVM.MESH_SIZE + y / 4096
+        scene.entity:set_position(scene.x, scene.y, scene.z)
     end
     return 0
 end
 
+--- Sets where the active entity moves and faces.
 SetActiveEntityDirectionAndFacing = function(direction)
     if WorldVM.current then WorldVM.current.direction = direction end
+    local scene = WorldVM.scene
+    if scene then
+        scene.direction = direction
+        world_map_module:set_model_heading(scene.entity_name, direction)
+        -- ReadSpecial(4) is the direction of the active entity: the scenes turn the ship with
+        -- SetActiveEntityDirectionAndFacing(ReadSpecial(4) - 3) repeated, a few degrees each time.
+        System.WorldMap.specials[4] = direction % 256
+    end
     return 0
 end
+
+--- Sets where the active entity moves, without turning it.
+SetActiveEntityDirection = function(direction)
+    local scene = WorldVM.scene
+    if scene then scene.direction = direction end
+    return 0
+end
+
+--- Sets the speed of the active entity (see WorldMapSettings.scene_speed_unit).
+SetActiveEntityMovespeed = function(speed)
+    local scene = WorldVM.scene
+    if scene then scene.speed = speed end
+    return 0
+end
+
+--- Sets the frames that the next Wait lasts.
+SetWaitFrames = function(frames)
+    local scene = WorldVM.scene
+    if scene then scene.wait_frames = frames end
+    return 0
+end
+
+--- Waits the frames of SetWaitFrames (30 per second), the entity moving all the time. It only waits in a
+-- scene, which runs as a script of the entity; anywhere else (when the scripts only look) it does nothing.
+Wait = function()
+    local scene = WorldVM.scene
+    if not scene then return 0 end
+    local frames = scene.wait_frames or 0
+    scene.wait_frames = 0
+    -- The speed is a distance for each FRAME of the script (speed / 8192 of a mesh, found in ff7.exe), so the
+    -- frame rate only changes how long the scene lasts, not how far the ship goes.
+    local unit = (WorldMapSettings and WorldMapSettings.scene_speed_unit) or 0.05
+    local frame = 1 / ((WorldMapSettings and WorldMapSettings.scene_fps) or 30)
+    while frames > 0 do
+        script:wait(frame)
+        if scene.speed ~= 0 then
+            local angle = scene.direction * 2 * math.pi / 256
+            local step = scene.speed * unit / 30
+            scene.x = scene.x + math.sin(angle) * step
+            scene.z = scene.z + math.cos(angle) * step
+            scene.entity:set_position(scene.x, scene.y, scene.z)
+        end
+        frames = frames - 1
+    end
+    return 0
+end
+
+--- Duration of a frame of the scripts.
+WorldVM.FRAME = 1 / 30
+--- What the scripts that only look at the first position of a scene raise.
+WorldVM.STOP = "world_vm_stop"
 
 --- Runs something that only looks at what a script does, and undoes what it wrote to the variables
 -- (it marks that it showed a window...).
@@ -191,6 +265,78 @@ WorldVM.can_enter = function(record, vehicle, landing)
     return allowed ~= nil and allowed[record] == true
 end
 
+--- FIELD.TBL records of the exits to the world that start a scene of the Warship (the parade of Junon, the
+-- Jenova·BIRTH of shpin_3...): the function of its type (8) is the whole scene.
+WorldVM.scene_records = {[36] = true, [37] = true, [38] = true, [39] = true}
+
+--- If an arrival record starts a scene.
+WorldVM.is_scene_record = function(record)
+    return record ~= nil and WorldVM.scene_records[record] == true
+end
+
+--- Where the first command of a function puts the active entity.
+-- @return {x, z, direction} or nil.
+WorldVM.first_position = function(script_function)
+    local spawn = WorldVM.run_sandboxed(function()
+        WorldVM.current = {stop_at_position = true}
+        pcall(script_function, System.WorldMap)
+        local result = WorldVM.current
+        WorldVM.current = nil
+        return result
+    end)
+    if not (spawn.mesh_x and spawn.in_x) then return nil end
+    return {
+        x = spawn.mesh_x * WorldVM.MESH_SIZE + spawn.in_x / 4096,
+        z = spawn.mesh_y * WorldVM.MESH_SIZE + spawn.in_y / 4096,
+        direction = spawn.direction or 0,
+    }
+end
+
+--- Starts the scene of the Warship, if the way into the world has one: creates the ship and runs its
+-- function as a script of the entity, so that it can wait. The ship is the active entity (the camera
+-- follows it) and Cloud is hidden. The function ends entering a field.
+-- @param map_id Map of the module (0 WM0, 1 WM2, 2 WM3).
+WorldVM.start_scene = function(map_id)
+    if map_id ~= 0 or not WorldVM.is_scene_record(ReadSpecial(6)) then return end
+    local functions = System.WorldMap.entity_functions
+    local function_id = functions and functions[8] and functions[8][0]
+    local scene_function = function_id and System.WorldMap["world_function_" .. function_id]
+    local model = WorldMapModels.models[WorldMapModels.situations[9][8]]
+    if not (scene_function and model) then
+        print("World map scene: there is no function or model for the Warship")
+        return
+    end
+    local start = WorldVM.first_position(scene_function)
+    if not start then
+        print("World map scene: the function of the Warship doesn't place it")
+        return
+    end
+    local entity_name = "WorldMap" .. model.name .. "_8"
+    EntityContainer[entity_name] = {
+        on_start = function(self)
+            local entity = entity_manager:get_entity(entity_name)
+            if entity == nil then return 0 end
+            local x, y, z = entity:get_position()
+            WorldVM.scene = {
+                entity = entity, entity_name = entity_name, x = x, y = y, z = z,
+                direction = start.direction, speed = 0, wait_frames = 0,
+            }
+            System.WorldMap.specials[4] = start.direction % 256
+            local ok, message = pcall(scene_function, System.WorldMap)
+            WorldVM.scene = nil
+            if not ok then print("World map scene failed: " .. tostring(message)) end
+            return 0
+        end,
+    }
+    world_map_module:add_world_model(
+        model.name .. "_8", WorldMapModels.situations[9][8], start.x, start.z, model.scale, start.direction,
+        0, 0, 0
+    )
+    local cloud = entity_manager:get_entity("WorldMapCloud")
+    if cloud ~= nil then cloud:set_visible(false) end
+    entity_manager:set_player_entity(entity_name)
+end
+
 --- Creates the models that the scripts place in a map.
 -- @param map_id Map of the module (0 WM0, 1 WM2, 2 WM3).
 WorldVM.place_models = function(map_id)
@@ -221,6 +367,7 @@ WorldVM.place_models = function(map_id)
             end
         end
     end
+    WorldVM.start_scene(map_id)
 end
 
 --- The types of entities that the init function of the map (function 1) creates with LoadModel,

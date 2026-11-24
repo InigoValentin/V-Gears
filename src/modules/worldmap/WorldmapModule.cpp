@@ -1762,9 +1762,9 @@ namespace VGears {
             * Ogre::Quaternion(Ogre::Degree(rotation_y), Ogre::Vector3::UNIT_Y)
             * Ogre::Quaternion(Ogre::Degree(rotation_z), Ogre::Vector3::UNIT_Z)
         );
-        // The direction of the script is a full turn in 256. How it relates to the heading of the
-        // module (0 faces +Z) is a guess.
-        const Ogre::Radian heading(Ogre::Degree(-direction * 360.0f / 256.0f));
+        // The direction of the script is a full turn in 256: 0 faces +Z (south), 64 east (+X), 128 north and
+        // 192 west. Checked with the sea around Junon in the scene of the Warship, which sails at 192.
+        const Ogre::Radian heading(Ogre::Degree(direction * 360.0f / 256.0f));
         static_cast<EntityModel*>(entity)->GetModel()->getParentSceneNode()->getParentSceneNode()
           ->setOrientation(Ogre::Quaternion(heading, Ogre::Vector3::UNIT_Y));
     }
@@ -1825,6 +1825,27 @@ namespace VGears {
             * Ogre::Quaternion(Ogre::Degree(y), Ogre::Vector3::UNIT_Y)
             * Ogre::Quaternion(Ogre::Degree(z), Ogre::Vector3::UNIT_Z)
         );
+    }
+
+    void WorldmapModule::SetModelHeading(const char* entity_name, const float direction){
+        if (entity_name == nullptr) return;
+        ::Entity* entity = EntityManager::getSingleton().GetEntity(entity_name);
+        if (entity == nullptr) return;
+        // The same heading as AddWorldModelFromScript.
+        const Ogre::Radian heading(Ogre::Degree(direction * 360.0f / 256.0f));
+        static_cast<EntityModel*>(entity)->GetModel()->getParentSceneNode()->getParentSceneNode()
+          ->setOrientation(Ogre::Quaternion(heading, Ogre::Vector3::UNIT_Y));
+    }
+
+    int WorldmapModule::GetModelHeading(const char* entity_name){
+        if (entity_name == nullptr) return 0;
+        ::Entity* entity = EntityManager::getSingleton().GetEntity(entity_name);
+        if (entity == nullptr) return 0;
+        const Ogre::Quaternion orientation = static_cast<EntityModel*>(entity)->GetModel()
+          ->getParentSceneNode()->getParentSceneNode()->getOrientation();
+        const Ogre::Vector3 forward = orientation * Ogre::Vector3(0.0f, 0.0f, 1.0f);
+        const float turns = std::atan2(forward.x, forward.z) / Ogre::Math::TWO_PI;
+        return static_cast<int>(std::floor(turns * 256.0f + 0.5f)) & 255;
     }
 
     bool WorldmapModule::SurfaceToOverworld(EntityModel* submarine){
@@ -2112,6 +2133,10 @@ namespace VGears {
         current_vehicle_ = VehicleType::TINY_BRONCO;
       }
       else{
+        // An entity of a scripted scene (the Warship): the camera follows it and nothing else happens.
+        if (active_entity != nullptr){
+          UpdateCamera(event.timeSinceLastFrame, false);
+        }
         return true;
       }
 
@@ -2292,6 +2317,7 @@ namespace VGears {
         else if (active_entity == highwind_entity_) camera_name = "highwind";
         else if (active_entity == submarine_entity_) camera_name = "submarine";
         else if (active_entity == tiny_bronco_entity_) camera_name = "tiny_bronco";
+        else if (active_entity != player_entity_) camera_name = "scene";
         float distance = std::sqrt(1.5f * 1.5f + 2.25f * 2.25f);
         float pitch = std::atan2(1.5f, 2.25f);
         const auto camera_settings = camera_settings_.find(camera_name);

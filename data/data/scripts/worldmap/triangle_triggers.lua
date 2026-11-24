@@ -82,7 +82,7 @@ Memory of the world map scripts (Read, ReadWord, ReadBit and their Write functio
 The variables of the game are the savemap from 0xBA4, the same as the memory banks of the field
 scripts: the address (or the bit, for ReadBit) goes through 256 bytes for each pair of banks, 1 and 2,
 3 and 4, 11 and 12, 13 and 14, and 7 and 15. The first one of the pair is the one for bytes and bits
-(Banks[1][127] and the bit 3 of it, BitBanks[1][127][3], are Read(127) and ReadBit(1019)), and the second
+(Banks[1][127] and the bit 3 of it are Read(127) and ReadBit(1019)), and the second
 one the one for words (Banks[2][0], the story counter, is ReadWord(0)). That way what the fields give
 (the vehicles, the progress of the story) is what the world has.
 
@@ -123,7 +123,8 @@ end
 --- Reads a bit of the game variables, as the address in bits.
 ReadBit = function(bit_address)
     local bank, _, offset = locate(math.floor(bit_address / 8))
-    return bank and BitBanks[bank][offset][bit_address % 8] or 0
+    if not bank then return 0 end
+    return get_byte_nth_bit(Banks[bank][offset], bit_address % 8)
 end
 
 --- Writes a byte of the game variables.
@@ -146,8 +147,9 @@ end
 WriteBit = function(bit_address, value)
     local bank, _, offset = locate(math.floor(bit_address / 8))
     if not bank then return end
-    remember(BitBanks[bank][offset], bit_address % 8)
-    BitBanks[bank][offset][bit_address % 8] = value ~= 0 and 1 or 0
+    -- The bits are the ones of the bytes (the fields set them with BITON/set_bank_bit on Banks).
+    remember(Banks[bank], offset)
+    Banks[bank][offset] = set_byte_nth_bit(Banks[bank][offset], bit_address % 8, value ~= 0 and 1 or 0)
 end
 
 System.WorldMap.locals = {}
@@ -222,7 +224,7 @@ EnterFieldScene = function(field_table_id, scenario)
             z = z,
             mesh_x = math.floor(x / WorldVM.MESH_SIZE),
             mesh_y = math.floor(z / WorldVM.MESH_SIZE),
-            direction = math.floor(player:get_rotation() / 360 * 256) % 256,
+            direction = world_map_module:get_model_heading(player:get_name()),
         }
     end
     console("camera_free false")

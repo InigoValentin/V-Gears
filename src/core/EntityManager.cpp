@@ -184,14 +184,28 @@ EntityManager::~EntityManager(){
 void EntityManager::Input(const VGears::Event& event){
     background_2d_.InputDebug(event);
     if (paused_ == true) return;
+    if (ignore_held_walk_){
+        InputManager& input = InputManager::getSingleton();
+        if (
+          !input.IsGameEventPressed("walk_left") && !input.IsGameEventPressed("walk_right")
+          && !input.IsGameEventPressed("walk_up") && !input.IsGameEventPressed("walk_down")
+        ) ignore_held_walk_ = false;
+    }
     if (player_entity_ != NULL && player_lock_ == false){
-        if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_left") player_move_.x = -1;
-        else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_right")
-            player_move_.x = 1;
-        if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_down") player_move_.y = -1;
-        else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_up")
-            player_move_.y = 1;
-        if (event.type == VGears::ET_KEY_REPEAT && event.event == "run") player_run_ = true;
+        // Keys held since the world map are ignored until they are released.
+        const bool key_ignored = ignore_held_walk_ && (
+          event.event == "walk_left" || event.event == "walk_right" || event.event == "walk_up"
+          || event.event == "walk_down" || event.event == "run"
+        );
+        if (!key_ignored){
+            if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_left") player_move_.x = -1;
+            else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_right")
+                player_move_.x = 1;
+            if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_down") player_move_.y = -1;
+            else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_up")
+                player_move_.y = 1;
+            if (event.type == VGears::ET_KEY_REPEAT && event.event == "run") player_run_ = true;
+        }
         if (event.type == VGears::ET_KEY_PRESS && event.event == "CONFIRM"){
             CheckEntityInteract();
             for (unsigned int i = 0; i < entity_triggers_.size(); ++ i){
@@ -868,7 +882,16 @@ void EntityManager::ScriptPlacePlayerAtFieldEntry(
         ));
         player_entity_->SetRotation(Ogre::Degree(direction));
         player_entity_->SetMoveTriangleId(safe_triangle_id);
+        // In the WALKMESH state the entity walks to its move position: without this one it walks to
+        // whatever it had (the origin of the field), and the player enters the town walking.
+        player_entity_->SetMovePosition(player_entity_->GetPosition());
         player_entity_->SetState(Entity::WALKMESH);
+        // The player starts standing still: no move or run from the world map, and the held keys
+        // don't count until they are released.
+        player_move_ = Ogre::Vector3::ZERO;
+        player_run_ = false;
+        ignore_held_walk_ = true;
+        player_entity_->PlayAnimationContinue(player_entity_->GetDefaultAnimationName());
 }
 
 Entity* EntityManager::ScriptGetPlayerEntity() const{
