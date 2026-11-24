@@ -43,6 +43,13 @@ class KernelDataInstaller{
         void ReadPrices();
 
         /**
+         * Writes the inventories of the shops, read from the executable.
+         *
+         * @param file_name Path of the Lua file to write.
+         */
+        void WriteShops(std::string file_name);
+
+        /**
          * Reads the command data from the kernel.
          *
          * @return The number of commands read.
