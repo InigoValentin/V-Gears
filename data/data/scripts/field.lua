@@ -110,17 +110,17 @@ end
 -- @param entity_name The entity name.
 -- @param character_id Id of the character to assign.
 set_entity_to_character = function(entity_name, character_id)
-    if character_id == Party[1] and entity_name ~= "" then
+    if character_id == Party.get_leader() and entity_name ~= "" then
         place_player_at_map_entry(entity_name)
     end
     entity_manager:set_entity_to_character(entity_name, character_id)
-    -- The model of a playable character is shown only if it is the leader of the party. The other
-    -- members are not drawn following the leader (join_party hides them too), and the scenes show
+    -- The model of a playable character is shown only if it is the leader of the party (the one the
+    -- scripts set, see Party.get_leader). The other members are not drawn following the leader (join_party hides them too), and the scenes show
     -- their models when they need them. Models are visible by default, so the ones of the
     -- characters that are not the leader, such as Cid in mds6_1 or Aerith in mrkt2 after the
     -- first scene, have to be hidden here. With no party at all (a new game that has not set it
     -- yet) nothing is hidden.
-    if character_id ~= Party[1] and entity_name ~= "" and Party[1] ~= nil then
+    if character_id ~= Party.get_leader() and entity_name ~= "" and Party.get_leader() ~= nil then
         local entity = entity_manager:get_entity(entity_name)
         if entity ~= nil then
             entity:set_visible(false)

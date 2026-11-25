@@ -55,7 +55,8 @@ local function neighbour(cell, button)
     return nil
 end
 
---- Is a character locked in its place? Locked characters can't be moved or replaced.
+--- Is a character locked in the party? Locked characters can't leave the party or join it, but they
+-- can change slots inside it.
 local function is_locked(char_id)
     return char_id ~= nil and Characters[char_id].locked == true
 end
@@ -93,8 +94,12 @@ end
 --  * party <-> party: changes the order (or moves the character to an empty slot).
 --  * party <-> reserve: the character leaves the party and the other one (if any) takes its place.
 --  * reserve <-> reserve: not allowed.
--- Locked characters can't be moved or replaced. The party can only be left once it has three
--- characters, or all the available ones if there are fewer.
+-- Locked characters can't leave the party or join it, but their slots can be swapped.
+-- The party can only be left once it has three characters, or all the available ones if there are
+-- fewer.
+--
+-- This menu never changes the leader of the field (see Party.get_leader). If the leader leaves the
+-- party, the character of the first slot becomes the leader.
 UiContainer.PhsMenu = UiContainer.Menu.new{
 
     id = "phs",
@@ -205,7 +210,8 @@ UiContainer.PhsMenu = UiContainer.Menu.new{
         local character = self:get_character(cell)
         if self.held == nil then
             -- Pick a character.
-            if character == nil or is_locked(character) then return false end
+            -- A locked character can only be moved inside the party.
+            if character == nil or (is_locked(character) and not is_party_cell(cell)) then return false end
             self:set_held(cell)
             return
         end
@@ -227,13 +233,15 @@ UiContainer.PhsMenu = UiContainer.Menu.new{
         if not is_party_cell(from) and not is_party_cell(to) then return false end
         local a = self:get_character(from)
         local b = self:get_character(to)
-        if is_locked(a) or is_locked(b) then return false end
+        -- Locked characters can swap slots in the party, but can't leave it or join it.
+        if (is_locked(a) or is_locked(b)) and not (is_party_cell(from) and is_party_cell(to)) then
+            return false
+        end
 
         -- Both cells exchange their contents, so nobody in the reserve changes place.
         self:set_character(from, b)
         self:set_character(to, a)
-        set_party(Party[1], Party[2], Party[3])
-        -- TODO: If the leader (first slot) changed, change the player entity of the field too.
+        set_party(Party[1], Party[2], Party[3], true)
         return true
     end,
 
@@ -243,7 +251,7 @@ UiContainer.PhsMenu = UiContainer.Menu.new{
         for slot = 1, PARTY_SLOTS do
             if Party[slot] ~= nil then members[#members + 1] = Party[slot] end
         end
-        set_party(members[1], members[2], members[3])
+        set_party(members[1], members[2], members[3], true)
     end,
 
     --- Shows the characters of the party and of the reserve.
@@ -299,7 +307,7 @@ UiContainer.PhsMenu = UiContainer.Menu.new{
         for slot = 1, PARTY_SLOTS do
             if Party[slot] ~= nil and Characters[Party[slot]] == nil then Party[slot] = nil end
         end
-        set_party(Party[1], Party[2], Party[3])
+        set_party(Party[1], Party[2], Party[3], true)
         -- Whoever is in the party is available, even if no script enabled them.
         for slot = 1, PARTY_SLOTS do
             if Party[slot] ~= nil then Characters[Party[slot]].enabled = true end

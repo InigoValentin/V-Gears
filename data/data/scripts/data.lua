@@ -247,6 +247,8 @@ MenuSettings = {
 --- Current party.
 Party = {
     MAX = 3,
+    --- Leader of the party in the field, the character the player controls. nil: the first member.
+    leader = nil,
     [1] = nil,
     [2] = nil,
     [3] = nil

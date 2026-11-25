@@ -30,6 +30,49 @@ UiContainer.MateriaMenu = {
     --- Max materias in the list
     list_size = 200,
 
+    --- Commands of the character, shown in the Check window.
+    commands = {},
+
+    --- Cursor over the commands of the Check window (columns of four, filled top to bottom).
+    command_cursor = UiContainer.Cursor.new{
+        widget = "MateriaMenu.Container.Details.Commands.Box.Cursor",
+        total = 1,
+        on_move = function() UiContainer.MateriaMenu:populate_command_help() end,
+    },
+
+    --- Cursor over the options of the Order menu.
+    order_cursor = UiContainer.Cursor.new{
+        widget = "MateriaMenu.Container.OrderMenu.Cursor",
+        total = 4,
+        wrap = true,
+        on_move = function() UiContainer.MateriaMenu:populate_order_help() end,
+    },
+
+    --- Descriptions of the options of the Order menu.
+    ORDER_HELP = {
+        "Sort the materia in the inventory",
+        "Exchange materia between the characters and the inventory",
+        "Remove all the materia equipped on the character",
+        "Trash materia",
+    },
+
+    --- Options of the Order menu that are not available yet.
+    ORDER_DISABLED = {},
+
+    --- True while the materia list is used to choose a materia to trash (Order > Trash).
+    trash_mode = false,
+
+    --- Entries of the list of spells, summons or enemy skills of a command.
+    abilities = {},
+
+    --- Cursor over the abilities list.
+    ability_cursor = UiContainer.ListCursor.new{
+        widget = "MateriaMenu.Container.Abilities.Cursor",
+        rows = 10,
+        on_scroll = function() UiContainer.MateriaMenu:populate_abilities() end,
+        on_move = function() UiContainer.MateriaMenu:populate_ability_help() end,
+    },
+
     --- Run when the menu is creaded.
     --
     -- It does nothing.
@@ -85,9 +128,15 @@ UiContainer.MateriaMenu = {
                     self.populate_details(self, false)
                 elseif button == Config.ACTIONS.CONFIRM then
                     if self.header_position_row == 1 and self.header_position == 1 then
-                        -- TODO: Command menu
+                        if #self.commands == 0 then
+                            audio_manager:play_sound("Error")
+                        else
+                            audio_manager:play_sound("Cursor")
+                            self.submenu_commands(self)
+                        end
                     elseif self.header_position_row == 2 and self.header_position == 1 then
-                        -- TODO: Order menu
+                        audio_manager:play_sound("Cursor")
+                        self.submenu_order(self)
                     else
                         -- TODO: Check for  avalid slot before entering list
                         if self.header_position_row == 1 and #(Game.Items[Characters[self.char_id].weapon.id].slots) > self.header_position - 2 then
@@ -103,6 +152,31 @@ UiContainer.MateriaMenu = {
                 -- TODO: Triangle->Remove
                 else
                     return 0
+                end
+            elseif UiContainer.current_submenu == "order" then
+                if button == Config.ACTIONS.CANCEL and event == "Press" then
+                    audio_manager:play_sound("Back")
+                    self.submenu_none(self)
+                elseif button == Config.ACTIONS.CONFIRM and event == "Press" then
+                    self.run_order(self)
+                elseif event == "Press" or event == "Repeat" then
+                    self.order_cursor:handle(button, "vertical")
+                end
+            elseif UiContainer.current_submenu == "commands" then
+                if button == Config.ACTIONS.CANCEL and event == "Press" then
+                    audio_manager:play_sound("Back")
+                    self.submenu_none(self)
+                elseif button == Config.ACTIONS.CONFIRM and event == "Press" then
+                    self.open_command(self)
+                elseif event == "Press" or event == "Repeat" then
+                    self:move_command_cursor(button)
+                end
+            elseif UiContainer.current_submenu == "abilities" then
+                if button == Config.ACTIONS.CANCEL and event == "Press" then
+                    audio_manager:play_sound("Back")
+                    self.submenu_commands(self)
+                elseif event == "Press" or event == "Repeat" then
+                    self.ability_cursor:handle(button, "vertical")
                 end
             elseif UiContainer.current_submenu == "list" then
                 if button == Config.CONTROLS.DOWN then
@@ -161,11 +235,27 @@ UiContainer.MateriaMenu = {
                     end
                 elseif button == Config.ACTIONS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
-                    self.submenu_none(self)
+                    if self.trash_mode then
+                        self.submenu_order(self)
+                        self.order_cursor:set(4)
+                    else
+                        self.submenu_none(self)
+                    end
                 elseif button == Config.ACTIONS.CONFIRM then
-                    -- TODO: Replace for "Equip materia" sound.
-                    audio_manager:play_sound("Cursor")
-                    self.equip_materia(self)
+                    if self.trash_mode then
+                        self.submenu_trash_confirm(self)
+                    else
+                        -- TODO: Replace for "Equip materia" sound.
+                        audio_manager:play_sound("Cursor")
+                        self.equip_materia(self)
+                    end
+                end
+            elseif UiContainer.current_submenu == "trash_confirm" then
+                if button == Config.ACTIONS.CANCEL and event == "Press" then
+                    audio_manager:play_sound("Back")
+                    self.submenu_trash(self)
+                elseif button == Config.ACTIONS.CONFIRM and event == "Press" then
+                    self.trash_materia(self)
                 end
             end
         end
@@ -193,15 +283,307 @@ UiContainer.MateriaMenu = {
     --- Enters or returns to the main equip menu.
     submenu_none = function(self)
         UiContainer.current_submenu = ""
+        self.trash_mode = false
+        ui_manager:get_widget("MateriaMenu.Container.TrashWindow"):set_visible(false)
         UiContainer.populate_character_data("MateriaMenu.Container.Character", Characters[self.char_id])
         ui_manager:get_widget("MateriaMenu.Container.Character.Portrait"):set_image("characters/" .. tostring(self.char_id) .. ".png")
         self.populate_equip(self)
         -- TODO: Do something for chars 9 and 10
         ui_manager:get_widget("MateriaMenu.Container.Character.WpnIcon"):set_image("icons/item_weapon_" .. tostring(self.char_id) .. ".png")
         ui_manager:get_widget("MateriaMenu.Container.List.Cursor"):set_visible(false)
+        ui_manager:get_widget("MateriaMenu.Container.Abilities"):set_visible(false)
+        ui_manager:get_widget("MateriaMenu.Container.OrderMenu"):set_visible(false)
+        ui_manager:get_widget("MateriaMenu.Container.Details.Commands.Box.Cursor"):set_visible(false)
         --TODO: Uncomment when implemented: ui_manager:get_widget("MateriaMenu.Container.Order.Cursor"):set_visible(false)
         ui_manager:get_widget("MateriaMenu.Container.Character.Cursor"):set_visible(true)
         self.populate_details(self, false)
+    end,
+
+    --- Refreshes the menu after the exchange menu closed (the equipment and stats may have changed).
+    on_exchange_closed = function(self)
+        UiContainer.populate_character_data("MateriaMenu.Container.Character", Characters[self.char_id])
+        self.populate_equip(self)
+        self.populate_list(self)
+        self.populate_order_help(self)
+    end,
+
+    --- Opens the Order menu (Arrange, Exchange, Remove all, Trash).
+    submenu_order = function(self)
+        UiContainer.current_submenu = "order"
+        self.trash_mode = false
+        ui_manager:get_widget("MateriaMenu.Container.TrashWindow"):set_visible(false)
+        ui_manager:get_widget("MateriaMenu.Container.List.Cursor"):set_visible(false)
+        ui_manager:get_widget("MateriaMenu.Container.OrderMenu"):set_visible(true)
+        for option = 1, 4 do
+            local item = ui_manager:get_widget("MateriaMenu.Container.OrderMenu.Item" .. option)
+            if self.ORDER_DISABLED[option] then item:set_colour(0.6, 0.6, 0.6) else item:set_colour(1, 1, 1) end
+        end
+        self.order_cursor:set(1)
+    end,
+
+    --- Enters (or returns to) the materia list to choose the materia to trash.
+    submenu_trash = function(self)
+        self.trash_mode = true
+        -- The Order popup stays open (with Trash highlighted) while choosing.
+        ui_manager:get_widget("MateriaMenu.Container.TrashWindow"):set_visible(false)
+        self.submenu_list(self)
+    end,
+
+    --- Opens the window that shows the highlighted materia before it is trashed.
+    submenu_trash_confirm = function(self)
+        local materia = Materia[self.list_first_visible + self.list_position - 1]
+        if materia == nil then
+            audio_manager:play_sound("Error")
+            return
+        end
+        audio_manager:play_sound("Cursor")
+        UiContainer.current_submenu = "trash_confirm"
+        local data = Game.Materia[materia.id]
+        local window = "MateriaMenu.Container.TrashWindow."
+        local levels = data.levels_ap or {}
+        local level = 0
+        for _, level_ap in ipairs(levels) do
+            if level_ap > (materia.ap or 0) then break end
+            level = level + 1
+        end
+        ui_manager:get_widget(window .. "Icon"):set_image("icons/materia_" .. tostring(data.type) .. ".png")
+        ui_manager:get_widget(window .. "Name"):set_text(data.name)
+        for star = 1, 5 do
+            local widget = ui_manager:get_widget(window .. "Star" .. star)
+            if star > #levels then
+                widget:set_visible(false)
+            else
+                widget:set_image((star <= level and "icons/materia_star_" or "icons/materia_star_empty_")
+                    .. tostring(data.type) .. ".png")
+                widget:set_visible(true)
+            end
+        end
+        ui_manager:get_widget(window .. "AP"):set_text(UiContainer.pad_value(materia.ap or 0, 8))
+        ui_manager:get_widget("MateriaMenu.Container.TrashWindow"):set_visible(true)
+    end,
+
+    --- Discards the materia shown in the trash window and goes back to the list.
+    trash_materia = function(self)
+        Materia[self.list_first_visible + self.list_position - 1] = nil
+        audio_manager:play_sound("Cursor")
+        self.populate_list(self)
+        self.submenu_trash(self)
+    end,
+
+    --- Shows the description of the highlighted option of the Order menu.
+    populate_order_help = function(self)
+        ui_manager:get_widget("MateriaMenu.Container.Help.Help"):set_text(self.ORDER_HELP[self.order_cursor:index()] or "")
+    end,
+
+    --- Runs the highlighted option of the Order menu.
+    run_order = function(self)
+        local option = self.order_cursor:index()
+        if self.ORDER_DISABLED[option] then
+            audio_manager:play_sound("Error")
+        elseif option == 1 then
+            audio_manager:play_sound("Cursor")
+            self.arrange_materia(self)
+        elseif option == 2 then
+            audio_manager:play_sound("Cursor")
+            script:request_end_sync(Script.UI, "ExchangeMenu", "show", 0)
+        elseif option == 4 then
+            audio_manager:play_sound("Cursor")
+            self.submenu_trash(self)
+        elseif option == 3 then
+            if self.remove_all_materia(self) then
+                audio_manager:play_sound("Cursor")
+            else
+                audio_manager:play_sound("Error")
+            end
+        end
+    end,
+
+    --- IDs of the master materia (Master Command, Master Magic and Master Summon).
+    MASTER_MATERIA = {[48] = true, [73] = true, [90] = true},
+
+    --- Sorts the materia of the inventory, as the original game does.
+    --
+    -- By type (the order of Materia.TYPE: magic, support, command, independent, summon); in each
+    -- type the master materia go first, then by ID ascending and by AP descending. The empty slots
+    -- go at the end.
+    arrange_materia = function(self)
+        local sorted = {}
+        for slot = 1, MAX_MATERIA_SLOTS do
+            if Materia[slot] ~= nil then sorted[#sorted + 1] = {materia = Materia[slot], order = #sorted} end
+        end
+        local master = self.MASTER_MATERIA
+        table.sort(sorted, function(l, r)
+            local l_id, r_id = l.materia.id, r.materia.id
+            local l_type, r_type = Game.Materia[l_id].type, Game.Materia[r_id].type
+            if l_type ~= r_type then return l_type < r_type end
+            if (master[l_id] == true) ~= (master[r_id] == true) then return master[l_id] == true end
+            if l_id ~= r_id then return l_id < r_id end
+            if (l.materia.ap or 0) ~= (r.materia.ap or 0) then return (l.materia.ap or 0) > (r.materia.ap or 0) end
+            return l.order < r.order
+        end)
+        for slot = 1, MAX_MATERIA_SLOTS do
+            Materia[slot] = sorted[slot] ~= nil and sorted[slot].materia or nil
+        end
+        self.list_first_visible = 1
+        self.list_position = 1
+        ui_manager:get_widget("MateriaMenu.Container.List.Cursor"):set_default_animation("Position1")
+        self.populate_list(self)
+    end,
+
+    --- Moves all the materia equipped on the character to the inventory.
+    --
+    -- If the inventory has not room for all of it, as many as fit are removed (the ones of the weapon
+    -- first, in slot order).
+    -- @return False if nothing was removed.
+    remove_all_materia = function(self)
+        local equipped = {}
+        local character = Characters[self.char_id]
+        for _, equipment in ipairs({character.weapon, character.armor}) do
+            for slot = 0, 7 do
+                if equipment.materia[slot] ~= nil then equipped[#equipped + 1] = {equipment, slot} end
+            end
+        end
+        local free = {}
+        for slot = 1, MAX_MATERIA_SLOTS do
+            if Materia[slot] == nil then free[#free + 1] = slot end
+        end
+        local count = math.min(#equipped, #free)
+        if count == 0 then return false end
+        for i = 1, count do
+            local place = equipped[i]
+            Materia[free[i]] = place[1].materia[place[2]]
+            place[1].materia[place[2]] = nil
+        end
+        -- The materia change the stats, and the current HP and MP can't be over the new maximums.
+        Characters.recalculate_stats(self.char_id)
+        self.submenu_none(self)
+        self.populate_list(self)
+        return true
+    end,
+
+    --- Enters (or returns to) the navigable list of commands of the Check window.
+    submenu_commands = function(self)
+        UiContainer.current_submenu = "commands"
+        ui_manager:get_widget("MateriaMenu.Container.Abilities"):set_visible(false)
+        ui_manager:get_widget("MateriaMenu.Container.Details.Commands.Box.Cursor"):set_visible(true)
+        self.command_cursor.total = #self.commands
+        if self.command_cursor.position > #self.commands then self.command_cursor.position = 1 end
+        self.command_cursor:refresh()
+    end,
+
+    --- Number of commands in each column of the Check window.
+    COMMAND_ROWS = 4,
+
+    --- Moves the command cursor. The commands fill the columns from top to bottom.
+    --
+    -- Up and down wrap inside the column, left and right wrap around the columns keeping the row
+    -- (or going to the last command of a shorter column).
+    move_command_cursor = function(self, button)
+        local rows = self.COMMAND_ROWS
+        local index = self.command_cursor:index() - 1
+        local column, row = math.floor(index / rows), index % rows
+        local columns = math.ceil(#self.commands / rows)
+        local function length(c) return math.min(rows, #self.commands - c * rows) end
+        if button == Config.CONTROLS.UP then
+            row = (row - 1) % length(column)
+        elseif button == Config.CONTROLS.DOWN then
+            row = (row + 1) % length(column)
+        elseif button == Config.CONTROLS.LEFT then
+            column = (column - 1) % columns
+            row = math.min(row, length(column) - 1)
+        elseif button == Config.CONTROLS.RIGHT then
+            column = (column + 1) % columns
+            row = math.min(row, length(column) - 1)
+        else
+            return
+        end
+        audio_manager:play_sound("Cursor")
+        self.command_cursor:set(column * rows + row + 1)
+    end,
+
+    --- Shows the description of the highlighted command.
+    populate_command_help = function(self)
+        local command = Game.Commands[self.commands[self.command_cursor:index()]]
+        ui_manager:get_widget("MateriaMenu.Container.Help.Help"):set_text(command ~= nil and command.description or "")
+    end,
+
+    --- Gets the kind of list a command opens.
+    --
+    -- @param command Definition of the command (an entry of Game.Commands).
+    -- @return "magic", "summon" or "eskill", or nil if the command has no list.
+    command_list_kind = function(self, command)
+        local menu = command ~= nil and command.menu or nil
+        if menu == Battle.Menu.MAGIC or menu == Battle.Menu.W_MAGIC then return "magic"
+        elseif menu == Battle.Menu.SUMMON or menu == Battle.Menu.W_SUMMON then return "summon"
+        elseif menu == Battle.Menu.E_SKILL then return "eskill"
+        end
+        return nil
+    end,
+
+    --- Opens the list of a command (spells, summons or enemy skills), if it has one.
+    open_command = function(self)
+        local command = Game.Commands[self.commands[self.command_cursor:index()]]
+        local kind = self:command_list_kind(command)
+        local entries = kind ~= nil and self:build_abilities(kind) or {}
+        if #entries == 0 then
+            audio_manager:play_sound("Error")
+            return
+        end
+        audio_manager:play_sound("Cursor")
+        self.abilities = entries
+        UiContainer.current_submenu = "abilities"
+        ui_manager:get_widget("MateriaMenu.Container.Abilities"):set_visible(true)
+        self.ability_cursor.count = #entries
+        self.ability_cursor:reset()
+        self:populate_abilities()
+    end,
+
+    --- Gets the spells, summons or enemy skills the character can use in battle.
+    --
+    -- @param kind "magic", "summon" or "eskill".
+    -- @return List of {attack = ID of the attack, times = uses per battle of a summon}.
+    build_abilities = function(self, kind)
+        local abilities = Characters.get_abilities(self.char_id)
+        local entries = {}
+        if kind == "magic" then
+            -- The spells of a materia go together.
+            for _, group in ipairs(abilities.magic_groups) do
+                for _, spell in ipairs(group) do entries[#entries + 1] = {attack = spell} end
+            end
+        elseif kind == "summon" then
+            for _, summon in ipairs(abilities.summon) do
+                entries[#entries + 1] = {attack = summon.id, times = summon.times}
+            end
+        else
+            for _, skill in ipairs(abilities.e_skill) do entries[#entries + 1] = {attack = skill} end
+        end
+        return entries
+    end,
+
+    --- Fills the rows of the abilities list.
+    populate_abilities = function(self)
+        local window = "MateriaMenu.Container.Abilities."
+        for row = 1, 10 do
+            local entry = self.abilities[self.ability_cursor.first + row - 1]
+            local data = entry ~= nil and Game.Attacks[entry.attack] or nil
+            if data == nil then
+                ui_manager:get_widget(window .. "Name" .. row):set_text("")
+                ui_manager:get_widget(window .. "Mp" .. row):set_text("")
+            else
+                local name = data.name
+                if entry.times ~= nil and entry.times < 255 then name = name .. " x" .. tostring(entry.times) end
+                ui_manager:get_widget(window .. "Name" .. row):set_text(name)
+                ui_manager:get_widget(window .. "Mp" .. row):set_text(UiContainer.pad_value(data.mp or 0, 3))
+            end
+        end
+        self:populate_ability_help()
+    end,
+
+    --- Shows the description of the highlighted ability.
+    populate_ability_help = function(self)
+        local entry = self.abilities[self.ability_cursor:index()]
+        local data = entry ~= nil and Game.Attacks[entry.attack] or nil
+        ui_manager:get_widget("MateriaMenu.Container.Help.Help"):set_text(data ~= nil and data.description or "")
     end,
 
     submenu_list = function(self)
@@ -314,7 +696,26 @@ UiContainer.MateriaMenu = {
         ui_manager:get_widget("MateriaMenu.Container.Details.EnemySkill"):set_visible(false)
         ui_manager:get_widget("MateriaMenu.Container.Details.Materia"):set_visible(false)
         ui_manager:get_widget("MateriaMenu.Container.Help.Help"):set_text("")
-        -- TODO
+        -- The commands the character has in battle.
+        local commands = Characters.get_commands(self.char_id)
+        self.commands = commands
+        for i = 1, 12 do
+            local widget = ui_manager:get_widget("MateriaMenu.Container.Details.Commands.Box.Command" .. i)
+            local command = Game.Commands[commands[i]]
+            if command ~= nil then
+                widget:set_text(command.name)
+                widget:set_visible(true)
+                -- Commands with a list but nothing in it (no enemy skill learned...) are dimmed.
+                local kind = self:command_list_kind(command)
+                if kind ~= nil and #self:build_abilities(kind) == 0 then
+                    widget:set_colour(0.6, 0.6, 0.6)
+                else
+                    widget:set_colour(1, 1, 1)
+                end
+            else
+                widget:set_visible(false)
+            end
+        end
     end,
 
     --- Populated the details of the selected header item (check, materia, or none).

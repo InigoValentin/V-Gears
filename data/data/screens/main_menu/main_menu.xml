@@ -63,6 +63,11 @@
                 <animation name="Position2" length="0" y="0:32%+40" />
                 <animation name="Position3" length="0" y="0:62%+40" />
             </sprite>
+            <sprite name="Held" image="icons/cursor.png" x="0" y="2%+40" width="24" height="16" visible="false">
+                <animation name="Blink1" length="0.4" y="0:2%+40" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink2" length="0.4" y="0:32%+40" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink3" length="0.4" y="0:62%+40" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+            </sprite>
         </widget>
         <widget name="Menu" x="100%-105" y="2%" width="90" height="144" visible="true">
             <prototype name="Window" />

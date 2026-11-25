@@ -23,6 +23,7 @@
     <screen file_name="screens/name_menu/name_menu.xml" />
     <screen file_name="screens/save_menu/save_menu.xml" />
     <screen file_name="screens/shop_menu/shop_menu.xml" />
+    <screen file_name="screens/exchange_menu/exchange_menu.xml" />
     <prototype file_name="screens/save_menu/prototypes.xml" />
     <!-- Battle UI -->
     <prototype file_name="screens/battle/prototypes.xml" />

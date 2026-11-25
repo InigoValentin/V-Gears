@@ -13,6 +13,7 @@ local BAR_WIDTH = 62
 local STAY = "stay"
 
 local CHARACTERS_CURSOR = "MainMenu.Container.Characters.Cursor"
+local CHARACTERS_HELD = "MainMenu.Container.Characters.Held"
 
 --- The main menu.
 UiContainer.MainMenu = UiContainer.Menu.new{
@@ -78,11 +79,12 @@ UiContainer.MainMenu = UiContainer.Menu.new{
             UiContainer.current_character_id = Party[slot]
             script:request_end_sync(Script.UI, "StatusMenu", "show", 0)
         end,
-        --- Toggles the row (front/back) of the character. Stays in the character selection.
+        --- Picks the character to change its row or swap it with another party slot.
+        -- A blinking cursor stays on it while the cursor moves (see the order_swap state).
         [ENTRY.ORDER] = function(self, slot)
-            local character = Characters[Party[slot]]
-            character.back_row = not character.back_row
-            self:update_portrait(slot)
+            self.order_held = slot
+            self:set_order_held(slot)
+            self:set_state("order_swap")
             return STAY
         end,
         [ENTRY.LIMIT] = function(self, slot)
@@ -90,6 +92,9 @@ UiContainer.MainMenu = UiContainer.Menu.new{
             script:request_end_sync(Script.UI, "LimitMenu", "show", 0)
         end,
     },
+
+    --- Party slot of the character picked with Order.
+    order_held = 0,
 
     states = {
         --- Choosing an entry of the menu.
@@ -137,7 +142,51 @@ UiContainer.MainMenu = UiContainer.Menu.new{
                 ui_manager:get_widget(CHARACTERS_CURSOR):set_visible(false)
             end,
         },
+
+        --- Order: a character is picked (blinking cursor) and the cursor moves over the three
+        -- party slots, empty ones included. Confirm on the picked character toggles its row;
+        -- confirm on another slot swaps the two.
+        order_swap = {
+            cursor = function(self) return self.character_cursor end,
+            axis = "vertical",
+            confirm_sound = false,
+            cancel = function(self)
+                self:set_order_held(nil)
+                self:set_state("main_character")
+            end,
+            confirm = function(self, cursor)
+                local held, slot = self.order_held, cursor:index()
+                if slot == held then
+                    local character = Characters[Party[held]]
+                    character.back_row = not character.back_row
+                    self:update_portrait(held)
+                    UiContainer.play_sound("Cursor")
+                else
+                    -- The first slot can't be left empty.
+                    if Party[slot] == nil and held == 1 then return false end
+                    Party[held], Party[slot] = Party[slot], Party[held]
+                    self:populate_character(held)
+                    self:populate_character(slot)
+                    UiContainer.play_sound("Cursor")
+                end
+                self:set_order_held(nil)
+                self:set_state("main_character")
+            end,
+        },
     },
+
+    --- Shows (or hides, with nil) the blinking cursor that marks the character picked with Order.
+    set_order_held = function(self, slot)
+        local held = ui_manager:get_widget(CHARACTERS_HELD)
+        held:set_visible(slot ~= nil)
+        if slot ~= nil then
+            local animation = "Blink" .. tostring(slot)
+            held:set_default_animation(animation)
+            held:play_animation(animation)
+        else
+            held:set_alpha(1.0)
+        end
+    end,
 
     --- Handles the menu button while the main menu is closed.
     on_inactive_button = function(self, button, event)

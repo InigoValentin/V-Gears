@@ -132,14 +132,38 @@ end
 
 --- Sets the current party.
 --
+-- This is what the scripts do (PRTYE and the party selection), so the first character also becomes
+-- the leader of the field: the character the player controls (see Party.get_leader). Changing the
+-- order of the party in the menus does not change the leader, so they pass `keep_leader`.
+--
 -- @param character1 The first member character ID, the party leader.
 -- @param character2 The second member character ID, can be nil.
 -- @param character3 The third member character ID, can be nil.
-set_party = function(character1, character2, character3)
+-- @param keep_leader If true, the leader of the field is not changed.
+set_party = function(character1, character2, character3, keep_leader)
     Party[1] = character1
     Party[2] = character2
     Party[3] = character3
+    if not keep_leader then Party.leader = character1 end
     export_party_members()
+end
+
+--- Gets the leader of the party in the field: the character whose entity the player controls.
+--
+-- It is set by the scripts when they set the party, and it isn't changed by moving characters
+-- around in the Order menu. If there is no leader, or the leader isn't in the party (a party made
+-- by adding characters, or a game saved before the leader was saved), the first member of the party
+-- becomes the leader, and stays so until a script changes it.
+--
+-- @return ID of the character, or nil if there is no party.
+Party.get_leader = function()
+    if Party.leader ~= nil then
+        for slot = 1, 3 do
+            if Party[slot] == Party.leader then return Party.leader end
+        end
+    end
+    Party.leader = Party[1]
+    return Party.leader
 end
 
 --- Sets the party from three values (SPTYE), the ones that GTPYE stored: 254 and 255 are an empty
@@ -211,6 +235,7 @@ remove_party_character = function(character)
     for i = 1, 3 do
         if Party[i] == character then
             Party[i] = nil
+            if Party.leader == character then Party.leader = nil end
             export_party_members()
             return
         end

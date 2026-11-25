@@ -12,6 +12,7 @@ if UiContainer == nil then UiContainer = {} end
 --  * "buy_quantity": how many of the highlighted item to buy.
 --  * "sell": list of the things of the party that can be sold.
 --  * "sell_quantity": how many of the highlighted item to sell.
+--  * "sell_materia": stars, AP and price of the highlighted materia, to confirm the sale.
 UiContainer.ShopMenu = UiContainer.Menu.new{
 
     id = "shop",
@@ -113,6 +114,13 @@ UiContainer.ShopMenu = UiContainer.Menu.new{
             cancel = function(self) self:enter_command() end,
         },
 
+        -- Details of a materia before selling it: confirm sells it, cancel goes back to the list.
+        sell_materia = {
+            confirm_sound = false,
+            confirm = function(self) return self:sell(self.entries[self.list_cursor:index()]) end,
+            cancel = function(self) self:set_state("sell") self:update_prompt() end,
+        },
+
         sell_quantity = {
             confirm_sound = false,
             confirm = function(self) return self:sell(self.entries[self.list_cursor:index()]) end,
@@ -206,6 +214,7 @@ UiContainer.ShopMenu = UiContainer.Menu.new{
         ui_manager:get_widget(bar .. "PromptSell"):set_visible(state == "sell")
         ui_manager:get_widget(bar .. "PromptQuantity"):set_visible(
             state == "buy_quantity" or state == "sell_quantity")
+        ui_manager:get_widget("ShopMenu.Container.MateriaSale"):set_visible(state == "sell_materia")
         ui_manager:get_widget("ShopMenu.Container.Quantity"):set_visible(
             state == "buy_quantity" or state == "sell_quantity")
         ui_manager:get_widget("ShopMenu.Container.List.Cursor"):set_visible(state ~= "")
@@ -245,7 +254,7 @@ UiContainer.ShopMenu = UiContainer.Menu.new{
                 local owned = Materia[slot]
                 if owned ~= nil and Game.Materia[owned.id] ~= nil then
                     table.insert(entries, {
-                        materia = true, id = owned.id, slot = slot,
+                        materia = true, id = owned.id, slot = slot, ap = owned.ap or 0,
                         price = self:materia_sell_price(owned.id, owned.ap or 0),
                         sellable = true,
                     })
@@ -411,7 +420,11 @@ UiContainer.ShopMenu = UiContainer.Menu.new{
         if entry == nil or not entry.sellable then return false end
         if not entry.materia and entry.price <= 0 then return false end
         if entry.materia then
-            return self:sell(entry)
+            self:set_state("sell_materia")
+            self:update_prompt()
+            self:populate_materia_sale(entry)
+            UiContainer.play_sound("Cursor")
+            return
         end
         self.max_quantity = entry.quantity
         self:enter_quantity("sell_quantity")
@@ -420,7 +433,7 @@ UiContainer.ShopMenu = UiContainer.Menu.new{
 
     --- Sells the chosen quantity of an entry.
     sell = function(self, entry)
-        if entry == nil then return false end
+        if entry == nil or not entry.sellable then return false end
         if entry.materia then
             Materia[entry.slot] = nil
             Inventory.add_money(entry.price)
@@ -486,6 +499,60 @@ UiContainer.ShopMenu = UiContainer.Menu.new{
         ui_manager:get_widget(window .. "Count"):set_text(UiContainer.pad_value(self.quantity, 2))
         ui_manager:get_widget(window .. "Total"):set_text(
             UiContainer.pad_value(entry.price * self.quantity, 8))
+        self:populate_slots(entry)
+    end,
+
+    --- Shows the materia slots and links of a weapon or armor in the quantity window, as the
+    -- equipment menu does. Other things have no slots.
+    populate_slots = function(self, entry)
+        local data = (not entry.materia) and Game.Items[entry.id] or nil
+        local slots = {}
+        local growth = 1
+        if data ~= nil and (data.type == Inventory.ITEM_TYPE.WEAPON or data.type == Inventory.ITEM_TYPE.ARMOR) then
+            slots = data.slots or {}
+            growth = data.growth
+        end
+        local window = "ShopMenu.Container.Quantity."
+        for s = 1, 8 do
+            local slot = ui_manager:get_widget(window .. "Slot" .. s)
+            slot:set_visible(#slots >= s)
+            if growth == 0 then
+                slot:set_image("icons/materia_slot_no_growth.png")
+            else
+                slot:set_image("icons/materia_slot.png")
+            end
+            if s % 2 ~= 0 then
+                -- A link joins an odd slot with the next one.
+                ui_manager:get_widget(window .. "Link" .. (math.floor(s / 2) + 1)):set_visible(
+                    #slots > s and slots[s] == 1)
+            end
+        end
+    end,
+
+    --- Fills the window that shows a materia before it is sold.
+    populate_materia_sale = function(self, entry)
+        local data = Game.Materia[entry.id]
+        local window = "ShopMenu.Container.MateriaSale."
+        local levels = data.levels_ap or {}
+        local level = 0
+        for _, level_ap in ipairs(levels) do
+            if level_ap > entry.ap then break end
+            level = level + 1
+        end
+        ui_manager:get_widget(window .. "Icon"):set_image("icons/materia_" .. tostring(data.type) .. ".png")
+        ui_manager:get_widget(window .. "Name"):set_text(data.name)
+        for star = 1, 5 do
+            local widget = ui_manager:get_widget(window .. "Star" .. star)
+            if star > #levels then
+                widget:set_visible(false)
+            else
+                widget:set_image((star <= level and "icons/materia_star_" or "icons/materia_star_empty_")
+                    .. tostring(data.type) .. ".png")
+                widget:set_visible(true)
+            end
+        end
+        ui_manager:get_widget(window .. "Ap"):set_text(UiContainer.pad_value(entry.ap, 8))
+        ui_manager:get_widget(window .. "Price"):set_text(UiContainer.pad_value(entry.price, 8))
     end,
 
     --- Fills the rows of the list.
@@ -542,11 +609,13 @@ UiContainer.ShopMenu = UiContainer.Menu.new{
         local data = (entry ~= nil and not entry.materia) and Game.Items[entry.id] or nil
         local is_weapon = data ~= nil and data.type == Inventory.ITEM_TYPE.WEAPON
         local is_armor = data ~= nil and data.type == Inventory.ITEM_TYPE.ARMOR
-        local slot = 0
-        for char_id = 0, 8 do
+        -- Each character has the spot of its ID, even if that leaves empty spots between them.
+        for char_id = 0, self.MAX_CHARACTERS - 1 do
+            local slot = char_id + 1
             local character = Characters[char_id]
-            if type(character) == "table" and character.enabled == true and slot < self.MAX_CHARACTERS then
-                slot = slot + 1
+            if not (type(character) == "table" and character.enabled == true) then
+                ui_manager:get_widget("ShopMenu.Container.Party.Slot" .. slot):set_visible(false)
+            else
                 local widget = "ShopMenu.Container.Party.Slot" .. slot
                 ui_manager:get_widget(widget):set_visible(true)
                 ui_manager:get_widget(widget .. ".Portrait"):set_image("characters/" .. tostring(char_id) .. ".png")
@@ -568,9 +637,6 @@ UiContainer.ShopMenu = UiContainer.Menu.new{
                 self:populate_stat(widget .. ".Atk", can_use, attack, new_attack)
                 self:populate_stat(widget .. ".Def", can_use, defense, new_defense)
             end
-        end
-        for hidden = slot + 1, self.MAX_CHARACTERS do
-            ui_manager:get_widget("ShopMenu.Container.Party.Slot" .. hidden):set_visible(false)
         end
     end,
 

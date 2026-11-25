@@ -136,6 +136,21 @@
                 <animation name="Position12" length="0" y="0:82%+2" />
                 <animation name="Position13" length="0" y="0:89%+2" />
             </sprite>
+            <sprite name="Held" image="icons/cursor.png" x="-11" y="5%+2" width="24" height="17" visible="false">
+                <animation name="Blink1" length="0.4" y="0:5%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink2" length="0.4" y="0:12%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink3" length="0.4" y="0:19%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink4" length="0.4" y="0:26%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink5" length="0.4" y="0:33%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink6" length="0.4" y="0:40%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink7" length="0.4" y="0:47%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink8" length="0.4" y="0:54%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink9" length="0.4" y="0:61%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink10" length="0.4" y="0:68%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink11" length="0.4" y="0:75%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink12" length="0.4" y="0:82%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+                <animation name="Blink13" length="0.4" y="0:89%+2" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+            </sprite>
 
 
         </widget>
