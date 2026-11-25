@@ -183,5 +183,10 @@ VerifyResult VerifyInstallation(const std::string& root, const std::string& refe
     check.Files(music, "data/audio/musics", ".ogg", 50);
     const std::string images = "Images";
     check.Files(images, "data/images/icons", "", 1);
+    // Fonts, built from WINDOW.BIN. They are installed even when images are not.
+    const std::string fonts = "Fonts";
+    for (const char* file : {
+      "data/fonts/ffvii_en.png", "data/fonts/ffvii_menu.png", "data/fonts/ffvii_digits.png", "data/fonts/ffvii_timer.png"
+    }) check.File(fonts, file);
     return result;
 }

@@ -33,6 +33,7 @@
 #include "data/VGearsLGPArchive.h"
 #include "data/VGearsTexFile.h"
 #include "TexFile.h"
+#include "WindowFonts.h"
 
 int MediaDataInstaller::TOTAL_SOUNDS = 750;
 
@@ -1313,6 +1314,25 @@ void MediaDataInstaller::InstallSprites(){
         // Delete Tex file.
         if (!keep_originals_) std::remove((data_dir_ + "images/" + f.file_name).c_str());
     }
+}
+
+bool MediaDataInstaller::InstallFonts(){
+    // WINDOW.BIN: the first file is the window graphics TIM, the second one the dialog font TIM.
+    WindowFonts::IndexImage window;
+    WindowFonts::IndexImage text;
+    for (u32 i = 0; i < 2; i ++){
+        std::unique_ptr<File> tim(window_.ExtractGZip(i));
+        if (tim == nullptr) return false;
+        std::vector<u8> buffer(tim->GetFileSize());
+        tim->GetFileBuffer(buffer.data(), 0, buffer.size());
+        if (!WindowFonts::ReadTim4(buffer.data(), buffer.size(), i == 0 ? window : text)) return false;
+    }
+    const std::string font_dir = data_dir_ + "fonts/";
+    WindowFonts::SavePng(WindowFonts::BuildTextFont(text), font_dir + "ffvii_en.png");
+    WindowFonts::SavePng(WindowFonts::BuildMenuFont(window), font_dir + "ffvii_menu.png");
+    WindowFonts::SavePng(WindowFonts::BuildDigitsFont(window), font_dir + "ffvii_digits.png");
+    WindowFonts::SavePng(WindowFonts::BuildTimerFont(window), font_dir + "ffvii_timer.png");
+    return true;
 }
 
 int MediaDataInstaller::InstallSoundsInit(){

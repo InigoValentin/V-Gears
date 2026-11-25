@@ -1,5 +1,0 @@
-pushWord 0
-jumpFalse postBranch
-stopObjectCodeA
-postBranch:
-stopObjectCodeA

@@ -310,6 +310,10 @@ float DataInstaller::Progress(){
             installation_state_ = MEDIA_IMAGES;
             return CalcProgress();
         case MEDIA_IMAGES:
+            // The fonts are always needed, even if the rest of the images are skipped.
+            write_output_line_("Extracting fonts...", 2, true);
+            if (!media_installer_->InstallFonts())
+                write_output_line_("WARNING: Couldn't read WINDOW.BIN, the game won't be able to show text.", 2, true);
             // Skip images if option is set.
             if (!options_.images){
                 write_output_line_("Skipping images installation...", 2, true);

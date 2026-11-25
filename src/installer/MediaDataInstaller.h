@@ -60,6 +60,16 @@ class MediaDataInstaller{
         void InstallSprites();
 
         /**
+         * Builds the font images from the textures in WINDOW.BIN and saves them in the "fonts" directory.
+         *
+         * The font XML files that describe them are part of the V-Gears data files. The fonts are always
+         * needed, so this doesn't depend on the images option.
+         *
+         * @return True if all the fonts were saved, false if WINDOW.BIN couldn't be read.
+         */
+        bool InstallFonts();
+
+        /**
          * Prepares the installer for the sounds extraction.
          *
          * @return The total number of sounds to process.

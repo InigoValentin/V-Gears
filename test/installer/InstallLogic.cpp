@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(EmptyDirectoryMissesEverything){
     BOOST_CHECK(!result.Ok());
     for (const char* group : {
       "Configuration", "Game files", "Kernel data", "Battle data", "Battle models", "Field maps", "Field models",
-      "World map", "World map models", "Sound effects", "Music", "Images"
+      "World map", "World map models", "Sound effects", "Music", "Images", "Fonts"
     }) BOOST_CHECK_MESSAGE(HasProblem(result, group), "no problem reported for " << group);
     BOOST_CHECK_GT(result.checked, 0);
 }

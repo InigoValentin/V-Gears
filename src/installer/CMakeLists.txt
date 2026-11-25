@@ -26,6 +26,7 @@ set(INSTALLER_SOURCE_FILES
     ScopedLgp.cpp
     TexFile.cpp
     VGearsUtility.cpp
+    WindowFonts.cpp
     WorldInstaller.cpp
     common/BinGZipFile.cpp
     common/DrawSkeleton.cpp

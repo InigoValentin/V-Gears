@@ -171,6 +171,7 @@ set(SOURCE_FILES
     installer/SfxDump.cpp
     installer/TexFile.cpp
     installer/VGearsUtility.cpp
+    installer/WindowFonts.cpp
     installer/WorldInstaller.cpp
     installer/common/BinGZipFile.cpp
     installer/common/DrawSkeleton.cpp

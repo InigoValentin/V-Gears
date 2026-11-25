@@ -14,7 +14,7 @@ You are a specialist at investigating FF7 binary formats in the V-Gears codebase
 
 ## Approach
 
-1. Check the format documentation in `doc/code/FFVII/` first.
+1. Check the format documentation in [the FF7 wiki at wiki.ffrtt.ru](https://wiki.ffrtt.ru/index.php/FF7) and in the header comments of existing parsers first.
 2. Find the relevant parser triplet in `src/data/` (`*File`, `*FileSerializer`, `*FileManager`) and read the serializer for the authoritative byte layout.
 3. For installer/decompiler questions, read `src/installer/` and the matching instruction classes under `src/installer/decompiler/`.
 4. Cross-check with the test suite in `test/` — tests often show minimal usage examples.
