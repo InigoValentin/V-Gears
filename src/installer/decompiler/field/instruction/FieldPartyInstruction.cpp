@@ -30,8 +30,8 @@ void FieldPartyInstruction::ProcessInst(
     FunctionMetaData md(func.metadata);
     //std::cout << "Party opcode: " << opcode_ << "\n";
     switch (opcode_){
-        case OPCODES::SPTYE: code_gen->WriteTodo(md.GetEntityName(), "SPTYE"); break;
-        case OPCODES::GTPYE: code_gen->WriteTodo(md.GetEntityName(), "GTPYE"); break;
+        case OPCODES::SPTYE: ProcessPartyVariables(code_gen, true); break;
+        case OPCODES::GTPYE: ProcessPartyVariables(code_gen, false); break;
         case OPCODES::GOLDU: ProcessGOLDU(code_gen); break;
         case OPCODES::GOLDD: ProcessGOLDD(code_gen); break;
         case OPCODES::HMPMAX1: code_gen->WriteTodo(md.GetEntityName(), "HMPMAX1"); break;
@@ -48,7 +48,7 @@ void FieldPartyInstruction::ProcessInst(
         case OPCODES::STITM: ProcessSTITM(code_gen); break;
         case OPCODES::DLITM: ProcessDLITM(code_gen); break;
         case OPCODES::CKITM: ProcessCKITM(code_gen); break;
-        case OPCODES::SMTRA: code_gen->WriteTodo(md.GetEntityName(), "SMTRA"); break;
+        case OPCODES::SMTRA: ProcessSMTRA(code_gen, md.GetEntityName()); break;
         case OPCODES::DMTRA: code_gen->WriteTodo(md.GetEntityName(), "DMTRA"); break;
         case OPCODES::CMTRA: code_gen->WriteTodo(md.GetEntityName(), "CMTRA"); break;
         case OPCODES::GETPC: code_gen->WriteTodo(md.GetEntityName(), "GETPC"); break;
@@ -140,6 +140,49 @@ void FieldPartyInstruction::ProcessCKITM(CodeGenerator* code_gen){
     ).str());
 }
 
+void FieldPartyInstruction::ProcessSMTRA(CodeGenerator* code_gen, const std::string& entity){
+    // Operands: four bank nibbles (all of them zero in the original fields: the values are
+    // literal), the ID of the materia and its AP, in three bytes (255, 255, 255 is the most).
+    for (int i = 0; i < 4; i ++){
+        if (params_[i]->GetUnsigned() != 0){
+            code_gen->WriteTodo(entity, "SMTRA");
+            return;
+        }
+    }
+    const long ap = params_[5]->GetUnsigned() + params_[6]->GetUnsigned() * 256
+      + params_[7]->GetUnsigned() * 256 * 256;
+    code_gen->AddOutputLine((
+      boost::format("Materia.add(%1%, %2%)") % params_[4]->GetUnsigned() % ap
+    ).str());
+}
+
+void FieldPartyInstruction::ProcessPartyVariables(CodeGenerator* code_gen, const bool set){
+    // Operands: the banks of three variables (a nibble for each, plus an unused one) and their
+    // addresses. GTPYE stores the characters of the party in them (255 for an empty place) and
+    // SPTYE sets the party from them. The scenes that change the party (a flashback) keep it that
+    // way and restore it.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    std::string variables[3];
+    for (int i = 0; i < 3; i ++){
+        variables[i] = FieldCodeGenerator::FormatValueOrVariable(
+          cg->GetFormatter(), params_[i]->GetUnsigned(), params_[4 + i]->GetUnsigned()
+        );
+    }
+    if (set){
+        code_gen->AddOutputLine((
+          boost::format("set_party_from_values(%1%, %2%, %3%)")
+          % variables[0] % variables[1] % variables[2]
+        ).str());
+    }
+    else{
+        for (int i = 0; i < 3; i ++){
+            code_gen->AddOutputLine(
+              (boost::format("%1% = Party[%2%] or 255") % variables[i] % (i + 1)).str()
+            );
+        }
+    }
+}
+
 void FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
     std::string chars[3];
     for (int i = 0; i < 3; i ++){
@@ -152,10 +195,11 @@ void FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
 }
 
 void FieldPartyInstruction::ProcessMMBUD(CodeGenerator* code_gen){
-    // Param 0 is the character, param 1 is 0 to hide it in the PHS and anything else to show it.
+    // Param 0 is 0 to hide the character in the PHS and anything else to show it, param 1 is the
+    // character (checked in the opcode handler of ff7.exe, 0x61c782).
     code_gen->AddOutputLine((
-      boost::format("set_character_enable(%1%, %2%)") % params_[0]->GetString()
-        % (params_[1]->GetUnsigned() != 0 ? "true" : "false")
+      boost::format("set_character_enable(%1%, %2%)") % params_[1]->GetString()
+        % (params_[0]->GetUnsigned() != 0 ? "true" : "false")
     ).str());
 }
 

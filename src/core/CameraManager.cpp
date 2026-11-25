@@ -174,12 +174,6 @@ void CameraManager::Set2DCamera(
 void CameraManager::StartBattleCamera(
   const Ogre::Vector3 position, const Ogre::Vector3 orientation
 ){
-    /*
-     * TODO: Something is wrong here. The camera look 'mostly' okay, but it's still weird.
-     * Also, there are variations and it doesn't look the same on successive calls.
-     * I thinks it's something related to the lookAt functions.
-     * Try to fix it. First, replace the deprecated calls, and see what happens.
-     */
     if (module_ != Module::BATTLE){
         LOG_ERROR("Tried to start battle camera but the CameraManager is already in battle mode");
         return;
@@ -218,15 +212,8 @@ void CameraManager::StartBattleCamera(
 }
 
 void CameraManager::SetBattleCamera(const Ogre::Vector3 position, const Ogre::Vector3 orientation){
-    camera_->resetFrustumExtents();
-    camera_->setFOVy(Ogre::Radian(Ogre::Math::PI / 4.0f));
-    camera_->setOrientation(Ogre::Quaternion::IDENTITY);
-    camera_->setPosition(position);
-    //CameraManager::getSingleton().GetCurrentCamera()->setFixedYawAxis(true, Ogre::Vector3::UNIT_Y);
-    camera_->lookAt(orientation);
-    camera_->roll(Ogre::Angle(90));
-    // Fix: compensate for the battle UI covered section of the screen.
-    camera_->move(Ogre::Vector3(0, 0, -4));
+    // The second vector is the point the camera looks at.
+    SetBattleCameraUpright(position, orientation);
 }
 
 void CameraManager::SetBattleCameraUpright(
@@ -245,9 +232,9 @@ void CameraManager::SetBattleCameraUpright(
     camera_->setFOVy(Ogre::Radian(Ogre::Math::PI / 4.0f));
     camera_->setPosition(position);
     camera_->setOrientation(Ogre::Quaternion(right, up, -direction));
-    // Compensation of the battle UI, like the other battle cameras. They move the camera 4 units
-    // down at about 60 units from the scene, so it's proportional to the distance here, because
-    // the cameras of the effects go from very far to very close.
+    // Compensation of the section of the screen that the battle UI covers: the camera moves down. It's
+    // proportional to the distance (4 units at about 60 from the scene), because the cameras of the
+    // effects go from very far to very close.
     const float distance = (look_at - position).length();
     camera_->move(Ogre::Vector3(0, 0, -0.066f * distance));
 }

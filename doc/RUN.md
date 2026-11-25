@@ -2,7 +2,7 @@
 
 ## Run the engine
 
-If you have followed the [build](BUILD.md "Building guide") and [installation](INSTALL.md "Installation guide") guides, you'll have the game data installed to `~/.v-gears/`, and the binaries compiled somewhere (we'll assume they are in `~/V-Gears/build/bin`, change the directories according to your system).
+If you have followed the [build](BUILD.md "Building guide") and [installation](INSTALL_DATA.md "Installation guide") guides, you'll have the game data installed to `~/.v-gears/`, and the binaries compiled somewhere (we'll assume they are in `~/V-Gears/build/bin`, change the directories according to your system).
 
 Run the engine from any directory:
 
@@ -39,7 +39,7 @@ The default bindings are in `config/config.cfg` of the installation directory, i
 |Page Up / Page Down|L1 / R1|Switch tab or character in menus|
 |Left Ctrl|run|Run in the field|
 
-The settings made in the in-game config menu (controls, sound, etc.) are saved with the game settings and loaded on start.
+The control settings changes made in the in-game config menu are saved with the game settings and loaded on start.
 
 <!-- TODO(review): verify the table against the in-game config menu (control remapping), and check the gamepad status. -->
 

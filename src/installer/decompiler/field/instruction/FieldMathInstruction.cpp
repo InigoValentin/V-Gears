@@ -245,6 +245,18 @@ void FieldMathInstruction::ProcessBITOFF(CodeGenerator* code_gen){
     ).str());
 }
 
+bool FieldMathInstruction::IsByteOperation() const{
+    switch (opcode_){
+        case OPCODES::PLUS:
+        case OPCODES::MINUS:
+        case OPCODES::MUL:
+        case OPCODES::INC:
+        case OPCODES::DEC:
+            return true;
+        default: return false;
+    }
+}
+
 void FieldMathInstruction::ProcessPLUSx_MINUSx(CodeGenerator* code_gen, const std::string& op){
     FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
     // TODO: Check for assignment to value.
@@ -254,6 +266,14 @@ void FieldMathInstruction::ProcessPLUSx_MINUSx(CodeGenerator* code_gen, const st
     const auto& rhs = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[1]->GetUnsigned(), params_[3]->GetUnsigned()
     );
+    // The byte variables wrap around (a script that counts down from zero relies on it, as the
+    // palette animation of jumin does). The words are left as they are.
+    if (IsByteOperation()){
+        code_gen->AddOutputLine(
+          (boost::format("%1% = (%1% %2% %3%) %% 256") % lhs % op % rhs).str()
+        );
+        return;
+    }
     // TODO: repect destination bank sizes and wraparound
     code_gen->AddOutputLine((boost::format("%1% = %1% %2% %3%") % lhs % op % rhs).str());
 }
@@ -277,6 +297,12 @@ void FieldMathInstruction::ProcessINCx_DECx(CodeGenerator* code_gen, const std::
     const auto& destination = FieldCodeGenerator::FormatValueOrVariable(
       cg->GetFormatter(), params_[0]->GetUnsigned(), params_[1]->GetUnsigned()
     );
+    if (IsByteOperation()){
+        code_gen->AddOutputLine(
+          (boost::format("%1% = (%1% %2% 1) %% 256") % destination % op).str()
+        );
+        return;
+    }
     // TODO: repect destination bank sizes and wraparound
     code_gen->AddOutputLine((boost::format("%1% = %1% %2% 1") % destination % op).str());
 }

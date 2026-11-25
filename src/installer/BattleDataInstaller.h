@@ -418,6 +418,15 @@ class BattleDataInstaller{
         void GenerateRsdFiles(SpellModel model, std::string path);
 
         /**
+         * Writes the data of a model that the cameras of the battles use, as a Lua script.
+         *
+         * @param[in] script The file with the animation scripts of the model.
+         * @param[in] skeleton The skeleton of the model.
+         * @param[in] model_name Name of the model, like rt_cloud.
+         */
+        void WriteModelCamera(File script, File skeleton, const std::string& model_name);
+
+        /**
          * Decompiles a compiled HRC file.
          *
          * To be used for battle enemy and playable character models, since they

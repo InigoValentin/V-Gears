@@ -24,6 +24,16 @@ First step: play the scene with log level 3 and look at the time between the `di
 layer of mds5_4 has no such opcodes and still scrolls with the rest, and it is not known why it should
 not.
 
+## Battle: recruits that remain untested
+
+Yuffie, Vincent and Cait Sith remain untested: the level they join with (`Characters.join` in `system.lua`)
+and, for Vincent and Cait Sith, the data they get when they are named (`Characters.load_recruit_record`). The
+other characters are working fine.
+
+- Yuffie's level comes from the variable at bank 1, address 2. Only the field blackbg4 writes it, so it is not
+  known what sets it in a normal game. While it is 0 the average level of the party is used, which is not from
+  the original.
+
 ## Battle: special limits
 
 Not done yet (kernel data in ff7.exe, ids 170-176, see `get_special_limit` in `battle_ui.lua`):
@@ -101,3 +111,22 @@ collides with several solid NPCs that stop around it (`CheckSolidCollisions`).
 The model of Ren was invisible. The probable cause (an instant `OFST` did not cancel a running smooth
 offset, so Ren stayed 4 units away) was fixed in `Entity::ScriptOffsetToPosition`, but it has not been
 tested in the game. Check the helicopter intro of pillar_3 and that Ren appears and jumps down.
+
+## World map: the exit of sichi
+
+When the player leaves sichi he appears where he entered (the exit script puts him at the corner of the mesh, which is a mountain, so `WorldVM.prepare` uses the exact position saved by `EnterFieldScene`). The original game position for this exit is not known. The direction that is saved (special 4) is not used for the player.
+
+## World map: the scenes of the Warship (what is missing)
+
+The scenes after jundoc1a (record 36) and shpin_3 (record 37) work: `WorldVM.start_scene` in `world_vm.lua` runs the
+function of the Warship (type 8) as a script of the entity, with `Wait`, speed and direction (the speed is
+`speed / 8192` of a mesh each frame, from ff7.exe; the scripts run at 15 frames per second, which is what the user
+remembers of the original). Not done:
+
+- `PlaySoundEffect(381)` at the start is a stub (the sound id is not mapped to an audio file).
+- `kernel_unknown_0x319`, `0x31C`, `0x31F`, `0x329`, `0x32A` and `0x32F` are stubs: they may be camera moves, fades or
+  sound state, and the original may use them to frame the ship or fade out at the end. They can be decoded from the
+  jump table at 0x75bfb9 of ff7.exe (kernel dispatcher 0x75b14c).
+- The records 38 and 39 also have a Warship scene in `world_function_64`; it is not known which fields lead to them and they
+  were not tested. The last move of record 37 (direction 176, facing 48) is a plain move without turning.
+- The vehicles may run at 15 frames per second as well (their speeds were tuned by eye).

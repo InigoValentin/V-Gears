@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(TestWorldDisassembler){
             ),
             std::string::npos
         );
-        BOOST_CHECK_NE(generated_script.str().find("return;"), std::string::npos);
+        BOOST_CHECK_NE(generated_script.str().find("do return end"), std::string::npos);
         BOOST_CHECK_NE(generated_script.str().find("end"), std::string::npos);
         BOOST_CHECK_EQUAL(generated_script.str().find("}\n"), std::string::npos);
 }

@@ -19,6 +19,9 @@ local function get_materia_level(materia, ap)
     return level
 end
 
+--- See get_materia_level, the stats need it too.
+Characters.get_materia_level = get_materia_level
+
 --- Gets the magic, summons and enemy skills a character can use with the materia that is equipped.
 --
 -- Every ability is listed once, even if more than one materia gives it.
@@ -89,6 +92,56 @@ Characters.get_abilities = function(char_id)
     table.sort(result.e_skill)
     table.sort(result.summon, function(a, b) return a.id < b.id end)
     return result
+end
+
+--- Gets the commands a character has in battle, in the order the battle menu shows them.
+--
+-- The Attack command (or the materia that replace it, like Slash-All or Flash) goes first. Then
+-- come the commands of the materia, Item (unless W-Item is equipped), Magic and Summon (if the
+-- character has spells or summons, and no W-Magic or W-Summon is equipped). The Limit command is
+-- not included, as it only appears in battle when the limit bar is full.
+--
+-- @param char_id ID of the character.
+-- @return List of IDs of commands (see Game.Commands).
+Characters.get_commands = function(char_id)
+    local commands = { 1 }
+    local character = Characters[char_id]
+    if character == nil then return commands end
+    local w_magic, w_summon, w_item = false, false, false
+    for _, part in ipairs({ "weapon", "armor" }) do
+        local equipment = character[part]
+        for slot = 0, 7 do
+            local equipped = equipment.materia[slot]
+            local materia = (equipped ~= nil) and Game.Materia[equipped.id] or nil
+            if materia ~= nil and materia.type == Materia.TYPE.COMMAND and materia.command ~= nil then
+                local level = get_materia_level(materia, equipped.ap or 0)
+                local command
+                for l, id in ipairs(materia.command) do
+                    if level >= l then command = id end
+                end
+                if command ~= nil then
+                    if command == 1 or command == 20 or (command >= 24 and command <= 27) then
+                        commands[1] = command
+                    else
+                        commands[#commands + 1] = command
+                    end
+                    if command == 21 then w_magic = true end
+                    if command == 22 then w_summon = true end
+                    if command == 23 then w_item = true end
+                end
+            end
+        end
+    end
+    local abilities = Characters.get_abilities(char_id)
+    if not w_item then commands[#commands + 1] = 4 end
+    if #abilities.magic > 0 and not w_magic then commands[#commands + 1] = 2 end
+    if #abilities.summon > 0 and not w_summon then commands[#commands + 1] = 3 end
+    local function substitute(id) return id == 1 or id == 20 or (id >= 24 and id <= 27) end
+    table.sort(commands, function(l, r)
+        if substitute(l) ~= substitute(r) then return substitute(l) end
+        return l < r
+    end)
+    return commands
 end
 
 --- Gets what the independent materia (Long Range, Mega All, Counter Attack, Cover, Pre-Emptive, EXP

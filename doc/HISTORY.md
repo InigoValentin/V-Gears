@@ -66,7 +66,7 @@ For a while, I added no new functionalities to the engine itself. That changed a
 
 ---
 
-##The Future - Here Is Where You Keep Going.
+## The Future - Here Is Where You Keep Going.
 
 I know I won't be the one who finishes V-Gears. Hell, I know I'm not the one who will announce the version 1 of it. I honestly don't have the skills or the time to do so.
 

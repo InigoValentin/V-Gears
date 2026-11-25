@@ -249,7 +249,7 @@ void FieldDisassembler::AddFunc(
     if (script_index > 0 && !to_return_only && !engine_->EntityIsLine(entity_index)){
         const bool ends = last_opcode_ == OPCODES::RET || last_opcode_ == OPCODES::JMPF
           || last_opcode_ == OPCODES::JMPFL || last_opcode_ == OPCODES::JMPB
-          || last_opcode_ == OPCODES::JMPBL;
+          || last_opcode_ == OPCODES::JMPBL || last_opcode_ == OPCODES::RETTO;
         if (!ends){
             const auto& entries = header_.entity_scripts[entity_index];
             for (size_t i = 1; i < entries.size(); ++ i){
@@ -832,51 +832,51 @@ bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
                     switch (opcode){
                         case OPCODES_KAWAI::EYETX:
                             // Parameters were "BBBB"
-                            ParseOpcode(opcode, "EYETX", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "EYETX", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::TRNSP:
                             // Parameters were "B"
-                            ParseOpcode(opcode, "TRNSP", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "TRNSP", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::AMBNT:
                             // Parameters were "AMBNT"
-                            ParseOpcode(opcode, "AMBNT", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "AMBNT", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown03:
-                            ParseOpcode(opcode, "Unknown03", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "Unknown03", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown04:
-                            ParseOpcode(opcode, "Unknown04", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "Unknown04", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown05:
-                            ParseOpcode(opcode, "Unknown05", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "Unknown05", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::LIGHT:
-                            ParseOpcode(opcode, "LIGHT", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "LIGHT", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown07:
-                            ParseOpcode(opcode, "Unknown07", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "Unknown07", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown08:
-                            ParseOpcode(opcode, "Unknown08", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "Unknown08", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown09:
-                            ParseOpcode(opcode, "Unknown09", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "Unknown09", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::SBOBJ:
-                            ParseOpcode(opcode, "SBOBJ", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "SBOBJ", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown0B:
-                            ParseOpcode(opcode, "Unknown0B", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "Unknown0B", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::Unknown0C:
-                            ParseOpcode(opcode, "Unknown0C", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "Unknown0C", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::SHINE:
-                            ParseOpcode(opcode, "SHINE", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "SHINE", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         case OPCODES_KAWAI::RESET:
-                            ParseOpcode(opcode, "RESET", new FieldModelInstruction(), 0, parameters.c_str());
+                            ParseOpcode((OPCODES::KAWAI << 8) | opcode, "RESET", new FieldModelInstruction(), 0, parameters.c_str());
                             break;
                         default:
                             throw UnknownSubOpcodeException(this->address_, opcode);

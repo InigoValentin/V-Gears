@@ -73,7 +73,7 @@ void FieldModuleInstruction::ProcessInst(
         case (OPCODES::SPECIAL << 8) | OPCODES_SPECIAL::CLITM:
             code_gen->WriteTodo(md.GetEntityName(), "CLITM");
             break;
-        case OPCODES::MINIGAME: code_gen->WriteTodo(md.GetEntityName(), "MINIGAME"); break;
+        case OPCODES::MINIGAME: ProcessMINIGAME(code_gen, func); break;
         case OPCODES::BTMD2: code_gen->WriteTodo(md.GetEntityName(), "BTMD2"); break;
         case OPCODES::BTRLD: code_gen->WriteTodo(md.GetEntityName(), "BTRLD"); break;
         case OPCODES::BTLTB: code_gen->WriteTodo(md.GetEntityName(), "BTLTB"); break;
@@ -141,6 +141,29 @@ void FieldModuleInstruction::ProcessBTLON(CodeGenerator* code_gen){
     code_gen->AddOutputLine((
       boost::format("entity_manager:random_encounters_on(%1%)")
       % FieldCodeGenerator::FormatInvertedBool(params_[0]->GetUnsigned())
+    ).str());
+}
+
+void FieldModuleInstruction::ProcessMINIGAME(CodeGenerator* code_gen, Function& func){
+    // Operands: the field where the game goes on when the minigame ends (and where the player is
+    // placed there, as in MAPJUMP) and the number of the minigame.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    const auto target_map_id = params_[0]->GetUnsigned();
+    FunctionMetaData md(func.metadata);
+    const std::string source_spawn_point_name = cg->GetFormatter().GetSpawnPointName(
+      target_map_id, md.GetEntityName(), func.name, address_
+    );
+    cg->GetFormatter().AddSpawnPoint(
+      target_map_id, md.GetEntityName(), func.name, address_,
+      params_[1]->GetSigned(), // X
+      params_[2]->GetSigned(), // Y
+      params_[3]->GetSigned(), // Walk mesh triangle ID
+      params_[4]->GetSigned()  // Angle
+    );
+    const std::string target_map_name = cg->GetFormatter().GetMapName(target_map_id);
+    code_gen->AddOutputLine((
+      boost::format("minigame(%1%, \"%2%\", \"%3%\")")
+      % params_[5]->GetUnsigned() % target_map_name % source_spawn_point_name
     ).str());
 }
 

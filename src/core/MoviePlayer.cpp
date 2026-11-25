@@ -168,8 +168,14 @@ int MoviePlayer::ScriptPlay(){
     return -1;
 }
 
+void MoviePlayer::ScriptUseMovieCamera(const bool use){movie_camera_ = use;}
+
+bool MoviePlayer::IsDrawnOver() const{
+    return state_.IsPlaying() && camera_data_.empty() && !movie_camera_;
+}
+
 bool MoviePlayer::IsDrawnBehind() const{
-    return state_.IsPlaying() && !camera_data_.empty();
+    return state_.IsPlaying() && (!camera_data_.empty() || movie_camera_);
 }
 
 void MoviePlayer::SetModelsHidden(const bool hidden){
@@ -298,7 +304,7 @@ void MoviePlayer::renderQueueStarted(
 ){
     if (!state_.IsPlaying()) return;
     if (!EntityManager::getSingleton().IsFieldModule()) return;
-    if (!camera_data_.empty()){
+    if (!camera_data_.empty() || movie_camera_){
         // Behind the models, which come in the main queue. They are only drawn if the movie has a
         // camera in the frame, or they would be in the wrong place. They are hidden with the
         // visibility mask of the viewport: skipping the queue would also skip the listeners that

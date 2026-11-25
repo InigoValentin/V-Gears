@@ -97,5 +97,7 @@ class FieldWalkmeshInstruction : public KernelCallInstruction{
          *
          * @param[in,out] code_gen Code generator to append lines.
          */
+        void ProcessSLINE(CodeGenerator* code_gen, const std::string& entity);
+
         void ProcessLINON(CodeGenerator* code_gen);
 };

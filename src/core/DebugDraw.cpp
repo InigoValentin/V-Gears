@@ -416,45 +416,51 @@ void DebugDraw::Text(
     }
 }
 
+void DebugDraw::SetOverlayDrawnByUi(const bool drawn_by_ui){overlay_drawn_by_ui_ = drawn_by_ui;}
+
+void DebugDraw::RenderOverlay(){
+    render_system_->clearFrameBuffer(Ogre::FBT_DEPTH);
+    // The text and the quads are given in screen coordinates. The background leaves its scroll
+    // in the view matrix, so without this they would move with it, but not at the same speed.
+    render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
+    render_system_->_setViewMatrix(Ogre::Matrix4::IDENTITY);
+    render_system_->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
+    auto render_params= render_system_->getFixedFunctionParams(Ogre::TVC_NONE, Ogre::FOG_NONE);
+    render_params->setConstant(
+      Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY
+    );
+    render_params->setConstant(
+      Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX, Ogre::Matrix4::IDENTITY
+    );
+    render_params->setConstant(
+      Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, Ogre::Matrix4::IDENTITY
+    );
+    render_system_->applyFixedFunctionParams(render_params, Ogre::GPV_GLOBAL);
+
+    if (line_render_operation_.vertexData->vertexCount != 0){
+        scene_manager_->_setPass(material_->getTechnique(0)->getPass(0), true, false);
+        render_system_->_render(line_render_operation_);
+        line_render_operation_.vertexData->vertexCount = 0;
+    }
+    if (quad_render_operation_.vertexData->vertexCount != 0){
+        scene_manager_->_setPass(material_->getTechnique(0)->getPass(0), true, false);
+        render_system_->_render(quad_render_operation_);
+        quad_render_operation_.vertexData->vertexCount = 0;
+    }
+    if (text_render_operation_.vertexData->vertexCount != 0){
+        scene_manager_->_setPass(
+          font_->getMaterial()->getTechnique(0)->getPass(0), true, false
+        );
+        render_system_->_render(text_render_operation_);
+        text_render_operation_.vertexData->vertexCount = 0;
+    }
+}
+
 void DebugDraw::renderQueueEnded(
   Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation
 ){
     if (queueGroupId == Ogre::RENDER_QUEUE_OVERLAY){
-        render_system_->clearFrameBuffer(Ogre::FBT_DEPTH);
-        // The text and the quads are given in screen coordinates. The background leaves its scroll
-        // in the view matrix, so without this they would move with it, but not at the same speed.
-        render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
-        render_system_->_setViewMatrix(Ogre::Matrix4::IDENTITY);
-        render_system_->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
-        auto render_params= render_system_->getFixedFunctionParams(Ogre::TVC_NONE, Ogre::FOG_NONE);
-        render_params->setConstant(
-          Ogre::GpuProgramParameters::ACT_WORLD_MATRIX, Ogre::Matrix4::IDENTITY
-        );
-        render_params->setConstant(
-          Ogre::GpuProgramParameters::ACT_PROJECTION_MATRIX, Ogre::Matrix4::IDENTITY
-        );
-        render_params->setConstant(
-          Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, Ogre::Matrix4::IDENTITY
-        );
-        render_system_->applyFixedFunctionParams(render_params, Ogre::GPV_GLOBAL);
-
-        if (line_render_operation_.vertexData->vertexCount != 0){
-            scene_manager_->_setPass(material_->getTechnique(0)->getPass(0), true, false);
-            render_system_->_render(line_render_operation_);
-            line_render_operation_.vertexData->vertexCount = 0;
-        }
-        if (quad_render_operation_.vertexData->vertexCount != 0){
-            scene_manager_->_setPass(material_->getTechnique(0)->getPass(0), true, false);
-            render_system_->_render(quad_render_operation_);
-            quad_render_operation_.vertexData->vertexCount = 0;
-        }
-        if (text_render_operation_.vertexData->vertexCount != 0){
-            scene_manager_->_setPass(
-              font_->getMaterial()->getTechnique(0)->getPass(0), true, false
-            );
-            render_system_->_render(text_render_operation_);
-            text_render_operation_.vertexData->vertexCount = 0;
-        }
+        if (!overlay_drawn_by_ui_) RenderOverlay();
     }
     else if (queueGroupId == Ogre::RENDER_QUEUE_MAIN){
         render_system_->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
@@ -505,7 +511,7 @@ void DebugDraw::DestroyLineVertexBuffer(){
 }
 
 void DebugDraw::CreateLine3dVertexBuffer(){
-    line_3d_max_vertex_ = 1024 * 2;
+    line_3d_max_vertex_ = 8192 * 2;
     line_3d_render_operation_.vertexData = new Ogre::VertexData;
     line_3d_render_operation_.vertexData->vertexStart = 0;
     Ogre::VertexDeclaration* vertex_declaration

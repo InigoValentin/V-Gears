@@ -139,6 +139,7 @@ void ScriptManager::InitBinds(){
       "set_alpha", &Entity::ScriptSetAlpha,
       "set_texture", &Entity::ScriptSetTexture,
       "get_bone_position", &Entity::ScriptGetBonePosition,
+      "get_bone_end", &Entity::ScriptGetBoneEnd,
       "attach_model", sol::overload(
         [](Entity& entity, const char* model, const int bone){
             return entity.ScriptAttachModel(model, bone, 0.0f, 0.0f, 0.0f);
@@ -230,6 +231,8 @@ void ScriptManager::InitBinds(){
       "roll_encounter_battle", &EntityManager::ScriptRollEncounterBattle,
       "is_key_on", &EntityManager::IsKeyOn,
       "is_key_off", &EntityManager::IsKeyOff,
+      "is_start_key_read", &EntityManager::IsStartKeyRead,
+      "set_line", &EntityManager::ScriptSetLine,
       "set_entity_to_character", &EntityManager::SetEntityToCharacter
     );
 
@@ -251,6 +254,7 @@ void ScriptManager::InitBinds(){
       "set_dynamic_mesh", &BattleManager::ScriptSetDynamicMesh,
       "remove_dynamic_mesh", &BattleManager::ScriptRemoveDynamicMesh,
       "get_layout", &BattleManager::ScriptGetLayout,
+      "get_intro_camera", &BattleManager::ScriptGetIntroCamera,
       "get_attack", [](BattleManager& manager, const int id, sol::this_state state) -> sol::object{
           sol::state_view view(state);
           const AttackData* attack = manager.GetAttackData(id);
@@ -383,6 +387,7 @@ void ScriptManager::InitBinds(){
       "get_battle_track_id", &AudioManager::ScriptGetBattleTrack,
       "set_battle_track_id", &AudioManager::ScriptSetBattleTrack,
       "play_music_once", &AudioManager::ScriptPlayMusicOnce,
+      "stop_music", &AudioManager::MusicStop,
       "is_music_playing", &AudioManager::ScriptIsMusicPlaying,
       "set_music_volume", &AudioManager::ScriptSetMusicVolume,
       "set_sound_volume", &AudioManager::ScriptSetSoundVolume
@@ -524,6 +529,7 @@ void ScriptManager::InitBinds(){
       "MoviePlayer",
       "set", &MoviePlayer::ScriptSet,
       "stop", &MoviePlayer::ScriptStop,
+      "use_movie_camera", &MoviePlayer::ScriptUseMovieCamera,
       "get_frame", &MoviePlayer::ScriptGetFrame,
       "is_playing", &MoviePlayer::ScriptIsPlaying
     );
@@ -558,6 +564,7 @@ void ScriptManager::InitBinds(){
       "Dialog",
       "dialog_open", &DialogsManager::OpenDialog,
       "set_numeric", &DialogsManager::SetNumeric,
+      "set_number", &DialogsManager::SetNumber,
       "update_timer", &DialogsManager::UpdateTimer,
       "set_mode", &DialogsManager::SetMode,
       "dialog_set_text", &DialogsManager::SetText,
@@ -657,6 +664,8 @@ void ScriptManager::InitBinds(){
       "unboard_vehicle", &VGears::WorldmapModule::UnboardVehicle,
       "set_encounters_locked", &VGears::WorldmapModule::SetEncountersLocked,
       "set_model_orientation", &VGears::WorldmapModule::SetModelOrientation,
+      "set_model_heading", &VGears::WorldmapModule::SetModelHeading,
+      "get_model_heading", &VGears::WorldmapModule::GetModelHeading,
       "set_model_offset", &VGears::WorldmapModule::SetModelOffset,
       "set_entity_altitude", &VGears::WorldmapModule::SetEntityAltitude,
       "enter", &VGears::WorldmapModule::Enter,

@@ -69,7 +69,7 @@ static const float ENCOUNTER_CHECK_FRAMES = 8.0f;
  */
 static const float ENCOUNTER_STEP_VALUE = 5.0f;
 
-const float EntityManager::SCENE_SCALE = 0.003f;
+const float EntityManager::SCENE_SCALE = 1.0f / 255.0f;
 
 const unsigned int EntityManager::BATTLE_BACKGROUND_ID = 1000;
 
@@ -184,14 +184,28 @@ EntityManager::~EntityManager(){
 void EntityManager::Input(const VGears::Event& event){
     background_2d_.InputDebug(event);
     if (paused_ == true) return;
+    if (ignore_held_walk_){
+        InputManager& input = InputManager::getSingleton();
+        if (
+          !input.IsGameEventPressed("walk_left") && !input.IsGameEventPressed("walk_right")
+          && !input.IsGameEventPressed("walk_up") && !input.IsGameEventPressed("walk_down")
+        ) ignore_held_walk_ = false;
+    }
     if (player_entity_ != NULL && player_lock_ == false){
-        if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_left") player_move_.x = -1;
-        else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_right")
-            player_move_.x = 1;
-        if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_down") player_move_.y = -1;
-        else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_up")
-            player_move_.y = 1;
-        if (event.type == VGears::ET_KEY_REPEAT && event.event == "run") player_run_ = true;
+        // Keys held since the world map are ignored until they are released.
+        const bool key_ignored = ignore_held_walk_ && (
+          event.event == "walk_left" || event.event == "walk_right" || event.event == "walk_up"
+          || event.event == "walk_down" || event.event == "run"
+        );
+        if (!key_ignored){
+            if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_left") player_move_.x = -1;
+            else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_right")
+                player_move_.x = 1;
+            if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_down") player_move_.y = -1;
+            else if (event.type == VGears::ET_KEY_REPEAT && event.event == "walk_up")
+                player_move_.y = 1;
+            if (event.type == VGears::ET_KEY_REPEAT && event.event == "run") player_run_ = true;
+        }
         if (event.type == VGears::ET_KEY_PRESS && event.event == "CONFIRM"){
             CheckEntityInteract();
             for (unsigned int i = 0; i < entity_triggers_.size(); ++ i){
@@ -320,6 +334,15 @@ void EntityManager::UpdateField(){
                             }
                         }
                         else is_move = PerformWalkmeshMove(entity_[i], speed, remaining_time);
+                        // The scripts set the animation of a scene as the default one (DFANM) and
+                        // don't set it back, but the player stands normally again as soon as they
+                        // walk in the original game (blin67_3, where Cloud ends the scene crouched).
+                        if (
+                          is_move == true && player_lock_ == false && player_entity_ == entity_[i]
+                          && entity_[i]->GetDefaultAnimationName() != "Idle"
+                        ){
+                            entity_[i]->ScriptSetDefaultAnimation("Idle");
+                        }
                         if (entity_[i]->GetMoveAutoAnimation() == true){
                             if (is_move == true){
                                 if (speed >= entity_[i]->GetMoveRunSpeed()){
@@ -361,6 +384,7 @@ void EntityManager::UpdateField(){
                 break;
         }
     }
+    CheckEntityContacts();
     // Reset player move. It already must be handled in update
     player_move_ = Ogre::Vector3::ZERO;
     player_run_ = false;
@@ -503,7 +527,8 @@ void EntityManager::RemoveBattleEntity(const Ogre::String& name){
         ScriptManager::getSingleton().RemoveEntity(ScriptManager::BATTLE, name);
         battle_entity_.erase(it);
         // The entity is not deleted, as its destructor would destroy the model again, like in
-        // ClearBattle.
+        // ClearBattle. So what the model holds (a weapon) has to be destroyed here.
+        entity->ScriptAttachModel("", -1, 0.0f, 0.0f, 0.0f);
         Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(name);
         scene_node_->removeAndDestroyChild("Battle_" + name);
         entity->ReleaseResources();
@@ -578,6 +603,7 @@ void EntityManager::OnResize(){background_2d_.OnResize();}
 void EntityManager::ClearField(){
     ClearEncounterTables();
     entities_hidden_by_battle_.clear();
+    entities_in_contact_.clear();
     walkmesh_.Clear();
     background_2d_.Clear();
     screen_fade_.Clear();
@@ -611,6 +637,9 @@ void EntityManager::ClearBattle(){
         ScriptManager::getSingleton().RemoveEntity(
           ScriptManager::ENTITY, battle_entity_[i]->GetName()
         );
+        // The model held in a bone (a weapon) is another Ogre entity, and the next battle creates
+        // one with the same name.
+        battle_entity_[i]->ScriptAttachModel("", -1, 0.0f, 0.0f, 0.0f);
         Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(
           battle_entity_[i]->GetName()
         );
@@ -827,6 +856,10 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
             // is left as it is.
             if (player_entity_ != nullptr && background_2d_.GetAutoScrollEntity() == player_entity_)
                 background_2d_.ScriptAutoScrollToEntity(entity_[i]);
+            // The camera follows the player when no script has said anything about it (the fields
+            // without a Director, such as ujunon1, have no opcode that starts it).
+            else if (!background_2d_.HasScrollControl())
+                background_2d_.ScriptAutoScrollToEntity(entity_[i]);
             player_entity_ = entity_[i];
             // Also, make it non-talkable. Visibility and solidity are left to the scripts, as in
             // the original game: some fields use hidden helper entities (like the 'camera') as
@@ -853,7 +886,16 @@ void EntityManager::ScriptPlacePlayerAtFieldEntry(
         ));
         player_entity_->SetRotation(Ogre::Degree(direction));
         player_entity_->SetMoveTriangleId(safe_triangle_id);
+        // In the WALKMESH state the entity walks to its move position: without this one it walks to
+        // whatever it had (the origin of the field), and the player enters the town walking.
+        player_entity_->SetMovePosition(player_entity_->GetPosition());
         player_entity_->SetState(Entity::WALKMESH);
+        // The player starts standing still: no move or run from the world map, and the held keys
+        // don't count until they are released.
+        player_move_ = Ogre::Vector3::ZERO;
+        player_run_ = false;
+        ignore_held_walk_ = true;
+        player_entity_->PlayAnimationContinue(player_entity_->GetDefaultAnimationName());
 }
 
 Entity* EntityManager::ScriptGetPlayerEntity() const{
@@ -881,6 +923,18 @@ void EntityManager::ScriptPlayerLock(const bool lock){
     }
     player_lock_ = lock;
     if (lock == true) player_move_ = Ogre::Vector3::ZERO;
+    // A field with no entity for the leader of the party (the parade of junonr4, where the player
+    // is a soldier that no PC opcode names) gives the control to the entity whose script lets go
+    // of it.
+    else if (player_entity_ == nullptr && IsFieldModule()){
+        const ScriptId script = ScriptManager::getSingleton().GetCurrentScriptId();
+        Entity* entity = GetEntity(script.entity);
+        if (entity != nullptr && !entity->IsLine()){
+            LOG_TRIVIAL("The control goes to '" + script.entity + "', there is no player entity.");
+            ScriptSetPlayerEntity(script.entity.c_str());
+            if (!background_2d_.HasScrollControl()) background_2d_.ScriptAutoScrollToEntity(entity);
+        }
+    }
 }
 
 bool EntityManager::IsPlayerLocked() const{return player_lock_;}
@@ -1026,7 +1080,12 @@ void EntityManager::SetEncounterRate(float rate){
     else encounter_rate_ = rate;
 }
 
+bool EntityManager::IsStartKeyRead() const{
+    return std::chrono::steady_clock::now() - start_key_read_time_ < std::chrono::milliseconds(300);
+}
+
 bool EntityManager::IsKeyOn(unsigned int key_code){
+    if (key_code & 2048) start_key_read_time_ = std::chrono::steady_clock::now();
     // The keys are read even if the player is locked: scenes lock the player and still ask for a
     // button, as the minigames that need to be pressed at the right time do. The scripts that
     // must not read the keys at some point (while a message is open, for example) have their own
@@ -1181,8 +1240,23 @@ bool EntityManager::PerformWalkmeshMove(Entity* entity, const float speed, const
         return false;
     }
     int current_triangle = entity->GetMoveTriangleId();
+    // A character that is not on the walkmesh (Jenova of shpin_3, that is placed outside it and
+    // moves with FMOVE) is walked in a straight line, or the scene that waits for it would never go
+    // on.
+    if (current_triangle == -1 && scripted_move && entity != player_entity_){
+        const float step = std::min(direction.length(), distance_to_target);
+        Ogre::Vector2 move = direction;
+        if (!move.isZeroLength()) move.normalise();
+        move *= step;
+        entity->SetPosition(Ogre::Vector3(start_point.x + move.x, start_point.y + move.y, start_point.z));
+        if (distance_to_target - step <= stop_distance + 0.0001f) entity->UnsetMove();
+        return step > 0.0f;
+    }
     if (current_triangle == -1){
-        LOG_ERROR("Entity '" + entity->GetName() + "' not placed on walkmesh and can't move.");
+        // The entities that a scene places later (the soldiers of the parade of junonr4) are asked
+        // to move before it, and wait. Only the player has to be on the walkmesh.
+        if (entity == player_entity_)
+            LOG_ERROR("Entity '" + entity->GetName() + "' not placed on walkmesh and can't move.");
         return false;
     }
     Ogre::Vector3 rotation(0.0f, 0.0f, 0.0f);
@@ -1444,6 +1518,7 @@ bool EntityManager::WalkmeshBorderCross(
       entity == player_entity_ && !player_lock_, entity->IsScriptedMove()
     );
     Ogre::Vector2 pos = Ogre::Vector2(position.x, position.y);
+    bool searched_other_triangle = false;
     for (;;){
         Ogre::Vector3 A3 = walkmesh_.GetA(current_triangle);
         Ogre::Vector3 B3 = walkmesh_.GetB(current_triangle);
@@ -1467,6 +1542,33 @@ bool EntityManager::WalkmeshBorderCross(
             bool lock = walkmesh_.IsLocked(next_triangle);
             if (lock == false || free_walk){
                 current_triangle = next_triangle;
+                continue;
+            }
+        }
+        // A walk of a script goes on over the edge: it keeps the last triangle, unless the point is
+        // inside another one (the triangles apart from the rest, that scenes use to put a character
+        // higher than the floor, are not joined to it: the character would keep that height after
+        // leaving it).
+        if (free_walk && !searched_other_triangle){
+            searched_other_triangle = true;
+            int other_triangle = -1;
+            float other_distance = 9999.0f;
+            for (int i = 0; i < walkmesh_.GetNumberOfTriangles(); ++ i){
+                if (i == current_triangle) continue;
+                const Ogre::Vector3 a = walkmesh_.GetA(i);
+                const Ogre::Vector3 b = walkmesh_.GetB(i);
+                const Ogre::Vector3 c = walkmesh_.GetC(i);
+                if (!Ogre::Math::pointInTri2D(
+                  pos, Ogre::Vector2(a.x, a.y), Ogre::Vector2(b.x, b.y), Ogre::Vector2(c.x, c.y)
+                )) continue;
+                const float distance = std::abs(position.z - PointElevation(pos, a, b, c));
+                if (distance < other_distance){
+                    other_distance = distance;
+                    other_triangle = i;
+                }
+            }
+            if (other_triangle >= 0){
+                current_triangle = other_triangle;
                 continue;
             }
         }
@@ -1635,6 +1737,55 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
                 //  << entity_triggers_[i]->GetName() << std::endl;
             }
 
+        }
+    }
+}
+
+void EntityManager::ScriptSetLine(
+  const char* name, const float x1, const float y1, const float z1, const float x2, const float y2,
+  const float z2
+){
+    for (EntityTrigger* trigger : entity_triggers_){
+        if (trigger->GetName() == name){
+            trigger->SetPoints(Ogre::Vector3(x1, y1, z1), Ogre::Vector3(x2, y2, z2));
+            return;
+        }
+    }
+}
+
+void EntityManager::CheckEntityContacts(){
+    if (IsBattleModule() || !IsFieldModule()) return;
+    if (player_entity_ == nullptr || player_lock_ || !player_entity_->IsSolid()){
+        entities_in_contact_.clear();
+        return;
+    }
+    const Ogre::Vector3 player_position = player_entity_->GetPosition();
+    for (Entity* entity : entity_){
+        if (entity == player_entity_ || entity->IsLine() || !entity->IsSolid()) continue;
+        const Ogre::Vector3 position = entity->GetPosition();
+        const float height = (position.z < player_position.z)
+          ? entity->GetHeight() : player_entity_->GetHeight();
+        const float distance_z = position.z - player_position.z + height;
+        bool touching = false;
+        if (distance_z < height * 2 && distance_z >= 0){
+            const float reach = player_entity_->GetSolidRadius() + entity->GetSolidRadius() + 0.05f;
+            const float dx = position.x - player_position.x;
+            const float dy = position.y - player_position.y;
+            touching = dx * dx + dy * dy < reach * reach;
+        }
+        if (!touching){
+            entities_in_contact_.erase(entity);
+            continue;
+        }
+        if (!entities_in_contact_.insert(entity).second) continue;
+        ScriptEntity* script_entity = ScriptManager::getSingleton().GetScriptEntityByName(
+          ScriptManager::ENTITY, entity->GetName()
+        );
+        // Most entities have no script for it: nothing to say then.
+        if (script_entity != nullptr){
+            ScriptManager::getSingleton().ScriptRequest(
+              script_entity, "script_2", INTERACT_SCRIPT_PRIORITY, "", "", false, false
+            );
         }
     }
 }

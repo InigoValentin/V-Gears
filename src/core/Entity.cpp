@@ -597,6 +597,9 @@ void Entity::ScriptOffsetToPosition(
 }
 
 int Entity::ScriptOffsetSync(){
+    // Nothing to wait for if the offset has already finished (the offset of a script that
+    // waits for a move that took longer, such as Jenova of shpin_3): nothing would resume it.
+    if (offset_type_ == AT_NONE) return 1;
     ScriptId script = ScriptManager::getSingleton().GetCurrentScriptId();
     LOG_TRIVIAL(
       "Wait entity '" + name_ + "' offset for function '"
@@ -656,6 +659,8 @@ void Entity::ScriptFaceEntity(Entity* entity){
 }
 
 int Entity::ScriptTurnSync(){
+    // The same as the offset: a turn that has already finished is not waited for.
+    if (turn_type_ == AT_NONE) return 1;
     ScriptId script = ScriptManager::getSingleton().GetCurrentScriptId();
     LOG_TRIVIAL(
       "Wait entity '" + name_ + "' turn for function '"

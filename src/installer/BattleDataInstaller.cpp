@@ -23,6 +23,7 @@
 #include <set>
 #include <cctype>
 #include <cstdio>
+#include <cstring>
 #include <cstdlib>
 #include <algorithm>
 #include <zlib.h>
@@ -593,6 +594,13 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
             // ones (enemies and the rest of the models with scripts) have 32.
             AbFile ab(File(output_dir_ + "temp/battle_models/" + model.script), !info.is_player);
             ab.GenerateScripts(model.id + "_" + info.name_normal, data_dir_ + "scripts/battle_models/");
+            if (!info.is_scene && "" != model.hrc){
+                WriteModelCamera(
+                  File(output_dir_ + "temp/battle_models/" + model.script),
+                  File(output_dir_ + "temp/battle_models/" + model.hrc + "bin"),
+                  model.id + "_" + info.name_normal
+                );
+            }
         }
 
         // Playable characters hold their weapons in battle (but Red XIII, who has none). Each one is a
@@ -901,6 +909,13 @@ void BattleDataInstaller::WriteBattleCameras(){
     }
     std::ofstream file(data_dir_ + "gamedata/battle_cameras.lua");
     BattleCameraScripts::WriteLua(file, sets);
+    // The ones of the start of the battles are in the executable.
+    BattleCameraScripts::Set intro;
+    auto exe_path = const_cast<DiskImage&>(disk_image_).filePath("ff7.exe");
+    if (exe_path != nullptr && BattleCameraScripts::ReadIntro(*exe_path, intro)){
+        BattleCameraScripts::WriteIntroLua(file, intro);
+    }
+    else std::cerr << "[WARNING] Can't read the cameras of the start of the battles from ff7.exe." << std::endl;
 }
 
 void BattleDataInstaller::WriteEffectMeshes(){
@@ -1091,6 +1106,14 @@ void BattleDataInstaller::WriteEnemies(){
         stat_eva->SetAttribute("id", "eva");
         stat_eva->SetAttribute("value", enemy.eva);
         stats->LinkEndChild(stat_eva.release());
+        std::unique_ptr<TiXmlElement> stat_hp(new TiXmlElement("stat"));
+        stat_hp->SetAttribute("id", "hp");
+        stat_hp->SetAttribute("value", enemy.hp);
+        stats->LinkEndChild(stat_hp.release());
+        std::unique_ptr<TiXmlElement> stat_mp(new TiXmlElement("stat"));
+        stat_mp->SetAttribute("id", "mp");
+        stat_mp->SetAttribute("value", enemy.mp);
+        stats->LinkEndChild(stat_mp.release());
         container->LinkEndChild(stats.release());
         std::unique_ptr<TiXmlElement> elements(new TiXmlElement("elements"));
         for (Enemy::Element element : enemy.elements){
@@ -1375,16 +1398,17 @@ void BattleDataInstaller::WriteFormations(){
         container->LinkEndChild(enemies.release());
         std::unique_ptr<TiXmlElement> cameras(new TiXmlElement("camera"));
         cameras->SetAttribute("initial", formation.initial_camera_position);
+        cameras->SetAttribute("intro", formation.intro_camera);
         int c = 0;
         for (Formation::Camera camera : formation.camera_positions){
             std::unique_ptr<TiXmlElement> camera_xml(new TiXmlElement("position"));
             camera_xml->SetAttribute("id", c);
-            camera_xml->SetAttribute("x", camera.x);
-            camera_xml->SetAttribute("y", camera.y);
-            camera_xml->SetAttribute("z", camera.z);
-            camera_xml->SetAttribute("direction_x", camera.d_x);
-            camera_xml->SetAttribute("direction_y", camera.d_y);
-            camera_xml->SetAttribute("direction_z", camera.d_z);
+            camera_xml->SetDoubleAttribute("x", camera.x);
+            camera_xml->SetDoubleAttribute("y", camera.y);
+            camera_xml->SetDoubleAttribute("z", camera.z);
+            camera_xml->SetDoubleAttribute("direction_x", camera.d_x);
+            camera_xml->SetDoubleAttribute("direction_y", camera.d_y);
+            camera_xml->SetDoubleAttribute("direction_z", camera.d_z);
             cameras->LinkEndChild(camera_xml.release());
             c ++;
         }
@@ -1622,6 +1646,54 @@ void BattleDataInstaller::GenerateRsdFiles(SpellModel model, std::string path){
     }
 }
 
+void BattleDataInstaller::WriteModelCamera(
+  File script, File skeleton, const std::string& model_name
+){
+    // The scripts of a model start with a header of 0x68 bytes, that ff7.exe copies to the data the
+    // cameras use (0x42b6a0): 16 points of the model at 0x12, the factors of the size at 0x44, two
+    // views of the model (a camera position and a point to look at) at 0x4C and the height of the point
+    // the camera looks at, at 0x64.
+    if (script.GetFileSize() < 0x68 || skeleton.GetFileSize() < 16) return;
+    skeleton.SetOffset(12);
+    const unsigned int bones = skeleton.readU32LE();
+    if (bones == 0 || skeleton.GetFileSize() < 16 + bones * 12) return;
+    std::ofstream file(data_dir_ + "scripts/battle_models/" + model_name + "_camera.lua");
+    if (!file) return;
+    file << "-- Data of the model for the cameras of the battles. A point is the end of the bone with the\n"
+      << "-- number of the point minus one (0 is the root).\n"
+      << "BattleModelCameras = BattleModelCameras or {}\n"
+      << "BattleModelCameras[\"" << model_name << "\"] = {\n    points = {";
+    script.SetOffset(0x12);
+    for (int i = 0; i < 16; i ++) file << static_cast<int>(script.readU8()) << ", ";
+    file << "},\n    size = {";
+    script.SetOffset(0x44);
+    for (int i = 0; i < 3; i ++) file << static_cast<int>(static_cast<int16_t>(script.readU16LE())) << ", ";
+    // The two views, one after the other.
+    script.SetOffset(0x4C);
+    file << "},\n    views = {";
+    for (int v = 0; v < 2; v ++){
+        for (int p = 0; p < 2; p ++){
+            file << (p == 0 ? "{pos = {" : "look = {");
+            for (int i = 0; i < 3; i ++) file << static_cast<int>(static_cast<int16_t>(script.readU16LE())) << ", ";
+            file << (p == 0 ? "}, " : "}}, ");
+        }
+    }
+    script.SetOffset(0x64);
+    file << "},\n    look_height = " << static_cast<int>(static_cast<int16_t>(script.readU16LE()))
+      << ",\n    lengths = {";
+    // The bones are the last data of the skeleton: parent, length (negative) and polygons.
+    skeleton.SetOffset(skeleton.GetFileSize() - bones * 12);
+    for (unsigned int b = 0; b < bones; b ++){
+        skeleton.readU32LE();
+        const u32 raw = skeleton.readU32LE();
+        float length = 0.0f;
+        std::memcpy(&length, &raw, sizeof(length));
+        skeleton.readU32LE();
+        file << "[" << b << "] = " << -length << ", ";
+    }
+    file << "},\n}\n";
+}
+
 void BattleDataInstaller::DecompileBattleModelHrc(
   File compiled, BattleModel model, std::string path, std::string skeleton_name
 ){
@@ -1723,7 +1795,9 @@ void BattleDataInstaller::DecompileSceneModelHrc(
         decompiled += "bone" + std::to_string(b) + "\n";
         if (b == 0) decompiled += "root\n";
         else decompiled += ("bone" + std::to_string(b - 1) + "\n");
-        decompiled += "100.000000\n";
+        // The pieces share the coordinates of the scene. A length would move each one along the depth, away
+        // from the previous one.
+        decompiled += "0.000000\n";
         decompiled += "1 " + model.p[b].substr(0, 4) + "\n\n";
     }
     std::ofstream out(path);

@@ -1460,31 +1460,45 @@ bool MediaDataInstaller::InstallMusics(){
 }
 
 void MediaDataInstaller::InstallHQMusics(){
-    std::vector<std::string> hq_musics = {"hearth", "sato", "sensui", "wind"};
-    for (const std::string hq_music : hq_musics){
-
-        int index = 2000;
+    // Four tracks are not MIDI files: they are the WAV files of DATA/MUSIC (HEART.WAV, SATO.WAV,
+    // SENSUI.WAV and WIND.WAV). The index of the music (MUSIC.IDX) says which track is each one, and
+    // they are installed as the other ones are, with the number of the track as the name. Without
+    // them tracks 14, 64, 87 and 96 are missing (the music of junair2, for example).
+    std::vector<std::string> hq_musics = {"heart", "sato", "sensui", "wind"};
+    for (const std::string& hq_music : hq_musics){
+        int index = -1;
         for (auto const& m : musics_map_){
             if (m.second == hq_music){
                 index = m.first;
                 break;
             }
         }
-
-        if (ToolsReady(false)){
-            const std::string ffmpeg = ffmpeg_tool_.path;
-            // TODO: This path doesn't exist in the PC install disk (the files are in DATA/MUSIC, and one of them is
-            // called HEART, not "hearth"), so these conversions have never run. They are skipped quietly, as
-            // before, until the source files and the destination are sorted out.
-            const std::string wav = disk_image_.getContentPath() + "musics/" + hq_music + ".wav";
-            const std::string ogg = data_dir_ + "audio/sounds/" + std::to_string(index) + ".ogg";
-            if (!boost::filesystem::exists(wav)) continue;
-            RunConversion(
-              "high quality music " + hq_music,
-              [ffmpeg, wav, ogg](std::string* error){return ExternalTools::ConvertToOgg(ffmpeg, wav, ogg, error);}
-            );
+        if (index < 0){
+            InstallLog::Get().Add("[WARNING] The music " + hq_music + " is not in the index of the music.");
+            continue;
         }
+        if (!ToolsReady(false)) continue;
+        const std::string ffmpeg = ffmpeg_tool_.path;
+        std::string upper = hq_music;
+        std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+        const std::unique_ptr<std::string> wav_path = disk_image_.filePath("data/music/" + upper + ".wav");
+        if (!wav_path || !boost::filesystem::exists(*wav_path)){
+            InstallLog::Get().Add("[WARNING] The file of the music " + hq_music + " was not found.");
+            continue;
+        }
+        const std::string wav = *wav_path;
+        const std::string ogg = data_dir_ + "audio/musics/" + std::to_string(index) + ".ogg";
+        RunConversion(
+          "high quality music " + hq_music,
+          [ffmpeg, wav, ogg](std::string* error){return ExternalTools::ConvertToOgg(ffmpeg, wav, ogg, error);}
+        );
     }
+    // The index lists the tracks by their position, and the MIDI files are four less than the tracks:
+    // the last ones (94 to 97) were left out of it. A track with no file is not written to the index.
+    int last_id = 0;
+    for (auto const& m : musics_map_) last_id = std::max(last_id, m.first);
+    for (int id = static_cast<int>(musics_.size()); id <= last_id; ++ id)
+        musics_.push_back("audio/musics/" + std::to_string(id) + ".ogg");
 }
 
 bool MediaDataInstaller::ToolsReady(bool need_timidity){

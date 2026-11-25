@@ -290,7 +290,6 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
           const int orientation, const char* animation
         );
 
-
         /**
          * Adds a mesh of a visual effect to the battle scene.
          *
@@ -348,7 +347,6 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          * @param[in] name Name of the mesh.
          */
         void ScriptRemoveDynamicMesh(const char* name);
-
 
         /**
          * Sets the battle layout.
@@ -577,6 +575,20 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         void SetInitialCamera(const unsigned int id);
 
         /**
+         * Sets the camera script of the start of the battle.
+         *
+         * @param[in] id ID of the script, -1 for none.
+         */
+        void SetIntroCamera(const int id);
+
+        /**
+         * Gets the camera script of the start of the battle.
+         *
+         * @return ID of the script, -1 if there is none.
+         */
+        int ScriptGetIntroCamera() const;
+
+        /**
          * Changes the battle camera to one of the cameras of the formation.
          *
          * To be called from Lua scripts.
@@ -651,7 +663,6 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          */
         void ClearDynamicMeshes();
 
-
         /**
          * Loads the party members into the battle.
          */
@@ -718,7 +729,8 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
         static const float SIDE_DISTANCE;
 
         /**
-         * Scale factor for battle enemy models.
+         * Scale factor for battle enemy models: the one of the positions of the battle (the original units are
+         * 255 times smaller than the ones of the scene).
          */
         static const float ENEMY_SCALE;
 
@@ -726,11 +738,6 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          * Scale factor for battle character models.
          */
         static const float PARTY_SCALE;
-
-        /**
-         * Scale factor for battle background models.
-         */
-        static const float SCENE_SCALE;
 
         /**
          * Scale factor for battle attack and spell models.
@@ -762,6 +769,11 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          * Default camera ID
          */
         unsigned int initial_camera_;
+
+        /**
+         * Camera script of the start of the battle.
+         */
+        int intro_camera_;
 
         /**
          * Battle layout.

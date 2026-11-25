@@ -26,6 +26,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include "ExeEffectCameras.h"
 
 /**
  * Reads the camera scripts of the battles (camdat0.bin, camdat1.bin and camdat2.bin of data/battle).
@@ -40,6 +41,9 @@
  * operands (bytes and 16 bit values). The lengths of the operands for each opcode of the two kinds
  * of scripts were found in the interpreter of ff7.exe (0x5c2341 for the position, 0x5c3f45 for the
  * point it looks at). A script ends with 0xff, or with 0xfe followed by 0xc0 (loop).
+ *
+ * The third pointer is the list of the scripts of the camera of the victory (the camera id -3 in the
+ * game): three for the position, one for each variant, and then three for the point it looks at.
  */
 namespace BattleCameraScripts{
 
@@ -50,6 +54,8 @@ namespace BattleCameraScripts{
     struct Set{
         std::vector<uint32_t> position;
         std::vector<uint32_t> look;
+        std::vector<uint32_t> victory_position;
+        std::vector<uint32_t> victory_look;
         std::map<uint32_t, std::vector<uint8_t>> scripts;
     };
 
@@ -183,7 +189,84 @@ namespace BattleCameraScripts{
                 list.back() = key;
             }
         }
+        const uint32_t victory = ReadU32(d, 8) - base;
+        if (victory >= d.size()) return false;
+        for (int i = 0; i < 6; ++ i){
+            const bool position = i < 3;
+            const uint32_t offset = ReadU32(d, victory + 4 * i) - base;
+            std::vector<uint8_t> script;
+            if (offset >= d.size() || !ReadScript(d, offset, position, script)) return false;
+            const uint32_t key = offset * 2 + (position ? 0 : 1);
+            set.scripts[key] = script;
+            (position ? set.victory_position : set.victory_look).push_back(key);
+        }
         return true;
+    }
+
+    /**
+     * Reads the scripts of the cameras of the start of the battles (the camera id -2 in the game) from
+     * ff7.exe. There are two lists of pointers, one for the position and one for the point it looks
+     * at, indexed by the camera byte of the formation (read at 0x5c2406 and 0x5c400a in the 1998
+     * build). An entry that isn't a script has the key 0.
+     *
+     * @return False if the file couldn't be read or the scripts aren't there.
+     */
+    inline bool ReadIntro(const std::string& path, Set& set){
+        set = Set();
+        ExeEffectCameras::Image image;
+        if (!ExeEffectCameras::LoadImage(path, image)) return false;
+        const uint32_t tables[2] = {0x8f70d0, 0x8f7270};
+        const size_t count = (tables[1] - tables[0]) / 4;
+        size_t valid = 0;
+        for (int kind = 0; kind < 2; ++ kind){
+            const bool position = kind == 0;
+            std::vector<uint32_t>& list = position ? set.position : set.look;
+            const int64_t table = ExeEffectCameras::FileOffset(image.sections, tables[kind]);
+            if (table < 0) return false;
+            for (size_t i = 0; i < count; ++ i){
+                list.push_back(0);
+                const uint32_t address = ReadU32(image.data, table + 4 * i);
+                const int64_t offset = ExeEffectCameras::FileOffset(image.sections, address);
+                std::vector<uint8_t> script;
+                // They start with an opcode, and none is long.
+                if (offset < 0 || image.data[offset] < 0xd5
+                  || !ReadScript(image.data, static_cast<uint32_t>(offset), position, script)
+                  || script.size() > 512) continue;
+                const uint32_t key = static_cast<uint32_t>(offset) * 2 + (position ? 0 : 1);
+                set.scripts[key] = script;
+                list.back() = key;
+                ++ valid;
+            }
+        }
+        // Another version of the executable has other things there.
+        return valid >= count;
+    }
+
+    /**
+     * Writes the cameras of the start of the battles, after {@see WriteLua}. Game.BattleCameras.intro
+     * has the lists "position" and "look" (index = camera of the formation + 1) and the scripts.
+     */
+    inline void WriteIntroLua(std::ostream& out, const Set& set){
+        const std::string name = "Game.BattleCameras.intro";
+        out << "-- Cameras of the start of the battles, read from ff7.exe.\n"
+            << name << " = {position = {}, look = {}, scripts = {}}\n";
+        for (int kind = 0; kind < 2; ++ kind){
+            const std::vector<uint32_t>& list = kind == 0 ? set.position : set.look;
+            out << name << "." << (kind == 0 ? "position" : "look") << " = {";
+            for (size_t i = 0; i < list.size(); ++ i){
+                if (i % 16 == 0) out << "\n    ";
+                out << list[i] << ", ";
+            }
+            out << "\n}\n";
+        }
+        for (const auto& script : set.scripts){
+            out << name << ".scripts[" << script.first << "] = {";
+            for (size_t i = 0; i < script.second.size(); ++ i){
+                if (i % 24 == 0) out << "\n    ";
+                out << static_cast<int>(script.second[i]) << ", ";
+            }
+            out << "\n}\n";
+        }
     }
 
     /**
@@ -195,7 +278,8 @@ namespace BattleCameraScripts{
         out << "-- Camera scripts of the battles, read from camdat0.bin, camdat1.bin and camdat2.bin.\n"
             << "-- Game.BattleCameras[file].position[camera id * 3 + variant + 1] is the name of a script in\n"
             << "-- Game.BattleCameras[file].scripts (the bytes of the script), the same for .look (the point\n"
-            << "-- the camera looks at). See scripts/battle/battle_camera.lua for the format.\n"
+            << "-- the camera looks at). .victory_position[variant + 1] and .victory_look are the ones of the\n"
+            << "-- camera of the victory. See scripts/battle/battle_camera.lua for the format.\n"
             << "Game.BattleCameras = Game.BattleCameras or {}\n";
         for (const auto& item : sets){
             const Set& set = item.second;
@@ -209,6 +293,11 @@ namespace BattleCameraScripts{
                     out << list[i] << ", ";
                 }
                 out << "\n}\n";
+            }
+            for (int kind = 0; kind < 2; ++ kind){
+                out << name << "." << (kind == 0 ? "victory_position" : "victory_look") << " = {";
+                for (const uint32_t key : kind == 0 ? set.victory_position : set.victory_look) out << key << ", ";
+                out << "}\n";
             }
             for (const auto& script : set.scripts){
                 out << name << ".scripts[" << script.first << "] = {";

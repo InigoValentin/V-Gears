@@ -43,7 +43,13 @@ void FieldCameraInstruction::ProcessInst(
     case OPCODES::FADE: ProcessFADE(code_gen); break;
     case OPCODES::FADEW: code_gen->AddOutputLine("screen_fade:wait()"); break;
     case OPCODES::SCRLP: code_gen->WriteTodo(md.GetEntityName(), "SCRLP"); break;
-    case OPCODES::MVCAM: code_gen->WriteTodo(md.GetEntityName(), "MVCAM"); break;
+    case OPCODES::MVCAM:
+        // The movie is the background of the field: the models are drawn over it.
+        code_gen->AddOutputLine(
+          std::string("movie_player:use_movie_camera(")
+          + (params_[0]->GetUnsigned() != 0 ? "true" : "false") + ")"
+        );
+        break;
     case OPCODES::SCRLA: ProcessSCRLA(code_gen, static_cast<FieldEngine&>(*engine)); break;
     default:
         code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(

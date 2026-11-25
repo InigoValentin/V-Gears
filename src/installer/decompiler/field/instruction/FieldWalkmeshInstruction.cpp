@@ -47,7 +47,7 @@ void FieldWalkmeshInstruction::ProcessInst(
             break;
         case OPCODES::LINE: ProcessLINE(code_gen, md.GetEntityName()); break;
         case OPCODES::LINON: ProcessLINON(code_gen); break;
-        case OPCODES::SLINE: code_gen->WriteTodo(md.GetEntityName(), "SLINE"); break;
+        case OPCODES::SLINE: ProcessSLINE(code_gen, md.GetEntityName()); break;
         default:
             code_gen->AddOutputLine(FieldCodeGenerator::FormatInstructionNotImplemented(
               md.GetEntityName(), address_, opcode_
@@ -81,6 +81,24 @@ void FieldWalkmeshInstruction::ProcessLINE(CodeGenerator* code_gen, const std::s
       "-- LINE (" + std::to_string(xa) + ", " + std::to_string(ya) + ", " + std::to_string(za)
       + ")-(" + std::to_string(xb) + ", " +std::to_string(yb) + ", " + std::to_string(zb) + ")"
     );
+}
+
+void FieldWalkmeshInstruction::ProcessSLINE(CodeGenerator* code_gen, const std::string& entity){
+    // Moves the line of the entity (the lines of the parade of junonr4 follow the last soldier).
+    // Operands: the banks of the six coordinates (a nibble each) and the six coordinates, which are
+    // values or the addresses of the variables that hold them.
+    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+    std::string coordinates[6];
+    for (int i = 0; i < 6; i ++){
+        coordinates[i] = "(" + FieldCodeGenerator::FormatValueOrVariable(
+          cg->GetFormatter(), params_[i]->GetUnsigned(), params_[6 + i]->GetSigned()
+        ) + ") / 128";
+    }
+    code_gen->AddOutputLine((
+      boost::format("entity_manager:set_line(\"%1%\", %2%, %3%, %4%, %5%, %6%, %7%)")
+      % entity % coordinates[0] % coordinates[1] % coordinates[2] % coordinates[3]
+      % coordinates[4] % coordinates[5]
+    ).str());
 }
 
 void FieldWalkmeshInstruction::ProcessLINON(CodeGenerator* code_gen){

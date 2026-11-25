@@ -24,6 +24,14 @@ local FLIGHT_PITCH = 20
 WorldMapSettings = {
     speed = speed,
 
+    --- World units per second for each point of SetActiveEntityMovespeed in the scenes of the Warship
+    -- (the Warship sails at 10 to 40 in them). From ff7.exe: a mesh is 8192 units and the ship moves
+    -- speed / 8192 of a mesh each frame, which is this value with 30 frames per second (a unit of 30 / 4096).
+    scene_speed_unit = 30 / 4096,
+    --- Frames of the scene scripts for each second. The distance does not depend on it (it is for each frame, in
+    -- the exe), only how long the waits and the movement take. 15 is what the user remembers of the original.
+    scene_fps = 15,
+
     --- Camera: distance to the vehicle (world units) and angle over the ground (degrees), by vehicle.
     -- submarine_underwater is the submarine in WM2 and submarine the one that floats in WM0.
     camera = {
@@ -34,6 +42,8 @@ WorldMapSettings = {
         highwind = {distance = DISTANCE, pitch = FLIGHT_PITCH},
         submarine = {distance = DISTANCE, pitch = PITCH},
         submarine_underwater = {distance = DISTANCE, pitch = FLIGHT_PITCH},
+        -- The entity of a scripted scene (the Warship).
+        scene = {distance = 1.25, pitch = 25},
     },
 
     --- Music of the world map (the logic is in world_music.lua). Numbers are the tracks of audio/musics.

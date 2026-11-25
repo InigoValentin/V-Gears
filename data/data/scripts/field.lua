@@ -14,6 +14,21 @@ load_field_map_request = function(map_name, point_name)
     end
 end
 
+--- Starts a minigame (the MINIGAME opcode).
+--
+-- The minigames are not implemented yet: the game goes on as if the minigame had been played, and
+-- jumps to the field that the original game goes to when it ends. The scripts of that field decide
+-- from the state of the game what comes next (the bike of blackbgb leads to the fight against the
+-- Motor Ball, because the script of the field set that state before starting the minigame).
+--
+-- @param game Number of the minigame.
+-- @param map_name Field where the game goes on.
+-- @param point_name Point of that field where the player is placed.
+minigame = function(game, map_name, point_name)
+    print("The minigame " .. tostring(game) .. " is not implemented: skipping it.")
+    load_field_map_request(map_name, point_name)
+end
+
 dispatch_menu = function(menu_id, parameter)
     menu_id = tonumber(menu_id)
     parameter = tonumber(parameter)
@@ -45,6 +60,8 @@ dispatch_menu = function(menu_id, parameter)
         open_menu("save")
     elseif menu_id == 15 then
         Party.steal_materia()
+    elseif menu_id == 17 then
+        Characters.unequip_materia(parameter)
     elseif menu_id == 18 then
         Characters.remove_materia(parameter)
     elseif menu_id == 19 then
@@ -93,17 +110,17 @@ end
 -- @param entity_name The entity name.
 -- @param character_id Id of the character to assign.
 set_entity_to_character = function(entity_name, character_id)
-    if character_id == Party[1] and entity_name ~= "" then
+    if character_id == Party.get_leader() and entity_name ~= "" then
         place_player_at_map_entry(entity_name)
     end
     entity_manager:set_entity_to_character(entity_name, character_id)
-    -- The model of a playable character is shown only if it is the leader of the party. The other
-    -- members are not drawn following the leader (join_party hides them too), and the scenes show
+    -- The model of a playable character is shown only if it is the leader of the party (the one the
+    -- scripts set, see Party.get_leader). The other members are not drawn following the leader (join_party hides them too), and the scenes show
     -- their models when they need them. Models are visible by default, so the ones of the
     -- characters that are not the leader, such as Cid in mds6_1 or Aerith in mrkt2 after the
     -- first scene, have to be hidden here. With no party at all (a new game that has not set it
     -- yet) nothing is hidden.
-    if character_id ~= Party[1] and entity_name ~= "" and Party[1] ~= nil then
+    if character_id ~= Party.get_leader() and entity_name ~= "" and Party.get_leader() ~= nil then
         local entity = entity_manager:get_entity(entity_name)
         if entity ~= nil then
             entity:set_visible(false)
@@ -202,6 +219,12 @@ player_lock = function(lock)
     MenuSettings.available = (lock == false)
 end
 
+--- Locks or unlocks the menu button (MENU2), with no effect on the player.
+-- @param lock True to lock, false to unlock.
+menu_lock = function(lock)
+    MenuSettings.available = (lock == false)
+end
+
 --- Sets a bit variable on (1).
 --
 -- @param bank Memory bank (0-index, as in game).
@@ -243,6 +266,9 @@ end
 -- @param az Address at which to store the Z coordinate.
 -- @param at Address at which to store the triangle.
 -- @param scale Map scale to multiply values
+-- The coordinates are rounded: the walkmesh is saved with six digits, so a height of 193 units comes
+-- as 192.9997 once scaled, and the scripts compare it with the exact value (blin68_1 asks for it to
+-- talk to a character).
 axyzi = function(bx, by, bz, bt, id, ax, ay, az, at, scale)
     local entity = entity_manager:get_entity_from_index(id)
     if entity == nil then
@@ -250,9 +276,9 @@ axyzi = function(bx, by, bz, bt, id, ax, ay, az, at, scale)
     end
     local x, y, z = entity:get_position()
     local t = entity:get_move_triangle_id()
-    Banks[bx][ax] = math.floor(x * scale)
-    Banks[by][ay] = math.floor(y * scale)
-    Banks[bz][az] = math.floor(z * scale)
+    Banks[bx][ax] = math.floor(x * scale + 0.5)
+    Banks[by][ay] = math.floor(y * scale + 0.5)
+    Banks[bz][az] = math.floor(z * scale + 0.5)
     Banks[bt][at] = t
     return 0
 end
@@ -271,8 +297,8 @@ getaxy = function(bx, by, id, ax, ay, scale)
         do return end
     end
     local x, y = entity:get_position()
-    Banks[bx][ax] = math.floor(x * scale)
-    Banks[by][ay] = math.floor(y * scale)
+    Banks[bx][ax] = math.floor(x * scale + 0.5)
+    Banks[by][ay] = math.floor(y * scale + 0.5)
     return 0
 end
 
@@ -290,9 +316,13 @@ name_character = function(id)
         print("Tried to rename invalid character with ID " .. tostring(id))
         return 0
     end
+    -- Cait Sith and Vincent get their data before they are named.
+    Characters.load_recruit_record(id)
     -- While the name menu is not enabled, the character just gets its default name.
     if not UiContainer.NameMenu.enabled then
         UiContainer.NameMenu:apply_default_name(id)
+        -- The level of the character is set once it has a name.
+        Characters.join(id)
         return 0
     end
     UiContainer.NameMenu.id = id
@@ -310,9 +340,20 @@ end
 -- @param menu The name of the menu.
 open_menu = function(menu)
     if menu == "party" then
-        -- TODO
+        -- The button that asked for the menu is still down: wait for it, or it would close the menu.
+        while entity_manager:is_key_on(16 + 64) do script:wait(0) end
+        script:request_end_sync(Script.UI, "MainMenu", "show", 0)
+        while ui_manager:get_widget("MainMenu"):is_visible() do script:wait(0) end
+        -- The same with the button that closed it: the script would see it as a new request.
+        while entity_manager:is_key_on(16 + 64) do script:wait(0) end
     elseif menu == "save" then
-        -- TODO
+        -- The button that asked for the menu (a script may read it) is down: wait for it.
+        while entity_manager:is_key_on(32 + 64) do script:wait(0) end
+        UiContainer.SaveMenu.operation = "save"
+        UiContainer.SaveMenu.standalone = true
+        script:request_end_sync(Script.UI, "SaveMenu", "show", 0)
+        while UiContainer.current_menu == "save" do script:wait(0) end
+        while entity_manager:is_key_on(32 + 64) do script:wait(0) end
     end
 end
 
@@ -320,7 +361,13 @@ end
 --
 -- @param id Shop ID.
 open_shop = function(id)
-    -- TODO: Implement
+    -- The button that talked to the shop (a script may read it) is down: wait for it, or it would
+    -- act in the menu.
+    while entity_manager:is_key_on(32 + 64) do script:wait(0) end
+    UiContainer.ShopMenu.shop_id = tonumber(id)
+    script:request_end_sync(Script.UI, "ShopMenu", "show", 0)
+    while UiContainer.current_menu == "shop" do script:wait(0) end
+    while entity_manager:is_key_on(32 + 64) do script:wait(0) end
 end
 
 --- Plays one of the tracks assigned to the field.
@@ -328,10 +375,12 @@ end
 -- @param id ID of the track in the field.
 play_map_music = function(id)
     local track_id = audio_manager:get_track_id(id)
+    -- A track of the field with no music (-1, an empty AKAO frame of the field file) is silence: the
+    -- scenes use it between two tracks, and some fields (trackin) have no music at all.
     if track_id ~= -1 then
         audio_manager:play_music(tostring(track_id))
     else
-        print("Requested non-existent music track ID " .. tostring(id))
+        audio_manager:stop_music()
     end
 end
 
@@ -347,8 +396,9 @@ end
 -- @param fade_in Fade in parameter of the original opcode (0 means no fade).
 change_map_music = function(id, fade_out, fade_in)
     local track_id = audio_manager:get_track_id(id)
+    -- A track with no music is silence (see play_map_music).
     if track_id == -1 then
-        print("Requested non-existent music track ID " .. tostring(id))
+        audio_manager:stop_music()
         return
     end
     if fade_in == 0 then
@@ -448,15 +498,18 @@ System["MapChanger"] = {
 
 --- Runs a script of the entity of a character (the PREQ, PRQSW and PRQEW opcodes).
 --
--- @param character ID of the character, the one that the entity was given with the PC opcode.
+-- @param character Slot of the party (0 is the leader), not the ID of a character: the scripts of a
+-- scene with another party (Aerith leading the party, for example) ask for the slot, and the
+-- request goes to the entity of the character that is in it (the one given with the PC opcode).
 -- @param script_name Name of the script function.
 -- @param priority Priority of the script.
 -- @param mode "request" does not wait, "start_sync" waits for the script to start and "end_sync" for
 -- it to end.
 party_request = function(character, script_name, priority, mode)
-    local entity = entity_manager:get_entity_from_character_id(character)
+    local character_id = Party[character + 1]
+    local entity = character_id ~= nil and entity_manager:get_entity_from_character_id(character_id) or nil
     if entity == nil then
-        print("party_request: there is no entity for the character " .. tostring(character) .. ".")
+        print("party_request: there is no entity for the party slot " .. tostring(character) .. ".")
         return
     end
     local name = entity:get_name()

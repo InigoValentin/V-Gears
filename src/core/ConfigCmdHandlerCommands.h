@@ -20,6 +20,7 @@
 #include <OgreStringConverter.h>
 #include "Console.h"
 #include "EntityManager.h"
+#include "ScriptManager.h"
 #include "Logger.h"
 #include "XmlMapFile.h"
 #include "XmlMapsFile.h"
@@ -292,11 +293,55 @@ void CmdMap(const Ogre::StringVector& params){
         Console::getSingleton().AddTextToOutput("Usage: /map [map_id]");
         return;
     }
-    EntityManager::getSingleton().Clear();
-    XmlMapsFile xml("./data/maps.xml");
-    Ogre::String file_name = xml.GetMapFileNameByName(params[1]);
-    XmlMapFile xml_map("./data/" + file_name);
-    xml_map.LoadMap();
+    // The same as the map function of the scripts (the old list of maps, ./data/maps.xml, doesn't
+    // exist: the fields are in ./data/fields/_fields.xml).
+    ScriptManager::getSingleton().RunString("map(\"" + params[1] + "\")");
+}
+
+/**
+ * Opens a shop, to test the shop menu by hand.
+ *
+ * @param[in] params Command parameters: the command name and the ID of the shop (0-79).
+ */
+void CmdShop(const Ogre::StringVector& params){
+    if (params.size() != 2){
+        Console::getSingleton().AddTextToOutput("Usage: /shop <shop_id>");
+        return;
+    }
+    // The scripts open shops with open_shop(), that waits for the menu to close and can only run
+    // in a script. Showing the menu directly doesn't need that.
+    ScriptManager::getSingleton().RunString(
+      "UiContainer.ShopMenu.shop_id = tonumber(\"" + params[1] + "\") or -1; "
+      "UiContainer.ShopMenu:show()"
+    );
+}
+
+/**
+ * Enables or disables characters in the PHS.
+ *
+ * @param[in] params Command parameters: the command name, the ID of the character (0-8) or "all", and
+ * optionally "on" (the default) or "off".
+ */
+void CmdPhs(const Ogre::StringVector& params){
+    if (params.size() < 2 || params.size() > 3){
+        Console::getSingleton().AddTextToOutput("Usage: /phs <character_id|all> [on|off]");
+        return;
+    }
+    const bool enable = params.size() < 3 || (params[2] != "off" && params[2] != "0");
+    const std::string value = enable ? "true" : "false";
+    std::string first = "0";
+    std::string last = "8";
+    if (params[1] != "all"){
+        first = params[1];
+        last = params[1];
+    }
+    ScriptManager::getSingleton().RunString(
+      "for id = (tonumber(\"" + first + "\") or -1), (tonumber(\"" + last + "\") or -2) do "
+      "if type(Characters[id]) == \"table\" then Characters[id].enabled = " + value + " end end"
+    );
+    Console::getSingleton().AddTextToOutput(
+      std::string(enable ? "Enabled " : "Disabled ") + (params[1] == "all" ? "all characters" : "character " + params[1]) + " in the PHS"
+    );
 }
 
 /**
@@ -305,7 +350,7 @@ void CmdMap(const Ogre::StringVector& params){
  * @param[in] complete_params The map names will be loaded here.
  */
 void CmdMapCompletion(Ogre::StringVector& complete_params){
-    XmlMapsFile xml("./data/maps.xml");
+    XmlMapsFile xml("./data/fields/_fields.xml");
     xml.GetMapNames(complete_params);
 }
 
@@ -368,7 +413,7 @@ void CmdResolutionCompletition(Ogre::StringVector& complete_params){
  */
 void CmdScreenshot(const Ogre::StringVector& params){
     Ogre::RenderWindow* window = VGears::Application::getSingleton().getRenderWindow();
-    Ogre::String ret = window->writeContentsToTimestampedFile("screenshot_", ".tga");
+    Ogre::String ret = window->writeContentsToTimestampedFile("screenshot_", ".png");
     Console::getSingleton().AddTextToOutput("Screenshot " + ret + " saved.");
 }
 
@@ -486,6 +531,8 @@ void ConfigCmdHandler::InitCmd(){
     );
     AddCommand("set_log_level", "Set log messages level", "", CmdSetLogLevel, NULL);
     AddCommand("map", "Run game module", "", CmdMap, CmdMapCompletion);
+    AddCommand("shop", "Open a shop", "<shop_id>", CmdShop, NULL);
+    AddCommand("phs", "Enable or disable characters in the PHS", "<character_id|all> [on|off]", CmdPhs, NULL);
     AddCommand("resolution", "Change resolution", "", CmdResolution, CmdResolutionCompletition);
     AddCommand("screenshot", "Capture current screen content", "", CmdScreenshot, NULL);
     AddCommand("fade", "Start a screen fade", "<type> <r> <g> <b> <speed>", CmdFade, NULL);

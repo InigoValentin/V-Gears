@@ -1,0 +1,210 @@
+<screen name="ShopMenu" script="scripts/menu/shop_menu.lua" visible="false">
+    <sprite name="Background" x="0" y="0" width="100%" height="100%" colour="0 0 0" visible="true"/>
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="TopBar" x="0" y="0" width="100%-100" height="24" visible="true">
+            <prototype name="Window" />
+            <widget name="Commands" x="0" y="0" width="100%" height="100%" visible="true">
+                <text_area name="Buy" x="36" y="6" text_name="ShopMenuBuy" font="FFVIIFont" visible="true" />
+                <text_area name="Sell" x="96" y="6" text_name="ShopMenuSell" font="FFVIIFont" visible="true" />
+                <text_area name="Exit" x="156" y="6" text_name="ShopMenuExit" font="FFVIIFont" visible="true" />
+                <sprite name="Cursor" image="icons/cursor.png" x="6" y="6" width="24" height="17" visible="true">
+                    <animation name="Position1" length="0" x="0:6" />
+                    <animation name="Position2" length="0" x="0:66" />
+                    <animation name="Position3" length="0" x="0:126" />
+                </sprite>
+            </widget>
+            <text_area name="PromptBuy" x="16" y="6" text_name="ShopMenuPromptBuy" font="FFVIIFont" visible="false" />
+            <text_area name="PromptSell" x="16" y="6" text_name="ShopMenuPromptSell" font="FFVIIFont" visible="false" />
+            <text_area name="PromptQuantity" x="16" y="6" text_name="ShopMenuPromptQuantity" font="FFVIIFont" visible="false" />
+        </widget>
+        <widget name="Title" x="100%-100" y="0" width="100" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Title" x="12" y="6" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Help" x="0" y="24" width="100%" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Help" x="16" y="6" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="List" x="0" y="48" width="62%" height="100%-148" visible="true">
+            <prototype name="Window" />
+            <sprite name="Icon1" image="icons/item_item.png" x="26" y="8" width="13" height="15" visible="false" />
+            <text_area name="Name1" x="44" y="8" font="FFVIIFont" visible="true" />
+            <text_area name="Price1" x="100%-76" y="8" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Icon2" image="icons/item_item.png" x="26" y="24" width="13" height="15" visible="false" />
+            <text_area name="Name2" x="44" y="24" font="FFVIIFont" visible="true" />
+            <text_area name="Price2" x="100%-76" y="24" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Icon3" image="icons/item_item.png" x="26" y="40" width="13" height="15" visible="false" />
+            <text_area name="Name3" x="44" y="40" font="FFVIIFont" visible="true" />
+            <text_area name="Price3" x="100%-76" y="40" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Icon4" image="icons/item_item.png" x="26" y="56" width="13" height="15" visible="false" />
+            <text_area name="Name4" x="44" y="56" font="FFVIIFont" visible="true" />
+            <text_area name="Price4" x="100%-76" y="56" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Icon5" image="icons/item_item.png" x="26" y="72" width="13" height="15" visible="false" />
+            <text_area name="Name5" x="44" y="72" font="FFVIIFont" visible="true" />
+            <text_area name="Price5" x="100%-76" y="72" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Icon6" image="icons/item_item.png" x="26" y="88" width="13" height="15" visible="false" />
+            <text_area name="Name6" x="44" y="88" font="FFVIIFont" visible="true" />
+            <text_area name="Price6" x="100%-76" y="88" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Icon7" image="icons/item_item.png" x="26" y="104" width="13" height="15" visible="false" />
+            <text_area name="Name7" x="44" y="104" font="FFVIIFont" visible="true" />
+            <text_area name="Price7" x="100%-76" y="104" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Icon8" image="icons/item_item.png" x="26" y="120" width="13" height="15" visible="false" />
+            <text_area name="Name8" x="44" y="120" font="FFVIIFont" visible="true" />
+            <text_area name="Price8" x="100%-76" y="120" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Cursor" image="icons/cursor.png" x="0" y="6" width="24" height="17" visible="false">
+                <animation name="Position1" length="0" y="0:6" />
+                <animation name="Position2" length="0" y="0:22" />
+                <animation name="Position3" length="0" y="0:38" />
+                <animation name="Position4" length="0" y="0:54" />
+                <animation name="Position5" length="0" y="0:70" />
+                <animation name="Position6" length="0" y="0:86" />
+                <animation name="Position7" length="0" y="0:102" />
+                <animation name="Position8" length="0" y="0:118" />
+            </sprite>
+        </widget>
+        <widget name="Info" x="62%" y="48" width="38%" height="100%-148" visible="true">
+            <prototype name="Window" />
+            <text_area name="GilLbl" text_name="ShopMenuGil" x="16" y="6" font="FFVIIFont" visible="true" />
+            <text_area name="Gil" x="30" y="19" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="OwnedLbl" text_name="ShopMenuOwned" x="16" y="38" font="FFVIIFont" visible="true" />
+            <text_area name="Owned" x="30" y="51" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="EquippedLbl" text_name="ShopMenuEquipped" x="16" y="68" font="FFVIIFont" visible="true" />
+            <text_area name="Equipped" x="30" y="81" font="FFVIIMenuDigits" visible="true" />
+        </widget>
+        <widget name="Party" x="0" y="100%-100" width="100%" height="100" visible="true">
+            <prototype name="Window" />
+            <widget name="Slot1" x="0%" y="4" width="33%" height="30" visible="false">
+                <sprite name="Portrait" image="other/choco.png" x="6" y="0" width="26" height="29" visible="true" />
+                <text_area name="AtkLbl" text_name="ShopMenuAtk" x="36" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkOld" x="46" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkArw" text_name="EquipMenuArrow" x="68" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkNew" x="78" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="ShopMenuDef" x="36" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefOld" x="46" y="15" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefArw" text_name="EquipMenuArrow" x="68" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefNew" x="78" y="15" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Slot2" x="33%" y="4" width="33%" height="30" visible="false">
+                <sprite name="Portrait" image="other/choco.png" x="6" y="0" width="26" height="29" visible="true" />
+                <text_area name="AtkLbl" text_name="ShopMenuAtk" x="36" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkOld" x="46" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkArw" text_name="EquipMenuArrow" x="68" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkNew" x="78" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="ShopMenuDef" x="36" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefOld" x="46" y="15" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefArw" text_name="EquipMenuArrow" x="68" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefNew" x="78" y="15" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Slot3" x="66%" y="4" width="33%" height="30" visible="false">
+                <sprite name="Portrait" image="other/choco.png" x="6" y="0" width="26" height="29" visible="true" />
+                <text_area name="AtkLbl" text_name="ShopMenuAtk" x="36" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkOld" x="46" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkArw" text_name="EquipMenuArrow" x="68" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkNew" x="78" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="ShopMenuDef" x="36" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefOld" x="46" y="15" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefArw" text_name="EquipMenuArrow" x="68" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefNew" x="78" y="15" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Slot4" x="0%" y="35" width="33%" height="30" visible="false">
+                <sprite name="Portrait" image="other/choco.png" x="6" y="0" width="26" height="29" visible="true" />
+                <text_area name="AtkLbl" text_name="ShopMenuAtk" x="36" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkOld" x="46" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkArw" text_name="EquipMenuArrow" x="68" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkNew" x="78" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="ShopMenuDef" x="36" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefOld" x="46" y="15" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefArw" text_name="EquipMenuArrow" x="68" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefNew" x="78" y="15" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Slot5" x="33%" y="35" width="33%" height="30" visible="false">
+                <sprite name="Portrait" image="other/choco.png" x="6" y="0" width="26" height="29" visible="true" />
+                <text_area name="AtkLbl" text_name="ShopMenuAtk" x="36" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkOld" x="46" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkArw" text_name="EquipMenuArrow" x="68" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkNew" x="78" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="ShopMenuDef" x="36" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefOld" x="46" y="15" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefArw" text_name="EquipMenuArrow" x="68" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefNew" x="78" y="15" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Slot6" x="66%" y="35" width="33%" height="30" visible="false">
+                <sprite name="Portrait" image="other/choco.png" x="6" y="0" width="26" height="29" visible="true" />
+                <text_area name="AtkLbl" text_name="ShopMenuAtk" x="36" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkOld" x="46" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkArw" text_name="EquipMenuArrow" x="68" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkNew" x="78" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="ShopMenuDef" x="36" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefOld" x="46" y="15" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefArw" text_name="EquipMenuArrow" x="68" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefNew" x="78" y="15" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Slot7" x="0%" y="66" width="33%" height="30" visible="false">
+                <sprite name="Portrait" image="other/choco.png" x="6" y="0" width="26" height="29" visible="true" />
+                <text_area name="AtkLbl" text_name="ShopMenuAtk" x="36" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkOld" x="46" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkArw" text_name="EquipMenuArrow" x="68" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkNew" x="78" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="ShopMenuDef" x="36" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefOld" x="46" y="15" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefArw" text_name="EquipMenuArrow" x="68" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefNew" x="78" y="15" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Slot8" x="33%" y="66" width="33%" height="30" visible="false">
+                <sprite name="Portrait" image="other/choco.png" x="6" y="0" width="26" height="29" visible="true" />
+                <text_area name="AtkLbl" text_name="ShopMenuAtk" x="36" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkOld" x="46" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkArw" text_name="EquipMenuArrow" x="68" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkNew" x="78" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="ShopMenuDef" x="36" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefOld" x="46" y="15" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefArw" text_name="EquipMenuArrow" x="68" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefNew" x="78" y="15" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+            <widget name="Slot9" x="66%" y="66" width="33%" height="30" visible="false">
+                <sprite name="Portrait" image="other/choco.png" x="6" y="0" width="26" height="29" visible="true" />
+                <text_area name="AtkLbl" text_name="ShopMenuAtk" x="36" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkOld" x="46" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="AtkArw" text_name="EquipMenuArrow" x="68" y="1" font="FFVIIFont" visible="true" />
+                <text_area name="AtkNew" x="78" y="2" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefLbl" text_name="ShopMenuDef" x="36" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefOld" x="46" y="15" font="FFVIIMenuDigits" visible="true" />
+                <text_area name="DefArw" text_name="EquipMenuArrow" x="68" y="14" font="FFVIIFont" visible="true" />
+                <text_area name="DefNew" x="78" y="15" font="FFVIIMenuDigits" visible="true" />
+            </widget>
+        </widget>
+        <widget name="Quantity" x="50%-110" y="50%-31" width="220" height="62" visible="false">
+            <prototype name="Window" />
+            <text_area name="Name" x="12" y="7" font="FFVIIFont" visible="true" />
+            <text_area name="Times" text_name="ShopMenuTimes" x="12" y="23" font="FFVIIFont" visible="true" />
+            <text_area name="Count" x="24" y="24" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Total" x="100%-90" y="24" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Slot1" image="icons/materia_slot.png" x="12" y="42" width="16" height="16" visible="false"/>
+            <sprite name="Slot2" image="icons/materia_slot.png" x="29" y="42" width="16" height="16" visible="false"/>
+            <sprite name="Link1" image="icons/materia_slot_link.png" x="24" y="42" width="9" height="16" visible="false"/>
+            <sprite name="Slot3" image="icons/materia_slot.png" x="46" y="42" width="16" height="16" visible="false"/>
+            <sprite name="Slot4" image="icons/materia_slot.png" x="63" y="42" width="16" height="16" visible="false"/>
+            <sprite name="Link2" image="icons/materia_slot_link.png" x="58" y="42" width="9" height="16" visible="false"/>
+            <sprite name="Slot5" image="icons/materia_slot.png" x="80" y="42" width="16" height="16" visible="false"/>
+            <sprite name="Slot6" image="icons/materia_slot.png" x="97" y="42" width="16" height="16" visible="false"/>
+            <sprite name="Link3" image="icons/materia_slot_link.png" x="92" y="42" width="9" height="16" visible="false"/>
+            <sprite name="Slot7" image="icons/materia_slot.png" x="114" y="42" width="16" height="16" visible="false"/>
+            <sprite name="Slot8" image="icons/materia_slot.png" x="131" y="42" width="16" height="16" visible="false"/>
+            <sprite name="Link4" image="icons/materia_slot_link.png" x="126" y="42" width="9" height="16" visible="false"/>
+        </widget>
+        <widget name="MateriaSale" x="50%-110" y="50%-41" width="220" height="82" visible="false">
+            <prototype name="Window" />
+            <sprite name="Icon" image="icons/materia_0.png" x="12" y="6" width="18" height="18" visible="true"/>
+            <text_area name="Name" x="36" y="9" font="FFVIIFont" visible="true" />
+            <sprite name="Star1" image="icons/materia_star_0.png" x="12" y="28" width="15" height="15" visible="true"/>
+            <sprite name="Star2" image="icons/materia_star_0.png" x="28" y="28" width="15" height="15" visible="true"/>
+            <sprite name="Star3" image="icons/materia_star_0.png" x="44" y="28" width="15" height="15" visible="true"/>
+            <sprite name="Star4" image="icons/materia_star_0.png" x="60" y="28" width="15" height="15" visible="true"/>
+            <sprite name="Star5" image="icons/materia_star_0.png" x="76" y="28" width="15" height="15" visible="true"/>
+            <text_area name="ApLbl" text_name="ShopMenuAP" x="12" y="47" font="FFVIIFont" visible="true" />
+            <text_area name="Ap" x="100%-90" y="47" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="PriceLbl" text_name="ShopMenuGil" x="12" y="63" font="FFVIIFont" visible="true" />
+            <text_area name="Price" x="100%-90" y="63" font="FFVIIMenuDigits" visible="true" />
+        </widget>
+    </widget>
+</screen>

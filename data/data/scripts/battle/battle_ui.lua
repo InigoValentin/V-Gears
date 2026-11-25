@@ -72,6 +72,13 @@ BattleStatus.FROZEN = {
     [BattleStatus.PARALYSIS] = true,
 }
 
+--- Statuses that each status removes when it is inflicted (ff7.exe: the pair of the table at 0x7ad628 for Haste
+-- and Slow, and the gain of Petrify at 0x433fe0). Fury and Sadness are handled with their items.
+BattleStatus.REMOVES = {
+    [BattleStatus.HASTE] = {BattleStatus.SLOW}, [BattleStatus.SLOW] = {BattleStatus.HASTE},
+    [BattleStatus.PETRIFY] = {BattleStatus.SLEEP, BattleStatus.POISON, BattleStatus.CONFUSION, BattleStatus.REGEN},
+}
+
 --- Seconds between the damage or healing of poison and regen.
 BattleStatus.TICK = 3
 
@@ -135,8 +142,12 @@ BattleAnimations.get_scripts = function(model)
                     table.insert(steps, {type = "move", distance = tonumber(args:match("^%s*(-?%d+)")) or 0})
                 elseif fn == "return_position" then
                     table.insert(steps, {type = "return"})
+                elseif (fn == "set_camera" or fn == "set_formation_camera") and tonumber(args) ~= nil
+                  -- Some models have scripts that are not real ones (they don't end).
+                  and body:find("return 0", 1, true) then
+                    table.insert(steps, {type = fn == "set_camera" and "camera" or "view", number = tonumber(args)})
                 end
-                -- TODO: set_direction, effects, sounds, camera...
+                -- TODO: set_direction, effects, sounds...
             end
             scripts[tonumber(number)] = steps
         end
@@ -435,6 +446,9 @@ UiContainer.BattleUi = {
                 self.command_queue = new_queue
                 audio_manager:play_sound("Cursor")
                 self:show_commands(self.command_queue[1])
+            elseif button == Config.ACTIONS.CONFIRM and self.party[self.current_character_window].manip_commands ~= nil
+              and self:has_status(Battle.TargetGroup.PARTY, self.current_character_window, BattleStatus.FROG) then
+                audio_manager:play_sound("Error")
             elseif button == Config.ACTIONS.CONFIRM and self.party[self.current_character_window].manip_commands ~= nil then
                 -- The commands are the attacks of the manipulated enemy.
                 self:select_manip_attack(self.cursor_command)
@@ -447,6 +461,10 @@ UiContainer.BattleUi = {
                     return 0
                 end
                 local command_id = self.party[self.current_character_window].command[self.cursor_command]
+                if self:is_frog_blocked(self.current_character_window, command_id) then
+                    audio_manager:play_sound("Error")
+                    return 0
+                end
                 if command_id == self.MANIP_COMMAND and self.party[self.current_character_window].manipulating ~= nil then
                     -- Nobody can manipulate an enemy while manipulating another one.
                     audio_manager:play_sound("Error")
@@ -461,10 +479,8 @@ UiContainer.BattleUi = {
                 elseif cmd.menu == Battle.Menu.TARGET or self.ENEMY_COMMANDS[command_id] then
                     audio_manager:play_sound("Cursor")
                     self:select_command_target(self.party[self.current_character_window].command[self.cursor_command])
-                elseif (cmd.menu == Battle.Menu.MAGIC or cmd.menu == Battle.Menu.W_MAGIC) and (self:has_status(Battle.TargetGroup.PARTY, self.current_character_window, BattleStatus.SILENCE)
-                  or self:has_status(Battle.TargetGroup.PARTY, self.current_character_window, BattleStatus.FROG)
-                  or self:has_status(Battle.TargetGroup.PARTY, self.current_character_window, BattleStatus.SMALL)) then
-                    -- Silenced, frog and small characters can't cast spells.
+                elseif self.SILENCED_COMMANDS[command_id] and self:has_status(Battle.TargetGroup.PARTY, self.current_character_window, BattleStatus.SILENCE) then
+                    -- Silenced characters can't cast, summon nor use enemy skills.
                     audio_manager:play_sound("Error")
                 else
                     self.selected_command = self.party[self.current_character_window].command[self.cursor_command]
@@ -821,6 +837,10 @@ UiContainer.BattleUi = {
     --
     -- @param command_id 18 for Change, 19 for Defend.
     queue_side_command = function(self, command_id)
+        if self:is_frog_blocked(self.current_character_window, command_id) then
+            audio_manager:play_sound("Error")
+            return
+        end
         self.selected_command = command_id
         self.current_list = "none"
         self.selected_attack = nil
@@ -1238,8 +1258,10 @@ UiContainer.BattleUi = {
             action.links = self.selected_links
             action.throw_item = self.selected_throw
         elseif self.selected_command == self.party[action.actor].command[1] then
-            -- The Attack command carries the links of its materia.
-            action.links = self.party[action.actor].attack_links
+            -- The Attack command carries the links of its materia. A frog that lost a replacement of the command
+            -- loses its links too.
+            local member = self.party[action.actor]
+            if member.command[1] == member.attack_command or member.command[1] == 20 then action.links = member.attack_links end
         end
         if self.selected_command == self.COIN_COMMAND then action.coin_gil = self.selected_coin end
         action.target_type = self.target_type
@@ -1292,6 +1314,27 @@ UiContainer.BattleUi = {
             -- Nothing else advances once the battle is over, but animations (victory poses) go on.
             self:update_animations(now)
             UiContainer.BattleFx:update(now)
+            local ok, err = pcall(BattleCameraController.update, BattleCameraController, now - self.last_tick_time)
+            if not ok then print("Battle camera: " .. tostring(err)) BattleCameraController:reset() end
+            self.last_tick_time = now
+            do return end
+        end
+        if self.intro == true then
+            -- The battle waits for the camera of its start. The first tick can be late (loading), so
+            -- the camera doesn't skip ahead.
+            self:update_animations(now)
+            UiContainer.BattleFx:update(now)
+            local elapsed = math.min(now - self.last_tick_time, 0.2)
+            self.last_tick_time = now
+            local ok, going = pcall(BattleCameraController.update_intro, BattleCameraController, elapsed)
+            if not ok then
+                print("Battle camera: " .. tostring(going))
+                BattleCameraController:reset()
+                battle_manager:set_camera(0)
+            end
+            self.intro = ok and going
+            -- The time that the ATBs are held for starts when the camera ends.
+            if self.intro ~= true then self.hold_start = now end
             do return end
         end
         local delta = now - self.last_tick_time
@@ -1306,7 +1349,9 @@ UiContainer.BattleUi = {
         if self.message_until ~= nil and now >= self.message_until then self:show_message("") end
         self:update_action(now)
         -- The camera of the attacks.
-        if self.action_executing ~= true then BattleCameraController:stop() end
+        if self.action_executing ~= true and not BattleCameraController:is_script_running() then
+            BattleCameraController:stop()
+        end
         local ok, err = pcall(BattleCameraController.update, BattleCameraController, delta)
         if not ok then print("Battle camera: " .. tostring(err)) BattleCameraController:stop(false) end
         -- Held ATBs start to fill after some time.
@@ -1619,13 +1664,15 @@ UiContainer.BattleUi = {
         end
         if (action.attack_id == nil or action.attack_id < 0) and action.actor_side == Battle.TargetGroup.PARTY then
             if action.command == 26 then
-                -- Flash: it can miss like a normal attack (accuracy of the weapon), does no damage, and
-                -- kills the enemies it hits unless they are immune to death.
+                -- Flash: it can miss like a normal attack, with half of the accuracy of the weapon (ff7.exe,
+                -- 0x5ca5c1), does no damage, and kills the enemies it hits unless they are immune to death.
                 local flash = self:get_weapon_attack(action.actor)
                 local damage = {}
                 for key, value in pairs(flash.damage) do damage[key] = value end
                 damage.power = 0
+                damage.no_damage = true
                 damage.critical = 0
+                damage.accuracy = math.floor(math.floor((damage.accuracy or 1) * 255 + 0.5) / 2) / 255
                 flash.damage = damage
                 flash.name = "Flash"
                 flash.elements = {}
@@ -1638,7 +1685,8 @@ UiContainer.BattleUi = {
                 local damage = {}
                 for key, value in pairs(attack.damage) do damage[key] = value end
                 damage.always_critical = 1
-                damage.hit_factor = self.DBLOW_CHANCE
+                -- A third of the accuracy of the weapon (ff7.exe, 0x5ca610).
+                damage.accuracy = math.floor(math.floor((damage.accuracy or 1) * 255 + 0.5) / 3) / 255
                 attack.damage = damage
                 attack.name = "D.blow"
                 return attack
@@ -1660,10 +1708,10 @@ UiContainer.BattleUi = {
         local elements = {}
         for element, _ in pairs(member.effects.elements.attack) do table.insert(elements, element) end
         table.sort(elements)
-        -- TODO: The chance of the added statuses is a guess (always).
+        -- The added statuses have the chance 5 of 63 (ff7.exe, 0x5c9c5f).
         local effects = {}
         for status, _ in pairs(member.effects.status.attack) do
-            table.insert(effects, {id = status, chance = 1, mode = "inflict"})
+            table.insert(effects, {id = status, chance = self.ADDED_EFFECT_CHANCE, mode = "inflict"})
         end
         return {
             id = -1, name = "Attack", mp = 0, weapon = true,
@@ -1688,29 +1736,147 @@ UiContainer.BattleUi = {
         return self:has_status(side, index, BattleStatus.BERSERK) or self:has_status(side, index, BattleStatus.CONFUSION)
     end,
 
-    --- Queues a basic attack for a combatant that can't choose what to do.
+    --- Picks the random target of a confused combatant in a side: a living one (a dead one for attacks that revive),
+    -- and not itself while there is another one.
     --
-    -- Berserk combatants attack the other side, confused ones attack anybody.
+    -- @return The index, nil if there is nobody to target.
+    get_confused_target = function(self, group, side, index, revives)
+        local list = group == Battle.TargetGroup.PARTY and self.party or self.enemies
+        local candidates = {}
+        for i = 1, #list do
+            if list[i].dead == revives and not (group == side and i == index) then table.insert(candidates, i) end
+        end
+        if #candidates == 0 then
+            if group == side and list[index] ~= nil and list[index].dead == revives then return index end
+            return nil
+        end
+        return candidates[math.random(1, #candidates)]
+    end,
+
+    --- Aims an action of a confused combatant: at the side opposite to the usual one of what it uses (an ally for what
+    -- is meant for enemies, and the other way round), at one random combatant or at the whole side.
+    --
+    -- @param multiple True to aim at the whole side.
+    -- @return False if there is nobody to target.
+    aim_confused = function(self, action, group, multiple, revives)
+        action.target_group = group
+        action.target_list = nil
+        action.target_index = nil
+        if multiple then
+            action.target_type = Battle.TargetType.GROUP
+            return true
+        end
+        action.target_type = Battle.TargetType.SINGLE
+        action.target_index = self:get_confused_target(group, action.actor_side or Battle.TargetGroup.PARTY, action.actor, revives)
+        return action.target_index ~= nil
+    end,
+
+    --- Turns around the targets of an action that was chosen before its actor got confused.
+    --
+    -- @param attack Attack data of the action.
+    -- @return False if there is nobody to target.
+    apply_confusion = function(self, action, attack)
+        local side = action.actor_side or Battle.TargetGroup.PARTY
+        if action.automatic or action.target_group == nil or not self:has_status(side, action.actor, BattleStatus.CONFUSION) then
+            return true
+        end
+        local group = action.target_group == Battle.TargetGroup.PARTY and Battle.TargetGroup.ENEMIES or Battle.TargetGroup.PARTY
+        local multiple = action.target_index == nil and (action.target_list == nil or #action.target_list > 1)
+        return self:aim_confused(action, group, multiple, self:attack_revives(attack))
+    end,
+
+    --- Gets the spells that a confused combatant can cast: the ones it can pay and isn't stopped from casting. For an
+    -- enemy, its attacks that cost MP.
+    --
+    -- @return A list of actions (attack_id, command and script).
+    get_confused_spells = function(self, side, index)
+        local spells = {}
+        if self:has_status(side, index, BattleStatus.SILENCE) then return spells end
+        local frog = self:has_status(side, index, BattleStatus.FROG)
+        if side == Battle.TargetGroup.PARTY then
+            local member = self.party[index]
+            local mp = Characters[member.character].stats.mp.current
+            for _, spell in ipairs(member.magic or {}) do
+                if self:get_spell_cost(Game.Attacks[spell.id].mp, nil) <= mp and (not frog or spell.id == self.FROG_SPELL) then
+                    table.insert(spells, {attack_id = spell.id, command = 2})
+                end
+            end
+        elseif not frog then
+            local source = battle_manager:get_enemy(index - 1)
+            for slot = 0, source:get_attack_count() - 1 do
+                local id = source:get_attack(slot)
+                local data = self:get_attack_data(id)
+                if data ~= nil and (data.mp or 0) > 0 and data.mp <= self.enemies[index].stats.mp then
+                    local script = source:get_attack_animation(slot)
+                    table.insert(spells, {attack_id = id, command = 1, script = script >= 0 and script or nil})
+                end
+            end
+        end
+        return spells
+    end,
+
+    --- Queues the action of a combatant that doesn't choose what to do. A berserk one attacks a random enemy. A
+    -- confused one attacks or casts a random spell (half of the times each, if it can cast any), at the side opposite
+    -- to the usual one. Berserk goes first.
     queue_auto_action = function(self, side, index)
         local other = side == Battle.TargetGroup.PARTY and Battle.TargetGroup.ENEMIES or Battle.TargetGroup.PARTY
-        local target_side = other
-        if self:has_status(side, index, BattleStatus.CONFUSION) and math.random() < 0.5 then target_side = side end
-        local target = self:random_living(target_side)
-        if target == nil then
-            target_side = other
-            target = self:random_living(other)
+        local berserk = self:has_status(side, index, BattleStatus.BERSERK)
+        local action = {
+            actor = index, actor_side = side, type = Battle.ActionType.COMMAND, command = 1, automatic = true,
+        }
+        -- The attack of an enemy is the first of the ones it has when manipulated (ff7.exe, 0x435a32 for Berserk).
+        if side == Battle.TargetGroup.ENEMIES then
+            local source = battle_manager:get_enemy(index - 1)
+            if source:get_manip_count() > 0 then
+                action.attack_id = source:get_manip_attack(0)
+                for slot = 0, source:get_attack_count() - 1 do
+                    if source:get_attack(slot) == action.attack_id and source:get_attack_animation(slot) >= 0 then
+                        action.script = source:get_attack_animation(slot)
+                        break
+                    end
+                end
+            end
         end
-        if target == nil then do return end end
-        table.insert(self.action_queue, {
-            actor = index, actor_side = side, type = Battle.ActionType.COMMAND, command = 1,
-            target_type = Battle.TargetType.SINGLE, target_group = target_side, target_index = target,
-        })
+        local aimed = false
+        if not berserk then
+            local spells = self:get_confused_spells(side, index)
+            if #spells > 0 and math.random() < 0.5 then
+                local spell = spells[math.random(1, #spells)]
+                local cast = {
+                    actor = index, actor_side = side, automatic = true, command = spell.command,
+                    attack_id = spell.attack_id, script = spell.script,
+                    type = side == Battle.TargetGroup.PARTY and Battle.ActionType.ATTACK or Battle.ActionType.COMMAND,
+                }
+                -- A spell without anybody to target (like Life with everybody alive) is left for an attack.
+                if self:aim_confused_default(cast) then action, aimed = cast, true end
+            end
+            if not aimed then aimed = self:aim_confused_default(action) end
+        else
+            action.target_type = Battle.TargetType.SINGLE
+            action.target_group = other
+            action.target_index = self:random_living(other)
+            aimed = action.target_index ~= nil
+        end
+        if not aimed then return end
+        table.insert(self.action_queue, action)
         local combatant = self:get_combatant(side, index)
         if side == Battle.TargetGroup.PARTY then combatant.acting = true
         else
             combatant.atb = 0
             combatant.waiting = true
         end
+    end,
+
+    --- Aims an action that a confused combatant chooses itself, from the usual targets of what it uses.
+    aim_confused_default = function(self, action)
+        local side = action.actor_side
+        local attack = self:get_action_attack(action)
+        local target = attack.target or {}
+        local other = side == Battle.TargetGroup.PARTY and Battle.TargetGroup.ENEMIES or Battle.TargetGroup.PARTY
+        local group = target.default_enemy ~= 0 and side or other
+        -- Spells that All materia can widen have both flags, and start with one target.
+        local multiple = target.default_multiple == 1 and target.toggle_multiple ~= 1
+        return self:aim_confused(action, group, multiple, self:attack_revives(attack))
     end,
 
     -- ================================================================================
@@ -2131,19 +2297,23 @@ UiContainer.BattleUi = {
     --- Rolls if an attack hits, with the formulas of ff7.exe (0x5ddb20 physical, 0x5dddce magical).
     --
     -- Physical: the chance is the accuracy of the attack + dexterity / 4 of the attacker + the evade of the attacker
-    -- - the evade of the target (the evade of a party member is dexterity / 4 + the evasion of its armor, the one
-    -- of an enemy is its evade), minus 30% if the attacker has Fury, and it is rolled from 1 to 100 (it hits if the
-    -- roll is lower). Luck lets attackers always hit (luck / 4 percent) and, for the attacks of enemies,
-    -- lets party members always evade. Sleep, Stop, Confusion, Petrify, Paralysis, Manipulate and Death are always
-    -- hit (before the luck rolls).
-    -- Magical: the chance is the accuracy (minus 30% with Fury) + level of the attacker - magic defense / 2 of the
-    -- target, after a roll against the magic evasion of the target (a percent). Reflect, and the statuses of
+    -- - the evade of the target (see get_evade), minus 30% if the attacker has Fury, and it is rolled from 1 to
+    -- 100 (it hits if the roll is lower). Darkness halves the accuracy of the attack. Luck lets attackers always
+    -- hit (luck / 4 percent) and, for the attacks of enemies, lets party members always evade. Sleep, Stop,
+    -- Confusion, Petrify, Paralysis, Manipulate and Death are always hit (before the luck rolls).
+    -- Magical: the chance is the accuracy (minus 30% with Fury) + level of the attacker - level of the target / 2,
+    -- after a roll against the magic evasion of the target (a percent). Reflect, and the statuses of
     -- the physical ones except Manipulate, make the target be hit. 255 or more of accuracy always hits.
+    -- Elements: a target that nullifies or absorbs the attack, or dies by its element, is hit like the ones with
+    -- those statuses. For attacks without power (the ones that only add statuses), a weakness doubles the
+    -- accuracy and a resistance halves it.
     --
     -- @param formula Formula of the attack.
     -- @param accuracy Accuracy byte of the attack.
+    -- @param element Element factor of the target against the attack (see get_element_factor), 1 if nil.
+    -- @param power Power of the attack.
     -- @return True if the attack hits.
-    roll_hit = function(self, formula, accuracy, attacker_side, attacker_index, target_side, target_index)
+    roll_hit = function(self, formula, accuracy, attacker_side, attacker_index, target_side, target_index, element, power)
         local physical = formula == 1 or formula == 6 or formula == 10
         local magical = formula == 2 or formula == 7
         if not physical and not magical then return true end
@@ -2156,21 +2326,28 @@ UiContainer.BattleUi = {
             end
             return false
         end
+        element = element or 1
+        local element_hit = element >= 10 or element == 0 or (element < 0 and element > -10)
+        if physical and self:has_status(attacker_side, attacker_index, BattleStatus.DARKNESS) then
+            accuracy = math.floor(accuracy / 2)
+        end
+        if power == 0 then
+            if element == 2 then accuracy = accuracy * 2
+            elseif element == 0.5 then accuracy = math.floor(accuracy / 2)
+            end
+        end
         if magical then
-            if accuracy >= 255 then return true end
+            if accuracy >= 255 or element_hit then return true end
             if self:has_status(target_side, target_index, BattleStatus.REFLECT) or any(self.MAGICAL_AUTO_HIT) then return true end
             if fury then accuracy = accuracy - math.floor(accuracy * 3 / 10) end
             if math.floor(math.random() * 100) < t.meva then return false end
-            return math.random(1, 100) < accuracy + a.level - math.floor(t.mdef / 2)
-        end
-        local function evade(side, stats)
-            if side == Battle.TargetGroup.PARTY then return math.floor(stats.dex / 4) + stats.eva end
-            return stats.eva
+            return math.random(1, 100) < accuracy + a.level - math.floor(t.level / 2)
         end
         local chance
-        if any(self.PHYSICAL_AUTO_HIT) then chance = 255
+        if element_hit or any(self.PHYSICAL_AUTO_HIT) then chance = 255
         else
-            chance = accuracy + math.floor(a.dex / 4) + evade(attacker_side, a) - evade(target_side, t)
+            chance = accuracy + math.floor(a.dex / 4) + self:get_evade(attacker_side, attacker_index)
+              - self:get_evade(target_side, target_index)
             if chance < 255 and fury then chance = chance - math.floor(chance * 3 / 10) end
             if chance <= 0 then chance = 1 end
         end
@@ -2180,6 +2357,17 @@ UiContainer.BattleUi = {
           and roll < math.floor(self:get_luck(target_side, target_index) / 4) then chance = 0
         end
         return math.random(1, 100) < chance
+    end,
+
+    --- Gets the physical evade of a combatant: dexterity / 4 plus the evasion of the armor for a party member,
+    -- its evade for an enemy. The evade modifier applies to the whole sum, the dexterity one doesn't count.
+    get_evade = function(self, side, index)
+        local stats = self:get_base_combat_stats(side, index)
+        local evade = stats.eva
+        if side == Battle.TargetGroup.PARTY then evade = evade + math.floor(stats.dex / 4) end
+        local mods = self:get_combatant(side, index).stat_mods
+        if mods ~= nil and mods.eva ~= nil then evade = evade + math.floor(evade * mods.eva / 100) end
+        return evade
     end,
 
     --- Gets the stats a damage formula needs from a combatant.
@@ -2320,7 +2508,7 @@ UiContainer.BattleUi = {
         end
         local source = battle_manager:get_enemy(index - 1)
         local factor = 1
-        for _, element in ipairs(attack.elements) do
+        for _, element in ipairs(attack.elements or {}) do
             for e = 0, source:get_element_count() - 1 do
                 if source:get_element(e) == element then factor = factor * source:get_element_factor(e) end
             end
@@ -2332,7 +2520,7 @@ UiContainer.BattleUi = {
     --
     -- Formulas as in the original game: 1 is physical, 2 is magical (modifier 5 heals, 3 takes a
     -- fraction of the current HP). Level attacks (8) only apply their effects, and some of formula 6 are done. The rest do no damage.
-    -- Criticals and rows are handled. TODO: Evasion, defending.
+    -- Hit chance, criticals, rows and defending are handled.
     -- @param attack Attack data, as in {@see get_attack_data}.
     -- @param target_count Number of targets of the action (several of them reduce the damage).
     -- @return A table: hit (false if the attack misses), amount (positive damages, negative heals),
@@ -2367,17 +2555,8 @@ UiContainer.BattleUi = {
         -- Accuracy is stored as the original byte divided by 255 (older installs stored 0 or 1, so 0 is treated
         -- as 1). Only the physical (1, 6, 10) and the magical (2, 7) formulas roll to hit, as in ff7.exe.
         local byte = (data.accuracy or 1) <= 0 and 255 or math.floor((data.accuracy or 1) * 255 + 0.5)
-        if not self:roll_hit(formula, byte, attacker_side, attacker_index, target_side, target_index) then
-            result.hit = false
-            return result
-        end
-        -- Extra miss chance of special attacks (D.blow connects only half of the times).
-        if data.hit_factor and math.random() > data.hit_factor then
-            result.hit = false
-            return result
-        end
-        -- Physical attacks of a blinded attacker miss half of the times.
-        if formula == 1 and self:has_status(attacker_side, attacker_index, BattleStatus.DARKNESS) and math.random() < 0.5 then
+        local element = self:get_element_factor(attack, target_side, target_index)
+        if not self:roll_hit(formula, byte, attacker_side, attacker_index, target_side, target_index, element, data.no_damage and 1 or power) then
             result.hit = false
             return result
         end
@@ -2619,6 +2798,9 @@ UiContainer.BattleUi = {
         end
         combatant.status[id] = {remaining = units, last = now, next_tick = now + BattleStatus.TICK}
         self:save_lasting_status(side, index, id, true)
+        for _, other in ipairs(BattleStatus.REMOVES[id] or {}) do self:clear_status(side, index, other) end
+        -- Those that can't act lose the control of who manipulates them.
+        if side == Battle.TargetGroup.ENEMIES and BattleStatus.FROZEN[id] then self:release_manipulation(index) end
         self:status_changed(side, index)
     end,
 
@@ -2783,7 +2965,8 @@ UiContainer.BattleUi = {
         local function apply()
             if applied then return end
             applied = true
-            local group = special.target == "enemies" and Battle.TargetGroup.ENEMIES or Battle.TargetGroup.PARTY
+            -- The side of the limit, or the opposite one if the caster is confused.
+            local group = action.target_group
             -- Curing Death (Pulse of Life) reaches the dead allies too.
             for _, mod in ipairs(special.user_mods or {}) do
                 self:change_stat_mod(Battle.TargetGroup.PARTY, index, mod.kind, mod.delta)
@@ -2888,8 +3071,192 @@ UiContainer.BattleUi = {
         self.message_timed = false
     end,
 
-    --- Damage divisor of the limit bar by limit level. TODO: Unverified, the exe takes it from data of the
-    -- character: the bar gets damage * 300 / maximum HP * 256 / divisor (x2 with Fury, half with Sadness).
+    --- Gets the statuses that a hit of an attack would cure on a target: the physical formulas wake up, cure
+    -- Confusion and end the manipulation (ff7.exe, 0x5ddb20). Magic doesn't.
+    --
+    -- @return A list of status IDs, empty if the attack isn't physical.
+    get_physical_cures = function(self, attack, side, index)
+        local formula = attack.damage.formula
+        local cures = {}
+        if formula == 1 or formula == 6 or formula == 10 or formula == 11 then
+            for _, id in ipairs({BattleStatus.SLEEP, BattleStatus.CONFUSION, BattleStatus.MANIPULATE}) do
+                if self:has_status(side, index, id) then table.insert(cures, id) end
+            end
+        end
+        return cures
+    end,
+
+    --- Cures the statuses that {@see get_physical_cures} gave.
+    apply_physical_cures = function(self, cures, side, index)
+        for _, id in ipairs(cures) do
+            if id == BattleStatus.MANIPULATE and side == Battle.TargetGroup.ENEMIES then self:release_manipulation(index) end
+            self:clear_status(side, index, id)
+        end
+    end,
+
+    --- Queues again the actions that a combatant kept while it couldn't act, if it can now.
+    release_held_actions = function(self, side, index)
+        local combatant = self:get_combatant(side, index)
+        if combatant == nil or combatant.held == nil or self:is_frozen(side, index) then return end
+        for _, action in ipairs(combatant.held) do table.insert(self.action_queue, action) end
+        combatant.held = nil
+    end,
+
+    --- Applies Berserk to the action of a party member when its turn comes: anything but a plain attack becomes
+    -- one, on a random enemy.
+    --
+    -- @param action The action, that is changed if needed.
+    -- @return False if the action is dropped (the first one of a double command).
+    apply_berserk = function(self, action)
+        if not self:has_status(Battle.TargetGroup.PARTY, action.actor, BattleStatus.BERSERK) then return true end
+        if action.command == 1 and action.attack_id == nil and action.item_id == nil then
+            action.automatic, action.links = true, nil
+            return true
+        end
+        if action.no_atb then return false end
+        action.target_index = self:random_living(Battle.TargetGroup.ENEMIES)
+        if action.target_index == nil then return false end
+        action.target_group = Battle.TargetGroup.ENEMIES
+        action.target_type = Battle.TargetType.SINGLE
+        action.type = Battle.ActionType.COMMAND
+        action.command = 1
+        action.automatic = true
+        action.limit, action.attack_id, action.item_id, action.target_list, action.links = nil, nil, nil, nil, nil
+        action.summon, action.throw_item, action.coin_gil = nil, nil, nil
+        return true
+    end,
+
+    --- Commands that a silenced character can't use (ff7.exe, 0x5dbde0): Magic, Summon, E.Skill, W-Magic and
+    -- W-Summon.
+    SILENCED_COMMANDS = {[2] = true, [3] = true, [13] = true, [21] = true, [22] = true},
+
+    --- Checks if Silence makes an action fail, as in ff7.exe: the commands of {@see SILENCED_COMMANDS} for a party
+    -- member, and the attacks that cost MP for an enemy.
+    --
+    -- @param action The action, with actor, actor_side (the party if nil) and command.
+    -- @param attack Attack data, as in {@see get_attack_data}.
+    is_silenced_action = function(self, action, attack)
+        local side = action.actor_side or Battle.TargetGroup.PARTY
+        if not self:has_status(side, action.actor, BattleStatus.SILENCE) then return false end
+        if side == Battle.TargetGroup.PARTY then return self.SILENCED_COMMANDS[action.command] == true end
+        return attack ~= nil and (attack.mp or 0) > 0
+    end,
+
+    --- Commands that a frog can use: Attack and Item. Their replacements (Slash-All, 2x-Cut, Flash, 4x-Cut,
+    -- Limit and W-Item) go back to them.
+    FROG_COMMANDS = {[1] = true, [4] = true},
+
+    --- The only spell a frog can cast (Toad, that cures it), and the commands to cast it with: Magic and
+    -- W-Magic (ff7.exe, 0x5dbde0).
+    FROG_SPELL = 10,
+    FROG_MAGIC_COMMANDS = {[2] = true, [21] = true},
+
+    --- Checks if a command can't be chosen because the character is a frog. Magic and W-Magic can if the
+    -- character has the Toad spell.
+    is_frog_blocked = function(self, index, command_id)
+        if self.FROG_COMMANDS[command_id] == true or not self:has_status(Battle.TargetGroup.PARTY, index, BattleStatus.FROG) then
+            return false
+        end
+        if self.FROG_MAGIC_COMMANDS[command_id] == true then
+            for _, spell in ipairs(self.party[index].magic or {}) do
+                if spell.id == self.FROG_SPELL then return false end
+            end
+        end
+        return true
+    end,
+
+    --- Applies Frog to the action of a party member when its turn comes: attacks with a replacement of the Attack
+    -- command and limits become plain attacks on one enemy (the limit bar is kept), W-Item uses only the second
+    -- item, and any other command but Attack, Item and the casts of Toad fails.
+    --
+    -- @param action The action, that is changed if needed.
+    -- @return False if the action fails.
+    apply_frog = function(self, action)
+        if not self:has_status(Battle.TargetGroup.PARTY, action.actor, BattleStatus.FROG) then return true end
+        local command = action.command
+        if command == 23 then
+            -- The first of the two doesn't end the turn, so it is the one that is lost.
+            if action.no_atb then return false end
+            action.command = 4
+            return true
+        end
+        if action.limit ~= nil or command == 20 or (command ~= nil and command >= 24 and command <= 27) then
+            if action.target_group ~= Battle.TargetGroup.ENEMIES or action.target_index == nil then
+                action.target_index = self:random_living(Battle.TargetGroup.ENEMIES)
+                if action.target_index == nil then return false end
+            end
+            action.target_group = Battle.TargetGroup.ENEMIES
+            action.target_type = Battle.TargetType.SINGLE
+            action.type = Battle.ActionType.COMMAND
+            action.command = 1
+            action.limit, action.attack_id, action.target_list, action.links = nil, nil, nil, nil
+            return true
+        end
+        if self.FROG_MAGIC_COMMANDS[command] == true then return action.attack_id == self.FROG_SPELL end
+        return self.FROG_COMMANDS[command] == true
+    end,
+
+    --- Changes the commands of a party member that depend on its state: Limit takes the place of Attack when the
+    -- limit bar is full, and a frog only has the plain Attack and Item ones.
+    update_commands = function(self, index)
+        local member = self.party[index]
+        if member.attack_command == nil then return end
+        local frog = self:has_status(Battle.TargetGroup.PARTY, index, BattleStatus.FROG)
+        local limit = Characters[member.character].limit
+        local first = member.attack_command
+        if frog then first = 1
+        elseif limit ~= nil and (limit.bar or 0) >= 255 and self:has_limit_techniques(index) then first = 20
+        end
+        member.command[1] = first
+        if member.item_slot ~= nil then member.command[member.item_slot] = frog and 4 or member.item_command end
+        -- If the commands of this character are on the screen, they change on the spot.
+        if self.current_character_window == index and member.manip_commands == nil
+          and (self.window_state == "command" or self.window_state == "change" or self.window_state == "defend") then
+            for c = 1, 12 do
+                if member.command[c] ~= nil then self:set_command_widget(index, c, member.command[c]) end
+            end
+        end
+    end,
+
+    --- Writes a command in its place of the command window, grey if it can't be used.
+    set_command_widget = function(self, index, position, command_id)
+        local widget = ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(position))
+        -- The colour goes before the text. Manipulate is not available while controlling an enemy.
+        if self:is_frog_blocked(index, command_id)
+          or (command_id == self.MANIP_COMMAND and self.party[index].manipulating ~= nil) then
+            widget:set_colour(0.5, 0.5, 0.5)
+        else
+            widget:set_colour(1, 1, 1)
+        end
+        widget:set_text(Game.Commands[command_id].name)
+    end,
+
+    --- Message of ff7.exe (battle text 91) for a character that can't pay a spell.
+    NOT_ENOUGH_MP = "Not enough MP!!",
+
+    --- Shows a message that goes away by itself after a moment.
+    show_timed_message = function(self, text)
+        self:show_message(text)
+        self.message_until = timer:get_game_time_total() + 2
+    end,
+
+    --- Takes from an enemy the MP of an attack, as ff7.exe does for every combatant (0x5dbde0).
+    --
+    -- @param index Index of the enemy.
+    -- @param attack Attack data, as in {@see get_attack_data}.
+    -- @return False if the enemy doesn't have enough MP: nothing is taken, and the attack fails.
+    pay_enemy_mp = function(self, index, attack)
+        local cost = attack.mp or 0
+        if cost <= 0 then return true end
+        local stats = self.enemies[index].stats
+        if stats.mp < cost then return false end
+        stats.mp = stats.mp - cost
+        return true
+    end,
+
+    --- Damage divisor of the limit bar by limit level, only for installs without the ones of the characters
+    -- (Game.Characters[id].limit_divisors). As in ff7.exe (0x5df1b0) the bar gets damage * 300 / maximum HP * 256 /
+    -- divisor (x2 with Fury, half with Sadness).
     LIMIT_DIVISOR = {150, 200, 250, 300},
 
     --- Checks if a party member has a limit technique that it can use: one that was learned in its limit level.
@@ -2915,7 +3282,9 @@ UiContainer.BattleUi = {
         if self:has_status(Battle.TargetGroup.PARTY, index, BattleStatus.FURY) then factor = 2
         elseif self:has_status(Battle.TargetGroup.PARTY, index, BattleStatus.SADNESS) then factor = 0.5
         end
-        local divisor = self.LIMIT_DIVISOR[char.limit.current] or self.LIMIT_DIVISOR[1]
+        local definition = Game.Characters[member.character]
+        local divisors = definition ~= nil and definition.limit_divisors or self.LIMIT_DIVISOR
+        local divisor = divisors[char.limit.current] or divisors[1]
         char.limit.bar = math.min(255, (char.limit.bar or 0) + math.floor(gain * 256 * factor / divisor))
         self:update_limit(index)
     end,
@@ -2925,7 +3294,10 @@ UiContainer.BattleUi = {
     update_limit = function(self, index)
         local member = self.party[index]
         local char = Characters[member.character]
-        if char.limit == nil then return end
+        if char.limit == nil then
+            self:update_commands(index)
+            return
+        end
         local bar = char.limit.bar or 0
         -- The message of a limit bar that has just got full (not at the start of the battle).
         local full = bar >= 255
@@ -2941,17 +3313,7 @@ UiContainer.BattleUi = {
         elseif self:has_status(Battle.TargetGroup.PARTY, index, BattleStatus.FURY) then widget:set_colour(1, 0.3, 0.3)
         else widget:set_colour(1, 0, 1)
         end
-        if member.attack_command ~= nil then
-            local before = member.command[1]
-            member.command[1] = (bar >= 255 and self:has_limit_techniques(index)) and 20 or member.attack_command
-            -- If the commands of this character are on the screen, the first one changes on the spot.
-            if before ~= member.command[1] and self.window_state == "command" and self.current_character_window == index
-              and member.manip_commands == nil then
-                local command_widget = ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd1")
-                command_widget:set_colour(1, 1, 1)
-                command_widget:set_text(Game.Commands[member.command[1]].name)
-            end
-        end
+        self:update_commands(index)
     end,
 
     --- Colours of the full limit bar, that flashes between them.
@@ -3043,9 +3405,10 @@ UiContainer.BattleUi = {
 
     --- Updates what depends on the statuses of a combatant after they change.
     status_changed = function(self, side, index)
+        self:release_held_actions(side, index)
         if side == Battle.TargetGroup.PARTY then
-            -- Someone that can't act can't choose a command.
-            if self:is_frozen(side, index) then self:remove_from_command_queue(index) end
+            -- Someone that can't act, or that acts by itself, can't choose a command.
+            if self:is_frozen(side, index) or self:acts_by_itself(side, index) then self:remove_from_command_queue(index) end
             self:update_name_colours()
             self:update_limit(index)
         end
@@ -3080,26 +3443,61 @@ UiContainer.BattleUi = {
         return false
     end,
 
+    --- Rolls if the statuses of an attack work on a target, as in ff7.exe (0x5dc099). The chance of the data is
+    -- a byte from 0 to 63 and it is worth 4 percent points each: 63 always works. MP Turbo raises it, and attacks
+    -- split between several targets lose a third of it. Removing Frog or Small from who has it always works, and so
+    -- do Haste, Shield and Berserk on party members.
+    --
+    -- @param attack Attack data, as in {@see get_attack_data}, with at least one effect.
+    -- @param target_count Number of targets of the action, one if nil.
+    -- @return True if the statuses work.
+    roll_status = function(self, attack, side, index, target_count)
+        local effects = attack.effects
+        local points = math.floor(math.abs(effects[1].chance) * 63 + 0.5) * 4
+        if #effects == 1 and (effects[1].id == BattleStatus.FROG or effects[1].id == BattleStatus.SMALL)
+          and self:has_status(side, index, effects[1].id) then
+            return true
+        end
+        if side == Battle.TargetGroup.PARTY then
+            for _, effect in ipairs(effects) do
+                if effect.id == BattleStatus.HASTE or effect.id == BattleStatus.SHIELD or effect.id == BattleStatus.BERSERK then
+                    return true
+                end
+            end
+        end
+        if points >= 252 then return true end
+        local bonus = attack.damage ~= nil and attack.damage.power_bonus or 0
+        points = points + math.floor(points * bonus / 100)
+        local target = attack.target or {}
+        if (target_count or 1) >= 2 and target.random ~= 1
+          and not (target.default_multiple == 1 and target.toggle_multiple == 0) then
+            points = math.floor(points * 2 / 3)
+        end
+        return math.random(1, 100) < points
+    end,
+
     --- Applies the status effects of an attack to a target.
     --
     -- Effects have a mode (inflict, cure or toggle), and a chance between 0 and 1.
-    apply_attack_effects = function(self, attack, side, index)
+    apply_attack_effects = function(self, attack, side, index, target_count)
+        -- The original rolls once for all the statuses of an attack.
+        local roll = nil
         for _, effect in ipairs(attack.effects) do
-            local chance = math.abs(effect.chance)
+            if roll == nil then roll = self:roll_status(attack, side, index, target_count) end
             local has = self:has_status(side, index, effect.id)
             local opposite = effect.id == BattleStatus.FURY and BattleStatus.SADNESS
               or (effect.id == BattleStatus.SADNESS and BattleStatus.FURY or nil)
             if opposite ~= nil and effect.mode ~= "cure" then
                 -- Hyper and Tranquilizer: they cure the opposite status if the target has it, and
                 -- otherwise induce their own (nothing happens if the target already has it).
-                if math.random() < chance and not has then
+                if roll and not has then
                     if self:has_status(side, index, opposite) then self:clear_status(side, index, opposite)
                     else self:set_status(side, index, effect.id)
                     end
                 end
             elseif effect.mode == "cure" or (effect.mode == "toggle" and has) then
-                if has and math.random() < chance then self:clear_status(side, index, effect.id) end
-            elseif not self:is_immune(side, index, effect.id) and math.random() < chance then
+                if has and roll then self:clear_status(side, index, effect.id) end
+            elseif not self:is_immune(side, index, effect.id) and roll then
                 if effect.id == BattleStatus.DEATH then
                     -- Death takes all the HP.
                     local stats = self:get_combat_stats(side, index)
@@ -3241,6 +3639,7 @@ UiContainer.BattleUi = {
                 self.party[index].dead = true
                 self.party[index].atb = 0
                 self.party[index].status = {}
+                self.party[index].held = nil
                 -- A character that dies loses its limit bar.
                 if char.limit ~= nil then char.limit.bar = 0 end
                 self:update_limit(index)
@@ -3263,6 +3662,7 @@ UiContainer.BattleUi = {
             if enemy.stats.hp == 0 then
                 enemy.dead = true
                 enemy.status = {}
+                enemy.held = nil
                 -- The model is hidden once the death animation ends, see update_action.
             end
         end
@@ -3302,37 +3702,61 @@ UiContainer.BattleUi = {
         end
     end,
 
+    --- Checks if an enemy was defeated: it is dead or petrified.
+    is_defeated = function(self, index)
+        return self.enemies[index].dead == true
+          or self:has_status(Battle.TargetGroup.ENEMIES, index, BattleStatus.PETRIFY)
+    end,
+
+    --- Rolls the item an enemy drops, as in ff7.exe (0x5c7c1e): its items are tried in order, each with its chance
+    -- out of 64, and the first one that passes is the drop.
+    --
+    -- @param source Enemy data.
+    -- @return The item ID, nil if it drops nothing.
+    roll_drop = function(self, source)
+        for d = 0, source:get_drop_count() - 1 do
+            local id = source:get_drop_id(d)
+            if id >= 0 and math.random(0, 63) <= math.floor(source:get_drop_rate(d) * 63 + 0.5) then return id end
+        end
+        return nil
+    end,
+
     --- Calculates the rewards for winning the battle and gives them to the party.
     --
-    -- EXP is split between the party members still alive, AP is given in full to each of them.
-    -- Every enemy gives its gil, EXP and AP, dead or not, and may drop items.
-    -- TODO: Level ups, kills counter.
+    -- As in ff7.exe, each party member that isn't dead or petrified gets all the EXP and AP, and the
+    -- available characters that aren't in the party get half of the EXP.
+    -- Only the defeated enemies (dead or petrified) give gil, EXP, AP and items, one item at most each.
     -- @return A list of strings with the results, one per result page.
     apply_rewards = function(self)
         local gil, exp, ap = 0, 0, 0
         local items = {}
         for i = 1, #self.enemies do
-            gil = gil + self.enemies[i].money
-            exp = exp + self.enemies[i].exp
-            ap = ap + self.enemies[i].ap
-            local source = battle_manager:get_enemy(i - 1)
-            if source ~= nil then
-                if self.enemies[i].morphed then
-                    -- A morphed enemy gives its morph item right away (Morph), and no drops.
-                else
-                    for d = 0, source:get_drop_count() - 1 do
-                        local id = source:get_drop_id(d)
-                        if id >= 0 and math.random() < source:get_drop_rate(d) then table.insert(items, id) end
-                    end
+            if self:is_defeated(i) then
+                gil = gil + self.enemies[i].money
+                exp = exp + self.enemies[i].exp
+                ap = ap + self.enemies[i].ap
+                local source = battle_manager:get_enemy(i - 1)
+                -- A morphed enemy gives its morph item right away (Morph), and no drops.
+                if source ~= nil and not self.enemies[i].morphed then
+                    local id = self:roll_drop(source)
+                    if id ~= nil then table.insert(items, id) end
                 end
             end
         end
         local alive = {}
         for i = 1, #self.party do
-            if self.party[i].dead == false then table.insert(alive, i) end
+            if self.party[i].dead == false and not self:has_status(Battle.TargetGroup.PARTY, i, BattleStatus.PETRIFY) then
+                table.insert(alive, i)
+            end
         end
-        local exp_each = 0
-        if #alive > 0 then exp_each = math.floor(exp / #alive) end
+        local level_ups = {}
+        local function give_exp(char_id, amount)
+            if Characters.add_exp(char_id, amount) > 0 then
+                local text = Characters[char_id].name .. " Lv " .. tostring(Characters[char_id].level)
+                table.insert(level_ups, text)
+                print(text)
+            end
+        end
         -- Gil Plus (the best one of the party) gives more gil.
         local gil_plus = 1
         for i = 1, #self.party do
@@ -3342,13 +3766,7 @@ UiContainer.BattleUi = {
         for _, i in ipairs(alive) do
             local char = Characters[self.party[i].character]
             -- EXP Plus gives more EXP to the character that has it.
-            local exp_each = math.floor(exp_each * ((self.party[i].independent or {}).exp_plus or 1))
-            char.exp = (char.exp or 0) + exp_each
-            if char.exp_to_next ~= nil then
-                char.exp_to_next = char.exp_to_next - exp_each
-                -- TODO: Level up, using the growth tables.
-                if char.exp_to_next <= 0 then print(char.name .. " has enough EXP to level up.") end
-            end
+            give_exp(self.party[i].character, math.floor(exp * ((self.party[i].independent or {}).exp_plus or 1)))
             -- AP goes to the materia equipped in the weapon and armor.
             for _, equip in ipairs({char.weapon, char.armor}) do
                 if equip ~= nil and equip.materia ~= nil then
@@ -3365,10 +3783,28 @@ UiContainer.BattleUi = {
                 end
             end
         end
+        -- The materia may have gained a level, and the ones that change the stats do it by level.
+        for _, i in ipairs(alive) do Characters.recalculate_stats(self.party[i].character) end
+        -- The reserve: everybody available that didn't fight.
+        local fought = {}
+        for i = 1, #self.party do fought[self.party[i].character] = true end
+        for char_id = 0, 8 do
+            local char = Characters[char_id]
+            if not fought[char_id] and IFMEMBQ(char_id) then
+                local hp_base, mp_base = char.stats.hp.base, char.stats.mp.base
+                give_exp(char_id, math.floor(exp / 2))
+                -- Unlike the ones that fought, they get the new HP and MP right away, if alive.
+                if char.stats.hp.current > 0 then
+                    char.stats.hp.current = char.stats.hp.current + math.max(0, char.stats.hp.base - hp_base)
+                    char.stats.mp.current = char.stats.mp.current + math.max(0, char.stats.mp.base - mp_base)
+                end
+            end
+        end
         Inventory.add_money(gil)
 
         local pages = {}
-        table.insert(pages, "EXP " .. tostring(exp_each) .. "  AP " .. tostring(ap))
+        table.insert(pages, "EXP " .. tostring(exp) .. "  AP " .. tostring(ap))
+        for _, text in ipairs(level_ups) do table.insert(pages, text) end
         table.insert(pages, tostring(gil) .. " Gil")
         for _, id in ipairs(items) do
             if Game.Items[id] ~= nil then
@@ -3380,7 +3816,7 @@ UiContainer.BattleUi = {
         self:update_limit_levels()
         for _, text in ipairs(self.limit_learned or {}) do table.insert(pages, text) end
         self.limit_learned = nil
-        print("Battle rewards: " .. tostring(exp_each) .. " EXP, " .. tostring(ap) .. " AP, " .. tostring(gil) .. " gil, " .. tostring(#items) .. " items.")
+        print("Battle rewards: " .. tostring(exp) .. " EXP, " .. tostring(ap) .. " AP, " .. tostring(gil) .. " gil, " .. tostring(#items) .. " items.")
         return pages
     end,
 
@@ -3399,6 +3835,8 @@ UiContainer.BattleUi = {
     finish_battle = function(self)
         local next_battle = self.pending_next_battle
         self.pending_next_battle = -1
+        -- The camera of the victory stays until here: it must not go on in the next battle.
+        BattleCameraController:reset()
         Battle.finish()
         if next_battle >= 0 then
             print("Next battle: " .. tostring(next_battle))
@@ -3424,7 +3862,7 @@ UiContainer.BattleUi = {
             end
         end
         local enemies_alive = false
-        for i = 1, #self.enemies do if self.enemies[i].dead == false then enemies_alive = true end end
+        for i = 1, #self.enemies do if not self:is_defeated(i) then enemies_alive = true end end
         -- Some scripts end the battle (a boss that leaves, for example).
         if self.ai_end_battle == true then enemies_alive = false end
         local party_alive = false
@@ -3445,6 +3883,8 @@ UiContainer.BattleUi = {
             self.pending_next_battle = battle_manager:get_next_formation_id()
             local pages = self:apply_rewards()
             if battle_manager:show_victory_pose() then
+                local ok, err = pcall(BattleCameraController.start_victory, BattleCameraController)
+                if not ok then print("Battle camera: " .. tostring(err)) BattleCameraController:reset() end
                 for i = 1, #self.party do
                     if self.party[i].dead == false then
                         self:play_script(Battle.TargetGroup.PARTY, i, self:get_script_number(Battle.TargetGroup.PARTY, i, "victory"), true)
@@ -3623,6 +4063,15 @@ UiContainer.BattleUi = {
                         q.time = q.time + duration
                     elseif step.type == "hit" then
                         if q.on_hit ~= nil then q.on_hit() end
+                    elseif step.type == "camera" or step.type == "view" then
+                        -- Nothing replaces the camera of the victory.
+                        if self.ending ~= true then
+                            local start = step.type == "camera" and BattleCameraController.start_script
+                              or BattleCameraController.set_view
+                            local ok, err = pcall(start, BattleCameraController, step.number)
+                            if not ok then print("Battle camera: " .. tostring(err)) BattleCameraController:reset() end
+                            if step.type == "camera" then print("Battle camera: animation, script " .. tostring(step.number)) end
+                        end
                     elseif step.type == "move" then
                         -- Run to a point in front of the target, stopping some distance before it.
                         local target_entity = q.target ~= nil and self:get_entity(q.target.side, q.target.index) or nil
@@ -3848,6 +4297,50 @@ UiContainer.BattleUi = {
         print("Animation speed: " .. tostring(BattleAnimations.SPEED))
     end,
 
+    --- Gets the camera IDs of an action: the ones of the item, of the limit, or of the attack, and for an enemy
+    -- the one it has for that attack.
+    --
+    -- @return The ID for one target and the one for several, nil if the action has no camera.
+    get_action_camera = function(self, side, action, attack)
+        if action.item_id ~= nil then
+            local item = Game.Items[action.item_id]
+            if item == nil then return nil end
+            return item.camera, item.camera
+        end
+        if action.attack_id == nil then return nil end
+        -- A limit has its own, even if it takes its data from another attack of the kernel.
+        local single, multiple
+        local own = action.limit ~= nil and Game.Attacks[action.attack_id] or nil
+        if own ~= nil and own.camera ~= nil then single, multiple = own.camera.single, own.camera.multiple
+        else
+            if attack.animation ~= nil then single, multiple = attack.animation.camera_single, attack.animation.camera_multiple end
+            local kernel = attack.id ~= nil and Game.Attacks[attack.id] or nil
+            if single == nil and kernel ~= nil and kernel.camera ~= nil then single, multiple = kernel.camera.single, kernel.camera.multiple end
+        end
+        -- The camera of the attack of an enemy overrides the one of the attack.
+        if side == Battle.TargetGroup.ENEMIES then
+            local source = battle_manager:get_enemy(action.actor - 1)
+            for slot = 0, source:get_attack_count() - 1 do
+                if source:get_attack(slot) == action.attack_id then
+                    local camera = source:get_camera_for_attack(slot)
+                    if camera ~= nil and camera >= 0 and camera < 0xffff then single, multiple = camera, camera end
+                    break
+                end
+            end
+        end
+        return single, multiple
+    end,
+
+    --- Starts the camera of an action, if it has one.
+    start_action_camera = function(self, side, action, attack, targets)
+        local ok, err = pcall(function()
+            local single, multiple = self:get_action_camera(side, action, attack)
+            if single == nil and multiple == nil then return end
+            BattleCameraController:start(side, action.actor, action.target_group, targets, single, multiple)
+        end)
+        if not ok then print("Battle camera: " .. tostring(err)) end
+    end,
+
     --- Starts executing the first action in the queue.
     --
     -- The attacker plays its attack script. The damage is applied when the script marks the hit,
@@ -3871,6 +4364,36 @@ UiContainer.BattleUi = {
             self:update_action(timer:get_game_time_total())
             return
         end
+        -- Those that can't act keep their actions for later. Counterattacks and the orders to manipulated enemies
+        -- are lost.
+        if self:is_frozen(actor_side, action.actor) and not action.final_attack then
+            if not action.is_counter and action.controller == nil then
+                actor.held = actor.held or {}
+                table.insert(actor.held, action)
+                self.current_action = nil
+                self.action_executing = false
+                return
+            end
+            current.hit_done = true
+            current.targets = {}
+            self:update_action(timer:get_game_time_total())
+            return
+        end
+        -- A berserk member attacks, whatever it chose before.
+        if actor_side == Battle.TargetGroup.PARTY and not self:apply_berserk(action) then
+            current.hit_done = true
+            current.targets = {}
+            self:update_action(timer:get_game_time_total())
+            return
+        end
+        -- A frog changes or loses the actions that it chose before.
+        if actor_side == Battle.TargetGroup.PARTY and not self:apply_frog(action) then
+            print(self:get_combatant_name(actor_side, action.actor) .. " can't do that as a frog")
+            current.hit_done = true
+            current.targets = {}
+            self:update_action(timer:get_game_time_total())
+            return
+        end
         -- Mime repeats the last action of the party, as a copy that doesn't use MP (items are used up again).
         if actor_side == Battle.TargetGroup.PARTY and action.command == self.MIME_COMMAND and action.attack_id == nil then
             local copy, reason = self:build_mime_action(action)
@@ -3890,13 +4413,18 @@ UiContainer.BattleUi = {
         end
         -- The last action of the party, for Mime. A mimed action leaves the one that was copied, so it can be mimed again.
         if actor_side == Battle.TargetGroup.PARTY and not action.mimed and not action.is_counter and not action.final_attack
-          and not action.sneak_attack and action.controller == nil then
+          and not action.sneak_attack and action.controller == nil and not action.automatic then
             local last = {}
             for key, value in pairs(action) do last[key] = value end
             self.last_party_action = last
         end
         local attack = self:get_action_attack(action)
         local revives = self:attack_revives(attack)
+        if not self:apply_confusion(action, attack) then
+            current.hit_done = true
+            self:update_action(timer:get_game_time_total())
+            return
+        end
         -- Attacks that revive are for the dead, the other ones for the living.
         local function valid(combatant) return combatant ~= nil and (combatant.dead == revives) end
         local target_list = action.target_group == Battle.TargetGroup.PARTY and self.party or self.enemies
@@ -3952,6 +4480,7 @@ UiContainer.BattleUi = {
         end
         -- Limits that are not attacks.
         if actor_side == Battle.TargetGroup.PARTY and action.limit ~= nil and self:get_special_limit(action.attack_id) ~= nil then
+            self:start_action_camera(actor_side, action, attack, current.targets)
             self:run_special_limit(current, action)
             return
         end
@@ -3996,6 +4525,11 @@ UiContainer.BattleUi = {
             current.pending = 0
             self:update_action(timer:get_game_time_total())
         end
+        -- Silence stops the actions that were chosen before it, too. Nothing is paid.
+        if self:is_silenced_action(action, attack) then
+            fizzle(self:get_combatant_name(actor_side, action.actor) .. " is silenced")
+            return
+        end
         if actor_side == Battle.TargetGroup.PARTY then
             local stats = Characters[self.party[action.actor].character].stats
             if action.item_id ~= nil then
@@ -4020,19 +4554,22 @@ UiContainer.BattleUi = {
                 Inventory.remove_item(action.throw_item, 1)
             elseif action.attack_id ~= nil and not action.mimed then
                 local cost = self:get_spell_cost(attack.mp, action.links)
-                -- Quadra Magic casts the spell four times, for four times the MP, a number of times per
-                -- battle. TODO: Unverified: the MP cost, the targets of each cast, and that a cast without
-                -- enough MP for four casts is a normal one (the original may not let it be chosen).
-                if action.links ~= nil and (action.links.quadra or 0) > 0 and cost > 0 then
+                local can_pay = stats.mp.current >= cost
+                -- Quadra Magic casts the spell four times with half of its power, for the MP of one cast, a
+                -- number of times per battle. TODO: Unverified: the targets of each cast.
+                if action.links ~= nil and (action.links.quadra or 0) > 0 and can_pay then
                     local used = self.party[action.actor].quadra_used[action.attack_id] or 0
-                    if used < action.links.quadra and stats.mp.current >= cost * 4 then
+                    if used < action.links.quadra then
                         self.party[action.actor].quadra_used[action.attack_id] = used + 1
-                        cost = cost * 4
                         current.quadra = true
                     end
                 end
                 if cost > 0 then
-                    if stats.mp.current < cost then fizzle("Not enough MP for " .. attack.name) return end
+                    if not can_pay then
+                        self:show_timed_message(self.NOT_ENOUGH_MP)
+                        fizzle("Not enough MP for " .. attack.name)
+                        return
+                    end
                     self:apply_damage(actor_side, action.actor, cost, true)
                 end
                 if action.summon ~= nil then
@@ -4043,6 +4580,18 @@ UiContainer.BattleUi = {
                     end
                 end
             end
+        end
+        -- Enemy frogs can't use the attacks that cost MP.
+        if actor_side == Battle.TargetGroup.ENEMIES and (attack.mp or 0) > 0
+          and self:has_status(actor_side, action.actor, BattleStatus.FROG) then
+            fizzle(self:get_combatant_name(actor_side, action.actor) .. " can't use " .. attack.name .. " as a frog")
+            return
+        end
+        if actor_side == Battle.TargetGroup.ENEMIES and not self:pay_enemy_mp(action.actor, attack) then
+            -- The window only shows the name of the attack, and nothing happens.
+            self:show_timed_message(attack.name)
+            fizzle(self:get_combatant_name(actor_side, action.actor) .. " doesn't have enough MP for " .. attack.name)
+            return
         end
         -- Limits empty the bar.
         if actor_side == Battle.TargetGroup.PARTY and action.limit ~= nil then self:use_limit(action) end
@@ -4102,28 +4651,8 @@ UiContainer.BattleUi = {
             end)
             if not ok then print("Battle aura: " .. tostring(err)) end
         end
-        -- The camera of the attack (summons have their own).
-        if not summon and (action.attack_id ~= nil) then
-            local single, multiple
-            if attack.animation ~= nil then single, multiple = attack.animation.camera_single, attack.animation.camera_multiple end
-            local kernel = attack.id ~= nil and Game.Attacks[attack.id] or nil
-            if single == nil and kernel ~= nil and kernel.camera ~= nil then single, multiple = kernel.camera.single, kernel.camera.multiple end
-            -- The camera of the attack of an enemy overrides the one of the attack.
-            if actor_side == Battle.TargetGroup.ENEMIES then
-                local source = battle_manager:get_enemy(action.actor - 1)
-                for slot = 0, source:get_attack_count() - 1 do
-                    if source:get_attack(slot) == action.attack_id then
-                        local camera = source:get_camera_for_attack(slot)
-                        if camera ~= nil and camera >= 0 and camera < 0xffff then single, multiple = camera, camera end
-                        break
-                    end
-                end
-            end
-            local ok, err = pcall(function()
-                return BattleCameraController:start(actor_side, action.actor, action.target_group, current.targets, single, multiple)
-            end)
-            if not ok then print("Battle camera: " .. tostring(err)) end
-        end
+        -- The camera of what is used (summons have their own).
+        if not summon then self:start_action_camera(actor_side, action, attack, current.targets) end
         local played = self:play_script(
           actor_side, action.actor, script, false,
           function()
@@ -4163,6 +4692,7 @@ UiContainer.BattleUi = {
         combatant.dead = false
         combatant.atb = 0
         combatant.status = {}
+        combatant.held = nil
         combatant.waiting = false
         combatant.acting = false
         if side == Battle.TargetGroup.PARTY then
@@ -4197,6 +4727,7 @@ UiContainer.BattleUi = {
         current.hit_done = true
         local action = current.action
         local attack = self:apply_links(self:get_action_attack(action), action.links)
+        if current.quadra then attack = self:apply_quadra(attack) end
         -- Steal and Sense do no damage.
         if current.side == Battle.TargetGroup.PARTY and action.attack_id == nil and action.item_id == nil and action.limit == nil
           and action.target_group == Battle.TargetGroup.ENEMIES and current.targets[1] ~= nil then
@@ -4434,25 +4965,22 @@ UiContainer.BattleUi = {
             if revives then self:revive(target_group, t) end
             local was_dead = target_group == Battle.TargetGroup.ENEMIES and self.enemies[t].dead
             local result = self:calculate_attack(attack, current.side, action.actor, target_group, t, #targets)
+            -- What a physical hit cures is decided before the effects of the attack.
+            local physical_cures = self:get_physical_cures(attack, target_group, t)
             if not result.hit then
                 print("Miss")
                 UiContainer.BattleFx:text(target_group, t, "Miss", UiContainer.BattleFx.COLOUR_MISS)
             else
                 UiContainer.BattleFx:hit(attack, target_group, t, result)
                 -- Status effects of the attack.
-                self:apply_attack_effects(attack, target_group, t)
+                self:apply_attack_effects(attack, target_group, t, #targets)
             end
-            -- Physical damage frees a manipulated enemy.
-            if result.hit and result.amount > 0 and not result.mp and target_group == Battle.TargetGroup.ENEMIES
-              and (attack.damage.formula == 1 or attack.damage.formula == 11) then
-                self:release_manipulation(t)
-            end
+            -- Physical hits wake up, cure Confusion and free manipulated enemies.
+            if result.hit then self:apply_physical_cures(physical_cures, target_group, t) end
             if result.hit and result.amount ~= 0 then
                 -- What the target has left limits what can be absorbed.
                 local hp_before = self:get_combat_stats(target_group, t).hp
                 self:apply_damage(target_group, t, result.amount, result.mp)
-                -- Damage wakes up sleepers.
-                if result.amount > 0 and not result.mp then self:clear_status(target_group, t, BattleStatus.SLEEP) end
                 local data = attack.damage
                 if result.amount > 0 and not result.mp then
                     local absorbed = math.min(result.amount, hp_before)
@@ -4907,11 +5435,13 @@ UiContainer.BattleUi = {
         local member = self.party[self.current_character_window]
         local stats = Characters[member.character].stats
         if kind == "magic" then
+            local frog = self:has_status(Battle.TargetGroup.PARTY, self.current_character_window, BattleStatus.FROG)
             for _, spell in ipairs(member.magic) do
                 local data = Game.Attacks[spell.id]
                 table.insert(entries, {
                     name = data.name, attack_id = spell.id, links = spell, group = spell.group,
-                    enabled = self:get_spell_cost(data.mp, spell) <= stats.mp.current - self:get_w_reserved_mp(),
+                    enabled = self:get_spell_cost(data.mp, spell) <= stats.mp.current - self:get_w_reserved_mp()
+                      and (not frog or spell.id == self.FROG_SPELL),
                 })
             end
         elseif kind == "eskill" then
@@ -5531,8 +6061,8 @@ UiContainer.BattleUi = {
     MIME_COMMAND = 12,
     DBLOW_COMMAND = 10,
 
-    --- Chance that D.blow hits (when it does, it is always a critical hit). TODO: Not verified, tune by feel.
-    DBLOW_CHANCE = 0.5,
+    --- Chance of the statuses that Added Effect materia gives to the attacks, out of 1 (5 of 63).
+    ADDED_EFFECT_CHANCE = 5 / 63,
 
     --- Names of the elements, by element id.
     ELEMENT_NAMES = {[0] = "Fire", "Ice", "Bolt", "Earth", "Poison", "Gravity", "Water", "Wind", "Holy",
@@ -5630,6 +6160,17 @@ UiContainer.BattleUi = {
         damage.power_bonus = links.mp_turbo or 0
         if (links.hp_absorb or 0) > 0 then damage.drain_hp = 1 end
         if (links.mp_absorb or 0) > 0 then damage.drain_mp = 1 end
+        local copy = {}
+        for key, value in pairs(attack) do copy[key] = value end
+        copy.damage = damage
+        return copy
+    end,
+
+    --- Gets a copy of an attack with half of its power, the one of each of the casts of Quadra Magic.
+    apply_quadra = function(self, attack)
+        local damage = {}
+        for key, value in pairs(attack.damage) do damage[key] = value end
+        damage.power = (damage.power or 0) / 2
         local copy = {}
         for key, value in pairs(attack) do copy[key] = value end
         copy.damage = damage
@@ -5804,6 +6345,12 @@ UiContainer.BattleUi = {
                 -- The first command is the Attack one (or its replacement), and the Limit one takes its place when
                 -- the limit bar is full.
                 self.party[i].attack_command = self.party[i].command[1]
+                -- The Item command, or W-Item, that a frog turns back into Item.
+                for slot, command_id in ipairs(self.party[i].command) do
+                    if command_id == 4 or command_id == 23 then
+                        self.party[i].item_slot, self.party[i].item_command = slot, command_id
+                    end
+                end
             end
         end
     end,
@@ -5853,6 +6400,9 @@ UiContainer.BattleUi = {
         self:queue_sneak_attacks()
         self:apply_animation_speed()
         UiContainer.BattleFx:show()
+        local ok, intro = pcall(BattleCameraController.start_intro, BattleCameraController)
+        if not ok then print("Battle camera: " .. tostring(intro)) end
+        self.intro = ok and intro
         -- The transition from the field ends in white.
         UiContainer.BattleFx:flash({1, 1, 1}, 1.0, 0.7)
         -- Battle music. The music of the field continues when the battle ends.
@@ -5909,12 +6459,13 @@ UiContainer.BattleUi = {
         for c = 1, 12 do
             if command_list[c] == nil then ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(c)):set_visible(false)
             else
-                -- The colour of the Limit command changes, so it is set again (before the text).
-                ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(c)):set_colour(1, 1, 1)
-                ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(c)):set_text(Game.Commands[command_list[c]].name)
-                -- Manipulate is not available while controlling an enemy.
-                if command_list[c] == self.MANIP_COMMAND and self.party[party_id].manipulating ~= nil then
-                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(c)):set_colour(0.5, 0.5, 0.5)
+                -- The colour of the Limit command changes, so it is set again.
+                if self.party[party_id].manip_commands == nil then
+                    self:set_command_widget(party_id, c, command_list[c])
+                else
+                    -- The attacks of a manipulated enemy.
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(c)):set_colour(1, 1, 1)
+                    ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(c)):set_text(Game.Commands[command_list[c]].name)
                 end
                 ui_manager:get_widget("BattleUi.Container.Bottom.Commands.Cmd" .. tostring(c)):set_visible(true)
                 total_commands = total_commands + 1

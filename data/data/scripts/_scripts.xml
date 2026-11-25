@@ -16,6 +16,7 @@
     <script file="gamedata/items.lua" />
     <script file="gamedata/key_items.lua" />
     <script file="gamedata/materia.lua" />
+    <script file="gamedata/shops.lua" />
     <script file="gamedata/summons.lua" />
     <script file="gamedata/weapons.lua" />
 

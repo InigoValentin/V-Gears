@@ -25,6 +25,8 @@ save_game = function(slot, force)
        end
     end
     savemap_manager:set_party(Party[1] or -1, Party[2] or -1, Party[3] or -1)
+    -- The leader of the field is not always the first member of the party.
+    savemap_manager:set_setting("field_leader", Party.get_leader() or -1)
     for i = 1, MAX_INVENTORY_SLOTS do
         if Inventory[i] ~= nil then
             savemap_manager:set_item(i - 1, Inventory[i].item, Inventory[i].quantity)
@@ -187,6 +189,9 @@ end
 --
 -- @param slot The slot to load (0-15).
 load_game = function(slot)
+    -- The game that was loaded keeps the control key of its slot, so it can be saved there again
+    -- without being taken for another playthrough.
+    ControlKey = savemap_manager:get_slot_control_key(slot)
     -- Populate banks
     for b = 0, Banks.COUNT do
         for a = 0, Banks.SIZE do
@@ -203,6 +208,12 @@ load_game = function(slot)
         if Party[p] == -1 then
             Party[p] = nil
         end
+    end
+    -- Games saved before the leader was saved have the first member as leader.
+    Party.leader = nil
+    if savemap_manager:is_slot_setting_set(slot, "field_leader") then
+        local leader = savemap_manager:get_slot_setting(slot, "field_leader")
+        if leader >= 0 then Party.leader = leader end
     end
     -- The battles and dialogs read the party from the text manager.
     export_party_members()

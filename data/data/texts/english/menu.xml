@@ -91,6 +91,10 @@
 
     <text name="MateriaMenuTitle">Materia</text>
     <text name="MateriaMenuCheck"><colour value="0.7 0.7 0.7">Check</colour></text>
+    <text name="MateriaMenuArrange">Arrange</text>
+    <text name="MateriaMenuExchange">Exchange</text>
+    <text name="MateriaMenuRemoveAll">Remove all</text>
+    <text name="MateriaMenuTrash">Trash</text>
     <text name="MateriaMenuOrder"><colour value="0.7 0.7 0.7">Order</colour></text>
     <text name="MateriaMenuAP"><colour value="0 0.8 1">A.P.:</colour></text>
     <text name="MateriaMenuAPNext"><colour value="0 0.8 1">Next:</colour></text>
@@ -109,6 +113,9 @@
     <text name="SaveMenuTime">Time</text>
     <text name="SaveMenuMoney">Gil</text>
     <text name="SaveMenuEmptySlot"><colour value="0.6 0.6 0.6">Empty slot</colour></text>
+    <text name="SaveMenuOverride">Override this save slot?</text>
+    <text name="SaveMenuOtherPlaythrough"><colour value="0.75 0.4 1">This slot belongs to another playthrough</colour></text>
+    <text name="SaveMenuSaved"><colour value="0.75 0.4 1">Game saved</colour></text>
     <text name="SaveMenuTitleSave">Save</text>
     <text name="SaveMenuTitleLoad">Load</text>
     <text name="SaveMenuDescSave">Select a slot to save</text>
@@ -251,4 +258,17 @@
     <text name="MagicMenuMpNeeded"><colour value="0 0.8 1">MP needed</colour></text>
     <text name="MagicMenuUses"><colour value="0 0.8 1">Uses</colour></text>
     <text name="StatusMenuTitle">Status</text>
+    <text name="ShopMenuBuy">Buy</text>
+    <text name="ShopMenuSell">Sell</text>
+    <text name="ShopMenuExit">Exit</text>
+    <text name="ShopMenuPromptBuy">What would you like to buy?</text>
+    <text name="ShopMenuPromptSell">What would you like to sell?</text>
+    <text name="ShopMenuPromptQuantity">How many?</text>
+    <text name="ShopMenuTimes">x</text>
+    <text name="ShopMenuGil"><colour value="0 0.8 1">Gil</colour></text>
+    <text name="ShopMenuOwned"><colour value="0 0.8 1">Owned</colour></text>
+    <text name="ShopMenuEquipped"><colour value="0 0.8 1">Equipped</colour></text>
+    <text name="ShopMenuAP"><colour value="0 0.8 1">AP</colour></text>
+    <text name="ShopMenuAtk"><colour value="0 0.8 1">A</colour></text>
+    <text name="ShopMenuDef"><colour value="0 0.8 1">D</colour></text>
 </texts>

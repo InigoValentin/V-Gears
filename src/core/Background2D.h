@@ -131,6 +131,14 @@ class Background2D : public Ogre::RenderQueueListener{
         Entity* GetAutoScrollEntity() const;
 
         /**
+         * Checks if the camera is following an entity, scrolling to one, or has been placed by a
+         * script.
+         *
+         * @return False if no script has told the camera what to do.
+         */
+        bool HasScrollControl() const;
+
+        /**
          * Scrolls the background to the position of the playable character.
          *
          * Background2D::NONE centers the view instantly and resumes following the character. Any
@@ -404,13 +412,17 @@ class Background2D : public Ogre::RenderQueueListener{
          * @param[in] blending Blending mode for the tile
          * @param[in] area Scripted area the tile belongs to, or 0 if it always has to be drawn.
          * @param[in] state Bit mask with the layers of the area in which the tile is drawn.
+         * @param[in] layer Layer of the original background the tile is from.
+         * @param[in] intensity Factor of the colour of the tile (0.25 for the additive tiles that
+         * only add a quarter of their colour).
          * @todo Depth is z-index??
          * @todo What are v1, v2, u1 and u2?
          */
         void AddTile(
           const int x, const int y, const int width, const int height, const float depth,
           const float u1, const float v1, const float u2, const float v2, const Blending blending,
-          const int area = 0, const int state = 0, const int layer = 0
+          const int area = 0, const int state = 0, const int layer = 0,
+          const float intensity = 1.0f
         );
 
         /**

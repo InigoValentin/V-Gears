@@ -19,6 +19,7 @@
 #include <iostream>
 #include <cctype>
 #include <algorithm>
+#include "core/DebugDraw.h"
 #include "core/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/UiManager.h"
@@ -36,9 +37,12 @@ template<>UiManager *Ogre::Singleton<UiManager>::msSingleton = nullptr;
 
 UiManager::UiManager(){
     Ogre::Root::getSingleton().getSceneManager("Scene")->addRenderQueueListener(this);
+    // The console is drawn after the widgets, so it is over them.
+    if (DebugDraw::getSingletonPtr() != nullptr) DebugDraw::getSingleton().SetOverlayDrawnByUi(true);
 }
 
 UiManager::~UiManager(){
+    if (DebugDraw::getSingletonPtr() != nullptr) DebugDraw::getSingleton().SetOverlayDrawnByUi(false);
     Ogre::Root::getSingleton().getSceneManager("Scene")->removeRenderQueueListener(this);
     for (size_t i = 0; i < fonts_.size(); ++ i) delete fonts_[i];
     for (size_t i = 0; i < widgets_.size(); ++ i) delete widgets_[i];
@@ -160,6 +164,7 @@ void UiManager::renderQueueEnded(
     if (queueGroupId == Ogre::RENDER_QUEUE_OVERLAY){
         Ogre::Root::getSingletonPtr()->getRenderSystem()->clearFrameBuffer(Ogre::FBT_DEPTH);
         for (unsigned int i = 0; i < widgets_.size(); ++ i) widgets_[i]->Render();
+        if (DebugDraw::getSingletonPtr() != nullptr) DebugDraw::getSingleton().RenderOverlay();
     }
 }
 

@@ -145,6 +145,20 @@ std::tuple<float, float, float> EntityModel::ScriptGetBonePosition(const int bon
     return std::make_tuple(position.x, position.y, position.z);
 }
 
+std::tuple<float, float, float> EntityModel::ScriptGetBoneEnd(const int bone, const float length){
+    Ogre::SkeletonInstance* skeleton = model_->getSkeleton();
+    const Ogre::String name = "bone" + std::to_string(bone);
+    if (skeleton == nullptr || !skeleton->hasBone(name)) return std::make_tuple(0.0f, 0.0f, 0.0f);
+    // Bring the skeleton to the current frame of the animation.
+    model_->_updateAnimation();
+    Ogre::Bone* node = skeleton->getBone(name);
+    // The bones go along their Y axis, where their children are placed.
+    const Ogre::Vector3 end = node->_getDerivedPosition()
+      + node->_getDerivedOrientation() * (node->_getDerivedScale() * Ogre::Vector3(0, length, 0));
+    const Ogre::Vector3 position = model_->_getParentNodeFullTransform() * end;
+    return std::make_tuple(position.x, position.y, position.z);
+}
+
 bool EntityModel::ScriptAttachModel(
   const char* model, const int bone, const float rx, const float ry, const float rz
 ){
@@ -308,9 +322,13 @@ void EntityModel::PlayAnimation(
         // finishes, so any script waiting for it would wait forever.
         if (animation_current_->getLength() <= 0.0f) animation_current_->setLoop(false);
         animation_current_->setEnabled(true);
-        animation_current_->setTimePosition(
-          (start == -1) ? animation_current_->getLength() : start
-        );
+        // A pose at the very end of the animation (the dead soldiers of shpin_3, that hold the last
+        // frame) is shown as the first frame: past the last key, the interpolation goes on to the
+        // first one, as it does when it loops. The time stays a hair before the end.
+        float time = (start == -1) ? animation_current_->getLength() : start;
+        const float length = animation_current_->getLength();
+        if (length > 0.0f && time >= length) time = std::max(0.0f, length - 0.0005f);
+        animation_current_->setTimePosition(time);
         animation_end_time_ = (end == -1) ? animation_current_->getLength() : end;
         animation_hold_ = (start != -1 && start == end) ? 1.0f / 30.0f : 0.0f;
         animation_state_ = state;

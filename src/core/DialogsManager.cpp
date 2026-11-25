@@ -173,6 +173,9 @@ void DialogsManager::SetText(const char* d_name, const char* text){
           height == 0.0f ? data->h : height
         );
         messages_[id]->text_area->SetText(xmlText);
+        data->last_text = text;
+        if (data->number_digits > 0)
+            messages_[id]->text_area->PutNumber(data->number, data->number_digits);
     }
     else{
         ShowMessage(id, data->x, data->y, data->w, data->h);
@@ -206,6 +209,29 @@ bool DialogsManager::ShowScriptMessage(const char* text){
     return true;
 }
 
+void DialogsManager::SetNumber(const char* d_name, const int value, const int digits){
+    int id = GetMessageId(d_name);
+    if (id == -1){
+        LOG_TRIVIAL("SetNumber: dialog '" + Ogre::String(d_name) + "' doesn't exist.");
+        return;
+    }
+    MessageData* data = messages_[id];
+    data->number = std::to_string(value);
+    data->number_digits = digits;
+    // The window is already showing its text: write the new number in it.
+    if (data->state != MS_CLOSED && !data->last_text.empty()){
+        float width = 0.0f;
+        float height = 0.0f;
+        TiXmlNode* xml_text = TextHandler::getSingleton().GetDialog(
+          data->last_text.c_str(), width, height
+        );
+        if (xml_text != NULL){
+            data->text_area->SetText(xml_text);
+            data->text_area->PutNumber(data->number, data->number_digits);
+        }
+    }
+}
+
 void DialogsManager::SetNumeric(const char* d_name, const bool numeric, const bool timer){
     int id = GetMessageId(d_name);
     if (id == -1){
@@ -223,8 +249,11 @@ void DialogsManager::SetNumeric(const char* d_name, const bool numeric, const bo
             timer_window_id_ = id;
         }
         else{
-            messages_[id]->numeric = false;
-            messages_[id]->timer = true;
+            // A number window shows its text as any other, with the number in it (WNUMB).
+            messages_[id]->text_area->SetFont("FFVIIFont");
+            messages_[id]->text_area->SetPadding(3, 5, 3, 5);
+            messages_[id]->numeric = true;
+            messages_[id]->timer = false;
         }
     }
     else{
@@ -390,6 +419,11 @@ void DialogsManager::ShowMessage(
 void DialogsManager::HideMessage(const int id){
     messages_[id]->auto_close = false;
     messages_[id]->state = MS_CLOSED;
+    // The number of a number window (WNUMB) belongs to it while it is open: the next text of the
+    // window has no number, or its spaces (the new lines of the texts) would be filled with it.
+    messages_[id]->number.clear();
+    messages_[id]->number_digits = 0;
+    messages_[id]->last_text.clear();
     if (messages_[id]->window != NULL) messages_[id]->window->SetVisible(false);
     if (messages_[id]->cursor != NULL) messages_[id]->cursor->SetVisible(false);
     messages_[id]->text_area->SetVisible(false);

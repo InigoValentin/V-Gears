@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <chrono>
+#include <set>
 #include <map>
 #include <utility>
 #include <vector>
@@ -553,6 +555,32 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         bool IsKeyOff(unsigned int key_code);
 
         /**
+         * Checks if a script has asked for the Start button a moment ago.
+         *
+         * The scenes that use Start for their own ends (blin70_3, to end the choice of the party)
+         * ask for it every frame, so the pause menu must not open with the same press.
+         *
+         * @return True if a script is asking for the Start button.
+         */
+        bool IsStartKeyRead() const;
+
+        /**
+         * Moves the line of a line entity (SLINE).
+         *
+         * @param[in] name Name of the entity.
+         * @param[in] x1 First vertex of the line.
+         * @param[in] y1 First vertex of the line.
+         * @param[in] z1 First vertex of the line.
+         * @param[in] x2 Second vertex of the line.
+         * @param[in] y2 Second vertex of the line.
+         * @param[in] z2 Second vertex of the line.
+         */
+        void ScriptSetLine(
+          const char* name, const float x1, const float y1, const float z1, const float x2,
+          const float y2, const float z2
+        );
+
+        /**
          * Assigns a character to an entity.
          *
          * Only entities of the currently active module can be assigned
@@ -783,6 +811,17 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void CheckEntityInteract();
 
         /**
+         * Runs the contact script (script 2) of the entities that the player touches.
+         *
+         * The script of an entity that the original game runs when the player collides with it
+         * (the old man of condor1 starts his conversation that way, and only after it can be
+         * talked to). It runs once for each touch.
+         */
+        void CheckEntityContacts();
+
+
+
+        /**
          * Calculates the next offset step for an entity.
          *
          * @param[in] entity The entity.
@@ -895,6 +934,13 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * Applies only for manual movement.
          */
         bool player_run_;
+        /// After entering a field from the world map, the walk keys that were held are ignored until
+        /// they are released, so the player starts standing still.
+        bool ignore_held_walk_ = false;
+        /// Entities that the player is touching.
+        std::set<const Entity*> entities_in_contact_;
+        /// Last time that a script asked for the Start button.
+        std::chrono::steady_clock::time_point start_key_read_time_;
 
         /**
          * Indicates if the player runs by default, and the run key makes it walk instead.

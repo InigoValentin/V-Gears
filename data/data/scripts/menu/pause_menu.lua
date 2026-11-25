@@ -20,7 +20,10 @@ UiContainer.PauseMenu = UiContainer.Menu.new{
     -- paused, it only handles the pause event.
     on_button = function(self, button, event)
         if System:is_paused() == false then
-            if button == Config.ACTIONS.START and event == "Press" then
+            -- A scene that reads the Start button itself (to end a choice) doesn't pause the game.
+            if button == Config.ACTIONS.START and event == "Press"
+                and not entity_manager:is_start_key_read()
+            then
                 System:pause()
             end
             return 0

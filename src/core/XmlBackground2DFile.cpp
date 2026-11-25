@@ -76,9 +76,13 @@ void XmlBackground2DFile::Load(){
                 const int state = GetInt(node, "state", 0);
                 // The layer of the original background the tile is from.
                 const int layer = GetInt(node, "layer", 0);
+                // The additive tiles that only add a quarter of their colour (the glow of
+                // ujunon4) write it here.
+                const float intensity = GetFloat(node, "intensity", 1.0f);
                 background->AddTile(
                   static_cast<int>(destination.x), static_cast<int>(destination.y),
-                  width, height, buffer_depth, uv.x, uv.y, uv.z, uv.w, blending, area, state, layer
+                  width, height, buffer_depth, uv.x, uv.y, uv.z, uv.w, blending, area, state, layer,
+                  intensity
                 );
                 TiXmlNode* node2 = node->FirstChild();
                 while (node2 != nullptr){

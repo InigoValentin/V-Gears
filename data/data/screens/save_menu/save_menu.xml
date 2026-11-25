@@ -25,5 +25,30 @@
             <animation name="Position2" length="0" y="0:48%+12" />
             <animation name="Position3" length="0" y="0:81%+12" />
         </sprite>
+        <widget name="ConfirmSame" x="50%-100" y="50%-33" width="200" height="66" visible="false">
+            <prototype name="Window" />
+            <text_area name="Question" text_name="SaveMenuOverride" x="16" y="8" font="FFVIIFont" visible="true" />
+            <text_area name="Yes" text_name="Yes" x="44" y="28" font="FFVIIFont" visible="true" />
+            <text_area name="No" text_name="No" x="44" y="44" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="icons/cursor.png" x="20" y="29" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:29" />
+                <animation name="Position2" length="0" y="0:45" />
+            </sprite>
+        </widget>
+        <widget name="ConfirmOther" x="50%-150" y="50%-41" width="300" height="82" visible="false">
+            <prototype name="Window" />
+            <text_area name="Question" text_name="SaveMenuOverride" x="16" y="8" font="FFVIIFont" visible="true" />
+            <text_area name="Warning" text_name="SaveMenuOtherPlaythrough" x="16" y="24" font="FFVIIFont" visible="true" />
+            <text_area name="Yes" text_name="Yes" x="44" y="44" font="FFVIIFont" visible="true" />
+            <text_area name="No" text_name="No" x="44" y="60" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="icons/cursor.png" x="20" y="45" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:45" />
+                <animation name="Position2" length="0" y="0:61" />
+            </sprite>
+        </widget>
+        <widget name="Saved" x="50%-60" y="50%-17" width="120" height="34" visible="false">
+            <prototype name="Window" />
+            <text_area name="Text" text_name="SaveMenuSaved" x="16" y="9" font="FFVIIFont" visible="true" />
+        </widget>
     </widget>
 </screen>

@@ -186,6 +186,10 @@ UiContainer.NameMenu = {
         local name = Characters[id].name
         -- HACK: Hack for Ex-Soldier default. Can this be extracted from menu.lgp?
         if string.lower(name) == "ex-soldier" then return "Cloud" end
+        -- The initial data of the game only holds "Red" for him.
+        if id == 4 and string.lower(name) == "red" then return "Red XIII" end
+        -- The data of ff7.exe that he joins with spells his name wrong.
+        if id == 6 and string.lower(name) == "cait seith" then return "Cait Sith" end
         return name
     end,
 
@@ -300,6 +304,8 @@ UiContainer.NameMenu = {
         if self.chocobo == false then
             Characters[self.id].name = self.name
             export_character_names()
+            -- The level of the character is set once it has a name.
+            Characters.join(self.id)
         else
             -- TODO: Do chocobo.
         end

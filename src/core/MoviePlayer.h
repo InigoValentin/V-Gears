@@ -86,6 +86,14 @@ class MoviePlayer : public Ogre::RenderQueueListener{
         int ScriptGetFrame() const;
 
         /**
+         * Makes the next movies the background of the field (MVCAM): the models are drawn over them
+         * even if the movie has no camera data (the elevator of junair).
+         *
+         * @param[in] use True while the models go over the movies.
+         */
+        void ScriptUseMovieCamera(const bool use);
+
+        /**
          * @return True while a movie is being played.
          */
         bool ScriptIsPlaying() const;
@@ -97,6 +105,16 @@ class MoviePlayer : public Ogre::RenderQueueListener{
          * @return True if a movie with a camera is being played.
          */
         bool IsDrawnBehind() const;
+
+        /**
+         * Checks if the movie covers the whole screen, over the field.
+         *
+         * The movies with no camera are drawn over everything of the field, and the fades of the
+         * field (the scenes black the screen before a movie starts) must not hide them.
+         *
+         * @return True if a movie is playing over the field.
+         */
+        bool IsDrawnOver() const;
 
         /**
          * Draws the movie. If it has a camera it's drawn behind the models, and the models are
@@ -137,6 +155,11 @@ class MoviePlayer : public Ogre::RenderQueueListener{
          * Whether the current frame of the movie has a camera.
          */
         bool camera_valid_ = false;
+
+        /**
+         * The script (MVCAM) wants the models over the movie.
+         */
+        bool movie_camera_ = false;
 
         /**
          * Whether the movie camera is in use.

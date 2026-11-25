@@ -65,8 +65,8 @@ void FieldControlFlowInstruction::ProcessInst(
 void FieldControlFlowInstruction::ProcessPartyRequest(
   CodeGenerator* code_gen, const std::string& mode
 ){
-    // Operands: the character (the one given to the PC opcode of the entity), the priority and the
-    // index of the script. The entity is the one of that character, which is known when running.
+    // Operands: the slot of the party (0 is the leader), the priority and the index of the script.
+    // The entity is the one of the character in that slot, which is known when running.
     const auto script_index = params_[2]->GetUnsigned();
     const std::string script_name
       = (script_index == 1) ? "on_interact" : "script_" + std::to_string(script_index);
@@ -79,31 +79,49 @@ void FieldControlFlowInstruction::ProcessPartyRequest(
 void FieldControlFlowInstruction::ProcessREQ(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
-    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& entity = engine.EntityByIndex(params_[0]->GetSigned());
-    const auto& script_name = cg->GetFormatter().GetFriendlyFunctionName(
-      entity.GetName(), entity.FunctionByIndex(params_[2]->GetUnsigned())
-    );
-    auto priority = params_[1]->GetUnsigned();
-    code_gen->AddOutputLine((
-      boost::format("script:request(Script.ENTITY, \"%1%\", \"%2%\", %3%)")
-      % entity.GetName() % script_name % priority
-    ).str());
+    // Some scripts ask for a script that the entity doesn't have (niv_ti2): it does nothing.
+    try{
+        FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+        const auto& entity = engine.EntityByIndex(params_[0]->GetSigned());
+        const auto& script_name = cg->GetFormatter().GetFriendlyFunctionName(
+          entity.GetName(), entity.FunctionByIndex(params_[2]->GetUnsigned())
+        );
+        auto priority = params_[1]->GetUnsigned();
+        code_gen->AddOutputLine((
+          boost::format("script:request(Script.ENTITY, \"%1%\", \"%2%\", %3%)")
+          % entity.GetName() % script_name % priority
+        ).str());
+    }
+    catch (const DecompilerException&){
+        code_gen->AddOutputLine((
+          boost::format("-- ERROR call to non existing function index %1%")
+          % params_[2]->GetUnsigned()
+        ).str());
+    }
 }
 
 void FieldControlFlowInstruction::ProcessREQSW(
   CodeGenerator* code_gen, const FieldEngine& engine
 ){
-    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& entity = engine.EntityByIndex(params_[0]->GetSigned());
-    const auto& script_name = cg->GetFormatter().GetFriendlyFunctionName(
-      entity.GetName(), entity.FunctionByIndex(params_[2]->GetUnsigned())
-    );
-    auto priority = params_[1]->GetUnsigned();
-    code_gen->AddOutputLine((
-      boost::format("script:request_start_sync(Script.ENTITY, \"%1%\", \"%2%\", %3%)")
-      % entity.GetName() % script_name % priority
-    ).str());
+    // Some scripts ask for a script that the entity doesn't have (niv_ti2): it does nothing.
+    try{
+        FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
+        const auto& entity = engine.EntityByIndex(params_[0]->GetSigned());
+        const auto& script_name = cg->GetFormatter().GetFriendlyFunctionName(
+          entity.GetName(), entity.FunctionByIndex(params_[2]->GetUnsigned())
+        );
+        auto priority = params_[1]->GetUnsigned();
+        code_gen->AddOutputLine((
+          boost::format("script:request_start_sync(Script.ENTITY, \"%1%\", \"%2%\", %3%)")
+          % entity.GetName() % script_name % priority
+        ).str());
+    }
+    catch (const DecompilerException&){
+        code_gen->AddOutputLine((
+          boost::format("-- ERROR call to non existing function index %1%")
+          % params_[2]->GetUnsigned()
+        ).str());
+    }
 }
 
 void FieldControlFlowInstruction::ProcessREQEW(
