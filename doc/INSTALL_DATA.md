@@ -35,8 +35,6 @@ To add the missing audio later, install the programs and run the installer again
 
 ## Launch the Installer
 
-If you have followed the [build](BUILD.md "Building guide") and [installaton](INSTALL.md "Installation guide") guides, you'll have the game data copied to `~/.v-gears/` (or you can let the installer copy it, see below), and the binaries compiled somewhere (we'll assume they are in `~/V-Gears/build/bin`, change the directories according to your system). Just run the installer:
-
 ```Bash
 ~/V-Gears/build/bin/v-gears-installer
 ```

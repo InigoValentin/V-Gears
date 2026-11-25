@@ -1,16 +1,28 @@
 # <img src="../v-gears.png" alt="V-Gears" width="50"/> V-Gears Building Guide
 
 ## Install dependencies
-If you are running Debian (or derivates), you can install the required dependencies by running as root
+
+If you are running Debian (or derivates), you can install the required dependencies with:
 
 ```bash
-apt install g++ cmake libqt5widgets5 qtbase5-dev zlib1g-dev libarchive-dev libogre-1.12-dev libois-dev libvorbis-dev libboost-dev libboost-program-options-dev libboost-test-dev libboost-filesystem-dev libboost-thread-dev libopenal-dev libtinyxml-dev libluajit-5.1-dev
+sudo apt install git build-essential cmake qtbase5-dev zlib1g-dev libarchive-dev libogre-1.12-dev libois-dev libvorbis-dev libboost-dev libboost-program-options-dev libboost-test-dev libboost-filesystem-dev libboost-thread-dev libopenal-dev libtinyxml-dev libluajit-5.1-dev
 ```
 
-The data installer also needs FFmpeg and TiMidity (see [Optional programs](#optional-programs)).
+This guide was checked on Debian forky/sid. Other releases and distributions may name some packages differently, especially `libogre-1.12-dev`.
+
+To convert the sound effects, the music and the videos, the data installer also uses FFmpeg and TiMidity. They are not needed to build V-Gears, only to install the game data (see the [data installation guide](INSTALL_DATA.md "Install Data")).
 
 ```bash
-apt install ffmpeg timidity
+sudo apt install ffmpeg timidity
+```
+
+## Get the code
+
+Clone the repository and enter its directory. All the commands in this guide are run from there, which is called the project directory.
+
+```bash
+git clone https://github.com/InigoValentin/V-Gears.git
+cd V-Gears
 ```
 
 ## Build using CMake
@@ -18,38 +30,38 @@ apt install ffmpeg timidity
 From the project directory, run these commands:
 
 ```bash
-mkdir build;
-cd build;
-cmake ../;
-make;
+cmake -S . -B build
+cmake --build build
 ```
 
-If you want to speed it up a bit (it can take several minutes, depending on your system), you can add the parameter `-j` to make to use multiple threads. For instance, `make -j3` will use three cores for the compilation. The build uses a lot of memory, so on machines with little RAM, use a low number (`-j2`).
+If you want to speed it up (it can take several minutes, depending on your system), add `-j` to the second command to use multiple threads. For instance, `cmake --build build -j3` will use three cores for the compilation. The build uses a lot of memory, so on machines with little RAM, use a low number (`-j2`).
 
 Once the build process finishes, you should have the following files (from the project directory):
 
 - `build/bin/v-gears`, the engine executable.
 - `build/bin/v-gears-installer`, the data installer.
 
-If you build with `-DCMAKE_BUILD_TYPE=Debug`, they are in `build/bin_debug/` instead.
+If you add `-DCMAKE_BUILD_TYPE=Debug` to the first command, they are in `build/bin_debug/` instead.
 
 The engine can be launched from anywhere: it finds its data directory (`~/.v-gears/` by default) and fills it from the `data/` folder of the repository the first time. See the [run guide](RUN.md "Run V-Gears") for details.
 
 ## Run the tests (optional)
 
-The tests are not built by default. To build and run the tests of the installer logic (the option rules, the installation layout, the verifier, the log, the tool finder and the movie camera data) and of the data directory and Ogre plugin lookup, which don't need the rest of the engine:
+The tests are not built by default: enable them with `-DBUILD_TESTS=ON`. It's best to use a separate build directory. From the project directory:
 
 ```bash
-mkdir build-tests;
-cd build-tests;
-cmake ../ -DBUILD_TESTS=ON;
-make v-gears-installer-tests;
-./bin/v-gears-installer-tests
+cmake -S . -B build-tests -DBUILD_TESTS=ON
+cmake --build build-tests --target v-gears-tests v-gears-installer-tests
+cd build-tests
+ctest --output-on-failure
 ```
 
-The engine tests (for example the movie state and camera frames) are in the `v-gears-tests` target, built the same way.
+There are two test programs:
 
-<!-- TODO(review): check that `make v-gears-tests` builds on its own and whether more build dependencies (video, audio) are required now. -->
+- `v-gears-tests`, the tests of the engine and of the script decompiler. It links the engine library, so it takes a while to build the first time, and it needs the same dependencies as V-Gears.
+- `v-gears-installer-tests`, the tests of the installer logic (the option rules, the installation layout, the verifier, the log, the tool finder and the movie camera data) and of the data directory and Ogre plugin lookup. It doesn't need the rest of the engine, so it builds quickly.
+
+To build and run only one of them, pass just its name to `--target` and run it from the build directory, for example `./bin/v-gears-installer-tests`.
 
 ## Make packages (optional)
 
@@ -60,14 +72,13 @@ V-Gears can be packaged for Linux as a `.deb` package and as a `.tar.gz` archive
 Use a separate Release build, so it doesn't interfere with your development build. From the project directory:
 
 ```bash
-mkdir build-release;
-cd build-release;
-cmake ../ -DCMAKE_BUILD_TYPE=Release;
-make -j4 v-gears v-gears-installer;
-cpack;
+cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release -j4 --target v-gears v-gears-installer
+cd build-release
+cpack
 ```
 
-The first build takes a while. Adjust `-j` as explained in [Build using CMake](#build-using-cmake).
+The first build takes a while. Adjust `-j` as explained in [Build using CMake](#build-using-cmake). Making the `.deb` needs `dpkg-dev`, which comes with `build-essential`.
 
 When `cpack` finishes, `build-release/` contains:
 
@@ -83,7 +94,7 @@ Both have the same files:
 
 - `bin/v-gears` and `bin/v-gears-installer`, the engine and the data installer.
 - `share/v-gears/`, the V-Gears data files (configuration, scripts, screens, fonts...). The engine copies them to the user's data directory (`~/.v-gears/`) the first time it runs, and the data installer adds the game data there.
-- `share/doc/v-gears/`, the documentation and the license.
+- `share/doc/v-gears/`, the documentation for players (not the build and style guides) and the license.
 - `share/applications/` and `share/icons/`, the desktop files and the icons.
 
 The `.deb` installs them under `/usr`, so both programs show in the applications menu. Install it with `apt`, so it installs the dependencies too:
@@ -114,10 +125,18 @@ These can be set when running `cmake` (`-D<option>=<value>`):
 
 ### Install without a package
 
-To install V-Gears directly in the system, with the same files and layout as the packages, run this from the build directory:
+To install V-Gears directly in the system, with the same files and layout as the packages, build it and then install it. From the project directory:
 
 ```bash
-sudo cmake --install . --prefix /usr/local
+cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release -j4
+sudo cmake --install build-release --prefix /usr/local
+```
+
+CMake writes the list of installed files to `build-release/install_manifest.txt`. To uninstall, remove those files. This leaves their directories, and your data in `~/.v-gears/`.
+
+```bash
+sudo xargs -d '\n' rm -f -- < build-release/install_manifest.txt
 ```
 
 ## Advanced build options
@@ -139,18 +158,7 @@ If you see warnings about missing Boost or OgreBites, prefer installing the
 appropriate `-dev` packages listed above, or point CMake at your OGRE/Boost
 installation with `-DOGRE_ROOT=...` and `-DBoost_DIR=...`/`-DBoost_LIBRARY_DIRS`.
 
-## Optional programs
-
-To convert the sound effects, the music and the videos, the installer uses FFmpeg and TiMidity. They are not needed to build V-Gears, only to install the data. In Debian (or derivates):
-
-```bash
-apt install ffmpeg timidity
-```
-
-See the [data installation guide](INSTALL_DATA.md "Install Data").
-
 ## Next steps
 
-- [Install V-Gears](INSTALL.md "Install V-Gears")
 - [Install data](INSTALL_DATA.md "Install Data")
 - [Run V-Gears](RUN.md "Run V-Gears")

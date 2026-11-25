@@ -24,7 +24,6 @@ install(
         ${CMAKE_SOURCE_DIR}/COPYING.txt
         ${CMAKE_SOURCE_DIR}/doc/AUTHORS.md
         ${CMAKE_SOURCE_DIR}/doc/HISTORY.md
-        ${CMAKE_SOURCE_DIR}/doc/INSTALL.md
         ${CMAKE_SOURCE_DIR}/doc/INSTALL_DATA.md
         ${CMAKE_SOURCE_DIR}/doc/RUN.md
     DESTINATION ${VGEARS_INSTALL_DOCDIR}

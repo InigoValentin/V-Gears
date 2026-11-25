@@ -16,18 +16,19 @@
 #include <boost/test/unit_test.hpp>
 #include "installer/decompiler/world/instruction/WorldSubStackInstruction.h"
 
-BOOST_AUTO_TEST_CASE(TestWorldSubStackInstructionLeftShiftIsValidLua){
+BOOST_AUTO_TEST_CASE(TestWorldSubStackInstructionRightShiftIsValidLua){
     WorldSubStackInstruction instruction;
     instruction.SetOpcode(0x51);
 
     ValueStack stack;
+    // The value is pushed first, and then the number of bits.
+    stack.Push(new VarValue("(2928 - Read(912))"));
     stack.Push(new VarValue("2"));
-    stack.Push(new VarValue("2928 - Read(912)"));
     Function function;
     instruction.ProcessInst(function, stack, nullptr, nullptr);
 
     BOOST_CHECK_EQUAL(
-        stack.Pop()->GetString(), "((2928 - Read(912)) * (2 ^ 2))"
+        stack.Pop()->GetString(), "math.floor((2928 - Read(912)) / 2 ^ 2)"
     );
 }
 

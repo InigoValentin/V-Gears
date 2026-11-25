@@ -1,5 +1,7 @@
-# Find packages required to compile tests.
-find_package(Boost COMPONENTS filesystem unit_test_framework REQUIRED)
+# Find packages required to compile tests. Imported targets are directory-scoped, so the Boost components that the
+# engine links (found in src/) have to be looked up here too.
+find_package(Boost REQUIRED COMPONENTS filesystem unit_test_framework program_options thread
+    OPTIONAL_COMPONENTS system chrono)
 
 
 # Compiler options.
@@ -266,17 +268,17 @@ else()
     set(_test_qt_libs -lQt5Widgets -lQt5Core)
 endif()
 
+# The tests use the same libraries as the engine (read from its target, as the variables set in src/ are not visible
+# here), plus libarchive, which the installer code needs.
+get_target_property(_engine_libs v-gears LINK_LIBRARIES)
+
 target_link_libraries(v-gears-tests
     libvgears
     ${_test_qt_libs}
-    ${OIS_LIBRARIES}
-    ${OPENAL_LIBRARY}
-    ${OGGVORBIS_LIBRARIES}
-    ${TinyXML_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${BOOST_LINK_LIBS}
-    ${OGRE_LIBRARIES}
+    ${_engine_libs}
+    archive
     ${ZLIB_LIBRARIES}
+    Boost::unit_test_framework
 )
 add_test(NAME v-gears-tests COMMAND v-gears-tests)
 
