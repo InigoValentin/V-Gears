@@ -841,28 +841,34 @@ UiContainer.ItemMenu = {
                 end
         elseif Game.Items[item].id == 71 then
             -- Power source. Can't be differenciated by other means other than ID. STR bonus + 1.
-            -- Original game caps bonus at 255. V-Gears doesn't.
-            Characters[char_id].stats.str.bonus = Characters[char_id].stats.str.bonus + 1
+            if not Characters.add_stat_bonus(char_id, "str") then
+                return false
+            end
         elseif Game.Items[item].id == 72 then
             -- Guard source. Can't be differenciated by other means other than ID. VIT bonus + 1.
-            -- Original game caps bonus at 255. V-Gears doesn't.
-            Characters[char_id].stats.vit.bonus = Characters[char_id].stats.vit.bonus + 1
+            if not Characters.add_stat_bonus(char_id, "vit") then
+                return false
+            end
         elseif Game.Items[item].id == 73 then
             -- Magic source. Can't be differenciated by other means other than ID. MAG bonus + 1.
-            -- Original game caps bonus at 255. V-Gears doesn't.
-            Characters[char_id].stats.mag.bonus = Characters[char_id].stats.mag.bonus + 1
+            if not Characters.add_stat_bonus(char_id, "mag") then
+                return false
+            end
         elseif Game.Items[item].id == 74 then
             -- Mind source. Can't be differenciated by other means other than ID. SPR bonus + 1.
-            -- Original game caps bonus at 255. V-Gears doesn't.
-            Characters[char_id].stats.spr.bonus = Characters[char_id].stats.spr.bonus + 1
+            if not Characters.add_stat_bonus(char_id, "spr") then
+                return false
+            end
         elseif Game.Items[item].id == 75 then
             -- Speed source. Can't be differenciated by other means other than ID. DEX bonus + 1.
-            -- Original game caps bonus at 255. V-Gears doesn't.
-            Characters[char_id].stats.dex.bonus = Characters[char_id].stats.dex.bonus + 1
+            if not Characters.add_stat_bonus(char_id, "dex") then
+                return false
+            end
         elseif Game.Items[item].id == 76 then
             -- Luck source. Can't be differenciated by other means other than ID. LCK bonus + 1.
-            -- Original game caps bonus at 255. V-Gears doesn't.
-            Characters[char_id].stats.lck.bonus = Characters[char_id].stats.lck.bonus + 1
+            if not Characters.add_stat_bonus(char_id, "lck") then
+                return false
+            end
         elseif Game.Items[item].id == 87 then
             -- Omnislash. Can't be differenciated by other means other than ID.
             -- Functionality hardcoded here.

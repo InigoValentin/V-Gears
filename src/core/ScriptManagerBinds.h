@@ -139,6 +139,7 @@ void ScriptManager::InitBinds(){
       "set_alpha", &Entity::ScriptSetAlpha,
       "set_texture", &Entity::ScriptSetTexture,
       "get_bone_position", &Entity::ScriptGetBonePosition,
+      "get_bone_end", &Entity::ScriptGetBoneEnd,
       "attach_model", sol::overload(
         [](Entity& entity, const char* model, const int bone){
             return entity.ScriptAttachModel(model, bone, 0.0f, 0.0f, 0.0f);
@@ -253,6 +254,7 @@ void ScriptManager::InitBinds(){
       "set_dynamic_mesh", &BattleManager::ScriptSetDynamicMesh,
       "remove_dynamic_mesh", &BattleManager::ScriptRemoveDynamicMesh,
       "get_layout", &BattleManager::ScriptGetLayout,
+      "get_intro_camera", &BattleManager::ScriptGetIntroCamera,
       "get_attack", [](BattleManager& manager, const int id, sol::this_state state) -> sol::object{
           sol::state_view view(state);
           const AttackData* attack = manager.GetAttackData(id);

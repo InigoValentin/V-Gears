@@ -195,10 +195,11 @@ void FieldPartyInstruction::ProcessPRTYE(CodeGenerator* code_gen){
 }
 
 void FieldPartyInstruction::ProcessMMBUD(CodeGenerator* code_gen){
-    // Param 0 is the character, param 1 is 0 to hide it in the PHS and anything else to show it.
+    // Param 0 is 0 to hide the character in the PHS and anything else to show it, param 1 is the
+    // character (checked in the opcode handler of ff7.exe, 0x61c782).
     code_gen->AddOutputLine((
-      boost::format("set_character_enable(%1%, %2%)") % params_[0]->GetString()
-        % (params_[1]->GetUnsigned() != 0 ? "true" : "false")
+      boost::format("set_character_enable(%1%, %2%)") % params_[1]->GetString()
+        % (params_[0]->GetUnsigned() != 0 ? "true" : "false")
     ).str());
 }
 

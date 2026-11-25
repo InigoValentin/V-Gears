@@ -50,6 +50,15 @@ void XmlEnemyFile::LoadEnemy(Enemy& enemy){
                 else if (GetString(node_stat, "id") == "spd") enemy.SetDex(value);
                 else if (GetString(node_stat, "id") == "lck") enemy.SetLck(value);
                 else if (GetString(node_stat, "id") == "eva") enemy.SetEva(value);
+                // The maximum goes first, the current value is capped to it.
+                else if (GetString(node_stat, "id") == "hp"){
+                    enemy.SetHpMax(value);
+                    enemy.SetHp(value);
+                }
+                else if (GetString(node_stat, "id") == "mp"){
+                    enemy.SetMpMax(value);
+                    enemy.SetMp(value);
+                }
                 node_stat = node_stat->NextSibling();
             }
         }

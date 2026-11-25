@@ -145,6 +145,20 @@ std::tuple<float, float, float> EntityModel::ScriptGetBonePosition(const int bon
     return std::make_tuple(position.x, position.y, position.z);
 }
 
+std::tuple<float, float, float> EntityModel::ScriptGetBoneEnd(const int bone, const float length){
+    Ogre::SkeletonInstance* skeleton = model_->getSkeleton();
+    const Ogre::String name = "bone" + std::to_string(bone);
+    if (skeleton == nullptr || !skeleton->hasBone(name)) return std::make_tuple(0.0f, 0.0f, 0.0f);
+    // Bring the skeleton to the current frame of the animation.
+    model_->_updateAnimation();
+    Ogre::Bone* node = skeleton->getBone(name);
+    // The bones go along their Y axis, where their children are placed.
+    const Ogre::Vector3 end = node->_getDerivedPosition()
+      + node->_getDerivedOrientation() * (node->_getDerivedScale() * Ogre::Vector3(0, length, 0));
+    const Ogre::Vector3 position = model_->_getParentNodeFullTransform() * end;
+    return std::make_tuple(position.x, position.y, position.z);
+}
+
 bool EntityModel::ScriptAttachModel(
   const char* model, const int bone, const float rx, const float ry, const float rz
 ){

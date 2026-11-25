@@ -55,15 +55,16 @@ void XmlFormationFile::LoadFormation(){
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "camera"){
             BattleManager::getSingleton().SetInitialCamera(GetInt(node, "initial"));
+            BattleManager::getSingleton().SetIntroCamera(GetInt(node, "intro", -1));
             TiXmlNode* camera_node = node->FirstChild();
             while (camera_node != nullptr){
                 int id = GetInt(camera_node, "id");
                 Ogre::Vector3 pos = Ogre::Vector3(
-                  GetInt(camera_node, "x"), GetInt(camera_node, "y"), GetInt(camera_node, "z")
+                  GetFloat(camera_node, "x"), GetFloat(camera_node, "y"), GetFloat(camera_node, "z")
                 );
                 Ogre::Vector3 dir = Ogre::Vector3(
-                  GetInt(camera_node, "direction_x"), GetInt(camera_node, "direction_y"),
-                  GetInt(camera_node, "direction_z")
+                  GetFloat(camera_node, "direction_x"), GetFloat(camera_node, "direction_y"),
+                  GetFloat(camera_node, "direction_z")
                 );
                 BattleManager::getSingleton().AddCamera(id, pos, dir);
                 camera_node = camera_node->NextSibling();

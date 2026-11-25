@@ -24,6 +24,16 @@ First step: play the scene with log level 3 and look at the time between the `di
 layer of mds5_4 has no such opcodes and still scrolls with the rest, and it is not known why it should
 not.
 
+## Battle: recruits that remain untested
+
+Yuffie, Vincent and Cait Sith remain untested: the level they join with (`Characters.join` in `system.lua`)
+and, for Vincent and Cait Sith, the data they get when they are named (`Characters.load_recruit_record`). The
+other characters are working fine.
+
+- Yuffie's level comes from the variable at bank 1, address 2. Only the field blackbg4 writes it, so it is not
+  known what sets it in a normal game. While it is 0 the average level of the party is used, which is not from
+  the original.
+
 ## Battle: special limits
 
 Not done yet (kernel data in ff7.exe, ids 170-176, see `get_special_limit` in `battle_ui.lua`):

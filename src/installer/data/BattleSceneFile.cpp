@@ -49,28 +49,14 @@ void BattleSceneFile::Read(File file){
     }
     for (int c = 0; c < 4; c ++){
         for (int p = 0; p < 3; p ++){
-            // Camera positions are stored as 16 bit floats. Here, 16 bit are being read, then, the
-            // sign is checked to fit it into -32766 and 32767 (0x7F9b). Then, the number is
-            // divided by 255 (0xFF) to keep just the integer part.
-            scene_.camera[c].camera[p].x = file.readU16LE();
-            if (scene_.camera[c].camera[p].x > 0x7F9B) scene_.camera[c].camera[p].x -= 0xFFFF;
-            scene_.camera[c].camera[p].x /= 0xFF;
-            // Y and Z are inverted in original data.
-            scene_.camera[c].camera[p].y = file.readU16LE();
-            if (scene_.camera[c].camera[p].y > 0x7F9B) scene_.camera[c].camera[p].y -= 0xFFFF;
-            scene_.camera[c].camera[p].y /= 0xFF;
-            scene_.camera[c].camera[p].z = file.readU16LE();
-            if (scene_.camera[c].camera[p].z > 0x7F9B) scene_.camera[c].camera[p].z -= 0xFFFF;
-            scene_.camera[c].camera[p].z /= 0xFF;
-            scene_.camera[c].camera[p].d_x = file.readU16LE();
-            if (scene_.camera[c].camera[p].d_x > 0x7F9B) scene_.camera[c].camera[p].d_x -= 0xFFFF;
-            scene_.camera[c].camera[p].d_x /= 0xFF;
-            scene_.camera[c].camera[p].d_y = file.readU16LE();
-            if (scene_.camera[c].camera[p].d_y > 0x7F9B) scene_.camera[c].camera[p].d_y -= 0xFFFF;
-            scene_.camera[c].camera[p].d_y /= 0xFF;
-            scene_.camera[c].camera[p].d_z = file.readU16LE();
-            if (scene_.camera[c].camera[p].d_z > 0x7F9B) scene_.camera[c].camera[p].d_z -= 0xFFFF;
-            scene_.camera[c].camera[p].d_z /= 0xFF;
+            // The position of the camera and the point it looks at, signed 16 bit values in the units of
+            // the original game. They are kept as they are, and converted when the formations are built.
+            scene_.camera[c].camera[p].x = static_cast<int16_t>(file.readU16LE());
+            scene_.camera[c].camera[p].y = static_cast<int16_t>(file.readU16LE());
+            scene_.camera[c].camera[p].z = static_cast<int16_t>(file.readU16LE());
+            scene_.camera[c].camera[p].d_x = static_cast<int16_t>(file.readU16LE());
+            scene_.camera[c].camera[p].d_y = static_cast<int16_t>(file.readU16LE());
+            scene_.camera[c].camera[p].d_z = static_cast<int16_t>(file.readU16LE());
         }
         for (int p = 0; p < 12; p ++) scene_.camera[c].unused[p] = file.readU8();
     }
@@ -462,16 +448,21 @@ void BattleSceneFile::Read(File file){
         formation.location_name = LocationToString(scene_.setup[f].location);
         for (int c = 0; c < 3; c ++){
             Formation::Camera camera;
-            camera.x = scene_.camera[f].camera[c].x;
-            camera.y = scene_.camera[f].camera[c].y;
-            camera.z = scene_.camera[f].camera[c].z;
-            camera.d_x = scene_.camera[f].camera[c].d_x;
-            camera.d_y = scene_.camera[f].camera[c].d_y;
-            camera.d_z = scene_.camera[f].camera[c].d_z;
+            // The original data has x to the side, y down and z in depth (the enemies are in the negative
+            // side). The scene has the same x, the depth in y and z up, in units 255 times bigger, like the
+            // positions of the enemies.
+            const BattleSceneFile::Scene::Camera::Position& source = scene_.camera[f].camera[c];
+            camera.x = source.x / 255.0f;
+            camera.y = source.z / 255.0f;
+            camera.z = -source.y / 255.0f;
+            camera.d_x = source.d_x / 255.0f;
+            camera.d_y = source.d_z / 255.0f;
+            camera.d_z = -source.d_y / 255.0f;
             formation.camera_positions.push_back(camera);
         }
-        if (scene_.setup[f].camera < formation.camera_positions.size())
-            formation.initial_camera_position = scene_.setup[f].camera;
+        // The camera byte of the formation is the script of the camera at the start of the battle, which
+        // ends at the first camera of the formation unless it chooses another one.
+        formation.intro_camera = scene_.setup[f].camera;
         for (int a = 0; a < 4; a ++){
             if (scene_.setup[f].next_arena_candidates[a] != 999){
                 formation.next_arena_formation_candidates.push_back(scene_.setup[f].next_arena_candidates[a]);

@@ -75,6 +75,8 @@ class EntityModel : public Entity{
 
         virtual std::tuple<float, float, float> ScriptGetBonePosition(const int bone);
 
+        virtual std::tuple<float, float, float> ScriptGetBoneEnd(const int bone, const float length);
+
         virtual bool ScriptAttachModel(
           const char* model, const int bone, const float rx, const float ry, const float rz
         );

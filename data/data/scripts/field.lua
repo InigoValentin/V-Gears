@@ -316,9 +316,13 @@ name_character = function(id)
         print("Tried to rename invalid character with ID " .. tostring(id))
         return 0
     end
+    -- Cait Sith and Vincent get their data before they are named.
+    Characters.load_recruit_record(id)
     -- While the name menu is not enabled, the character just gets its default name.
     if not UiContainer.NameMenu.enabled then
         UiContainer.NameMenu:apply_default_name(id)
+        -- The level of the character is set once it has a name.
+        Characters.join(id)
         return 0
     end
     UiContainer.NameMenu.id = id

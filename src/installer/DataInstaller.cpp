@@ -301,6 +301,11 @@ float DataInstaller::Progress(){
         case KERNEL_SAVEMAP:
             write_output_line_("Extracting the initial savemap...", 2, true);
             kernel_installer_->ReadInitialSaveMap();
+            {
+                auto exe_path = disk_image_.filePath("ff7.exe");
+                if (exe_path) kernel_installer_->ReadRecruitRecords(*exe_path);
+                else write_output_line_("ff7.exe not found, Cait Sith and Vincent won't have their data.", 2, true);
+            }
             kernel_installer_->WriteInitialSaveMap(data_dir_ + "gamedata/initial_savemap.lua");
             installation_state_ = MEDIA_IMAGES;
             return CalcProgress();
