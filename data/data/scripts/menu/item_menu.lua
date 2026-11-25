@@ -71,6 +71,12 @@ UiContainer.ItemMenu = {
     -- Slots in the party inventory
     inventory_size = 320,
 
+    --- True while the items are being ordered by hand (Order > Custom).
+    custom_mode = false,
+
+    --- Inventory position of the item picked in the custom order, or nil.
+    custom_held = nil,
+
     --- Run when the menu is creaded.
     --
     -- It does nothing.
@@ -151,7 +157,9 @@ UiContainer.ItemMenu = {
                 elseif button == Config.ACTIONS.CONFIRM then
                     audio_manager:play_sound("Cursor")
                     if self.order_cursor_position == 1 then
-                        Inventory.sort(Inventory.ORDER.CUSTOM)
+                        -- Custom: the items are moved by hand in the list.
+                        self.submenu_custom(self)
+                        return 0
                     elseif self.order_cursor_position == 2 then
                         Inventory.sort(Inventory.ORDER.FIELD)
                     elseif self.order_cursor_position == 3 then
@@ -233,9 +241,21 @@ UiContainer.ItemMenu = {
                     end
                 elseif button == Config.ACTIONS.CANCEL and event == "Press" then
                     audio_manager:play_sound("Back")
-                    self.submenu_bar(self)
-                    UiContainer.current_submenu = "bar_selection"
-                    ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
+                    if self.custom_mode then
+                        if self.custom_held ~= nil then
+                            -- Drop the picked item.
+                            self.custom_held = nil
+                        else
+                            -- Back to the order options.
+                            self.submenu_order(self)
+                        end
+                    else
+                        self.submenu_bar(self)
+                        UiContainer.current_submenu = "bar_selection"
+                        ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
+                    end
+                elseif button == Config.ACTIONS.CONFIRM and event == "Press" and self.custom_mode then
+                    self.custom_confirm(self)
                 elseif button == Config.ACTIONS.CONFIRM then
                     local selected = Inventory[self.item_cursor_item_selected]
                     if selected ~= nil and Game.Items[selected.item].menu == 1 then
@@ -436,6 +456,8 @@ UiContainer.ItemMenu = {
                 end
 
             end
+            -- The blinking cursor of the custom order follows the list when it scrolls.
+            if self.custom_mode then self.update_held(self) end
         end
         return 0
     end,
@@ -465,6 +487,9 @@ UiContainer.ItemMenu = {
     --- Initializes the selection of the menu section in the top bar.
     submenu_bar = function(self)
         UiContainer.current_submenu = "bar_selection"
+        self.custom_mode = false
+        self.custom_held = nil
+        self.update_held(self)
         ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
         ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Cursor"):set_visible(false)
         ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.CursorMultiple"):set_visible(false)
@@ -479,6 +504,9 @@ UiContainer.ItemMenu = {
     --- Initializes the sorting mode window.
     submenu_order = function(self)
         UiContainer.current_submenu = "order_selection"
+        self.custom_mode = false
+        self.custom_held = nil
+        self.update_held(self)
         self.order_cursor_position = 1
         ui_manager:get_widget("ItemMenu.Container.ItemList.Cursor"):set_visible(false)
         ui_manager:get_widget("ItemMenu.Container.ItemMenuCharacters.Cursor"):set_visible(false)
@@ -489,6 +517,56 @@ UiContainer.ItemMenu = {
         ui_manager:get_widget("ItemMenu.Container.ItemOrder"):set_visible(true)
         ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_visible(true)
         ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_default_animation("Position" .. self.order_cursor_position)
+    end,
+
+    --- Starts the custom order: the cursor goes over the list of items, and they can be swapped.
+    submenu_custom = function(self)
+        self.custom_mode = true
+        self.custom_held = nil
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder"):set_visible(false)
+        ui_manager:get_widget("ItemMenu.Container.ItemOrder.Cursor"):set_visible(false)
+        self.submenu_items(self)
+    end,
+
+    --- Confirm in the custom order: picks the highlighted item, or swaps it with the picked one.
+    --
+    -- Items can only be swapped with other items, so the list never gets empty places in the
+    -- middle.
+    custom_confirm = function(self)
+        local index = self.item_cursor_item_selected
+        if self.custom_held == nil then
+            if Inventory[index] == nil then
+                audio_manager:play_sound("Error")
+                return
+            end
+            audio_manager:play_sound("Cursor")
+            self.custom_held = index
+        elseif self.custom_held == index then
+            audio_manager:play_sound("Back")
+            self.custom_held = nil
+        elseif Inventory[index] == nil then
+            audio_manager:play_sound("Error")
+        else
+            audio_manager:play_sound("Cursor")
+            Inventory[self.custom_held], Inventory[index] = Inventory[index], Inventory[self.custom_held]
+            self.custom_held = nil
+            self.populate_items(self)
+            self.show_item_description(self)
+        end
+    end,
+
+    --- Places the blinking cursor of the item picked in the custom order, or hides it.
+    update_held = function(self)
+        local held = ui_manager:get_widget("ItemMenu.Container.ItemList.Held")
+        local row = nil
+        if self.custom_held ~= nil then row = self.custom_held - self.first_item_in_window end
+        if row == nil or row < 1 or row > self.item_cursor_position_total then
+            held:set_visible(false)
+            return
+        end
+        held:set_visible(true)
+        held:set_default_animation("Blink" .. tostring(row))
+        held:play_animation("Blink" .. tostring(row))
     end,
 
     --- Shows the description of the highlighted inventory item, or clears it if the slot is empty.

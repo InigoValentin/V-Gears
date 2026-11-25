@@ -90,9 +90,34 @@
             <widget name="Empty" x="0" y ="0" width="100%" height="100%" visible="false">
             </widget>
             <widget name="Commands" x="0" y ="0" width="100%" height="100%" visible="false">
-                <widget name="Box" x="20" y ="20" width="100%-40" height="60" visible="true">
+                <widget name="Box" x="4" y="12" width="100%-8" height="88" visible="true">
                     <prototype name="Window" />
-                    <!-- TODO -->
+                    <text_area name="Command1" x="20" y="8" font="FFVIIFont" visible="false" />
+                    <text_area name="Command2" x="20" y="26" font="FFVIIFont" visible="false" />
+                    <text_area name="Command3" x="20" y="44" font="FFVIIFont" visible="false" />
+                    <text_area name="Command4" x="20" y="62" font="FFVIIFont" visible="false" />
+                    <text_area name="Command5" x="88" y="8" font="FFVIIFont" visible="false" />
+                    <text_area name="Command6" x="88" y="26" font="FFVIIFont" visible="false" />
+                    <text_area name="Command7" x="88" y="44" font="FFVIIFont" visible="false" />
+                    <text_area name="Command8" x="88" y="62" font="FFVIIFont" visible="false" />
+                    <text_area name="Command9" x="156" y="8" font="FFVIIFont" visible="false" />
+                    <text_area name="Command10" x="156" y="26" font="FFVIIFont" visible="false" />
+                    <text_area name="Command11" x="156" y="44" font="FFVIIFont" visible="false" />
+                    <text_area name="Command12" x="156" y="62" font="FFVIIFont" visible="false" />
+                    <sprite name="Cursor" image="icons/cursor.png" x="3" y="10" width="24" height="17" visible="false">
+                        <animation name="Position1" length="0" x="0:3" y="0:10" />
+                        <animation name="Position2" length="0" x="0:3" y="0:28" />
+                        <animation name="Position3" length="0" x="0:3" y="0:46" />
+                        <animation name="Position4" length="0" x="0:3" y="0:64" />
+                        <animation name="Position5" length="0" x="0:71" y="0:10" />
+                        <animation name="Position6" length="0" x="0:71" y="0:28" />
+                        <animation name="Position7" length="0" x="0:71" y="0:46" />
+                        <animation name="Position8" length="0" x="0:71" y="0:64" />
+                        <animation name="Position9" length="0" x="0:139" y="0:10" />
+                        <animation name="Position10" length="0" x="0:139" y="0:28" />
+                        <animation name="Position11" length="0" x="0:139" y="0:46" />
+                        <animation name="Position12" length="0" x="0:139" y="0:64" />
+                    </sprite>
                 </widget>
             </widget>
             <widget name="EnemySkill" x="0" y ="0" width="100%" height="100%" visible="false">
@@ -228,6 +253,66 @@
                 <animation name="Position9" length="0" y="0:76%+3" />
                 <animation name="Position10" length="0" y="0:85%+3" />
             </sprite>
+        </widget>
+        <widget name="Abilities" x="230" y="99" width="100%-230" height="100%-99" visible="false">
+            <prototype name="Window" />
+            <text_area name="Name1" x="20" y="4%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp1" x="100%-48" y="4%" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Name2" x="20" y="13%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp2" x="100%-48" y="13%" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Name3" x="20" y="22%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp3" x="100%-48" y="22%" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Name4" x="20" y="31%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp4" x="100%-48" y="31%" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Name5" x="20" y="40%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp5" x="100%-48" y="40%" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Name6" x="20" y="49%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp6" x="100%-48" y="49%" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Name7" x="20" y="58%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp7" x="100%-48" y="58%" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Name8" x="20" y="67%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp8" x="100%-48" y="67%" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Name9" x="20" y="76%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp9" x="100%-48" y="76%" font="FFVIIMenuDigits" visible="true" />
+            <text_area name="Name10" x="20" y="85%" font="FFVIIFont" visible="true" />
+            <text_area name="Mp10" x="100%-48" y="85%" font="FFVIIMenuDigits" visible="true" />
+            <sprite name="Cursor" image="icons/cursor.png" x="-15" y="8" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:4%+3" />
+                <animation name="Position2" length="0" y="0:13%+3" />
+                <animation name="Position3" length="0" y="0:22%+3" />
+                <animation name="Position4" length="0" y="0:31%+3" />
+                <animation name="Position5" length="0" y="0:40%+3" />
+                <animation name="Position6" length="0" y="0:49%+3" />
+                <animation name="Position7" length="0" y="0:58%+3" />
+                <animation name="Position8" length="0" y="0:67%+3" />
+                <animation name="Position9" length="0" y="0:76%+3" />
+                <animation name="Position10" length="0" y="0:85%+3" />
+            </sprite>
+        </widget>
+        <widget name="OrderMenu" x="170" y="2" width="108" height="84" visible="false">
+            <prototype name="Window" />
+            <text_area name="Item1" text_name="MateriaMenuArrange" x="20" y="6" font="FFVIIFont" visible="true" />
+            <text_area name="Item2" text_name="MateriaMenuExchange" x="20" y="24" font="FFVIIFont" visible="true" />
+            <text_area name="Item3" text_name="MateriaMenuRemoveAll" x="20" y="42" font="FFVIIFont" visible="true" />
+            <text_area name="Item4" text_name="MateriaMenuTrash" x="20" y="60" font="FFVIIFont" visible="true" />
+            <sprite name="Cursor" image="icons/cursor.png" x="-8" y="8" width="24" height="17" visible="true">
+                <animation name="Position1" length="0" y="0:8" />
+                <animation name="Position2" length="0" y="0:26" />
+                <animation name="Position3" length="0" y="0:44" />
+                <animation name="Position4" length="0" y="0:62" />
+            </sprite>
+        </widget>
+        <widget name="TrashWindow" x="50%-110" y="50%-31" width="220" height="64" visible="false">
+            <prototype name="Window" />
+            <sprite name="Icon" image="icons/materia_0.png" x="12" y="6" width="18" height="18" visible="true"/>
+            <text_area name="Name" x="36" y="9" font="FFVIIFont" visible="true" />
+            <sprite name="Star1" image="icons/materia_star_0.png" x="12" y="28" width="15" height="15" visible="true"/>
+            <sprite name="Star2" image="icons/materia_star_0.png" x="28" y="28" width="15" height="15" visible="true"/>
+            <sprite name="Star3" image="icons/materia_star_0.png" x="44" y="28" width="15" height="15" visible="true"/>
+            <sprite name="Star4" image="icons/materia_star_0.png" x="60" y="28" width="15" height="15" visible="true"/>
+            <sprite name="Star5" image="icons/materia_star_0.png" x="76" y="28" width="15" height="15" visible="true"/>
+            <text_area name="LblAP" text_name="MateriaMenuAP" x="12" y="47" font="FFVIIFont" visible="true" />
+            <text_area name="AP" x="100%-90" y="47" font="FFVIIMenuDigits" visible="true" />
         </widget>
     </widget>
 </screen>

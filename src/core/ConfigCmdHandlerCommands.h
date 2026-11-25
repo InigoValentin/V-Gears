@@ -317,6 +317,34 @@ void CmdShop(const Ogre::StringVector& params){
 }
 
 /**
+ * Enables or disables characters in the PHS.
+ *
+ * @param[in] params Command parameters: the command name, the ID of the character (0-8) or "all", and
+ * optionally "on" (the default) or "off".
+ */
+void CmdPhs(const Ogre::StringVector& params){
+    if (params.size() < 2 || params.size() > 3){
+        Console::getSingleton().AddTextToOutput("Usage: /phs <character_id|all> [on|off]");
+        return;
+    }
+    const bool enable = params.size() < 3 || (params[2] != "off" && params[2] != "0");
+    const std::string value = enable ? "true" : "false";
+    std::string first = "0";
+    std::string last = "8";
+    if (params[1] != "all"){
+        first = params[1];
+        last = params[1];
+    }
+    ScriptManager::getSingleton().RunString(
+      "for id = (tonumber(\"" + first + "\") or -1), (tonumber(\"" + last + "\") or -2) do "
+      "if type(Characters[id]) == \"table\" then Characters[id].enabled = " + value + " end end"
+    );
+    Console::getSingleton().AddTextToOutput(
+      std::string(enable ? "Enabled " : "Disabled ") + (params[1] == "all" ? "all characters" : "character " + params[1]) + " in the PHS"
+    );
+}
+
+/**
  * Loads a list of map names.
  *
  * @param[in] complete_params The map names will be loaded here.
@@ -504,6 +532,7 @@ void ConfigCmdHandler::InitCmd(){
     AddCommand("set_log_level", "Set log messages level", "", CmdSetLogLevel, NULL);
     AddCommand("map", "Run game module", "", CmdMap, CmdMapCompletion);
     AddCommand("shop", "Open a shop", "<shop_id>", CmdShop, NULL);
+    AddCommand("phs", "Enable or disable characters in the PHS", "<character_id|all> [on|off]", CmdPhs, NULL);
     AddCommand("resolution", "Change resolution", "", CmdResolution, CmdResolutionCompletition);
     AddCommand("screenshot", "Capture current screen content", "", CmdScreenshot, NULL);
     AddCommand("fade", "Start a screen fade", "<type> <r> <g> <b> <speed>", CmdFade, NULL);

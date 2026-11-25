@@ -19,7 +19,48 @@ UiContainer.SaveMenu = UiContainer.Menu.new{
         on_scroll = function() UiContainer.SaveMenu:populate_slots() end,
     },
 
+    --- Cursors over Yes and No of the confirmation windows.
+    confirm_cursor = {
+        same = UiContainer.Cursor.new{widget = "SaveMenu.Container.ConfirmSame.Cursor", total = 2},
+        other = UiContainer.Cursor.new{widget = "SaveMenu.Container.ConfirmOther.Cursor", total = 2},
+    },
+
+    --- Slot (1-based) waiting for the confirmation, and which window is open ("same" or "other").
+    pending_slot = nil,
+    confirm_kind = "same",
+
     states = {
+        --- Confirmation to override a slot. Yes is the default unless the slot belongs to another
+        -- playthrough.
+        confirm_save = {
+            cursor = function(self) return self.confirm_cursor[self.confirm_kind] end,
+            axis = "vertical",
+            confirm_sound = false,
+            confirm = function(self, cursor)
+                if cursor:index() == 1 then
+                    self:save_slot(self.pending_slot)
+                else
+                    self:close_confirm()
+                    UiContainer.play_sound("Back")
+                end
+            end,
+            cancel = function(self) self:close_confirm() end,
+        },
+
+        --- "Game saved". Confirm or cancel close it.
+        saved = {
+            confirm_sound = false,
+            cancel_sound = false,
+            confirm = function(self)
+                self:close_saved()
+                UiContainer.play_sound("Back")
+            end,
+            cancel = function(self)
+                self:close_saved()
+                UiContainer.play_sound("Back")
+            end,
+        },
+
         [""] = {
             cursor = function(self) return self.cursor end,
             axis = "vertical",
@@ -63,6 +104,9 @@ UiContainer.SaveMenu = UiContainer.Menu.new{
         ui_manager:get_widget(container .. "TopBar.DescLoad"):set_visible(loading)
         ui_manager:get_widget(container .. "Title.TitleSave"):set_visible(not loading)
         ui_manager:get_widget(container .. "Title.TitleLoad"):set_visible(loading)
+        ui_manager:get_widget("SaveMenu.Container.ConfirmSame"):set_visible(false)
+        ui_manager:get_widget("SaveMenu.Container.ConfirmOther"):set_visible(false)
+        ui_manager:get_widget("SaveMenu.Container.Saved"):set_visible(false)
         ui_manager:get_widget("SaveMenu"):set_visible(true)
         self.cursor.count = self.max_slots
         self.cursor:reset()
@@ -106,19 +150,54 @@ UiContainer.SaveMenu = UiContainer.Menu.new{
 
     action = function(self, slot)
         if self.operation == "save" then
-            if savemap_manager:is_slot_empty(slot - 1) == false and ControlKey ~= savemap_manager:get_slot_control_key(slot - 1) then
-                -- TODO: Confirmation dialog
-                print("OVERRIDE ANOTHER SAVE")
+            if savemap_manager:is_slot_empty(slot - 1) == true then
+                -- Nothing to override.
+                self:save_slot(slot)
+                return
             end
-            save_game(slot - 1, true)
+            -- Ask first. A slot of another playthrough is not overridden unless the player says so.
+            self.pending_slot = slot
+            local other = (ControlKey ~= savemap_manager:get_slot_control_key(slot - 1))
+            self.confirm_kind = other and "other" or "same"
+            ui_manager:get_widget("SaveMenu.Container.ConfirmSame"):set_visible(not other)
+            ui_manager:get_widget("SaveMenu.Container.ConfirmOther"):set_visible(other)
+            self.confirm_cursor[self.confirm_kind]:set(other and 2 or 1)
+            self:set_state("confirm_save")
             audio_manager:play_sound("Cursor")
-            self:populate_slots()
         elseif self.operation == "load" then
             audio_manager:play_sound("Window")
             script:request_end_sync(Script.UI, "SaveMenu", "hide", 0)
             script:request_end_sync(Script.UI, "BeginMenu", "hide", 0)
             load_game(slot - 1)
         end
+    end,
+
+    --- Closes the confirmation window without saving.
+    close_confirm = function(self)
+        ui_manager:get_widget("SaveMenu.Container.ConfirmSame"):set_visible(false)
+        ui_manager:get_widget("SaveMenu.Container.ConfirmOther"):set_visible(false)
+        self.pending_slot = nil
+        self:set_state("")
+    end,
+
+    --- Saves the game in a slot and shows the "Game saved" window.
+    --
+    -- @param slot Slot to save in (1-based).
+    save_slot = function(self, slot)
+        ui_manager:get_widget("SaveMenu.Container.ConfirmSame"):set_visible(false)
+        ui_manager:get_widget("SaveMenu.Container.ConfirmOther"):set_visible(false)
+        self.pending_slot = nil
+        save_game(slot - 1, true)
+        audio_manager:play_sound("Cursor")
+        self:populate_slots()
+        ui_manager:get_widget("SaveMenu.Container.Saved"):set_visible(true)
+        self:set_state("saved")
+    end,
+
+    --- Closes the "Game saved" window.
+    close_saved = function(self)
+        ui_manager:get_widget("SaveMenu.Container.Saved"):set_visible(false)
+        self:set_state("")
     end,
 
     --- Hides the item menu and goes back to the main menu.
