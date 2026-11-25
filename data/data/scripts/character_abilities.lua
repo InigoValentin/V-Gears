@@ -19,6 +19,9 @@ local function get_materia_level(materia, ap)
     return level
 end
 
+--- See get_materia_level, the stats need it too.
+Characters.get_materia_level = get_materia_level
+
 --- Gets the magic, summons and enemy skills a character can use with the materia that is equipped.
 --
 -- Every ability is listed once, even if more than one materia gives it.

@@ -388,6 +388,17 @@ class Entity{
         }
 
         /**
+         * Gets the position in the scene of the end of a bone of the skeleton of the entity.
+         *
+         * @param[in] bone Number of the bone.
+         * @param[in] length Length of the bone, in the units of the model.
+         * @return The position, all zeros if there is no such bone.
+         */
+        virtual std::tuple<float, float, float> ScriptGetBoneEnd(const int bone, const float length){
+            return std::make_tuple(0.0f, 0.0f, 0.0f);
+        }
+
+        /**
          * Attaches another model to a bone of this entity's skeleton, like the weapon a battle character
          * holds. A previously attached model is replaced.
          *

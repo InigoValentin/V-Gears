@@ -69,7 +69,7 @@ static const float ENCOUNTER_CHECK_FRAMES = 8.0f;
  */
 static const float ENCOUNTER_STEP_VALUE = 5.0f;
 
-const float EntityManager::SCENE_SCALE = 0.003f;
+const float EntityManager::SCENE_SCALE = 1.0f / 255.0f;
 
 const unsigned int EntityManager::BATTLE_BACKGROUND_ID = 1000;
 
@@ -527,7 +527,8 @@ void EntityManager::RemoveBattleEntity(const Ogre::String& name){
         ScriptManager::getSingleton().RemoveEntity(ScriptManager::BATTLE, name);
         battle_entity_.erase(it);
         // The entity is not deleted, as its destructor would destroy the model again, like in
-        // ClearBattle.
+        // ClearBattle. So what the model holds (a weapon) has to be destroyed here.
+        entity->ScriptAttachModel("", -1, 0.0f, 0.0f, 0.0f);
         Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(name);
         scene_node_->removeAndDestroyChild("Battle_" + name);
         entity->ReleaseResources();
@@ -636,6 +637,9 @@ void EntityManager::ClearBattle(){
         ScriptManager::getSingleton().RemoveEntity(
           ScriptManager::ENTITY, battle_entity_[i]->GetName()
         );
+        // The model held in a bone (a weapon) is another Ogre entity, and the next battle creates
+        // one with the same name.
+        battle_entity_[i]->ScriptAttachModel("", -1, 0.0f, 0.0f, 0.0f);
         Ogre::Root::getSingleton().getSceneManager("Scene")->destroyEntity(
           battle_entity_[i]->GetName()
         );

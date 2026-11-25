@@ -193,32 +193,32 @@ struct Formation{
         /**
          * X position.
          */
-        int x;
+        float x;
 
         /**
          * Y position.
          */
-        int y;
+        float y;
 
         /**
          * z position.
          */
-        int z;
+        float z;
 
         /**
          * X direction.
          */
-        int d_x;
+        float d_x;
 
         /**
          * Y direction.
          */
-        int d_y;
+        float d_y;
 
         /**
          * z direction.
          */
-        int d_z;
+        float d_z;
 
         /**
          * Constructor.
@@ -304,6 +304,11 @@ struct Formation{
     int initial_camera_position;
 
     /**
+     * Camera script of the start of the battle.
+     */
+    int intro_camera;
+
+    /**
      * Indicates if the formation is an arena battle.
      */
     bool is_arena_battle;
@@ -321,7 +326,7 @@ struct Formation{
     Formation():
       id(0), next_formation(-1), escape_counter(0.0f), escapable(true), skip_victory_pose(false),
       skip_spoils(false), preemptive_disabled(false), layout(Layout::NORMAL), location(-1),
-      location_name(""), initial_camera_position(0),is_arena_battle(false)
+      location_name(""), initial_camera_position(0), intro_camera(-1),is_arena_battle(false)
     {
         enemies.clear();
         camera_positions.clear();

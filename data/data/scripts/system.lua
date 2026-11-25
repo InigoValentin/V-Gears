@@ -255,6 +255,15 @@ set_character_enable = function(character, enable)
         return
     end
     Characters[character].enabled = enable;
+    -- As in ff7.exe (0x61c782), a character that is hidden also leaves the party, locked or not.
+    if not enable then
+        for i = 1, 3 do
+            if Party[i] == character then
+                Party[i] = nil
+                export_party_members()
+            end
+        end
+    end
 end
 
 --- Checks if a character is enabled in the PHS.
@@ -487,124 +496,296 @@ Inventory.sort = function(criteria)
     end
 end
 
+-- Leveling up, as in ff7.exe (1998 build, functions 0x5c76d9 to 0x5c7bb1).
+
+Characters.MAX_LEVEL = 99
+Characters.MAX_EXP = 999999999
+--- Caps of the base stats that level ups give. Sources go to the stat bonus, not to the base.
+Characters.MAX_BASE_STAT = 100
+Characters.MAX_BASE_HP = 9999
+Characters.MAX_BASE_MP = 999
+
+--- Divides truncating toward zero, like the integer divisions of the original.
+local function divide(a, b)
+    local quotient = a / b
+    if quotient < 0 then return math.ceil(quotient) end
+    return math.floor(quotient)
+end
+
+--- Gets the segment of the growth curves used for a level: one every 10 levels up to 60, then one
+-- every 20.
+local function curve_segment(level)
+    if level <= 60 then return math.max(0, math.floor((level - 1) / 10)) end
+    return math.min(7, math.floor((level - 61) / 20) + 6)
+end
+
+--- Picks one of the 12 bonuses: a random number from 1 to 8 plus how far the character is behind.
+local function bonus_index(difference)
+    return math.max(0, math.min(11, math.random(1, 8) + difference))
+end
+
+--- Gets the total experience a character needs to go from a level to the next one.
+--
+-- It's the sum of gradient * n^2 / 10 for n from 1 to the level, all of them with the gradient of
+-- the segment of that level.
+--
+-- @param id Character ID.
+-- @param level The level.
+-- @return The total experience, 0 for level 0.
+Characters.exp_threshold = function(id, level)
+    local gradient = Game.Growth.curves[Game.Characters[id].curves.exp][curve_segment(level)].gradient
+    local total = 0
+    for n = 1, level do total = total + math.floor(gradient * n * n / 10) end
+    return total
+end
+
+--- Raises the base stats of a character for one level.
+--
+-- Each stat has a curve that gives the value expected at the new level; the further the character
+-- is below it, the better the bonus is likely to be.
+local function level_up(id)
+    local character = Characters[id]
+    local stats = character.stats
+    local level = character.level
+    local segment = curve_segment(level)
+    local curves = Game.Characters[id].curves
+    local function curve(name) return Game.Growth.curves[curves[name]][segment] end
+
+    for _, name in ipairs({"str", "vit", "mag", "spr", "dex", "lck"}) do
+        local stat = stats[name]
+        local value = math.max(1, stat.base)
+        local data = curve(name)
+        local expected = math.floor(data.gradient * (level + 1) / 100) + data.base
+        local gain = Game.Growth.bonus.primary[bonus_index(expected - value)]
+        stat.base = math.min(Characters.MAX_BASE_STAT, value + gain)
+    end
+
+    local hp = curve("hp")
+    local function expected_hp(n) return hp.gradient * n + hp.base * 40 end
+    local value = math.max(1, stats.hp.base)
+    local index = bonus_index(divide(expected_hp(level) * 100, value) - 100)
+    local gain = divide((expected_hp(level + 1) - expected_hp(level)) * Game.Growth.bonus.hp[index], 100)
+    stats.hp.base = math.min(Characters.MAX_BASE_HP, value + gain)
+
+    local mp = curve("mp")
+    local function expected_mp(n) return math.floor(mp.gradient * n / 10) + mp.base * 2 end
+    value = math.max(1, stats.mp.base)
+    index = bonus_index(divide(expected_mp(level) * 100, value) - 100)
+    gain = divide((expected_mp(level + 1) - expected_mp(level)) * Game.Growth.bonus.mp[index], 100)
+    stats.mp.base = math.min(Characters.MAX_BASE_MP, value + gain)
+
+    character.level = level + 1
+end
+
+--- Gives experience to a character, and levels it up as many times as it reaches.
+--
+-- The current HP and MP don't change, only the base values and the maximums.
+--
+-- @param id Character ID.
+-- @param exp Experience gained.
+-- @return The number of levels gained.
+Characters.add_exp = function(id, exp)
+    local character = Characters[id]
+    local definition = Game.Characters[id]
+    if character == nil or definition == nil or definition.curves == nil then return 0 end
+    character.exp = math.min(Characters.MAX_EXP, (character.exp or 0) + exp)
+    local first_level = character.level
+    while character.level < Characters.MAX_LEVEL
+      and character.exp >= Characters.exp_threshold(id, character.level) do
+        level_up(id)
+    end
+    if character.level < Characters.MAX_LEVEL then
+        character.exp_to_next = Characters.exp_threshold(id, character.level) - character.exp
+    else
+        character.exp_to_next = 0
+    end
+    if character.level > first_level then Characters.recalculate_stats(id) end
+    return character.level - first_level
+end
+
+--- Variable of the field scripts with the level of the characters whose level doesn't depend on
+-- the one of the party (Yuffie): bank 1, address 2.
+Characters.JOIN_LEVEL_BANK = 1
+Characters.JOIN_LEVEL_ADDRESS = 2
+
+--- Gets the average level of the available characters (in the party or enabled in the PHS), without
+-- counting one of them.
+--
+-- @param excluded ID of the character that isn't counted.
+-- @return The average, or the level of the excluded character if there is nobody else.
+Characters.average_level = function(excluded)
+    local sum, count = 0, 0
+    for id = 0, 8 do
+        if id ~= excluded and Characters[id] ~= nil and (IFMEMBQ(id) or IFPRTYQ(id)) then
+            sum = sum + Characters[id].level
+            count = count + 1
+        end
+    end
+    if count == 0 then return Characters[excluded].level end
+    return math.floor(sum / count)
+end
+
+--- Copies a table and the tables in it.
+local function copy_table(source)
+    if type(source) ~= "table" then return source end
+    local result = {}
+    for key, value in pairs(source) do result[key] = copy_table(value) end
+    return result
+end
+
+--- Gives a character the data it joins with. The slots of Cait Sith and Vincent hold young Cloud and
+-- Sephiroth at the start: ff7.exe replaces the whole slot with data of its own when the window to
+-- name them opens (0x70ec9a). Nothing happens for the other characters.
+--
+-- The availability and the lock in the party are not part of that data, and are kept.
+--
+-- @param id Character ID.
+Characters.load_recruit_record = function(id)
+    local record = Game.RecruitRecords ~= nil and Game.RecruitRecords[id] or nil
+    if record == nil or Characters[id] == nil then return end
+    local character = copy_table(record)
+    character.enabled = Characters[id].enabled
+    character.locked = Characters[id].locked
+    Characters[id] = character
+    Characters.recalculate_stats(id)
+end
+
+--- Sets the level of a character that joins, as in ff7.exe (0x5c72a6). The original does it when the
+-- window to name the character is closed (for everybody but Cloud).
+--
+-- The level is the average of the other available characters plus half of the level offset of the
+-- character. With an odd offset (Yuffie) it comes from a variable of the field scripts instead, and
+-- the character is built again from level 1. The experience of the previous level is added to the
+-- one the character has, and it levels up as usual, so it never goes down. HP and MP end up filled.
+--
+-- @param id Character ID.
+Characters.join = function(id)
+    local character = Characters[id]
+    local definition = Game.Characters[id]
+    if id == 0 or character == nil or definition == nil or definition.curves == nil then return end
+    -- The offset is a signed byte.
+    local offset = tonumber(definition.initial_level) or 0
+    if offset > 127 then offset = offset - 256 end
+    local stats = character.stats
+    local level
+    if offset % 2 == 0 then
+        level = Characters.average_level(id) + divide(offset, 2)
+    else
+        level = Banks[Characters.JOIN_LEVEL_BANK][Characters.JOIN_LEVEL_ADDRESS] or 0
+        -- It is unknown what writes the variable in a normal game: without it, the character would
+        -- be left at level 1, so the average of the party is used.
+        if level == 0 then level = Characters.average_level(id) end
+        character.level = 1
+        character.exp = 0
+        for _, name in ipairs({"str", "vit", "mag", "spr", "dex", "lck", "hp", "mp"}) do
+            stats[name].base = 1
+        end
+    end
+    level = math.max(1, math.min(Characters.MAX_LEVEL, level))
+    Characters.add_exp(id, Characters.exp_threshold(id, level - 1))
+    stats.hp.current = stats.hp.base
+    stats.mp.current = stats.mp.base
+    Characters.recalculate_stats(id)
+    print(character.name .. " joins at level " .. tostring(character.level))
+end
+
+--- Names of the primary stats.
+Characters.PRIMARY_STATS = {"str", "vit", "mag", "spr", "dex", "lck"}
+
+--- Cap of the primary stats and of the bonus that the sources give, as in ff7.exe.
+Characters.MAX_STAT = 255
+
+--- Primary stat or maximum raised by each of the Plus materia, by the ID of its ability.
+Characters.PLUS_MATERIA = {
+    [0] = "str", [1] = "vit", [2] = "mag", [3] = "spr", [4] = "dex", [5] = "lck", [8] = "hp", [9] = "mp",
+}
+
+--- Item ID of the Curse Ring, and what it adds to the stats on top of the bonuses of its data.
+Characters.CURSE_RING = 313
+Characters.CURSE_RING_BONUS = {str = 15, vit = 15, mag = 15, spr = 15, dex = 15, lck = 10}
+
+--- Uses a source on a character: one more point of bonus for a primary stat.
+--
+-- @param id Character ID.
+-- @param name Name of the stat, one of {@see Characters.PRIMARY_STATS}.
+-- @return False if the bonus is already at its cap, and nothing happens.
+Characters.add_stat_bonus = function(id, name)
+    local stat = Characters[id].stats[name]
+    if (stat.bonus or 0) >= Characters.MAX_STAT then return false end
+    stat.bonus = (stat.bonus or 0) + 1
+    Characters.recalculate_stats(id)
+    return true
+end
+
 Characters.recalculate_stats = function(id)
     -- Initialize
     local stats = Characters[id].stats
-    stats.str.total = stats.str.base
-    stats.vit.total = stats.vit.base
-    stats.mag.total = stats.mag.base
-    stats.spr.total = stats.spr.base
-    stats.dex.total = stats.dex.base
-    stats.lck.total = stats.lck.base
+    -- The primary stats start with the base value, that grows with the levels, plus the bonus that the
+    -- sources give.
+    for _, name in ipairs(Characters.PRIMARY_STATS) do
+        stats[name].total = stats[name].base + (stats[name].bonus or 0)
+    end
     stats.hp.max = stats.hp.base
     stats.mp.max = stats.mp.base
-    -- Weapon bonus. HP and MP are percents of base, the rest absolutes. The stats are keyed by name,
-    -- so they are walked with pairs (ipairs only walks the array part and found nothing).
     local weapon = Game.Items[Characters[id].weapon.id]
-    for stat, value in pairs(weapon.stats or {}) do
-        if stat == "str" then
-            stats.str.total = stats.str.total + value
-        elseif stat == "vit" then
-            stats.vit.total = stats.vit.total + value
-        elseif stat == "mag" then
-            stats.mag.total = stats.mag.total + value
-        elseif stat == "spr" then
-            stats.spr.total = stats.spr.total + value
-        elseif stat == "dex" then
-            stats.dex.total = stats.dex.total + value
-        elseif stat == "lck" then
-            stats.lck.total = stats.lck.total + value
-        elseif stat == "hp" then
-            stats.hp.max = stats.hp.max + (value * stats.hp.max / 100)
-        elseif stat == "mp" then
-            stats.mp.max = stats.mp.max + (value * stats.mp.max / 100)
-        end
-    end
-    -- Armor bonus. HP and MP are percents of bsae, the rest absolutes.
     local armor = Game.Items[Characters[id].armor.id]
-    for stat, value in pairs(armor.stats or {}) do
-        if stat == "str" then
-            stats.str.total = stats.str.total + value
-        elseif stat == "vit" then
-            stats.vit.total = stats.vit.total + value
-        elseif stat == "mag" then
-            stats.mag.total = stats.mag.total + value
-        elseif stat == "spr" then
-            stats.spr.total = stats.spr.total + value
-        elseif stat == "dex" then
-            stats.dex.total = stats.dex.total + value
-        elseif stat == "lck" then
-            stats.lck.total = stats.lck.total + value
-        elseif stat == "hp" then
-            stats.hp.max = stats.hp.max + (value * stats.hp.max / 100)
-        elseif stat == "mp" then
-            stats.mp.max = stats.mp.max + (value * stats.mp.max / 100)
-        end
-    end
-    -- Accesory bonus
-    local accessory = Game.Items[Characters[id].accessory]
-    if (accessory ~= nil) then
-        for stat, value in pairs(accessory.stats or {}) do
-            if stat == "str" then
-                stats.str.total = stats.str.total + value
-            elseif stat == "vit" then
-                stats.vit.total = stats.vit.total + value
-            elseif stat == "mag" then
-                stats.mag.total = stats.mag.total + value
-            elseif stat == "spr" then
-                stats.spr.total = stats.spr.total + value
-            elseif stat == "dex" then
-                stats.dex.total = stats.dex.total + value
-            elseif stat == "lck" then
-                stats.lck.total = stats.lck.total + value
-            elseif stat == "hp" then
-                stats.hp.max = stats.hp.max + (value * stats.hp.max / 100)
-            elseif stat == "mp" then
-                stats.mp.max = stats.mp.max + (value * stats.mp.max / 100)
+    -- Bonuses of the equipment: points added to the primary stats. They are keyed by name, so they are
+    -- walked with pairs (ipairs only walks the array part and found nothing).
+    for _, item in pairs({weapon, armor, Game.Items[Characters[id].accessory]}) do
+        for name, value in pairs(item.stats or {}) do
+            if stats[name] ~= nil and stats[name].total ~= nil then
+                stats[name].total = stats[name].total + value
             end
         end
+    end
+    -- The Curse Ring has more bonuses than its data can hold, ff7.exe adds them (0x6bbb04).
+    if Characters[id].accessory == Characters.CURSE_RING then
+        for name, value in pairs(Characters.CURSE_RING_BONUS) do stats[name].total = stats[name].total + value end
     end
     -- Get a list of materias
-    local materias = {}
-    for m = 0, 7 do
-        if Characters[id].weapon.materia[m] ~= nil then
-            table.insert(materias, Game.Materia[Characters[id].weapon.materia[m].id])
-        end
-        if Characters[id].armor.materia[m] ~= nil then
-            table.insert(materias, Game.Materia[Characters[id].armor.materia[m].id])
-        end
-    end
-    -- Get materia bonuses. All are percents of base.
-    for _, materia in ipairs(materias) do
-        for stat, value in pairs(materia.stats or {}) do
-            if stat == "str" then
-                stats.str.total = stats.str.total + (value * stats.str.base / 100)
-            elseif stat == "vit" then
-                stats.vit.total = stats.vit.total + (value * stats.vit.base / 100)
-            elseif stat == "mag" then
-                stats.mag.total = stats.mag.total + (value * stats.mag.base / 100)
-            elseif stat == "spr" then
-                stats.spr.total = stats.spr.total + (value * stats.spr.base / 100)
-            elseif stat == "dex" then
-                stats.dex.total = stats.dex.total + (value * stats.dex.base / 100)
-            elseif stat == "lck" then
-                stats.lck.total = stats.lck.total + (value * stats.lck.base / 100)
-            elseif stat == "hp" then
-                stats.hp.max = stats.hp.max + (value * stats.hp.max / 100)
-            elseif stat == "mp" then
-                stats.mp.max = stats.mp.max + (value * stats.mp.max / 100)
+    local materias, equipped_materias = {}, {}
+    for _, part in ipairs({Characters[id].weapon, Characters[id].armor}) do
+        for m = 0, 7 do
+            local equipped = part.materia[m]
+            if equipped ~= nil and Game.Materia[equipped.id] ~= nil then
+                table.insert(materias, Game.Materia[equipped.id])
+                table.insert(equipped_materias, equipped)
             end
         end
     end
-    -- Round down all basic stats
-    stats.str.total = math.floor(stats.str.total)
-    stats.vit.total = math.floor(stats.vit.total)
-    stats.mag.total = math.floor(stats.mag.total)
-    stats.spr.total = math.floor(stats.spr.total)
-    stats.dex.total = math.floor(stats.dex.total)
-    stats.lck.total = math.floor(stats.lck.total)
-    stats.hp.max = math.floor(stats.hp.max)
-    stats.mp.max = math.floor(stats.mp.max)
+    -- Materia changes, as in ff7.exe (0x5cd1e8 and 0x5ce487): points for the primary stats and percents
+    -- for HP and MP, that every equipped materia adds up, and the percents of the Plus materia (HP,
+    -- MP, Speed, Magic and Luck Plus).
+    local points, percents = {}, {}
+    local function add(list, name, value) list[name] = (list[name] or 0) + value end
+    for index, materia in ipairs(materias) do
+        for name, value in pairs(materia.stats or {}) do
+            if name == "hp" or name == "mp" then add(percents, name, value)
+            else add(points, name, value)
+            end
+        end
+        local name = materia.type == Materia.TYPE.INDEPENDENT and materia.ability ~= nil
+          and Characters.PLUS_MATERIA[materia.ability.id] or nil
+        if name ~= nil then
+            local level = math.max(1, Characters.get_materia_level(materia, equipped_materias[index].ap or 0))
+            local param = materia.ability.param
+            add(percents, name, param[level] or param[#param])
+        end
+    end
+    local function percent_of(value, name)
+        local result = value * math.min(100, percents[name] or 0) / 100
+        -- Truncated toward zero, like the integer division of the original.
+        if result < 0 then return math.ceil(result) end
+        return math.floor(result)
+    end
+    -- The percent of a Plus materia applies to the stat with the equipment, without the materia points.
+    for _, name in ipairs(Characters.PRIMARY_STATS) do
+        local value = math.min(Characters.MAX_STAT, stats[name].total)
+        value = value + percent_of(value, name) + (points[name] or 0)
+        stats[name].total = math.max(0, math.min(Characters.MAX_STAT, math.floor(value)))
+    end
+    stats.hp.max = math.min(Characters.MAX_BASE_HP, stats.hp.max + percent_of(stats.hp.max, "hp"))
+    stats.mp.max = math.min(Characters.MAX_BASE_MP, stats.mp.max + percent_of(stats.mp.max, "mp"))
 
     -- HP<->MP materia swap the maximum HP and MP. TODO: Unverified: its levels (it is done at any level).
     for _, materia in ipairs(materias) do
@@ -618,24 +799,6 @@ Characters.recalculate_stats = function(id)
     if stats.hp.current ~= nil then stats.hp.current = math.min(stats.hp.current, math.max(1, stats.hp.max)) end
     if stats.mp.current ~= nil then stats.mp.current = math.min(stats.mp.current, math.max(0, stats.mp.max)) end
 
-    if stats.str.total < 1 then
-        stats.str.total = 1
-    end
-    if stats.vit.total < 1 then
-        stats.vit.total = 1
-    end
-    if stats.mag.total < 1 then
-        stats.mag.total = 1
-    end
-    if stats.spr.total < 1 then
-        stats.spr.total = 1
-    end
-    if stats.dex.total < 1 then
-        stats.dex.total = 1
-    end
-    if stats.lck.total < 1 then
-        stats.lck.total = 1
-    end
     if stats.hp.max < 1 then
         stats.hp.max = 1
     end
@@ -662,8 +825,8 @@ Characters.recalculate_stats = function(id)
     if stats.def < 1 then
         stats.def = 1
     end
-    if stats.eva < 1 then
-        stats.eva = 1
+    if stats.eva < 0 then
+        stats.eva = 0
     end
     if stats.matk < 1 then
         stats.matk = 1
@@ -671,8 +834,8 @@ Characters.recalculate_stats = function(id)
     if stats.mdef < 1 then
         stats.mdef = 1
     end
-    if stats.meva < 1 then
-        stats.meva = 1
+    if stats.meva < 0 then
+        stats.meva = 0
     end
 
     -- Cap current HP/MP

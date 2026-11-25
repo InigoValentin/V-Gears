@@ -207,6 +207,15 @@ class KernelDataInstaller{
         void ReadInitialSaveMap();
 
         /**
+         * Reads from ff7.exe the character data that Cait Sith and Vincent get when they join.
+         *
+         * Their slots of the initial savemap hold young Cloud and Sephiroth.
+         *
+         * @param[in] exe_path Path to ff7.exe.
+         */
+        void ReadRecruitRecords(const std::string& exe_path);
+
+        /**
          * Saves the initial savemap to a Lua script.
          *
          * @param[in] file_name Absolute path to the target Lua file.
@@ -2523,7 +2532,7 @@ class KernelDataInstaller{
             /**
              * Curve bases.
              */
-            u8 base[8];
+            s8 base[8];
 
         };
 
@@ -2627,6 +2636,32 @@ class KernelDataInstaller{
          * The initial savemap structure.
          */
         SaveMap savemap_;
+
+        /**
+         * Reads one character record of the savemap.
+         *
+         * @param[in,out] savemap_file Data, at the start of the record.
+         * @param[out] character The character read.
+         */
+        void ReadSaveMapCharacter(File& savemap_file, SaveMap::Character& character);
+
+        /**
+         * Writes one character record as a Lua table.
+         *
+         * @param[in,out] file Target file.
+         * @param[in] character The character to write.
+         */
+        void WriteSaveMapCharacter(std::ostream& file, const SaveMap::Character& character);
+
+        /**
+         * Character data of Cait Sith and Vincent when they join.
+         */
+        SaveMap::Character recruit_records_[2];
+
+        /**
+         * True if the recruit records could be read.
+         */
+        bool recruit_records_found_ = false;
 
         /**
          * The kernel file.

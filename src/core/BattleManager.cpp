@@ -50,13 +50,11 @@ template<>BattleManager *Ogre::Singleton<BattleManager>::msSingleton = nullptr;
 ConfigVar cv_debug_battle_grid("debug_battle_grid", "Draw debug battle grid", "false");
 ConfigVar cv_debug_battle_axis("debug_battle_axis", "Draw debug battle axis", "false");
 
-const float BattleManager::ENEMY_SCALE = 0.0032f;
+const float BattleManager::ENEMY_SCALE = 1.0f / 255.0f;
 
 const float BattleManager::ATTACK_SCALE = 0.0032f;
 
-const float BattleManager::PARTY_SCALE = 0.0039f;
-
-const float BattleManager::SCENE_SCALE = 0.0012f;
+const float BattleManager::PARTY_SCALE = 1.0f / 255.0f;
 
 const float BattleManager::PARTY_Y = 5.0f;
 
@@ -106,6 +104,7 @@ void BattleManager::ClearBattle(){
     // TODO location_ = null;
     camera_.clear();
     initial_camera_ = 0;
+    intro_camera_ = -1;
     layout_ = LAYOUT::NORMAL;
     escape_difficulty_ = 0.0f;
     arena_battle_ = false;
@@ -635,6 +634,16 @@ void BattleManager::SetInitialCamera(const unsigned int id){
     }
     initial_camera_ = id;
 }
+
+void BattleManager::SetIntroCamera(const int id){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set the camera in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    intro_camera_ = id;
+}
+
+int BattleManager::ScriptGetIntroCamera() const{return intro_camera_;}
 
 void BattleManager::LoadParty(){
     if (module_ != Module::BATTLE){

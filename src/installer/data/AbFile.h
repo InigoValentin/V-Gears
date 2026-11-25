@@ -76,6 +76,20 @@ class AbFile{
         std::string DecompileScript(u32 offset);
 
         /**
+         * Reads the next byte of the file.
+         *
+         * @return The byte, 0 past the end of the file.
+         */
+        u8 ReadByte();
+
+        /**
+         * Reads the next two bytes of the file, little endian.
+         *
+         * @return The value, with 0 for the bytes past the end of the file.
+         */
+        u16 ReadWord();
+
+        /**
          * The ab file.
          */
         File ab_file_;

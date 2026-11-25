@@ -37,9 +37,8 @@ end
 
 --- Calculates how much of the way to the next level a character has done.
 --
--- Uses the EXP curve of the character (see Game.Growth.curves): the EXP needed to attain a level
--- L is Mod * (L - 1)^2 / 10, where Mod is the gradient of the curve segment for L. The character
--- stores the EXP still missing for the next level (exp_to_next).
+-- The character stores the experience still missing for the next level (exp_to_next), see
+-- Characters.exp_threshold.
 --
 -- @param character Entry of the Characters table.
 -- @return A number from 0 to 1. 0 if it can't be calculated (e.g. level 99).
@@ -48,21 +47,11 @@ UiContainer.exp_progress = function(character)
     if definition == nil or definition.curves == nil or definition.curves.exp == nil then
         return 0
     end
-    local curve = Game.Growth.curves[definition.curves.exp]
     local level = character.level
-    local target = level + 1
-    if curve == nil or target > 99 then return 0 end
-    local segment
-    if target <= 11 then segment = 0
-    elseif target <= 21 then segment = 1
-    elseif target <= 31 then segment = 2
-    elseif target <= 41 then segment = 3
-    elseif target <= 51 then segment = 4
-    elseif target <= 61 then segment = 5
-    elseif target <= 81 then segment = 6
-    else segment = 7 end
-    local span = math.floor(curve[segment].gradient * level * level / 10)
-    if span <= 0 or character.exp_to_next == nil then return 0 end
+    if level >= Characters.MAX_LEVEL or character.exp_to_next == nil then return 0 end
+    local span = Characters.exp_threshold(character.char_id, level)
+      - Characters.exp_threshold(character.char_id, level - 1)
+    if span <= 0 then return 0 end
     return math.max(0, math.min(1, 1 - character.exp_to_next / span))
 end
 

@@ -174,7 +174,7 @@ class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
         const Ogre::Vector3 ProjectPointToScreen(const Ogre::Vector3& point);
 
         /**
-         * Sets the battle camera.
+         * Sets the battle camera, like {@see SetBattleCameraUpright}.
          *
          * Unlike {@see StartBattleCamera}, it doesn't save the state of the field camera, so it
          * can be used to change the camera during a battle.
@@ -187,8 +187,8 @@ class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
         /**
          * Sets the battle camera, always with the Z axis of the scene pointing up.
          *
-         * {@see SetBattleCamera} is only upright for cameras looking toward negative X, so this
-         * one is for the cameras of the effects, that can look anywhere.
+         * It also moves the camera down to compensate for the part of the screen that the battle
+         * interface covers.
          *
          * @param[in] position Camera position.
          * @param[in] look_at Point the camera looks at.
