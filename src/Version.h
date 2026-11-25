@@ -22,8 +22,8 @@
 /**
  * Application version.
  */
-#define VGEARS_VERSION "0.3.5"
+#define VGEARS_VERSION "0.4.0"
 #define VGEARS_VERSION_MAJOR "0"
-#define VGEARS_VERSION_MINOR "3"
-#define VGEARS_VERSION_PATCH "5"
-#define VGEARS_VERSION_SIGNATURE "V-Gears v0.3.5"
+#define VGEARS_VERSION_MINOR "4"
+#define VGEARS_VERSION_PATCH "0"
+#define VGEARS_VERSION_SIGNATURE "V-Gears v0.4.0"

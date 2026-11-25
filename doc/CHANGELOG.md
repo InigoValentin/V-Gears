@@ -1,5 +1,85 @@
 # Changelog
 
+## 0.4.0
+
+Changes since 0.3.5. Most of the work is in the battle and menu modules (rules, cameras, shops and materia), and in fixes from playing through the fields and the world map.
+
+### Menus
+
+**Shops**
+- New shop menu to buy and sell items, weapons, armor, accessories and materia, opened by the field scripts. The installer reads the inventory of each shop from the game executable.
+- New console command `/shop <shop_id>`.
+- Fixed the ids and prices of the accessories.
+
+**Materia**
+- The Check, Order and Exchange options of the materia menu work.
+
+**Party, items and saving**
+- The Order option of the main menu swaps party slots and rows. The character controlled in the field is set by the scripts, saved with the game, and doesn't change with the party order.
+- Locked characters can change slots, but can't leave or join the party.
+- Item menu: Order > Custom swaps items by hand.
+- The save menu asks before saving over a slot and confirms when the game is saved.
+- New console command `/phs <character_id|all> [on|off]`.
+- The console is drawn over the menus.
+
+### Battle
+
+**Rules**
+- Enemy HP and MP are read from the game data. Enemies pay the MP of their attacks, and fail the ones they can't pay.
+- Source bonuses count in the stats (capped at 255). Equipped materia and accessories modify the stats.
+- Accuracy and evasion fixes, including magic hit chance, Darkness, evade modifiers and several commands.
+- Per character divisors for the limit bar.
+- Fixed MP usage and spell strength with support materia.
+- Only felled enemies give rewards.
+
+**Characters**
+- Characters level up with the growth curves of the original game.
+- Recruits get their level from the party average, and reused characters get their own data first.
+- Fields can enable every character in the PHS, not only the first two. Hiding a character removes it from the party.
+
+**Statuses**
+- Silence, Frog and Small restrict the actions they should.
+- Only physical hits cure Sleep, Confusion and Manipulate. Haste and Slow replace each other, and Petrify removes Sleep, Poison, Confusion and Regen. Actions of combatants that can't act wait until they can.
+- Confused combatants attack or cast a random spell at the opposite side. Berserk party members only use the plain Attack.
+
+**Cameras and animation**
+- Fixed the camera axes, and the depth, aim and scale of the scripted attack cameras.
+- Items and limits use their own cameras. New camera instructions (orbit, target group, single target and model view).
+- Added the camera at the start of a battle, the victory camera, and the shots and view changes of the enemy animations.
+- Fixed the scale of party members, enemies and backgrounds.
+- Unknown animation sequences are skipped.
+- Fixed consecutive battles.
+
+### Field
+
+**Installer and decompiler**
+- New opcodes: `SMTRA` (give materia), `GTPYE` and `SPTYE` (store and restore the party), `MENU` 17 (unequip materia), `MINIGAME` (skips to the return field), `MVCAM` (movie camera), `MUSVT` (stop music), `WNUMB` (number windows), `SLINE` (move a line trigger) and party requests by party slot.
+- Fixed the menu lock, byte arithmetic wrapping, `KAWAI` sub-opcodes (party members could wait forever), and scripts falling through after `RETTO`.
+- Fields no longer fail to convert because of a request to a missing script. frcyo and del3 are no longer skipped.
+- Fixed the intensity of additive tiles. Music tracks 14, 64, 87 and 96 are converted.
+
+**Engine**
+- Touching an entity runs its contact script. Fixes to script priorities, movement and turn syncs, scripted walks off the walkmesh, player entity changes and party followers.
+- Fixed the camera limits of off-center ranges and the height of characters in some scripted walks.
+- Backgrounds hold up to 4096 tiles of each kind, and tile intensity scales their colour.
+- Movies can be drawn behind the models, and fades don't cover them.
+- Dialogs handle long texts and number windows, and text pauses are counted in frames.
+- The party and save menus can be opened by scripts. The pause menu doesn't open when a script reads Start.
+- `/map` uses the field list, and `/screenshot` saves PNG files.
+
+### World map
+
+- Entering a field from the world no longer makes the player walk on their own.
+- Flags set by fields are seen by the world scripts.
+- The Warship scenes after jundoc1a and shpin_3 play.
+- Placed models face the right way.
+- Exits back to the world map put the player where they entered.
+
+### Build and documentation
+
+- The tests build again.
+- Updated the README and the build, run and authors documentation. `INSTALL.md` was removed.
+
 ## 0.3.5
 
 Changes since 0.3.4. Most of the work is in the world map module, which now runs the original world scripts, and in the field module and its installer.
