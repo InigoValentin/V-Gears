@@ -18,6 +18,7 @@
 #include <boost/filesystem.hpp>
 #include <algorithm>
 #include <fstream>
+#include "installer/InstallCommandLine.h"
 #include "installer/InstallLayout.h"
 #include "installer/InstallLog.h"
 #include "installer/InstallOptions.h"
@@ -579,3 +580,81 @@ BOOST_AUTO_TEST_CASE(LogCanBeAppended){
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+// Command line.
+
+BOOST_AUTO_TEST_CASE(CommandLineWithoutInstallerOptionsOpensTheWindow){
+    using namespace InstallCommandLine;
+    BOOST_CHECK(Parse({}).mode == Mode::GUI);
+    // Qt's own arguments are left for the window.
+    BOOST_CHECK(Parse({"-platform", "xcb"}).mode == Mode::GUI);
+}
+
+BOOST_AUTO_TEST_CASE(CommandLineInstallDefaults){
+    using namespace InstallCommandLine;
+    const Arguments a = Parse({"--cli", "--iso", "disk.iso"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK_EQUAL(a.iso, "disk.iso");
+    BOOST_CHECK(a.output.empty());
+    BOOST_CHECK(a.copy_data);
+    BOOST_CHECK(a.keep_originals);
+    BOOST_CHECK(!a.yes);
+    // Everything, except the videos, which are not on the install disk.
+    const InstallOptions o = a.options;
+    BOOST_CHECK(o.kernel && o.fields && o.field_models && o.wm && o.wm_models && o.battle_data && o.battle_models);
+    BOOST_CHECK(o.images && o.sounds && o.music);
+    BOOST_CHECK(!o.videos);
+}
+
+BOOST_AUTO_TEST_CASE(CommandLineInstallerOptionsImplyCli){
+    using namespace InstallCommandLine;
+    const Arguments a = Parse({"-i", "disk.iso", "-o", "/tmp/vg", "-y", "--no-copy-data", "--discard-originals"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK_EQUAL(a.output, "/tmp/vg");
+    BOOST_CHECK(a.yes);
+    BOOST_CHECK(!a.copy_data);
+    BOOST_CHECK(!a.keep_originals);
+    // "--option=value" works too.
+    BOOST_CHECK_EQUAL(Parse({"--iso=other.iso"}).iso, "other.iso");
+}
+
+BOOST_AUTO_TEST_CASE(CommandLinePresetsAndParts){
+    using namespace InstallCommandLine;
+    Arguments a = Parse({"-i", "d.iso", "--preset", "battle", "--with", "music,images", "--without", "kernel"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK(a.options.battle_data && a.options.battle_models && a.options.music && a.options.images);
+    BOOST_CHECK(!a.options.kernel && !a.options.fields && !a.options.sounds);
+
+    a = Parse({"-i", "d.iso", "-p", "custom", "--with", "fields"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK(a.options.fields && !a.options.field_models && !a.options.kernel);
+
+    // Removing a part removes what depends on it.
+    a = Parse({"-i", "d.iso", "--without", "world-map"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK(!a.options.wm && !a.options.wm_models);
+}
+
+BOOST_AUTO_TEST_CASE(CommandLineErrors){
+    using namespace InstallCommandLine;
+    BOOST_CHECK(Parse({"--cli"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"--iso"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"-i", "d.iso", "--preset", "nope"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"-i", "d.iso", "--with", "nope"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"-i", "d.iso", "--bogus"}).mode == Mode::INVALID);
+    // A part can't be added without what it needs.
+    BOOST_CHECK(Parse({"-i", "d.iso", "-p", "custom", "--with", "field-models"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"--verify", "-i", "d.iso"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"--verify", "--with", "music"}).mode == Mode::INVALID);
+}
+
+BOOST_AUTO_TEST_CASE(CommandLineOtherModes){
+    using namespace InstallCommandLine;
+    BOOST_CHECK(Parse({"--verify"}).mode == Mode::VERIFY);
+    BOOST_CHECK_EQUAL(Parse({"--verify", "-o", "/x"}).output, "/x");
+    BOOST_CHECK(Parse({"--help"}).mode == Mode::HELP);
+    BOOST_CHECK(Parse({"-i", "d.iso", "-h"}).mode == Mode::HELP);
+    BOOST_CHECK(Parse({"--version"}).mode == Mode::VERSION);
+    BOOST_CHECK(Parse({"--list-parts"}).mode == Mode::LIST_PARTS);
+    BOOST_CHECK(!Usage("v-gears-installer").empty());
+}

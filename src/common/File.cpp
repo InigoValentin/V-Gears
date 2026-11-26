@@ -17,6 +17,8 @@
 #include <string.h>
 #include "common/File.h"
 #include "common/FileSystem.h"
+#include <algorithm>
+#include <cstring>
 #include "core/Logger.h"
 
 File::File(const Ogre::String& file):
@@ -27,7 +29,8 @@ File::File(const Ogre::String& file):
 {
     LOG_TRIVIAL("Loading file: " + file_name_ + "\n");
     buffer_size_ = FileSystem::GetFileSize(file_name_);
-    buffer_ = static_cast<u8*>(malloc(sizeof(u8) * buffer_size_));
+    // Zeroed, so a file that can't be read is empty data, not whatever was in memory.
+    buffer_ = static_cast<u8*>(calloc(buffer_size_, sizeof(u8)));
     if (!FileSystem::ReadFile(file_name_, buffer_, 0, buffer_size_))
         LOG_TRIVIAL("Warning: " + file_name_ + " not found!\n");
 }
@@ -68,21 +71,27 @@ const Ogre::String& File::GetFileName() const{return file_name_;}
 u32 File::GetFileSize() const{return buffer_size_;}
 
 void File::GetFileBuffer(u8* buffer, const u32 &start, const u32 &length) const{
-    memcpy(buffer, buffer_ + start, length);
+    // What is past the end of the file is read as zeros.
+    const u32 available = start < buffer_size_ ? std::min(length, buffer_size_ - start) : 0;
+    if (available > 0) memcpy(buffer, buffer_ + start, available);
+    if (available < length) memset(buffer + available, 0, length - available);
 }
 
-u8 File::GetU8(u32 offset) const{return *(buffer_ + offset);}
+// Many of the original files are read past their end by the parsers (truncated animations, headers of the
+// last entry of an archive...). Those bytes are read as zeros, instead of whatever is in memory after the file.
+
+u8 File::GetU8(u32 offset) const{return offset < buffer_size_ ? buffer_[offset] : 0;}
 
 u16 File::GetU16LE(u32 offset) const{
-    return (buffer_ + offset)[0] | ((buffer_ + offset)[1] << 8);
+    return GetU8(offset) | (GetU8(offset + 1) << 8);
 }
 
 u32 File::GetU32LE(u32 offset) const{
     return
-      (buffer_ + offset)[0]
-      | ((buffer_ + offset)[1] << 8)
-      | ((buffer_ + offset)[2] << 16)
-      | ((buffer_ + offset)[3] << 24);
+      static_cast<u32>(GetU8(offset))
+      | (static_cast<u32>(GetU8(offset + 1)) << 8)
+      | (static_cast<u32>(GetU8(offset + 2)) << 16)
+      | (static_cast<u32>(GetU8(offset + 3)) << 24);
 }
 
 u8 File::readU8(){

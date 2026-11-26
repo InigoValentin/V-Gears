@@ -296,6 +296,7 @@ add_executable(v-gears-installer-tests
     installer/MovieCamera.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/MovieCamera.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/ExternalTools.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/InstallCommandLine.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/InstallLayout.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/InstallLog.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/InstallOptions.cpp

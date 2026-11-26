@@ -475,12 +475,12 @@ class DataInstaller{
         /**
          * Substeps in the current installation step.
          */
-        int substeps_;
+        int substeps_ = 0;
 
         /**
          * Current substep in the current installation step.
          */
-        int cur_substep_;
+        int cur_substep_ = 0;
 
         /**
          * Weight of each installation step.

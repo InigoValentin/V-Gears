@@ -41,6 +41,10 @@
 #include "data/VGearsTriggersFile.h"
 #include "data/VGearsMapListFile.h"
 #include "Version.h"
+#include <OgreControllerManager.h>
+#include <OgreDefaultHardwareBufferManager.h>
+#include <OgreMaterialManager.h>
+#include <OgreMeshManager.h>
 
 /**
  * Application singleton.
@@ -134,7 +138,32 @@ namespace VGears{
         return true;
     }
 
-    void Application::loadPlugins(){
+    bool Application::initOgreHeadless(){
+        if (_initialized) return false;
+        _initialized = true;
+        _headless = true;
+        // No plugins file is passed to Ogre: the plugins are looked for in several places, see loadPlugins.
+        _root = std::make_unique<Ogre::Root>("", config_filename_, log_filename_);
+        loadPlugins(true);
+        _overlay_system = std::make_unique<Ogre::OverlaySystem>();
+        Ogre::LogManager::getSingleton().getDefaultLog()->setLogDetail(Ogre::LL_BOREME);
+        // Without a render system nobody creates the hardware buffer manager, and meshes need one.
+        _buffer_manager = std::make_unique<Ogre::DefaultHardwareBufferManager>();
+        // What Ogre::Root::initialise and the render system do, except what needs a graphics driver: the
+        // controllers (used by animated materials), a texture manager for the textures named by the materials,
+        // the default material that new materials copy, and the built-in meshes.
+        if (Ogre::ControllerManager::getSingletonPtr() == nullptr)
+            _controller_manager = std::make_unique<Ogre::ControllerManager>();
+        _texture_manager = std::make_unique<Ogre::DefaultTextureManager>();
+        Ogre::MaterialManager::getSingleton().initialise();
+        Ogre::MeshManager::getSingleton()._initialise();
+        registerArchiveFactories();
+        loadResourcesConfig();
+        initComponents();
+        return true;
+    }
+
+    void Application::loadPlugins(bool skip_render_systems){
         const bfs::path plugins_file(bfs::absolute(bfs::path(plugins_filename_)));
         OgrePlugins::Config config;
         if (!OgrePlugins::ReadConfig(plugins_file, config))
@@ -148,6 +177,10 @@ namespace VGears{
           + std::to_string(OGRE_VERSION_PATCH)
         );
         for (const String& name : config.plugins){
+            if (skip_render_systems && name.compare(0, 13, "RenderSystem_") == 0){
+                Ogre::LogManager::getSingleton().logMessage("Not loading Ogre plugin " + name + ": no render system");
+                continue;
+            }
             const bfs::path file(OgrePlugins::Find(name, directories, ogre_version));
             if (file.empty()){
                 String searched;

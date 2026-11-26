@@ -51,20 +51,20 @@ struct Enemy{
         /**
          * Attack ID.
          */
-        u16 id;
+        u16 id = 0;
 
         /**
          * Camera ID to use during the attack.
          *
          * -1 to not move the camera.
          */
-        int camera;
+        int camera = -1;
 
         /**
          * Animation script of the model to play for the attack, as in the model animation scripts
          * ("scriptN"). -1 if there is none.
          */
-        int animation;
+        int animation = -1;
     };
 
     /**

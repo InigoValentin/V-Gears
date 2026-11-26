@@ -121,7 +121,8 @@ u32 BinGZipFile::GetNumberOfFiles(){return file_count_;}
 
 void BinGZipFile::InnerGetNumberOfFiles(){
     file_count_ = 0;
-    for (u32 pointer = 0; pointer < buffer_size_;){
+    // Each file has a 6 byte header, then the GZip data, whose header is checked: stop when they don't fit.
+    for (u32 pointer = 0; pointer + 6 + 8 <= buffer_size_;){
         u16 temp = GetU16LE(pointer);
         if (temp == 0xFFFF) temp = 0; // Hack to deal with scene.bin
         pointer += 6;
@@ -141,7 +142,7 @@ void BinGZipFile::InnerGetNumberOfFiles(){
 u32 BinGZipFile::InnerGetFileOffset(u32 file_index){
     if (file_index >= file_count_) return 0;
     u32 current_file = 0;
-    for (u32 pointer = 0; pointer < buffer_size_;){
+    for (u32 pointer = 0; pointer + 6 + 8 <= buffer_size_;){
         u16 temp = GetU16LE(pointer);
         pointer += 6;
         // Condition for GZip header

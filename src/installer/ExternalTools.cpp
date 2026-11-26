@@ -251,7 +251,12 @@ namespace ExternalTools{
     }
 
     std::vector<std::string> FfmpegArguments(const std::string& input, const std::string& output){
-        return {"-hide_banner", "-loglevel", "panic", "-y", "-i", input, output};
+        // Bit exact: without it the Ogg stream serial number is random, so every installation writes different
+        // files.
+        return {
+          "-hide_banner", "-loglevel", "panic", "-y", "-i", input, "-fflags", "+bitexact", "-flags:a", "+bitexact",
+          output
+        };
     }
 
     std::vector<std::string> FfmpegStdinArguments(const std::string& output){
@@ -263,7 +268,7 @@ namespace ExternalTools{
         return {
           "-hide_banner", "-loglevel", "panic", "-y", "-i", "-", "-af",
           "areverse,silenceremove=start_periods=1:start_duration=0:start_threshold=-50dB"
-          ":start_silence=0.3:detection=peak,areverse",
+          ":start_silence=0.3:detection=peak,areverse", "-fflags", "+bitexact", "-flags:a", "+bitexact",
           output
         };
     }
@@ -317,7 +322,10 @@ namespace ExternalTools{
         // The sound. Some movies have none.
         const std::string ogg = directory + "/" + name + ".ogg";
         const RunResult sound = Run(
-          ffmpeg, {"-hide_banner", "-loglevel", "panic", "-y", "-i", input, "-vn", ogg}, -1
+          ffmpeg,
+          {"-hide_banner", "-loglevel", "panic", "-y", "-i", input, "-vn", "-fflags", "+bitexact", "-flags:a",
+           "+bitexact", ogg},
+          -1
         );
         if (!sound.started || !sound.finished || sound.exit_code != 0 || fs::file_size(ogg, ec) == 0 || ec)
             fs::remove(ogg, ec);

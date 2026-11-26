@@ -34,7 +34,8 @@ DataInstaller::DataInstaller(
   disk_image_(disk_image), output_dir_(output_dir), data_dir_(InstallLayout::DataDir(output_dir)),
   options_(options), write_output_line_(write_output_line)
 {
-    if (!application_.initOgre(true)) throw std::runtime_error("Ogre init failure");
+    // The installer only converts data, so it needs no render system, no window and no display.
+    if (!application_.initOgreHeadless()) throw std::runtime_error("Ogre init failure");
     Ogre::Log* default_log(Ogre::LogManager::getSingleton().getDefaultLog());
     assert( default_log );
     default_log->setLogDetail(Ogre::LL_LOW);

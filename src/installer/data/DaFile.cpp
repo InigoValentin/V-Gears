@@ -26,8 +26,8 @@ DaFile::DaFile(File file): da_file_(file){
     animations_.clear();
     // Save file contents as a byte array.
     file.SetOffset(0);
-    da_bytes_ = new u8[file.GetFileSize()];
-    file.GetFileBuffer(da_bytes_, 0, file.GetFileSize());
+    da_bytes_.assign(file.GetFileSize(), 0);
+    if (!da_bytes_.empty()) file.GetFileBuffer(da_bytes_.data(), 0, da_bytes_.size());
     bit_offset_ = 0;
     file.SetOffset(0);
     Read();
@@ -211,7 +211,10 @@ int DaFile::GetBitsU(int bits){
     // Bits are read most significant first.
     int value = 0;
     for (int i = 0; i < bits; i ++){
-        const int byte = da_bytes_[bit_offset_ / 8];
+        // Some animations are cut short in the original files, and their last frame goes past the end of the
+        // file. Those bits are read as 0, instead of whatever is in memory after the file.
+        const size_t byte_index = bit_offset_ / 8;
+        const int byte = byte_index < da_bytes_.size() ? da_bytes_[byte_index] : 0;
         const int bit = (byte >> (7 - (bit_offset_ % 8))) & 1;
         value = (value << 1) | bit;
         bit_offset_ ++;

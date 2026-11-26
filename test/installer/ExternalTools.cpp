@@ -233,13 +233,16 @@ BOOST_AUTO_TEST_SUITE(ExternalToolsArgumentTests)
 
 BOOST_AUTO_TEST_CASE(FfmpegArgumentsDontNeedQuoting){
     const std::vector<std::string> expected = {
-      "-hide_banner", "-loglevel", "panic", "-y", "-i", "/path with spaces/in put.wav", "/out dir/o'ut.ogg"
+      "-hide_banner", "-loglevel", "panic", "-y", "-i", "/path with spaces/in put.wav", "-fflags", "+bitexact",
+      "-flags:a", "+bitexact", "/out dir/o'ut.ogg"
     };
     BOOST_CHECK(FfmpegArguments("/path with spaces/in put.wav", "/out dir/o'ut.ogg") == expected);
 }
 
 BOOST_AUTO_TEST_CASE(FfmpegReadsStdin){
-    const std::vector<std::string> expected = {"-hide_banner", "-loglevel", "panic", "-y", "-i", "-", "out.ogg"};
+    const std::vector<std::string> expected = {
+      "-hide_banner", "-loglevel", "panic", "-y", "-i", "-", "-fflags", "+bitexact", "-flags:a", "+bitexact", "out.ogg"
+    };
     BOOST_CHECK(FfmpegStdinArguments("out.ogg") == expected);
 }
 

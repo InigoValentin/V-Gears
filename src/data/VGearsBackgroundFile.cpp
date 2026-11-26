@@ -114,6 +114,8 @@ namespace VGears{
         );
         Ogre::MemoryDataStream *buffer(new Ogre::MemoryDataStream(memory_size));
         uint32 *color(reinterpret_cast<uint32*>(buffer->getPtr()));
+        // The tiles don't fill the image: what they don't cover must be transparent, not whatever was in memory.
+        memset(color, 0, memory_size);
 
         int dst_x(0), dst_y(0);
         int dst_x_16(0), dst_y_16(0);

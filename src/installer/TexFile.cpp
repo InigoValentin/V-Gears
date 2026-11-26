@@ -140,7 +140,9 @@ void TexFile::SavePng(
         return;
     }
     // TODO: Warn if wrong palette index.
-    Ogre::Image* image = new Ogre::Image(Ogre::PF_R8G8B8A8_UINT, w, h);
+    // What the texture doesn't cover is transparent, not whatever was in memory.
+    Ogre::Image image(Ogre::PF_R8G8B8A8_UINT, w, h);
+    image.setTo(Ogre::ColourValue::ZERO);
     int target_x = 0;
     int target_y = 0;
     for (int c_y = y; c_y < height_ && c_y < y + h; c_y ++){
@@ -171,7 +173,7 @@ void TexFile::SavePng(
                     a = palettes_.at(palette).at(pixel_ref_.at(i)).a;
                 }
             }
-            image->setColourAt(Ogre::ColourValue(r, g, b, a), target_x, target_y, 0);
+            image.setColourAt(Ogre::ColourValue(r, g, b, a), target_x, target_y, 0);
             target_x ++;
             if (target_x >= w){
                 target_y ++;
@@ -179,7 +181,7 @@ void TexFile::SavePng(
             }
         }
     }
-    image->save(file_name);
+    image.save(file_name);
 }
 
 void TexFile::SavePng(std::string file_name, unsigned int palette){
@@ -196,7 +198,9 @@ void TexFile::SavePng(
         return;
     }
     // TODO: Warn if wrong palette index.
-    Ogre::Image* image = new Ogre::Image(Ogre::PF_R8G8B8A8_UINT, w1 + w2, h);
+    // What the texture doesn't cover is transparent, not whatever was in memory.
+    Ogre::Image image(Ogre::PF_R8G8B8A8_UINT, w1 + w2, h);
+    image.setTo(Ogre::ColourValue::ZERO);
     int target_x = 0;
     int target_y = 0;
     // First image
@@ -219,7 +223,7 @@ void TexFile::SavePng(
                 b = palettes_.at(palette).at(pixel_ref_.at(i)).b;
                 a = palettes_.at(palette).at(pixel_ref_.at(i)).a;
             }
-            image->setColourAt(Ogre::ColourValue(r, g, b, a), target_x, target_y, 0);
+            image.setColourAt(Ogre::ColourValue(r, g, b, a), target_x, target_y, 0);
             target_x ++;
             if (target_x >= w1){
                 target_y ++;
@@ -248,7 +252,7 @@ void TexFile::SavePng(
                 b = palettes_.at(palette).at(pixel_ref_.at(i)).b;
                 a = palettes_.at(palette).at(pixel_ref_.at(i)).a;
             }
-            image->setColourAt(Ogre::ColourValue(r, g, b, a), target_x, target_y, 0);
+            image.setColourAt(Ogre::ColourValue(r, g, b, a), target_x, target_y, 0);
             target_x ++;
             if (target_x >= w1 + w2){
                 target_y ++;
@@ -256,5 +260,5 @@ void TexFile::SavePng(
             }
         }
     }
-    image->save(file_name);
+    image.save(file_name);
 }
