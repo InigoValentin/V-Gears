@@ -15,6 +15,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "common/File.h"
 
 /**
@@ -65,10 +68,21 @@ class BinGZipFile : public File{
          * Extracts a file from the compressed BIN file.
          *
          * @param[in] file_index The index of the file to extract.
-         * @return The extracted file, or NULL if there is no file at the
-         * specified index.
+         * @return The extracted file. It is empty if there is no file at the specified index, or it can't be
+         * extracted.
          */
-        File* ExtractGZip(u32 file_index);
+        File ExtractGZip(u32 file_index);
+
+        /**
+         * Decompresses GZip data.
+         *
+         * @param[in] data The compressed data.
+         * @param[in] size Size of the compressed data.
+         * @param[out] out The decompressed data.
+         * @param[out] error What went wrong, if it fails.
+         * @return True if the data was decompressed.
+         */
+        static bool Inflate(const u8* data, size_t size, std::vector<u8>& out, std::string& error);
 
         /**
          * Counts the number of files packed in the compressed BIN file.

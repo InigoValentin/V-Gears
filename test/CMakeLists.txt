@@ -171,6 +171,7 @@ set(SOURCE_FILES
     installer/SfxDump.cpp
     installer/TexFile.cpp
     installer/VGearsUtility.cpp
+    installer/WindowFonts.cpp
     installer/WorldInstaller.cpp
     installer/common/BinGZipFile.cpp
     installer/common/DrawSkeleton.cpp
@@ -289,12 +290,14 @@ add_executable(v-gears-installer-tests
     common/DataDirectory.cpp
     common/OgrePlugins.cpp
     ${CMAKE_SOURCE_DIR}/src/common/DataDirectory.cpp
+    ${CMAKE_SOURCE_DIR}/src/common/InstallStamp.cpp
     ${CMAKE_SOURCE_DIR}/src/common/OgrePlugins.cpp
     installer/InstallLogic.cpp
     installer/ExternalTools.cpp
     installer/MovieCamera.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/MovieCamera.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/ExternalTools.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/InstallCommandLine.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/InstallLayout.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/InstallLog.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/InstallOptions.cpp

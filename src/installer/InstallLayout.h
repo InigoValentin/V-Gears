@@ -63,6 +63,57 @@ namespace InstallLayout{
     std::vector<std::string> RemovableTempSubdirs();
 
     /**
+     * Gets the directory where the installation disk is extracted.
+     *
+     * Its files are only read while installing.
+     *
+     * @param[in] root Installation directory, ending with '/'.
+     */
+    std::string OriginalDataDir(const std::string& root);
+
+    /**
+     * Directories of the game data (in <installation directory>/data) that a clean installation keeps: the
+     * configuration of the game, and the videos, which come from the game disks, not from the install disk.
+     */
+    const std::vector<std::string>& CleanInstallKeptDataDirs();
+
+    /**
+     * Tells if a directory is a V-Gears installation: it has the configuration files the installer copies.
+     *
+     * @param[in] root The directory, ending with '/'.
+     */
+    bool IsInstallation(const std::string& root);
+
+    /**
+     * Result of cleaning an installation.
+     */
+    struct CleanResult{
+
+        /**
+         * Number of files and directories removed.
+         */
+        unsigned long long removed = 0;
+
+        /**
+         * What could not be removed.
+         */
+        std::vector<std::string> errors;
+    };
+
+    /**
+     * Deletes what a previous installation wrote, so a new one starts from nothing.
+     *
+     * It removes the extracted disk, the temporary files, the record of the installations (install.info) and the
+     * game data, except the directories in
+     * {@see CleanInstallKeptDataDirs}. The rest of the installation directory (saves, controls, the configuration
+     * files of V-Gears and Ogre, logs) is kept. A directory that is not an installation ({@see IsInstallation}) is
+     * not touched.
+     *
+     * @param[in] root Installation directory, ending with '/'.
+     */
+    CleanResult CleanInstallation(const std::string& root);
+
+    /**
      * Directories the game registers as resource locations, relative to the installation directory.
      */
     const std::vector<std::string>& GameResourceDirs();

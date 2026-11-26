@@ -215,9 +215,12 @@ struct DiskImage{
          * path.
          *
          * @param[in] installation_path The v-gears installation directory.
+         * @param[in] progress Receives the progress [0-100]. It can be empty.
          * @return True if the extraction was successful, false otherwise.
          */
-        bool extractImage(std::string installation_path);
+        bool extractImage(
+          std::string installation_path, const std::function<void(float)>& progress = std::function<void(float)>()
+        );
 
         /**
          * Finds a file in the extracted content of the disk image.

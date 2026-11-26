@@ -570,7 +570,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Delete previously installed files.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Performs a clean installation, unconditionally removing all previously installed data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Delete the previous installation first.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Before installing, the data of a previous installation in the installation directory is deleted: the converted game data, the temporary files and the extracted disk. The saves, the controls, the game configuration and the videos are kept.&lt;br&gt;&lt;br&gt;It needs 'Copy V-Gears data files', since the V-Gears data files are deleted too.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>Clean install</string>
@@ -728,13 +728,13 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Don't delete original data after installation.&lt;/b&gt;&lt;br&gt;&lt;br&gt;The installer extracts some original data from the installation disk, such as MIDI sounds, TEX images, and some LGP archives. If checked, this data will not be deleted when the installation is complete.&lt;br&gt;&lt;br&gt;This data is never used by V-Gears, and there is usually no need to check this.&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Keep the original data after the installation.&lt;/b&gt;&lt;br&gt;&lt;br&gt;The installer extracts the install disk and some original data (WAV sounds, MIDI music, TEX images and temporary model files) to convert it. Without this option, all of it is deleted when the installation is complete.&lt;br&gt;&lt;br&gt;V-Gears never uses this data, so there is usually no need to check this.&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="text">
             <string>Preserve original data</string>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
           <widget class="QCheckBox" name="chk_fields">

@@ -290,11 +290,6 @@ class MainWindow : public QMainWindow{
         bool background_ = false;
 
         /**
-         * True once an installation has started. The installer can only run once.
-         */
-        bool install_started_ = false;
-
-        /**
          * True while the option rules are being applied, to avoid applying them recursively.
          */
         bool updating_options_ = false;
@@ -315,4 +310,9 @@ class MainWindow : public QMainWindow{
          * The selected disk image.
          */
         DiskImage disk_image_;
+
+        /**
+         * The installation directory of the installation in progress, ending with '/'.
+         */
+        QString install_dir_;
 };

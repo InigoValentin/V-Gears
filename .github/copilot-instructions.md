@@ -19,7 +19,7 @@ V-Gears is a free, cross-platform reimplementation of the Final Fantasy VII engi
 - LuaJIT is a system dependency.
 - `test/` — Boost.Test suite mirroring `src/` paths; sources are listed manually in `test/CMakeLists.txt`.
 - `data/` — runtime configuration only (Ogre plugins/resources cfgs). Not game data.
-- `doc/` — all guides; `doc/code/FFVII/` documents the original binary formats.
+- `doc/` — all guides. The original binary formats are documented in the header comments of the parsers and in [the FF7 wiki at wiki.ffrtt.ru](https://wiki.ffrtt.ru/index.php/FF7).
 - `_OLD/` — legacy q-gears code kept for reference. Do not modify or reuse without asking.
 
 ## Build and Test

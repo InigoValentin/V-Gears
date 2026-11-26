@@ -13,7 +13,7 @@ Most formats in `src/data/` follow this structure — mirror it when adding form
 - `XFileSerializer` — reads/writes the binary layout (derives from `VGearsSerializer`).
 - `XFileManager` — Ogre `ResourceManager` integration (singleton + `Resource`).
 
-Format documentation lives in [doc/code/FFVII/](../../../doc/code/FFVII/). Check there and at existing similar parsers (e.g. `src/data/worldmap/TxzFile*`) before writing a new one.
+Format documentation lives in [the FF7 wiki at wiki.ffrtt.ru](https://wiki.ffrtt.ru/index.php/FF7) and in the header comments of the parsers. Check there and at existing similar parsers (e.g. `src/data/worldmap/TxzFile*`) before writing a new one.
 
 ## Installer Gotchas (verified, don't regress)
 

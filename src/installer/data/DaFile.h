@@ -294,7 +294,7 @@ class DaFile{
         /**
          * Contents of the da file as a byte array.
          */
-        u8* da_bytes_;
+        std::vector<u8> da_bytes_;
 
         /**
          * List of animations.

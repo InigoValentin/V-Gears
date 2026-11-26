@@ -35,13 +35,10 @@ class WorldInstaller{
          *
          * @param[in] disk_image Disk image to extract the data from.
          * @param[in] output_dir Path to the directory of the installation data.
-         * @param[in] keep_originals True to keep original data after
-         * conversion, false to remove.
          * @param[in] res_mgr The application resource manager.
          */
         WorldInstaller(
-          const DiskImage& disk_image, const std::string output_dir,
-          const bool keep_originals, Ogre::ResourceGroupManager* res_mgr
+          const DiskImage& disk_image, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr
         );
 
         /**
@@ -346,11 +343,6 @@ class WorldInstaller{
          * Directory where the game data is installed (<install dir>/data/).
          */
         std::string data_dir_;
-
-        /**
-         * If true, original files will not be deleted after conversion.
-         */
-        bool keep_originals_;
 
         /**
          * Number of maps already processed.

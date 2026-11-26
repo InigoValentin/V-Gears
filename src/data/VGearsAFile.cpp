@@ -109,15 +109,23 @@ namespace VGears{
             key_frame->setTranslate(ConvertRootTranslation(frame->root_translation, flip_forward_axis));
             SetFrameRotation(key_frame, frame->root_rotation);
         }
+        // Some models of the original game use animations made for a model with more bones (Barret in southmk2,
+        // Yuffie in trnad_4...). The bones are matched by their position, and the ones the skeleton doesn't have
+        // are left out.
+        // The extra bones are not at the end: Tifa's skeleton, whose animations Barret uses, has the hair and an
+        // armour bone in the middle, so the bones after them get the rotations of other bones. Like the original
+        // engine, which has no bone names. These scenes looked right in the game (southmk2, trnad_4, kuro_7,
+        // spipe_2...), so matching the bones by name is not needed for now.
+        const uint32 skeleton_bones = skeleton->getNumBones() > 0 ? skeleton->getNumBones() - 1 : 0;
+        if (bone_count_ > skeleton_bones){
+            Ogre::LogManager::getSingleton().logMessage(
+              "[WARNING] The animation " + name + " has " + std::to_string(bone_count_) + " bones, and the skeleton "
+              + skeleton->getName() + " " + std::to_string(skeleton_bones) + ": the other "
+              + std::to_string(bone_count_ - skeleton_bones) + " are not animated.", Ogre::LML_CRITICAL
+            );
+        }
         for(uint32 i(0); i < bone_count_; ++ i){
-            if (i + 1 >= skeleton->getNumBones()){
-                // TODO: Figure out why this happens/fix it.
-                LOG_ERROR(
-                  "Bone " + std::to_string(i + 1) + "  is out of bounds "
-                  + std::to_string(skeleton->getNumBones()) + " for: " + name
-                  + " in: " + skeleton->getName()
-                );
-            }
+            if (i + 1 >= skeleton->getNumBones()) continue;
             else{
                 bone = skeleton->getBone(i + 1);
                 track = anim->createNodeTrack(track_handle ++, bone);

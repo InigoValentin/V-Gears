@@ -130,3 +130,12 @@ remembers of the original). Not done:
 - The records 38 and 39 also have a Warship scene in `world_function_64`; it is not known which fields lead to them and they
   were not tested. The last move of record 37 (direction 176, facing 48) is a plain move without turning.
 - The vehicles may run at 15 frames per second as well (their speeds were tuned by eye).
+
+## Fonts: possible improvements
+
+The fonts are built by the installer from WINDOW.BIN (see `WindowFonts`) and drawn as a texture atlas: the PNG is loaded once, each letter is a quad with its cell as texture coordinates, and the geometry is only rebuilt when the text or the position changes. Converting the fonts to TTF was considered and discarded: an engine that loads TTF files rasterizes them into the same kind of atlas, the FF7 font is a two colour pixel font (glyph and shadow) that an outline format can't keep, and the installer would need a font writing library. Possible improvements, not planned yet:
+
+- `UiFont::GetCharData` searches the list of characters for every letter each time the geometry is rebuilt. An array indexed by the character code would make it a direct lookup.
+- The PC version has a font twice the resolution (24x24 cells) in `usfont_a_h.tex` and `usfont_b_h.tex` of menu_us.lgp, split in two textures. The installer could merge them in one image and write the XML for it, for sharper text at high resolutions.
+- The installer could write `ffvii_en.xml` from the width table in WINDOW.BIN (third file, one byte per character: 3 bits of lead, 5 bits of width) instead of keeping it by hand. The XML in the repository matches the table except for `! " , . : ?`, which were made tighter by hand.
+- Loading TTF files makes sense only to support fonts made by users, not for the fonts of the game.

@@ -45,192 +45,11 @@
 #include "InstallLayout.h"
 #include "InstallLog.h"
 #include "InstallOptions.h"
+#include "InstallSteps.h"
 #include "InstallVerifier.h"
 #include "MainWindow.h"
 #include "MovieCamera.h"
 #include <ui_MainWindow.h>
-
-namespace{
-
-    /**
-     * Converts the movies in a folder to what the game plays: frames and sound. The game can't
-     * decode the original videos. The movies that already have a converted folder are skipped,
-     * and the originals are kept so they are not extracted again.
-     *
-     * @param[in] video_dir Folder with the extracted movies.
-     */
-    void ConvertMovies(const std::string& video_dir){
-        const ExternalTools::Tool ffmpeg = ExternalTools::FindFfmpeg(ExternalTools::CurrentLocations());
-        if (!ffmpeg.usable){
-            InstallLog::Get().Add(
-              "[WARNING] FFmpeg can't be used, so the videos are not converted and the game can't play them: "
-              + ffmpeg.problem
-            );
-            return;
-        }
-        QDir directory(QString::fromStdString(video_dir));
-        for (const QString& file : directory.entryList({"*.avi"}, QDir::Files)){
-            const std::string name = QFileInfo(file).completeBaseName().toStdString();
-            const std::string destination = video_dir + name;
-            if (QFileInfo::exists(QString::fromStdString(destination + "/movie.xml"))) continue;
-            InstallLog::Get().Add("Converting " + name + ".avi...");
-            std::string error;
-            if (ExternalTools::ConvertMovie(
-                  ffmpeg.path, video_dir + file.toStdString(), destination, name,
-                  MovieCamera::LoadCamera(video_dir + "moviecam.lgp", name), &error
-                ))
-                InstallLog::Get().Add("Converted " + name);
-            else InstallLog::Get().Add("[WARNING] Could not convert " + name + ": " + error);
-        }
-    }
-}
-
-/**
- * Indicates if an installer has already been created.
- */
-static bool installer_created = false;
-
-/**
- * Finds the V-Gears "data" folder shipped with the game.
- *
- * It contains the configuration files and plugins (copied to the installation directory) and a "data" subfolder with
- * the game data (copied to <installation directory>/data).
- *
- * @return Path of the folder, or an empty string if it can't be found.
- */
-static QString FindGameDataDir(){
-    // The same places the game copies its files from when the data directory is empty, then the current directory.
-    std::vector<boost::filesystem::path> candidates = VGears::DataDirectory::TemplateCandidates(
-      boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString())
-    );
-    candidates.emplace_back((QDir::currentPath() + "/data").toStdString());
-    candidates.emplace_back((QDir::currentPath() + "/../data").toStdString());
-    const boost::filesystem::path found = VGears::DataDirectory::FindTemplate(candidates, boost::filesystem::path());
-    return found.empty() ? QString() : QDir::cleanPath(QString::fromStdString(found.string()));
-}
-
-#ifndef VGEARS_OGRE_PLUGIN_DIR
-#define VGEARS_OGRE_PLUGIN_DIR ""
-#endif
-
-/**
- * Names of the plugins in the plugins.cfg of a folder that the game won't find.
- *
- * The game looks for them in the same places (see VGears::OgrePlugins::SearchDirectories), so they don't need to be
- * copied to the installation directory.
- */
-static QStringList MissingOgrePlugins(const QString& source_dir){
-    namespace bfs = boost::filesystem;
-    QStringList missing;
-    const bfs::path dir(source_dir.toStdString());
-    VGears::OgrePlugins::Config config;
-    if (!VGears::OgrePlugins::ReadConfig(dir / "plugins.cfg", config)) return missing;
-    const std::vector<bfs::path> directories = VGears::OgrePlugins::SearchDirectories(
-      dir, config.folder, bfs::path(QCoreApplication::applicationDirPath().toStdString()), VGEARS_OGRE_PLUGIN_DIR
-    );
-    const std::string version = std::to_string(OGRE_VERSION_MAJOR) + "." + std::to_string(OGRE_VERSION_MINOR) + "."
-      + std::to_string(OGRE_VERSION_PATCH);
-    for (const std::string& name : config.plugins){
-        if (VGears::OgrePlugins::Find(name, directories, version).empty()) missing << QString::fromStdString(name);
-    }
-    return missing;
-}
-
-/**
- * Minimum free space needed besides the ISO extraction: converted data, intermediate files and logs.
- */
-static const qint64 kRequiredFreeSpace = 3LL * 1024 * 1024 * 1024;
-
-/**
- * Result of the checks done before starting an installation.
- */
-struct PreflightResult{
-    QStringList errors;
-    QStringList warnings;
-};
-
-/**
- * Checks that an installation can succeed before anything is extracted or written.
- *
- * @param[in] disk_image The selected disk image.
- * @param[in] output Absolute installation directory, ending with '/'.
- * @param[in] copy_data True if the V-Gears data files will be copied.
- * @param[in] game_data_dir The V-Gears "data" folder to copy (only used if copy_data is true).
- */
-static PreflightResult RunPreflight(
-  DiskImage& disk_image, const QString& output, bool copy_data, const QString& game_data_dir
-){
-    PreflightResult result;
-    const QString iso_path = QString::fromStdString(disk_image.getPath());
-
-    // Input.
-    if (iso_path.isEmpty()) result.errors << QObject::tr("No ISO image selected.");
-    else if (!QFileInfo(iso_path).isReadable()) result.errors << QObject::tr("The ISO image can't be read: %1").arg(iso_path);
-    else if (!disk_image.isValid()) result.errors << QObject::tr("The selected ISO is not a valid Final Fantasy VII image.");
-    else if (!disk_image.isSupported()) result.warnings << QString::fromStdString(disk_image.getWarningMessage());
-
-    // Output: it must be creatable and writable.
-    if (!QDir().mkpath(output)) result.errors << QObject::tr("The installation directory can't be created: %1").arg(output);
-    else{
-        QFile probe(output + ".v-gears-write-test");
-        if (!probe.open(QIODevice::WriteOnly)) result.errors << QObject::tr("The installation directory is not writable: %1").arg(output);
-        else{
-            probe.close();
-            probe.remove();
-        }
-        // Free space: the extracted ISO plus the converted data.
-        QStorageInfo storage(output);
-        const qint64 needed = kRequiredFreeSpace + (iso_path.isEmpty() ? 0 : QFileInfo(iso_path).size());
-        if (storage.isValid() && storage.bytesAvailable() < needed){
-            result.errors << QObject::tr("Not enough free space in %1: %2 MB available, about %3 MB needed.")
-              .arg(storage.rootPath()).arg(storage.bytesAvailable() / (1024 * 1024)).arg(needed / (1024 * 1024));
-        }
-    }
-
-    // Configuration and plugins.
-    if (copy_data){
-        if (game_data_dir.isEmpty() || !QFile::exists(game_data_dir + "/plugins.cfg") || !QDir(game_data_dir + "/data").exists())
-            result.errors << QObject::tr("The V-Gears 'data' folder was not found (it must contain plugins.cfg and a data folder).");
-        else{
-            const QStringList missing = MissingOgrePlugins(game_data_dir);
-            if (!missing.isEmpty())
-                result.errors << QObject::tr("Ogre plugins not found in the data folder or the system: %1").arg(missing.join(", "));
-        }
-    }
-    else{
-        if (!QFile::exists(output + "plugins.cfg") || !QFile::exists(output + "resources.cfg"))
-            result.errors << QObject::tr("The installation directory has no plugins.cfg and resources.cfg. Enable 'Copy V-Gears data files'.");
-        else{
-            const QStringList missing = MissingOgrePlugins(output);
-            if (!missing.isEmpty())
-                result.errors << QObject::tr("Ogre plugins not found in the installation directory or the system: %1").arg(missing.join(", "));
-        }
-    }
-    return result;
-}
-
-/**
- * Recursively copies a directory, overwriting existing files.
- *
- * @return True if every file was copied.
- */
-static bool CopyDirectory(const QString& src, const QString& dst){
-    const QDir src_dir(src);
-    if (!QDir().mkpath(dst)) return false;
-    bool ok = true;
-    QDirIterator it(src, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-    while (it.hasNext()){
-        const QString file = it.next();
-        const QString target = dst + "/" + src_dir.relativeFilePath(file);
-        QDir().mkpath(QFileInfo(target).absolutePath());
-        if (QFile::exists(target)) QFile::remove(target);
-        if (!QFile::copy(file, target)){
-            std::cout << "Could not copy " << file.toStdString() << " to " << target.toStdString() << std::endl;
-            ok = false;
-        }
-    }
-    return ok;
-}
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), main_window_(new Ui::MainWindow){
     main_window_->setupUi(this);
@@ -302,6 +121,8 @@ void MainWindow::InitSettings(void){
 }
 
 void MainWindow::OpenInstallLog(const QString& dir, bool append){
+    // A new installation starts with an empty log window.
+    if (!append) main_window_->data_log->clear();
     InstallLog& install_log = InstallLog::Get();
     install_log.Open((dir + "installer.log").toStdString(), append);
     install_log.SetSink([this](InstallLog::Level level, const std::string& message){
@@ -411,7 +232,9 @@ void MainWindow::on_btn_verify_clicked(){
         QMessageBox::warning(this, tr("Verify install"), tr("The installation directory does not exist: %1").arg(dir));
         return;
     }
-    const VerifyResult result = VerifyInstallation(dir.toStdString(), FindGameDataDir().toStdString());
+    const VerifyResult result = VerifyInstallation(
+      dir.toStdString(), InstallSteps::FindGameDataDir().toStdString(), InstallSteps::PluginSearch()
+    );
     // The game can start if its configuration and the V-Gears data files are there.
     bool can_launch = true;
     QString text;
@@ -520,12 +343,13 @@ void MainWindow::on_actionHelp_triggered(){
       "<li>Click <b>Install data</b>. The log shows the progress. Problems are shown in color and also written to "
       "<code>installer.log</code> in the installation directory.</li>"
       "</ol>"
-      "<p>The installation can only be done once per window. To install again, close the installer and open it "
-      "again.</p>"
       "<h3>Options</h3>"
       "<p>Select <b>Show advanced options</b> to choose what to install. <b>What to install</b> offers ready-made "
       "sets; choose <b>Custom</b> to pick the options by hand. Some options need others (for example the field "
-      "models need the field maps). <b>Clean install</b> deletes the data of a previous installation first. The "
+      "models need the field maps). <b>Clean install</b> deletes the data of a previous installation first; the "
+      "saves, the controls, the game configuration and the videos are kept. <b>Preserve original data</b> keeps "
+      "what the installer extracts and no longer needs (the install disk, temporary files and the original "
+      "sounds, music and images); without it, that is deleted at the end. The "
       "estimate under the options shows about how much disk space it needs.</p>"
       "<p>With <b>Copy V-Gears data files</b> the installer also copies the files that come with V-Gears (scripts, "
       "screens, fonts and configuration) to the installation directory.</p>"
@@ -615,10 +439,7 @@ void MainWindow::on_btn_data_run_clicked(){
         return;
     }
     // Normalize the output path.
-    QString output = QDir::fromNativeSeparators(main_window_->line_data_dst->text());
-    if (!output.endsWith("/")) output += "/";
-    // The working directory changes during installation, so the path must be absolute.
-    if (QDir::isRelativePath(output)) output = QDir(output).absolutePath() + "/";
+    const QString output = InstallSteps::NormalizeOutputDir(main_window_->line_data_dst->text());
 
     // A game disk only has videos: extract them, without the rest of the installation.
     if (disk_image_.isValid() && disk_image_.isVideoDisk()){
@@ -630,7 +451,7 @@ void MainWindow::on_btn_data_run_clicked(){
     const bool copy_data = main_window_->chk_copy_data->checkState() == Qt::Checked;
     QString game_data;
     if (copy_data){
-        game_data = FindGameDataDir();
+        game_data = InstallSteps::FindGameDataDir();
         if (game_data.isEmpty()){
             game_data = QFileDialog::getExistingDirectory(
               this, tr("Select the V-Gears 'data' folder to copy"), QCoreApplication::applicationDirPath()
@@ -639,9 +460,13 @@ void MainWindow::on_btn_data_run_clicked(){
         }
     }
 
-    // Check everything that can be checked before touching the disk.
-    PreflightResult preflight = RunPreflight(disk_image_, output, copy_data, game_data);
-    for (const std::string& problem : InstallRules::Problems(CurrentOptions(), QFile::exists(output + "data/fields/_fields.xml")))
+    // Check everything that can be checked before touching the disk. A clean installation deletes the field maps
+    // that are already installed.
+    const bool clean = main_window_->chk_clean_install->checkState() == Qt::Checked;
+    InstallSteps::PreflightResult preflight
+      = InstallSteps::RunPreflight(disk_image_, output, copy_data, game_data, clean);
+    const bool fields_installed = !clean && QFile::exists(output + "data/fields/_fields.xml");
+    for (const std::string& problem : InstallRules::Problems(CurrentOptions(), fields_installed))
         preflight.errors << QString::fromStdString(problem);
     if (!preflight.errors.isEmpty()){
         QMessageBox::critical(
@@ -659,8 +484,44 @@ void MainWindow::on_btn_data_run_clicked(){
     }
     // The audio is converted with external programs: say now, before anything is extracted, if they are missing.
     if (!ResolveMissingTools(CurrentOptions())) return;
+    // Everything is checked: the previous installation can be deleted.
+    if (clean && InstallLayout::IsInstallation(output.toStdString())){
+        const auto answer = QMessageBox::warning(
+          this, tr("Clean install"),
+          tr("The data of the installation in %1 will be deleted before installing. The saves, the controls, the "
+             "game configuration and the videos are kept.\n\nContinue?").arg(QDir::toNativeSeparators(output)),
+          QMessageBox::Yes | QMessageBox::No, QMessageBox::No
+        );
+        if (answer != QMessageBox::Yes) return;
+        const InstallLayout::CleanResult cleaned = InstallLayout::CleanInstallation(output.toStdString());
+        if (!cleaned.errors.empty()){
+            QStringList errors;
+            for (const std::string& error : cleaned.errors) errors << QString::fromStdString(error);
+            QMessageBox::critical(
+              this, tr("Clean install"),
+              tr("The previous installation could not be deleted:\n\n- %1").arg(errors.join("\n- "))
+            );
+            return;
+        }
+        main_window_->data_log->append(tr("Deleted the previous installation (%1 files and folders).").arg(cleaned.removed));
+    }
+    // From here on, the installation directory is being changed: until it finishes, the record says so.
+    install_dir_ = output;
+    InstallSteps::MarkInstallStarted(output, CurrentOptions(), disk_image_.getId());
     {
-        bool extraction_success = disk_image_.extractImage(output.toStdString());
+        // The extraction and the copy run here, in the window's thread: the progress is shown as they go, and the
+        // window is repainted, without taking the clicks (nothing can be started twice).
+        main_window_->data_progress_bar->setValue(0);
+        const auto show_phase = [this](InstallSteps::Phase phase, const QString& text){
+            return [this, phase, text](float value){
+                ShowProgress(InstallSteps::OverallProgress(phase, value));
+                main_window_->label_progress->setText(text);
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            };
+        };
+        bool extraction_success = disk_image_.extractImage(
+          output.toStdString(), show_phase(InstallSteps::Phase::EXTRACT, tr("Extracting the install disk..."))
+        );
         if (!extraction_success) {
             QMessageBox::critical(this, tr("Extraction error"), tr("Failed to extract ISO file."));
             return;
@@ -673,44 +534,25 @@ void MainWindow::on_btn_data_run_clicked(){
       }
       if (!input.endsWith("/")) input += "/";
 
-        // TODO: Enumerate files or find some better way to do this.
-        const std::vector<std::string> required_files = {
-          "data/field/char.lgp",
-          "data/field/flevel.lgp",
-          "data/kernel/KERNEL.BIN",
-          "data/menu/menu_us.lgp",
-          "data/sound/audio.fmt",
-          "data/sound/audio.dat",
-          "data/music/music.idx",
-          "data/midi/midi.lgp",
-          "data/battle/scene.bin",
-          "data/battle/battle.lgp",
-          "data/battle/magic.lgp",
-          "data/wm/WM0.MAP",
-          "data/wm/WM2.MAP",
-          "data/wm/WM3.MAP",
-          "data/wm/world_us.lgp",
-          "ff7.exe"
-        };
-
         // Ensure required files are in the input dir
-        for (auto& file : required_files){
-            std::cout << "Checking for required file: " << file << std::endl;
-            const auto matched_file = disk_image_.filePath(file);
-            if (!matched_file){
-                QMessageBox::critical(
-                  this, tr("Missing input file"),
-                  tr("Some of the required files were not found among the extracted data.\n\nMake sure that the file '")
-                    + file.c_str() + tr("' is in the extracted data.")
-                );
-                return;
-            }
+        const std::vector<std::string> missing_files = InstallSteps::MissingRequiredFiles(disk_image_);
+        if (!missing_files.empty()){
+            QStringList names;
+            for (const std::string& file : missing_files) names << QString::fromStdString(file);
+            QMessageBox::critical(
+              this, tr("Missing input file"),
+              tr("Some of the required files were not found among the extracted data.\n\nMake sure that these "
+                 "files are in the extracted data:\n\n%1").arg(names.join("\n"))
+            );
+            return;
         }
         // Copy the V-Gears data files (scripts, screens, fonts...) to the installation directory.
         if (copy_data){
             main_window_->data_log->append(tr("Copying data files from %1...").arg(game_data));
             // Everything in the folder goes to the installation directory, and its "data" subfolder to <dir>/data.
-            if (!CopyDirectory(game_data, output)){
+            if (!InstallSteps::CopyDirectory(
+              game_data, output, show_phase(InstallSteps::Phase::COPY, tr("Copying the V-Gears data files..."))
+            )){
                 QMessageBox::critical(
                   this, tr("Copy error"), tr("Failed to copy the V-Gears data files to the installation directory.")
                 );
@@ -733,41 +575,21 @@ void MainWindow::on_btn_data_run_clicked(){
             QMessageBox::critical(this, tr("Output error"), tr("Could not enter the installation directory."));
             return;
         }
-        if (installer_created){
-            // Due to the use of singletons, the installer can't be re-run.
-            // TODO: Verify that this is true, and if so, try to fix it.
-            QMessageBox::critical(
-              this, tr("Error"), tr("Please, fix the errors, and then close the installer before trying again.")
-            );
-            return;
-        }
         // Collect every message of the installation in one place: the log file, the log window and the summary.
         UpdateToolLocations(output);
         OpenInstallLog(output, false);
         // Start data conversion
         try{
             // Parse advanced options.
-            DataInstaller::AdvancedOptions options;
-            options.battle_data = (Qt::Checked == main_window_->chk_battle_data->checkState());
-            options.battle_models = (Qt::Checked == main_window_->chk_battle_models->checkState());
-            options.kernel = (Qt::Checked == main_window_->chk_kernel->checkState());
-            options.images = (Qt::Checked == main_window_->chk_images->checkState());
-            options.sounds = (Qt::Checked == main_window_->chk_sounds->checkState());
-            options.music = (Qt::Checked == main_window_->chk_music->checkState());
-            options.videos = false;
+            DataInstaller::AdvancedOptions options = InstallSteps::ToAdvancedOptions(
+              CurrentOptions(), Qt::Checked == main_window_->chk_keep_original->checkState()
+            );
             if (Qt::Checked == main_window_->chk_videos->checkState()){
                 InstallLog::Get().Add(
                   "[WARNING] The install disk has no videos. To extract them, select game disk 1, 2 or 3 as the "
-                  "ISO and install again (with a new installer window)."
+                  "ISO and install again."
                 );
             }
-            options.fields = (Qt::Checked == main_window_->chk_fields->checkState());
-            options.field_models = options.fields && (Qt::Checked == main_window_->chk_field_models->checkState());
-            options.wm = (Qt::Checked == main_window_->chk_wm->checkState());
-            options.wm_models = options.wm && (Qt::Checked == main_window_->chk_wm_models->checkState());
-            options.keep_originals = (Qt::Checked == main_window_->chk_keep_original->checkState());
-            installer_created = true;
-            install_started_ = true;
             const std::string output_path = QDir::toNativeSeparators(output).toStdString();
             const auto write_line = [this](const std::string log_line, int level, bool as_progress = false){
                 InstallLog::Get().Add(log_line);
@@ -778,9 +600,9 @@ void MainWindow::on_btn_data_run_clicked(){
                     );
                 }
             };
-            // The installation runs in a worker thread so the window stays responsive. Ogre, and the OpenGL context
-            // it creates, belong to the thread that creates them, so the installer is created, run and destroyed
-            // there. Setting "BackgroundInstall" to false runs it in the UI thread, step by step from a timer.
+            // The installation runs in a worker thread so the window stays responsive. Ogre belongs to the thread
+            // that creates it, so the installer is created, run and destroyed there. Setting "BackgroundInstall" to
+            // false runs it in the UI thread, step by step from a timer.
             background_ = settings_->value("BackgroundInstall", true).toBool();
             if (background_){
                 stop_requested_ = false;
@@ -796,7 +618,6 @@ void MainWindow::on_btn_data_run_clicked(){
             InstallLog::Get().Add(std::string("[ERROR] Installation failed: ") + ex.what());
             InstallLog::Get().Close();
             installer_.reset();
-            installer_created = false;
             OnInstallStopped();
             QMessageBox::critical(this, tr("Installation error"), ex.what());
         }
@@ -808,8 +629,7 @@ void MainWindow::on_chk_advanced_options_stateChanged(){
 }
 
 void MainWindow::EnableUi(bool enable){
-    // The installer can't run twice, so once an installation has started the button never comes back.
-    main_window_->btn_data_run->setEnabled(enable && !install_started_);
+    main_window_->btn_data_run->setEnabled(enable);
     main_window_->btn_close->setEnabled(enable);
     main_window_->actionExit->setEnabled(enable);
     main_window_->label_tools->setEnabled(enable);
@@ -819,7 +639,6 @@ void MainWindow::EnableUi(bool enable){
     main_window_->btn_data_src->setEnabled(enable);
     main_window_->line_data_dst->setEnabled(enable);
     main_window_->btn_data_dst->setEnabled(enable);
-    main_window_->data_progress_bar->setValue(0);
     // In background mode the worker thread does the work, so there is nothing to poll.
     if (!enable && !background_) timer_->start(0);
     else timer_->stop();
@@ -830,23 +649,9 @@ void MainWindow::OnInstallStarted(){EnableUi(false);}
 void MainWindow::OnInstallStopped(){EnableUi(true);}
 
 void MainWindow::StartVideoExtraction(const QString& output){
+    main_window_->data_progress_bar->setValue(0);
     // Only the output directory is needed: no plugins, no configuration, no Ogre.
-    QStringList errors;
-    if (!QDir().mkpath(output)) errors << tr("The installation directory can't be created: %1").arg(output);
-    else{
-        QFile probe(output + ".v-gears-write-test");
-        if (!probe.open(QIODevice::WriteOnly)) errors << tr("The installation directory is not writable: %1").arg(output);
-        else{
-            probe.close();
-            probe.remove();
-        }
-        const QStorageInfo storage(output);
-        const qint64 needed = 1024LL * 1024 * 1024;
-        if (storage.isValid() && storage.bytesAvailable() < needed){
-            errors << tr("Not enough free space in %1: %2 MB available, about %3 MB needed.")
-              .arg(storage.rootPath()).arg(storage.bytesAvailable() / (1024 * 1024)).arg(needed / (1024 * 1024));
-        }
-    }
+    const QStringList errors = InstallSteps::CheckVideoOutput(output);
     if (!errors.isEmpty()){
         QMessageBox::critical(
           this, tr("The extraction can't start"), tr("Fix these problems and try again:\n\n- %1").arg(errors.join("\n- "))
@@ -873,16 +678,17 @@ void MainWindow::StartVideoExtraction(const QString& output){
               },
               [](const std::string& message){InstallLog::Get().Add(message);}, &extracted, &skipped
             );
-            if (ok) ConvertMovies(output.toStdString() + "data/video/");
+            if (ok) InstallSteps::ConvertMovies(output.toStdString() + "data/video/");
         }
         catch (const std::exception& ex){
             error = ex.what();
         }
         if (stop_requested_) return;
-        QMetaObject::invokeMethod(this, [this, ok, error, extracted, skipped](){
+        QMetaObject::invokeMethod(this, [this, ok, error, extracted, skipped, output](){
             if (worker_.joinable()) worker_.join();
             if (ok && error.empty()){
                 ShowProgress(100);
+                InstallSteps::MarkVideosInstalled(output);
                 InstallLog::Get().Add(
                   "Videos extracted: " + std::to_string(extracted) + " new, " + std::to_string(skipped)
                   + " already installed."
@@ -900,16 +706,10 @@ void MainWindow::StartVideoExtraction(const QString& output){
 void MainWindow::UpdateToolLocations(const QString& install_dir){
     // Where to look for FFmpeg and TiMidity: what the user chose, then a "tools" folder in the installation
     // directory or next to the installer, then the system PATH.
-    QString dir = QDir::fromNativeSeparators(install_dir);
-    if (!dir.isEmpty() && !dir.endsWith("/")) dir += "/";
-    ExternalTools::Locations& tools = ExternalTools::CurrentLocations();
-    tools.ffmpeg = settings_->value("FFmpegPath").toString().toStdString();
-    tools.timidity = settings_->value("TimidityPath").toString().toStdString();
-    const QString app_dir = QCoreApplication::applicationDirPath();
-    tools.directories.clear();
-    if (!dir.isEmpty()) tools.directories.push_back((dir + "tools").toStdString());
-    tools.directories.push_back((app_dir + "/tools").toStdString());
-    tools.directories.push_back(app_dir.toStdString());
+    InstallSteps::SetToolLocations(
+      install_dir, settings_->value("FFmpegPath").toString().toStdString(),
+      settings_->value("TimidityPath").toString().toStdString()
+    );
 }
 
 void MainWindow::RefreshToolStatus(){
@@ -1040,7 +840,8 @@ void MainWindow::RunInstallation(
             const auto now = std::chrono::steady_clock::now();
             if (progress >= 100 || now - last_shown > std::chrono::milliseconds(100)){
                 last_shown = now;
-                QMetaObject::invokeMethod(this, [this, progress](){ShowProgress(progress);}, Qt::QueuedConnection);
+                const float overall = InstallSteps::OverallProgress(InstallSteps::Phase::CONVERT, progress);
+                QMetaObject::invokeMethod(this, [this, overall](){ShowProgress(overall);}, Qt::QueuedConnection);
             }
         }
     }
@@ -1059,14 +860,13 @@ void MainWindow::RunInstallation(
         if (worker_.joinable()) worker_.join();
         if (finished){
             launch_available_ = true;
+            InstallSteps::MarkInstallFinished(install_dir_);
             OnInstallStopped();
             InstallLog::Get().Close();
         }
         else{
             InstallLog::Get().Add("[ERROR] Installation failed: " + error);
             InstallLog::Get().Close();
-            // If the installer could not even be created it can be tried again.
-            if (!created) installer_created = false;
             OnInstallStopped();
             QMessageBox::critical(this, created ? tr("Data conversion exception") : tr("Installation error"), QString::fromStdString(error));
         }
@@ -1076,9 +876,10 @@ void MainWindow::RunInstallation(
 void MainWindow::DoProgress(){
     try{
         const float progress = installer_->Progress();
-        ShowProgress(progress);
+        ShowProgress(InstallSteps::OverallProgress(InstallSteps::Phase::CONVERT, progress));
         if (progress >= 100){
             launch_available_ = true;
+            InstallSteps::MarkInstallFinished(install_dir_);
             OnInstallStopped();
             InstallLog::Get().Close();
         }

@@ -18,10 +18,13 @@
 #include <boost/filesystem.hpp>
 #include <algorithm>
 #include <fstream>
+#include "installer/InstallCommandLine.h"
 #include "installer/InstallLayout.h"
 #include "installer/InstallLog.h"
 #include "installer/InstallOptions.h"
 #include "installer/InstallVerifier.h"
+#include "common/InstallStamp.h"
+#include "common/OgrePlugins.h"
 #include "installer/TaskPool.h"
 #include "installer/VideoFiles.h"
 #include <atomic>
@@ -300,20 +303,33 @@ BOOST_AUTO_TEST_CASE(EmptyDirectoryMissesEverything){
     BOOST_CHECK(!result.Ok());
     for (const char* group : {
       "Configuration", "Game files", "Kernel data", "Battle data", "Battle models", "Field maps", "Field models",
-      "World map", "World map models", "Sound effects", "Music", "Images"
+      "World map", "World map models", "Sound effects", "Music", "Images", "Fonts"
     }) BOOST_CHECK_MESSAGE(HasProblem(result, group), "no problem reported for " << group);
     BOOST_CHECK_GT(result.checked, 0);
 }
 
 BOOST_AUTO_TEST_CASE(ConfigurationAndPlugins){
     TempDir dir;
-    dir.Touch("plugins.cfg");
-    dir.Touch("resources.cfg");
     BOOST_CHECK(HasProblem(VerifyInstallation(dir.Root()), "Configuration"));
-    // The plugins have a version suffix.
-    dir.Touch("RenderSystem_GL.so.1.12.10");
-    dir.Touch("Codec_STBI.so.1.12.10");
+    // A plugin that can't be in the system, so only the given directories count.
+    const std::string plugin = "Plugin_VGearsVerifierTest";
+    VerifyPlugins search;
+    search.ogre_version = "1.2.3";
+    const std::string file_name = VGears::OgrePlugins::FileNames(plugin, search.ogre_version).front();
+    std::ofstream(dir.path.string() + "/plugins.cfg") << "Plugin=" << plugin << "\n";
+    dir.Touch("resources.cfg");
+    BOOST_CHECK(HasProblem(VerifyInstallation(dir.Root(), "", search), "Configuration"));
+    // Without the Ogre version the plugins are not checked.
     BOOST_CHECK(!HasProblem(VerifyInstallation(dir.Root()), "Configuration"));
+    // Next to the executable, as the game looks for it there too.
+    TempDir executable;
+    executable.Touch(file_name);
+    search.executable_dir = executable.path.string();
+    BOOST_CHECK(!HasProblem(VerifyInstallation(dir.Root(), "", search), "Configuration"));
+    // In the installation directory.
+    search.executable_dir.clear();
+    dir.Touch(file_name);
+    BOOST_CHECK(!HasProblem(VerifyInstallation(dir.Root(), "", search), "Configuration"));
 }
 
 BOOST_AUTO_TEST_CASE(RootWithoutTrailingSlash){
@@ -579,3 +595,203 @@ BOOST_AUTO_TEST_CASE(LogCanBeAppended){
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+// Command line.
+
+BOOST_AUTO_TEST_CASE(CommandLineWithoutInstallerOptionsOpensTheWindow){
+    using namespace InstallCommandLine;
+    BOOST_CHECK(Parse({}).mode == Mode::GUI);
+    // Qt's own arguments are left for the window.
+    BOOST_CHECK(Parse({"-platform", "xcb"}).mode == Mode::GUI);
+}
+
+BOOST_AUTO_TEST_CASE(CommandLineInstallDefaults){
+    using namespace InstallCommandLine;
+    const Arguments a = Parse({"--cli", "--iso", "disk.iso"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK_EQUAL(a.iso, "disk.iso");
+    BOOST_CHECK(a.output.empty());
+    BOOST_CHECK(a.copy_data);
+    BOOST_CHECK(!a.keep_originals);
+    BOOST_CHECK(!a.clean);
+    BOOST_CHECK(!a.strict);
+    BOOST_CHECK(!a.yes);
+    // Everything, except the videos, which are not on the install disk.
+    const InstallOptions o = a.options;
+    BOOST_CHECK(o.kernel && o.fields && o.field_models && o.wm && o.wm_models && o.battle_data && o.battle_models);
+    BOOST_CHECK(o.images && o.sounds && o.music);
+    BOOST_CHECK(!o.videos);
+}
+
+BOOST_AUTO_TEST_CASE(CommandLineInstallerOptionsImplyCli){
+    using namespace InstallCommandLine;
+    const Arguments a = Parse({"-i", "disk.iso", "-o", "/tmp/vg", "-y", "--no-copy-data", "--keep-originals", "--clean"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK_EQUAL(a.output, "/tmp/vg");
+    BOOST_CHECK(a.yes);
+    BOOST_CHECK(!a.copy_data);
+    BOOST_CHECK(a.keep_originals);
+    BOOST_CHECK(a.clean);
+    // Each of them is enough to use the command line.
+    BOOST_CHECK(Parse({"--clean"}).mode == Mode::INVALID); // No ISO, but not the window.
+    BOOST_CHECK(Parse({"--keep-originals"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"-i", "d.iso", "--strict"}).strict);
+    // "--option=value" works too.
+    BOOST_CHECK_EQUAL(Parse({"--iso=other.iso"}).iso, "other.iso");
+}
+
+BOOST_AUTO_TEST_CASE(CommandLinePresetsAndParts){
+    using namespace InstallCommandLine;
+    Arguments a = Parse({"-i", "d.iso", "--preset", "battle", "--with", "music,images", "--without", "kernel"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK(a.options.battle_data && a.options.battle_models && a.options.music && a.options.images);
+    BOOST_CHECK(!a.options.kernel && !a.options.fields && !a.options.sounds);
+
+    a = Parse({"-i", "d.iso", "-p", "custom", "--with", "fields"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK(a.options.fields && !a.options.field_models && !a.options.kernel);
+
+    // Removing a part removes what depends on it.
+    a = Parse({"-i", "d.iso", "--without", "world-map"});
+    BOOST_REQUIRE(a.mode == Mode::INSTALL);
+    BOOST_CHECK(!a.options.wm && !a.options.wm_models);
+}
+
+BOOST_AUTO_TEST_CASE(CommandLineErrors){
+    using namespace InstallCommandLine;
+    BOOST_CHECK(Parse({"--cli"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"--iso"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"-i", "d.iso", "--preset", "nope"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"-i", "d.iso", "--with", "nope"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"-i", "d.iso", "--bogus"}).mode == Mode::INVALID);
+    // A part can't be added without what it needs.
+    BOOST_CHECK(Parse({"-i", "d.iso", "-p", "custom", "--with", "field-models"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"--verify", "-i", "d.iso"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"--verify", "--with", "music"}).mode == Mode::INVALID);
+    BOOST_CHECK(Parse({"--verify", "--clean"}).mode == Mode::INVALID);
+    // The old name of the option is gone.
+    BOOST_CHECK(Parse({"-i", "d.iso", "--discard-originals"}).mode == Mode::INVALID);
+}
+
+BOOST_AUTO_TEST_CASE(CommandLineOtherModes){
+    using namespace InstallCommandLine;
+    BOOST_CHECK(Parse({"--verify"}).mode == Mode::VERIFY);
+    BOOST_CHECK_EQUAL(Parse({"--verify", "-o", "/x"}).output, "/x");
+    BOOST_CHECK(Parse({"--help"}).mode == Mode::HELP);
+    BOOST_CHECK(Parse({"-i", "d.iso", "-h"}).mode == Mode::HELP);
+    BOOST_CHECK(Parse({"--version"}).mode == Mode::VERSION);
+    BOOST_CHECK(Parse({"--list-parts"}).mode == Mode::LIST_PARTS);
+    BOOST_CHECK(!Usage("v-gears-installer").empty());
+}
+
+// Clean installation.
+
+BOOST_AUTO_TEST_CASE(CleanInstallationDeletesTheDataAndKeepsTheRest){
+    TempDir dir;
+    const std::string root = dir.Root();
+    for (const char* file : {
+      "plugins.cfg", "resources.cfg", "v-gears.cfg", "controls.cfg", "installer.log", "save/0.xml",
+      "data/config/config.cfg", "data/video/opening/movie.xml", "data/fields/md1_1/map.xml",
+      "data/models/fields/aerisflowers.mesh", "data/audio/sounds/1.ogg", "data/scripts/x.lua",
+      "temp/char/cbba.rsd", "temp/world_models/a.p", "original_data/ff7/ff7.exe", "install.info"
+    }) dir.Touch(file);
+    const InstallLayout::CleanResult result = InstallLayout::CleanInstallation(root);
+    BOOST_CHECK(result.errors.empty());
+    BOOST_CHECK(result.removed > 0);
+    // Kept.
+    for (const char* file : {
+      "plugins.cfg", "resources.cfg", "v-gears.cfg", "controls.cfg", "installer.log", "save/0.xml",
+      "data/config/config.cfg", "data/video/opening/movie.xml"
+    }) BOOST_CHECK_MESSAGE(fs::exists(dir.path / file), std::string("kept: ") + file);
+    // Deleted.
+    for (const char* path : {"data/fields", "data/models", "data/audio", "data/scripts", "temp", "original_data", "install.info"})
+        BOOST_CHECK_MESSAGE(!fs::exists(dir.path / path), std::string("deleted: ") + path);
+    BOOST_CHECK(fs::is_directory(dir.path / "data"));
+}
+
+BOOST_AUTO_TEST_CASE(CleanInstallationDoesNotTouchOtherDirectories){
+    // Without the configuration files it is not an installation, and nothing is deleted.
+    TempDir dir;
+    dir.Touch("data/my_files/document.txt");
+    dir.Touch("temp/notes.txt");
+    BOOST_CHECK(!InstallLayout::IsInstallation(dir.Root()));
+    const InstallLayout::CleanResult result = InstallLayout::CleanInstallation(dir.Root());
+    BOOST_CHECK_EQUAL(result.removed, 0u);
+    BOOST_CHECK(fs::exists(dir.path / "data/my_files/document.txt"));
+    BOOST_CHECK(fs::exists(dir.path / "temp/notes.txt"));
+}
+
+BOOST_AUTO_TEST_CASE(OriginalDataIsInsideTheInstallationDirectory){
+    BOOST_CHECK_EQUAL(InstallLayout::OriginalDataDir("/x/"), "/x/original_data/");
+}
+
+// Record of the installations.
+
+BOOST_AUTO_TEST_CASE(InstallStampIsWrittenAndRead){
+    namespace stamp = VGears::InstallStamp;
+    TempDir dir;
+    stamp::Stamp written;
+    stamp::Start(written, {"kernel", "fields"}, "1.2.3", "2026-11-26 10:00:00", "Install Disk");
+    BOOST_REQUIRE(stamp::Write(dir.path, written));
+    stamp::Stamp read;
+    BOOST_REQUIRE(stamp::Read(dir.path, read));
+    BOOST_CHECK(!read.complete);
+    BOOST_CHECK_EQUAL(read.installer, "1.2.3");
+    BOOST_CHECK_EQUAL(read.date, "2026-11-26 10:00:00");
+    BOOST_CHECK_EQUAL(read.disk, "Install Disk");
+    BOOST_CHECK(read.installing == std::vector<std::string>({"kernel", "fields"}));
+    stamp::Finish(read);
+    BOOST_REQUIRE(stamp::Write(dir.path, read));
+    BOOST_REQUIRE(stamp::Read(dir.path, read));
+    BOOST_CHECK(read.complete);
+    BOOST_CHECK(read.installing.empty());
+    BOOST_CHECK_EQUAL(read.parts["kernel"], stamp::DATA_VERSION);
+    BOOST_CHECK_EQUAL(read.parts["fields"], stamp::DATA_VERSION);
+    BOOST_CHECK(stamp::Outdated(read).empty());
+    BOOST_CHECK(stamp::Problems(dir.path).empty());
+    // Without a file, there is no record.
+    TempDir empty;
+    BOOST_CHECK(!stamp::Read(empty.path, read));
+    bool found = true;
+    BOOST_CHECK(stamp::Problems(empty.path, &found).empty());
+    BOOST_CHECK(!found);
+}
+
+BOOST_AUTO_TEST_CASE(InstallStampReportsUnfinishedAndOldInstallations){
+    namespace stamp = VGears::InstallStamp;
+    TempDir dir;
+    stamp::Stamp record;
+    // A complete installation, then one of other parts that is interrupted.
+    stamp::Start(record, {"kernel"}, "1", "a", "disk");
+    stamp::Finish(record);
+    stamp::Start(record, {"battle-data"}, "1", "b", "disk");
+    BOOST_REQUIRE(stamp::Write(dir.path, record));
+    BOOST_CHECK_EQUAL(stamp::Problems(dir.path).size(), 1u);
+    BOOST_CHECK(stamp::Outdated(record) == std::vector<std::string>({"battle-data"}));
+    // The next installation doesn't install them again: they stay as not installed.
+    stamp::Start(record, {"fields"}, "1", "c", "disk");
+    stamp::Finish(record);
+    BOOST_CHECK_EQUAL(record.parts["battle-data"], 0);
+    BOOST_CHECK(stamp::Outdated(record) == std::vector<std::string>({"battle-data"}));
+    BOOST_CHECK_EQUAL(record.parts["kernel"], stamp::DATA_VERSION);
+    // A part of an older version of the data.
+    record.parts["fields"] = stamp::DATA_VERSION - 1;
+    BOOST_REQUIRE(stamp::Write(dir.path, record));
+    const std::vector<std::string> problems = stamp::Problems(dir.path);
+    BOOST_REQUIRE_EQUAL(problems.size(), 1u);
+    BOOST_CHECK(problems[0].find("battle-data") != std::string::npos);
+    BOOST_CHECK(problems[0].find("fields") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(VerifierReportsTheRecord){
+    namespace stamp = VGears::InstallStamp;
+    TempDir dir;
+    BOOST_CHECK(HasProblem(VerifyInstallation(dir.Root()), "Installation"));
+    stamp::Stamp record;
+    stamp::Start(record, {"kernel"}, "1", "a", "disk");
+    BOOST_REQUIRE(stamp::Write(dir.path, record));
+    BOOST_CHECK(HasProblem(VerifyInstallation(dir.Root()), "Installation"));
+    stamp::Finish(record);
+    BOOST_REQUIRE(stamp::Write(dir.path, record));
+    BOOST_CHECK(!HasProblem(VerifyInstallation(dir.Root()), "Installation"));
+}

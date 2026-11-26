@@ -44,8 +44,8 @@ std::string WorldInstaller::TERRAIN_MODELS_DIR("models/world/terrain");
 
 WorldInstaller::WorldInstaller(
   const DiskImage& disk_image, const std::string output_dir,
-  const bool keep_originals, Ogre::ResourceGroupManager* res_mgr
-): disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "data/"), keep_originals_(keep_originals), res_mgr_(res_mgr) {}
+  Ogre::ResourceGroupManager* res_mgr
+): disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "data/"), res_mgr_(res_mgr) {}
 
 WorldInstaller::~WorldInstaller(){}
 

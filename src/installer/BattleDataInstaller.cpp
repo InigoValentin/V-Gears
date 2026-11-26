@@ -145,7 +145,7 @@ unsigned int BattleDataInstaller::InitializeSpellModels(){
 
 unsigned int BattleDataInstaller::ProcessScene(){
     if (next_scene_ >= scenes_uncompressed_.size()) return total_scenes_;
-    File* scene_file = scenes_uncompressed_[next_scene_];
+    File* scene_file = scenes_uncompressed_[next_scene_].get();
     if (scene_file == NULL){
         // Keep battle IDs stable: an unreadable scene still takes its 4 battle slots.
         std::cout << "Warning: scene " << next_scene_ << " could not be extracted." << std::endl;
@@ -412,7 +412,6 @@ unsigned int BattleDataInstaller::ProcessSpellModel(){
         magic_lgp_files_[next_model_to_process_].WriteFile(
           output_dir_ + "temp/spell_models/" + p_name
         );
-        std::cout << "[BONE RENAMED] " << fname << " --> " << p_name << std::endl;
         bool found = false;
         for (int m = 0; m < spell_models_.size(); m ++){
             if (spell_models_[m].id == id){
@@ -673,13 +672,11 @@ unsigned int BattleDataInstaller::ConvertSpellModel(){
 
         // Decompile the .hrc file (if any)
         if (model.hrc != ""){
-            std::cout << "[DECOMPILE] " << output_dir_ + "temp/spell_models/" + model.hrc << std::endl;
             DecompileSpellModelHrc(
               File(output_dir_ + "temp/spell_models/" + model.hrc), model,
               output_dir_ + "temp/spell_models/" + info.name_normal + ".hrc", model.id
             );
             model.hrc = info.name_normal + ".hrc";
-            std::cout << "    TO: " << (output_dir_ + "temp/spell_models/" + info.name_normal + ".hrc") << std::endl;
         }
         GenerateRsdFiles(model, output_dir_ + "temp/spell_models/");
 
@@ -697,7 +694,6 @@ unsigned int BattleDataInstaller::ConvertSpellModel(){
 
         // Export meshes thet have an .hrc skeleton.
         if (model.hrc != ""){
-            std::cout << "[EXPORT MESH] " << model.hrc << std::endl;
             Ogre::ResourcePtr hrc = VGears::HRCFileManager::GetSingleton().load(model.id + ".hrc", "FFVII");
             Ogre::String base_name;
             VGears::StringUtil::splitBase(model.hrc, base_name);
@@ -790,6 +786,9 @@ unsigned int BattleDataInstaller::InitializeEffectModels(){
         if (it != index.end()){found_folder = ""; return it->second;}
         return static_cast<size_t>(-1);
     };
+    // The folders that have each file, for the textures of the models of the root.
+    std::map<std::string, std::vector<std::string>> texture_folders;
+    for (const auto& entry : index) if (!entry.first.first.empty()) texture_folders[entry.first.second].push_back(entry.first.first);
     std::set<std::string> written;
     auto write = [&](size_t f, const std::string& name){
         if (written.insert(name).second) magic_lgp_files_[f].WriteFile(dir + name);
@@ -817,33 +816,67 @@ unsigned int BattleDataInstaller::InitializeEffectModels(){
         std::string p_folder;
         size_t p_index = find(folder, ply + ".p", p_folder);
         if (p_index == static_cast<size_t>(-1)) continue;
-        const std::string key = key_of(folder);
-        EffectModel model;
-        model.name = key + "_" + EffectSafeName(EffectStem(rsd_name));
         const std::string p_name = key_of(p_folder) + "_" + EffectSafeName(ply) + ".p";
         write(p_index, p_name);
-        std::string rsd = "@RSD940102\nPLY=" + p_name.substr(0, p_name.size() - 2) + ".PLY\n";
-        rsd += "MAT=" + model.name + ".MAT\nGRP=" + model.name + ".GRP\n";
-        std::vector<std::string> tex_names;
-        for (const std::string& t : tex){
-            std::string t_folder;
-            size_t t_index = find(folder, t + ".tex", t_folder);
-            if (t_index == static_cast<size_t>(-1)) continue;
-            const std::string t_name = key_of(t_folder) + "_" + EffectSafeName(t) + ".tex";
-            write(t_index, t_name);
-            tex_names.push_back(t_name);
+        const std::string stem = EffectSafeName(EffectStem(rsd_name));
+        // Tells if a texture is in a folder, or in the archive root.
+        const auto has_texture = [&](const std::string& texture_folder, const std::string& t){
+            std::string found;
+            return find(texture_folder, t + ".tex", found) != static_cast<size_t>(-1);
+        };
+        // Writes a model with the textures of a folder. The textures keep their place in the list, so the
+        // polygons get the texture they use even if one is missing.
+        const auto add_model = [&](const std::string& name, const std::string& texture_folder){
+            EffectModel model;
+            model.name = name;
+            std::string rsd = "@RSD940102\nPLY=" + p_name.substr(0, p_name.size() - 2) + ".PLY\n";
+            rsd += "MAT=" + model.name + ".MAT\nGRP=" + model.name + ".GRP\n";
+            std::vector<std::string> tex_names;
+            for (const std::string& t : tex){
+                std::string t_folder;
+                const size_t t_index = find(texture_folder, t + ".tex", t_folder);
+                if (t_index == static_cast<size_t>(-1)){
+                    std::cerr << "[WARNING] The texture " << t << " of the effect model " << model.name
+                      << " is not in magic.lgp." << std::endl;
+                    tex_names.push_back(key_of(texture_folder) + "_" + EffectSafeName(t) + ".tex");
+                    continue;
+                }
+                const std::string t_name = key_of(t_folder) + "_" + EffectSafeName(t) + ".tex";
+                write(t_index, t_name);
+                tex_names.push_back(t_name);
+            }
+            rsd += "NTEX=" + std::to_string(tex_names.size()) + "\n";
+            for (size_t t = 0; t < tex_names.size(); t ++){
+                rsd += "TEX[" + std::to_string(t) + "]=" + tex_names[t].substr(0, tex_names[t].size() - 4) + ".TIM\n";
+            }
+            model.textures = tex_names;
+            std::ofstream(dir + model.name + ".rsd") << rsd;
+            // A model with a single bone, with the mesh.
+            std::ofstream(dir + model.name + ".hrc")
+              << ":HEADER_BLOCK 2\n:SKELETON " << model.name << "\n:BONES 1\n\nbone0\nroot\n0.000000\n1 "
+              << model.name << "\n\n";
+            effect_models_.push_back(model);
+        };
+        bool complete = true;
+        for (const std::string& t : tex) complete = complete && has_texture(folder, t);
+        // The models of the archive root are shared by several effects, and each effect has its own version of
+        // their textures in its folder (exp_1.tex is in five, all different). There is a model for each folder
+        // that has all of them, named after the folder like the models of the folders.
+        std::vector<std::string> variants;
+        if (!complete && folder.empty()){
+            std::set<std::string> candidates;
+            for (const std::string& t : tex){
+                const auto found = texture_folders.find(t + ".tex");
+                if (found != texture_folders.end()) candidates.insert(found->second.begin(), found->second.end());
+            }
+            for (const std::string& candidate : candidates){
+                bool all = true;
+                for (const std::string& t : tex) all = all && has_texture(candidate, t);
+                if (all) variants.push_back(candidate);
+            }
         }
-        rsd += "NTEX=" + std::to_string(tex_names.size()) + "\n";
-        for (size_t t = 0; t < tex_names.size(); t ++){
-            rsd += "TEX[" + std::to_string(t) + "]=" + tex_names[t].substr(0, tex_names[t].size() - 4) + ".TIM\n";
-        }
-        model.textures = tex_names;
-        std::ofstream(dir + model.name + ".rsd") << rsd;
-        // A model with a single bone, with the mesh.
-        std::ofstream(dir + model.name + ".hrc")
-          << ":HEADER_BLOCK 2\n:SKELETON " << model.name << "\n:BONES 1\n\nbone0\nroot\n0.000000\n1 "
-          << model.name << "\n\n";
-        effect_models_.push_back(model);
+        if (variants.empty()) add_model(key_of(folder) + "_" + stem, folder);
+        else for (const std::string& variant : variants) add_model(key_of(variant) + "_" + stem, variant);
     }
     res_mgr_->removeResourceLocation(dir, "FFVII");
     res_mgr_->addResourceLocation(dir, "FileSystem", "FFVII", true, true);
@@ -861,6 +894,8 @@ unsigned int BattleDataInstaller::ConvertEffectModel(){
             const std::string path = data_dir_ + "models/battle/effects/"
               + texture.substr(0, texture.size() - 4) + ".png";
             if (boost::filesystem::exists(path)) continue;
+            // A texture that is not in magic.lgp is already reported.
+            if (!boost::filesystem::exists(output_dir_ + "temp/effects/" + texture)) continue;
             try{
                 TexFile tex(output_dir_ + "temp/effects/" + texture);
                 tex.SavePng(path);
@@ -1486,87 +1521,29 @@ std::string BattleDataInstaller::BuildAttackFileName(Attack attack){
     return file_name;
 }
 
-File* BattleDataInstaller::ExtractGZipScene(File file){
-    u32 offset = 0;
-    u8* file_buffer = static_cast<u8*>(malloc(file.GetFileSize()));
-    file.GetFileBuffer(file_buffer, 0, file.GetFileSize());
-    u32 extract_size = 256 * 1024;
-    u8* extract_buffer = static_cast<u8*>(malloc(extract_size));
-    int ret;
-    z_stream strm;
-    strm.zalloc = Z_NULL; // Used to allocate the internal state.
-    strm.zfree = Z_NULL; // Used to free the internal state.
-    strm.opaque = Z_NULL; // Private data object passed to zalloc and zfree.
-    strm.next_in = file_buffer + offset; //Next input byte.
-    strm.avail_in = file.GetFileSize() - offset; // Number of bytes available at next_in.
-    strm.next_out = extract_buffer; // Next output byte should be put there.
-    strm.avail_out = extract_size; // Remaining free space at next_out.
-    ret = inflateInit2(&strm, 15 + 32);
-    if (ret != Z_OK){
-        switch (ret){
-            case Z_MEM_ERROR:
-                inflateEnd(&strm);
-                std::cout << "Warning: inflateInit2 - Z_MEM_ERROR in file " << file.GetFileName() << std::endl;
-                break;
-            case Z_STREAM_ERROR:
-                inflateEnd(&strm);
-                std::cout << "Warning: inflateInit2 - Z_STREAM_ERROR in file " << file.GetFileName() << std::endl;
-                break;
-            default:
-                inflateEnd(&strm);
-                std::cout << "Warning: inflateInit2 - unknown error in file " << file.GetFileName() << std::endl;
-        }
-        return NULL;
+std::unique_ptr<File> BattleDataInstaller::ExtractGZipScene(const File& file){
+    std::vector<u8> compressed(file.GetFileSize());
+    if (!compressed.empty()) file.GetFileBuffer(compressed.data(), 0, compressed.size());
+    std::vector<u8> out;
+    std::string error;
+    if (compressed.empty() || !BinGZipFile::Inflate(compressed.data(), compressed.size(), out, error) || out.empty()){
+        std::cout << "Warning: " << (error.empty() ? "empty data" : error) << " in file " << file.GetFileName() << std::endl;
+        return nullptr;
     }
-    do{
-        if (strm.next_out == NULL){
-            inflateEnd(&strm);
-            std::cout << "Warning: strm.next_out == NULL in file " << file.GetFileName() << std::endl;
-            return NULL;
-        }
-        ret = inflate(&strm, Z_NO_FLUSH);
-        assert(ret != Z_STREAM_ERROR);
-        switch (ret){
-            case Z_NEED_DICT:
-                inflateEnd(&strm);
-                std::cout << "Warning: inflate - Z_NEED_DICT in file " << file.GetFileName() << std::endl;
-                return NULL;
-            case Z_DATA_ERROR:
-                inflateEnd(&strm);
-                std::cout << "Warning: inflate - Z_DATA_ERROR in file " << file.GetFileName() << std::endl;
-                return NULL;
-            case Z_MEM_ERROR:
-                inflateEnd(&strm);
-                std::cout << "Warning: inflate - Z_MEM_ERROR in file " << file.GetFileName() << std::endl;
-                return NULL;
-        }
-        if (ret != Z_STREAM_END){
-            extract_buffer = static_cast<u8*>(realloc(extract_buffer, extract_size * 2));
-            if (extract_buffer == NULL){
-                inflateEnd(&strm);
-                //std::cout << "Warning: extract_buffer == NULL in file "
-                //  << file.GetFileName() << std::endl;
-                return NULL;
-            }
-            strm.next_out = static_cast<u8*>(extract_buffer + extract_size);
-            strm.avail_out = extract_size;
-            extract_size *= 2;
-        }
-    } while (ret != Z_STREAM_END);
-    extract_size = extract_size - strm.avail_out;
-    (void)inflateEnd(&strm);
-    if (ret != Z_STREAM_END){
-        std::cout << "Warning: ret != Z_STREAM_END in file " << file.GetFileName() << std::endl;
-        return NULL;
-    }
-    File* out_file = new File(extract_buffer, 0, extract_size);
-    return out_file;
+    return std::make_unique<File>(out.data(), 0, static_cast<u32>(out.size()));
 }
 
 void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh){
     VGears::String base_mesh_name;
     VGears::StringUtil::splitFull(mesh->getName(), base_mesh_name);
     MakeMaterialsUnique(mesh, outdir + base_mesh_name);
+    // A model without geometry (enemy 15, Eye, has only a skeleton and animations) has no bounds, and Ogre
+    // doesn't export a mesh without them. It is exported as an empty mesh at the origin.
+    // Ogre also wants a radius that is not 0, so the bounds are a tiny box.
+    if (mesh->getBounds().isNull() || mesh->getBoundingSphereRadius() <= 0){
+        mesh->_setBounds(Ogre::AxisAlignedBox(Ogre::Vector3(-0.01f), Ogre::Vector3(0.01f)), false);
+        mesh->_setBoundingSphereRadius(0.02f);
+    }
     Ogre::MeshSerializer mesh_serializer;
     Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
     Ogre::SkeletonSerializer skeleton_serializer;
@@ -1576,6 +1553,7 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
     mesh->setSkeletonName(outdir + base_mesh_name + ".skeleton");
     mesh_serializer.exportMesh(mesh.get(), data_dir_ + "models/battle/" + outdir + mesh->getName());
     Ogre::MaterialSerializer mat_ser;
+    bool queued = false;
     std::set<std::string> textures;
     Ogre::Mesh::SubMeshList sub_meshes = mesh->getSubMeshes();
     for (Ogre::SubMesh* sub_mesh : sub_meshes){
@@ -1603,10 +1581,13 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
         }
         if (std::count(battle_materials_.begin(), battle_materials_.end(), sub_mesh->getMaterialName()) == 0){
             mat_ser.queueForExport(mat);
+            queued = true;
             battle_materials_.push_back(sub_mesh->getMaterialName());
         }
     }
-    mat_ser.exportQueued(data_dir_ + "models/battle/" + outdir + base_mesh_name + VGears::EXT_MATERIAL);
+    // Ogre throws if there is nothing to export (a mesh without geometry, or whose materials are already exported).
+    if (queued)
+        mat_ser.exportQueued(data_dir_ + "models/battle/" + outdir + base_mesh_name + VGears::EXT_MATERIAL);
 }
 
 void BattleDataInstaller::GenerateRsdFiles(BattleModel model, std::string path){

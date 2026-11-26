@@ -259,14 +259,6 @@ void BattleSceneFile::Read(File file){
                 enemy.immunities.push_back(immunity);
             }
         }
-        for (int a = 0; a < 16; a ++){
-            if (scene_.enemy_data[e].attacks[a] == 0xFFFF) continue;
-            Enemy::Attack attack;
-            attack.id = scene_.enemy_data[e].attacks[a];
-            if (scene_.enemy_data[e].attack_camera[a] == 0xFFFF) attack.camera = -1;
-            else attack.camera = scene_.enemy_data[e].attack_camera[a];
-            enemy.attacks.push_back(attack);
-        }
         for (int m = 0; m < 3; m ++){
             if (scene_.enemy_data[e].maniputale_attacks[m] == 0xFFFF) continue;
             enemy.manipulate_attacks.push_back(scene_.enemy_data[e].maniputale_attacks[m]);

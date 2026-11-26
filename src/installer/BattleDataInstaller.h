@@ -360,7 +360,7 @@ class BattleDataInstaller{
          * @return Uncompressed file. NULL if errors were encountered (they will
          * be logged to console).
          */
-        File* ExtractGZipScene(File file);
+        std::unique_ptr<File> ExtractGZipScene(const File& file);
 
         /**
          * Constructs a file name for the XML file to save an enemy to.
@@ -517,7 +517,7 @@ class BattleDataInstaller{
         /**
          * List of uncompressed scenes.
          */
-        std::vector<File*> scenes_uncompressed_;
+        std::vector<std::unique_ptr<File>> scenes_uncompressed_;
 
         /**
          * Processed scenes.

@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <OgreLog.h>
 #include "common/VGearsApplication.h"
 #include "DiskImage.h"
 #include "FieldDataInstaller.h"
@@ -95,14 +96,10 @@ class DataInstaller{
             bool wm_models;
 
             /**
-             * Option to keep original data after installation.
+             * Option to keep the original data after installation: the extracted install disk, the temporary
+             * files and the original files of the converted sounds, music and images.
              */
             bool keep_originals;
-
-            /**
-             * Option to perform a clean installation.
-             */
-            bool clean_install;
 
         };
 
@@ -165,9 +162,10 @@ class DataInstaller{
         void CreateDirectories();
 
         /**
-         * Cleans up after the installation is complete.
+         * Removes the original data once the installation is complete: the extracted install disk and the
+         * temporary files the game doesn't read.
          */
-        void CleanInstall();
+        void RemoveOriginals();
 
         /**
          * Installation steps.
@@ -473,14 +471,29 @@ class DataInstaller{
         static const char* StepGroup(int state);
 
         /**
+         * Prepares the resources for the conversion of a kind of models.
+         *
+         * The parts of the models of every kind (field, battle, spells, effects, world map) are in the same resource
+         * group, and many have the same names in different kinds (the field part cbba.rsd and the battle part
+         * cbba.rsd). Ogre keeps every loaded resource by name, so a model would get the part of another kind of
+         * model, loaded before, or the part of another kind left in its temporary folder by a previous installation
+         * in the same directory. This releases the parts loaded before, and leaves in the group only the temporary
+         * folder of the models that will be converted.
+         *
+         * @param[in] temp_dir Temporary folder of the models, relative to the installation directory
+         * ("temp/char/").
+         */
+        void UseModelParts(const std::string& temp_dir);
+
+        /**
          * Substeps in the current installation step.
          */
-        int substeps_;
+        int substeps_ = 0;
 
         /**
          * Current substep in the current installation step.
          */
-        int cur_substep_;
+        int cur_substep_ = 0;
 
         /**
          * Weight of each installation step.
@@ -526,6 +539,24 @@ class DataInstaller{
          * time round.
          */
         VGears::Application application_;
+
+        /**
+         * Passes the problems that V-Gears writes to Ogre's log to the installation log.
+         */
+        class OgreProblems : public Ogre::LogListener{
+
+            public:
+
+                void messageLogged(
+                  const Ogre::String& message, Ogre::LogMessageLevel lml, bool mask_debug,
+                  const Ogre::String& log_name, bool& skip_message
+                ) override;
+        };
+
+        /**
+         * Listener of Ogre's log. Declared after the application, so it is destroyed before Ogre.
+         */
+        OgreProblems ogre_problems_;
 
         /**
          * LGP archive with field data.

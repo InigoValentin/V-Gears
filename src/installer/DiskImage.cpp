@@ -561,7 +561,19 @@ DiskImage::DiskImage(std::string path) : DiskImage() {
 
 DiskImage::~DiskImage(){};
 
-bool DiskImage::extractImage(std::string installation_path){
+bool DiskImage::extractImage(std::string installation_path, const std::function<void(float)>& progress){
+    // The progress is how much of the image has been read, reported when it goes up by a percent. The reader can go
+    // back to read some parts again, so it only goes up.
+    const qint64 image_size = QFileInfo(QString::fromStdString(path)).size();
+    int last_percent = -1;
+    const auto report = [&](qint64 done){
+        if (!progress || image_size <= 0) return;
+        const int percent = static_cast<int>(std::min<qint64>(100, 100 * done / image_size));
+        if (percent <= last_percent) return;
+        last_percent = percent;
+        progress(static_cast<float>(percent));
+    };
+    report(0);
     struct archive* a;
     struct archive* ext;
     struct archive_entry* entry;
@@ -653,6 +665,7 @@ bool DiskImage::extractImage(std::string installation_path){
                     std::cerr << "Error writing data block: " << archive_error_string(ext) << std::endl;
                     break;
                 }
+                report(archive_filter_bytes(a, -1));
             }
         }
         archive_write_finish_entry(ext);
@@ -809,6 +822,7 @@ bool DiskImage::extractImage(std::string installation_path){
                                 }
                                 out_file.write(chunk.data(), got);
                                 remaining -= static_cast<uint32_t>(got);
+                                report(image_file.tellg());
                             }
                         }
                     }
@@ -825,6 +839,7 @@ bool DiskImage::extractImage(std::string installation_path){
 
         content_path = data_dir;
         is_extracted = true;
+        if (progress) progress(100);
         return true;
     }
 
@@ -846,6 +861,7 @@ bool DiskImage::extractImage(std::string installation_path){
 
     content_path = data_dir;
     is_extracted = true;
+    if (progress) progress(100);
     return true;
 }
 

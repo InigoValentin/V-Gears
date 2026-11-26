@@ -17,6 +17,10 @@
 
 #include <OgreRoot.h>
 #include <OgreOverlaySystem.h>
+#include <OgreHardwareBufferManager.h>
+#include <OgreLogManager.h>
+#include <OgreControllerManager.h>
+#include <OgreTextureManager.h>
 #include <memory>
 #include "TypeDefine.h"
 
@@ -64,6 +68,26 @@ namespace VGears{
              * if there were errors or it was already initialized.
              */
             bool initOgre(bool hideWindow = false);
+
+            /**
+             * Initializes Ogre without a render system, for programs that only convert data.
+             *
+             * No window is created, so no display or graphics driver is needed. The render system plugins in the
+             * plugins file are not loaded, and meshes and skeletons are kept in system memory (see
+             * Ogre::DefaultHardwareBufferManager). Materials can name textures, but no texture is created (see
+             * Ogre::DefaultTextureManager). Nothing can be rendered.
+             *
+             * @return True if the system was succesfully initiated, false if there were errors or it was already
+             * initialized.
+             */
+            bool initOgreHeadless();
+
+            /**
+             * Tells if Ogre was initialized without a render system (see {@see initOgreHeadless}).
+             *
+             * @return True if there is no render system.
+             */
+            bool IsHeadless() const{return _headless;}
 
             /**
              * Retrieves the Ogre system main component.
@@ -144,9 +168,10 @@ namespace VGears{
              *
              * Each plugin is looked for in the directories given by {@see OgrePlugins::SearchDirectories}.
              *
+             * @param[in] skip_render_systems True to not load the render system plugins.
              * @throws std::runtime_error If the plugins file can't be read or a plugin is not found.
              */
-            void loadPlugins(void);
+            void loadPlugins(bool skip_render_systems = false);
 
             /**
              * Loads the resource configuration from  the file.
@@ -286,9 +311,43 @@ namespace VGears{
             bool _initialized = false;
 
             /**
+             * True if Ogre was initialized without a render system.
+             */
+            bool _headless = false;
+
+            /**
+             * Hardware buffer manager used without a render system, that keeps the buffers in system memory.
+             *
+             * It is declared before the root so it is destroyed after it: the meshes, destroyed with the root,
+             * notify the buffer manager when their buffers are released.
+             */
+            std::unique_ptr<Ogre::HardwareBufferManager> _buffer_manager;
+
+            /**
+             * Log manager created without a render system, so Ogre's messages only go to the log file.
+             *
+             * The root uses it instead of creating its own. Declared before the root so it is destroyed after it.
+             */
+            std::unique_ptr<Ogre::LogManager> _log_manager;
+
+            /**
+             * Controller manager used without a render system, if the root didn't create one.
+             *
+             * Declared before the root for the same reason as the buffer manager.
+             */
+            std::unique_ptr<Ogre::ControllerManager> _controller_manager;
+
+            /**
              * Ogre main component.
              */
             std::unique_ptr<Ogre::Root> _root;
+
+            /**
+             * Texture manager used without a render system. Materials can name textures, but no texture is created.
+             *
+             * Declared after the root so it is destroyed before it, as the texture manager of a render system is.
+             */
+            std::unique_ptr<Ogre::TextureManager> _texture_manager;
 
             /**
              *The ogre overlay system.

@@ -594,6 +594,7 @@ set(VGEARS_SOURCE_FILES
     common/LzsFile.cpp
     common/TypeDefine.cpp
     common/DataDirectory.cpp
+    common/InstallStamp.cpp
     common/OgrePlugins.cpp
     common/VGearsApplication.cpp
     common/VGearsManualObject.cpp

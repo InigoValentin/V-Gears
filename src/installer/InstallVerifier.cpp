@@ -15,6 +15,15 @@
 
 #include "InstallVerifier.h"
 #include <boost/filesystem.hpp>
+#include "common/InstallStamp.h"
+#include "common/OgrePlugins.h"
+
+/**
+ * Directory with the Ogre plugins, found when V-Gears was built. Set by CMake (VGEARS_OGRE_PLUGIN_DIR).
+ */
+#ifndef VGEARS_OGRE_PLUGIN_DIR
+#define VGEARS_OGRE_PLUGIN_DIR ""
+#endif
 
 namespace fs = boost::filesystem;
 
@@ -41,15 +50,32 @@ namespace{
             }
 
             /**
-             * A file whose name starts with a prefix (a library with a version number) must exist in a directory.
+             * The Ogre plugins listed in plugins.cfg must be found where the game looks for them.
+             *
+             * @param[in] group The group of the problems.
+             * @param[in] search Where to look for them.
              */
-            void FileWithPrefix(const std::string& group, const std::string& dir, const std::string& prefix){
-                ++ result_.checked;
+            void OgrePlugins(const std::string& group, const VerifyPlugins& search){
+                if (search.ogre_version.empty()) return;
+                namespace plugins = VGears::OgrePlugins;
+                const fs::path file(root_ + "plugins.cfg");
                 boost::system::error_code ec;
-                for (fs::directory_iterator it(root_ + dir, ec), end; !ec && it != end; it.increment(ec)){
-                    if (it->path().filename().string().compare(0, prefix.size(), prefix) == 0) return;
+                // A missing plugins.cfg is already reported.
+                if (!fs::is_regular_file(file, ec)) return;
+                ++ result_.checked;
+                plugins::Config config;
+                if (!plugins::ReadConfig(file, config)){
+                    Fail(group, "plugins.cfg can't be read");
+                    return;
                 }
-                Fail(group, "no " + prefix + "* file in " + (dir.empty() ? "the installation directory" : dir));
+                const std::vector<fs::path> directories = plugins::SearchDirectories(
+                  file.parent_path(), config.folder, fs::path(search.executable_dir), VGEARS_OGRE_PLUGIN_DIR
+                );
+                for (const std::string& name : config.plugins){
+                    ++ result_.checked;
+                    if (plugins::Find(name, directories, search.ogre_version).empty())
+                        Fail(group, "the Ogre plugin " + name + " is not in the installation directory or the system");
+                }
             }
 
             /**
@@ -93,16 +119,32 @@ namespace{
 
 }
 
-VerifyResult VerifyInstallation(const std::string& root, const std::string& reference_dir){
+VerifyResult VerifyInstallation(
+  const std::string& root, const std::string& reference_dir, const VerifyPlugins& plugins
+){
     VerifyResult result;
     Checker check(root, result);
+
+    // The record of the installations: whether the last one finished, and whether a part is outdated.
+    const std::string installation = "Installation";
+    ++ result.checked;
+    bool recorded = false;
+    for (const std::string& problem : VGears::InstallStamp::Problems(fs::path(root), &recorded))
+        result.problems.push_back({installation, problem});
+    if (!recorded){
+        result.problems.push_back({
+          installation, "there is no record of the installation: it was made by an older installer, whose data may "
+          "be outdated. Install the data again."
+        });
+    }
 
     // Configuration, plugins and the files of the repository, which the game always needs.
     const std::string config = "Configuration";
     check.File(config, "plugins.cfg");
     check.File(config, "resources.cfg");
-    check.FileWithPrefix(config, "", "RenderSystem_GL");
-    check.FileWithPrefix(config, "", "Codec_STBI");
+    // The plugins don't have to be in the installation directory: the game also looks for them next to its
+    // executable and in the system.
+    check.OgrePlugins(config, plugins);
     const std::string game = "Game files";
     for (const char* file : {
       "data/config/config.cfg", "data/system/system.fontdef", "data/system/system.lua", "data/system/system.material",
@@ -183,5 +225,10 @@ VerifyResult VerifyInstallation(const std::string& root, const std::string& refe
     check.Files(music, "data/audio/musics", ".ogg", 50);
     const std::string images = "Images";
     check.Files(images, "data/images/icons", "", 1);
+    // Fonts, built from WINDOW.BIN. They are installed even when images are not.
+    const std::string fonts = "Fonts";
+    for (const char* file : {
+      "data/fonts/ffvii_en.png", "data/fonts/ffvii_menu.png", "data/fonts/ffvii_digits.png", "data/fonts/ffvii_timer.png"
+    }) check.File(fonts, file);
     return result;
 }

@@ -8,13 +8,16 @@ find_package(Qt5 COMPONENTS Core REQUIRED)
 set(INSTALLER_SOURCE_FILES
     main.cpp
     BattleDataInstaller.cpp
+    CliInstaller.cpp
     DataInstaller.cpp
     DiskImage.cpp
     FieldDataInstaller.cpp
     FieldTextWriter.cpp
+    InstallCommandLine.cpp
     InstallLayout.cpp
     InstallLog.cpp
     InstallOptions.cpp
+    InstallSteps.cpp
     ExternalTools.cpp
     InstallVerifier.cpp
     VideoFiles.cpp
@@ -26,6 +29,7 @@ set(INSTALLER_SOURCE_FILES
     ScopedLgp.cpp
     TexFile.cpp
     VGearsUtility.cpp
+    WindowFonts.cpp
     WorldInstaller.cpp
     common/BinGZipFile.cpp
     common/DrawSkeleton.cpp

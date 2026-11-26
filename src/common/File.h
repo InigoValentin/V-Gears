@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <vector>
 #include <OgreString.h>
 #include "common/TypeDefine.h"
 
@@ -24,6 +25,11 @@
 class File{
 
     public:
+
+        /**
+         * Creates an empty file.
+         */
+        File();
 
         /**
          * Opens a file.
@@ -37,7 +43,7 @@ class File{
          *
          * @param[in] file Pointer to the file.
          */
-        File(const File* file);
+        explicit File(const File* file);
 
         /**
          * Loads a file fragment.
@@ -61,6 +67,26 @@ class File{
          * Destructor.
          */
         virtual ~File();
+
+        /**
+         * Copies a file, with its own copy of the data.
+         */
+        File(const File& file) = default;
+
+        /**
+         * Moves a file.
+         */
+        File(File&& file) = default;
+
+        /**
+         * Copies a file, with its own copy of the data.
+         */
+        File& operator=(const File& file) = default;
+
+        /**
+         * Moves a file.
+         */
+        File& operator=(File&& file) = default;
 
         /**
          * Writes the contents of the buffer to a file.
@@ -149,10 +175,7 @@ class File{
         /**
          * Checks the current offset of the file.
          *
-         * Default is 0. Can be set on instantiation with {@see
-         * File(const File* file, u32 offset, u32 length)} or {@see
-         * File(const u8* buffer, u32 offset, u32 length)} and advanced with
-         * {@see readU8}, {@see readU16LE} or {@see readU32LE}
+         * Default is 0. It is advanced with {@see readU8}, {@see readU16LE} or {@see readU32LE}.
          */
         u32 GetCurrentOffset();
 
@@ -176,22 +199,12 @@ class File{
         /**
          * Current offset of the file.
          *
-         * Default is 0. Can be set on instantiation with {@see
-         * File(const File* file, u32 offset, u32 length)} or {@see
-         * File(const u8* buffer, u32 offset, u32 length)} and advanced with
-         * {@see readU8}, {@see readU16LE} or {@see readU32LE}
+         * Default is 0. It is advanced with {@see readU8}, {@see readU16LE} or {@see readU32LE}.
          */
         u32 offset_ = 0;
 
         /**
-         * The file buffer.
-         *
-         * It contains the file data.
+         * The file data. Each file has its own copy, freed with the file.
          */
-        u8* buffer_;
-
-        /**
-         * The allocated size of {@see buffer_}.
-         */
-        u32 buffer_size_;
+        std::vector<u8> buffer_;
 };
