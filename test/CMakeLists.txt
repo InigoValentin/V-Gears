@@ -290,6 +290,7 @@ add_executable(v-gears-installer-tests
     common/DataDirectory.cpp
     common/OgrePlugins.cpp
     ${CMAKE_SOURCE_DIR}/src/common/DataDirectory.cpp
+    ${CMAKE_SOURCE_DIR}/src/common/InstallStamp.cpp
     ${CMAKE_SOURCE_DIR}/src/common/OgrePlugins.cpp
     installer/InstallLogic.cpp
     installer/ExternalTools.cpp

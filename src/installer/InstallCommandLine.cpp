@@ -151,8 +151,16 @@ namespace InstallCommandLine{
                 arguments.copy_data = false;
                 cli = true;
             }
-            else if (arg == "--discard-originals"){
-                arguments.keep_originals = false;
+            else if (arg == "--keep-originals"){
+                arguments.keep_originals = true;
+                cli = true;
+            }
+            else if (arg == "--clean"){
+                arguments.clean = true;
+                cli = true;
+            }
+            else if (arg == "--strict"){
+                arguments.strict = true;
                 cli = true;
             }
             else if (arg == "-i" || arg == "--iso"){
@@ -241,6 +249,7 @@ namespace InstallCommandLine{
             if (!arguments.iso.empty()) return Invalid("--verify checks an installation, it doesn't take an ISO.");
             if (preset_given || !added.empty() || !removed.empty())
                 return Invalid("--verify checks everything; it doesn't take a preset or parts.");
+            if (arguments.clean) return Invalid("--verify checks an installation, it doesn't delete it.");
             arguments.mode = Mode::VERIFY;
             return arguments;
         }
@@ -271,11 +280,15 @@ namespace InstallCommandLine{
           << "                           must already have them.\n"
           << "      --data-dir <dir>     The V-Gears 'data' folder to copy. Default: looked for next to\n"
           << "                           the installer and in the system.\n"
-          << "      --discard-originals  Delete the original files once converted.\n"
+          << "      --clean              Delete the data of a previous installation first. The saves, the\n"
+          << "                           controls, the game configuration and the videos are kept.\n"
+          << "      --keep-originals     Keep the original data once converted: the extracted disk, the\n"
+          << "                           temporary files and the original sounds, music and images.\n"
           << "      --ffmpeg <file>      Path to FFmpeg. Default: looked for in the 'tools' folder of the\n"
           << "                           installation and of the installer, then in the PATH.\n"
           << "      --timidity <file>    Path to TiMidity. Looked for like FFmpeg.\n"
           << "  -y, --yes                Continue when there are warnings or the audio tools are missing.\n"
+          << "      --strict             End with status 3 if the installation finished with errors in its log.\n"
           << "\n"
           << "Other options:\n"
           << "      --cli                Use the command line, not the window. Implied by any option above.\n"
@@ -286,7 +299,8 @@ namespace InstallCommandLine{
           << "Parts: " << PartNames() << ".\n"
           << "\n"
           << "Exit status: 0 if everything went well, 1 if the installation or the verification failed,\n"
-          << "2 if the command line is wrong.\n";
+          << "2 if the command line is wrong, 3 if it finished with errors and --strict was given, 130 if it\n"
+          << "was interrupted.\n";
         return usage.str();
     }
 

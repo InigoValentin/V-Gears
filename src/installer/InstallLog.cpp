@@ -49,7 +49,7 @@ class InstallLog::Tee : public std::streambuf{
             std::string line;
             {
                 std::lock_guard<std::mutex> lock(mutex_);
-                original_->sputc(static_cast<char>(c));
+                if (log_.echo_) original_->sputc(static_cast<char>(c));
                 if (c == '\n') line.swap(line_);
                 else line_ += static_cast<char>(c);
             }
@@ -100,7 +100,10 @@ void InstallLog::Close(){
     tee_err_.reset();
     std::lock_guard<std::mutex> lock(mutex_);
     if (file_.is_open()) file_.close();
+    echo_ = true;
 }
+
+void InstallLog::SetEcho(bool echo){echo_ = echo;}
 
 void InstallLog::SetSink(Sink sink){
     std::lock_guard<std::mutex> lock(mutex_);
@@ -127,7 +130,7 @@ void InstallLog::Add(const std::string& message, bool show){
         if (show) sink = sink_;
     }
     // Echo to the terminal without capturing the message again.
-    if (tee_out_) tee_out_->WriteOriginal(message + "\n");
+    if (tee_out_ && echo_) tee_out_->WriteOriginal(message + "\n");
     if (sink) sink(level, message);
 }
 

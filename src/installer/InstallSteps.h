@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <QtCore/QString>
@@ -22,6 +23,7 @@
 #include "DataInstaller.h"
 #include "DiskImage.h"
 #include "InstallOptions.h"
+#include "InstallVerifier.h"
 
 /**
  * Steps of an installation that don't depend on the user interface.
@@ -75,9 +77,10 @@ namespace InstallSteps{
      * @param[in] output Absolute installation directory, ending with '/'.
      * @param[in] copy_data True if the V-Gears data files will be copied.
      * @param[in] game_data_dir The V-Gears "data" folder to copy (only used if copy_data is true).
+     * @param[in] clean True if the data of a previous installation will be deleted first.
      */
     PreflightResult RunPreflight(
-      DiskImage& disk_image, const QString& output, bool copy_data, const QString& game_data_dir
+      DiskImage& disk_image, const QString& output, bool copy_data, const QString& game_data_dir, bool clean
     );
 
     /**
@@ -91,11 +94,42 @@ namespace InstallSteps{
     QStringList CheckVideoOutput(const QString& output);
 
     /**
+     * Gets where the verifier looks for the Ogre plugins: next to this program, with the Ogre version V-Gears was
+     * built with.
+     */
+    VerifyPlugins PluginSearch();
+
+    /**
      * Recursively copies a directory, overwriting existing files.
      *
+     * The configuration of the game (data/config) is only copied if it isn't there: the user may have changed it.
+     *
+     * @param[in] src The directory to copy.
+     * @param[in] dst Where to copy it.
+     * @param[in] progress Receives the progress [0-100]. It can be empty.
      * @return True if every file was copied.
      */
-    bool CopyDirectory(const QString& src, const QString& dst);
+    bool CopyDirectory(
+      const QString& src, const QString& dst,
+      const std::function<void(float)>& progress = std::function<void(float)>()
+    );
+
+    /**
+     * Phases of an installation, for its progress.
+     */
+    enum class Phase{EXTRACT, COPY, CONVERT};
+
+    /**
+     * Gets the progress of a whole installation from the progress of one of its phases.
+     *
+     * The phases take a part of the progress that is about the part of the time they take: the extraction of the
+     * disk the first 5%, the copy of the V-Gears data files 1%, and the conversion the rest.
+     *
+     * @param[in] phase The phase.
+     * @param[in] progress Progress of the phase [0-100].
+     * @return Progress of the installation [0-100].
+     */
+    float OverallProgress(Phase phase, float progress);
 
     /**
      * Gets the files the installer needs that are not in an extracted install disk.
@@ -125,6 +159,38 @@ namespace InstallSteps{
      * @param[in] timidity Path to TiMidity chosen by the user. It can be empty.
      */
     void SetToolLocations(const QString& install_dir, const std::string& ffmpeg, const std::string& timidity);
+
+    /**
+     * Gets the names of the parts an installation installs, as in the command line ("fields"...).
+     *
+     * The videos are not installed from the install disk, so they are not included.
+     */
+    std::vector<std::string> PartNames(const InstallOptions& options);
+
+    /**
+     * Records in the installation directory that an installation has started (see VGears::InstallStamp).
+     *
+     * Until it is marked as finished, the game and the verifier say that the installation didn't finish.
+     *
+     * @param[in] output The installation directory, ending with '/'.
+     * @param[in] options What is installed.
+     * @param[in] disk The disk.
+     */
+    void MarkInstallStarted(const QString& output, const InstallOptions& options, const std::string& disk);
+
+    /**
+     * Records in the installation directory that the installation has finished.
+     *
+     * @param[in] output The installation directory, ending with '/'.
+     */
+    void MarkInstallFinished(const QString& output);
+
+    /**
+     * Records in the installation directory that the videos of a game disk are installed.
+     *
+     * @param[in] output The installation directory, ending with '/'.
+     */
+    void MarkVideosInstalled(const QString& output);
 
     /**
      * Converts the options of an installation to the options of the data installer.

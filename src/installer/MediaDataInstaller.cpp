@@ -1321,10 +1321,10 @@ bool MediaDataInstaller::InstallFonts(){
     WindowFonts::IndexImage window;
     WindowFonts::IndexImage text;
     for (u32 i = 0; i < 2; i ++){
-        std::unique_ptr<File> tim(window_.ExtractGZip(i));
-        if (tim == nullptr) return false;
-        std::vector<u8> buffer(tim->GetFileSize());
-        tim->GetFileBuffer(buffer.data(), 0, buffer.size());
+        const File tim = window_.ExtractGZip(i);
+        if (tim.GetFileSize() == 0) return false;
+        std::vector<u8> buffer(tim.GetFileSize());
+        tim.GetFileBuffer(buffer.data(), 0, buffer.size());
         if (!WindowFonts::ReadTim4(buffer.data(), buffer.size(), i == 0 ? window : text)) return false;
     }
     const std::string font_dir = data_dir_ + "fonts/";
@@ -1372,12 +1372,10 @@ bool MediaDataInstaller::InstallSounds(){
               [ffmpeg, wav, ogg](std::string* error){return ExternalTools::ConvertToOgg(ffmpeg, wav, ogg, error);},
               [wav, keep](){if (!keep) std::remove(wav.c_str());}
             );
-            std::cout << "    ADD SOUND " << processed_sounds_ << ".ogg" << std::endl;
             sounds_.push_back("audio/sounds/" + std::to_string(processed_sounds_) + ".ogg");
         }
         else{
             sounds_.push_back("audio/sounds/INVALID.ogg");
-            std::cout << "    -- ADD SOUND INVALID.ogg" << std::endl;
         }
     }
     processed_sounds_ ++;

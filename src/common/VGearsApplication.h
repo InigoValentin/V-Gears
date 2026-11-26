@@ -18,6 +18,7 @@
 #include <OgreRoot.h>
 #include <OgreOverlaySystem.h>
 #include <OgreHardwareBufferManager.h>
+#include <OgreLogManager.h>
 #include <OgreControllerManager.h>
 #include <OgreTextureManager.h>
 #include <memory>
@@ -321,6 +322,13 @@ namespace VGears{
              * notify the buffer manager when their buffers are released.
              */
             std::unique_ptr<Ogre::HardwareBufferManager> _buffer_manager;
+
+            /**
+             * Log manager created without a render system, so Ogre's messages only go to the log file.
+             *
+             * The root uses it instead of creating its own. Declared before the root so it is destroyed after it.
+             */
+            std::unique_ptr<Ogre::LogManager> _log_manager;
 
             /**
              * Controller manager used without a render system, if the root didn't create one.

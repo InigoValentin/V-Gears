@@ -223,18 +223,8 @@ bool FieldDataInstaller::IsAFieldFile(const Ogre::String& resource_name){
 }
 
 bool FieldDataInstaller::WillCrash(const Ogre::String& resource_name){
-    if (
-      resource_name == "bugin1a" // crashes in back ground image generation
-      || resource_name == "fr_e" // Background image crash
-      || resource_name == "las4_2" // Background image crash
-      || resource_name == "las4_3" // Background image crash
-      || resource_name == "lastmap" // Background image crash
-      || resource_name == "md_e1" // Background image crash
-      || resource_name == "trnad_3" // Background image crash
-      || resource_name == "bonevil2" // stof
-      || resource_name == "coloin1" // boost::bad_format_string: format-string is ill-formed
-      || resource_name == "elmin4_2" // boost::bad_format_string: format-string is ill-formed
-    ) return true;
+    // No field is known to crash at the moment.
+    (void)resource_name;
     return false;
 }
 
@@ -571,13 +561,11 @@ void FieldDataInstaller::ConvertModels(std::string model_name){
         if (VGears::HRCFileManager::GetSingleton().resourceExists(model->first, "FFVII"))
             VGears::HRCFileManager::GetSingleton().remove(model->first, "FFVII");
         write_output_line_("[ERROR] Ogre exception converting model " + model->first + ": " + ex.what());
-        std::cerr << "[ERROR] Ogre exception converting model " << model->first <<": " << ex.what() << std::endl;
     }
     catch (const std::exception& ex){
         if (VGears::HRCFileManager::GetSingleton().resourceExists(model->first, "FFVII"))
             VGears::HRCFileManager::GetSingleton().remove(model->first, "FFVII");
         write_output_line_("[ERROR] Exception converting model " + model->first + ": " + ex.what());
-        std::cerr << "[ERROR] Exception converting model " << model->first << ": " << ex.what() << std::endl;
     }
 }
 
@@ -728,21 +716,15 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
             try{field_text_writer_.Write(raw_field_data, field->getName());}
             catch (const std::out_of_range& ex){
                 write_output_line_("[ERROR] Failed to read texts from field " + field->getName() + ": " + ex.what());
-                std::cerr << "[ERROR] Failed to read texts from field "
-                  << field->getName() << ": " << ex.what() << std::endl;
             }
             field_text_writer_.End();
         }
         else{
             write_output_line_("[ERROR] Failed to open script file from field " + field->getName() + " for writing.");
-            std::cerr << "[ERROR] Failed to open script file from field "
-              << field->getName() << "for writing." << std::endl;
         }
     }
     catch (const ::DecompilerException& ex){
         write_output_line_("[ERROR] Internal decompiler error in field " + field->getName() + ": " + ex.what());
-        std::cerr << "[ERROR] Internal decompiler error in field "
-          << field->getName() << ": " << ex.what() << std::endl;
     }
     // Write out the map file which links all the other files together for a given field.
     {
@@ -836,16 +818,43 @@ void FieldDataInstaller::PcFieldToVGearsField(VGears::FLevelFilePtr& field){
                 // complex. Now "get the Z value of the triangle with that ID". Note that ID
                 // actually just means index.
                 unsigned int triangle_index = static_cast<unsigned int>(gateway.destination.z);
-                if (triangle_index >= field->GetWalkmesh()->GetTriangles().size()){
-                    write_output_line_(
-                      "[WARNING] In field " + field->getName() + ": Map jump triangle ("
-                      + std::to_string(triangle_index) + ") out of bounds ("
-                      + std::to_string(field->GetWalkmesh()->GetTriangles().size()) + ")"
-                    );
-                    std::cerr << "[WARNING] In field " << field->getName()
-                      << ": Map jump triangle (" << triangle_index << ") out of bounds ("
-                      << field->GetWalkmesh()->GetTriangles().size() << ")" << std::endl;
-                    triangle_index = 0;
+                const auto& triangles = field->GetWalkmesh()->GetTriangles();
+                if (triangle_index >= triangles.size()){
+                    // Some map jumps of the original scripts have a triangle that is not in the walkmesh (pillar_3
+                    // to mds6_22). The one under the position is used instead, in the units the walkmesh is
+                    // written in.
+                    const float scale = GetFieldScaleFactor(this_field_id);
+                    const float x = gateway.destination.x / downscaler_next;
+                    const float y = gateway.destination.y / downscaler_next;
+                    const auto side = [x, y](const Ogre::Vector3& a, const Ogre::Vector3& b){
+                        return (x - b.x) * (a.y - b.y) - (a.x - b.x) * (y - b.y);
+                    };
+                    size_t under = triangles.size();
+                    for (size_t t = 0; t < triangles.size() && under == triangles.size(); t ++){
+                        const Ogre::Vector3 a = triangles[t].a / scale, b = triangles[t].b / scale;
+                        const Ogre::Vector3 c = triangles[t].c / scale;
+                        const float d1 = side(a, b), d2 = side(b, c), d3 = side(c, a);
+                        const bool negative = d1 < 0 || d2 < 0 || d3 < 0, positive = d1 > 0 || d2 > 0 || d3 > 0;
+                        if (!(negative && positive)) under = t;
+                    }
+                    const SpawnPointDb::Record& record = spawn_point_records[i];
+                    const std::string source = record.from_script
+                      ? "the script " + record.entity_name + ":" + record.script_function_name + " (address "
+                        + std::to_string(record.gateway_index_or_map_jump_address) + ")"
+                      : "the door " + std::to_string(record.gateway_index_or_map_jump_address);
+                    // Only reported when the position is not on the walkmesh either: those jumps are of the debug
+                    // rooms (blackbg1, blackbg4) or of scenes that place the player themselves.
+                    if (under == triangles.size()){
+                        write_output_line_(
+                          "[WARNING] In field " + field->getName() + ": the entrance from "
+                          + map_list_.at(record.field_id) + " (" + source + ") is on the walkmesh triangle "
+                          + std::to_string(triangle_index) + ", which the walkmesh doesn't have (it has "
+                          + std::to_string(triangles.size()) + "), at (" + std::to_string(gateway.destination.x) + ", "
+                          + std::to_string(gateway.destination.y) + "), which is not on the walkmesh."
+                        );
+                        triangle_index = 0;
+                    }
+                    else triangle_index = static_cast<unsigned int>(under);
                 }
                 const float z_of_triangle_with_id
                   = field->GetWalkmesh()->GetTriangles().at(triangle_index).a.z / GetFieldScaleFactor(this_field_id);

@@ -42,6 +42,16 @@ namespace CliInstaller{
     const int EXIT_USAGE = 2;
 
     /**
+     * Exit status when the installation finished with errors in its log, with --strict.
+     */
+    const int EXIT_ERRORS = 3;
+
+    /**
+     * Exit status when the installation is interrupted (Ctrl+C), as usual: 128 plus the number of SIGINT.
+     */
+    const int EXIT_INTERRUPTED = 130;
+
+    /**
      * Does what the command line asks.
      *
      * A QCoreApplication must exist. The mode of the arguments must not be GUI.

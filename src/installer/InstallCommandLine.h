@@ -114,9 +114,20 @@ namespace InstallCommandLine{
         std::string data_dir;
 
         /**
-         * True to keep the original data after converting it.
+         * True to keep the original data after converting it: the extracted install disk, the temporary files and
+         * the original sounds, music and images.
          */
-        bool keep_originals = true;
+        bool keep_originals = false;
+
+        /**
+         * True to delete the data of a previous installation in the directory first.
+         */
+        bool clean = false;
+
+        /**
+         * True to end with an error status when the installation finished with errors in its log.
+         */
+        bool strict = false;
 
         /**
          * Path to FFmpeg. Empty to look for it.

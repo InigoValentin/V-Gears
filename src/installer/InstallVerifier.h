@@ -56,6 +56,25 @@ struct VerifyResult{
 };
 
 /**
+ * How the Ogre plugins of an installation are looked for.
+ *
+ * They are looked for where the game looks for them (see VGears::OgrePlugins::SearchDirectories): the installation
+ * directory, the directory of the game executable and the system.
+ */
+struct VerifyPlugins{
+
+    /**
+     * Directory of the running program, usually the same as the game's. It can be empty.
+     */
+    std::string executable_dir;
+
+    /**
+     * The Ogre version, as "major.minor.patch": the plugins have it in their file names. Empty to not check them.
+     */
+    std::string ogre_version;
+};
+
+/**
  * Checks that an installation has everything the game needs.
  *
  * It only looks at the existence of files, it doesn't open them. Parts of the installation can be skipped on purpose
@@ -64,5 +83,9 @@ struct VerifyResult{
  * @param[in] root Installation directory.
  * @param[in] reference_dir V-Gears "data" folder of the game (the one copied to the installation). If not empty,
  * every file in it must exist in the installation too. It can be empty.
+ * @param[in] plugins Where the Ogre plugins listed in plugins.cfg are looked for. Without the Ogre version, the
+ * plugins are not checked.
  */
-VerifyResult VerifyInstallation(const std::string& root, const std::string& reference_dir = "");
+VerifyResult VerifyInstallation(
+  const std::string& root, const std::string& reference_dir = "", const VerifyPlugins& plugins = VerifyPlugins()
+);

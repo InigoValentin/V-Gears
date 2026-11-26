@@ -371,11 +371,12 @@ namespace VGears{
              * @param[in,out] mo The object to add to the group.
              * @param[in] sub_name Name for mo.
              * @param[in] material_base_name Name of the material for mo.
+             * @param[in] material_group Resource group of the materials.
              * @param[in] bone The bone to assign to bo.
              */
             virtual void AddGroup(
               const Group &group, ManualObject &mo, const String &sub_name,
-              const String &material_base_name, const Ogre::Bone *bone
+              const String &material_base_name, const String &material_group, const Ogre::Bone *bone
             ) const;
 
             /**

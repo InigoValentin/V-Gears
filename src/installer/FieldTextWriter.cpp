@@ -37,12 +37,22 @@ void FieldTextWriter::Begin(std::string file_name){
 }
 
 u16 FieldTextWriter::GetU16LE(u32 offset){
-    if (offset+1 >= data_.size()) throw std::out_of_range("");
+    if (offset+1 >= data_.size()){
+        throw std::out_of_range(
+          "reading past the end of the script section (" + std::to_string(offset) + " of " + std::to_string(data_.size())
+          + " bytes)"
+        );
+    }
     return *reinterpret_cast<u16*>(&data_[offset]);
 }
 
 u8 FieldTextWriter::GetU8(u32 offset){
-    if (offset >= data_.size()) throw std::out_of_range("");
+    if (offset >= data_.size()){
+        throw std::out_of_range(
+          "reading past the end of the script section (" + std::to_string(offset) + " of " + std::to_string(data_.size())
+          + " bytes)"
+        );
+    }
     return data_[offset];
 }
 
@@ -64,8 +74,15 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
     if (tag_open_){
         logger_->Log("[ERROR exception]");
         logger_->Log("</dialog>\n");
+        tag_open_ = false;
     }
-    u16 dialogCount = GetU16LE(offset_to_sector + offset_to_dialogs);
+    // A field without texts can have its table of texts at the end of the section, with no room for it (nivgate3,
+    // nivl_4), or with bytes that are not a table (las4_42).
+    const u32 table = offset_to_sector + offset_to_dialogs;
+    if (table + 2 > data_.size()) return;
+    const auto fits = [this, table](u32 count){return table + 2 + count * 2 <= data_.size();};
+    u16 dialogCount = GetU16LE(table);
+    if (!fits(dialogCount)) dialogCount = 0;
     // The first string comes right after the table of offsets, so its offset says how many strings
     // there are. A field with 256 of them has a count that doesn't fit (it is read as 0), and the
     // field would have no texts at all.
@@ -73,7 +90,7 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
         const u16 first_offset = GetU16LE(offset_to_sector + offset_to_dialogs + 0x02);
         if (first_offset >= 0x02 && (first_offset % 2) == 0){
             const u16 count_from_table = (first_offset - 0x02) / 2;
-            if (count_from_table > dialogCount) dialogCount = count_from_table;
+            if (count_from_table > dialogCount && fits(count_from_table)) dialogCount = count_from_table;
         }
     }
     for (u16 i = 0; i <dialogCount; ++ i){
@@ -91,7 +108,9 @@ void FieldTextWriter::Write(const std::vector<u8>& script_section_buffer, std::s
         int colour_opened = 0;
         // Number of the next variable code of the dialog (see MPARA and MPRA2 in the scripts).
         int variable_count = 0;
-        for (unsigned char temp = 0x00;; ++ offset){
+        // A text ends with 0xFF, or at the end of the section: the empty texts of some fields have no end mark
+        // (life, life2).
+        for (unsigned char temp = 0x00; offset < data_.size(); ++ offset){
             temp = GetU8(offset);
             if (temp == 0xFF) break;
             if (temp == 0xE0 && english == true){

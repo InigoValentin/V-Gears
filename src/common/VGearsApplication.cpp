@@ -41,6 +41,7 @@
 #include "data/VGearsTriggersFile.h"
 #include "data/VGearsMapListFile.h"
 #include "Version.h"
+#include "common/InstallStamp.h"
 #include <OgreControllerManager.h>
 #include <OgreDefaultHardwareBufferManager.h>
 #include <OgreMaterialManager.h>
@@ -142,6 +143,12 @@ namespace VGears{
         if (_initialized) return false;
         _initialized = true;
         _headless = true;
+        // Ogre writes its messages to the log file only, not to the terminal: the programs that convert data have
+        // their own output. Created before the root, which then doesn't create its own log.
+        if (Ogre::LogManager::getSingletonPtr() == nullptr){
+            _log_manager = std::make_unique<Ogre::LogManager>();
+            _log_manager->createLog(log_filename_, true, false, false);
+        }
         // No plugins file is passed to Ogre: the plugins are looked for in several places, see loadPlugins.
         _root = std::make_unique<Ogre::Root>("", config_filename_, log_filename_);
         loadPlugins(true);
@@ -323,6 +330,14 @@ namespace VGears{
             return false;
         }
         std::cout << "Data directory: " << data_directory.directory.string() << std::endl;
+        // The record of the installations says if the game data must be installed again.
+        bool recorded = false;
+        for (const std::string& problem : InstallStamp::Problems(data_directory.directory, &recorded))
+            std::cout << "Warning: " << problem << std::endl;
+        if (!recorded && bfs::exists(data_directory.directory / "data" / "fields" / "_fields.xml", ec)){
+            std::cout << "Warning: the game data was installed by an older version of v-gears-installer, and may be "
+              "outdated. Install it again with v-gears-installer." << std::endl;
+        }
         return true;
     }
 

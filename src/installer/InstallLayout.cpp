@@ -13,9 +13,63 @@
  * GNU General Public License for more details.
  */
 
+#include <algorithm>
+#include <boost/filesystem.hpp>
+#include "common/InstallStamp.h"
 #include "InstallLayout.h"
 
 namespace InstallLayout{
+
+    namespace{
+
+        /**
+         * Removes a file or a directory with its contents, and counts what was removed.
+         */
+        void Remove(const boost::filesystem::path& path, CleanResult& result){
+            boost::system::error_code ec;
+            const auto removed = boost::filesystem::remove_all(path, ec);
+            if (ec) result.errors.push_back(path.string() + ": " + ec.message());
+            else result.removed += removed;
+        }
+
+    }
+
+    std::string OriginalDataDir(const std::string& root){return root + "original_data/";}
+
+    const std::vector<std::string>& CleanInstallKeptDataDirs(){
+        static const std::vector<std::string> dirs = {"config", "video"};
+        return dirs;
+    }
+
+    bool IsInstallation(const std::string& root){
+        boost::system::error_code ec;
+        return boost::filesystem::is_regular_file(root + "plugins.cfg", ec)
+          && boost::filesystem::is_regular_file(root + "resources.cfg", ec);
+    }
+
+    CleanResult CleanInstallation(const std::string& root){
+        namespace fs = boost::filesystem;
+        CleanResult result;
+        if (!IsInstallation(root)) return result;
+        boost::system::error_code ec;
+        if (fs::exists(OriginalDataDir(root), ec)) Remove(OriginalDataDir(root), result);
+        if (fs::exists(TempDir(root), ec)) Remove(TempDir(root), result);
+        // The record of the installations describes what was just deleted.
+        if (fs::exists(root + VGears::InstallStamp::FILE_NAME, ec)) Remove(root + VGears::InstallStamp::FILE_NAME, result);
+        const fs::path data(DataDir(root));
+        if (fs::is_directory(data, ec)){
+            const std::vector<std::string>& kept = CleanInstallKeptDataDirs();
+            std::vector<fs::path> entries;
+            for (fs::directory_iterator it(data, ec), end; !ec && it != end; it.increment(ec))
+                entries.push_back(it->path());
+            if (ec) result.errors.push_back(data.string() + ": " + ec.message());
+            for (const fs::path& entry : entries){
+                if (std::find(kept.begin(), kept.end(), entry.filename().string()) == kept.end())
+                    Remove(entry, result);
+            }
+        }
+        return result;
+    }
 
     std::string DataDir(const std::string& root){return root + "data/";}
 

@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <algorithm>
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <QtCore/QCoreApplication>
@@ -26,9 +27,15 @@
 #include "common/DataDirectory.h"
 #include "common/OgrePlugins.h"
 #include "ExternalTools.h"
+#include "common/InstallStamp.h"
+#include "InstallCommandLine.h"
 #include "InstallLog.h"
 #include "InstallSteps.h"
 #include "MovieCamera.h"
+
+#ifndef VGEARS_INSTALLER_VERSION
+#define VGEARS_INSTALLER_VERSION "unknown"
+#endif
 
 #ifndef VGEARS_OGRE_PLUGIN_DIR
 #define VGEARS_OGRE_PLUGIN_DIR ""
@@ -123,9 +130,16 @@ namespace InstallSteps{
     }
 
     PreflightResult RunPreflight(
-      DiskImage& disk_image, const QString& output, bool copy_data, const QString& game_data_dir
+      DiskImage& disk_image, const QString& output, bool copy_data, const QString& game_data_dir, bool clean
     ){
         PreflightResult result;
+        // A clean installation deletes the V-Gears data files too, so they must be copied again.
+        if (clean && !copy_data){
+            result.errors << QObject::tr(
+              "A clean installation deletes the V-Gears data files of the installation directory too: enable 'Copy "
+              "V-Gears data files'."
+            );
+        }
         const QString iso_path = QString::fromStdString(disk_image.getPath());
 
         // Input.
@@ -178,20 +192,35 @@ namespace InstallSteps{
         return result;
     }
 
+    VerifyPlugins PluginSearch(){
+        VerifyPlugins search;
+        search.executable_dir = QCoreApplication::applicationDirPath().toStdString();
+        search.ogre_version = std::to_string(OGRE_VERSION_MAJOR) + "." + std::to_string(OGRE_VERSION_MINOR) + "."
+          + std::to_string(OGRE_VERSION_PATCH);
+        return search;
+    }
+
     QStringList CheckVideoOutput(const QString& output){
         QStringList errors;
         CheckWritable(output, kRequiredVideoSpace, errors);
         return errors;
     }
 
-    bool CopyDirectory(const QString& src, const QString& dst){
+    bool CopyDirectory(const QString& src, const QString& dst, const std::function<void(float)>& progress){
         const QDir src_dir(src);
         if (!QDir().mkpath(dst)) return false;
         bool ok = true;
+        // The files are listed first, to know the progress.
+        QStringList files;
         QDirIterator it(src, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-        while (it.hasNext()){
-            const QString file = it.next();
-            const QString target = dst + "/" + src_dir.relativeFilePath(file);
+        while (it.hasNext()) files << it.next();
+        if (progress) progress(0);
+        for (int f = 0; f < files.size(); ++ f){
+            if (progress) progress(100.0f * f / files.size());
+            const QString& file = files[f];
+            const QString relative = src_dir.relativeFilePath(file);
+            const QString target = dst + "/" + relative;
+            if (relative.startsWith("data/config/") && QFile::exists(target)) continue;
             QDir().mkpath(QFileInfo(target).absolutePath());
             if (QFile::exists(target)) QFile::remove(target);
             if (!QFile::copy(file, target)){
@@ -199,7 +228,18 @@ namespace InstallSteps{
                 ok = false;
             }
         }
+        if (progress) progress(100);
         return ok;
+    }
+
+    float OverallProgress(Phase phase, float progress){
+        const float value = std::max(0.0f, std::min(100.0f, progress));
+        switch (phase){
+            case Phase::EXTRACT: return value * 0.05f;
+            case Phase::COPY: return 5.0f + value * 0.01f;
+            case Phase::CONVERT: return 6.0f + value * 0.94f;
+        }
+        return value;
     }
 
     std::vector<std::string> MissingRequiredFiles(DiskImage& disk_image){
@@ -224,7 +264,6 @@ namespace InstallSteps{
         };
         std::vector<std::string> missing;
         for (const std::string& file : required_files){
-            std::cout << "Checking for required file: " << file << std::endl;
             if (!disk_image.filePath(file)) missing.push_back(file);
         }
         return missing;
@@ -268,6 +307,41 @@ namespace InstallSteps{
         tools.directories.push_back(app_dir.toStdString());
     }
 
+    std::vector<std::string> PartNames(const InstallOptions& options){
+        std::vector<std::string> names;
+        for (const InstallCommandLine::Part& part : InstallCommandLine::Parts()){
+            if (options.*(part.option) && part.option != &InstallOptions::videos) names.push_back(part.name);
+        }
+        return names;
+    }
+
+    void MarkInstallStarted(const QString& output, const InstallOptions& options, const std::string& disk){
+        const boost::filesystem::path dir(output.toStdString());
+        VGears::InstallStamp::Stamp stamp;
+        VGears::InstallStamp::Read(dir, stamp);
+        VGears::InstallStamp::Start(stamp, PartNames(options), VGEARS_INSTALLER_VERSION, VGears::InstallStamp::Now(), disk);
+        if (!VGears::InstallStamp::Write(dir, stamp))
+            std::cout << "[WARNING] The installation record can't be written in " << dir.string() << std::endl;
+    }
+
+    void MarkInstallFinished(const QString& output){
+        const boost::filesystem::path dir(output.toStdString());
+        VGears::InstallStamp::Stamp stamp;
+        VGears::InstallStamp::Read(dir, stamp);
+        VGears::InstallStamp::Finish(stamp);
+        if (!VGears::InstallStamp::Write(dir, stamp))
+            std::cout << "[WARNING] The installation record can't be written in " << dir.string() << std::endl;
+    }
+
+    void MarkVideosInstalled(const QString& output){
+        const boost::filesystem::path dir(output.toStdString());
+        VGears::InstallStamp::Stamp stamp;
+        // Without a record there is no installation to add the videos to: one is made, marked as finished.
+        if (!VGears::InstallStamp::Read(dir, stamp)) stamp.complete = true;
+        stamp.parts["videos"] = VGears::InstallStamp::DATA_VERSION;
+        VGears::InstallStamp::Write(dir, stamp);
+    }
+
     DataInstaller::AdvancedOptions ToAdvancedOptions(const InstallOptions& options, bool keep_originals){
         DataInstaller::AdvancedOptions advanced;
         advanced.battle_data = options.battle_data;
@@ -282,7 +356,6 @@ namespace InstallSteps{
         advanced.wm = options.wm;
         advanced.wm_models = options.wm && options.wm_models;
         advanced.keep_originals = keep_originals;
-        advanced.clean_install = false;
         return advanced;
     }
 

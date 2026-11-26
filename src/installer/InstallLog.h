@@ -16,6 +16,7 @@
 #pragma once
 
 #include <fstream>
+#include <atomic>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -73,6 +74,16 @@ class InstallLog{
         void SetSink(Sink sink);
 
         /**
+         * Sets if the messages and the captured standard streams are written to the terminal.
+         *
+         * They are by default. A program that draws its own output (the progress line of the command line
+         * installer) turns it off and shows the messages it gets in the sink. Closing the log turns it on again.
+         *
+         * @param[in] echo True to write to the terminal.
+         */
+        void SetEcho(bool echo);
+
+        /**
          * Adds a message.
          *
          * @param[in] message The message. Its prefix sets the severity.
@@ -127,6 +138,11 @@ class InstallLog{
         void AddCaptured(const std::string& line);
 
         mutable std::mutex mutex_;
+
+        /**
+         * True to write the messages and the captured streams to the terminal.
+         */
+        std::atomic<bool> echo_{true};
         std::ofstream file_;
         std::string path_;
         Sink sink_;

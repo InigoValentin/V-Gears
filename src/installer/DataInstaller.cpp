@@ -19,6 +19,10 @@
 #include "InstallLayout.h"
 #include "InstallLog.h"
 #include "DiskImage.h"
+#include "data/VGearsAFileManager.h"
+#include "data/VGearsHRCFileManager.h"
+#include "data/VGearsPFileManager.h"
+#include "data/VGearsRSDFileManager.h"
 
 float DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
 
@@ -39,6 +43,12 @@ DataInstaller::DataInstaller(
     Ogre::Log* default_log(Ogre::LogManager::getSingleton().getDefaultLog());
     assert( default_log );
     default_log->setLogDetail(Ogre::LL_LOW);
+    // Ogre's messages only go to its own log (install.log, see Application::initOgreHeadless). Most are expected
+    // while converting (meshes without a skeleton yet, materials without a render system), and in the terminal and
+    // installer.log they hide the messages of the installer. The problems that V-Gears itself writes to that log
+    // (LOG_ERROR and LOG_WARNING) are passed to the installation log.
+    default_log->setDebugOutputEnabled(false);
+    default_log->addListener(&ogre_problems_);
 
     // Assign weights.
     for (int i = IDLE; i < STATE_COUNT; i ++) step_weight_[i] = 1;
@@ -56,7 +66,16 @@ DataInstaller::DataInstaller(
     step_weight_[FIELD_CONVERT_MODELS] = 3;
 }
 
-DataInstaller::~DataInstaller(){}
+DataInstaller::~DataInstaller(){
+    Ogre::Log* default_log = Ogre::LogManager::getSingletonPtr() ? Ogre::LogManager::getSingleton().getDefaultLog() : nullptr;
+    if (default_log) default_log->removeListener(&ogre_problems_);
+}
+
+void DataInstaller::OgreProblems::messageLogged(
+  const Ogre::String& message, Ogre::LogMessageLevel, bool, const Ogre::String&, bool&
+){
+    if (message.compare(0, 7, "[ERROR]") == 0 || message.compare(0, 9, "[WARNING]") == 0) InstallLog::Get().Add(message);
+}
 
 const char* DataInstaller::StepGroup(int state){
     if (state >= FIELD_CONVERT_MODELS_INIT && state <= FIELD_CONVERT_MODELS)
@@ -110,7 +129,7 @@ float DataInstaller::Progress(){
                         );
             battle_installer_ = std::make_unique<BattleDataInstaller>(disk_image_, output_dir_, application_.ResMgr());
             world_installer_ = std::make_unique<WorldInstaller>(
-              disk_image_, output_dir_, options_.keep_originals, application_.ResMgr()
+              disk_image_, output_dir_, application_.ResMgr()
             );
             installation_state_ = BATTLE_SCENES_INIT;
             return CalcProgress();
@@ -171,6 +190,7 @@ float DataInstaller::Progress(){
             if (cur_substep_ >= substeps_) installation_state_ = BATTLE_MODELS_CONVERT_INIT;
             return CalcProgress();
         case BATTLE_MODELS_CONVERT_INIT:
+            UseModelParts("temp/battle_models/");
             cur_substep_ = 0;
             substeps_ =  battle_installer_->ConvertBattleModelsInit();
             installation_state_ = BATTLE_MODELS_CONVERT;
@@ -200,6 +220,7 @@ float DataInstaller::Progress(){
             if (cur_substep_ >= substeps_) installation_state_ = SPELL_MODELS_CONVERT_INIT;
             return CalcProgress();
         case SPELL_MODELS_CONVERT_INIT:
+            UseModelParts("temp/spell_models/");
             cur_substep_ = 0;
             substeps_ =  battle_installer_->ConvertSpellModelsInit();
             installation_state_ = SPELL_MODELS_CONVERT;
@@ -210,6 +231,7 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case EFFECT_MODELS_INIT:
             write_output_line_("Extracting battle effects...", 2, true);
+            UseModelParts("temp/effects/");
             substeps_ = battle_installer_->InitializeEffectModels();
             cur_substep_ = 0;
             installation_state_ = EFFECT_MODELS_CONVERT;
@@ -444,6 +466,7 @@ float DataInstaller::Progress(){
                 return CalcProgress();
             }
             write_output_line_("Converting field models...", 2, true);
+            UseModelParts("temp/char/");
             field_model_names_ = field_installer_->ConvertModelsInit();
             substeps_ = field_model_names_.size();
             cur_substep_ = 0;
@@ -465,6 +488,7 @@ float DataInstaller::Progress(){
                 return CalcProgress();
             }
             write_output_line_("Extracting world map data...", 2, true);
+            UseModelParts("temp/world_models/");
             substeps_ = world_installer_->Initialize();
             cur_substep_ = 0;
             installation_state_ = WM_MATERIALS;
@@ -511,7 +535,7 @@ float DataInstaller::Progress(){
                 }
             }
             write_output_line_("Cleaning up...", 2, true);
-            if (!options_.keep_originals) CleanInstall();
+            if (!options_.keep_originals) RemoveOriginals();
             installation_state_ = DONE;
             return CalcProgress();
         case DONE:
@@ -538,6 +562,31 @@ const float DataInstaller::CalcProgress(){
     float progress = 100 * (weight_done + weight_substeps) / weight_total;
     if (progress >= 100.0f) progress = 99.9f;
     return progress;
+}
+
+void DataInstaller::UseModelParts(const std::string& temp_dir){
+    Ogre::ResourceGroupManager& res_mgr = Ogre::ResourceGroupManager::getSingleton();
+    // Only the files of the parts are released: each of them removes what it made (an HRC file its mesh and its
+    // skeleton, an RSD file its materials). Ogre's clearResourceGroup can't be used: it removes those too, and then
+    // their owners fail to remove them.
+    std::vector<Ogre::ResourceManager*> managers = {
+      &VGears::HRCFileManager::GetSingleton(), &VGears::RSDFileManager::GetSingleton(),
+      &VGears::PFileManager::GetSingleton(), &VGears::AFileManager::GetSingleton()
+    };
+    for (Ogre::ResourceManager* manager : managers){
+        std::vector<Ogre::ResourceHandle> handles;
+        auto it = manager->getResourceIterator();
+        while (it.hasMoreElements()){
+            const Ogre::ResourcePtr resource = it.getNext();
+            if (resource->getGroup() == "FFVII") handles.push_back(resource->getHandle());
+        }
+        for (const Ogre::ResourceHandle handle : handles){
+            if (manager->getByHandle(handle)) manager->remove(handle);
+        }
+    }
+    for (const std::string& dir : {"temp/char/", "temp/battle_models/", "temp/spell_models/", "temp/effects/", "temp/world_models/"}){
+        if (dir != temp_dir) res_mgr.removeResourceLocation(output_dir_ + dir, "FFVII");
+    }
 }
 
 void DataInstaller::CreateDirectories(){
@@ -572,10 +621,12 @@ void DataInstaller::CreateDirectories(){
     fields_lgp_ = std::make_unique<ScopedLgp>(application_.getRoot(), *fields_lgp_path, "LGP", "FFVIIFields");
 }
 
-void DataInstaller::CleanInstall(){
+void DataInstaller::RemoveOriginals(){
+    boost::system::error_code ec;
     // The game itself reads some of the temp directories, so only the rest are removed.
     for (const std::string& dir : InstallLayout::RemovableTempSubdirs())
-        boost::filesystem::remove_all(InstallLayout::TempDir(output_dir_) + dir + "/");
+        boost::filesystem::remove_all(InstallLayout::TempDir(output_dir_) + dir + "/", ec);
+    boost::filesystem::remove_all(InstallLayout::OriginalDataDir(output_dir_), ec);
 }
 
 void DataInstaller::CreateDir(const std::string& path, bool in_root){

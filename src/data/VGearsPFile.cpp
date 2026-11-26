@@ -16,6 +16,7 @@
 #include <iostream>
 #include <OgreBone.h>
 #include <OgreLogManager.h>
+#include <OgreMaterialManager.h>
 #include <OgreStringConverter.h>
 #include "data/VGearsPFile.h"
 #include "common/VGearsStringUtil.h"
@@ -135,7 +136,7 @@ namespace VGears{
             const String sub_name(
               bone_name + "/" + rsd_base + "/" + Ogre::StringConverter::toString(g)
             );
-            AddGroup(groups_[g], mo, sub_name, material_base_name, skeleton->getBone(bone_name));
+            AddGroup(groups_[g], mo, sub_name, material_base_name, rsd->getGroup(), skeleton->getBone(bone_name));
         }
     }
 
@@ -151,13 +152,22 @@ namespace VGears{
 
     void PFile::AddGroup(
       const Group &group, ManualObject &mo, const String &sub_name,
-      const String &material_base_name, const Ogre::Bone *bone
+      const String &material_base_name, const String &material_group, const Ogre::Bone *bone
     ) const{
         size_t material_index(0);
         if (group.has_texture) material_index = group.texture_index + 1;
         String material_name(
           material_base_name + "/" + Ogre::StringConverter::toString(material_index)
         );
+        // A group can use a texture that its RSD file doesn't list (some battle effects get it from the effect
+        // that uses them). Without a material the group would have none at all: use the one without texture.
+        if (material_index > 0 && !Ogre::MaterialManager::getSingleton().resourceExists(material_name, material_group)){
+            Ogre::LogManager::getSingleton().logMessage(
+              "[WARNING] The group " + sub_name + " uses the texture " + Ogre::StringConverter::toString(group.texture_index)
+              + ", which " + material_base_name + " doesn't have: it has no texture.", Ogre::LML_CRITICAL
+            );
+            material_name = material_base_name + "/0";
+        }
         const uint16 bone_handle(bone->getHandle());
         const Ogre::Vector3 bone_position(GetPosition(bone));
         size_t index(0);
