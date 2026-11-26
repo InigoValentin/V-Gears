@@ -240,10 +240,6 @@ namespace VGears{
 
     Ogre::RenderWindow* Application::getRenderWindow(){return _render_window;}
 
-    const String& Application::getResourcesFilename(){
-        return resources_filename_;
-    }
-
     String Application::getWindowTitle() const {return VGEARS_VERSION_SIGNATURE;}
 
     bool Application::processCommandLine( int argc, char *argv[]){

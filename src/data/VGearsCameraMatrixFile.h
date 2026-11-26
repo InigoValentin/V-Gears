@@ -62,13 +62,6 @@ namespace VGears{
             static const String RESOURCE_TYPE;
 
             /**
-             * Retrieves the camera matrix in the file.
-             *
-             * @return The camera matrix.
-             */
-            const Ogre::Matrix3& GetMatrix() const;
-
-            /**
              * Sets the camera matrix.
              *
              * @param[in] matrix The camera matrix.
@@ -118,13 +111,6 @@ namespace VGears{
              * @todo What is this number?
              */
             void SetCount(const size_t count);
-
-            /**
-             * Retrieves the focal length.
-             *
-             * @return The focal length.
-             */
-            const Ogre::Real& GetFocalLength() const;
 
             /**
              * Sets the focal length.

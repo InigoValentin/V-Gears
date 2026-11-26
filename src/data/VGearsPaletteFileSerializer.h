@@ -147,14 +147,6 @@ namespace VGears{
             using Serializer::readObject;
 
             /**
-             * Converts a colour.
-             *
-             * @param[in,out] colour Colour to convert.
-             * @todo What kind of conversion is it doing?
-             */
-            virtual void ConvertColour(uint16 &colour) const;
-
-            /**
              * A pixel format.
              */
             static const Ogre::PixelFormat PIXEL_FORMAT;

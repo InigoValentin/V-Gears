@@ -154,20 +154,6 @@ class ParticlePoolMap{
         };
 
         /**
-         * Releases all locked particles.
-         *
-         * It also resets the pool map operator.
-         */
-        void ReleaseAllElements(){
-            // Move all elements from locked elements to released elements
-            PoolMapIterator it;
-            for (it = locked_.begin(); it != locked_.end(); ++ it)
-                released_.insert(make_pair(it->first, it->second));
-            locked_.clear();
-            ResetIterator();
-        };
-
-        /**
          * Locks the released particle pointed by the iterator.
          *
          * The particle gets added to the end of the locked particle list.

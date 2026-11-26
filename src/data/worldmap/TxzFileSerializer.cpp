@@ -45,15 +45,6 @@ namespace VGears {
         ImportDecompressed(decompressed_stream, dest);
     }
 
-    std::vector<std::vector<TxzFileSerializer::Rgba>>
-      TxzFileSerializer::GetWorldMapTexture(uint32 id)
-    {
-        auto it = textures_.find(id);
-        if (it != std::end(textures_)) return it->second;
-        std::vector<std::vector<TxzFileSerializer::Rgba>> emptexture_y;
-        return emptexture_y;
-    }
-
     void TxzFileSerializer::ImportDecompressed(
       Ogre::DataStream& stream, TxzFile& dest
     ){

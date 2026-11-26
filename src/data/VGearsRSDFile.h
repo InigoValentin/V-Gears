@@ -105,20 +105,6 @@ namespace VGears{
             virtual const String& GetPolygonName() const;
 
             /**
-             * Retrieves the material name.
-             *
-             * @return The matyerial name.
-             */
-            virtual const String& GetMaterialName() const;
-
-            /**
-             * Retrieves the group name.
-             *
-             * @return The group name.
-             */
-            virtual const String& GetGroupName() const;
-
-            /**
              * Counts the texture names.
              *
              * @return The number of texture names.

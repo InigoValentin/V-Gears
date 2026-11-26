@@ -113,18 +113,6 @@ void AudioManager::ClearBattle(){battle_track_ = -1;}
 
 void AudioManager::ClearWorld(){tracks_.clear();}
 
-void AudioManager::MusicPause(){
-    boost::recursive_mutex::scoped_lock lock(update_mutex_);
-    if (module_ == Module::BATTLE) battle_music_.Pause();
-    else music_.Pause();
-}
-
-void AudioManager::MusicResume(){
-    boost::recursive_mutex::scoped_lock lock(update_mutex_);
-    if (module_ == Module::BATTLE) battle_music_.Resume();
-    else music_.Resume();
-}
-
 void AudioManager::ScriptPlayMusic(const char* name){
     const Ogre::String name_str = Ogre::String(name);
     MusicPlay(name_str);
@@ -335,23 +323,6 @@ void AudioManager::UpdateBattle(){
 }
 
 void AudioManager::UpdateWorld(){UpdateField();}
-
-const char* AudioManager::ALError(){
-    //ALenum error_code = alGetError();
-    //if (error_code == AL_NO_ERROR)
-        return nullptr;
-    //else return alGetString(error_code);
-}
-
-const char* AudioManager::ALCError(const ALCdevice* device){
-    //const ALCdevice *alc_device =
-    //  ((device == nullptr) ? const_cast< ALCdevice* >(al_device_) :
-    //    const_cast< ALCdevice* >(device));
-    //ALCenum error_code = alcGetError(const_cast< ALCdevice* >(alc_device));
-    //if (error_code == ALC_NO_ERROR)
-        return nullptr;
-    //else return alcGetString(const_cast< ALCdevice* >(device), error_code);
-}
 
 AudioManager::Player::Player(boost::recursive_mutex* mutex):
   loop_(-1.0), vorbis_info_(nullptr), vorbis_section_(0),

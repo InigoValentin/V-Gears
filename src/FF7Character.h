@@ -88,15 +88,6 @@ class Character{
             UNKNOWN = 9
         };
 
-        /**
-         * Retrieves a character ID from it's name.
-         *
-         * @param[in] name Chaarcter name.
-         * @return ID of the character with the specified name, or {@see
-         * UNKNOWN} if the character doesn't exist.
-         */
-        static CharacterId GetIdByName( const VGears::String& name);
-
     private:
 
         typedef std::map<VGears::String, CharacterId> CharacterIdLookupMap;

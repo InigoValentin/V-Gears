@@ -147,22 +147,3 @@ void XmlMapFile::LoadMap(){
         node = node->NextSibling();
     }
 }
-
-const Ogre::String XmlMapFile::GetWalkmeshFileName(){
-    TiXmlNode* node = file_.RootElement();
-    if (node == nullptr || node->ValueStr() != "map"){
-        LOG_ERROR(
-          "Field Map XML Manager: " + file_.ValueStr()
-          + " is not a valid fields map file! No <map> in root."
-        );
-        return "";
-    }
-    node = node->FirstChild();
-    while (node != nullptr){
-        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "walkmesh")
-            return GetString(node, "file_name");
-        node = node->NextSibling();
-    }
-    LOG_WARNING("Can't find field's walkmesh in " + file_.ValueStr() + ".");
-    return "";
-}

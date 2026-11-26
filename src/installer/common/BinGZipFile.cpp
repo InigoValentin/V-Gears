@@ -101,8 +101,6 @@ File BinGZipFile::ExtractGZip(u32 file_index){
     return File(out.data(), 0, static_cast<u32>(out.size()));
 }
 
-u32 BinGZipFile::GetNumberOfFiles(){return file_count_;}
-
 void BinGZipFile::InnerGetNumberOfFiles(){
     file_count_ = 0;
     // Each file has a 6 byte header, then the GZip data, whose header is checked: stop when they don't fit.

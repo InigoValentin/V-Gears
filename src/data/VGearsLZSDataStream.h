@@ -182,20 +182,6 @@ namespace VGears{
             virtual void close() override;
 
             /**
-             * Checks how many data still remains compresses.
-             *
-             * @return The number of compressed bytes.
-             */
-            size_t AvailableCompressed() const {return available_compressed_;}
-
-            /**
-             * Checks how many data still has been uncompressesed.
-             *
-             * @return The number of uncompressed bytes.
-             */
-            size_t AvailableUncompressed() const{return buffer_.Available();}
-
-            /**
              * Flips the endian mode of some data.
              *
              * Little endian data will be transformed into big endian, and big

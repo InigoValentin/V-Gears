@@ -49,14 +49,6 @@ namespace VGears{
 
     const String& MapFile::GetScriptName() const{return script_name_;}
 
-    const String& MapFile::GetBackground2dName() const{return background_2d_name_;}
-
-    const String& MapFile::GetTextsName() const{return texts_name_;}
-
-    const String& MapFile::GetWalkmeshName() const{return walkmesh_name_;}
-
-    const Ogre::Real& MapFile::GetForwardDirection() const{return forward_direction_;}
-
     MapFile::PointList& MapFile::GetPoints(){return points_;}
 
     MapFile::TriggerList& MapFile::GetTriggers(){return triggers_;}
@@ -66,8 +58,6 @@ namespace VGears{
     void MapFile::SetBackground2dName(const String &background2d_name){
         background_2d_name_ = background2d_name;
     }
-
-    void MapFile::SetTextsName(const String& texts_name){texts_name_ = texts_name;}
 
     void MapFile::SetWalkmeshName(const String &walkmesh_name){walkmesh_name_ = walkmesh_name;}
 

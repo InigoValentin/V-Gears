@@ -765,11 +765,6 @@ bool ScriptManager::ScriptRequest(
     return false;
 }
 
-void ScriptManager::AddValueToStack(const float value){
-    QueueScript* script = GetScriptByScriptId(current_script_id_);
-    if (script != nullptr) lua_pushnumber(script->state, value);
-}
-
 void ScriptManager::UpdateField(){}
 
 void ScriptManager::UpdateBattle(){}

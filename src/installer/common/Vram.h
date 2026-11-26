@@ -17,7 +17,6 @@
 
 #include <memory>
 #include "common/TypeDefine.h"
-#include "installer/common/Surface.h"
 
 /**
  * Emulates a VRAM block.
@@ -27,13 +26,6 @@
 class Vram{
 
     public:
-
-        /**
-         * Creates a VRAM block.
-         *
-         * @return The VRAM block.
-         */
-        static std::unique_ptr<Vram> MakeInstance(){return std::unique_ptr<Vram>(new Vram());}
 
         /**
          * Destructor.
@@ -62,16 +54,6 @@ class Vram{
         void Save(const Ogre::String& file);
 
         // TODO: Where is this implemented?:
-        /**
-         * Adds an image buffer to an existing buffer.
-         *
-         * @param[in] x X coordinate for the start of the image buffer.
-         * @param[in] y Y coordinate for the start of the image buffer.
-         * @param[in] width Width of the image buffer.
-         * @param[in] height Height of the image buffer.
-         * @param[out] buffer The buffer to add the image buffer to.
-         */
-        void AddImageBuffer(u16 x, u16 y, u16 width, u16 height, u8* buffer);
 
         /**
          * Writes 8 bytes to the VRAM block.

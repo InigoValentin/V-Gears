@@ -224,15 +224,6 @@ class CameraManager : public Manager, public Ogre::Singleton<CameraManager>{
         Ogre::Viewport* getViewport();
 
         /**
-         * Enables or disables the camera wireframe.
-         *
-         * In wireframe mode, faces will not be rendered, only edges
-         *
-         * @param[in] enable True to enable wireframe mode, false to disable.
-         */
-        void EnableWireFrame(bool enable);
-
-        /**
          * Sets the camera position and orientation.
          *
          * It's only meand to be used for 3D cameras (battle, world map...), and using it while on

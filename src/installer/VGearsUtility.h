@@ -41,13 +41,6 @@ namespace VGears{
             virtual ~Utility();
 
             /**
-             * Retrieves the camera.
-             *
-             * @return The camera.
-             */
-            virtual Ogre::Camera* GetCamera(void);
-
-            /**
              * Decodes a FF7 encoded string.
              *
              * It doesn't work for compressed strings.
@@ -59,16 +52,6 @@ namespace VGears{
             static std::string DecodeString(const u8* bytes, const unsigned int size);
 
         protected:
-
-            /**
-             * Initializes components used by the utilities.
-             */
-            virtual void InitComponents();
-
-            /**
-             * Initializes components used by the utilities.
-             */
-            virtual void DestroyComponents();
 
         private:
 

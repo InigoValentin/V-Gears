@@ -141,13 +141,6 @@ namespace VGears{
             virtual const BoneList& GetBones() const{return bones_;}
 
             /**
-             * Retrieves the skeleton.
-             *
-             * @return The skeleton.
-             */
-            virtual Ogre::SkeletonPtr GetSkeleton() const;
-
-            /**
              * The type of resource.
              */
             static const String RESOURCE_TYPE;

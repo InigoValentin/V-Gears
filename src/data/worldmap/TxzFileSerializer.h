@@ -201,15 +201,6 @@ namespace VGears {
          */
         void Import(Ogre::DataStreamPtr& stream, TxzFile& dest);
 
-        /**
-         * Retrieves a texture color pixels from a texture ID.
-         *
-         * @param[in] id ID of the texture.
-         * @return List of color pixels conforming the texture, or an empty
-         * vector if the texture doesn't exist.
-         */
-        std::vector<std::vector<Rgba>> GetWorldMapTexture(uint32 id);
-
     private:
 
         /**

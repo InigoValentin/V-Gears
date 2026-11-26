@@ -73,37 +73,6 @@ namespace VGears{
             virtual const String& GetScriptName() const;
 
             /**
-             * Retrieves the map background file name.
-             *
-             * @return The background file name.
-             */
-            virtual const String& GetBackground2dName() const;
-
-            /**
-             * Retrieves the map texts file name.
-             *
-             * @return The texts file name.
-             */
-            virtual const String& GetTextsName() const;
-
-            /**
-             * Retrieves the map walkmesh file name.
-             *
-             * @return The walkmesh file name.
-             */
-            virtual const String& GetWalkmeshName() const;
-
-            /**
-             * Retrieves the map forward direction.
-             *
-             * The forward direction is the direction the playable character moves when 'up' is
-             * pressed.
-             *
-             * @return The forward direction.
-             */
-            virtual const Ogre::Real& GetForwardDirection() const;
-
-            /**
              * Retrieves the list of entity points in the map.
              *
              * @return The list of entity points in the map.
@@ -130,13 +99,6 @@ namespace VGears{
              * @param[in] background2d_name The background file name.
              */
             virtual void SetBackground2dName(const String& background2d_name);
-
-            /**
-             * Sets the map field texts file name.
-             *
-             * @param[in] texts_name The texts file name.
-             */
-            virtual void SetTextsName(const String& texts_name);
 
             /**
              * Sets the map walkmesh file name.
@@ -187,11 +149,6 @@ namespace VGears{
              * The background file name.
              */
             String background_2d_name_;
-
-            /**
-             * The background file name.
-             */
-            String texts_name_;
 
             /**
              * The walkmesh file name.

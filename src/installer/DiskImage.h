@@ -122,34 +122,6 @@ struct DiskImage{
         std::string const getId();
 
         /**
-         * Gets the platform for which the disk image is intended.
-         *
-         * @return The platform of the disk image.
-         */
-        Platform const getPlatform();
-
-        /**
-         * Gets the region for which the disk image is intended.
-         *
-         * @return The region of the disk image.
-         */
-        Region const getRegion();
-
-        /**
-         * Gets the language for which the disk image is intended.
-         *
-         * @return The language of the disk image.
-         */
-        Language const getLanguage();
-
-        /**
-         * Gets the disk for which the disk image is intended.
-         *
-         * @return The disk of the disk image.
-         */
-        Disk const getDisk();
-
-        /**
          * Checks if the disk image is a valid Final Fantasy VII release.
          *
          * @return True if the disk image is valid, false otherwise.

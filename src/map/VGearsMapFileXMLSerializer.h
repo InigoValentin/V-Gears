@@ -80,14 +80,6 @@ namespace VGears{
             virtual void ReadBackground2D(TiXmlNode &node, MapFile *dest);
 
             /**
-             * Reads the text file location from the field XML file.
-             *
-             * @param[in] node The XML node to read.
-             * @param[out] dest The background data will be loaded here.
-             */
-            virtual void ReadTexts(TiXmlNode &node, MapFile *dest);
-
-            /**
              * Reads the walkmesh file location from the field XML file.
              *
              * @param[in] node The XML node to read.

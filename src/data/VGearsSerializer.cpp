@@ -119,10 +119,6 @@ namespace VGears{
         stream->read(&dest,1);
     }
 
-    void Serializer::ReadFloat(Ogre::DataStreamPtr &stream, float &dest){
-        readFloats(stream, &dest, 1);
-    }
-
     String Serializer::GetLine(Ogre::DataStreamPtr &stream) const{
         String line("");
         do{

@@ -652,10 +652,6 @@ void Background2D::SetScrollCurrentSeconds(const float seconds){scroll_current_s
 
 float Background2D::GetScrollCurrentSeconds() const{return scroll_current_seconds_;}
 
-void Background2D::SetScreenScroll(const Ogre::Vector2& position){
-    SetScroll(position / screen_scale_);
-}
-
 void Background2D::SetScroll(const Ogre::Vector2& position){
     position_ = ClampScroll(position);
     applyScroll();

@@ -123,13 +123,6 @@ class MediaDataInstaller{
         void WriteMusicsIndex();
 
         /**
-         * Prepares the installer for the video extraction.
-         *
-         * @return The total number of videos to process.
-         */
-        int InstallVideosInit();
-
-        /**
          * Copies the FMV videos.
          */
         void InstallVideos();

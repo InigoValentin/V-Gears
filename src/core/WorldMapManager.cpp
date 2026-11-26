@@ -67,28 +67,6 @@ void WorldMapManager::ClearWorld(){
     // TODO
 }
 
-void WorldMapManager::AddTerrain(
-  const unsigned int index, const Ogre::String mesh, const Ogre::Vector3 pos
-){
-    if (module_ != Module::WORLD){
-        LOG_ERROR(
-          "Tried to add terrain to the WorldMapManager, but the manager was not in world map mode."
-        );
-        return;
-    }
-    /*Enemy* enemy = new Enemy(id, pos, front, visible, targeteable, active, cover);
-    enemies_.push_back(*enemy);
-    EntityManager::getSingleton().AddEntity(
-      enemy->GetName() + "_" + std::to_string(enemies_.size() - 1),
-      "enemies/" + enemy->GetModel() + ".mesh", enemy->GetPos(), Ogre::Degree(1),
-      Ogre::Vector3(ENEMY_SCALE, ENEMY_SCALE, ENEMY_SCALE), Ogre::Quaternion(1, 1, 0, 0), id
-    );
-    EntityManager::getSingleton().GetEntity(
-      enemy->GetName() + "_" + std::to_string(enemies_.size() - 1)
-    )->SetRotation(Ogre::Degree(180));
-    */
-}
-
 void WorldMapManager::UpdateField(){}
 
 void WorldMapManager::UpdateBattle(){}

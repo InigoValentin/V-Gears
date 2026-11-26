@@ -682,20 +682,17 @@ set(VGEARS_SOURCE_FILES
     core/XmlTextFile.cpp
     core/XmlTextsFile.cpp
     core/XmlWalkmeshFile.cpp
-    core/XmlWorldMapFile.cpp
     data/VGearsAFile.cpp
     data/VGearsAFileManager.cpp
     data/VGearsAFileSerializer.cpp
     data/VGearsBackgroundFile.cpp
     data/VGearsBackgroundFileManager.cpp
     data/VGearsBackgroundFileSerializer.cpp
-    data/VGearsBackgroundTextureLoader.cpp
     data/VGearsCameraMatrixFile.cpp
     data/VGearsCameraMatrixFileManager.cpp
     data/VGearsCameraMatrixFileSerializer.cpp
     data/VGearsFLevelBackground2DLoader.cpp
     data/VGearsFLevelFile.cpp
-    data/VGearsFLevelFileManager.cpp
     data/VGearsFLevelFileSerializer.cpp
     data/VGearsFLevelTextureLoader.cpp
     data/VGearsHRCFile.cpp
@@ -731,7 +728,6 @@ set(VGEARS_SOURCE_FILES
     data/worldmap/WorldmapFileManager.cpp
     data/worldmap/WorldmapFileSerializer.cpp
     data/worldmap/TxzFile.cpp
-    data/worldmap/TxzFileManager.cpp
     data/worldmap/TxzFileSerializer.cpp
     map/VGearsBackground2DFile.cpp
     map/VGearsBackground2DFileManager.cpp
@@ -744,7 +740,6 @@ set(VGEARS_SOURCE_FILES
     map/VGearsWalkmeshFileXMLSerializer.cpp
     map/FinalFantasy7/FF7WalkmeshFileSerializer.cpp
     modules/worldmap/WorldmapModule.cpp
-    #viewer/ViewerModule.cpp
 )
 endif()
 

@@ -29,29 +29,12 @@
 Ogre::String HexToString(int value, unsigned short width, char fill);
 
 /**
- * Converts a boolean value to a string.
- *
- * @param[in] value The value to convert.
- * @return String representation of the value. 'true' if the value is true,
- * 'false' otherwise.
- */
-Ogre::String BoolToString(bool value);
-
-/**
  * Converts an integer value to a string.
  *
  * @param[in] value The value to convert.
  * @return String representation of the value.
  */
 Ogre::String IntToString(int value);
-
-/**
- * Converts a real value to a string.
- *
- * @param[in] value The value to convert.
- * @return String representation of the value.
- */
-Ogre::String FloatToString(float value);
 
 /**
  * Application logger utility.
@@ -78,13 +61,6 @@ class Logger{
          * @param[in] text Message to log.
          */
         void Log(const Ogre::String& text);
-
-        /**
-         * Logs a message.
-         *
-         * @param[in] text Message to log.
-         */
-        void LogW(const Ogre::UTFString& text);
 
         /**
          * Logs messages.

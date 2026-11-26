@@ -825,57 +825,6 @@ class Savemap{
                 static constexpr unsigned int MP = 7;
         };
 
-        /**
-         * Window corners.
-         */
-        class CORNER{
-
-            public:
-
-                /**
-                 * Top left window corner.
-                 */
-                static constexpr unsigned int T_L = 0;
-
-                /**
-                 * Top right window corner.
-                 */
-                static constexpr unsigned int T_R = 1;
-
-                /**
-                 * Bottom right window corner.
-                 */
-                static constexpr unsigned int B_R = 2;
-
-                /**
-                 * Bottom left window corner.
-                 */
-                static constexpr unsigned int B_L = 3;
-        };
-
-        /**
-         * Colour codes
-         */
-        class COLOUR{
-
-            public:
-
-                /**
-                 * Red colour.
-                 */
-                static constexpr unsigned int R = 0;
-
-                /**
-                 * Green colour.
-                 */
-                static constexpr unsigned int G = 1;
-
-                /**
-                 * Blue colour.
-                 */
-                static constexpr unsigned int B = 2;
-        };
-
     private:
 
         /**

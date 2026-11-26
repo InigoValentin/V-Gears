@@ -54,10 +54,6 @@ void ParticleEntityRenderer::CopyAttributesTo(ParticleRenderer* renderer){
     entity_renderer->mesh_name_ = mesh_name_;
 }
 
-const Ogre::String& ParticleEntityRenderer::GetMeshName() const{
-    return mesh_name_;
-}
-
 
 void ParticleEntityRenderer::SetMeshName(const Ogre::String& mesh_name){
     mesh_name_ = mesh_name;

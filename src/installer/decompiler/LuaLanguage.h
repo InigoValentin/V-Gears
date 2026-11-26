@@ -121,27 +121,6 @@ class LuaLanguage{
         virtual std::string WhileHeader(bool before_expr);
 
         /**
-         * The Lua argument separator.
-         *
-         * @return ",".
-         */
-        virtual const std::string FunctionCallArgumentSeperator();
-
-        /**
-         * The Lua function argument list opener.
-         *
-         * @return "(".
-         */
-        virtual const std::string FunctionCallBegin();
-
-        /**
-         * The Lua function argument list closer.
-         *
-         * @return ")".
-         */
-        virtual const std::string FunctionCallEnd();
-
-        /**
          * Generates a Lua label to use with goto.
          *
          * @param[in] addr Target address label.

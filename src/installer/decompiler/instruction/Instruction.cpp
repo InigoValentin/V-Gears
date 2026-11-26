@@ -101,11 +101,7 @@ ValuePtr Instruction::GetParam(uint32 index) const{
     else return nullptr;
 }
 
-void Instruction::SetParams(std::vector<ValuePtr> params){params_ = params;}
-
 void Instruction::AddParam(ValuePtr value){params_.push_back(value);}
-
-std::string Instruction::GetCodeGenData() const{return code_gen_data_;}
 
 void Instruction::SetCodeGenData(std::string code_gen_data){code_gen_data_ = code_gen_data;}
 

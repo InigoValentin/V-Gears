@@ -642,15 +642,6 @@ class Entity{
         float GetMoveAutoSpeed() const;
 
         /**
-         * Sets the entity's walking movement speed.
-         *
-         * @param[in] speed Walking speed.
-         * @todo Describe where this speed is used, and max and mins or
-         * references.
-         */
-        void SetMoveWalkSpeed(const float speed);
-
-        /**
          * Retrieves the entity's walking speed.
          *
          * @return Walking speed.
@@ -658,15 +649,6 @@ class Entity{
          * references.
          */
         float GetMoveWalkSpeed() const;
-
-        /**
-         * Sets the entity's running movement speed.
-         *
-         * @param[in] speed Running speed.
-         * @todo Describe where this speed is used, and max and mins or
-         * references.
-         */
-        void SetMoveRunSpeed(const float speed);
 
         /**
          * Retrieves the entity's running speed.

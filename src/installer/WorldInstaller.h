@@ -297,14 +297,6 @@ class WorldInstaller{
         static std::string TERRAIN_MODELS_DIR;
 
         /**
-         * Decompresses data compressed in LZSS or LZS formats.
-         *
-         * @param[in] compressed_data The compresed data as bytes.
-         * @return The data, decompressed, as bytes.
-         */
-        std::vector<u8> DecompressLZSSData(u32* compressed_data);
-
-        /**
          * Exports a mesh to a file.
          *
          * The file will have the mesh name.

@@ -14,6 +14,7 @@
  */
 
 #include <string>
+#include <Ogre.h>
 #include <OgreStringConverter.h>
 #include "installer/common/Vram.h"
 #include "installer/common/Logger.h"

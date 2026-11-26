@@ -322,13 +322,6 @@ class Background2D : public Ogre::RenderQueueListener{
         float GetScrollCurrentSeconds() const;
 
         /**
-         * Scroll position in screen coordinates.
-         *
-         * @param[in] position Position to set the scroll.
-         */
-        void SetScreenScroll(const Ogre::Vector2& position);
-
-        /**
          * Retrieves the scroll position in screen coordinates.
          *
          * @return Screen coordinates of the scroll.

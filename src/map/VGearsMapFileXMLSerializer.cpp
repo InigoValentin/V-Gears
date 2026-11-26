@@ -66,15 +66,6 @@ namespace VGears{
         }
     }
 
-    void MapFileXMLSerializer::ReadTexts(TiXmlNode &node, MapFile *dest){
-        TiXmlNode *child(FindChildNode(node, "texts"));
-        if (child != nullptr){
-            String file_name;
-            ReadAttribute(*child, "file_name", file_name);
-            dest->SetTextsName(file_name);
-        }
-    }
-
     void MapFileXMLSerializer::ReadWalkmesh(TiXmlNode &node, MapFile *dest){
         TiXmlNode *child(FindChildNode(node, "walkmesh"));
         if (child != nullptr){

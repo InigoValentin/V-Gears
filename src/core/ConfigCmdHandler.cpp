@@ -41,8 +41,6 @@ void ConfigCmdHandler::AddCommand(
     ));
 }
 
-void ConfigCmdHandler::ExecuteString(const Ogre::String& cmd_string){}
-
 ConfigCmd* ConfigCmdHandler::Find(const Ogre::String& name) const{
     for (unsigned int i = 0; i < commands_.size(); ++ i)
         if (commands_[i]->GetName() == name) return commands_[i].get();

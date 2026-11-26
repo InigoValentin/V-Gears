@@ -50,42 +50,6 @@ template<typename T> class Stack {
             return retval;
         }
 
-        /**
-         * Return the topmost item on the stack without removing it.
-         *
-         * @return The topmost item on the stack.
-         */
-        T &Peek(){return stack_.front();}
-
-        /**
-         * Return the topmost item on the stack without removing it.
-         *
-         * @return The topmost item on the stack.
-         */
-        const T &Peek() const{return stack_.front();}
-
-        /**
-         * Gets item on a specified stack position without removing it.
-         *
-         * @param[in] pos The number of items to skip on the stack.
-         * @return The desired item from the stack.
-         */
-        T &PeekPos(size_t pos){
-            if (pos >= stack_.size()) std::cerr << "WARNING: Looking outside stack\n";
-            return stack_.at(pos);
-        }
-
-        /**
-         * Gets item on a specified stack position without removing it.
-         *
-         * @param[in] pos The number of items to skip on the stack.
-         * @return The desired item from the stack.
-         */
-        const T &PeekPos(size_t pos) const{
-            if (pos >= stack_.size()) std::cerr << "WARNING: Looking outside stack\n";
-            return stack_.at(pos);
-        }
-
     private:
 
         /**

@@ -83,42 +83,6 @@ namespace VGears{
         }
     }
 
-    void FLevelFile::LoadModels(){
-        HRCFileManager &hrc_mgr(HRCFileManager::getSingleton());
-        ModelList &models(model_list_->GetModels());
-        ModelList::const_iterator it(models.begin()), it_end(models.end());
-        while (it != it_end){
-            String hrc_name(it->hrc_name);
-            Ogre::LogManager::getSingleton().stream() << "Loading Model: " << hrc_name;
-            StringUtil::toLowerCase(hrc_name);
-            HRCFilePtr hrc = hrc_mgr.load(hrc_name, mGroup).staticCast<HRCFile>();
-            LoadAnimations(hrc, it->animations);
-            hrc_files_.push_back(hrc);
-            ++ it;
-        }
-    }
-
-    void FLevelFile::LoadAnimations(
-      const HRCFilePtr &model, const AnimationList &animations
-    ){
-        AFileManager &a_mgr(AFileManager::getSingleton());
-        AnimationList::const_iterator
-          it(animations.begin()), it_end(animations.end());
-        while (it != it_end){
-            String animation_name;
-            StringUtil::splitBase(it->name, animation_name);
-            StringUtil::toLowerCase(animation_name);
-            String animation_filename(animation_name + EXT_A);
-            AFilePtr animation = a_mgr.load(
-              animation_filename, model->getGroup()
-            ).staticCast<AFile>();
-            animation_name = NameLookup::Animation(animation_name);
-            Ogre::LogManager::getSingleton().stream() << " Adding Animation: " << animation_name;
-            animation->AddTo(model->GetSkeleton(), animation_name);
-            ++ it;
-        }
-    }
-
     void FLevelFile::unloadImpl(){
         background_.reset();
         camera_matrix_.reset();

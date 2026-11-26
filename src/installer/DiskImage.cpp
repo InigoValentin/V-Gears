@@ -999,22 +999,6 @@ const std::string DiskImage::getId(){
     return id;
 };
 
-const DiskImage::Platform DiskImage::getPlatform(){
-    return platform;
-};
-
-const DiskImage::Region DiskImage::getRegion(){
-    return region;
-};
-
-const DiskImage::Language DiskImage::getLanguage(){
-    return language;
-};
-
-const DiskImage::Disk DiskImage::getDisk(){
-    return disk;
-};
-
 const bool DiskImage::isValid(){
     return valid;
 };

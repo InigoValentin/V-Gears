@@ -158,13 +158,6 @@ class ParticleEmitter : public Ogre::StringInterface, public Particle{
         void SetEmissionRate(int rate) {emission_rate_ = rate;};
 
         /**
-        * Retrieves the emission rate of the emitter.
-        *
-        * @return Emission rate.
-        */
-        int GetEmissionRate() const {return emission_rate_;};
-
-        /**
          * Sets the particle direction for the emitter.
          *
          * It sets a fixed direction. For a variable, ranged direction, use

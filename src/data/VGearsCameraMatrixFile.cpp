@@ -53,8 +53,6 @@ namespace VGears{
         return Ogre::Quaternion(matrix_);
     }
 
-    const Ogre::Matrix3& CameraMatrixFile::GetMatrix() const{return matrix_;}
-
     void CameraMatrixFile::SetMatrix(const Ogre::Matrix3& matrix){
         matrix_ = matrix;
     }
@@ -74,10 +72,6 @@ namespace VGears{
     const size_t& CameraMatrixFile::GetCount() const{return count_;}
 
     void CameraMatrixFile::SetCount(const size_t count){count_ = count;}
-
-    const Ogre::Real& CameraMatrixFile::GetFocalLength() const{
-        return focal_length_;
-    }
 
     void CameraMatrixFile::SetFocalLength(const Ogre::Real focal_length){
         focal_length_ = focal_length;

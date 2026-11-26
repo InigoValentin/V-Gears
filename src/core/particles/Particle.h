@@ -89,13 +89,6 @@ class Particle{
         virtual void CopyAttributesTo(Particle* particle);
 
         /**
-         * Retrieves the particle type.
-         *
-         * @return The particle type.
-         */
-        ParticleType GetParticleType() const {return particle_type_;};
-
-        /**
          * Sets the particle emitter.
          *
          * @param[in] parent_emitter The emitter for the particle.
@@ -104,13 +97,6 @@ class Particle{
         void SetParentEmitter(ParticleEmitter* parent_emitter){
             parent_emitter_ = parent_emitter;
         };
-
-        /**
-         * Retrieves the particle emitter.
-         *
-         * @return The emitter.
-         */
-        ParticleEmitter* GetParentEmitter() const {return parent_emitter_;};
 
         /**
          * Enables or disables the particle

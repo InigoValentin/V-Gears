@@ -45,13 +45,6 @@ class ParticleEntityRenderer : public ParticleRenderer{
         virtual void CopyAttributesTo(ParticleRenderer* renderer);
 
         /**
-         * Retrieves the emitter's mesh name.
-         *
-         * @return The emitter mesh name.
-         */
-        const Ogre::String& GetMeshName() const;
-
-        /**
          * Sets the emitter's mesh name.
          *
          * @param[in] mesh_name The name for the emitter's mesh.

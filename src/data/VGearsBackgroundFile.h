@@ -231,11 +231,6 @@ namespace VGears{
             typedef std::vector<SpriteData*> SpritePtrList;
 
             /**
-             * Sorts the sprites.
-             */
-            void SortSprites();
-
-            /**
              * A layer of a background.
              */
             struct Layer{

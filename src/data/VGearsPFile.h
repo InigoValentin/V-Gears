@@ -65,20 +65,6 @@ namespace VGears{
             virtual ~PFile();
 
             /**
-             * Indicates if the file is a valid P file.
-             *
-             * @return True if the file is a valid P file, false otherwise.
-             */
-            virtual bool IsValid();
-
-            /**
-             * Indicates if the poligons definitions are valid.
-             *
-             * @return True if all the poligon definitions are valid, false otherwise.
-             */
-            virtual bool IsPolygonDefinitionListValid();
-
-            /**
              * Adds a resource group.
              *
              * A resource group includes a bone, a mesh and a graphical resource.

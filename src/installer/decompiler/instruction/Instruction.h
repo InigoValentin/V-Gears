@@ -295,27 +295,11 @@ class Instruction : public RefCounted {
         ValuePtr GetParam(uint32 index) const;
 
         /**
-         * Sets the instructions parameters.
-         *
-         * @param[in] params The list of instruction parameters.
-         */
-        void SetParams(std::vector<ValuePtr> params);
-
-        /**
          * Adds a parameter to the instructions.
          *
          * @param[in] value The parameter to add.
          */
         void AddParam(ValuePtr value);
-
-        /**
-         * Retrieves metadata for code generation.
-         *
-         * See the extended documentation for details.
-         *
-         * @return Code generator metadata.
-         */
-        std::string GetCodeGenData() const;
 
         /**
          * Sets metadata for code generation.

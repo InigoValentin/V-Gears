@@ -116,9 +116,4 @@ namespace VGears{
         return NameLookup::model(base_name) + EXT_MESH;
     }
 
-    Ogre::SkeletonPtr HRCFile::GetSkeleton(void) const{
-        skeleton_->load();
-        return skeleton_;
-    }
-
 }

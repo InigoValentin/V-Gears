@@ -53,13 +53,6 @@ class ConfigCmdHandler : public Ogre::Singleton<ConfigCmdHandler>{
         );
 
         /**
-         * Executes a command.
-         *
-         * @param[in] cmd_string The command, in string format.
-         */
-        void ExecuteString( const Ogre::String& cmd_string );
-
-        /**
          * Finds a command by name.
          *
          * @param[in] name Name of the command.

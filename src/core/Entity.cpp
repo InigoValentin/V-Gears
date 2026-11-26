@@ -375,11 +375,7 @@ void Entity::SetMoveAutoSpeed(const float speed){move_auto_speed_ = speed;}
 
 float Entity::GetMoveAutoSpeed() const{return move_auto_speed_;}
 
-void Entity::SetMoveWalkSpeed(const float speed){move_walk_speed_ = speed;}
-
 float Entity::GetMoveWalkSpeed() const{return move_walk_speed_;}
-
-void Entity::SetMoveRunSpeed(const float speed){move_run_speed_ = speed;}
 
 float Entity::GetMoveRunSpeed() const{return move_run_speed_;}
 

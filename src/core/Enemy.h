@@ -237,13 +237,6 @@ class Enemy{
         void SetMoney(const unsigned int money);
 
         /**
-         * Retrieves the enemy animation IDs.
-         *
-         * @return The list of animation IDs
-         */
-        std::vector<unsigned int> GetAnimations() const;
-
-        /**
          * Adds an animation for the enemy.
          *
          * @param[in] animation Animation ID.
@@ -265,13 +258,6 @@ class Enemy{
         void AddAttack(const Attack attack);
 
         /**
-         * Retrieves the enemy possible item drops.
-         *
-         * @return List of items that can be dropped by the enemy.
-         */
-        std::vector<Item> GetDrop() const;
-
-        /**
          * Adds an item drop for the enemy.
          *
          * @param[in] item The dropable item.
@@ -279,25 +265,11 @@ class Enemy{
         void AddDrop(const Item item);
 
         /**
-         * Retrieves the list of the enemy elemental affinities.
-         *
-         * @return The list of elemental affinities.
-         */
-        std::vector<Element> GetElements() const;
-
-        /**
          * Adds an elemental affinity to the monster.
          *
          * @param[in] element Elemental affinity.
          */
         void AddElement(const Element element);
-
-        /**
-         * Retrieves the list of status immunities.
-         *
-         * @return The list of status immunities.
-         */
-        std::vector<Immunity> GetImmunities() const;
 
         /**
          * Adds an immunity to the monster.
@@ -324,13 +296,6 @@ class Enemy{
         void AddManipulateAttack(const unsigned int attack);
 
         /**
-         * Retrieves the enemy possible item stelas.
-         *
-         * @return List of items that can be stolen from the enemy.
-         */
-        std::vector<Item> GetSteal() const;
-
-        /**
          * Adds an item steal to the enemy.
          *
          * @param[in] item The stealableitem.
@@ -350,13 +315,6 @@ class Enemy{
          * @param[in] morph ID of the item the enemy can be morphed into, -1 if none.
          */
         void SetMorph(const int morph);
-
-        /**
-         * Retrieves the multiplier for the damage the enemy receives when attacked from the back.
-         *
-         * @return Back attack damage multiplier.
-         */
-        float GetBackDamage() const;
 
         /**
          * Sets the multiplier for the damage the enemy receives when attacked from the back.
@@ -471,13 +429,6 @@ class Enemy{
         unsigned int GetMeva() const;
 
         /**
-         * Sets the enemy's magic evasion stat.
-         *
-         * @param[in] meva The magic evasion stat.
-         */
-        void SetMeva(const unsigned int meva);
-
-        /**
          * Retrieves the enemy's current HP.
          *
          * @return The current HP.
@@ -553,13 +504,6 @@ class Enemy{
         Ogre::Vector3& GetPos();
 
         /**
-         * Sets the enemy position in the battlefield.
-         *
-         * @param[in] pos The enemy position (x, y, z).
-         */
-        void SetPos(const Ogre::Vector3 &pos);
-
-        /**
          * Retrieves the enemy position.
          *
          * @return The X, Y and Z coordinates for Lua scripts.
@@ -572,13 +516,6 @@ class Enemy{
          * @return True if the enemy is in the front row. false if not.
          */
         bool IsFront() const;
-
-        /**
-         * Sets the enemy in or out the front row.
-         *
-         * @param[in] front True to set the enemy in the front row, false for the back row.
-         */
-        void SetFront(bool front);
 
         /**
          * Checks the enemy visibility.
@@ -602,45 +539,11 @@ class Enemy{
         bool IsTargeteable() const;
 
         /**
-         * Determines whether the enemy can be targeted.
-         *
-         * @param[in] targeteable True to allow targeting the enemy false to prevent it.
-         */
-        void SetTargeteable(bool targeteable);
-
-        /**
          * Checks whether the enemy's main script is active.
          *
          * @return True if the script is active, false if not.
          */
         bool IsActive() const;
-
-        /**
-         * Activates or deactivates the enemy main script.
-         *
-         * @param[in] active True to activate the script, false to deactivate it.
-         */
-        void SetActive(bool active);
-
-        /**
-         * Retrieves the flags for enemy covering.
-         *
-         * {@see https://wiki.ffrtt.ru/index.php/FF7/Battle/Battle_Scenes#Binary_.22Cover_Flags.22}
-         * for more info about cover flags.
-         *
-         * @return A string with five 0s or 1s indicating the cover flags.
-         */
-        std::string GetCover() const;
-
-        /**
-         * Sets the flags for enemy covering.
-         *
-         * {@see https://wiki.ffrtt.ru/index.php/FF7/Battle/Battle_Scenes#Binary_.22Cover_Flags.22}
-         * for more info about cover flags.
-         *
-         * @param[in] cover A string with five 0s or 1s indicating the cover flags.
-         */
-        void SetCover(std::string cover);
 
         /**
          * Retrieves the number of attacks of the enemy.

@@ -196,14 +196,6 @@ namespace VGears{
             void ReadUInt8(Ogre::DataStreamPtr &stream, uint8 &dest);
 
             /**
-             * Reads bytes from a stream and evaluates them as a float.
-             *
-             * @param[in] stream Input data.
-             * @param[out] dest The evaluated number.
-             */
-            void ReadFloat(Ogre::DataStreamPtr &stream, float &dest);
-
-            /**
              * @todo Understand and document.
              */
             void ReadEndString(

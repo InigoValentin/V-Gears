@@ -42,8 +42,6 @@ namespace VGears{
 
     ModelListFile::ModelList&ModelListFile::GetModels(){return models_;}
 
-    uint16 ModelListFile::GetScale() const{return scale_;}
-
     void ModelListFile::SetScale(uint16 scale){scale_ = scale;}
 
 }

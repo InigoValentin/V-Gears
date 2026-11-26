@@ -77,29 +77,6 @@ ParticleSystem* ParticleSystemManager::GetParticleSystemTemplate(const Ogre::Str
     return 0;
 }
 
-void ParticleSystemManager::ParticleSystemTemplateNames(std::vector<Ogre::String>& v){
-    ParticleSystemTemplateMap::iterator it;
-    ParticleSystemTemplateMap::iterator it_end = particle_system_templates_.end();
-    for (it = particle_system_templates_.begin(); it != it_end; ++ it) v.push_back((*it).first);
-}
-
-ParticleSystem* ParticleSystemManager::CreateParticleSystem(
-  const Ogre::String& name, const Ogre::String& template_name
-){
-    Ogre::NameValuePairList params;
-    params["template_name"] = template_name;
-    ParticleSystem* system = static_cast<ParticleSystem*>(
-      Ogre::Root::getSingleton().getSceneManager("Scene")->createMovableObject(
-        name, ParticleSystemFactory::FACTORY_TYPE_NAME, &params
-      )
-    );
-    return system;
-}
-
-void ParticleSystemManager::DestroyParticleSystem(ParticleSystem* particle_system){
-    Ogre::Root::getSingleton().getSceneManager("Scene")->destroyMovableObject(particle_system);
-}
-
 ParticleTechnique* ParticleSystemManager::CreateTechnique(){
     ParticleTechnique* technique = new ParticleTechnique();
     technique->CreateRenderer("Entity"); // Set default renderer

@@ -46,17 +46,7 @@ bool ConfigVar::GetB() const{return value_b_;}
 
 Ogre::String ConfigVar::GetS() const{return value_s_;}
 
-void ConfigVar::SetI(int value){
-    value_s_ = Ogre::StringConverter::toString(value);
-    UpdateVariables();
-}
-
 void ConfigVar::SetF(float value){
-    value_s_ = Ogre::StringConverter::toString(value);
-    UpdateVariables();
-}
-
-void ConfigVar::SetB(bool value){
     value_s_ = Ogre::StringConverter::toString(value);
     UpdateVariables();
 }

@@ -135,23 +135,6 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
         void ClearWorld() override;
 
         /**
-         * Pauses currently playing music.
-         *
-         * If the manager is in battle mode, the battle music player will be paused. If not, the
-         * field or world map player will be paused. Playback can be resumed by calling
-         * {@see MusicResume}.
-         */
-        void MusicPause();
-
-        /**
-         * resumes currently paused music.
-         *
-         * If the manager is in battle mode, the battle music player will be resumed. If not, the
-         * field or world map player will be resumed.
-         */
-        void MusicResume();
-
-        /**
          * Plays a music track.
          *
          * To be called from Lua scripts
@@ -489,22 +472,6 @@ class AudioManager : public Manager, public Ogre::Singleton<AudioManager>{
          * @todo Verify this comment.
          */
         const bool Init();
-
-        /**
-         * Handles errors
-         *
-         * @return nullptr
-         * @todo Implement and get error info.
-         */
-        const char* ALError();
-
-        /**
-         * Handles errors
-         *
-         * @return nullptr
-         * @todo Implement and get error info.
-         */
-        const char* ALCError( const ALCdevice* device );
 
         /**
          * Updates the audio manager while on the field.

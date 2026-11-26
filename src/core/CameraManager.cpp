@@ -326,16 +326,6 @@ Ogre::Camera* CameraManager::GetCurrentCamera(){return camera_;}
 
 Ogre::Viewport* CameraManager::getViewport(){return viewport_;}
 
-void CameraManager::EnableWireFrame(bool enable){
-    if (camera_){
-        //camera_->setPolygonMode(Ogre::PM_WIREFRAME);
-        //camera_->rotate(
-        //  Ogre::Vector3::UNIT_Z, Ogre::Radian(Ogre::Degree(180))
-        //);
-        camera_->setFarClipDistance(900000000);
-    }
-}
-
 void CameraManager::ScriptSetCamera(
   const int x, const int y, const int z, const int d_x, const int d_y, const int d_z
 ){

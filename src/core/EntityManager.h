@@ -448,13 +448,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void SetPlayerMoveRotation(const Ogre::Radian rotation);
 
         /**
-         * Checks if random battle encounters are active in the field.
-         *
-         * @return True if random battles can occur, false otherwise.
-         */
-        bool GetRandomEncounters();
-
-        /**
          * Gets the multiplier of the random encounter rate (the encounter_multiplier cvar).
          *
          * @return The multiplier. 0 prevents random encounters.
@@ -474,20 +467,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @param[in] active True to enable encounters, false to deactivate them.
          */
         void SetRandomEncounters(bool active);
-
-        /**
-         * Get the encounter rate for the field.
-         *
-         * @return The encounter rate, between 0 and 1 (both included).
-         */
-        float GetEncounterRate();
-
-        /**
-         * Sets the battle encounter rate.
-         *
-         * @param[in] rate The encounter rate (0-1).
-         */
-        void SetEncounterRate(float rate);
 
         /**
          * Removes the random encounter tables of the field.
@@ -589,13 +568,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @param[in] char_id The character ID.
          */
         void SetEntityToCharacter(const char* entity_name, unsigned int char_id);
-
-        /**
-         * Retrieves the entity associated to the 3D background.
-         *
-         * @return The 3D background entity. nullptr if not set, of if the manager is in field mode.
-         */
-        Entity* GetBackground3D() const;
 
         /**
          * Sets the 3D model for the background.
@@ -778,14 +750,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * not solid, always false. If the manager is in battle mode, it will always return false.
          */
         bool CheckSolidCollisions(Entity* entity, Ogre::Vector3& position);
-
-        /**
-         * Sets an entity direction
-         *
-         * @param[in] entity Entity whose direction is to be set.
-         * @param[in] vector Direction vector.
-         */
-        void SetEntityDirectionByVector(Entity* entity, const Ogre::Vector2& vector);
 
         /**
          * Checks for entity triggers near a entity.

@@ -368,14 +368,6 @@ class UiWidget{
         void SetX(const float percent, const float x);
 
         /**
-         * Retrieves the X coordinate for the widget.
-         *
-         * @param[out] percent @todo
-         * @param[out] x The X coordinate will be loaded here.
-         */
-        void GetX(float& percent, float& x);
-
-        /**
          * Sets the Y coordinate for the widget.
          *
          * @param[in] percent @todo

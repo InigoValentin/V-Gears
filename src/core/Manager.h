@@ -70,15 +70,6 @@ class Manager{
         Module GetModule() const;
 
         /**
-         * Checks the currently selected module.
-         *
-         * @param[in] module The module to check.
-         * @return True if the currently selected module matches the module to check, false
-         * otherwise.
-         */
-        bool IsModule(const Module module) const;
-
-        /**
          * Checks if the currently selected module is the field module.
          *
          * @return True if the currently selected module is the field module, false otherwise.
@@ -201,15 +192,6 @@ class Manager{
          * Clear all world map information in the manager.
          */
         virtual void ClearWorld() = 0;
-
-        /**
-         * Clears the manager.
-         *
-         * Clears the entity manager for every module. Check {@see ClearField()},
-         * {@see ClearBattle()}, {@see ClearWorld()} for information about what this does
-         * depending on the currently loaded module.
-         */
-        void ClearAll();
 
         /**
          * Handles game pausing.

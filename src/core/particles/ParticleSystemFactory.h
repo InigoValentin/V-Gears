@@ -46,13 +46,6 @@ class ParticleSystemFactory : public Ogre::MovableObjectFactory{
          */
         const Ogre::String& getType() const;
 
-        /**
-         * Destroys a particle system.
-         *
-         * @param[in,out] obj System to destroy.
-         */
-        void DestroyInstance(Ogre::MovableObject* obj);
-
     private:
 
         /**

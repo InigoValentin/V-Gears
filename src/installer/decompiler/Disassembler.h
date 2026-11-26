@@ -20,7 +20,6 @@
 #include "common/BinaryReader.h"
 #include "DecompilerException.h"
 #include "instruction/Instruction.h"
-#include "ObjectFactory.h"
 
 /**
  * Base class for disassemblers.
@@ -55,15 +54,6 @@ class Disassembler{
          */
         void Disassemble();
 
-        /**
-         * Outputs the disassembled code.
-         *
-         * Disassembles code if this has not already been done.
-         *
-         * @param[out] output The output stream.
-         */
-        void DumpDisassembly(std::ostream &output);
-
     protected:
 
         /**
@@ -73,13 +63,6 @@ class Disassembler{
          * @throws std::exception on other failures.
          */
         virtual void DoDisassemble() = 0;
-
-        /**
-         * Outputs the disassembled code.
-         *
-         * @param[out] output The output stream.
-         */
-        virtual void DoDumpDisassembly(std::ostream &output);
 
         /**
          * Read parameters and associate them with an instruction.

@@ -84,13 +84,6 @@ class BinGZipFile : public File{
          */
         static bool Inflate(const u8* data, size_t size, std::vector<u8>& out, std::string& error);
 
-        /**
-         * Counts the number of files packed in the compressed BIN file.
-         *
-         * @return The number of files.
-         */
-        u32 GetNumberOfFiles();
-
     private:
 
         /**

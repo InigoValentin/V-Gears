@@ -29,22 +29,6 @@ void WorldCodeGenerator::OnEndFunction(const Function&){
     AddOutputLine("end", true, false);
 }
 
-const InstPtr WorldCodeGenerator::FindFirstCall(){
-    ConstInstIterator it = cur_group_->start;
-    do{
-        if ((*it)->IsFuncCall() || (*it)->IsKernelCall()) return *it;
-    } while (it ++ != cur_group_->end);
-    return *cur_group_->start;
-}
-
-const InstPtr WorldCodeGenerator::FindLastCall(){
-    ConstInstIterator it = cur_group_->end;
-    do {
-        if ((*it)->IsFuncCall() || (*it)->IsKernelCall()) return *it;
-    } while (it -- != cur_group_->start);
-    return *cur_group_->end;
-}
-
 void WorldCodeGenerator::ProcessSpecialMetadata(const InstPtr inst, char c, int pos){}
 
 void WorldCodeGenerator::ProcessUnstructuredCondJump(InstVec& insts, const InstPtr inst){

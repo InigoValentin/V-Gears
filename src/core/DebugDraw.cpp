@@ -179,45 +179,6 @@ void DebugDraw::Line3d(const Ogre::Vector3& point1, const Ogre::Vector3& point2)
 }
 
 
-void DebugDraw::Triangle3d(
-  const Ogre::Vector3& point1, const Ogre::Vector3& point2, const Ogre::Vector3& point3
-){
-    if (triangle_3d_render_operation_.vertexData->vertexCount + 3 > triangle_3d_max_vertex_){
-        LOG_ERROR(
-          "Max number of 3d triangles reached. Can't create more than "
-          + Ogre::StringConverter::toString(triangle_3d_max_vertex_ / 3) + " 3d triangles."
-        );
-        return;
-    }
-    float* write_iterator = static_cast<float*>(triangle_3d_vertex_buffer_->lock(
-        Ogre::HardwareBuffer::HBL_NORMAL
-    ));
-    write_iterator += triangle_3d_render_operation_.vertexData->vertexCount * 7;
-    *write_iterator ++ = point1.x;
-    *write_iterator ++ = point1.y;
-    *write_iterator ++ = point1.z;
-    *write_iterator ++ = colour_.r;
-    *write_iterator ++ = colour_.g;
-    *write_iterator ++ = colour_.b;
-    *write_iterator ++ = colour_.a;
-    *write_iterator ++ = point2.x;
-    *write_iterator ++ = point2.y;
-    *write_iterator ++ = point2.z;
-    *write_iterator ++ = colour_.r;
-    *write_iterator ++ = colour_.g;
-    *write_iterator ++ = colour_.b;
-    *write_iterator ++ = colour_.a;
-    *write_iterator ++ = point3.x;
-    *write_iterator ++ = point3.y;
-    *write_iterator ++ = point3.z;
-    *write_iterator ++ = colour_.r;
-    *write_iterator ++ = colour_.g;
-    *write_iterator ++ = colour_.b;
-    *write_iterator ++ = colour_.a;
-    triangle_3d_render_operation_.vertexData->vertexCount += 3;
-    triangle_3d_vertex_buffer_->unlock();
-}
-
 void DebugDraw::Quad(
   const float x1, const float y1, const float x2, const float y2,
   const float x3, const float y3, const float x4, const float y4

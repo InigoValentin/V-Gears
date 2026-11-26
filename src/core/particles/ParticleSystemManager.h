@@ -60,30 +60,6 @@ class ParticleSystemManager: public Ogre::Singleton<ParticleSystemManager>{
         );
 
         /**
-         * Gets all template names.
-         *
-         * @param[out] v List where the names will be loaded.
-         */
-        void ParticleSystemTemplateNames(std::vector<Ogre::String>& v);
-
-        /**
-         * Creates a particle system.
-         *
-         * @param[in] name Name for the template system.
-         * @param[in] template_name Name for the system template.
-         */
-        ParticleSystem* CreateParticleSystem(
-          const Ogre::String& name, const Ogre::String& template_name
-        );
-
-        /**
-         * Destroys a particle system.
-         *
-         * @param[out] particle_system Particle system to destroy.
-         */
-        void DestroyParticleSystem(ParticleSystem* particle_system);
-
-        /**
          * Creates a new technique.
          *
          * @return The new technique.

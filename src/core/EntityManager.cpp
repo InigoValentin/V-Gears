@@ -551,14 +551,6 @@ void EntityManager::RemoveWorldMapEntity(const Ogre::String& name){
     }
 }
 
-Entity* EntityManager::GetBackground3D() const{
-    if (IsFieldModule()){
-        LOG_WARNING("Tried to retrieve a 3D background while the EntityManager is in field mode.");
-        return nullptr;
-    }
-    return background_3d_;
-}
-
 void EntityManager::SetBackground3D(const Ogre::String& name, const Ogre::String& file_name){
     if (IsFieldModule()){
         LOG_ERROR("Tried to add a 3D background while the EntityManager is in field mode.");
@@ -949,15 +941,11 @@ void EntityManager::SetPlayerMoveRotation(const Ogre::Radian rotation){
     player_move_rotation_ = rotation;
 }
 
-bool EntityManager::GetRandomEncounters(){return random_encounters_;}
-
 float EntityManager::GetEncounterMultiplier() const{return cv_encounter_multiplier.GetF();}
 
 bool EntityManager::IsDebugEncounters() const{return cv_debug_encounters.GetB();}
 
 void EntityManager::SetRandomEncounters(bool active){random_encounters_ = active;}
-
-float EntityManager::GetEncounterRate(){return encounter_rate_;}
 
 void EntityManager::HideFieldEntities(){
     entities_hidden_by_battle_.clear();
@@ -1072,12 +1060,6 @@ void EntityManager::UpdateEncounters(const bool walked){
         ScriptManager::getSingleton().RunString("Encounter.start(" + std::to_string(battle) + ")");
         return;
     }
-}
-
-void EntityManager::SetEncounterRate(float rate){
-    if (rate >= 1.0f) encounter_rate_ = 1.0f;
-    else if (rate <= 0.0f) encounter_rate_ = 0.0f;
-    else encounter_rate_ = rate;
 }
 
 bool EntityManager::IsStartKeyRead() const{

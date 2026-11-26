@@ -91,14 +91,6 @@ namespace VGears{
         }
     }
 
-    void BackgroundFile::SortSprites(){
-        for (size_t i(0); i < LAYER_COUNT; ++ i){
-            if (layers_[i].enabled){
-                std::sort(layers_[i].sprites.begin(), layers_[i].sprites.end(), SpriteSorter);
-            }
-        }
-    }
-
     Ogre::Image* BackgroundFile::CreateImage(const PaletteFilePtr &palette){
         assert(palette != nullptr);
         SpritePtrList sprites;

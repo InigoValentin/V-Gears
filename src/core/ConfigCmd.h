@@ -70,13 +70,6 @@ class ConfigCmd{
          *
          * @return The command parameter description.
          */
-        const Ogre::String& GetParamsDescription() const;
-
-        /**
-         * Retrieves the command parameter description.
-         *
-         * @return The command parameter description.
-         */
         ConfigCmdParams GetHandler() const;
 
         /**

@@ -39,13 +39,11 @@ set(SOURCE_FILES
     data/VGearsBackgroundFile.cpp
     data/VGearsBackgroundFileManager.cpp
     data/VGearsBackgroundFileSerializer.cpp
-    data/VGearsBackgroundTextureLoader.cpp
     data/VGearsCameraMatrixFile.cpp
     data/VGearsCameraMatrixFileManager.cpp
     data/VGearsCameraMatrixFileSerializer.cpp
     data/VGearsFLevelBackground2DLoader.cpp
     data/VGearsFLevelFile.cpp
-    data/VGearsFLevelFileManager.cpp
     data/VGearsFLevelFileSerializer.cpp
     data/VGearsFLevelTextureLoader.cpp
     data/VGearsHRCFile.cpp
@@ -81,7 +79,6 @@ set(SOURCE_FILES
     data/worldmap/MapFileManager.cpp
     data/worldmap/MapFileSerializer.cpp
     data/worldmap/TxzFile.cpp
-    data/worldmap/TxzFileManager.cpp
     data/worldmap/TxzFileSerializer.cpp
     common/Application.cpp
     common/File.cpp
@@ -175,12 +172,9 @@ set(SOURCE_FILES
     installer/WorldInstaller.cpp
     installer/common/BinGZipFile.cpp
     installer/common/DrawSkeleton.cpp
-    installer/common/FontFile.cpp
     installer/common/Logger.cpp
     installer/common/OgreBase.cpp
     installer/common/OgreGenUtilites.cpp
-    installer/common/Surface.cpp
-    installer/common/TimToVram.cpp
     installer/common/Vram.cpp
     installer/decompiler/CodeGenerator.cpp
     installer/decompiler/ControlFlow.cpp
@@ -211,19 +205,12 @@ set(SOURCE_FILES
     installer/decompiler/field/instruction/FieldWalkmeshInstruction.cpp
     installer/decompiler/field/instruction/FieldWindowInstruction.cpp
     installer/decompiler/instruction/BinaryOpStackInstruction.cpp
-    installer/decompiler/instruction/BoolNegateStackInstruction.cpp
-    installer/decompiler/instruction/CallInstruction.cpp
     installer/decompiler/instruction/CondJumpInstruction.cpp
-    installer/decompiler/instruction/DupStackInstruction.cpp
     installer/decompiler/instruction/Instruction.cpp
     installer/decompiler/instruction/KernelCallInstruction.cpp
-    installer/decompiler/instruction/KernelCallStackInstruction.cpp
     installer/decompiler/instruction/LoadInstruction.cpp
-    installer/decompiler/instruction/ReturnInstruction.cpp
     installer/decompiler/instruction/StackInstruction.cpp
     installer/decompiler/instruction/StoreInstruction.cpp
-    installer/decompiler/instruction/UnaryOpPostfixStackInstruction.cpp
-    installer/decompiler/instruction/UnaryOpPrefixStackInstruction.cpp
     installer/decompiler/instruction/UncondJumpInstruction.cpp
     installer/decompiler/world/WorldDisassembler.cpp
     installer/decompiler/world/WorldCodeGenerator.cpp
@@ -249,7 +236,6 @@ set(SOURCE_FILES
     map/VGearsWalkmeshFileXMLSerializer.cpp
     map/FinalFantasy7/FF7WalkmeshFileSerializer.cpp
     modules/worldmap/WorldMapModule.cpp
-    viewer/ViewerModule.cpp
 )
 
 

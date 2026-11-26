@@ -126,22 +126,6 @@ class DebugDraw : public Ogre::RenderQueueListener, public Ogre::Singleton<Debug
         void Line3d(const Ogre::Vector3& point1, const Ogre::Vector3& point2);
 
         /**
-         * Draws a triangle in 3D space.
-         *
-         * If the debug vertex limit has been reached or if it would be
-         * exceeded by drawing the triangle, a warning message will be printed
-         * and nothing will be done.
-         *
-         * @param[in] point1 A triangle vertex point.
-         * @param[in] point2 A triangle vertex point.
-         * @param[in] point3 A triangle vertex point.
-         */
-        void Triangle3d(
-          const Ogre::Vector3& point1, const Ogre::Vector3& point2,
-          const Ogre::Vector3& point3
-        );
-
-        /**
          * Draws a quad in 2D space.
          *
          * If the debug vertex limit has been reached or if it would be

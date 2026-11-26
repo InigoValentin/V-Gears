@@ -150,11 +150,6 @@ float ParseKeyFrameTime(const float length, const Ogre::String& string){
     return res;
 }
 
-const Ogre::String CreateAutoName(const Ogre::String prefix){
-    static int enumerator = 0;
-    return prefix + Ogre::StringConverter::toString(enumerator ++);
-}
-
 /**
  * Relates key codes and their names.
  */

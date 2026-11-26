@@ -57,14 +57,6 @@ namespace VGears{
         if (colour & BIT_MASK_ALPHA) dest.a = 1.0f;
     }
 
-    void PaletteFileSerializer::ConvertColour(uint16 &colour) const{
-        colour
-          = ((colour & BIT_MASK_RED) << 10)
-            | (colour & BIT_MASK_GREEN)
-            | ((colour & BIT_MASK_BLUE) >> 10)
-            | ((colour) & BIT_MASK_ALPHA);
-    }
-
     void PaletteFileSerializer::readObject(
       Ogre::DataStreamPtr &stream, Page &dest
     ){

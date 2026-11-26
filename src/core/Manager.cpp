@@ -25,8 +25,6 @@ Manager::~Manager(){}
 
 Manager::Module Manager::GetModule() const{return module_;}
 
-bool Manager::IsModule(Module module) const{return (module_ == module);}
-
 bool Manager::IsFieldModule() const{return (module_ == Module::FIELD);}
 
 bool Manager::IsBattleModule() const{return (module_ == Module::BATTLE);}
@@ -106,12 +104,6 @@ void Manager::Clear(const Module module){
             ClearWorld();
             break;
     }
-}
-
-void Manager::ClearAll(){
-    ClearField();
-    ClearBattle();
-    ClearWorld();
 }
 
 void Manager::ScriptSetPaused(const bool paused){paused_ = paused;}

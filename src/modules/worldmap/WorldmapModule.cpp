@@ -1535,10 +1535,6 @@ namespace VGears {
         return found;
     }
 
-    WorldmapModule::VehicleType WorldmapModule::GetCurrentVehicle() const{
-      return current_vehicle_;
-    }
-
     void WorldmapModule::ClearVehicleTerrains(){
         active_vehicle_terrain_types_.clear();
     }

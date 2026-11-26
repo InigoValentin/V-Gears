@@ -83,13 +83,6 @@ namespace VGears{
             bool initOgreHeadless();
 
             /**
-             * Tells if Ogre was initialized without a render system (see {@see initOgreHeadless}).
-             *
-             * @return True if there is no render system.
-             */
-            bool IsHeadless() const{return _headless;}
-
-            /**
              * Retrieves the Ogre system main component.
              *
              * @return Pointer to the Ogre main component.
@@ -107,13 +100,6 @@ namespace VGears{
              * The overlay system (it must be added to a scene manager as a render queue listener to draw overlays).
              */
             Ogre::OverlaySystem* GetOverlaySystem(){return _overlay_system.get();}
-
-            /**
-             * Retrieves the Ogre resources file name.
-             *
-             * @return Ogre resource configuration file name.
-             */
-            const String& getResourcesFilename(void);
 
             /**
              * Retrieves the Ogre resource manager.

@@ -24,10 +24,6 @@ const Ogre::String& ParticleSystemFactory::getType() const{
     return FACTORY_TYPE_NAME;
 }
 
-void ParticleSystemFactory::DestroyInstance(Ogre::MovableObject* obj){
-    delete obj;
-}
-
 Ogre::MovableObject* ParticleSystemFactory::createInstanceImpl(
   const Ogre::String& name, const Ogre::NameValuePairList* params
 ){

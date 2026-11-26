@@ -177,17 +177,6 @@ class EntityTrigger{
         void ResetNearEventCooldown();
 
         /**
-         * Sets the cooldown time required between calls to on_near event to 0.
-         *
-         * After the on_near script is run, a cooltime of a number of frames is set before running
-         * it again. This is because most of the time this trigger checks for a key, and if its
-         * pressed, is run multiple times.
-         *
-         * Must be called whent the playable entity gets away from the line
-         */
-        void ClearNearEventCooldown();
-
-        /**
          * Clears the proximity statuses and event triggering statuses.
          *
          * Can be called once the playable entity leaves the line.

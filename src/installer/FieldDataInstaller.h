@@ -518,17 +518,6 @@ class FieldDataInstaller{
         static bool WillCrash(const Ogre::String& resource_name);
 
         /**
-         * Checks if a map is a test field.
-         *
-         * It uses a hardcoded list of maps that are known to be test maps.
-         * Unused maps are considered to be test maps.
-         *
-         * @param[in] resource_name The name of the map file to test.
-         * @return True if the map is a test map, false otherwise.
-         */
-        static bool IsTestField(const Ogre::String& resource_name);
-
-        /**
          * Collects the scale factor from a map.
          *
          * @param[in] field The field to collect from.

@@ -119,23 +119,15 @@ unsigned int Enemy::GetMoney() const{return money_;}
 
 void Enemy::SetMoney(const unsigned int money){money_ = money;}
 
-std::vector<unsigned int> Enemy::GetAnimations() const{return animations_;}
-
 void Enemy::AddAnimation(const unsigned int animation){animations_.push_back(animation);}
 
 std::vector<Enemy::Attack> Enemy::GetAttacks() const{return attacks_;}
 
 void Enemy::AddAttack(const Attack attack){attacks_.push_back(attack);}
 
-std::vector<Enemy::Item> Enemy::GetDrop() const{return drop_;}
-
 void Enemy::AddDrop(const Item item){drop_.push_back(item);}
 
-std::vector<Enemy::Element> Enemy::GetElements() const{return elements_;}
-
 void Enemy::AddElement(const Element element){elements_.push_back(element);}
-
-std::vector<Enemy::Immunity> Enemy::GetImmunities() const{return immunities_;}
 
 void Enemy::AddImmunity(const Immunity immunity){immunities_.push_back(immunity);}
 
@@ -143,15 +135,11 @@ std::vector<unsigned int> Enemy::GetManipulateAttacks() const{return manipulate_
 
 void Enemy::AddManipulateAttack(const unsigned int attack){manipulate_attacks_.push_back(attack);}
 
-std::vector<Enemy::Item> Enemy::GetSteal() const{return steal_;}
-
 void Enemy::AddSteal(const Item item){steal_.push_back(item);}
 
 unsigned int Enemy::GetMorph() const{return morph_;}
 
 void Enemy::SetMorph(const int morph){morph_ = std::max(-1, morph);}
-
-float Enemy::GetBackDamage() const{return back_damage_;}
 
 void Enemy::SetBackDamage(const float back_damage){
     if (back_damage < 0.0f) back_damage_ = 0.0f;
@@ -188,8 +176,6 @@ void Enemy::SetEva(const unsigned int eva){eva_ = eva;}
 
 unsigned int Enemy::GetMeva() const{return meva_;}
 
-void Enemy::SetMeva(const unsigned int meva){meva_ = meva;}
-
 unsigned int Enemy::GetHp() const{return hp_;}
 
 void Enemy::SetHp(const unsigned int hp){hp_ = std::min(hp, hp_max_);}
@@ -214,15 +200,11 @@ void Enemy::SetMpMax(const unsigned int mp_max){
 
 Ogre::Vector3& Enemy::GetPos(){return pos_;}
 
-void Enemy::SetPos(const Ogre::Vector3 &pos){pos_ = pos;}
-
 std::tuple<float, float, float> Enemy::ScriptGetPos() const{
     return std::make_tuple(pos_.x, pos_.y, pos_.z);
 }
 
 bool Enemy::IsFront() const{return front_;}
-
-void Enemy::SetFront(bool front){front_ = front;}
 
 bool Enemy::IsVisible() const{return visible_;}
 
@@ -230,15 +212,7 @@ void Enemy::SetVisible(bool visible){visible_ = visible;}
 
 bool Enemy::IsTargeteable() const{return targeteable_;}
 
-void Enemy::SetTargeteable(bool targeteable){targeteable_ = targeteable;}
-
 bool Enemy::IsActive() const{return active_;}
-
-void Enemy::SetActive(bool active){active_ = active;}
-
-std::string Enemy::GetCover() const{return cover_;}
-
-void Enemy::SetCover(std::string cover){cover_ = cover;}
 
 int Enemy::ScriptGetAttackCount(){return attacks_.size();}
 

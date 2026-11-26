@@ -95,8 +95,6 @@ void EntityTrigger::DecreaseNearEventCooldown(){
 
 void EntityTrigger::ResetNearEventCooldown(){near_event_cooldown_ = NEAR_EVENT_COOLDOWN_FRAMES;}
 
-void EntityTrigger::ClearNearEventCooldown(){near_event_cooldown_ = 0;}
-
 void EntityTrigger::Clear(){
     approached_ = false;
     crossed_ = false;

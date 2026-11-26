@@ -41,8 +41,6 @@ class FieldMediaInstruction : public KernelCallInstruction{
 
     private:
 
-        void ProcessAKAO2(CodeGenerator* code_gen);
-
         void ProcessBMUSC(CodeGenerator* code_gen);
 
         void ProcessCMUSC(CodeGenerator* code_gen);

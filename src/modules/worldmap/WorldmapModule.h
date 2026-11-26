@@ -59,7 +59,6 @@ namespace VGears {
 
             bool frameStarted(const Ogre::FrameEvent& event) override;
 
-            VehicleType GetCurrentVehicle() const;
             void ClearVehicleTerrains();
             void AddVehicleTerrain(const char* terrain_name);
             Ogre::String GetTerrainTypeUnderEntity(const char* entity_name) const;

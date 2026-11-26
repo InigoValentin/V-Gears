@@ -30,19 +30,6 @@ namespace VGears {
         public:
 
             /**
-             * Block header of map files.
-             */
-            struct BlockHeader{
-                /**
-                 * Offset in this block of the compressed data.
-                 *
-                 * At the compressed data offset there is a uint32 containing
-                 * the size of the compressed LZS payload.
-                 */
-                uint32 compressed_data_offsets[16];
-            };
-
-            /**
              * Block header of a mesh section in map files.
              */
             struct BlockMeshHeader{

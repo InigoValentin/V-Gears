@@ -459,54 +459,6 @@ void CmdNFade(const Ogre::StringVector& params){
     );
 }
 
-/*
-void CmdViewer(const Ogre::StringVector& params){
-    if (params.size() == 2 || params.size() > 3){
-        Console::getSingleton().AddTextToOutput(
-          "Usage: /viewer [type_of_thing_to_view] [path_to_resource]"
-        );
-        return;
-    }
-    ModuleManager::getSingleton().RunViewer();
-    if (params.size() == 3){
-        ViewerModule* module
-          = (ViewerModule*)(ModuleManager::getSingleton().GetTopModule());
-
-        if (params[1] == "walkmesh") module->SetWalkmeshToLoad(params[2]);
-        else if (params[1] == "model") module->SetModelToLoad(params[2]);
-        else{
-            LOG_ERROR(
-              "Unsupported type \"" + params[1] + "\" in viewer command."
-            );
-        }
-    }
-}
-
-void CmdViewerCompletion(Ogre::StringVector& complete_params){
-    // models
-    complete_params.push_back("model");
-    Ogre::FileInfoListPtr resources
-      = Ogre::ResourceGroupManager::getSingleton().listResourceFileInfo("Game");
-    Ogre::FileInfoList resource_names = *resources;
-
-    Ogre::FileInfoList::iterator i = resource_names.begin();
-    for (; i != resource_names.end(); ++ i){
-        Ogre::String name;
-        Ogre::String ext;
-        Ogre::StringUtil::splitBaseFilename(i->filename, name, ext);
-        if (ext == "mesh") complete_params.push_back("model " + i->filename);
-    }
-
-    // walkmeshes
-    complete_params.push_back("walkmesh");
-    XmlMapsFile xml("./data/game_data/maps.xml");
-    Ogre::StringVector tmp;
-    xml.GetMapNames(tmp);
-    for (int i = 0; i < tmp.size(); ++i)
-        complete_params.push_back("walkmesh " + tmp[i]);
-}
-*/
-
 /**
  * Initializes all available commands.
  */
@@ -537,7 +489,4 @@ void ConfigCmdHandler::InitCmd(){
     AddCommand("screenshot", "Capture current screen content", "", CmdScreenshot, NULL);
     AddCommand("fade", "Start a screen fade", "<type> <r> <g> <b> <speed>", CmdFade, NULL);
     AddCommand("nfade", "Start a screen nfade", "<type> <r> <g> <b> <frames>", CmdNFade, NULL);
-    //AddCommand(
-    //  "viewer", "Run viewer module", "", CmdViewer, CmdViewerCompletion
-    //);
 }

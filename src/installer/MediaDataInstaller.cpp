@@ -1624,23 +1624,6 @@ void MediaDataInstaller::WriteMusicsIndex(){
     xml.SaveFile(data_dir_ + "audio/musics/_musics.xml");
 }
 
-int MediaDataInstaller::InstallVideosInit(){
-    // TODO: Look ofor anothe rvideo folders
-    processed_videos_ = 0;
-    const boost::filesystem::path movies_dir(output_dir_ + "/ff7/movies/");
-    if (!boost::filesystem::exists(movies_dir) || !boost::filesystem::is_directory(movies_dir)) return 0;
-
-    int total_videos = 0;
-    for (const auto& entry : boost::filesystem::directory_iterator(movies_dir)){
-        if (boost::filesystem::is_regular_file(entry.path())){
-            std::cout << entry.path().filename().string() << std::endl;
-            videos_.push_back(entry.path().string());
-            total_videos ++;
-        }
-    }
-    return total_videos;
-}
-
 void MediaDataInstaller::InstallVideos(){
     if (processed_videos_ < 0 || processed_videos_ >= videos_.size()) return;
     const std::string output_dir = data_dir_ + "video/";

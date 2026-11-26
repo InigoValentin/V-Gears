@@ -74,17 +74,6 @@ class WorldMapManager : public Manager, public Ogre::Singleton<WorldMapManager>{
          */
         void ClearWorld() override;
 
-        /**
-         * Adds a terrain block.
-         *
-         * @param[in] index Block index.
-         * @param[in] mesh Path to the mesh file.
-         * @param[in] pos Terrain position (x, y, z).
-         */
-        void AddTerrain(
-          const unsigned int id, const Ogre::String mesh, const Ogre::Vector3 pos
-        );
-
     private:
 
         /**

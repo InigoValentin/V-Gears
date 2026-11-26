@@ -154,17 +154,6 @@ class ParticlePool{
         };
 
         /**
-         * Releases all locked particles.
-         *
-         * It also resets the pool operator.
-         */
-        void ReleaseAllElements(){
-            // Move all elements from locked elements to released elements
-            released_.splice(released_.end(), locked_);
-            ResetIterator();
-        };
-
-        /**
          * Locks the released particle pointed by the iterator.
          *
          * The particle gets added to the end of the locked particle list.
@@ -186,15 +175,6 @@ class ParticlePool{
             // Move all elements from released elements to locked elements
             locked_.splice(locked_.end(), released_);
             ResetIterator();
-        };
-
-        /**
-         * Retrieves the list of released particles.
-         *
-         * @return List of released particles.
-         */
-        std::list<T*>& GetActiveElementsList(){
-            return released_;
         };
 
     protected:

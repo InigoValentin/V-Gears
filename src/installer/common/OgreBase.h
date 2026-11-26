@@ -382,8 +382,3 @@ class DisplayFrameListener :
  * @param[in] name Application title.
  */
 void InitializeOgreBase(const Ogre::String& name);
-
-/**
- * Destructs the Ogre system.
- */
-void DeinitializeOgreBase();

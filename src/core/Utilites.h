@@ -186,15 +186,6 @@ void ParsePercent(float& value_percent, float& value, const Ogre::String& string
 float ParseKeyFrameTime(const float length, const Ogre::String& string);
 
 /**
- * Creates a name.
- *
- * @param[in] prefix Name prefix.
- * @return PREFIX + "0".
- * @todo This seems so simple, am I missing something?
- */
-const Ogre::String CreateAutoName(const Ogre::String prefix);
-
-/**
  * Obtains a name from a key code.
  *
  * @param[in] key Key code.

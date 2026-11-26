@@ -228,16 +228,6 @@ namespace VGears{
             virtual void loadImpl(void) override;
 
             /**
-             * Loads the level models.
-             */
-            void LoadModels(void);
-
-            /**
-             * Loads the level animations
-             */
-            void LoadAnimations(const HRCFilePtr &model, const AnimationList &animations);
-
-            /**
              * Unloads the file.
              */
             virtual void unloadImpl(void) override;

@@ -59,29 +59,6 @@ class Engine {
         virtual std::unique_ptr<CodeGenerator> GetCodeGenerator(const InstVec& insts, std::ostream &output) = 0;
 
         /**
-         * Post-processing step after CFG analysis.
-         * @param[out] insts Vector to place the Instructions in.
-         * @param[in] graph Graph generated from the CFG analysis.
-         */
-        virtual void PostCFG(InstVec& insts, Graph graph);
-
-        /**
-         * Whether or not code flow analysis is supported for this engine.
-         *
-         * @return True if supported, false if not. If false is returned, code
-         * flow analysis should not take place.
-         */
-        virtual bool SupportsCodeFlow() const;
-
-        /**
-         * Whether or not code generation is supported for this engine.
-         *
-         * @return True if supported, false if not. If false is returned, code
-         * generation should not take place.
-         */
-        virtual bool SupportsCodeGen() const;
-
-        /**
          * Retrieves the names of all variants supported for this engine.
          *
          * If variants are not used by this engine, it will be empty (default

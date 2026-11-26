@@ -147,10 +147,6 @@ namespace VGears{
 
     const String& RSDFile::GetPolygonName() const{return polygon_name_;}
 
-    const String&RSDFile::GetMaterialName() const{return material_name_;}
-
-    const String& RSDFile::GetGroupName() const{return group_name_;}
-
     size_t RSDFile::GetTextureNameCount() const{return texture_names_.size();}
 
     RSDFile::TextureNameList& RSDFile::GetTextureNames(){return texture_names_;}

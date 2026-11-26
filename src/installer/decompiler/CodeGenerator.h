@@ -82,19 +82,6 @@ class CodeGenerator {
         LuaLanguage& GetLanguage();
 
         /**
-         * Writes a function call.
-         *
-         * @param[in] function_name The name of the function.
-         * @param[in] param_format Characters indicating the parameter format.
-         * 'b' for boolean parameters, 'n' for integers (treated as unsigned)
-         * or 'f' for floats.
-         * @param[in] params The list of parameters.
-         */
-        void WriteFunctionCall(
-          std::string function_name, std::string param_format, const std::vector<ValuePtr>& params
-        );
-
-        /**
          * Generates code from the provided graph and outputs it to stdout.
          *
          * @param[in] insts The list of instructions.
@@ -122,14 +109,6 @@ class CodeGenerator {
         void WriteTodo(std::string class_name, std::string instruction);
 
         /**
-         * Generate an assignment statement.
-         *
-         * @param[in] dst The variable being assigned to.
-         * @param[in] src The value being assigned.
-         */
-        void WriteAssignment(ValuePtr dst, ValuePtr src);
-
-        /**
          * Add an argument to the argument list.
          *
          * @param[in] arg The argument to add.
@@ -146,13 +125,6 @@ class CodeGenerator {
          * Unused.
          */
         virtual void ProcessSpecialMetadata(const InstPtr inst, char c, int pos);
-
-        /**
-         * Retrieves the argument list.
-         *
-         * @return The argument list.
-         */
-        virtual ValueList GetArgList();
 
         /**
          * Retrieves the order of operands for binary operations.

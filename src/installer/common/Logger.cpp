@@ -28,11 +28,7 @@ Ogre::String HexToString(int value, unsigned short width, char fill){
     return stream.str();
 }
 
-Ogre::String BoolToString(bool value){return Ogre::StringConverter::toString(value);}
-
 Ogre::String IntToString(int value){return Ogre::StringConverter::toString(value);}
-
-Ogre::String FloatToString(float value){return Ogre::StringConverter::toString(value);}
 
 Logger::Logger(const Ogre::String& log_file_name):
     log_file_(log_file_name){
@@ -42,8 +38,6 @@ Logger::Logger(const Ogre::String& log_file_name):
 Logger::~Logger(){}
 
 void Logger::Log(const Ogre::String& text){FileSystem::WriteFile(log_file_, text.c_str(), text.size());}
-
-void Logger::LogW(const Ogre::UTFString& text){FileSystem::WriteFile(log_file_, text.c_str(), text.size() * 2);}
 
 void Logger::Log(std::vector< unsigned char >& text){
     unsigned char* temp = new unsigned char[ text.size() ];

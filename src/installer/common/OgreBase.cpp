@@ -115,9 +115,3 @@ void InitializeOgreBase(const Ogre::String& name){
     camera->setAspectRatio(Ogre::Real(viewport->getActualWidth()) / Ogre::Real(viewport->getActualHeight()));
     LOGGER = new Logger("game.log");
 }
-
-void DeinitializeOgreBase(){
-    delete LOGGER;
-    delete root;
-    delete frame_listener;
-}

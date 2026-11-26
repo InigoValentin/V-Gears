@@ -43,11 +43,6 @@ Savemap* SavemapHandler::GetSavemap(unsigned int slot){
     return saved_savemaps_[slot];
 }
 
-std::vector<Savemap*> SavemapHandler::GetSavemaps(){
-    if (!savemaps_read_) ReadSavemaps();
-    return saved_savemaps_;
-}
-
 bool SavemapHandler::Save(unsigned int slot, const bool force){
     if (current_savemap_ == nullptr) return false;
     if (slot >= MAX_SAVE_SLOTS) return false;

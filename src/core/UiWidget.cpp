@@ -474,11 +474,6 @@ void UiWidget::SetX(const float percent, const float x){
     SetUpdateTransformation();
 }
 
-void UiWidget::GetX(float& percent, float& x){
-    percent = x_percent_;
-    x = x_;
-}
-
 void UiWidget::SetY(const float percent, const float y){
     y_percent_ = percent;
     y_ = y;

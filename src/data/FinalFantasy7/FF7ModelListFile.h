@@ -139,13 +139,6 @@ namespace VGears{
             typedef std::vector<ModelDescription>   ModelList;
 
             /**
-             * Retrieves the scale for the models.
-             *
-             * @return The scale.
-             */
-            virtual uint16 GetScale() const;
-
-            /**
              * Sets the scale for the models.
              *
              * @param[in] scale The scale.

@@ -96,36 +96,6 @@ namespace VGears{
           + bounding_boxes_.size() * sizeof(bounding_boxes_.front());
     }
 
-    bool PFile::IsValid(){return true && IsPolygonDefinitionListValid();}
-
-    bool PFile::IsPolygonDefinitionListValid(){
-        Ogre::Log::Stream log(Ogre::LogManager::getSingleton().stream());
-        size_t vertex_count(vertices_.size());
-        size_t normal_count(normals_.size());
-        size_t edge_count  (edges_.size());
-        for (size_t p(polygon_definitions_.size()); p --;){
-            const PolygonDefinition& def(polygon_definitions_[p]);
-            for (int i(3); i --;){
-                if (def.vertex[i] >= vertex_count){
-                    log << "Error: index to vertex is out of Bounds: polygon_definitions_[" << p
-                      << "].vertex[" << i << "]: " << def.vertex[i];
-                    return false;
-                }
-                if (def.normal[i] >= normal_count){
-                    log << "Error: index to normal is out of Bounds: polygon_definitions_[" << p
-                      << "].normal[" << i << "]: " << def.normal[i];
-                    return false;
-                }
-                if (def.edge[i] >= edge_count){
-                    log << "Error: index to edge is out of Bounds: polygon_definitions_[" << p
-                      << "].edge[" << i << "]: " << def.edge[i];
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     void PFile::AddGroups(Ogre::Mesh *mesh, const String &bone_name, const RSDFilePtr &rsd) const{
         const Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
         const String material_base_name(rsd->GetMaterialBaseName());

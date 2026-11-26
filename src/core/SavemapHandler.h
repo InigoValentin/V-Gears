@@ -59,11 +59,6 @@ class SavemapHandler : public Ogre::Singleton<SavemapHandler>{
         Savemap* GetSavemap(unsigned int slot);
 
         /**
-         * Retrieves a list of the saved maps.
-         */
-        std::vector<Savemap*> GetSavemaps();
-
-        /**
          * Copies the current savemap to a slot and writes the file.
          *
          * @param[in] slot Slot at which to save.

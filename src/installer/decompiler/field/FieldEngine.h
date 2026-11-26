@@ -233,28 +233,11 @@ class FieldEngine : public Engine{
         ) override;
 
         /**
-         * Post-processing actions to apply to the scripts.
-         *
-         * It actually does nothing. CFG stands for control flow group.
-         *
-         * @param[in] insts Instruction list.
-         * @param[in] graph Code graph.
-         */
-        virtual void PostCFG(InstVec &insts, Graph graph) override;
-
-        /**
          * Indicates if instructions are purely grouped.
          *
          * @return True if instructions are purely grouped. Always false.
          */
         virtual bool UsePureGrouping() const override;
-
-        /**
-         * Retrieves all entities in the map.
-         *
-         * @return A map of entities, with the name and index.
-         */
-        std::map<std::string, int> GetEntities() const;
 
         /**
          * Retrieves all non-line entities in the map.
@@ -311,13 +294,6 @@ class FieldEngine : public Engine{
          * @return True if it does.
          */
         bool PalettePagesAreDynamic() const;
-
-        /**
-         * Retrieves all entities in the map.
-         *
-         * @return A map of entities, with the name and index.
-         */
-        std::map<size_t, Entity> GetEntityIndexMap() const{return entity_index_map_;}
 
         /**
          * Adds a function to an entity.
@@ -433,40 +409,6 @@ class FieldEngine : public Engine{
         const std::string& GetScriptName() const;
 
     private:
-
-        /**
-         * Removes extraneous return statements.
-         *
-         * Useful for scripts that only contain one one return statement.
-         *
-         * @param[in,out] insts List of instructions to process. Extraneous
-         * return statements will be deleted from the instructions.
-         * @param[in] graph Code graph. Unused.
-         */
-        void RemoveExtraneousReturnStatements(InstVec& insts, Graph graph);
-
-        /**
-         * Removes trailing infinite loops.
-         *
-         * In FF7 some scripts ends with an infinite loop to keep it alive. In
-         * VGears this isn't required, and can cause infinite loops, so they
-         * can be removed.
-         *
-         * @param[in,out] insts List of instructions to proccess. Trailing
-         * infinite loops will be deleted from the instructions.
-         * @param[in] graph Code graph.
-         */
-        void RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph);
-
-        /**
-         * Tries to detect scripts with trailing infinite loops.
-         *
-         * In FF7 some scripts ends with an infinite loop to keep it alive. In
-         * VGears this isn't required, and can cause infinite loops, so they
-         * can be removed. This function marks them, so they can be deleted
-         * with @{see FieldEngine::RemoveTrailingInfiniteLoops}.
-         */
-        void MarkInfiniteLoopGroups(InstVec& insts, Graph graph);
 
         /**
          * The script formatter.

@@ -33,12 +33,9 @@ set(INSTALLER_SOURCE_FILES
     WorldInstaller.cpp
     common/BinGZipFile.cpp
     common/DrawSkeleton.cpp
-    common/FontFile.cpp
     common/Logger.cpp
     common/OgreBase.cpp
     common/OgreGenUtilites.cpp
-    common/Surface.cpp
-    common/TimToVram.cpp
     common/Vram.cpp
     data/AbFile.cpp
     data/BattleSceneFile.cpp
@@ -70,19 +67,12 @@ set(INSTALLER_SOURCE_FILES
     decompiler/field/instruction/FieldWindowInstruction.cpp
     decompiler/Graph.cpp
     decompiler/instruction/BinaryOpStackInstruction.cpp
-    decompiler/instruction/BoolNegateStackInstruction.cpp
-    decompiler/instruction/CallInstruction.cpp
     decompiler/instruction/CondJumpInstruction.cpp
-    decompiler/instruction/DupStackInstruction.cpp
     decompiler/instruction/Instruction.cpp
     decompiler/instruction/KernelCallInstruction.cpp
-    decompiler/instruction/KernelCallStackInstruction.cpp
     decompiler/instruction/LoadInstruction.cpp
-    decompiler/instruction/ReturnInstruction.cpp
     decompiler/instruction/StackInstruction.cpp
     decompiler/instruction/StoreInstruction.cpp
-    decompiler/instruction/UnaryOpPostfixStackInstruction.cpp
-    decompiler/instruction/UnaryOpPrefixStackInstruction.cpp
     decompiler/instruction/UncondJumpInstruction.cpp
     decompiler/LuaLanguage.cpp
     decompiler/ScriptFormatter.cpp

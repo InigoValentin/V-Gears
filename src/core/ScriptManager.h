@@ -447,14 +447,6 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
           const Ogre::String& argument3 = "", bool allow_duplicate = false
         );
 
-        /**
-         * Adds a script to the stack.
-         *
-         * @param[in] value ID of the script to add.
-         * @todo Verify this documentation.
-         */
-        void AddValueToStack(const float value);
-
     private:
 
         /**

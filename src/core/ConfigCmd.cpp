@@ -30,8 +30,6 @@ const Ogre::String& ConfigCmd::GetName() const{return name_;}
 
 const Ogre::String& ConfigCmd::GetDescription() const{return description_;}
 
-const Ogre::String& ConfigCmd::GetParamsDescription() const{return params_description_;}
-
 ConfigCmdParams ConfigCmd::GetHandler() const{return params_;}
 
 ConfigCmdCompletion ConfigCmd::GetCompletion() const{return completion_;}

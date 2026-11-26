@@ -68,25 +68,11 @@ class ConfigVar{
         Ogre::String GetS() const;
 
         /**
-         * Sets the integer value of the variable.
-         *
-         * @param[in] value The variable value.
-         */
-        void SetI(int value);
-
-        /**
          * Sets the float value of the variable.
          *
          * @param[in] value The variable value.
          */
         void SetF(float value);
-
-        /**
-         * Sets the boolean value of the variable.
-         *
-         * @param[in] value The variable value.
-         */
-        void SetB(bool value);
 
         /**
          * Sets the string value of the variable.
