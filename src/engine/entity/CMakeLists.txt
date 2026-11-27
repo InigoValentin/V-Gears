@@ -4,6 +4,10 @@ vgears_sources(
     EntityCollision.cpp
     EntityDirection.cpp
     EntityManager.cpp
+    EntityManagerEncounters.cpp
+    EntityManagerMovement.cpp
+    EntityManagerPlayer.cpp
+    EntityManagerTriggers.cpp
     EntityModel.cpp
     EntityPoint.cpp
     EntityTrigger.cpp

@@ -651,6 +651,18 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         static const unsigned int  WORLD_MAP_BACKGROUND_ID;
 
         /**
+         * Priority of the script that runs when the player presses OK in front of an entity.
+         *
+         * It has to run before the scripts that fields leave running on an entity (the loops that
+         * play an animation, requested with priority 5 or 6), or the entity could not be talked to.
+         * But it can't be the highest: a script of the same entity that is requested with a higher
+         * priority (3 or smaller) has to be able to run while the talk script waits for it, as in
+         * the scenes where a talk script asks its own entity to do something and waits for it to
+         * start.
+         */
+        static const int INTERACT_SCRIPT_PRIORITY;
+
+        /**
          * Updates the field entities in the manager.
          */
         void UpdateField() override;
