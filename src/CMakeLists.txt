@@ -628,7 +628,7 @@ set(VGEARS_SOURCE_FILES
     engine/entity/EntityPoint.cpp
     engine/entity/EntityTrigger.cpp
     core/GameFrameListener.cpp
-    core/InputManager.cpp
+    engine/input/InputManager.cpp
     core/Manager.cpp
     core/particles/Particle.cpp
     core/particles/ParticleEmitter.cpp

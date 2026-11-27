@@ -48,7 +48,7 @@
 #include <OgreMaterialManager.h>
 #include <OgreResourceGroupManager.h>
 #include "data/VGearsTexFile.h"
-#include "core/InputManager.h"
+#include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/entity/EntityModel.h"

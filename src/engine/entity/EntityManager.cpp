@@ -26,7 +26,7 @@
 #include "engine/graphics/DebugDraw.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/entity/EntityModel.h"
-#include "core/InputManager.h"
+#include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"

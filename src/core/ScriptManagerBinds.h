@@ -24,7 +24,7 @@
 #include "engine/entity/EntityManager.h"
 #include "BattleManager.h"
 #include "engine/audio/AudioManager.h"
-#include "InputManager.h"
+#include "engine/input/InputManager.h"
 #include "SavemapHandler.h"
 #include "Timer.h"
 #include "UiManager.h"

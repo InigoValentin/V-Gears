@@ -19,7 +19,7 @@
 #include "Manager.h"
 #include "UiManager.h"
 #include "UiTextArea.h"
-#include "InputManager.h"
+#include "engine/input/InputManager.h"
 
 
 /**

@@ -33,7 +33,7 @@
 #include "engine/graphics/DebugDraw.h"
 #include "engine/entity/EntityManager.h"
 #include "core/GameFrameListener.h"
-#include "core/InputManager.h"
+#include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "core/SavemapHandler.h"
 #include "core/ScriptManager.h"

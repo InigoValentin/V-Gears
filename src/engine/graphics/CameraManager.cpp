@@ -22,7 +22,7 @@
 #include "engine/graphics/CameraManagerCommands.h"
 #include "app/VGearsApplication.h"
 #include "engine/config/ConfigVar.h"
-#include "core/InputManager.h"
+#include "engine/input/InputManager.h"
 #include "common/Logger.h"
 
 ConfigVar cv_cam_speed("camera_speed", "Camera speed", "0.02");

@@ -15,8 +15,8 @@
 
 #include <algorithm>
 #include "core/Console.h"
-#include "core/InputManager.h"
-#include "core/InputManagerCommands.h"
+#include "engine/input/InputManager.h"
+#include "engine/input/InputManagerCommands.h"
 #include "common/Logger.h"
 #include "core/Timer.h"
 #include "core/Manager.h"

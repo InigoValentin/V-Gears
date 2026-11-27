@@ -28,7 +28,7 @@
 #include "core/DialogsManager.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/config/ConfigVar.h"
-#include "core/InputManager.h"
+#include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/TextHandler.h"
