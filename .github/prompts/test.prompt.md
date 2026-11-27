@@ -11,6 +11,6 @@ Build and run the V-Gears test suite:
 2. Run the suite: `ctest --test-dir build --output-on-failure`.
 3. For each failure, read the failing test and the code under test, fix the root cause, and rerun.
    - Tests use Boost.Test with dynamic linking.
-   - New test sources must be registered manually in `test/CMakeLists.txt`.
+   - New test sources must be registered manually in the `CMakeLists.txt` of their folder (`vgears_tests()`).
    - Never use original game data in tests — build fixtures in code.
 4. Report pass/fail counts and summarize what was fixed.

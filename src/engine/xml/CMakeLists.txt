@@ -1,0 +1,20 @@
+# Sources of this folder (see vgears_sources in src/CMakeLists.txt).
+vgears_sources(
+    XmlAttackFile.cpp
+    XmlBackground2DFile.cpp
+    XmlBattleCharactersFile.cpp
+    XmlBattleScenesFile.cpp
+    XmlFontFile.cpp
+    XmlFontsFile.cpp
+    XmlMapFile.cpp
+    XmlMapsFile.cpp
+    XmlMusicsFile.cpp
+    XmlPrototypesFile.cpp
+    XmlScreenFile.cpp
+    XmlScreensFile.cpp
+    XmlScriptsFile.cpp
+    XmlSoundsFile.cpp
+    XmlTextFile.cpp
+    XmlTextsFile.cpp
+    XmlWalkmeshFile.cpp
+)

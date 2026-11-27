@@ -4,93 +4,11 @@ find_package(ZLIB REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS Core REQUIRED)
 
-# Source files for the installer.
-set(INSTALLER_SOURCE_FILES
-    main.cpp
-    extractors/BattleDataInstaller.cpp
-    cli/CliInstaller.cpp
-    steps/DataInstaller.cpp
-    formats/DiskImage.cpp
-    extractors/FieldDataInstaller.cpp
-    extractors/FieldTextWriter.cpp
-    cli/InstallCommandLine.cpp
-    steps/InstallLayout.cpp
-    steps/InstallLog.cpp
-    steps/InstallOptions.cpp
-    steps/InstallSteps.cpp
-    steps/ExternalTools.cpp
-    steps/InstallVerifier.cpp
-    steps/VideoFiles.cpp
-    extractors/MovieCamera.cpp
-    extractors/KernelDataInstaller.cpp
-    gui/MainWindow.cpp
-    extractors/MediaDataInstaller.cpp
-    extractors/ModelsAndAnimationsDb.cpp
-    extractors/ScopedLgp.cpp
-    formats/TexFile.cpp
-    support/Utility.cpp
-    extractors/WindowFonts.cpp
-    extractors/WorldInstaller.cpp
-    formats/BinGZipFile.cpp
-    support/DrawSkeleton.cpp
-    support/Logger.cpp
-    support/OgreBase.cpp
-    support/OgreGenUtilities.cpp
-    support/Vram.cpp
-    formats/AbFile.cpp
-    formats/BattleSceneFile.cpp
-    formats/DaFile.cpp
-    formats/WorldMapWalkmesh.cpp
-    decompiler/CodeGenerator.cpp
-    decompiler/ControlFlow.cpp
-    decompiler/DecompilerException.cpp
-    decompiler/Disassembler.cpp
-    decompiler/Engine.cpp
-    decompiler/field/FieldCodeGenerator.cpp
-    decompiler/field/FieldDecompiler.cpp
-    decompiler/field/FieldDisassembler.cpp
-    decompiler/field/FieldEngine.cpp
-    decompiler/field/FieldScriptFormatter.cpp
-    decompiler/field/instruction/FieldBackgroundInstruction.cpp
-    decompiler/field/instruction/FieldCameraInstruction.cpp
-    decompiler/field/instruction/FieldCondJumpInstruction.cpp
-    decompiler/field/instruction/FieldControlFlowInstruction.cpp
-    decompiler/field/instruction/FieldMathInstruction.cpp
-    decompiler/field/instruction/FieldMediaInstruction.cpp
-    decompiler/field/instruction/FieldModelInstruction.cpp
-    decompiler/field/instruction/FieldModuleInstruction.cpp
-    decompiler/field/instruction/FieldNoOperationInstruction.cpp
-    decompiler/field/instruction/FieldPartyInstruction.cpp
-    decompiler/field/instruction/FieldUncategorizedInstruction.cpp
-    decompiler/field/instruction/FieldUncondJumpInstruction.cpp
-    decompiler/field/instruction/FieldWalkmeshInstruction.cpp
-    decompiler/field/instruction/FieldWindowInstruction.cpp
-    decompiler/Graph.cpp
-    decompiler/instruction/BinaryOpStackInstruction.cpp
-    decompiler/instruction/CondJumpInstruction.cpp
-    decompiler/instruction/Instruction.cpp
-    decompiler/instruction/KernelCallInstruction.cpp
-    decompiler/instruction/LoadInstruction.cpp
-    decompiler/instruction/StackInstruction.cpp
-    decompiler/instruction/StoreInstruction.cpp
-    decompiler/instruction/UncondJumpInstruction.cpp
-    decompiler/LuaLanguage.cpp
-    decompiler/ScriptFormatter.cpp
-    decompiler/Value.cpp
-    decompiler/world/instruction/WorldBinaryEqualStackInstruction.cpp
-    decompiler/world/instruction/WorldCondJumpInstruction.cpp
-    decompiler/world/instruction/WorldKernelCallInstruction.cpp
-    decompiler/world/instruction/WorldLoadBankInstruction.cpp
-    decompiler/world/instruction/WorldLoadInstruction.cpp
-    decompiler/world/instruction/WorldNoOutputInstruction.cpp
-    decompiler/world/instruction/WorldStackInstruction.cpp
-    decompiler/world/instruction/WorldStoreInstruction.cpp
-    decompiler/world/instruction/WorldSubStackInstruction.cpp
-    decompiler/world/instruction/WorldUncondJumpInstruction.cpp
-    decompiler/world/WorldCodeGenerator.cpp
-    decompiler/world/WorldDisassembler.cpp
-    decompiler/world/WorldEngine.cpp
-)
+# Source files for the installer: the ones its folders listed (see vgears_sources in src/CMakeLists.txt).
+get_property(INSTALLER_SOURCE_FILES GLOBAL PROPERTY VGEARS_SOURCES)
+list(FILTER INSTALLER_SOURCE_FILES INCLUDE REGEX "^installer/.*\\.cpp$")
+list(TRANSFORM INSTALLER_SOURCE_FILES REPLACE "^installer/" "")
+list(SORT INSTALLER_SOURCE_FILES)
 
 # Included directories for the installer.
 include_directories (

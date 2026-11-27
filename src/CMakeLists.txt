@@ -582,164 +582,6 @@ if(NOT OGRE_LIBRARIES MATCHES ".*OgreBites.*")
 endif()
 
 
-# Source files for libvgears and v-gears.
-set(VGEARS_SOURCE_FILES
-    app/main.cpp
-    common/FF7Character.cpp
-    common/FF7Common.cpp
-    engine/GameState.cpp
-    common/File.cpp
-    common/FileSystem.cpp
-    formats/FF7NameLookup.cpp
-    common/LzsFile.cpp
-    common/TypeDefine.cpp
-    common/DataDirectory.cpp
-    common/InstallStamp.cpp
-    common/OgrePlugins.cpp
-    app/Application.cpp
-    common/ManualObject.cpp
-    common/Resource.cpp
-    common/StringUtil.cpp
-    engine/audio/AudioManager.cpp
-    engine/graphics/Background2DAnimation.cpp
-    engine/graphics/Background2D.cpp
-    engine/graphics/BackgroundPalette.cpp
-    engine/graphics/ScreenFade.cpp
-    engine/graphics/MovieCameraFrame.cpp
-    engine/graphics/MoviePlayer.cpp
-    engine/graphics/MovieState.cpp
-    engine/graphics/ScreenFadeState.cpp
-    modules/battle/BattleBinds.cpp
-    modules/battle/BattleManager.cpp
-    engine/graphics/CameraManager.cpp
-    engine/config/ConfigCmd.cpp
-    engine/config/ConfigCmdHandler.cpp
-    engine/config/ConfigFile.cpp
-    engine/config/ConfigVar.cpp
-    engine/config/ConfigVarHandler.cpp
-    engine/ui/Console.cpp
-    engine/graphics/DebugDraw.cpp
-    engine/ui/DialogsManager.cpp
-    modules/battle/Enemy.cpp
-    engine/entity/EntityCollision.cpp
-    engine/entity/Entity.cpp
-    engine/entity/EntityDirection.cpp
-    engine/entity/EntityManager.cpp
-    engine/entity/EntityModel.cpp
-    engine/entity/EntityPoint.cpp
-    engine/entity/EntityTrigger.cpp
-    app/GameFrameListener.cpp
-    engine/input/InputManager.cpp
-    engine/Manager.cpp
-    engine/particles/Particle.cpp
-    engine/particles/ParticleEmitter.cpp
-    engine/particles/ParticleEmitterDictionary.cpp
-    engine/particles/ParticleEmitterTranslator.cpp
-    engine/particles/ParticleRenderer.cpp
-    engine/particles/ParticleRendererTranslator.cpp
-    engine/particles/ParticleSystem.cpp
-    engine/particles/ParticleSystemFactory.cpp
-    engine/particles/ParticleSystemManager.cpp
-    engine/particles/ParticleSystemTranslator.cpp
-    engine/particles/ParticleSystemTranslatorManager.cpp
-    engine/particles/ParticleTechnique.cpp
-    engine/particles/ParticleTechniqueTranslator.cpp
-    engine/particles/ParticleVisual.cpp
-    engine/particles/emitters/PointEmitter.cpp
-    engine/particles/emitters/PointEmitterFactory.cpp
-    engine/particles/renderer/ParticleEntityRenderer.cpp
-    engine/particles/renderer/ParticleEntityRendererDictionary.cpp
-    engine/save/Savemap.cpp
-    engine/save/SavemapHandler.cpp
-    engine/script/ScriptManager.cpp
-    engine/ui/TextHandler.cpp
-    engine/Timer.cpp
-    engine/ui/UiAnimation.cpp
-    engine/ui/UiFont.cpp
-    engine/ui/UiManager.cpp
-    engine/ui/UiSprite.cpp
-    engine/ui/UiTextArea.cpp
-    engine/ui/UiWidget.cpp
-    common/Utilities.cpp
-    engine/entity/Walkmesh.cpp
-    modules/worldmap/WorldMapManager.cpp
-    engine/xml/XmlAttackFile.cpp
-    engine/xml/XmlBackground2DFile.cpp
-    engine/xml/XmlBattleCharactersFile.cpp
-    engine/xml/XmlBattleScenesFile.cpp
-    modules/battle/XmlEnemyFile.cpp
-    common/XmlFile.cpp
-    engine/xml/XmlFontFile.cpp
-    engine/xml/XmlFontsFile.cpp
-    modules/battle/XmlFormationFile.cpp
-    engine/xml/XmlMapFile.cpp
-    engine/xml/XmlMapsFile.cpp
-    engine/xml/XmlMusicsFile.cpp
-    engine/xml/XmlPrototypesFile.cpp
-    engine/xml/XmlScreenFile.cpp
-    engine/xml/XmlScreensFile.cpp
-    engine/xml/XmlScriptsFile.cpp
-    engine/xml/XmlSoundsFile.cpp
-    engine/xml/XmlTextFile.cpp
-    engine/xml/XmlTextsFile.cpp
-    engine/xml/XmlWalkmeshFile.cpp
-    formats/model/AFile.cpp
-    formats/model/AFileManager.cpp
-    formats/model/AFileSerializer.cpp
-    formats/field/BackgroundFile.cpp
-    formats/field/BackgroundFileManager.cpp
-    formats/field/BackgroundFileSerializer.cpp
-    formats/field/CameraMatrixFile.cpp
-    formats/field/CameraMatrixFileManager.cpp
-    formats/field/CameraMatrixFileSerializer.cpp
-    formats/field/FLevelBackground2DLoader.cpp
-    formats/field/FLevelFile.cpp
-    formats/field/FLevelFileSerializer.cpp
-    formats/field/FLevelTextureLoader.cpp
-    formats/model/HRCFile.cpp
-    formats/model/HRCFileManager.cpp
-    formats/model/HRCFileSerializer.cpp
-    formats/model/HRCMeshLoader.cpp
-    formats/model/HRCSkeletonLoader.cpp
-    formats/lgp/LGPArchive.cpp
-    formats/lgp/LGPArchiveFactory.cpp
-    formats/lgp/LGPArchiveSerializer.cpp
-    formats/LZSDataStream.cpp
-    formats/field/LZSFLevelFile.cpp
-    formats/field/LZSFLevelFileManager.cpp
-    formats/field/MapListFile.cpp
-    formats/field/PaletteFile.cpp
-    formats/field/PaletteFileManager.cpp
-    formats/field/PaletteFileSerializer.cpp
-    formats/model/PFile.cpp
-    formats/model/PFileManager.cpp
-    formats/model/PFileSerializer.cpp
-    formats/model/RSDFile.cpp
-    formats/model/RSDFileManager.cpp
-    formats/model/RSDFileSerializer.cpp
-    formats/Serializer.cpp
-    formats/texture/TexCodec.cpp
-    formats/texture/TexFile.cpp
-    formats/field/TriggersFile.cpp
-    formats/XMLSerializer.cpp
-    formats/model/FF7ModelListFile.cpp
-    formats/model/FF7ModelListFileManager.cpp
-    formats/model/FF7ModelListFileSerializer.cpp
-    formats/worldmap/WorldmapFile.cpp
-    formats/worldmap/WorldmapFileManager.cpp
-    formats/worldmap/WorldmapFileSerializer.cpp
-    formats/worldmap/TxzFile.cpp
-    formats/worldmap/TxzFileSerializer.cpp
-    formats/field/Background2DFile.cpp
-    formats/field/Background2DFileManager.cpp
-    formats/field/Background2DFileXMLSerializer.cpp
-    formats/field/WalkmeshFile.cpp
-    formats/field/WalkmeshFileManager.cpp
-    formats/field/WalkmeshFileXMLSerializer.cpp
-    formats/field/FF7WalkmeshFileSerializer.cpp
-    modules/worldmap/WorldmapBinds.cpp
-    modules/worldmap/WorldmapModule.cpp
-)
 endif()
 
 # Compiler options.
@@ -771,12 +613,34 @@ endif()
 # Prefer target-level compile definitions and options below (kept conservative).
 
 
-# Generate libvgears.
-if(NOT VGEARS_SOURCE_FILES)
-    file(GLOB_RECURSE VGEARS_SOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
-    list(LENGTH VGEARS_SOURCE_FILES _vgears_auto_count)
-    message(STATUS "Auto-collected VGEARS_SOURCE_FILES count: ${_vgears_auto_count}")
-endif()
+# Source files. Each folder lists its own in its CMakeLists.txt, with this function. They are collected in a global
+# property, as paths relative to this directory.
+function(vgears_sources)
+    foreach(_source IN LISTS ARGN)
+        file(RELATIVE_PATH _path "${PROJECT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/${_source}")
+        set_property(GLOBAL APPEND PROPERTY VGEARS_SOURCES "${_path}")
+    endforeach()
+endfunction()
+
+add_subdirectory(app)
+add_subdirectory(common)
+add_subdirectory(engine)
+add_subdirectory(formats)
+add_subdirectory(modules)
+# The folders of the installer. Its target is defined later, in installer/CMakeLists.txt.
+add_subdirectory(installer/cli)
+add_subdirectory(installer/decompiler)
+add_subdirectory(installer/extractors)
+add_subdirectory(installer/formats)
+add_subdirectory(installer/gui)
+add_subdirectory(installer/steps)
+add_subdirectory(installer/support)
+vgears_sources(installer/main.cpp)
+
+# libvgears has every source, and the game all of them but the ones of the installer. The list is sorted, so the link
+# order doesn't depend on the order of the folders.
+get_property(VGEARS_SOURCE_FILES GLOBAL PROPERTY VGEARS_SOURCES)
+list(SORT VGEARS_SOURCE_FILES)
 
 # If installer is disabled, remove installer sources from the collected list
 if(NOT BUILD_INSTALLER)
@@ -822,19 +686,6 @@ if(QT_UIC_EXECUTABLE AND EXISTS "${_ui_src}")
     )
     add_custom_target(generate_ui_files DEPENDS "${_ui_out}")
     set(_GENERATED_UI_TARGET generate_ui_files)
-endif()
-
-# Exclude unit tests under installer/decompiler/test from the main
-# library to avoid pulling test-only dependencies (gtest/gmock).
-set(_test_removed_count 0)
-foreach(_f IN LISTS VGEARS_SOURCE_FILES)
-    if(_f MATCHES "installer/decompiler/test/")
-        list(REMOVE_ITEM VGEARS_SOURCE_FILES ${_f})
-        math(EXPR _test_removed_count "${_test_removed_count} + 1")
-    endif()
-endforeach()
-if(_test_removed_count GREATER 0)
-    message(STATUS "Removed ${_test_removed_count} decompiler test source(s) from libvgears")
 endif()
 
 # Directory with the system's Ogre plugins (RenderSystem_GL, Codec_STBI...). V-Gears looks for the plugins listed in

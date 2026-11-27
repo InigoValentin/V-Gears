@@ -27,29 +27,34 @@ include_directories(
 )
 
 
-# Test source files.
-set(SOURCE_FILES
-    main.cpp
-    formats/model/AFile.cpp
-    formats/worldmap/MapFileSerializer.cpp
-    engine/graphics/MovieCameraFrame.cpp
-    engine/graphics/MovieState.cpp
-    engine/graphics/ScreenFadeState.cpp
-    engine/entity/EntityManager.cpp
-    engine/entity/EntityPoint.cpp
-    engine/ui/TextHandler.cpp
-    installer/extractors/FieldDataInstaller.cpp
-    installer/extractors/SfxDump.cpp
-    installer/extractors/WindowFonts.cpp
-    installer/decompiler/field/FieldCodeGenerator.cpp
-    installer/decompiler/field/FieldDecompiler.cpp
-    installer/decompiler/world/WorldDisassembler.cpp
-    installer/decompiler/world/instruction/WorldSubStackInstruction.cpp
-)
+# Test source files. Each folder lists its own in its CMakeLists.txt, with one of these functions: vgears_tests for
+# the main test program, and vgears_installer_tests for the one of the installer logic.
+function(vgears_collect_tests property)
+    foreach(_source IN LISTS ARGN)
+        file(RELATIVE_PATH _path "${PROJECT_SOURCE_DIR}/test" "${CMAKE_CURRENT_SOURCE_DIR}/${_source}")
+        set_property(GLOBAL APPEND PROPERTY ${property} "${_path}")
+    endforeach()
+endfunction()
+function(vgears_tests)
+    vgears_collect_tests(VGEARS_TESTS ${ARGN})
+endfunction()
+function(vgears_installer_tests)
+    vgears_collect_tests(VGEARS_INSTALLER_TESTS ${ARGN})
+endfunction()
+
+add_subdirectory(common)
+add_subdirectory(engine)
+add_subdirectory(formats)
+add_subdirectory(installer)
+
+get_property(TEST_SOURCE_FILES GLOBAL PROPERTY VGEARS_TESTS)
+list(SORT TEST_SOURCE_FILES)
+get_property(INSTALLER_TEST_SOURCE_FILES GLOBAL PROPERTY VGEARS_INSTALLER_TESTS)
+list(SORT INSTALLER_TEST_SOURCE_FILES)
 
 
 # Generate tests
-add_executable(v-gears-tests ${SOURCE_FILES})
+add_executable(v-gears-tests main.cpp ${TEST_SOURCE_FILES})
 SET_PROPERTY(TARGET v-gears-tests PROPERTY FOLDER "build/v-gears-test")
 
 # Qt imported targets are directory-scoped: the ones created in src/ are not
@@ -82,14 +87,11 @@ add_test(NAME v-gears-tests COMMAND v-gears-tests)
 # Tests of the installer logic that doesn't need the rest of the engine (layout, option rules, verifier, log), and of
 # the data directory lookup shared by the game and the installer.
 add_executable(v-gears-installer-tests
-    common/DataDirectory.cpp
-    common/OgrePlugins.cpp
+    ${INSTALLER_TEST_SOURCE_FILES}
+    # The code under test, which is built again here so these tests don't need the whole engine.
     ${CMAKE_SOURCE_DIR}/src/common/DataDirectory.cpp
     ${CMAKE_SOURCE_DIR}/src/common/InstallStamp.cpp
     ${CMAKE_SOURCE_DIR}/src/common/OgrePlugins.cpp
-    installer/steps/InstallLogic.cpp
-    installer/steps/ExternalTools.cpp
-    installer/extractors/MovieCamera.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/extractors/MovieCamera.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/steps/ExternalTools.cpp
     ${CMAKE_SOURCE_DIR}/src/installer/cli/InstallCommandLine.cpp
