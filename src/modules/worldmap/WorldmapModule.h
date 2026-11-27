@@ -215,15 +215,15 @@ namespace VGears {
             std::set<Ogre::String> hidden_vehicles_;
 
             void CreatePlayer();
-                        void CreateCompanionModels();
-                        void AddWorldModel(
-                            const Ogre::String& name, const Ogre::String& mesh_name,
-                            const Ogre::Vector3& desired_position, Ogre::Real target_size,
-                            const Ogre::Quaternion& orientation,
-                            Ogre::Real collision_radius_scale = 1.0f,
-                            bool talkable = false,
-                            Ogre::Real explicit_scale = 0.0f
-                        );
+            void CreateCompanionModels();
+            void AddWorldModel(
+                const Ogre::String& name, const Ogre::String& mesh_name,
+                const Ogre::Vector3& desired_position, Ogre::Real target_size,
+                const Ogre::Quaternion& orientation,
+                Ogre::Real collision_radius_scale = 1.0f,
+                bool talkable = false,
+                Ogre::Real explicit_scale = 0.0f
+            );
             void UpdateCamera(Ogre::Real delta_time, bool snap_to_player);
 
             /**

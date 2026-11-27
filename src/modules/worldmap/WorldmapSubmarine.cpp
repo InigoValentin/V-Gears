@@ -80,7 +80,7 @@ namespace VGears {
                             continue;
                         }
                         const size_t indices[3] = {
-                          triangle.vertex_0_index, triangle.vertex_1_index, triangle.vertex_2_index
+                            triangle.vertex_0_index, triangle.vertex_1_index, triangle.vertex_2_index
                         };
                         Triangle result;
                         for (int i = 0; i < 3; ++i){

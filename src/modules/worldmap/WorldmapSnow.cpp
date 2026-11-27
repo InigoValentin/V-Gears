@@ -137,32 +137,32 @@ namespace VGears {
     }
 
     float WorldmapSnow::UpdateCamera(const float delta_time){
-      if (snow_camera_remaining_ == 0.0f){
-        snow_camera_timer_ -= delta_time;
-        if (snow_camera_timer_ > 0.0f) return 0.0f;
-        const float degrees = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_DEGREES, SNOW_CAMERA_MAX_DEGREES);
-        const float direction = Ogre::Math::UnitRandom() < 0.5f ? -1.0f : 1.0f;
-        snow_camera_remaining_ = direction * Ogre::Math::DegreesToRadians(degrees);
-        snow_camera_timer_ = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_WAIT, SNOW_CAMERA_MAX_WAIT);
-      }
-      const float step = std::min(std::abs(snow_camera_remaining_), CAMERA_ROTATION_SPEED * delta_time);
-      const float signed_step = snow_camera_remaining_ < 0.0f ? -step : step;
-      snow_camera_remaining_ -= signed_step;
-      if (std::abs(snow_camera_remaining_) < 0.0001f) snow_camera_remaining_ = 0.0f;
-      return signed_step;
+        if (snow_camera_remaining_ == 0.0f){
+            snow_camera_timer_ -= delta_time;
+            if (snow_camera_timer_ > 0.0f) return 0.0f;
+            const float degrees = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_DEGREES, SNOW_CAMERA_MAX_DEGREES);
+            const float direction = Ogre::Math::UnitRandom() < 0.5f ? -1.0f : 1.0f;
+            snow_camera_remaining_ = direction * Ogre::Math::DegreesToRadians(degrees);
+            snow_camera_timer_ = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_WAIT, SNOW_CAMERA_MAX_WAIT);
+        }
+        const float step = std::min(std::abs(snow_camera_remaining_), CAMERA_ROTATION_SPEED * delta_time);
+        const float signed_step = snow_camera_remaining_ < 0.0f ? -step : step;
+        snow_camera_remaining_ -= signed_step;
+        if (std::abs(snow_camera_remaining_) < 0.0001f) snow_camera_remaining_ = 0.0f;
+        return signed_step;
     }
 
     void WorldmapSnow::PlacePole(const PoleCreator& create){
-      // The oldest pole goes away when there is no room for another one.
-      while (snow_poles_.size() >= SNOW_MAX_POLES){
-        EntityManager::getSingleton().RemoveWorldMapEntity(snow_poles_.front());
-        snow_poles_.pop_front();
-      }
-      const std::string name = "snowpole_" + std::to_string(snow_pole_counter_++);
-      create(name);
-      if (EntityManager::getSingleton().GetEntity("WorldMap" + name) != nullptr){
-        snow_poles_.push_back("WorldMap" + name);
-      }
+        // The oldest pole goes away when there is no room for another one.
+        while (snow_poles_.size() >= SNOW_MAX_POLES){
+            EntityManager::getSingleton().RemoveWorldMapEntity(snow_poles_.front());
+            snow_poles_.pop_front();
+        }
+        const std::string name = "snowpole_" + std::to_string(snow_pole_counter_++);
+        create(name);
+        if (EntityManager::getSingleton().GetEntity("WorldMap" + name) != nullptr){
+            snow_poles_.push_back("WorldMap" + name);
+        }
     }
 
 } // namespace VGears

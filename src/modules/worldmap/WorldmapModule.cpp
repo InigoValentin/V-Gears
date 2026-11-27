@@ -80,7 +80,7 @@ namespace VGears {
     {}
 
     WorldmapModule::~WorldmapModule(){
-      if (frame_listener_attached_) Root::getSingleton().removeFrameListener(this);
+        if (frame_listener_attached_) Root::getSingleton().removeFrameListener(this);
     }
 
     bool WorldmapModule::frameStarted(const Ogre::FrameEvent& event){
@@ -265,7 +265,7 @@ namespace VGears {
         return true;
     }
 
-      void WorldmapModule::UpdateCamera(Ogre::Real delta_time, bool snap_to_player){
+    void WorldmapModule::UpdateCamera(Ogre::Real delta_time, bool snap_to_player){
         ::Entity* active_entity = EntityManager::getSingleton().ScriptGetPlayerEntity();
         if (active_entity == nullptr) return;
         const Ogre::Vector3 target
@@ -285,8 +285,8 @@ namespace VGears {
         float pitch = std::atan2(1.5f, 2.25f);
         const auto camera_settings = camera_settings_.find(camera_name);
         if (camera_settings != camera_settings_.end()){
-          distance = camera_settings->second.distance;
-          pitch = Ogre::Math::DegreesToRadians(camera_settings->second.pitch_degrees);
+            distance = camera_settings->second.distance;
+            pitch = Ogre::Math::DegreesToRadians(camera_settings->second.pitch_degrees);
         }
         const Ogre::Vector3 camera_offset
           = Ogre::Quaternion(Ogre::Radian(yaw), Ogre::Vector3::UNIT_Y)
@@ -294,17 +294,17 @@ namespace VGears {
         Ogre::Camera* camera = CameraManager::getSingleton().GetCurrentCamera();
         const Ogre::Vector3 desired_position = target + camera_offset;
         if (snap_to_player){
-          camera->setPosition(desired_position);
+            camera->setPosition(desired_position);
         }
         else{
-          const Ogre::Real follow_amount = std::min(1.0f, delta_time * 8.0f);
-          camera->setPosition(
-            camera->getPosition()
-            + (desired_position - camera->getPosition()) * follow_amount
-          );
+            const Ogre::Real follow_amount = std::min(1.0f, delta_time * 8.0f);
+            camera->setPosition(
+              camera->getPosition()
+              + (desired_position - camera->getPosition()) * follow_amount
+            );
         }
         camera->lookAt(target);
-      }
+    }
 
     void WorldmapModule::PauseForBattle(){
         paused_for_battle_ = true;
@@ -325,152 +325,152 @@ namespace VGears {
 
     /// Names of the entities of the overworld whose state is kept when the map is replaced.
     static const char* const OVERWORLD_ENTITY_NAMES[] = {
-      "WorldMapCloud", "WorldMapChocobo", "WorldMapHighwind", "WorldMapBuggy",
-      "WorldMapSubmarine", "WorldMapTinyBronco"
+        "WorldMapCloud", "WorldMapChocobo", "WorldMapHighwind", "WorldMapBuggy",
+        "WorldMapSubmarine", "WorldMapTinyBronco"
     };
 
     void WorldmapModule::SaveOverworldSnapshot(){
-      overworld_snapshot_.clear();
-      for (const char* name : OVERWORLD_ENTITY_NAMES){
-        ::Entity* entity = EntityManager::getSingleton().GetEntity(name);
-        if (entity == nullptr) continue;
-        EntityState state;
-        state.name = name;
-        state.position = entity->GetPosition();
-        state.orientation = static_cast<EntityModel*>(entity)->GetModel()->getParentSceneNode()
-          ->getParentSceneNode()->getOrientation();
-        state.visible = entity->IsVisible();
-        state.solid = entity->IsSolid();
-        state.talkable = entity->IsTalkable();
-        overworld_snapshot_.push_back(state);
-      }
+        overworld_snapshot_.clear();
+        for (const char* name : OVERWORLD_ENTITY_NAMES){
+            ::Entity* entity = EntityManager::getSingleton().GetEntity(name);
+            if (entity == nullptr) continue;
+            EntityState state;
+            state.name = name;
+            state.position = entity->GetPosition();
+            state.orientation = static_cast<EntityModel*>(entity)->GetModel()->getParentSceneNode()
+              ->getParentSceneNode()->getOrientation();
+            state.visible = entity->IsVisible();
+            state.solid = entity->IsSolid();
+            state.talkable = entity->IsTalkable();
+            overworld_snapshot_.push_back(state);
+        }
     }
 
     void WorldmapModule::RestoreOverworldSnapshot(){
-      for (const EntityState& state : overworld_snapshot_){
-        ::Entity* entity = EntityManager::getSingleton().GetEntity(state.name);
-        if (entity == nullptr) continue;
-        entity->SetPosition(state.position);
-        static_cast<EntityModel*>(entity)->GetModel()->getParentSceneNode()->getParentSceneNode()
-          ->setOrientation(state.orientation);
-        entity->SetVisible(state.visible);
-        entity->SetSolid(state.solid);
-        entity->SetTalkable(state.talkable);
-      }
-      overworld_snapshot_.clear();
+        for (const EntityState& state : overworld_snapshot_){
+            ::Entity* entity = EntityManager::getSingleton().GetEntity(state.name);
+            if (entity == nullptr) continue;
+            entity->SetPosition(state.position);
+            static_cast<EntityModel*>(entity)->GetModel()->getParentSceneNode()->getParentSceneNode()
+              ->setOrientation(state.orientation);
+            entity->SetVisible(state.visible);
+            entity->SetSolid(state.solid);
+            entity->SetTalkable(state.talkable);
+        }
+        overworld_snapshot_.clear();
     }
 
     void WorldmapModule::DestroyWorldMap(){
-      // The overworld is built again when the submarine surfaces: keep where everything was.
-      if (map_id_ == 0) SaveOverworldSnapshot();
-      Suspend();
-      terrain_.Clear();
-      encounters_.Clear();
-      // The entities of the old map (player, vehicles, models and scripts).
-      EntityManager::getSingleton().ClearWorld();
-      initialized_ = false;
-      map_id_ = -1;
+        // The overworld is built again when the submarine surfaces: keep where everything was.
+        if (map_id_ == 0) SaveOverworldSnapshot();
+        Suspend();
+        terrain_.Clear();
+        encounters_.Clear();
+        // The entities of the old map (player, vehicles, models and scripts).
+        EntityManager::getSingleton().ClearWorld();
+        initialized_ = false;
+        map_id_ = -1;
     }
 
     void WorldmapModule::Enter(const int map_id){
-      if (initialized_) DestroyWorldMap();
-      Init(map_id);
+        if (initialized_) DestroyWorldMap();
+        Init(map_id);
     }
 
     void WorldmapModule::Init(const int map_id){
-      if (map_id < 0 || map_id >= WORLD_MAP_COUNT){
-        LogManager::getSingleton().logMessage(
-          "Invalid world map " + std::to_string(map_id) + ". Valid maps are 0 to "
-            + std::to_string(WORLD_MAP_COUNT - 1) + "."
-        );
-        return;
-      }
-      if (initialized_ && map_id != map_id_){
-        DestroyWorldMap();
-      }
-      if (initialized_){
-        if (frame_listener_attached_) return;
+        if (map_id < 0 || map_id >= WORLD_MAP_COUNT){
+            LogManager::getSingleton().logMessage(
+              "Invalid world map " + std::to_string(map_id) + ". Valid maps are 0 to "
+                + std::to_string(WORLD_MAP_COUNT - 1) + "."
+            );
+            return;
+        }
+        if (initialized_ && map_id != map_id_){
+            DestroyWorldMap();
+        }
+        if (initialized_){
+            if (frame_listener_attached_) return;
+            EntityManager::getSingleton().SetWorldModule();
+            DialogsManager::getSingleton().SetWorldModule();
+            terrain_.SetVisible(true);
+            // The music starts again (a field or a battle had its own).
+            music_timer_ = 1.0f;
+            ScriptManager::getSingleton().RunString("if WorldMusic then WorldMusic.reset() end");
+            CreatePlayer();
+            Root::getSingleton().addFrameListener(this);
+            frame_listener_attached_ = true;
+            return;
+        }
+        map_id_ = map_id;
+        camera_yaw_ = 0;
         EntityManager::getSingleton().SetWorldModule();
         DialogsManager::getSingleton().SetWorldModule();
-        terrain_.SetVisible(true);
-        // The music starts again (a field or a battle had its own).
+        terrain_.Load(Root::getSingleton().getSceneManager("Scene"), map_id_);
+        const Ogre::Vector3 center = terrain_.GetCenter();
+        Ogre::Camera* camera = CameraManager::getSingleton().GetCurrentCamera();
+        camera->setPosition(Ogre::Vector3(center.x, 80.0f, center.z + 90.0f));
+        camera->lookAt(Ogre::Vector3(center.x, 0.0f, center.z));
+        // Underwater (WM2): everything fades to black with the distance to the camera.
+        if (map_id_ == 1){
+            Root::getSingleton().getSceneManager("Scene")->setFog(
+              Ogre::FOG_LINEAR, Ogre::ColourValue::Black, 0.0f, UNDERWATER_FOG_START, UNDERWATER_FOG_END
+            );
+        }
+        else Root::getSingleton().getSceneManager("Scene")->setFog(Ogre::FOG_NONE);
+        // Snow map (WM3): it always snows.
+        snow_.SetVisible(map_id_ == 2);
+        // The music of the map starts in the first frame.
         music_timer_ = 1.0f;
         ScriptManager::getSingleton().RunString("if WorldMusic then WorldMusic.reset() end");
+        // The button that was used to get here (a menu, a field) must not count as the first pole.
+        confirm_was_pressed_ = InputManager::getSingleton().IsGameEventPressed("CONFIRM");
+        snow_.Reset();
+        ScriptManager::getSingleton().RunFile(
+          "game/world/scripts/wm" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id_]) + ".lua"
+        );
+        // The debug spawn points, if debug_data.lua has them.
+        spawn_overrides_.clear();
+        hidden_vehicles_.clear();
+        ScriptManager::getSingleton().RunString(
+          "if WorldMapDebug and WorldMapDebug.spawn then "
+          "for name, point in pairs(WorldMapDebug.spawn) do "
+          "world_map_module:set_spawn(name, point[1], point[2]) end end"
+        );
+        // The positions that the scripts give to the vehicles, for the story (debug ones have priority).
+        ScriptManager::getSingleton().RunString(
+          "if WorldVM then WorldVM.prepare(" + std::to_string(map_id_) + ") end"
+        );
         CreatePlayer();
+        // The models that the scripts place (scenery).
+        ScriptManager::getSingleton().RunString(
+          "if WorldVM then WorldVM.place_models(" + std::to_string(map_id_) + ") end"
+        );
+        encounters_.Load();
+        initialized_ = true;
         Root::getSingleton().addFrameListener(this);
         frame_listener_attached_ = true;
-        return;
-      }
-      map_id_ = map_id;
-      camera_yaw_ = 0;
-      EntityManager::getSingleton().SetWorldModule();
-      DialogsManager::getSingleton().SetWorldModule();
-      terrain_.Load(Root::getSingleton().getSceneManager("Scene"), map_id_);
-      const Ogre::Vector3 center = terrain_.GetCenter();
-      Ogre::Camera* camera = CameraManager::getSingleton().GetCurrentCamera();
-      camera->setPosition(Ogre::Vector3(center.x, 80.0f, center.z + 90.0f));
-      camera->lookAt(Ogre::Vector3(center.x, 0.0f, center.z));
-      // Underwater (WM2): everything fades to black with the distance to the camera.
-      if (map_id_ == 1){
-        Root::getSingleton().getSceneManager("Scene")->setFog(
-          Ogre::FOG_LINEAR, Ogre::ColourValue::Black, 0.0f, UNDERWATER_FOG_START, UNDERWATER_FOG_END
-        );
-      }
-      else Root::getSingleton().getSceneManager("Scene")->setFog(Ogre::FOG_NONE);
-      // Snow map (WM3): it always snows.
-      snow_.SetVisible(map_id_ == 2);
-      // The music of the map starts in the first frame.
-      music_timer_ = 1.0f;
-      ScriptManager::getSingleton().RunString("if WorldMusic then WorldMusic.reset() end");
-      // The button that was used to get here (a menu, a field) must not count as the first pole.
-      confirm_was_pressed_ = InputManager::getSingleton().IsGameEventPressed("CONFIRM");
-      snow_.Reset();
-      ScriptManager::getSingleton().RunFile(
-        "game/world/scripts/wm" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id_]) + ".lua"
-      );
-      // The debug spawn points, if debug_data.lua has them.
-      spawn_overrides_.clear();
-      hidden_vehicles_.clear();
-      ScriptManager::getSingleton().RunString(
-        "if WorldMapDebug and WorldMapDebug.spawn then "
-        "for name, point in pairs(WorldMapDebug.spawn) do "
-        "world_map_module:set_spawn(name, point[1], point[2]) end end"
-      );
-      // The positions that the scripts give to the vehicles, for the story (debug ones have priority).
-      ScriptManager::getSingleton().RunString(
-        "if WorldVM then WorldVM.prepare(" + std::to_string(map_id_) + ") end"
-      );
-      CreatePlayer();
-      // The models that the scripts place (scenery).
-      ScriptManager::getSingleton().RunString(
-        "if WorldVM then WorldVM.place_models(" + std::to_string(map_id_) + ") end"
-      );
-      encounters_.Load();
-      initialized_ = true;
-      Root::getSingleton().addFrameListener(this);
-      frame_listener_attached_ = true;
     }
 
     void WorldmapModule::Suspend(){
-      if (!frame_listener_attached_) return;
-      Root::getSingleton().removeFrameListener(this);
-      frame_listener_attached_ = false;
-      terrain_.SetVisible(false);
-      snow_.SetVisible(false);
-      player_entity_ = nullptr;
-      highwind_entity_ = nullptr;
-      buggy_entity_ = nullptr;
-      chocobo_entity_ = nullptr;
-      submarine_entity_ = nullptr;
-      tiny_bronco_entity_ = nullptr;
-      current_vehicle_ = VehicleType::ON_FOOT;
-      active_vehicle_terrain_types_.clear();
-      active_function_mesh_index_ = -1;
-      active_function_id_ = -1;
-      flight_active_ = false;
-      flight_entity_ = nullptr;
-      cancel_was_pressed_ = false;
-      confirm_was_pressed_ = false;
+        if (!frame_listener_attached_) return;
+        Root::getSingleton().removeFrameListener(this);
+        frame_listener_attached_ = false;
+        terrain_.SetVisible(false);
+        snow_.SetVisible(false);
+        player_entity_ = nullptr;
+        highwind_entity_ = nullptr;
+        buggy_entity_ = nullptr;
+        chocobo_entity_ = nullptr;
+        submarine_entity_ = nullptr;
+        tiny_bronco_entity_ = nullptr;
+        current_vehicle_ = VehicleType::ON_FOOT;
+        active_vehicle_terrain_types_.clear();
+        active_function_mesh_index_ = -1;
+        active_function_id_ = -1;
+        flight_active_ = false;
+        flight_entity_ = nullptr;
+        cancel_was_pressed_ = false;
+        confirm_was_pressed_ = false;
     }
 
 } // namespace VGears

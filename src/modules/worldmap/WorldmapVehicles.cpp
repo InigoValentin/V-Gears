@@ -203,7 +203,7 @@ namespace VGears {
         }
     }
 
-      bool WorldmapModule::UnboardVehicle(const char* vehicle_name){
+    bool WorldmapModule::UnboardVehicle(const char* vehicle_name){
         if (vehicle_name == nullptr) return false;
 
         EntityManager& entity_manager = EntityManager::getSingleton();
@@ -213,7 +213,7 @@ namespace VGears {
           player_entity == nullptr || vehicle_entity == nullptr
           || player_entity != vehicle_entity || player_entity == player_entity_
         ){
-          return false;
+            return false;
         }
 
         const Ogre::Vector3 vehicle_position = vehicle_entity->GetPosition();
@@ -221,60 +221,60 @@ namespace VGears {
           = vehicle_entity->GetSolidRadius() + player_entity_->GetSolidRadius() + 0.1f;
         const Ogre::Real diagonal_distance = unboard_distance * 0.70710678f;
         const Ogre::Vector3 directions[] = {
-          Ogre::Vector3(1, 0, 0), Ogre::Vector3(-1, 0, 0),
-          Ogre::Vector3(0, 0, 1), Ogre::Vector3(0, 0, -1),
-          Ogre::Vector3(1, 0, 1), Ogre::Vector3(-1, 0, 1),
-          Ogre::Vector3(1, 0, -1), Ogre::Vector3(-1, 0, -1)
+            Ogre::Vector3(1, 0, 0), Ogre::Vector3(-1, 0, 0),
+            Ogre::Vector3(0, 0, 1), Ogre::Vector3(0, 0, -1),
+            Ogre::Vector3(1, 0, 1), Ogre::Vector3(-1, 0, 1),
+            Ogre::Vector3(1, 0, -1), Ogre::Vector3(-1, 0, -1)
         };
 
         for (size_t i = 0; i < sizeof(directions) / sizeof(directions[0]); ++i){
-          const Ogre::Real distance = i < 4 ? unboard_distance : diagonal_distance;
-          const Ogre::Vector3 requested_position
-            = vehicle_position + directions[i] * distance;
-          Ogre::Vector3 surface;
-          uint8 walkability_type = 0;
-          if (!FindWalkableSurface(
-              requested_position, surface, false, false, &walkability_type
-            ) || !IsFootWalkable(walkability_type)){
-            continue;
-          }
-          surface.y += player_height_offset_;
-          if (entity_manager.IsWorldPositionBlocked(player_entity_, surface)) continue;
-
-          if (vehicle_entity == highwind_entity_){
-            // The Highwind lands. It can't be left higher up, Cloud couldn't board it again.
-            Ogre::Vector3 ground;
-            if (!FindWalkableSurface(vehicle_position, ground, false, false)) return false;
-            if (vehicle_position.y - ground.y > HIGHWIND_MAX_LANDING_HEIGHT) return false;
-            vehicle_entity->SetPosition(Ogre::Vector3(vehicle_position.x, ground.y, vehicle_position.z));
-            // Landing on the terrain of the northern cave enters it (the function of the triangle runs).
-            uint8 landing_terrain = 0;
-            size_t landing_triangle = 0;
-            if (FindWalkableSurface(vehicle_position, ground, false, false, &landing_terrain, &landing_triangle)
-              && landing_terrain == VGears::WorldmapFileSerializer::NORTHERND_CAVE
-              && terrain_.GetTriangles()[landing_triangle].function_id >= 3){
-              landing_after_unboard_ = &terrain_.GetTriangles()[landing_triangle];
+            const Ogre::Real distance = i < 4 ? unboard_distance : diagonal_distance;
+            const Ogre::Vector3 requested_position
+              = vehicle_position + directions[i] * distance;
+            Ogre::Vector3 surface;
+            uint8 walkability_type = 0;
+            if (!FindWalkableSurface(
+                requested_position, surface, false, false, &walkability_type
+              ) || !IsFootWalkable(walkability_type)){
+                continue;
             }
-          }
-          player_entity_->SetPosition(surface);
-          // The boarding scripts hide Cloud and make him non-solid.
-          player_entity_->SetVisible(true);
-          player_entity_->SetSolid(true);
-          vehicle_entity->SetTalkable(true);
-          entity_manager.ScriptSetPlayerEntity("WorldMapCloud");
-          ClearVehicleTerrains();
-          if (landing_after_unboard_ != nullptr){
-            // The Highwind is what entered (the vehicle of the trigger).
-            current_vehicle_ = VehicleType::HIGHWIND;
-            landing_trigger_ = true;
-            TriggerTriangleFunction(*landing_after_unboard_);
-            landing_trigger_ = false;
-            landing_after_unboard_ = nullptr;
-          }
-          current_vehicle_ = VehicleType::ON_FOOT;
-          return true;
+            surface.y += player_height_offset_;
+            if (entity_manager.IsWorldPositionBlocked(player_entity_, surface)) continue;
+
+            if (vehicle_entity == highwind_entity_){
+                // The Highwind lands. It can't be left higher up, Cloud couldn't board it again.
+                Ogre::Vector3 ground;
+                if (!FindWalkableSurface(vehicle_position, ground, false, false)) return false;
+                if (vehicle_position.y - ground.y > HIGHWIND_MAX_LANDING_HEIGHT) return false;
+                vehicle_entity->SetPosition(Ogre::Vector3(vehicle_position.x, ground.y, vehicle_position.z));
+                // Landing on the terrain of the northern cave enters it (the function of the triangle runs).
+                uint8 landing_terrain = 0;
+                size_t landing_triangle = 0;
+                if (FindWalkableSurface(vehicle_position, ground, false, false, &landing_terrain, &landing_triangle)
+                  && landing_terrain == VGears::WorldmapFileSerializer::NORTHERND_CAVE
+                  && terrain_.GetTriangles()[landing_triangle].function_id >= 3){
+                    landing_after_unboard_ = &terrain_.GetTriangles()[landing_triangle];
+                }
+            }
+            player_entity_->SetPosition(surface);
+            // The boarding scripts hide Cloud and make him non-solid.
+            player_entity_->SetVisible(true);
+            player_entity_->SetSolid(true);
+            vehicle_entity->SetTalkable(true);
+            entity_manager.ScriptSetPlayerEntity("WorldMapCloud");
+            ClearVehicleTerrains();
+            if (landing_after_unboard_ != nullptr){
+                // The Highwind is what entered (the vehicle of the trigger).
+                current_vehicle_ = VehicleType::HIGHWIND;
+                landing_trigger_ = true;
+                TriggerTriangleFunction(*landing_after_unboard_);
+                landing_trigger_ = false;
+                landing_after_unboard_ = nullptr;
+            }
+            current_vehicle_ = VehicleType::ON_FOOT;
+            return true;
         }
         return false;
-      }
+    }
 
 } // namespace VGears

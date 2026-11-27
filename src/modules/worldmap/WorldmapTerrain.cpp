@@ -66,24 +66,24 @@ namespace VGears {
     }
 
     void WorldmapTerrain::Load(SceneManager* scene_manager, const int map_id){
-      scene_manager_ = scene_manager;
-      // The node is kept when a map is replaced.
-      if (world_map_node_ == nullptr){
-        world_map_node_ = scene_manager_->getRootSceneNode()
-          ->createChildSceneNode("WorldMapTerrain");
-      }
-      world_map_node_->setVisible(true);
-      const MapLayout layout = GetMapLayout(map_id);
-      grid_width_ = layout.width;
-      grid_height_ = layout.height;
-      origin_x_ = layout.origin_x;
-      origin_y_ = layout.origin_y;
+        scene_manager_ = scene_manager;
+        // The node is kept when a map is replaced.
+        if (world_map_node_ == nullptr){
+            world_map_node_ = scene_manager_->getRootSceneNode()
+              ->createChildSceneNode("WorldMapTerrain");
+        }
+        world_map_node_->setVisible(true);
+        const MapLayout layout = GetMapLayout(map_id);
+        grid_width_ = layout.width;
+        grid_height_ = layout.height;
+        origin_x_ = layout.origin_x;
+        origin_y_ = layout.origin_y;
         std::vector<VGears::WorldmapFileSerializer::Block> blocks
           = LoadWorldMap("WM" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id]) + ".MAP");
         if (GetTextureIdOffset(map_id) != 0){
-          for (auto& block : blocks) for (auto& mesh : block.meshes) for (auto& triangle : mesh.triangles){
-            triangle.TextureInfo += GetTextureIdOffset(map_id);
-          }
+            for (auto& block : blocks) for (auto& mesh : block.meshes) for (auto& triangle : mesh.triangles){
+                triangle.TextureInfo += GetTextureIdOffset(map_id);
+            }
         }
         const size_t texture_count = WORLD_MAP_TEXTURE_COUNT;
         // WM0 has extra blocks after the 9x7 grid: the alternate shapes of the story progress.

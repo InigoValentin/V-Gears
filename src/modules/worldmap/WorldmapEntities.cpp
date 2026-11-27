@@ -115,10 +115,10 @@ namespace VGears {
             player_entity_ = submarine_entity_;
             player_height_offset_ = 0;
             if (dive_requested_){
-              // Same heading as in WM0.
-              submarine_entity_->GetModel()->getParentSceneNode()->getParentSceneNode()
-                ->setOrientation(Ogre::Quaternion(Ogre::Radian(dive_heading_), Ogre::Vector3::UNIT_Y));
-              dive_requested_ = false;
+                // Same heading as in WM0.
+                submarine_entity_->GetModel()->getParentSceneNode()->getParentSceneNode()
+                  ->setOrientation(Ogre::Quaternion(Ogre::Radian(dive_heading_), Ogre::Vector3::UNIT_Y));
+                dive_requested_ = false;
             }
             // It floats over the seabed.
             submarine_entity_->SetPosition(

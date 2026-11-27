@@ -40,9 +40,9 @@ namespace VGears {
 
     struct ImageDataDeleter{
 
-      void operator()(Ogre::ImageCodec::ImageData* image_data) const{
-        OGRE_DELETE image_data;
-      }
+        void operator()(Ogre::ImageCodec::ImageData* image_data) const{
+            OGRE_DELETE image_data;
+        }
     };
 
     TexturePtr LoadWorldMapTexture(const std::string& name){

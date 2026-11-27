@@ -81,7 +81,7 @@ namespace VGears {
         );
     }
 
-      Ogre::String WorldmapModule::GetTerrainTypeUnderEntity(const char* entity_name) const{
+    Ogre::String WorldmapModule::GetTerrainTypeUnderEntity(const char* entity_name) const{
         if (entity_name == nullptr) return "";
         const ::Entity* entity = EntityManager::getSingleton().GetEntity(entity_name);
         if (entity == nullptr) return "";
@@ -89,12 +89,12 @@ namespace VGears {
         Ogre::Vector3 surface;
         uint8 walkability_type = 0;
         if (!FindWalkableSurface(entity->GetPosition(), surface, false, false, &walkability_type)){
-          return "";
+            return "";
         }
         return GetWorldMapTerrainName(walkability_type);
-      }
+    }
 
-      int WorldmapModule::GetTerrainTriangleUnderEntity(const char* entity_name) const{
+    int WorldmapModule::GetTerrainTriangleUnderEntity(const char* entity_name) const{
         if (entity_name == nullptr) return -1;
         const ::Entity* entity = EntityManager::getSingleton().GetEntity(entity_name);
         if (entity == nullptr) return -1;
@@ -102,9 +102,9 @@ namespace VGears {
         Ogre::Vector3 surface;
         size_t triangle_index = 0;
         if (!FindWalkableSurface(entity->GetPosition(), surface, false, false, nullptr, &triangle_index)){
-          return -1;
+            return -1;
         }
         return static_cast<int>(triangle_index);
-      }
+    }
 
 } // namespace VGears

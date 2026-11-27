@@ -334,78 +334,78 @@ namespace VGears {
     }
 
     bool IsFootWalkable(uint8 walkability_type){
-      using WalkType = VGears::WorldmapFileSerializer::TriangleWalkMapTypes;
-      switch (walkability_type){
-        case WalkType::GRASS:
-        case WalkType::FOREST:
-        case WalkType::SWAMP:
-        case WalkType::DESERT:
-        case WalkType::WASTELAND:
-        case WalkType::SNOW:
-        case WalkType::RIVERSIDE:
-        case WalkType::COREL_BRIDGE:
-        case WalkType::WUTAI_BRIDGE:
-        case WalkType::HILL_SIDE:
-        case WalkType::BEACH:
-        case WalkType::CANYON:
-        case WalkType::MOUNTAIN_PASS:
-        case WalkType::GOLD_SAUCER_DESERT:
-        case WalkType::JUNGLE:
-        case WalkType::NORTHERND_CAVE:
-        case WalkType::GOLD_SAUCER_DESERT_BORDER:
-        case WalkType::BRIDGE_HEAD:
-        case WalkType::BACK_ENTRANCE:
-          return true;
-        default:
-          return false;
-      }
+        using WalkType = VGears::WorldmapFileSerializer::TriangleWalkMapTypes;
+        switch (walkability_type){
+            case WalkType::GRASS:
+            case WalkType::FOREST:
+            case WalkType::SWAMP:
+            case WalkType::DESERT:
+            case WalkType::WASTELAND:
+            case WalkType::SNOW:
+            case WalkType::RIVERSIDE:
+            case WalkType::COREL_BRIDGE:
+            case WalkType::WUTAI_BRIDGE:
+            case WalkType::HILL_SIDE:
+            case WalkType::BEACH:
+            case WalkType::CANYON:
+            case WalkType::MOUNTAIN_PASS:
+            case WalkType::GOLD_SAUCER_DESERT:
+            case WalkType::JUNGLE:
+            case WalkType::NORTHERND_CAVE:
+            case WalkType::GOLD_SAUCER_DESERT_BORDER:
+            case WalkType::BRIDGE_HEAD:
+            case WalkType::BACK_ENTRANCE:
+            return true;
+            default:
+            return false;
+        }
     }
 
     const std::map<Ogre::String, uint8>& GetWorldMapTerrainTypes(){
-      using WalkType = VGears::WorldmapFileSerializer::TriangleWalkMapTypes;
-      static const std::map<Ogre::String, uint8> terrain_types = {
-        {"GRASS", static_cast<uint8>(WalkType::GRASS)},
-        {"FOREST", static_cast<uint8>(WalkType::FOREST)},
-        {"MOUNTAIN", static_cast<uint8>(WalkType::MOUNTAIN)},
-        {"SEA_DEEP_WATER", static_cast<uint8>(WalkType::SEA_DEEP_WATER)},
-        {"RIVER_CROSSING", static_cast<uint8>(WalkType::RIVER_CROSSING)},
-        {"RIVER", static_cast<uint8>(WalkType::RIVER)},
-        {"WATER", static_cast<uint8>(WalkType::WATER)},
-        {"SWAMP", static_cast<uint8>(WalkType::SWAMP)},
-        {"DESERT", static_cast<uint8>(WalkType::DESERT)},
-        {"WASTELAND", static_cast<uint8>(WalkType::WASTELAND)},
-        {"SNOW", static_cast<uint8>(WalkType::SNOW)},
-        {"RIVERSIDE", static_cast<uint8>(WalkType::RIVERSIDE)},
-        {"CLIFF", static_cast<uint8>(WalkType::CLIFF)},
-        {"COREL_BRIDGE", static_cast<uint8>(WalkType::COREL_BRIDGE)},
-        {"WUTAI_BRIDGE", static_cast<uint8>(WalkType::WUTAI_BRIDGE)},
-        {"UNUSED_1", static_cast<uint8>(WalkType::UNUSED_1)},
-        {"HILL_SIDE", static_cast<uint8>(WalkType::HILL_SIDE)},
-        {"BEACH", static_cast<uint8>(WalkType::BEACH)},
-        {"SUBMARINE_PEN", static_cast<uint8>(WalkType::SUBMARINE_PEN)},
-        {"CANYON", static_cast<uint8>(WalkType::CANYON)},
-        {"MOUNTAIN_PASS", static_cast<uint8>(WalkType::MOUNTAIN_PASS)},
-        {"UNKNOWN_1", static_cast<uint8>(WalkType::UNKNOWN_1)},
-        {"WATERFALL", static_cast<uint8>(WalkType::WATERFALL)},
-        {"UNUSED_2", static_cast<uint8>(WalkType::UNUSED_2)},
-        {"GOLD_SAUCER_DESERT", static_cast<uint8>(WalkType::GOLD_SAUCER_DESERT)},
-        {"JUNGLE", static_cast<uint8>(WalkType::JUNGLE)},
-        {"SEA", static_cast<uint8>(WalkType::SEA)},
-        {"NORTHERND_CAVE", static_cast<uint8>(WalkType::NORTHERND_CAVE)},
-        {"GOLD_SAUCER_DESERT_BORDER", static_cast<uint8>(WalkType::GOLD_SAUCER_DESERT_BORDER)},
-        {"BRIDGE_HEAD", static_cast<uint8>(WalkType::BRIDGE_HEAD)},
-        {"BACK_ENTRANCE", static_cast<uint8>(WalkType::BACK_ENTRANCE)},
-        {"UNUSED_3", static_cast<uint8>(WalkType::UNUSED_3)}
-      };
-      return terrain_types;
+        using WalkType = VGears::WorldmapFileSerializer::TriangleWalkMapTypes;
+        static const std::map<Ogre::String, uint8> terrain_types = {
+            {"GRASS", static_cast<uint8>(WalkType::GRASS)},
+            {"FOREST", static_cast<uint8>(WalkType::FOREST)},
+            {"MOUNTAIN", static_cast<uint8>(WalkType::MOUNTAIN)},
+            {"SEA_DEEP_WATER", static_cast<uint8>(WalkType::SEA_DEEP_WATER)},
+            {"RIVER_CROSSING", static_cast<uint8>(WalkType::RIVER_CROSSING)},
+            {"RIVER", static_cast<uint8>(WalkType::RIVER)},
+            {"WATER", static_cast<uint8>(WalkType::WATER)},
+            {"SWAMP", static_cast<uint8>(WalkType::SWAMP)},
+            {"DESERT", static_cast<uint8>(WalkType::DESERT)},
+            {"WASTELAND", static_cast<uint8>(WalkType::WASTELAND)},
+            {"SNOW", static_cast<uint8>(WalkType::SNOW)},
+            {"RIVERSIDE", static_cast<uint8>(WalkType::RIVERSIDE)},
+            {"CLIFF", static_cast<uint8>(WalkType::CLIFF)},
+            {"COREL_BRIDGE", static_cast<uint8>(WalkType::COREL_BRIDGE)},
+            {"WUTAI_BRIDGE", static_cast<uint8>(WalkType::WUTAI_BRIDGE)},
+            {"UNUSED_1", static_cast<uint8>(WalkType::UNUSED_1)},
+            {"HILL_SIDE", static_cast<uint8>(WalkType::HILL_SIDE)},
+            {"BEACH", static_cast<uint8>(WalkType::BEACH)},
+            {"SUBMARINE_PEN", static_cast<uint8>(WalkType::SUBMARINE_PEN)},
+            {"CANYON", static_cast<uint8>(WalkType::CANYON)},
+            {"MOUNTAIN_PASS", static_cast<uint8>(WalkType::MOUNTAIN_PASS)},
+            {"UNKNOWN_1", static_cast<uint8>(WalkType::UNKNOWN_1)},
+            {"WATERFALL", static_cast<uint8>(WalkType::WATERFALL)},
+            {"UNUSED_2", static_cast<uint8>(WalkType::UNUSED_2)},
+            {"GOLD_SAUCER_DESERT", static_cast<uint8>(WalkType::GOLD_SAUCER_DESERT)},
+            {"JUNGLE", static_cast<uint8>(WalkType::JUNGLE)},
+            {"SEA", static_cast<uint8>(WalkType::SEA)},
+            {"NORTHERND_CAVE", static_cast<uint8>(WalkType::NORTHERND_CAVE)},
+            {"GOLD_SAUCER_DESERT_BORDER", static_cast<uint8>(WalkType::GOLD_SAUCER_DESERT_BORDER)},
+            {"BRIDGE_HEAD", static_cast<uint8>(WalkType::BRIDGE_HEAD)},
+            {"BACK_ENTRANCE", static_cast<uint8>(WalkType::BACK_ENTRANCE)},
+            {"UNUSED_3", static_cast<uint8>(WalkType::UNUSED_3)}
+        };
+        return terrain_types;
     }
 
-      Ogre::String GetWorldMapTerrainName(const uint8 walkability_type){
+    Ogre::String GetWorldMapTerrainName(const uint8 walkability_type){
         for (const auto& terrain : GetWorldMapTerrainTypes()){
-          if (terrain.second == walkability_type) return terrain.first;
+            if (terrain.second == walkability_type) return terrain.first;
         }
         return "";
-      }
+    }
 
     MapLayout GetMapLayout(const int map_id){
         switch (map_id){
