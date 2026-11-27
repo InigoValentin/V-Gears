@@ -4,12 +4,13 @@ vgears_sources(
     EntityCollision.cpp
     EntityDirection.cpp
     EntityManager.cpp
-    EntityManagerEncounters.cpp
-    EntityManagerMovement.cpp
+    EntityManagerField.cpp
     EntityManagerPlayer.cpp
-    EntityManagerTriggers.cpp
     EntityModel.cpp
     EntityPoint.cpp
     EntityTrigger.cpp
+    EntityTriggers.cpp
+    FieldEncounters.cpp
     Walkmesh.cpp
+    WalkmeshMovement.cpp
 )

@@ -16,8 +16,6 @@
 #pragma once
 
 #include <chrono>
-#include <set>
-#include <map>
 #include <utility>
 #include <vector>
 #include <OgreSingleton.h>
@@ -25,11 +23,14 @@
 #include "Entity.h"
 #include "EntityPoint.h"
 #include "EntityTrigger.h"
+#include "EntityTriggers.h"
+#include "FieldEncounters.h"
 #include "engine/Event.h"
 #include "engine/Manager.h"
 #include "engine/graphics/MoviePlayer.h"
 #include "engine/graphics/ScreenFade.h"
 #include "Walkmesh.h"
+#include "WalkmeshMovement.h"
 
 class EntityModel;
 
@@ -49,55 +50,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * Destructor.
          */
         virtual ~EntityManager();
-
-        /**
-         * Limits a scripted movement step to its remaining distance.
-         *
-         * @param[in] distance Distance to the target.
-         * @param[in] stop_distance Desired distance from the target.
-         * @param[in] max_step Maximum distance to move this frame.
-         * @return Distance to move this frame.
-         */
-        static float ScriptedMoveStep(float distance, float stop_distance, float max_step);
-
-        /**
-         * Decides whether an entity is a better target to interact with than the best one so far.
-         *
-         * The one the player faces more directly wins. If the angles are the same, the nearest
-         * one does.
-         *
-         * @param[in] angle Angle in degrees between where the player faces and the candidate.
-         * @param[in] distance Squared distance to the candidate.
-         * @param[in] best_angle Angle of the best candidate so far, or the largest one allowed.
-         * @param[in] best_distance Squared distance to the best candidate so far.
-         * @return True if the candidate is better.
-         */
-        static bool IsBetterInteractionTarget(
-          float angle, float distance, float best_angle, float best_distance
-        );
-
-        /**
-         * Retrieves how close to a line an entity has to be to trigger it.
-         *
-         * It's the solid radius of the entity, unless a script has made it too small, as scripts
-         * do while a scene is playing. Lines couldn't be triggered at all then.
-         *
-         * @param[in] solid_radius Solid radius of the entity.
-         * @return The distance to the line from which it triggers.
-         */
-        static float TriggerReach(float solid_radius);
-
-        /**
-         * Checks if the edge of the walkmesh stops an entity.
-         *
-         * It stops the player and the characters that wander. The characters that a script walks
-         * to a position are not stopped: the original game lets them walk off the walkmesh.
-         *
-         * @param[in] is_player Whether the entity is the player.
-         * @param[in] scripted_move Whether a script asked the entity to walk to a position.
-         * @return True if the edge of the walkmesh blocks the entity.
-         */
-        static bool WalkmeshEdgeBlocks(bool is_player, bool scripted_move);
 
         /**
          * Handles an input event.
@@ -580,62 +532,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
     private:
 
         /**
-         * Calculates the point elevation over a plane.
-         *
-         * @param[in] point Point to calculate the elevation of.
-         * @param[in] a First point of the plane.
-         * @param[in] b Second point of the plane.
-         * @param[in] c Third  point of the plane.
-         * @return The elevation of the point.
-         */
-        static float PointElevation(
-          const Ogre::Vector2& point,
-          const Ogre::Vector3& a, const Ogre::Vector3& b, const Ogre::Vector3& c
-        );
-
-        /**
-         * Determines at which side of a line a point is.
-         *
-         * @param[in] point The point to evaluate.
-         * @param[in] p1 The first point of the line.
-         * @param[in] p2 The second point of the line.
-         * @return A negative value if the point is on the "left" of the line vector, a positive
-         * value if the point is on the "right" of the vector line, or 0 if the point is part of
-         * the line. "Left" and "right" are determined by going from p1 to p2.
-         */
-        static float SideOfVector(
-          const Ogre::Vector2& point, const Ogre::Vector2& p1, const Ogre::Vector2& p2
-        );
-
-        /**
-         * Calculates the square distance between a point and a line.
-         *
-         * The calculated distance is the vector orthogonal to the line that passes by the point,
-         * i.e. the shortest distance.
-         *
-         * @param[in] point The point.
-         * @param[in] point_a First point of the line.
-         * @param[in] point_b Second point of the line.
-         * @param[out] proj Vector representing the shortest distance.
-         * @return The distance from the point to the line.
-         */
-        static float SquareDistanceToLine(
-          const Ogre::Vector3& point, const Ogre::Vector3& point_a, const Ogre::Vector3& point_b,
-          Ogre::Vector3& proj
-        );
-
-        /**
-         * Calculates the direction degree between to points.
-         *
-         * @param[in] current_point Origin point.
-         * @param[in] direction_point Next point in the direction.
-         * @return Degrees between the two points
-         */
-        static Ogre::Degree GetDirectionToPoint(
-          const Ogre::Vector3& current_point, const Ogre::Vector3& direction_point
-        );
-
-        /**
          * Scale factor for battle background models.
          */
         static const float SCENE_SCALE;
@@ -649,18 +545,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * Entity ID for world map background entity.
          */
         static const unsigned int  WORLD_MAP_BACKGROUND_ID;
-
-        /**
-         * Priority of the script that runs when the player presses OK in front of an entity.
-         *
-         * It has to run before the scripts that fields leave running on an entity (the loops that
-         * play an animation, requested with priority 5 or 6), or the entity could not be talked to.
-         * But it can't be the highest: a script of the same entity that is requested with a higher
-         * priority (3 or smaller) has to be able to run while the talk script waits for it, as in
-         * the scenes where a talk script asks its own entity to do something and waits for it to
-         * start.
-         */
-        static const int INTERACT_SCRIPT_PRIORITY;
 
         /**
          * Updates the field entities in the manager.
@@ -714,56 +598,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         );
 
         /**
-         * Attaches an entity to the walkmesh.
-         *
-         * It sets the triangle from the entity position coordinates. To account for multiple
-         * triangles on different levels, it uses only the X and Y coordinates, and automatically
-         * sets the Z one to the closest triangle. If the manager is in battle mode, it will do
-         * nothing.
-         *
-         * @param[in] entity Entity to attach.
-         * @return True if the entity was assigned to a walkmesh triangle, false if the entity is
-         * not in a triangle or if the manager is in battle mode.
-         */
-        bool SetEntityOnWalkmesh(Entity* entity);
-
-        /**
-         * Moves an entity in the walkmesh.
-         *
-         * If the manager is in battle mode, it will do nothing.
-         *
-         * @param[in] entity Entity to move.
-         * @param[in] speed Movement speed.
-         * @param[in] delta_time Time elapsed for this movement step.
-         * @return True if the movement was possible and the entity was moved, false otherwise.
-         * If the manager is in battle mode, it will always return false.
-         */
-        bool PerformWalkmeshMove(Entity* entity, const float speed, const float delta_time);
-
-        /**
-         * Checks if the entity is crossing a walkmesh triangle border.
-         *
-         * @param[in] entity Entity to check.
-         * @param[in] position The position. @todo document more.
-         * @param[in] move_vector The move vector. @todo document more.
-         * @return True if the entity is crossing a triangle border, false otherwise. If the manager
-         * is in battle mode, it will always return false.
-         */
-        bool WalkmeshBorderCross(
-          Entity* entity, Ogre::Vector3& position, const Ogre::Vector2& move_vector
-        );
-
-        /**
-         * Checks for collisions of the entity with other entities.
-         *
-         * @param[in] entity Entity to check for collisions.
-         * @param[in] position Position of the entity.
-         * @return True if the entity is colliding with another, false otherwise. If the entity is
-         * not solid, always false. If the manager is in battle mode, it will always return false.
-         */
-        bool CheckSolidCollisions(Entity* entity, Ogre::Vector3& position);
-
-        /**
          * Checks for entity triggers near a entity.
          *
          * If there are triggers, and the conditions are met, the appropriate trigger function will
@@ -787,15 +621,50 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         void CheckEntityInteract();
 
         /**
-         * Runs the contact script (script 2) of the entities that the player touches.
-         *
-         * The script of an entity that the original game runs when the player collides with it
-         * (the old man of condor1 starts his conversation that way, and only after it can be
-         * talked to). It runs once for each touch.
+         * Moves the player entity according to the pressed directions.
          */
-        void CheckEntityContacts();
+        void ApplyPlayerInput();
 
+        /**
+         * Updates the scroll, offset, turn and movement of an entity of a field.
+         *
+         * @param[in] entity The entity.
+         */
+        void UpdateFieldEntity(Entity* entity);
 
+        /**
+         * Updates an entity that is on the walkmesh: moves it and chooses its animation.
+         *
+         * @param[in] entity The entity.
+         */
+        void UpdateWalkingEntity(Entity* entity);
+
+        /**
+         * Updates an entity that is not moving.
+         *
+         * @param[in] entity The entity.
+         */
+        void UpdateStandingEntity(Entity* entity);
+
+        /**
+         * Retrieves the speed at which an entity walks.
+         *
+         * @param[in] entity The entity.
+         * @return The speed.
+         */
+        float GetWalkingSpeed(const Entity* entity) const;
+
+        /**
+         * Walks an entity for the time of this frame.
+         *
+         * Scripted moves are done in small steps, so a long frame doesn't make them miss their
+         * destination.
+         *
+         * @param[in] entity The entity.
+         * @param[in] speed The speed of the entity.
+         * @return True if the entity moved.
+         */
+        bool WalkEntity(Entity* entity, const float speed);
 
         /**
          * Calculates the next offset step for an entity.
@@ -810,24 +679,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * @param[in] entity The entity.
          */
         void SetNextTurnStep(Entity* entity);
-
-        /**
-         * Calculates and sets the next position during a linear movement.
-         *
-         * If the manager is in battle mode, it will do nothing
-         *
-         * @param[in] entity The moving entity.
-         */
-        void SetNextLinearStep(Entity* entity);
-
-        /**
-         * Calculates and sets the next position during a jump.
-         *
-         * If the manager is in battle mode, it will do nothing
-         *
-         * @param[in] entity The jump entity.
-         */
-        void SetNextJumpStep(Entity* entity);
 
         /**
          * @todo Understand and document.
@@ -854,11 +705,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
          * fade must be drawn over it.
          */
         ScreenFade screen_fade_;
-
-        /**
-         * The entity table name.
-         */
-        Ogre::String entity_table_name_;
 
         /**
          * The list of field or world entities.
@@ -913,8 +759,6 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         /// After entering a field from the world map, the walk keys that were held are ignored until
         /// they are released, so the player starts standing still.
         bool ignore_held_walk_ = false;
-        /// Entities that the player is touching.
-        std::set<const Entity*> entities_in_contact_;
         /// Last time that a script asked for the Start button.
         std::chrono::steady_clock::time_point start_key_read_time_;
 
@@ -939,6 +783,21 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         std::vector<Ogre::String> entity_scripts_;
 
         /**
+         * Runs the scripts of lines, touches and talks.
+         */
+        EntityTriggers triggers_;
+
+        /**
+         * Random battles of the field.
+         */
+        FieldEncounters encounters_;
+
+        /**
+         * Moves the entities on the walkmesh.
+         */
+        WalkmeshMovement movement_;
+
+        /**
          * The scene node.
          */
         Ogre::SceneNode* scene_node_;
@@ -954,85 +813,8 @@ class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
         Ogre::Entity* axis_;
 
         /**
-         * Indicates if random encounters happen in the map.
-         */
-        bool random_encounters_;
-
-        /**
-         * The encounter rate of the map.
-         */
-        float encounter_rate_;
-
-        /**
-         * Random encounter table of a field.
-         */
-        struct EncounterTable{
-
-            /**
-             * Encounter rate, as in the original game.
-             */
-            int rate;
-
-            /**
-             * Standard encounters: battle ID and probability (out of 64).
-             */
-            std::vector<std::pair<int, int>> battles;
-
-            /**
-             * Special encounters: battle ID and probability (out of 64).
-             */
-            std::vector<std::pair<int, int>> specials;
-        };
-
-        /**
-         * Random encounter tables of the field, by ID.
-         */
-        std::map<int, EncounterTable> encounter_tables_;
-
-        /**
          * Entities that were visible before a battle, hidden while it lasts.
          */
         std::vector<Entity*> entities_hidden_by_battle_;
 
-        /**
-         * ID of the encounter table in use.
-         */
-        int encounter_table_;
-
-        /**
-         * Distance walked by the player since the last step.
-         */
-        float encounter_distance_;
-
-        /**
-         * Position of the player in the last frame, to know how much it has walked.
-         */
-        Ogre::Vector3 encounter_last_position_;
-
-        /**
-         * Indicates if {@see encounter_last_position_} is valid.
-         */
-        bool encounter_last_position_valid_;
-
-        /**
-         * Steps that must be taken before encounters can happen again.
-         */
-        int encounter_safe_steps_;
-
-        /**
-         * Accumulated chance of a random encounter, out of 256 * 256. It grows while walking.
-         */
-        int encounter_accumulator_ = 0;
-
-        /**
-         * Last random battle, which is not repeated twice in a row. -1 if none.
-         */
-        int encounter_last_battle_ = -1;
-
-        /**
-         * Counts the steps of the player and starts random encounters.
-         *
-         * @param[in] walked True if the player was moved by the player's input in this frame.
-         */
-        void UpdateEncounters(const bool walked);
 };

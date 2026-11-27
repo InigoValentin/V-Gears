@@ -14,11 +14,12 @@
  */
 
 #include <cstdlib>
-#include "engine/config/ConfigVar.h"
-#include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
-#include "engine/script/ScriptManager.h"
 #include "engine/Timer.h"
+#include "engine/config/ConfigVar.h"
+#include "engine/entity/Entity.h"
+#include "engine/entity/FieldEncounters.h"
+#include "engine/script/ScriptManager.h"
 
 ConfigVar cv_encounter_multiplier(
   "encounter_multiplier", "Multiplier of the random encounter rate (0 disables them)", "1"
@@ -39,38 +40,38 @@ static const float ENCOUNTER_CHECK_FRAMES = 8.0f;
  */
 static const float ENCOUNTER_STEP_VALUE = 5.0f;
 
-float EntityManager::GetEncounterMultiplier() const{return cv_encounter_multiplier.GetF();}
+float FieldEncounters::GetMultiplier(){return cv_encounter_multiplier.GetF();}
 
-bool EntityManager::IsDebugEncounters() const{return cv_debug_encounters.GetB();}
+bool FieldEncounters::IsDebug(){return cv_debug_encounters.GetB();}
 
-void EntityManager::SetRandomEncounters(bool active){random_encounters_ = active;}
+void FieldEncounters::SetActive(bool active){active_ = active;}
 
-void EntityManager::ClearEncounterTables(){
-    encounter_tables_.clear();
-    encounter_table_ = 1;
-    encounter_distance_ = 0.0f;
-    encounter_last_position_valid_ = false;
-    encounter_accumulator_ = 0;
-    encounter_last_battle_ = -1;
+void FieldEncounters::Clear(){
+    tables_.clear();
+    table_ = 1;
+    distance_ = 0.0f;
+    last_position_valid_ = false;
+    accumulator_ = 0;
+    last_battle_ = -1;
 }
 
-void EntityManager::AddEncounterTable(
+void FieldEncounters::AddTable(
   const int id, const int rate, const std::vector<std::pair<int, int>>& battles,
   const std::vector<std::pair<int, int>>& specials
 ){
-    EncounterTable table;
+    Table table;
     table.rate = rate;
     table.battles = battles;
     table.specials = specials;
-    encounter_tables_[id] = table;
+    tables_[id] = table;
 }
 
-void EntityManager::ScriptSetEncounterTable(const int id){encounter_table_ = id;}
+void FieldEncounters::SetTable(const int id){table_ = id;}
 
-int EntityManager::ScriptRollEncounterBattle() const{
-    auto found = encounter_tables_.find(encounter_table_);
-    if (found == encounter_tables_.end()) return -1;
-    const EncounterTable& table = found->second;
+int FieldEncounters::RollBattle() const{
+    auto found = tables_.find(table_);
+    if (found == tables_.end()) return -1;
+    const Table& table = found->second;
     // Like the original game: a roll out of 64 is checked against the special battles one after
     // the other (each one adds its probability). If none is hit, a new roll chooses a standard
     // battle, the last one being the default.
@@ -90,21 +91,21 @@ int EntityManager::ScriptRollEncounterBattle() const{
     return table.battles.back().first;
 }
 
-void EntityManager::UpdateEncounters(const bool walked){
-    if (player_entity_ == nullptr){
-        encounter_last_position_valid_ = false;
+void FieldEncounters::Update(const Entity* player, const bool player_locked, const bool walked){
+    if (player == nullptr){
+        last_position_valid_ = false;
         return;
     }
-    const Ogre::Vector3 position = player_entity_->GetPosition();
+    const Ogre::Vector3 position = player->GetPosition();
     const float distance
-      = encounter_last_position_valid_ ? (position - encounter_last_position_).length() : 0.0f;
-    encounter_last_position_ = position;
-    encounter_last_position_valid_ = true;
+      = last_position_valid_ ? (position - last_position_).length() : 0.0f;
+    last_position_ = position;
+    last_position_valid_ = true;
     // Only walking counts: not scripted movements, and not jumps to another place.
-    if (!walked || player_lock_ || distance > 2.0f) return;
-    if (!random_encounters_ || encounter_tables_.empty()) return;
-    auto found = encounter_tables_.find(encounter_table_);
-    if (found == encounter_tables_.end()) return;
+    if (!walked || player_locked || distance > 2.0f) return;
+    if (!active_ || tables_.empty()) return;
+    auto found = tables_.find(table_);
+    if (found == tables_.end()) return;
     const float multiplier = cv_encounter_multiplier.GetF();
     if (multiplier <= 0.0f) return;
     // Same as the original game. Every few frames of walking the accumulator grows by a value
@@ -112,29 +113,31 @@ void EntityManager::UpdateEncounters(const bool walked){
     // starts if a random number is lower than the accumulator.
     const int rate = found->second.rate;
     if (rate <= 0) return;
-    encounter_distance_ += Timer::getSingleton().GetGameTimeDelta() * 30.0f;
-    while (encounter_distance_ >= ENCOUNTER_CHECK_FRAMES){
-        encounter_distance_ -= ENCOUNTER_CHECK_FRAMES;
-        // Enemy Away and Enemy Lure materia change the rate of the party (see Party.get_encounter_modifier).
+    distance_ += Timer::getSingleton().GetGameTimeDelta() * 30.0f;
+    while (distance_ >= ENCOUNTER_CHECK_FRAMES){
+        distance_ -= ENCOUNTER_CHECK_FRAMES;
+        // Enemy Away and Enemy Lure materia change the rate of the party (see
+        // Party.get_encounter_modifier).
         const float materia_multiplier
           = ScriptManager::getSingleton().EvaluateNumber("Party.get_encounter_modifier()", 1.0f);
-        encounter_accumulator_ += static_cast<int>(ENCOUNTER_STEP_VALUE * multiplier * materia_multiplier * 256.0f) / rate;
+        accumulator_
+          += static_cast<int>(ENCOUNTER_STEP_VALUE * multiplier * materia_multiplier * 256.0f) / rate;
         const int roll = std::rand() % 256 * 256;
         if (cv_debug_encounters.GetB()){
             LOG_TRIVIAL(
               "Encounter check: rate " + std::to_string(rate) + ", accumulator "
-              + std::to_string(encounter_accumulator_ / 256.0f) + "/256, roll "
+              + std::to_string(accumulator_ / 256.0f) + "/256, roll "
               + std::to_string(roll / 256)
             );
         }
-        if (roll >= encounter_accumulator_) continue;
-        int battle = ScriptRollEncounterBattle();
+        if (roll >= accumulator_) continue;
+        int battle = RollBattle();
         // The same battle is not repeated: it's rolled again once.
-        if (battle == encounter_last_battle_) battle = ScriptRollEncounterBattle();
+        if (battle == last_battle_) battle = RollBattle();
         if (battle < 0) return;
-        encounter_distance_ = 0.0f;
-        encounter_accumulator_ = 0;
-        encounter_last_battle_ = battle;
+        distance_ = 0.0f;
+        accumulator_ = 0;
+        last_battle_ = battle;
         LOG_TRIVIAL("Random encounter: battle " + std::to_string(battle));
         // The battle is started by a script, as it has to change the module of every manager.
         ScriptManager::getSingleton().RunString("Encounter.start(" + std::to_string(battle) + ")");

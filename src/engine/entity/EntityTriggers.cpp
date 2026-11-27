@@ -15,13 +15,15 @@
 
 #include <cmath>
 #include <limits>
-#include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
+#include "engine/entity/Entity.h"
+#include "engine/entity/EntityTrigger.h"
+#include "engine/entity/EntityTriggers.h"
 #include "engine/script/ScriptManager.h"
 
-const int EntityManager::INTERACT_SCRIPT_PRIORITY = 4;
+const int EntityTriggers::INTERACT_SCRIPT_PRIORITY = 4;
 
-float EntityManager::SquareDistanceToLine(
+float EntityTriggers::SquareDistanceToLine(
   const Ogre::Vector3& point, const Ogre::Vector3& point_a, const Ogre::Vector3& point_b,
   Ogre::Vector3& proj
 ){
@@ -47,10 +49,9 @@ float EntityManager::SquareDistanceToLine(
     return -1;
 }
 
-Ogre::Degree EntityManager::GetDirectionToPoint(
+Ogre::Degree EntityTriggers::GetDirectionToPoint(
   const Ogre::Vector3& current_point, const Ogre::Vector3& direction_point
 ){
-    // TODO: Declare function in header file.
     Ogre::Vector2 up(0.0f, -1.0f);
     Ogre::Vector2 dir(direction_point.x - current_point.x, direction_point.y - current_point.y);
     // Angle between vectors
@@ -58,28 +59,13 @@ Ogre::Degree EntityManager::GetDirectionToPoint(
     return (dir.x < 0) ? Ogre::Degree(360) - angle : angle;
 }
 
-void EntityManager::AddEntityTrigger(
-  const Ogre::String& name,
-  const Ogre::Vector3& point1, const Ogre::Vector3& point2, const bool enabled
-){
-    if (IsBattleModule()){
-        LOG_WARNING("Tried to add an entity trigger but the EntityManager is in battle mode.");
-        return;
-    }
-    EntityTrigger* trigger = new EntityTrigger(name);
-    trigger->SetPoints(point1, point2);
-    trigger->SetEnabled(enabled);
-    entity_triggers_.push_back(trigger);
-    ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, trigger->GetName(), nullptr);
-}
-
-float EntityManager::TriggerReach(float solid_radius){
+float EntityTriggers::Reach(float solid_radius){
     // The radius an entity has when a script doesn't change it.
     const float default_radius = 0.21f;
     return solid_radius < 0.01f ? default_radius : solid_radius;
 }
 
-bool EntityManager::IsBetterInteractionTarget(
+bool EntityTriggers::IsBetterInteractionTarget(
   float angle, float distance, float best_angle, float best_distance
 ){
     const float same_angle = 0.001f;
@@ -87,15 +73,11 @@ bool EntityManager::IsBetterInteractionTarget(
     return std::fabs(angle - best_angle) <= same_angle && distance < best_distance;
 }
 
-void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position){
-    if (IsBattleModule()){
-        LOG_WARNING("Tried to check for triggers, but the EntityManager is in battle mode");
-        return;
-    }
-    if (entity->IsSolid() == false) return;
-    if (player_entity_ != entity) return;
-    if (player_entity_->IsSolid() == false) return;
-    if (player_lock_) return;
+void EntityTriggers::ClearContacts(){contacts_.clear();}
+
+void EntityTriggers::CheckLines(
+  Entity* entity, const Ogre::Vector3& position, const std::vector<EntityTrigger*>& lines
+){
     bool is_moving = true;
     if (
       std::fabs(entity->GetPosition().x - position.x) < 0.005f
@@ -105,20 +87,20 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
         is_moving = false;
     }
 
-    for (unsigned int i = 0; i < entity_triggers_.size(); ++ i){
+    for (unsigned int i = 0; i < lines.size(); ++ i){
         ScriptEntity* trigger = ScriptManager::getSingleton().GetScriptEntityByName(
-          ScriptManager::ENTITY, entity_triggers_[i]->GetName()
+          ScriptManager::ENTITY, lines[i]->GetName()
         );
 
-        if (trigger != nullptr && entity_triggers_[i]->IsEnabled() == true){
-            Ogre::Vector3 point_a = entity_triggers_[i]->GetPoint1();
-            Ogre::Vector3 point_b = entity_triggers_[i]->GetPoint2();
+        if (trigger != nullptr && lines[i]->IsEnabled() == true){
+            Ogre::Vector3 point_a = lines[i]->GetPoint1();
+            Ogre::Vector3 point_b = lines[i]->GetPoint2();
             Ogre::Vector3 entity_position = entity->GetPosition();
             Ogre::Vector3 proj;
 
             // Calculate distance
             float square_dist = SquareDistanceToLine(entity_position, point_a, point_b, proj);
-            float solid_radius = TriggerReach(entity->GetSolidRadius());
+            float solid_radius = Reach(entity->GetSolidRadius());
 
             // Calculate direction.
             const Ogre::Degree direction_to_line = GetDirectionToPoint(entity_position, proj);
@@ -134,12 +116,12 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
             if (
               square_dist != -1 && square_dist <= solid_radius * solid_radius
               && angle < Ogre::Degree(180) && angle > Ogre::Degree(0)
-              && entity_triggers_[i]->CheckApproached() == false
+              && lines[i]->CheckApproached() == false
               && is_moving
             ){
-                entity_triggers_[i]->SetApproached(true);
+                lines[i]->SetApproached(true);
                 //std::cout << "    [TRIGGER] " << entity->GetName() << " on_approach "
-                //  << entity_triggers_[i]->GetName() << std::endl;
+                //  << lines[i]->GetName() << std::endl;
                 ScriptManager::getSingleton().ScriptRequest(
                   trigger, "on_approach", 1, entity->GetName(), "", false, false
                 );
@@ -150,12 +132,12 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
             // previously entered the line.
             if (
               square_dist != -1 && square_dist < 1
-              && entity_triggers_[i]->CheckCrossed() == false
-              && entity_triggers_[i]->CheckApproached() == true
+              && lines[i]->CheckCrossed() == false
+              && lines[i]->CheckApproached() == true
             ){
-                entity_triggers_[i]->SetCrossed(true);
+                lines[i]->SetCrossed(true);
                 //std::cout << "    [TRIGGER] " << entity->GetName() << " on_cross "
-                //  << entity_triggers_[i]->GetName() << std::endl;
+                //  << lines[i]->GetName() << std::endl;
                 ScriptManager::getSingleton().ScriptRequest(
                   trigger, "on_cross", 1, entity->GetName(), "", false, false
                 );
@@ -166,33 +148,33 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
             // the entity has previously entered the line.
             if (
               square_dist != -1 && square_dist <= solid_radius * solid_radius
-              && entity_triggers_[i]->CheckApproached() == true
+              && lines[i]->CheckApproached() == true
             ){
                 // TODO: Fix this hack.
                 // After the on_near script is run, set a cooltime of 5 frames before running
                 // it again. This is because most of the time this trigger checks for a key, and
                 // if its pressed, is run multiple times.
-                if (entity_triggers_[i]->GetNearEventCooldown() == 0){
+                if (lines[i]->GetNearEventCooldown() == 0){
                     //std::cout << "    [TRIGGER] " << entity->GetName()
-                    //  << " on_near " << entity_triggers_[i]->GetName() << std::endl;
+                    //  << " on_near " << lines[i]->GetName() << std::endl;
                     ScriptManager::getSingleton().ScriptRequest(
                       trigger, "on_near", 1, entity->GetName(), "", true, true
                     );
-                    entity_triggers_[i]->ResetNearEventCooldown();
+                    lines[i]->ResetNearEventCooldown();
                 }
-                else entity_triggers_[i]->DecreaseNearEventCooldown();
+                else lines[i]->DecreaseNearEventCooldown();
             }
 
             // Check on cross line once.
             // The same as on cross line, but only once.
             if (
               square_dist != -1 && square_dist < solid_radius * solid_radius
-              && entity_triggers_[i]->CheckNearSingleEventTriggered() == false
-              && entity_triggers_[i]->CheckApproached() == true
+              && lines[i]->CheckNearSingleEventTriggered() == false
+              && lines[i]->CheckApproached() == true
             ){
-                entity_triggers_[i]->SetNearSingleEventTriggered(true);
+                lines[i]->SetNearSingleEventTriggered(true);
                 //std::cout << "    [TRIGGER] " << entity->GetName()
-                //  << " on_near_once " << entity_triggers_[i]->GetName() << std::endl;
+                //  << " on_near_once " << lines[i]->GetName() << std::endl;
                 ScriptManager::getSingleton().ScriptRequest(
                   trigger, "on_near_once", 1, entity->GetName(), "", false, false
                 );
@@ -204,10 +186,10 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
             // on enter script has been triggered previously.
             if (
               square_dist != -1 && square_dist > solid_radius * solid_radius
-              && entity_triggers_[i]->CheckApproached()
+              && lines[i]->CheckApproached()
             ){
                 //std::cout << "    [TRIGGER] " << entity->GetName() << " on_leave "
-                //  << entity_triggers_[i]->GetName() << std::endl;
+                //  << lines[i]->GetName() << std::endl;
                 ScriptManager::getSingleton().ScriptRequest(
                   trigger, "on_leave", 1, entity->GetName(), "", false, false
                 );
@@ -215,52 +197,41 @@ void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position)
 
             // If the entity is far enough from the line, mark every trigger as inactive
             if (square_dist == -1 || square_dist > solid_radius * solid_radius){
-                entity_triggers_[i]->Clear();
+                lines[i]->Clear();
                 //std::cout << "    [TRIGGER] " << entity->GetName() << " clear of "
-                //  << entity_triggers_[i]->GetName() << std::endl;
+                //  << lines[i]->GetName() << std::endl;
             }
 
         }
     }
 }
 
-void EntityManager::ScriptSetLine(
-  const char* name, const float x1, const float y1, const float z1, const float x2, const float y2,
-  const float z2
+void EntityTriggers::CheckContacts(
+  Entity* player, const bool player_locked, const std::vector<Entity*>& entities
 ){
-    for (EntityTrigger* trigger : entity_triggers_){
-        if (trigger->GetName() == name){
-            trigger->SetPoints(Ogre::Vector3(x1, y1, z1), Ogre::Vector3(x2, y2, z2));
-            return;
-        }
-    }
-}
-
-void EntityManager::CheckEntityContacts(){
-    if (IsBattleModule() || !IsFieldModule()) return;
-    if (player_entity_ == nullptr || player_lock_ || !player_entity_->IsSolid()){
-        entities_in_contact_.clear();
+    if (player == nullptr || player_locked || !player->IsSolid()){
+        contacts_.clear();
         return;
     }
-    const Ogre::Vector3 player_position = player_entity_->GetPosition();
-    for (Entity* entity : entity_){
-        if (entity == player_entity_ || entity->IsLine() || !entity->IsSolid()) continue;
+    const Ogre::Vector3 player_position = player->GetPosition();
+    for (Entity* entity : entities){
+        if (entity == player || entity->IsLine() || !entity->IsSolid()) continue;
         const Ogre::Vector3 position = entity->GetPosition();
         const float height = (position.z < player_position.z)
-          ? entity->GetHeight() : player_entity_->GetHeight();
+          ? entity->GetHeight() : player->GetHeight();
         const float distance_z = position.z - player_position.z + height;
         bool touching = false;
         if (distance_z < height * 2 && distance_z >= 0){
-            const float reach = player_entity_->GetSolidRadius() + entity->GetSolidRadius() + 0.05f;
+            const float reach = player->GetSolidRadius() + entity->GetSolidRadius() + 0.05f;
             const float dx = position.x - player_position.x;
             const float dy = position.y - player_position.y;
             touching = dx * dx + dy * dy < reach * reach;
         }
         if (!touching){
-            entities_in_contact_.erase(entity);
+            contacts_.erase(entity);
             continue;
         }
-        if (!entities_in_contact_.insert(entity).second) continue;
+        if (!contacts_.insert(entity).second) continue;
         ScriptEntity* script_entity = ScriptManager::getSingleton().GetScriptEntityByName(
           ScriptManager::ENTITY, entity->GetName()
         );
@@ -273,72 +244,12 @@ void EntityManager::CheckEntityContacts(){
     }
 }
 
-void EntityManager::CheckEntityInteract(){
-    if (IsBattleModule()){
-        LOG_WARNING(
-          "Tried to check for entity interaction, but the EntityManager is in battle mode"
-        );
-        return;
-    }
-    if (player_entity_ == NULL || player_lock_ == true || player_entity_->IsSolid() == false)
-        return;
-    Ogre::Degree angle_pc = player_entity_->GetRotation();
-    Entity* entity_to_interact = NULL;
-    Ogre::Degree less_angle(90);
-    float best_distance = std::numeric_limits<float>::max();
-    Ogre::Real nearest_worldmap_distance = -1.0f;
-    for (unsigned int i = 0; i < entity_.size(); ++ i){
-        if (entity_[i]->IsTalkable() == false) continue;
-        if (entity_[i] == player_entity_) continue;
-        Ogre::Vector3 pos1 =  entity_[i]->GetPosition();
-        float interact_range =  entity_[i]->GetTalkRadius();
-        Ogre::Vector3 pos2 = player_entity_->GetPosition();
-        float solid_range = player_entity_->GetSolidRadius();
-                if (IsWorldModule()){
-                        const Ogre::Real target_bottom = pos1.y;
-                        const Ogre::Real player_bottom = pos2.y;
-                                                const Ogre::Real talk_range
-                                                    = interact_range + solid_range + 0.05f;
-                        const Ogre::Real distance
-                            = (pos1.x - pos2.x) * (pos1.x - pos2.x)
-                                + (pos1.z - pos2.z) * (pos1.z - pos2.z);
-                        const bool height_overlap
-                            = player_bottom <= target_bottom + entity_[i]->GetHeight()
-                                && player_bottom + player_entity_->GetHeight() >= target_bottom;
-                        if (
-                                height_overlap && distance <= talk_range * talk_range
-                                && (nearest_worldmap_distance < 0 || distance < nearest_worldmap_distance)
-                        ){
-                                entity_to_interact = entity_[i];
-                                nearest_worldmap_distance = distance;
-                        }
-                        continue;
-                }
-        int height = (pos1.z < pos2.z) ? entity_[i]->GetHeight() : player_entity_->GetHeight();
-        if (((pos1.z - pos2.z + height) < (height * 2)) && ((pos1.z - pos2.z + height) >= 0)){
-            interact_range = (interact_range + solid_range) * (interact_range + solid_range);
-            float distance
-              = (pos1.x - pos2.x) * (pos1.x - pos2.x) + (pos1.y - pos2.y) * (pos1.y - pos2.y);
-            if (distance < interact_range + solid_range){
-                Ogre::Degree angle_to_model = GetDirectionToPoint(pos2, pos1);
-                Ogre::Degree angle = angle_pc - angle_to_model;
-                angle = (angle < Ogre::Degree(0)) ? -angle : angle;
-                angle = (angle >= Ogre::Degree(180)) ? Ogre::Degree(360) - angle : angle;
-                // With several entities in range, interact with the one the player faces most.
-                // Nobody 90 degrees or more away from where the player faces is considered.
-                if (
-                  angle < Ogre::Degree(90) && IsBetterInteractionTarget(
-                    angle.valueDegrees(), distance, less_angle.valueDegrees(), best_distance
-                  )
-                ){
-                    less_angle = angle;
-                    best_distance = distance;
-                    entity_to_interact = entity_[i];
-                }
-            }
-        }
-    }
-    if (entity_to_interact != NULL && entity_to_interact->IsLine() == false){
+void EntityTriggers::Interact(
+  Entity* player, const std::vector<Entity*>& entities, const bool world_map
+){
+    Entity* entity_to_interact = world_map
+      ? FindWorldMapTarget(player, entities) : FindFieldTarget(player, entities);
+    if (entity_to_interact != nullptr && entity_to_interact->IsLine() == false){
         Ogre::String name = entity_to_interact->GetName();
         ScriptEntity* scr_entity = ScriptManager::getSingleton().GetScriptEntityByName(
           ScriptManager::ENTITY, name
@@ -350,4 +261,86 @@ void EntityManager::CheckEntityInteract(){
             LOG_WARNING("Script 'on_interact' for entity '" +  name + "' doesn't exist.");
         }
     }
+}
+
+void EntityTriggers::InteractWithLines(const std::vector<EntityTrigger*>& lines){
+    for (EntityTrigger* line : lines){
+        if (line->IsEnabled() == true && line->CheckApproached() == true){
+            ScriptEntity* script_entity = ScriptManager::getSingleton().GetScriptEntityByName(
+              ScriptManager::ENTITY, line->GetName()
+            );
+            const bool added = ScriptManager::getSingleton().ScriptRequest(
+              script_entity, "on_interact", INTERACT_SCRIPT_PRIORITY, "", "", false, false
+            );
+            if (added == false){
+                LOG_WARNING(
+                  "Script 'on_interact' for entity '" + line->GetName() + "' doesn't exist."
+                );
+            }
+        }
+    }
+}
+
+Entity* EntityTriggers::FindWorldMapTarget(Entity* player, const std::vector<Entity*>& entities){
+    Entity* target = nullptr;
+    Ogre::Real nearest_distance = -1.0f;
+    const Ogre::Vector3 player_position = player->GetPosition();
+    for (Entity* entity : entities){
+        if (entity->IsTalkable() == false || entity == player) continue;
+        const Ogre::Vector3 position = entity->GetPosition();
+        const Ogre::Real talk_range = entity->GetTalkRadius() + player->GetSolidRadius() + 0.05f;
+        // The world map has the height in the Y axis.
+        const Ogre::Real distance
+          = (position.x - player_position.x) * (position.x - player_position.x)
+          + (position.z - player_position.z) * (position.z - player_position.z);
+        const bool height_overlap
+          = player_position.y <= position.y + entity->GetHeight()
+          && player_position.y + player->GetHeight() >= position.y;
+        if (
+          height_overlap && distance <= talk_range * talk_range
+          && (nearest_distance < 0 || distance < nearest_distance)
+        ){
+            target = entity;
+            nearest_distance = distance;
+        }
+    }
+    return target;
+}
+
+Entity* EntityTriggers::FindFieldTarget(Entity* player, const std::vector<Entity*>& entities){
+    Entity* target = nullptr;
+    Ogre::Degree less_angle(90);
+    float best_distance = std::numeric_limits<float>::max();
+    const Ogre::Degree player_angle = player->GetRotation();
+    const Ogre::Vector3 player_position = player->GetPosition();
+    const float solid_range = player->GetSolidRadius();
+    for (Entity* entity : entities){
+        if (entity->IsTalkable() == false || entity == player) continue;
+        const Ogre::Vector3 position = entity->GetPosition();
+        const int height = (position.z < player_position.z)
+          ? entity->GetHeight() : player->GetHeight();
+        const float distance_z = position.z - player_position.z + height;
+        if (!((distance_z < (height * 2)) && (distance_z >= 0))) continue;
+        float interact_range = entity->GetTalkRadius();
+        interact_range = (interact_range + solid_range) * (interact_range + solid_range);
+        const float distance
+          = (position.x - player_position.x) * (position.x - player_position.x)
+          + (position.y - player_position.y) * (position.y - player_position.y);
+        if (!(distance < interact_range + solid_range)) continue;
+        Ogre::Degree angle = player_angle - GetDirectionToPoint(player_position, position);
+        angle = (angle < Ogre::Degree(0)) ? -angle : angle;
+        angle = (angle >= Ogre::Degree(180)) ? Ogre::Degree(360) - angle : angle;
+        // With several entities in range, interact with the one the player faces most. Nobody 90
+        // degrees or more away from where the player faces is considered.
+        if (
+          angle < Ogre::Degree(90) && IsBetterInteractionTarget(
+            angle.valueDegrees(), distance, less_angle.valueDegrees(), best_distance
+          )
+        ){
+            less_angle = angle;
+            best_distance = distance;
+            target = entity;
+        }
+    }
+    return target;
 }

@@ -45,25 +45,7 @@ void EntityManager::Input(const VGears::Event& event){
         }
         if (event.type == VGears::ET_KEY_PRESS && event.event == "CONFIRM"){
             CheckEntityInteract();
-            for (unsigned int i = 0; i < entity_triggers_.size(); ++ i){
-                if (
-                  entity_triggers_[i]->IsEnabled() == true
-                  && entity_triggers_[i]->CheckApproached() == true
-                ){
-                    ScriptEntity* scr_entity = ScriptManager::getSingleton().GetScriptEntityByName(
-                      ScriptManager::ENTITY, entity_triggers_[i]->GetName()
-                    );
-                    bool added = ScriptManager::getSingleton().ScriptRequest(
-                      scr_entity, "on_interact", INTERACT_SCRIPT_PRIORITY, "", "", false, false
-                    );
-                    if (added == false){
-                        LOG_WARNING(
-                          "Script 'on_interact' for entity '" + entity_triggers_[i]->GetName()
-                          + "' doesn't exist."
-                        );
-                    }
-                }
-            }
+            triggers_.InteractWithLines(entity_triggers_);
         }
     }
 }
@@ -87,7 +69,7 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
                     entity_[i]->SetRotation(player_entity_->GetRotation());
                 }
             }
-            if (entity_[i]->GetMoveTriangleId() == -1) SetEntityOnWalkmesh(entity_[i]);
+            if (entity_[i]->GetMoveTriangleId() == -1) movement_.PlaceOnWalkmesh(entity_[i]);
             LOG_TRIVIAL("Player entity set to '" + std::string(name) + "'.");
             // The camera that follows the player keeps following it when another entity takes over
             // (Cloud and the dressed Cloud, for example); a camera that follows some other entity
@@ -109,31 +91,31 @@ void EntityManager::ScriptSetPlayerEntity(const char* name){
 }
 
 void EntityManager::ScriptPlacePlayerAtFieldEntry(
-    const float x, const float y, const int triangle_id, const float direction
+  const float x, const float y, const int triangle_id, const float direction
 ){
-        if (player_entity_ == nullptr || walkmesh_.GetNumberOfTriangles() <= 0) return;
+    if (player_entity_ == nullptr || walkmesh_.GetNumberOfTriangles() <= 0) return;
 
-        int safe_triangle_id = triangle_id;
-        if (safe_triangle_id < 0 || safe_triangle_id >= walkmesh_.GetNumberOfTriangles()){
-                LOG_WARNING("World-map field entry has an invalid walkmesh triangle; using triangle 0.");
-                safe_triangle_id = 0;
-        }
+    int safe_triangle_id = triangle_id;
+    if (safe_triangle_id < 0 || safe_triangle_id >= walkmesh_.GetNumberOfTriangles()){
+        LOG_WARNING("World-map field entry has an invalid walkmesh triangle; using triangle 0.");
+        safe_triangle_id = 0;
+    }
 
-        player_entity_->SetPosition(Ogre::Vector3(
-            x, y, walkmesh_.GetA(static_cast<unsigned int>(safe_triangle_id)).z
-        ));
-        player_entity_->SetRotation(Ogre::Degree(direction));
-        player_entity_->SetMoveTriangleId(safe_triangle_id);
-        // In the WALKMESH state the entity walks to its move position: without this one it walks to
-        // whatever it had (the origin of the field), and the player enters the town walking.
-        player_entity_->SetMovePosition(player_entity_->GetPosition());
-        player_entity_->SetState(Entity::WALKMESH);
-        // The player starts standing still: no move or run from the world map, and the held keys
-        // don't count until they are released.
-        player_move_ = Ogre::Vector3::ZERO;
-        player_run_ = false;
-        ignore_held_walk_ = true;
-        player_entity_->PlayAnimationContinue(player_entity_->GetDefaultAnimationName());
+    player_entity_->SetPosition(Ogre::Vector3(
+      x, y, walkmesh_.GetA(static_cast<unsigned int>(safe_triangle_id)).z
+    ));
+    player_entity_->SetRotation(Ogre::Degree(direction));
+    player_entity_->SetMoveTriangleId(safe_triangle_id);
+    // In the WALKMESH state the entity walks to its move position: without this one it walks to
+    // whatever it had (the origin of the field), and the player enters the town walking.
+    player_entity_->SetMovePosition(player_entity_->GetPosition());
+    player_entity_->SetState(Entity::WALKMESH);
+    // The player starts standing still: no move or run from the world map, and the held keys
+    // don't count until they are released.
+    player_move_ = Ogre::Vector3::ZERO;
+    player_run_ = false;
+    ignore_held_walk_ = true;
+    player_entity_->PlayAnimationContinue(player_entity_->GetDefaultAnimationName());
 }
 
 Entity* EntityManager::ScriptGetPlayerEntity() const{

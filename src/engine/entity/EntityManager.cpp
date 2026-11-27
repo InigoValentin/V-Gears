@@ -41,6 +41,10 @@ const unsigned int EntityManager::BATTLE_BACKGROUND_ID = 1000;
 
 const unsigned int EntityManager::WORLD_MAP_BACKGROUND_ID = 1001;
 
+float EntityManager::GetTriangleHeight(int triangle, float x, float y, float fallback) const{
+    return movement_.GetTriangleHeight(triangle, x, y, fallback);
+}
+
 EntityManager::EntityManager():
     background_3d_(nullptr),
   player_entity_(nullptr),
@@ -48,13 +52,10 @@ EntityManager::EntityManager():
   player_move_rotation_(0),
   player_lock_(false),
   player_run_(false),
-  random_encounters_(false),
-  encounter_rate_(0),
-  encounter_table_(1),
-  encounter_distance_(0.0f),
-  encounter_last_position_(Ogre::Vector3::ZERO),
-  encounter_last_position_valid_(false),
-  encounter_safe_steps_(0)
+  movement_(
+    *this, walkmesh_, entity_, player_entity_, player_lock_, player_slip_, player_move_,
+    [this](Entity* entity, const Ogre::Vector3& position){CheckTriggers(entity, position);}
+  )
 {
     LOG_TRIVIAL("EntityManager created.");
     scene_node_ = Ogre::Root::getSingleton().getSceneManager("Scene")
@@ -78,173 +79,6 @@ EntityManager::~EntityManager(){
       "EntityManager"
     );
     LOG_TRIVIAL("EntityManager destroyed.");
-}
-
-void EntityManager::UpdateField(){
-    // Update all entity scripts
-    ScriptManager::getSingleton().Update(ScriptManager::ENTITY);
-    // The player is walking if there is a move set by the input.
-    const bool walked = player_entity_ != nullptr && player_move_ != Ogre::Vector3::ZERO;
-
-    // Set move point for player entity
-    if (player_entity_ != nullptr && player_move_ != Ogre::Vector3::ZERO){
-        Entity::State state = player_entity_->GetState();
-        if (state == Entity::WALKMESH || state == Entity::NONE){
-            // The directional keys are relative to the screen. Rotate them to the field's move
-            // rotation here, once per frame. This can't be done in Input, which runs once for each
-            // event, so the rotation would be applied several times when there is more than one
-            // event in the frame (diagonals, running, ...). player_move_ stays as the raw input,
-            // which is what ladders need.
-            // A scripted walk of an entity that isn't the player keeps the last triangle when it
-            // goes over an edge, so the stored triangle can be far from the position. Reattach to
-            // the walkmesh before moving manually, otherwise every move would be blocked.
-            const int current_triangle = player_entity_->GetMoveTriangleId();
-            bool in_current_triangle = false;
-            if (current_triangle >= 0 && current_triangle < walkmesh_.GetNumberOfTriangles()){
-                const Ogre::Vector3 position = player_entity_->GetPosition();
-                const Ogre::Vector3 A = walkmesh_.GetA(current_triangle);
-                const Ogre::Vector3 B = walkmesh_.GetB(current_triangle);
-                const Ogre::Vector3 C = walkmesh_.GetC(current_triangle);
-                in_current_triangle = Ogre::Math::pointInTri2D(
-                  Ogre::Vector2(position.x, position.y), Ogre::Vector2(A.x, A.y),
-                  Ogre::Vector2(B.x, B.y), Ogre::Vector2(C.x, C.y)
-                );
-            }
-            if (!in_current_triangle) SetEntityOnWalkmesh(player_entity_);
-
-            Ogre::Quaternion rotation;
-            rotation.FromAngleAxis(player_move_rotation_, Ogre::Vector3::UNIT_Z);
-            // Normalized, so diagonals aren't faster than straight moves.
-            Ogre::Vector3 input = player_move_;
-            input.normalise();
-            const Ogre::Vector3 walk_move = rotation * input
-              * (player_entity_->GetMoveWalkSpeed() * Timer::getSingleton().GetGameTimeDelta());
-            player_entity_->SetMovePosition(player_entity_->GetPosition() + walk_move);
-            player_entity_->SetState(Entity::WALKMESH);
-        }
-
-        // HACK: If manually moving, make playable entity solid.
-        // Some scripts 'forget' to make the playable entity solid at the end
-        // of them, and if it remains non-solid, it can't interact with lines
-        // (i.e. it cant' use gateways).
-        player_entity_->SetSolid(true);
-    }
-
-    for (unsigned int i = 0; i < entity_.size(); ++ i){
-        entity_[i]->Update();
-
-        // It's not needed to update movements it delta time == 0 (for example
-        // if time is stopped)
-        if (Timer::getSingleton().GetGameTimeDelta() == 0) continue;
-
-        // Update screen scroll.
-        Entity* scroll_entity = background_2d_.GetAutoScrollEntity();
-        if (scroll_entity == entity_[i])
-            background_2d_.SetScroll(background_2d_.GetEntityScroll(scroll_entity));
-        // Update offset.
-        if (entity_[i]->GetOffsetType() != AT_NONE) SetNextOffsetStep(entity_[i]);
-        // Update turn.
-        if (entity_[i]->GetTurnType() != AT_NONE) SetNextTurnStep(entity_[i]);
-        // Update movement.
-        switch(entity_[i]->GetState()){
-            case Entity::WALKMESH:
-                {
-                    // Try set entity on walkmesh if it's still don't has triangle.
-                    if (entity_[i]->GetMoveTriangleId() == -1){
-                        if (SetEntityOnWalkmesh(entity_[i]) == false){
-                            LOG_TRIVIAL(
-                              "Can't set entity '" + entity_[i]->GetName()
-                              + "' on walkmesh. Finish move."
-                            );
-                            entity_[i]->UnsetMove();
-                        }
-                    }
-                    // Perform move
-                    if (entity_[i]->GetState() == Entity::WALKMESH){
-                        float speed = 0;
-                        if (player_lock_ == false && player_entity_ == entity_[i]){
-                            speed = entity_[i]->GetMoveWalkSpeed();
-                            // TODO: Set as a constant.
-                            // Or even better, as a configurable variable.
-                            // The run key inverts the default movement.
-                            if (player_run_ != player_default_run_) speed *= 4;
-                        }
-                        else speed = entity_[i]->GetMoveAutoSpeed();
-                        float remaining_time = Timer::getSingleton().GetGameTimeDelta();
-                        bool is_move = false;
-                        if (entity_[i]->IsScriptedMove() && speed > 0.0f){
-                            const float max_step_time = 0.2f / speed;
-                            while (remaining_time > 0.0f && entity_[i]->GetState() == Entity::WALKMESH){
-                                const float step_time = std::min(remaining_time, max_step_time);
-                                const bool moved = PerformWalkmeshMove(entity_[i], speed, step_time);
-                                is_move = is_move || moved;
-                                if (!moved) break;
-                                remaining_time -= step_time;
-                            }
-                        }
-                        else is_move = PerformWalkmeshMove(entity_[i], speed, remaining_time);
-                        // The scripts set the animation of a scene as the default one (DFANM) and
-                        // don't set it back, but the player stands normally again as soon as they
-                        // walk in the original game (blin67_3, where Cloud ends the scene crouched).
-                        if (
-                          is_move == true && player_lock_ == false && player_entity_ == entity_[i]
-                          && entity_[i]->GetDefaultAnimationName() != "Idle"
-                        ){
-                            entity_[i]->ScriptSetDefaultAnimation("Idle");
-                        }
-                        if (entity_[i]->GetMoveAutoAnimation() == true){
-                            if (is_move == true){
-                                if (speed >= entity_[i]->GetMoveRunSpeed()){
-                                    entity_[i]->PlayAnimationContinue(
-                                      entity_[i]->GetMoveAnimationRunName()
-                                    );
-                                }
-                                else{
-                                    entity_[i]->PlayAnimationContinue(
-                                      entity_[i]->GetMoveAnimationWalkName()
-                                    );
-                                }
-                            }
-                            else if (
-                              entity_[i]->GetAnimationState() != Entity::REQUESTED_ANIMATION
-                            ){
-                                entity_[i]->PlayAnimationContinue(
-                                  entity_[i]->GetDefaultAnimationName()
-                                );
-                            }
-                        }
-                    }
-                }
-                break;
-            case Entity::LINEAR:
-                CheckTriggers(entity_[i], entity_[i]->GetPosition());
-                SetNextLinearStep(entity_[i]);
-                break;
-            case Entity::JUMP:
-                SetNextJumpStep(entity_[i]);
-                break;
-            case Entity::NEEDS_TO_REATTACH:
-                if (SetEntityOnWalkmesh(entity_[i])) entity_[i]->SetState(Entity::WALKMESH);
-                else entity_[i]->SetState(Entity::NONE);
-            case Entity::NONE:
-                CheckTriggers(entity_[i], entity_[i]->GetPosition());
-                if (entity_[i]->GetAnimationState() != Entity::REQUESTED_ANIMATION)
-                    entity_[i]->PlayAnimationContinue(entity_[i]->GetDefaultAnimationName());
-                break;
-        }
-    }
-    CheckEntityContacts();
-    // Reset player move. It already must be handled in update
-    player_move_ = Ogre::Vector3::ZERO;
-    player_run_ = false;
-    if (background_2d_.GetScrollType() != Background2D::NONE) SetNextScrollStep();
-    background_2d_.Update();
-    // This can start a battle and change the module, so it's the last thing to do.
-    UpdateEncounters(walked);
-    // The movie follows the speed of the game, so the scenes that are timed with it stay in sync.
-    // Its sound doesn't, so at any other speed they drift apart.
-    movie_player_.Update(Timer::getSingleton().GetGameTimeDelta());
-    screen_fade_.Update(Timer::getSingleton().GetGameTimeDelta());
 }
 
 void EntityManager::UpdateBattle(){
@@ -442,9 +276,9 @@ void EntityManager::UpdateDebug(){
 void EntityManager::OnResize(){background_2d_.OnResize();}
 
 void EntityManager::ClearField(){
-    ClearEncounterTables();
+    encounters_.Clear();
     entities_hidden_by_battle_.clear();
-    entities_in_contact_.clear();
+    triggers_.ClearContacts();
     walkmesh_.Clear();
     background_2d_.Clear();
     screen_fade_.Clear();
@@ -531,6 +365,27 @@ void EntityManager::ClearWorld(){
 
 Walkmesh* EntityManager::GetWalkmesh(){return &walkmesh_;}
 
+bool EntityManager::IsWorldPositionBlocked(
+  const Entity* moving_entity, const Ogre::Vector3& position
+) const{
+    if (!IsWorldModule() || moving_entity == nullptr) return false;
+
+    for (const Entity* other : entity_){
+        if (other == moving_entity || !other->IsSolid()) continue;
+
+        const Ogre::Vector3 other_position = other->GetPosition();
+        const Ogre::Real dx = position.x - other_position.x;
+        const Ogre::Real dz = position.z - other_position.z;
+        const Ogre::Real radius = moving_entity->GetSolidRadius() + other->GetSolidRadius();
+        if (dx * dx + dz * dz >= radius * radius) continue;
+
+        const Ogre::Real moving_top = position.y + moving_entity->GetHeight();
+        const Ogre::Real other_top = other_position.y + other->GetHeight();
+        if (position.y < other_top && other_position.y < moving_top) return true;
+    }
+    return false;
+}
+
 Background2D* EntityManager::GetBackground2D(){return &background_2d_;}
 
 ScreenFade* EntityManager::GetScreenFade(){return &screen_fade_;}
@@ -564,6 +419,21 @@ void EntityManager::ScriptAddEntity(
   const char* name, const char* file_name,
   const float x, const float y, const float z, const float rotation, int index
 ){AddEntity(name, file_name, Ogre::Vector3(x, y, z), Ogre::Degree(rotation), index);}
+
+void EntityManager::AddEntityTrigger(
+  const Ogre::String& name,
+  const Ogre::Vector3& point1, const Ogre::Vector3& point2, const bool enabled
+){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to add an entity trigger but the EntityManager is in battle mode.");
+        return;
+    }
+    EntityTrigger* trigger = new EntityTrigger(name);
+    trigger->SetPoints(point1, point2);
+    trigger->SetEnabled(enabled);
+    entity_triggers_.push_back(trigger);
+    ScriptManager::getSingleton().AddEntity(ScriptManager::ENTITY, trigger->GetName(), nullptr);
+}
 
 void EntityManager::AddEntityPoint(
   const Ogre::String& name, const Ogre::Vector3& position, const float rotation
@@ -674,4 +544,56 @@ void EntityManager::SetEntityToCharacter(const char* entity_name, unsigned int c
       "Unabe to assigne character ID " + std::to_string(char_id) + " to entity '" + entity_name
       + "'. No entity by that name exists."
     );
+}
+
+float EntityManager::GetEncounterMultiplier() const{return FieldEncounters::GetMultiplier();}
+
+bool EntityManager::IsDebugEncounters() const{return FieldEncounters::IsDebug();}
+
+void EntityManager::SetRandomEncounters(bool active){encounters_.SetActive(active);}
+
+void EntityManager::ClearEncounterTables(){encounters_.Clear();}
+
+void EntityManager::AddEncounterTable(
+  const int id, const int rate, const std::vector<std::pair<int, int>>& battles,
+  const std::vector<std::pair<int, int>>& specials
+){
+    encounters_.AddTable(id, rate, battles, specials);
+}
+
+void EntityManager::ScriptSetEncounterTable(const int id){encounters_.SetTable(id);}
+
+int EntityManager::ScriptRollEncounterBattle() const{return encounters_.RollBattle();}
+
+void EntityManager::ScriptSetLine(
+  const char* name, const float x1, const float y1, const float z1, const float x2, const float y2,
+  const float z2
+){
+    for (EntityTrigger* trigger : entity_triggers_){
+        if (trigger->GetName() == name){
+            trigger->SetPoints(Ogre::Vector3(x1, y1, z1), Ogre::Vector3(x2, y2, z2));
+            return;
+        }
+    }
+}
+
+void EntityManager::CheckTriggers(Entity* entity, const Ogre::Vector3& position){
+    if (IsBattleModule()){
+        LOG_WARNING("Tried to check for triggers, but the EntityManager is in battle mode");
+        return;
+    }
+    // Only the player triggers the lines.
+    if (entity != player_entity_ || !entity->IsSolid() || player_lock_) return;
+    triggers_.CheckLines(entity, position, entity_triggers_);
+}
+
+void EntityManager::CheckEntityInteract(){
+    if (IsBattleModule()){
+        LOG_WARNING(
+          "Tried to check for entity interaction, but the EntityManager is in battle mode"
+        );
+        return;
+    }
+    if (player_entity_ == nullptr || player_lock_ || !player_entity_->IsSolid()) return;
+    triggers_.Interact(player_entity_, entity_, IsWorldModule());
 }
