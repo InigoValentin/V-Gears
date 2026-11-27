@@ -26,10 +26,10 @@
 #include <OgreTechnique.h>
 #include <OgreTextureManager.h>
 #include "engine/audio/AudioManager.h"
-#include "core/CameraManager.h"
+#include "engine/graphics/CameraManager.h"
 #include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
-#include "core/MoviePlayer.h"
+#include "engine/graphics/MoviePlayer.h"
 
 namespace{
 

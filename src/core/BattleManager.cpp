@@ -29,7 +29,7 @@
 #include "engine/audio/AudioManager.h"
 #include "core/BattleManager.h"
 #include "modules/worldmap/WorldmapModule.h"
-#include "core/CameraManager.h"
+#include "engine/graphics/CameraManager.h"
 #include "core/Console.h"
 #include "core/DialogsManager.h"
 #include "core/Enemy.h"

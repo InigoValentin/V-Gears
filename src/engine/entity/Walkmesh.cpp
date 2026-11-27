@@ -14,7 +14,7 @@
  */
 
 #include "engine/config/ConfigVar.h"
-#include "core/DebugDraw.h"
+#include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "engine/entity/Walkmesh.h"
 #include "map/VGearsWalkmeshFile.h"

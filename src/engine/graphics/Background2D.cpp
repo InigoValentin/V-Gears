@@ -22,11 +22,11 @@
 #include <OgreTextureManager.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <algorithm>
-#include "core/Background2D.h"
-#include "core/CameraManager.h"
+#include "engine/graphics/Background2D.h"
+#include "engine/graphics/CameraManager.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/config/ConfigVar.h"
-#include "core/DebugDraw.h"
+#include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "core/Timer.h"
 

@@ -23,7 +23,7 @@
 #include <OgreRenderSystem.h>
 #include <OgreSceneManager.h>
 #include "ScreenFadeState.h"
-#include "ScriptManager.h"
+#include "core/ScriptManager.h"
 
 /**
  * A coloured fade of the screen, for flashes and fades to a colour.

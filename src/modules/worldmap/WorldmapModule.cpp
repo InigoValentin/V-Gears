@@ -57,7 +57,7 @@
 #include "data/worldmap/WorldmapFile.h"
 #include "data/worldmap/WorldmapFileManager.h"
 #include "data/worldmap/WorldmapFileSerializer.h"
-#include "core/CameraManager.h"
+#include "engine/graphics/CameraManager.h"
 #include "core/UiManager.h"
 #include "core/UiWidget.h"
 

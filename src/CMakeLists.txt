@@ -601,23 +601,23 @@ set(VGEARS_SOURCE_FILES
     common/VGearsResource.cpp
     common/VGearsStringUtil.cpp
     engine/audio/AudioManager.cpp
-    core/Background2DAnimation.cpp
-    core/Background2D.cpp
-    core/BackgroundPalette.cpp
-    core/ScreenFade.cpp
-    core/MovieCameraFrame.cpp
-    core/MoviePlayer.cpp
-    core/MovieState.cpp
-    core/ScreenFadeState.cpp
+    engine/graphics/Background2DAnimation.cpp
+    engine/graphics/Background2D.cpp
+    engine/graphics/BackgroundPalette.cpp
+    engine/graphics/ScreenFade.cpp
+    engine/graphics/MovieCameraFrame.cpp
+    engine/graphics/MoviePlayer.cpp
+    engine/graphics/MovieState.cpp
+    engine/graphics/ScreenFadeState.cpp
     core/BattleManager.cpp
-    core/CameraManager.cpp
+    engine/graphics/CameraManager.cpp
     engine/config/ConfigCmd.cpp
     engine/config/ConfigCmdHandler.cpp
     engine/config/ConfigFile.cpp
     engine/config/ConfigVar.cpp
     engine/config/ConfigVarHandler.cpp
     core/Console.cpp
-    core/DebugDraw.cpp
+    engine/graphics/DebugDraw.cpp
     core/DialogsManager.cpp
     core/Enemy.cpp
     engine/entity/EntityCollision.cpp

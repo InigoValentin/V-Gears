@@ -19,7 +19,7 @@
 #include <iostream>
 #include <cctype>
 #include <algorithm>
-#include "core/DebugDraw.h"
+#include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/UiManager.h"

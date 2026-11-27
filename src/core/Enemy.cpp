@@ -17,7 +17,7 @@
 #include <OgreMaterialManager.h>
 #include "core/Enemy.h"
 #include "engine/config/ConfigVar.h"
-#include "core/DebugDraw.h"
+#include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "core/XmlEnemyFile.h"
 

@@ -18,8 +18,8 @@
 #include <OgreRoot.h>
 #include <OgreViewport.h>
 #include <OIS/OIS.h>
-#include "core/CameraManager.h"
-#include "core/CameraManagerCommands.h"
+#include "engine/graphics/CameraManager.h"
+#include "engine/graphics/CameraManagerCommands.h"
 #include "app/VGearsApplication.h"
 #include "engine/config/ConfigVar.h"
 #include "core/InputManager.h"

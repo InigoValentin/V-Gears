@@ -18,9 +18,9 @@
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
 #include <OgreViewport.h>
-#include "core/DebugDraw.h"
-#include "core/CameraManager.h"
-#include "core/DebugDraw.h"
+#include "engine/graphics/DebugDraw.h"
+#include "engine/graphics/CameraManager.h"
+#include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "core/UiTextArea.h"
 

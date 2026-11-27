@@ -23,7 +23,7 @@
 #include "engine/audio/AudioManager.h"
 #include "core/WorldMapManager.h"
 #include "core/WorldMapManager.h"
-#include "core/CameraManager.h"
+#include "engine/graphics/CameraManager.h"
 #include "core/Console.h"
 #include "core/DialogsManager.h"
 #include "engine/entity/EntityManager.h"

@@ -17,8 +17,8 @@
 
 #include <OgreCamera.h>
 #include <OgreSingleton.h>
-#include "Event.h"
-#include "Manager.h"
+#include "core/Event.h"
+#include "core/Manager.h"
 
 /**
  * The camera manager.

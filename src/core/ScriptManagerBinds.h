@@ -18,7 +18,7 @@
 #include "../modules/worldmap/WorldmapModule.h"
 #include "Console.h"
 #include "common/Logger.h"
-#include "CameraManager.h"
+#include "engine/graphics/CameraManager.h"
 #include "Enemy.h"
 #include "engine/entity/Entity.h"
 #include "engine/entity/EntityManager.h"

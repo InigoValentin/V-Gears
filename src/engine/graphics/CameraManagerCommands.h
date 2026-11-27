@@ -18,7 +18,7 @@
 #include <OgreStringConverter.h>
 #include "CameraManager.h"
 #include "engine/config/ConfigCmdHandler.h"
-#include "Console.h"
+#include "core/Console.h"
 
 void CommandCameraFree(const Ogre::StringVector& params){
     if (params.size() < 1){

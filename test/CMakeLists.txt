@@ -32,9 +32,9 @@ set(SOURCE_FILES
     main.cpp
     data/VGearsAFile.cpp
     data/worldmap/MapFileSerializer.cpp
-    core/MovieCameraFrame.cpp
-    core/MovieState.cpp
-    core/ScreenFadeState.cpp
+    engine/graphics/MovieCameraFrame.cpp
+    engine/graphics/MovieState.cpp
+    engine/graphics/ScreenFadeState.cpp
     engine/entity/EntityManager.cpp
     engine/entity/EntityPoint.cpp
     core/TextHandler.cpp

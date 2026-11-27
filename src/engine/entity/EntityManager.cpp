@@ -21,9 +21,9 @@
 #include <OgreEntity.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
-#include "core/CameraManager.h"
+#include "engine/graphics/CameraManager.h"
 #include "engine/config/ConfigVar.h"
-#include "core/DebugDraw.h"
+#include "engine/graphics/DebugDraw.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/entity/EntityModel.h"
 #include "core/InputManager.h"

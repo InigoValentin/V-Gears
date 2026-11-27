@@ -17,10 +17,10 @@
 #include <OgreMaterialManager.h>
 #include <OgreRoot.h>
 #include <OgreTechnique.h>
-#include "core/CameraManager.h"
+#include "engine/graphics/CameraManager.h"
 #include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
-#include "core/ScreenFade.h"
+#include "engine/graphics/ScreenFade.h"
 
 namespace{
 

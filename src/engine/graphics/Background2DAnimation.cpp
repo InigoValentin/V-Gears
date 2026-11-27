@@ -14,8 +14,8 @@
  */
 
 #include <Ogre.h>
-#include "core/Background2DAnimation.h"
-#include "core/Background2D.h"
+#include "engine/graphics/Background2DAnimation.h"
+#include "engine/graphics/Background2D.h"
 #include "common/Logger.h"
 
 Background2DAnimation::Background2DAnimation(

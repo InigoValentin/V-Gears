@@ -13,9 +13,9 @@
  * GNU General Public License for more details.
  */
 
-#include "core/Background2D.h"
-#include "core/Background2DAnimation.h"
-#include "core/CameraManager.h"
+#include "engine/graphics/Background2D.h"
+#include "engine/graphics/Background2DAnimation.h"
+#include "engine/graphics/CameraManager.h"
 #include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
 #include "core/XmlBackground2DFile.h"

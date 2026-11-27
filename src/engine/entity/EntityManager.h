@@ -21,14 +21,14 @@
 #include <utility>
 #include <vector>
 #include <OgreSingleton.h>
-#include "core/Background2D.h"
+#include "engine/graphics/Background2D.h"
 #include "Entity.h"
 #include "EntityPoint.h"
 #include "EntityTrigger.h"
 #include "core/Event.h"
 #include "core/Manager.h"
-#include "core/MoviePlayer.h"
-#include "core/ScreenFade.h"
+#include "engine/graphics/MoviePlayer.h"
+#include "engine/graphics/ScreenFade.h"
 #include "Walkmesh.h"
 
 class EntityModel;

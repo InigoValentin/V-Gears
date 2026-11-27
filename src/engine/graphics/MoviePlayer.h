@@ -27,7 +27,7 @@
 #include <OgreTexture.h>
 #include "MovieCameraFrame.h"
 #include "MovieState.h"
-#include "ScriptManager.h"
+#include "core/ScriptManager.h"
 
 /**
  * Plays the movies that the installer converted: a folder of JPEG frames and an ogg file with the

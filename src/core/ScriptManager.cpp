@@ -15,7 +15,7 @@
 
 #include <algorithm>
 #include "engine/config/ConfigVar.h"
-#include "core/DebugDraw.h"
+#include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/ScriptManagerBinds.h"

@@ -1,5 +1,5 @@
 #include "engine/config/ConfigVar.h"
-#include "core/DebugDraw.h"
+#include "engine/graphics/DebugDraw.h"
 #include "engine/entity/EntityPoint.h"
 #include "core/ScriptManager.h"
 

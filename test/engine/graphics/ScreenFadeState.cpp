@@ -14,7 +14,7 @@
  */
 
 #include <boost/test/unit_test.hpp>
-#include "core/ScreenFadeState.h"
+#include "engine/graphics/ScreenFadeState.h"
 
 BOOST_AUTO_TEST_CASE(TestScreenFadeStateSpeedToSeconds){
     BOOST_CHECK_CLOSE(ScreenFadeState::SpeedToSeconds(1), 8.0f, 0.01f);

@@ -15,7 +15,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include "core/MovieState.h"
+#include "engine/graphics/MovieState.h"
 
 // Defined here too, as the tests and the scripts take it by reference.
 const int MovieState::NO_MOVIE_FRAME;

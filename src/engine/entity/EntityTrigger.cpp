@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/DebugDraw.h"
+#include "engine/graphics/DebugDraw.h"
 #include "engine/entity/Entity.h"
 #include "engine/entity/EntityTrigger.h"
 #include "engine/config/ConfigVar.h"

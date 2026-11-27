@@ -16,7 +16,7 @@
 
 #include <algorithm>
 #include <OgreResourceGroupManager.h>
-#include "core/BackgroundPalette.h"
+#include "engine/graphics/BackgroundPalette.h"
 #include "common/Logger.h"
 
 namespace{

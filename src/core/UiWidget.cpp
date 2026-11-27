@@ -19,8 +19,8 @@
 #include <OgreViewport.h>
 #include "app/VGearsApplication.h"
 #include "engine/config/ConfigVar.h"
-#include "core/CameraManager.h"
-#include "core/DebugDraw.h"
+#include "engine/graphics/CameraManager.h"
+#include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"

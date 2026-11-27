@@ -17,7 +17,7 @@
 #include <OgreMath.h>
 #include <cstring>
 #include <vector>
-#include "core/MovieCameraFrame.h"
+#include "engine/graphics/MovieCameraFrame.h"
 
 namespace{
 

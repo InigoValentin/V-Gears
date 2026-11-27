@@ -14,7 +14,7 @@
  */
 
 #include <algorithm>
-#include "core/ScreenFadeState.h"
+#include "engine/graphics/ScreenFadeState.h"
 
 namespace{
 

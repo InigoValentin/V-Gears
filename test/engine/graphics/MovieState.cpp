@@ -14,7 +14,7 @@
  */
 
 #include <boost/test/unit_test.hpp>
-#include "core/MovieState.h"
+#include "engine/graphics/MovieState.h"
 
 BOOST_AUTO_TEST_CASE(TestMovieStateReportsAHighFrameIfThereIsNoMovie){
     MovieState movie;
