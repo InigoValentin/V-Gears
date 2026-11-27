@@ -732,9 +732,6 @@ set(VGEARS_SOURCE_FILES
     map/VGearsBackground2DFile.cpp
     map/VGearsBackground2DFileManager.cpp
     map/VGearsBackground2DFileXMLSerializer.cpp
-    map/VGearsMapFile.cpp
-    map/VGearsMapFileManager.cpp
-    map/VGearsMapFileXMLSerializer.cpp
     map/VGearsWalkmeshFile.cpp
     map/VGearsWalkmeshFileManager.cpp
     map/VGearsWalkmeshFileXMLSerializer.cpp

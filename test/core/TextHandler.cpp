@@ -18,14 +18,6 @@
 #include <boost/test/unit_test.hpp>
 #include <tinyxml.h>
 
-#pragma message("Unimplemented test file: " __FILE__)
-
-BOOST_AUTO_TEST_CASE(TestTextManager){
-    // TODO
-    BOOST_WARN_MESSAGE(false, "Unimplemented test file: TextManager");
-    BOOST_CHECK(0 == 0);
-}
-
 
 namespace{
     std::string TextOf(const char* xml){

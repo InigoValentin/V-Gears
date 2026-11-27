@@ -81,7 +81,6 @@ int main(int argc, char *argv[]){
         directionalLight->setSpecularColour(Ogre::ColourValue(0.0, 0.0, 0.0));
         directionalLight->setDirection(Ogre::Vector3(0, 1, 0));
         // auto fontManager = std::make_unique<Ogre::FontManager>();
-        //VGears::MapFileManager* worldManager = new VGears::MapFileManager();
 
         // Initialize resources.
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
