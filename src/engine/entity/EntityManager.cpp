@@ -29,7 +29,7 @@
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
-#include "core/Timer.h"
+#include "engine/Timer.h"
 #include "engine/ui/DialogsManager.h"
 
 /**

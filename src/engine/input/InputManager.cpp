@@ -18,8 +18,8 @@
 #include "engine/input/InputManager.h"
 #include "engine/input/InputManagerCommands.h"
 #include "common/Logger.h"
-#include "core/Timer.h"
-#include "core/Manager.h"
+#include "engine/Timer.h"
+#include "engine/Manager.h"
 #include "engine/config/ConfigCmdHandler.h"
 
 /**

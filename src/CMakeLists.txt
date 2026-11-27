@@ -627,9 +627,9 @@ set(VGEARS_SOURCE_FILES
     engine/entity/EntityModel.cpp
     engine/entity/EntityPoint.cpp
     engine/entity/EntityTrigger.cpp
-    core/GameFrameListener.cpp
+    engine/GameFrameListener.cpp
     engine/input/InputManager.cpp
-    core/Manager.cpp
+    engine/Manager.cpp
     engine/particles/Particle.cpp
     engine/particles/ParticleEmitter.cpp
     engine/particles/ParticleEmitterDictionary.cpp
@@ -652,7 +652,7 @@ set(VGEARS_SOURCE_FILES
     engine/save/SavemapHandler.cpp
     engine/script/ScriptManager.cpp
     engine/ui/TextHandler.cpp
-    core/Timer.cpp
+    engine/Timer.cpp
     engine/ui/UiAnimation.cpp
     engine/ui/UiFont.cpp
     engine/ui/UiManager.cpp

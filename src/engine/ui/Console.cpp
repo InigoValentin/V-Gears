@@ -20,7 +20,7 @@
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
-#include "core/Timer.h"
+#include "engine/Timer.h"
 #include "common/Utilites.h"
 #include "engine/config/ConfigCmdHandler.h"
 #include "engine/config/ConfigVarHandler.h"

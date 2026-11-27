@@ -21,7 +21,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include "engine/audio/AudioManager.h"
-#include "core/Event.h"
+#include "engine/Event.h"
 #include "engine/xml/XmlMusicsFile.h"
 #include "engine/xml/XmlSoundsFile.h"
 #include "common/Logger.h"

@@ -30,7 +30,7 @@
 #include "engine/entity/EntityModel.h"
 #include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
-#include "core/Timer.h"
+#include "engine/Timer.h"
 
 EntityModel::EntityModel(
   const Ogre::String& name, const Ogre::String file_name, Ogre::SceneNode* node,

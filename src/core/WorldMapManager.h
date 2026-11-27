@@ -16,8 +16,8 @@
 #pragma once
 
 #include <OgreSingleton.h>
-#include "Event.h"
-#include "Manager.h"
+#include "engine/Event.h"
+#include "engine/Manager.h"
 
 /**
  * The world map manager.

@@ -20,7 +20,7 @@
 #include "engine/script/ScriptManager.h"
 #include "engine/script/ScriptManagerBinds.h"
 #include "engine/script/ScriptManagerCommands.h"
-#include "core/Timer.h"
+#include "engine/Timer.h"
 #include "common/Utilites.h"
 #include "engine/xml/XmlScriptsFile.h"
 #include "LuaIncludes.h"

@@ -16,7 +16,7 @@
 #include <OgreStringConverter.h>
 #include "app/VGearsGameState.h"
 #include "core/BattleManager.h"
-#include "core/GameFrameListener.h"
+#include "engine/GameFrameListener.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/config/ConfigVar.h"
 #include "engine/ui/Console.h"
@@ -25,7 +25,7 @@
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
-#include "core/Timer.h"
+#include "engine/Timer.h"
 #include "engine/ui/UiManager.h"
 #include "engine/ui/DialogsManager.h"
 

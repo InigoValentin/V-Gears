@@ -21,8 +21,8 @@
 #include <OgreString.h>
 #include <OgreStringVector.h>
 #include <OIS/OIS.h>
-#include "core/Event.h"
-#include "core/Manager.h"
+#include "engine/Event.h"
+#include "engine/Manager.h"
 
 typedef std::vector<VGears::Event> InputEventArray;
 

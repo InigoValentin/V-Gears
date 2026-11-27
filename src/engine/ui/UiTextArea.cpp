@@ -26,7 +26,7 @@
 #include "common/Logger.h"
 #include "engine/ui/UiManager.h"
 #include "engine/ui/UiTextArea.h"
-#include "core/Timer.h"
+#include "engine/Timer.h"
 #include "engine/ui/UiSprite.h"
 #include "common/Utilites.h"
 #include "TextHandler.h"

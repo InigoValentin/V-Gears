@@ -22,8 +22,8 @@
 #include <OgreManualObject.h>
 #include <OgreSingleton.h>
 #include "Enemy.h"
-#include "Event.h"
-#include "Manager.h"
+#include "engine/Event.h"
+#include "engine/Manager.h"
 #include "engine/xml/XmlBattleCharactersFile.h"
 #include "engine/xml/XmlBattleScenesFile.h"
 #include "engine/xml/XmlAttackFile.h"

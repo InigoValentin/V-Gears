@@ -16,7 +16,7 @@
 #pragma once
 
 #include <OgreSingleton.h>
-#include "core/Manager.h"
+#include "engine/Manager.h"
 #include "UiManager.h"
 #include "UiTextArea.h"
 #include "engine/input/InputManager.h"

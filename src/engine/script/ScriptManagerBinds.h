@@ -26,7 +26,7 @@
 #include "engine/audio/AudioManager.h"
 #include "engine/input/InputManager.h"
 #include "engine/save/SavemapHandler.h"
-#include "core/Timer.h"
+#include "engine/Timer.h"
 #include "engine/ui/UiManager.h"
 #include "engine/ui/UiWidget.h"
 #include "engine/xml/XmlMapFile.h"

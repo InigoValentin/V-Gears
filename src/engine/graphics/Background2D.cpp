@@ -28,7 +28,7 @@
 #include "engine/config/ConfigVar.h"
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
-#include "core/Timer.h"
+#include "engine/Timer.h"
 
 ConfigVar cv_debug_background2d("debug_background2d", "Draw background debug info", "false");
 ConfigVar cv_show_background2d("show_background2d", "Draw background", "true");

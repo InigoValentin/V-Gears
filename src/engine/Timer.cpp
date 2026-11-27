@@ -14,7 +14,7 @@
  */
 
 #include "engine/config/ConfigVar.h"
-#include "core/Timer.h"
+#include "engine/Timer.h"
 
 ConfigVar cv_timer_scale_game(
   "timer_scale_game", "Timer speed for game related things", "1"
