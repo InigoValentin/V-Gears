@@ -35,7 +35,7 @@
 #include "core/GameFrameListener.h"
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
-#include "core/SavemapHandler.h"
+#include "engine/save/SavemapHandler.h"
 #include "engine/script/ScriptManager.h"
 #include "core/Timer.h"
 #include "engine/ui/UiManager.h"

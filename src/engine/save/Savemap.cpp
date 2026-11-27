@@ -18,7 +18,7 @@
 #include <iostream>
 #include <algorithm>
 #include <tinyxml.h>
-#include "core/Savemap.h"
+#include "engine/save/Savemap.h"
 #include "common/Logger.h"
 #include "engine/xml/XmlFile.h"
 #include "common/TypeDefine.h"

@@ -18,7 +18,7 @@
 #include <vector>
 #include <OgreSingleton.h>
 #include <OgreColourValue.h>
-#include "core/Savemap.h"
+#include "engine/save/Savemap.h"
 
 /**
  * A handler for savemaps.

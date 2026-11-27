@@ -648,8 +648,8 @@ set(VGEARS_SOURCE_FILES
     engine/particles/emitters/PointEmitterFactory.cpp
     engine/particles/renderer/ParticleEntityRenderer.cpp
     engine/particles/renderer/ParticleEntityRendererDictionary.cpp
-    core/Savemap.cpp
-    core/SavemapHandler.cpp
+    engine/save/Savemap.cpp
+    engine/save/SavemapHandler.cpp
     engine/script/ScriptManager.cpp
     engine/ui/TextHandler.cpp
     core/Timer.cpp
