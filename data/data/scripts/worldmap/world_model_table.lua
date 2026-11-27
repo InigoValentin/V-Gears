@@ -1,6 +1,6 @@
 -- The models of the world map and where each type of entity of the world scripts uses which one.
 --
--- The data is from the tables of ff7.exe (see src/installer/WorldModelTable.h): the models are the
+-- The data is from the tables of ff7.exe (see src/installer/tables/WorldModelTable.h): the models are the
 -- HRC files of WORLD_US.LGP with the name and the scale the game gives them, and "situations" has
 -- the model that each type of entity has in each of the 13 situations of the map (the argument of
 -- LoadModel in the scripts is the type). The scale is the raw value of the game: 0x200 is 1.

@@ -1,0 +1,601 @@
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
+
+#include <string>
+#include <vector>
+#include <iostream>
+#include <OgreLog.h>
+#include "app/VGearsApplication.h"
+#include "installer/formats/DiskImage.h"
+#include "installer/extractors/FieldDataInstaller.h"
+#include "installer/extractors/KernelDataInstaller.h"
+#include "installer/extractors/MediaDataInstaller.h"
+#include "installer/extractors/BattleDataInstaller.h"
+#include "installer/extractors/WorldInstaller.h"
+#include "installer/extractors/ModelsAndAnimationsDb.h"
+
+/**
+ * The data installer.
+ */
+class DataInstaller{
+
+    public:
+
+        /**
+         * Advanced options available in the installer.
+         */
+        struct AdvancedOptions{
+
+            /**
+             * Option to install battle scenes.
+             */
+            bool battle_data;
+
+            /**
+             * Option to install battle models.
+             */
+            bool battle_models;
+
+            /**
+             * Option to install kernel data.
+             */
+            bool kernel;
+
+            /**
+             * Option to install images.
+             */
+            bool images;
+
+            /**
+             * Option to install sound effects.
+             */
+            bool sounds;
+
+            /**
+             * Option to install music tracks.
+             */
+            bool music;
+
+            /**
+             * Option to install FMV videos.
+             */
+            bool videos;
+
+            /**
+             * Option to install field maps.
+             */
+            bool fields;
+
+            /**
+             * Option to install field models.
+             */
+            bool field_models;
+
+            /**
+             * Option to install world map data.
+             */
+            bool wm;
+
+            /**
+             * Option to install world map models.
+             */
+            bool wm_models;
+
+            /**
+             * Option to keep the original data after installation: the extracted install disk, the temporary
+             * files and the original files of the converted sounds, music and images.
+             */
+            bool keep_originals;
+
+        };
+
+        /**
+         * The scale factor for line point coordinates.
+         *
+         * When a LINE opcode is found in the game scripts, the line points X
+         * and Y coordinates must be scaled down by this factor.
+         */
+        static float LINE_SCALE_FACTOR;
+
+        /**
+         * Installer constructor
+         *
+         * @param[in] disk_image Disk image with the original data to parse.
+         * @param[in] output_dir Path to the directory to write generated data.
+         * @param[in] options Advanced options for the installer.
+         * @param[in] write_output_line Pointer to function to write output.
+         */
+        DataInstaller(
+          const DiskImage& disk_image, const std::string output_dir, AdvancedOptions options,
+          std::function<void(std::string, int, bool)> write_output_line
+        );
+
+        /**
+         * Installer destructor.
+         */
+        ~DataInstaller();
+
+        /**
+         * Handle the installation progress.
+         *
+         * @return Installation progress [0-100].
+         */
+        float Progress();
+
+    private:
+
+        /**
+         * Calculates the installation progress.
+         *
+         * @return Installation progress [0-100]
+         */
+        const float CalcProgress();
+
+        /**
+         * Creates a directory in the data path (<installation dir>/data/).
+         *
+         * @param[in] dir Path of the directory to create, relative to the data path.
+         * @param[in] in_root True to make the path relative to the installation dir instead.
+         * @throws std::runtime_error If the directory can't be created.
+         */
+        void CreateDir(const std::string& dir, bool in_root = false);
+
+        /**
+         * Creates all directories required for the installation.
+         *
+         * It also adds certain location to the resource group manager.
+         */
+        void CreateDirectories();
+
+        /**
+         * Removes the original data once the installation is complete: the extracted install disk and the
+         * temporary files the game doesn't read.
+         */
+        void RemoveOriginals();
+
+        /**
+         * Installation steps.
+         */
+        enum InstallationSteps{
+
+            /**
+             * Installation not started.
+             */
+            IDLE = 0,
+
+            /**
+             * Create all directories required for the installation.
+             */
+            CREATE_DIRECTORIES,
+
+            /**
+             * Initialize data for installation.
+             */
+            INITIALIZE,
+
+            /**
+             * Initializes the battle installer for scene processing.
+             */
+            BATTLE_SCENES_INIT,
+
+            /**
+             * Extracts battle scenes.
+             */
+            BATTLE_SCENES_PROCESS,
+
+            /**
+             * Writes attack data.
+             */
+            BATTLE_SCENES_WRITE_ATTACKS,
+
+            /**
+             * Writes enemy data.
+             */
+            BATTLE_SCENES_WRITE_ENEMIES,
+
+            /**
+             * Writes enemy formation data.
+             */
+            BATTLE_SCENES_WRITE_FORMATIONS,
+
+            /**
+             * Initializes the battle installer for 3D model processing.
+             */
+            BATTLE_MODELS_INIT,
+
+            /**
+             * Extracts 3D battle models.
+             */
+            BATTLE_MODELS_PROCESS,
+
+            /**
+             * Prepares for 3D battle model conversion.
+             */
+            BATTLE_MODELS_CONVERT_INIT,
+
+            /**
+             * Converts 3D battle models.
+             */
+            BATTLE_MODELS_CONVERT,
+
+            /**
+             * Writes playable character model info.
+             */
+            BATTLE_MODELS_WRITE_CHARACTERS,
+
+            /**
+             * Writes battle scene model info.
+             */
+            BATTLE_MODELS_WRITE_SCENES,
+
+            /**
+             * Initializes the battle installer for 3D spell processing.
+             */
+            SPELL_MODELS_INIT,
+
+            /**
+             * Extracts 3D spell models.
+             */
+            SPELL_MODELS_PROCESS,
+
+            /**
+             * Prepares for 3D spell model conversion.
+             */
+            SPELL_MODELS_CONVERT_INIT,
+
+            /**
+             * Converts 3D spell models.
+             */
+            SPELL_MODELS_CONVERT,
+
+            /**
+             * Extracts the meshes and textures of the battle effects.
+             */
+            EFFECT_MODELS_INIT,
+
+            /**
+             * Converts the battle effect meshes.
+             */
+            EFFECT_MODELS_CONVERT,
+
+            /**
+             * Parses item and materia prices from ff7.exe.
+             */
+            KERNEL_PRICES,
+
+            /**
+             * Parses command data from KERNEL.BIN.
+             */
+            KERNEL_COMMANDS,
+
+            /**
+             * Parses attack data from KERNEL.BIN.
+             */
+            KERNEL_ATTACKS,
+
+            /**
+             * Parses characters data from KERNEL.BIN.
+             */
+            KERNEL_CHARACTERS,
+
+            /**
+             * Parses item data from KERNEL.BIN.
+             */
+            KERNEL_ITEMS,
+
+            /**
+             * Parses growth data from KERNEL.BIN.
+             */
+            KERNEL_GROWTH,
+
+            /**
+             * Parses weapon data from KERNEL.BIN.
+             */
+            KERNEL_WEAPONS,
+
+            /**
+             * Parses armor data from KERNEL.BIN.
+             */
+            KERNEL_ARMORS,
+
+            /**
+             * Parses accessory data from KERNEL.BIN.
+             */
+            KERNEL_ACCESSORIES,
+
+            /**
+             * Parses materia data from KERNEL.BIN.
+             */
+            KERNEL_MATERIA,
+
+            /**
+             * Parses key item data data from KERNEL.BIN.
+             */
+            KERNEL_KEY_ITEMS,
+
+            /**
+             * Parses summon names data from KERNEL.BIN.
+             */
+            KERNEL_SUMMON_NAMES,
+
+            /**
+             * Parses the initial savemap from KERNEL.BIN.
+             */
+            KERNEL_SAVEMAP,
+
+            /**
+             * Extract game images and icons from menu.lgp.
+             */
+            MEDIA_IMAGES,
+
+            /**
+             * Prepares the installer for sound extraction.
+             */
+            MEDIA_SOUNDS_INIT,
+
+            /**
+             * Extract game sounds.
+             */
+            MEDIA_SOUNDS,
+
+            /**
+             * Build sounds index.
+             */
+            MEDIA_SOUNDS_INDEX,
+
+            /**
+             * Prepares the installer for music extraction.
+             */
+            MEDIA_MUSICS_INIT,
+
+            /**
+             * Extracts the game music.
+             */
+            MEDIA_MUSICS,
+
+            /**
+             * Extracts the game high quality music.
+             */
+            MEDIA_MUSICS_HQ,
+
+            /**
+             * Build the music index.
+             */
+            MEDIA_MUSICS_INDEX,
+
+            /**
+             * Copies the FMV videos.
+             */
+            MEDIA_VIDEOS,
+
+            /**
+             * Initializer for {@see SPAWN_POINTS_AND_SCALE_FACTORS}.
+             */
+            FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT,
+
+            /**
+             * Step that collects spawn points and sclae factors.
+             */
+            FIELD_SPAWN_POINTS_AND_SCALE_FACTORS,
+
+            /**
+             * Step that convets fields to V-Gears format.
+             */
+            FIELD_CONVERT,
+
+            /**
+             * Initializer for {@see WRITE_MAPS}.
+             */
+            FIELD_WRITE_INIT,
+
+            /**
+             * Step that writes XML maps.
+             */
+            FIELD_WRITE,
+
+            /**
+             * Clean up after {@see WRITE_MAPS}.
+             */
+            FIELD_WRITE_END,
+
+            /**
+             * Initializer for {@see CONVERT_FIELD_MODELS}.
+             */
+            FIELD_CONVERT_MODELS_INIT,
+
+            /**
+             * Step that converts field models.
+             */
+            FIELD_CONVERT_MODELS,
+
+            /**
+             * Prepares the installer for world map data installation.
+             */
+            WM_INIT,
+
+            /**
+             * Generates the materials for the world map terrain.
+             */
+            WM_MATERIALS,
+
+            /**
+             * Step that extracts world map terrain data.
+             */
+            WM_MAPS,
+
+            /**
+             * Step that extracts world map models.
+             */
+            WM_MODELS,
+
+            /**
+             * Cleans up after the installation.
+             */
+            CLEAN,
+
+            /**
+             * Number of installation steps.
+             */
+            STATE_COUNT,
+
+            /**
+             * Installation finished.
+             */
+            DONE = 100,
+        };
+
+        /**
+         * Current installation status.
+         */
+        InstallationSteps installation_state_ = IDLE;
+
+        /**
+         * Gets the name of the part of the installation a step belongs to.
+         *
+         * @param[in] state An installation step.
+         */
+        static const char* StepGroup(int state);
+
+        /**
+         * Prepares the resources for the conversion of a kind of models.
+         *
+         * The parts of the models of every kind (field, battle, spells, effects, world map) are in the same resource
+         * group, and many have the same names in different kinds (the field part cbba.rsd and the battle part
+         * cbba.rsd). Ogre keeps every loaded resource by name, so a model would get the part of another kind of
+         * model, loaded before, or the part of another kind left in its temporary folder by a previous installation
+         * in the same directory. This releases the parts loaded before, and leaves in the group only the temporary
+         * folder of the models that will be converted.
+         *
+         * @param[in] temp_dir Temporary folder of the models, relative to the installation directory
+         * ("temp/char/").
+         */
+        void UseModelParts(const std::string& temp_dir);
+
+        /**
+         * Substeps in the current installation step.
+         */
+        int substeps_ = 0;
+
+        /**
+         * Current substep in the current installation step.
+         */
+        int cur_substep_ = 0;
+
+        /**
+         * Weight of each installation step.
+         *
+         * Used to calculate current progress.
+         */
+        int step_weight_[STATE_COUNT];
+
+        /**
+         * List of field model names.
+         */
+        std::vector<std::string> field_model_names_;
+
+        /**
+         * The disk image from which to read the PC game data.
+         */
+        DiskImage disk_image_;
+
+        /**
+         * The path to the directory where to save the V-Gears data.
+         */
+        std::string output_dir_;
+
+        /**
+         * Directory where the game data is installed (<install dir>/data/).
+         */
+        std::string data_dir_;
+
+        /**
+         * Name of the part of the installation being done, used to report problems per part.
+         */
+        const char* current_group_ = nullptr;
+
+        /**
+         * Advanced options.
+         */
+        AdvancedOptions options_;
+
+        /**
+         * The installer application.
+         *
+         * It's a singleton so it can't be recreated. It will crash the second
+         * time round.
+         */
+        VGears::Application application_;
+
+        /**
+         * Passes the problems that V-Gears writes to Ogre's log to the installation log.
+         */
+        class OgreProblems : public Ogre::LogListener{
+
+            public:
+
+                void messageLogged(
+                  const Ogre::String& message, Ogre::LogMessageLevel lml, bool mask_debug,
+                  const Ogre::String& log_name, bool& skip_message
+                ) override;
+        };
+
+        /**
+         * Listener of Ogre's log. Declared after the application, so it is destroyed before Ogre.
+         */
+        OgreProblems ogre_problems_;
+
+        /**
+         * LGP archive with field data.
+         */
+        std::unique_ptr<ScopedLgp> fields_lgp_;
+
+        /**
+         * The installer for fiel maps data.
+         */
+        std::unique_ptr<FieldDataInstaller> field_installer_;
+
+        /**
+         * The installer for kernel data.
+         */
+        std::unique_ptr<KernelDataInstaller> kernel_installer_;
+
+        /**
+         * The installer for media files.
+         */
+        std::unique_ptr<MediaDataInstaller> media_installer_;
+
+        /**
+         * The installer for battle data.
+         */
+        std::unique_ptr<BattleDataInstaller> battle_installer_;
+
+        /**
+         * The installer for world map data.
+         */
+        std::unique_ptr<WorldInstaller> world_installer_;
+
+        /**
+         * Function used to print text to the log output, line by line.
+         *
+         * @param[in] msg the message to write.
+         * @param[in] level Log level for the message.
+         * @param[in] as_progress If true, the text will also be set as the
+         * current text behind the progress bar.
+         */
+        std::function<void(std::string msg, int level, bool progress)> write_output_line_;
+
+};

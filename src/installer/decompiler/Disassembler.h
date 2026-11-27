@@ -17,7 +17,7 @@
 
 #include <iostream>
 #include <vector>
-#include "common/BinaryReader.h"
+#include "installer/formats/BinaryReader.h"
 #include "DecompilerException.h"
 #include "instruction/Instruction.h"
 

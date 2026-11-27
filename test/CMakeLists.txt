@@ -38,9 +38,9 @@ set(SOURCE_FILES
     engine/entity/EntityManager.cpp
     engine/entity/EntityPoint.cpp
     engine/ui/TextHandler.cpp
-    installer/FieldDataInstaller.cpp
-    installer/SfxDump.cpp
-    installer/WindowFonts.cpp
+    installer/extractors/FieldDataInstaller.cpp
+    installer/extractors/SfxDump.cpp
+    installer/extractors/WindowFonts.cpp
     installer/decompiler/field/FieldCodeGenerator.cpp
     installer/decompiler/field/FieldDecompiler.cpp
     installer/decompiler/world/WorldDisassembler.cpp
@@ -87,17 +87,17 @@ add_executable(v-gears-installer-tests
     ${CMAKE_SOURCE_DIR}/src/common/DataDirectory.cpp
     ${CMAKE_SOURCE_DIR}/src/common/InstallStamp.cpp
     ${CMAKE_SOURCE_DIR}/src/common/OgrePlugins.cpp
-    installer/InstallLogic.cpp
-    installer/ExternalTools.cpp
-    installer/MovieCamera.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/MovieCamera.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/ExternalTools.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallCommandLine.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallLayout.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallLog.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallOptions.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallVerifier.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/VideoFiles.cpp
+    installer/steps/InstallLogic.cpp
+    installer/steps/ExternalTools.cpp
+    installer/extractors/MovieCamera.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/extractors/MovieCamera.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/ExternalTools.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/cli/InstallCommandLine.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/InstallLayout.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/InstallLog.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/InstallOptions.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/InstallVerifier.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/VideoFiles.cpp
 )
 SET_PROPERTY(TARGET v-gears-installer-tests PROPERTY FOLDER "build/v-gears-test")
 target_link_libraries(v-gears-installer-tests ${_test_qt_libs} ${Boost_LIBRARIES})

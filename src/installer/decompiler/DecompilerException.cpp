@@ -14,7 +14,7 @@
  */
 
 #include "decompiler/DecompilerException.h"
-#include "common/scummsys.h"
+#include "installer/support/scummsys.h"
 
 UnknownOpcodeParameterException::UnknownOpcodeParameterException(std::string param){
     what_ = "Unknown opcode parameter string: " + param;

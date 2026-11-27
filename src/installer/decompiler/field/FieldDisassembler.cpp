@@ -35,7 +35,7 @@
 #include "instruction/FieldUncondJumpInstruction.h"
 #include "instruction/FieldWalkmeshInstruction.h"
 #include "instruction/FieldWindowInstruction.h"
-#include "common/Lzs.h"
+#include "installer/formats/Lzs.h"
 
 
 const int FieldDisassembler::MAGIC(0x0502);

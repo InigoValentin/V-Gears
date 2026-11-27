@@ -7,40 +7,40 @@ find_package(Qt5 COMPONENTS Core REQUIRED)
 # Source files for the installer.
 set(INSTALLER_SOURCE_FILES
     main.cpp
-    BattleDataInstaller.cpp
-    CliInstaller.cpp
-    DataInstaller.cpp
-    DiskImage.cpp
-    FieldDataInstaller.cpp
-    FieldTextWriter.cpp
-    InstallCommandLine.cpp
-    InstallLayout.cpp
-    InstallLog.cpp
-    InstallOptions.cpp
-    InstallSteps.cpp
-    ExternalTools.cpp
-    InstallVerifier.cpp
-    VideoFiles.cpp
-    MovieCamera.cpp
-    KernelDataInstaller.cpp
-    MainWindow.cpp
-    MediaDataInstaller.cpp
-    ModelsAndAnimationsDb.cpp
-    ScopedLgp.cpp
-    TexFile.cpp
-    VGearsUtility.cpp
-    WindowFonts.cpp
-    WorldInstaller.cpp
-    common/BinGZipFile.cpp
-    common/DrawSkeleton.cpp
-    common/Logger.cpp
-    common/OgreBase.cpp
-    common/OgreGenUtilites.cpp
-    common/Vram.cpp
-    data/AbFile.cpp
-    data/BattleSceneFile.cpp
-    data/DaFile.cpp
-    data/WorldMapWalkmesh.cpp
+    extractors/BattleDataInstaller.cpp
+    cli/CliInstaller.cpp
+    steps/DataInstaller.cpp
+    formats/DiskImage.cpp
+    extractors/FieldDataInstaller.cpp
+    extractors/FieldTextWriter.cpp
+    cli/InstallCommandLine.cpp
+    steps/InstallLayout.cpp
+    steps/InstallLog.cpp
+    steps/InstallOptions.cpp
+    steps/InstallSteps.cpp
+    steps/ExternalTools.cpp
+    steps/InstallVerifier.cpp
+    steps/VideoFiles.cpp
+    extractors/MovieCamera.cpp
+    extractors/KernelDataInstaller.cpp
+    gui/MainWindow.cpp
+    extractors/MediaDataInstaller.cpp
+    extractors/ModelsAndAnimationsDb.cpp
+    extractors/ScopedLgp.cpp
+    formats/TexFile.cpp
+    support/VGearsUtility.cpp
+    extractors/WindowFonts.cpp
+    extractors/WorldInstaller.cpp
+    formats/BinGZipFile.cpp
+    support/DrawSkeleton.cpp
+    support/Logger.cpp
+    support/OgreBase.cpp
+    support/OgreGenUtilites.cpp
+    support/Vram.cpp
+    formats/AbFile.cpp
+    formats/BattleSceneFile.cpp
+    formats/DaFile.cpp
+    formats/WorldMapWalkmesh.cpp
     decompiler/CodeGenerator.cpp
     decompiler/ControlFlow.cpp
     decompiler/DecompilerException.cpp
@@ -107,12 +107,12 @@ include_directories (
 
 
 # Generate QT UIs.
-set(v-gears-installer_UIS MainWindow.ui)
+set(v-gears-installer_UIS gui/MainWindow.ui)
 QT5_WRAP_UI(UIS ${v-gears-installer_UIS})
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-set(v-gears-installer_MOCS MainWindow.h)
+set(v-gears-installer_MOCS gui/MainWindow.h)
 QT5_WRAP_CPP(MOCS ${v-gears-installer_MOCS})
-set(v-gears-installer_RESOURCES installer_resources.qrc)
+set(v-gears-installer_RESOURCES gui/installer_resources.qrc)
 qt5_add_resources(RCC_SOURCES ${v-gears-installer_RESOURCES})
 
 

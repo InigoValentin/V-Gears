@@ -804,7 +804,7 @@ endforeach()
 # libvgears. Some build order setups (unity/PCH/cotire) may attempt to
 # compile sources that include generated `ui_*.h` before uic runs, so add
 # an explicit custom command/target to generate the header.
-set(_ui_src "${CMAKE_CURRENT_SOURCE_DIR}/installer/MainWindow.ui")
+set(_ui_src "${CMAKE_CURRENT_SOURCE_DIR}/installer/gui/MainWindow.ui")
 # Place generated headers under the build tree parallel to the source dir
 # CMAKE_CURRENT_BINARY_DIR is <build>/src so append 'installer' (not
 # 'src/installer').
@@ -848,7 +848,7 @@ set(VGEARS_OGRE_PLUGIN_DIR "${_vgears_default_plugin_dir}" CACHE PATH "Directory
 message(STATUS "Ogre plugin directory: ${VGEARS_OGRE_PLUGIN_DIR}")
 
 add_library(libvgears STATIC ${VGEARS_SOURCE_FILES})
-target_sources(libvgears PRIVATE installer/SfxDump.c)
+target_sources(libvgears PRIVATE installer/extractors/SfxDump.c)
 # Ensure generated ui headers are created before compiling libvgears
 if(DEFINED _GENERATED_UI_TARGET)
     add_dependencies(libvgears ${_GENERATED_UI_TARGET})
