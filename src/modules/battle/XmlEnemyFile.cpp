@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "engine/xml/XmlEnemyFile.h"
+#include "modules/battle/XmlEnemyFile.h"
 #include "modules/battle/Enemy.h"
 #include "common/Logger.h"
 

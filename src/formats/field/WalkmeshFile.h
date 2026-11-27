@@ -16,7 +16,7 @@
 #pragma once
 
 #include "common/Resource.h"
-#include "engine/entity/Walkmesh.h"
+#include "formats/field/WalkmeshTriangle.h"
 
 namespace VGears{
 

@@ -22,6 +22,7 @@
 #include <OgreManualObject.h>
 #include <OgreSingleton.h>
 #include "Enemy.h"
+#include "engine/BattleInterface.h"
 #include "engine/Event.h"
 #include "engine/Manager.h"
 #include "engine/xml/XmlBattleCharactersFile.h"
@@ -31,7 +32,8 @@
 /**
  * The battle manager.
  */
-class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
+class BattleManager :
+  public Manager, public Ogre::Singleton<BattleManager>, public VGears::BattleInterface{
 
     public:
 
@@ -383,7 +385,7 @@ class BattleManager : public Manager, public Ogre::Singleton<BattleManager>{
          *
          * @param[in] mode The flags.
          */
-        void ScriptSetMode(const int mode);
+        void ScriptSetMode(const int mode) override;
 
         /**
          * Retrieves the battle mode flags.

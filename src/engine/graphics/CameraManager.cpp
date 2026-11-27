@@ -20,7 +20,7 @@
 #include <OIS/OIS.h>
 #include "engine/graphics/CameraManager.h"
 #include "engine/graphics/CameraManagerCommands.h"
-#include "app/Application.h"
+#include "engine/ApplicationInterface.h"
 #include "engine/config/ConfigVar.h"
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
@@ -58,7 +58,7 @@ CameraManager::CameraManager():
     //camera_->lookAt(Ogre::Vector3(0, 0, 0));
     Ogre::Root::getSingleton().getSceneManager("Scene")->getRootSceneNode()
       ->lookAt(Ogre::Vector3(0, 0, 0), Ogre::Node::TS_LOCAL);
-    viewport_ = VGears::Application::getSingleton().getRenderWindow()->addViewport(camera_, 0);
+    viewport_ = VGears::ApplicationInterface::Get()->getRenderWindow()->addViewport(camera_, 0);
     viewport_->setBackgroundColour(Ogre::ColourValue(0, 0, 0));
     camera_->setAspectRatio(
       Ogre::Real(viewport_->getActualWidth()) / Ogre::Real(viewport_->getActualHeight())

@@ -46,7 +46,7 @@ Ogre::String script_entity_type[] = {"SYSTEM", "ENTITY", "UI", "BATTLE"};
  */
 bool priority_queue_compare(QueueScript a, QueueScript b){return a.priority < b.priority;}
 
-ScriptManager::ScriptManager():
+ScriptManager::ScriptManager(const std::vector<ModuleBinder>& module_binders):
   system_table_name_("System"), entity_table_name_("EntityContainer"), ui_table_name_("UiContainer")
 {
     lua_state_ = lua_open();
@@ -57,6 +57,7 @@ ScriptManager::ScriptManager():
     luaopen_math(lua_state_);
     luaopen_io(lua_state_);
     InitBinds();
+    for (ModuleBinder bind : module_binders) bind(lua_state_);
     InitCmd();
     // TODO: Use the one in data/ ?
     RunFile("system/system.lua");

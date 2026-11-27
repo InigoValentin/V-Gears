@@ -15,7 +15,7 @@
 
 #include <OgreFontManager.h>
 #include <OgreRenderWindow.h>
-#include "app/Application.h"
+#include "engine/ApplicationInterface.h"
 #include "engine/ui/Console.h"
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
@@ -55,7 +55,7 @@ Console::Console():
     else LOG_ERROR("Console::frameStarted: Font for console not found.");
 
     // Calculate width and height of console depending on size of application
-    Ogre::RenderTarget *render_target( VGears::Application::getSingleton().getRenderWindow());
+    Ogre::RenderTarget *render_target( VGears::ApplicationInterface::Get()->getRenderWindow());
     console_width_ = render_target->getWidth();
     console_height_ = static_cast<int>(render_target->getHeight() / 2.5f);
     line_width_ = (console_width_ - 20) / 8;
@@ -379,7 +379,7 @@ void Console::UpdateNotification(){
 
 void Console::OnResize(){
     // Calculate width and height of console depending on size of application
-    Ogre::RenderTarget *render_target(VGears::Application::getSingleton().getRenderWindow());
+    Ogre::RenderTarget *render_target(VGears::ApplicationInterface::Get()->getRenderWindow());
     console_width_ = render_target->getWidth();
     console_height_ = static_cast<int>(render_target->getHeight() / 2.5f);
     line_width_ = (console_width_ - 20) / 8;

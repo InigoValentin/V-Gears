@@ -17,46 +17,7 @@
 
 #include <Ogre.h>
 #include <vector>
-
-/**
- * A triangle of a walkmesh.
- */
-struct WalkmeshTriangle{
-
-    /**
-     * Constructor.
-     */
-    WalkmeshTriangle(): a(0, 0, 0), b(0, 0, 0), c(0, 0, 0), locked(false){
-        access_side[0] = -1;
-        access_side[1] = -1;
-        access_side[2] = -1;
-    }
-
-    /**
-     * A side of the triangle.
-     */
-    Ogre::Vector3 a;
-
-    /**
-     * A side of the triangle.
-     */
-    Ogre::Vector3 b;
-
-    /**
-     * A side of the triangle.
-     */
-    Ogre::Vector3 c;
-
-    /**
-     * @todo Understand and document.
-     */
-    int access_side[3];
-
-    /**
-     * Indicates if the triangle is locked (if it's walkable).
-     */
-    bool locked;
-};
+#include "formats/field/WalkmeshTriangle.h"
 
 namespace VGears{
     typedef Ogre::SharedPtr<class WalkmeshFile> WalkmeshFilePtr;

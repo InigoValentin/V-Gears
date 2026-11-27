@@ -15,7 +15,7 @@
 
 #include <OgreStringConverter.h>
 #include "common/Logger.h"
-#include "engine/xml/XmlFile.h"
+#include "common/XmlFile.h"
 
 XmlFile::XmlFile(const Ogre::String& file): file_(file){
     file_.SetCondenseWhiteSpace(false);

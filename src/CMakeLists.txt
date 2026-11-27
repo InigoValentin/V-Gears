@@ -587,7 +587,7 @@ set(VGEARS_SOURCE_FILES
     app/main.cpp
     common/FF7Character.cpp
     common/FF7Common.cpp
-    app/GameState.cpp
+    engine/GameState.cpp
     common/File.cpp
     common/FileSystem.cpp
     formats/FF7NameLookup.cpp
@@ -609,6 +609,7 @@ set(VGEARS_SOURCE_FILES
     engine/graphics/MoviePlayer.cpp
     engine/graphics/MovieState.cpp
     engine/graphics/ScreenFadeState.cpp
+    modules/battle/BattleBinds.cpp
     modules/battle/BattleManager.cpp
     engine/graphics/CameraManager.cpp
     engine/config/ConfigCmd.cpp
@@ -627,7 +628,7 @@ set(VGEARS_SOURCE_FILES
     engine/entity/EntityModel.cpp
     engine/entity/EntityPoint.cpp
     engine/entity/EntityTrigger.cpp
-    engine/GameFrameListener.cpp
+    app/GameFrameListener.cpp
     engine/input/InputManager.cpp
     engine/Manager.cpp
     engine/particles/Particle.cpp
@@ -666,11 +667,11 @@ set(VGEARS_SOURCE_FILES
     engine/xml/XmlBackground2DFile.cpp
     engine/xml/XmlBattleCharactersFile.cpp
     engine/xml/XmlBattleScenesFile.cpp
-    engine/xml/XmlEnemyFile.cpp
-    engine/xml/XmlFile.cpp
+    modules/battle/XmlEnemyFile.cpp
+    common/XmlFile.cpp
     engine/xml/XmlFontFile.cpp
     engine/xml/XmlFontsFile.cpp
-    engine/xml/XmlFormationFile.cpp
+    modules/battle/XmlFormationFile.cpp
     engine/xml/XmlMapFile.cpp
     engine/xml/XmlMapsFile.cpp
     engine/xml/XmlMusicsFile.cpp
@@ -736,6 +737,7 @@ set(VGEARS_SOURCE_FILES
     formats/field/WalkmeshFileManager.cpp
     formats/field/WalkmeshFileXMLSerializer.cpp
     formats/field/FF7WalkmeshFileSerializer.cpp
+    modules/worldmap/WorldmapBinds.cpp
     modules/worldmap/WorldmapModule.cpp
 )
 endif()

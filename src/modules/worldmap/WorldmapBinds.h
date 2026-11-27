@@ -13,8 +13,18 @@
  * GNU General Public License for more details.
  */
 
-#include "app/GameState.h"
+#pragma once
+
+struct lua_State;
 
 namespace VGears{
-    GAME_STATE  g_ApplicationState;
+
+    /**
+     * Makes the world map module available to the scripts, as "world_map_module".
+     *
+     * The module must have been created.
+     *
+     * @param[in] state Lua state of the scripts.
+     */
+    void BindWorldmapModule(lua_State* state);
 }

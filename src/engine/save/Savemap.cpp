@@ -20,7 +20,7 @@
 #include <tinyxml.h>
 #include "engine/save/Savemap.h"
 #include "common/Logger.h"
-#include "engine/xml/XmlFile.h"
+#include "common/XmlFile.h"
 #include "common/TypeDefine.h"
 
 constexpr unsigned int Savemap::MAX_CHARACTERS;

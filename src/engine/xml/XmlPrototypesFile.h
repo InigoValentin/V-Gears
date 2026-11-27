@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "XmlFile.h"
+#include "common/XmlFile.h"
 
 /**
  * Handles the main XML prototypes file.

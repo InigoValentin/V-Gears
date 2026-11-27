@@ -18,7 +18,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "XmlFile.h"
+#include "common/XmlFile.h"
 
 /**
  * Data of an attack, as stored in the attack XML files.

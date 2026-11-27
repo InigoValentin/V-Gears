@@ -139,3 +139,9 @@ The fonts are built by the installer from WINDOW.BIN (see `WindowFonts`) and dra
 - The PC version has a font twice the resolution (24x24 cells) in `usfont_a_h.tex` and `usfont_b_h.tex` of menu_us.lgp, split in two textures. The installer could merge them in one image and write the XML for it, for sharper text at high resolutions.
 - The installer could write `ffvii_en.xml` from the width table in WINDOW.BIN (third file, one byte per character: 3 bits of lead, 5 bits of width) instead of keeping it by hand. The XML in the repository matches the table except for `! " , . : ?`, which were made tighter by hand.
 - Loading TTF files makes sense only to support fonts made by users, not for the fonts of the game.
+
+## Changing the resolution breaks the display
+
+The console command `/resolution <width> <height> [full screen]` leaves menus, fields, the world map and battles broken. Screenshots (`/screenshot`) work. It doesn't seem new: the resize functions (`CmdResolution`, `GameFrameListener::windowResized` and the `OnResize` of the managers and widgets) are the same as before the code reorganization, but it hasn't been compared in the game with an older build.
+
+To check, not verified: whether `windowResized` is called at all when the size is changed with `Ogre::RenderWindow::resize` or `setFullscreen`, and not by the window system. Several `OnResize` functions are also empty (battle, world map, dialogs).

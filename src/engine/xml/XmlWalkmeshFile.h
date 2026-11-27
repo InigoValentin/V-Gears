@@ -14,7 +14,7 @@
  */
 
 #pragma once
-#include "XmlFile.h"
+#include "common/XmlFile.h"
 
 /**
  * Handles a walkmesh file.

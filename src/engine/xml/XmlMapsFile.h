@@ -16,7 +16,7 @@
 #pragma once
 
 #include <OgreStringVector.h>
-#include "XmlFile.h"
+#include "common/XmlFile.h"
 
 /**
  * Handles the main maps file.

@@ -14,9 +14,9 @@
  */
 
 #include <OgreStringConverter.h>
-#include "app/GameState.h"
+#include "engine/GameState.h"
 #include "modules/battle/BattleManager.h"
-#include "engine/GameFrameListener.h"
+#include "app/GameFrameListener.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/config/ConfigVar.h"
 #include "engine/ui/Console.h"

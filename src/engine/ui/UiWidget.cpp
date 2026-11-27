@@ -17,7 +17,7 @@
 #include <OgreMath.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
-#include "app/Application.h"
+#include "engine/ApplicationInterface.h"
 #include "engine/config/ConfigVar.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/graphics/DebugDraw.h"
@@ -305,7 +305,7 @@ void UiWidget::SetUpdateTransformation(){
 
 void UiWidget::UpdateTransformation(){
 
-    Ogre::RenderWindow* window = VGears::Application::getSingleton().getRenderWindow();
+    Ogre::RenderWindow* window = VGears::ApplicationInterface::Get()->getRenderWindow();
     float res_width = static_cast<float>(window->getWidth());
     float res_height = static_cast<float>(window->getHeight());
     screen_width_ = res_width;

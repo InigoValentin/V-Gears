@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "engine/xml/XmlFormationFile.h"
+#include "modules/battle/XmlFormationFile.h"
 #include "modules/battle/BattleManager.h"
 #include "common/Logger.h"
 

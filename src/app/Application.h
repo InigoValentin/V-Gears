@@ -23,13 +23,14 @@
 #include <OgreTextureManager.h>
 #include <memory>
 #include "common/TypeDefine.h"
+#include "engine/ApplicationInterface.h"
 
 namespace VGears{
 
     /**
      * The V-Gears main applicacion
      */
-    class Application : public Ogre::Singleton<Application>{
+    class Application : public Ogre::Singleton<Application>, public ApplicationInterface{
 
         public:
 
@@ -94,12 +95,12 @@ namespace VGears{
              *
              * @return Pointer to the Ogre window.
              */
-            Ogre::RenderWindow* getRenderWindow(void);
+            Ogre::RenderWindow* getRenderWindow() override;
 
             /**
              * The overlay system (it must be added to a scene manager as a render queue listener to draw overlays).
              */
-            Ogre::OverlaySystem* GetOverlaySystem(){return _overlay_system.get();}
+            Ogre::OverlaySystem* GetOverlaySystem() override{return _overlay_system.get();}
 
             /**
              * Retrieves the Ogre resource manager.

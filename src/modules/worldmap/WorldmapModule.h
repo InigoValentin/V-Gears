@@ -23,6 +23,7 @@
 #include <set>
 #include <vector>
 #include "common/TypeDefine.h"
+#include "engine/WorldMapInterface.h"
 
 class EntityModel;
 
@@ -31,7 +32,8 @@ namespace VGears {
     /**
      * The world map module.
      */
-    class WorldmapModule : public Ogre::Singleton<WorldmapModule>, public Ogre::FrameListener{
+    class WorldmapModule :
+      public Ogre::Singleton<WorldmapModule>, public Ogre::FrameListener, public WorldMapInterface{
 
         public:
 
@@ -55,25 +57,25 @@ namespace VGears {
              * was already loaded, it is replaced.
              */
             void Init(const int map_id = 0);
-            void Suspend();
+            void Suspend() override;
 
             bool frameStarted(const Ogre::FrameEvent& event) override;
 
             void ClearVehicleTerrains();
             void AddVehicleTerrain(const char* terrain_name);
-            Ogre::String GetTerrainTypeUnderEntity(const char* entity_name) const;
-            int GetTerrainTriangleUnderEntity(const char* entity_name) const;
+            Ogre::String GetTerrainTypeUnderEntity(const char* entity_name) const override;
+            int GetTerrainTriangleUnderEntity(const char* entity_name) const override;
             bool UnboardVehicle(const char* vehicle_name);
 
             /**
              * Hides the world map and stops it while a battle is on.
              */
-            void PauseForBattle();
+            void PauseForBattle() override;
 
             /**
              * Shows the world map again after a battle.
              */
-            void ResumeAfterBattle();
+            void ResumeAfterBattle() override;
 
             /**
              * Prevents or allows random encounters (the SetBattleLock opcode).

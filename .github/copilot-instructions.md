@@ -10,11 +10,12 @@ V-Gears is a free, cross-platform reimplementation of the Final Fantasy VII engi
 
 ## Architecture
 
-- `src/app/` — the game entry point, the application class and the game state.
+- `src/app/` — the game entry point, the application class and the game loop.
 - `src/common/` — files, logger, strings, types and other utilities shared by all targets.
 - `src/formats/` — FF7 binary format parsers, by kind: `lgp/`, `field/`, `model/`, `texture/` and `worldmap/`. Most formats follow a triplet: `*File` (data), `*FileSerializer` (read/write), `*FileManager` (Ogre resource loading).
 - `src/engine/` — engine runtime, by subsystem: `audio/`, `config/`, `entity/`, `graphics/`, `input/`, `particles/`, `save/`, `script/` (`ScriptManager`, Lua bindings via sol2 and system LuaJIT), `ui/` and `xml/` (XML loaders).
 - `src/modules/` — game modules: `battle/` and `worldmap/`.
+- Layers, from low to high: `common/`, `formats/`, `engine/`, `modules/`, `app/`. A layer never includes a higher one: the engine reaches the application and the modules through its interfaces (`engine/*Interface.h`), and each module binds itself to Lua (`*Binds.cpp`).
 - `src/installer/` — Qt data installer (`v-gears-installer`): `gui/`, `cli/`, `steps/` (the installation process), `extractors/` (game data conversion), `formats/`, `support/`, `tables/` (data tables) and `decompiler/` (converts field and world scripts into Lua).
 - `src/third_party/sol/` — vendored sol2 single header. Do not restyle, modernize, or refactor it.
 - LuaJIT is a system dependency.

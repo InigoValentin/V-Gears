@@ -21,9 +21,10 @@
 #include <Overlay/OgreOverlayManager.h>
 #include <Overlay/OgreFontManager.h>
 #include <OIS/OIS.h>
-#include "app/GameState.h"
+#include "engine/GameState.h"
 #include "app/Application.h"
 #include "engine/audio/AudioManager.h"
+#include "modules/battle/BattleBinds.h"
 #include "modules/battle/BattleManager.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/config/ConfigCmdHandler.h"
@@ -32,7 +33,7 @@
 #include "engine/ui/Console.h"
 #include "engine/graphics/DebugDraw.h"
 #include "engine/entity/EntityManager.h"
-#include "engine/GameFrameListener.h"
+#include "app/GameFrameListener.h"
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "engine/save/SavemapHandler.h"
@@ -45,6 +46,7 @@
 #include "formats/field/LZSFLevelFileManager.h"
 #include "formats/lgp/LGPArchiveFactory.h"
 #include "formats/worldmap/WorldmapFileManager.h"
+#include "modules/worldmap/WorldmapBinds.h"
 #include "modules/worldmap/WorldmapModule.h"
 
 /**
@@ -154,7 +156,9 @@ int main(int argc, char *argv[]){
         auto worldMapModule = std::make_unique<VGears::WorldmapModule>();
 
         // Initialize after game managers because it attaches them to script.
-        auto script_manager = std::make_unique<ScriptManager>();
+        auto script_manager = std::make_unique<ScriptManager>(
+          std::vector<ScriptManager::ModuleBinder>{&BindBattleModule, &VGears::BindWorldmapModule}
+        );
 
         // Set base listener for usual game modules.
         auto frame_listener = std::make_unique<GameFrameListener>(window);

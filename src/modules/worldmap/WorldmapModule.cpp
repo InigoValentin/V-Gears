@@ -40,7 +40,8 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreLogManager.h>
 #include <OgreTextureManager.h>
-#include "app/Application.h"
+#include <OgreOverlaySystem.h>
+#include "engine/ApplicationInterface.h"
 #include <Overlay/OgreOverlay.h>
 #include <Overlay/OgreOverlayContainer.h>
 #include <Overlay/OgreOverlayManager.h>
@@ -808,7 +809,7 @@ namespace VGears {
         if (overlay == nullptr){
             if (!visible) return;
             // The engine doesn't draw the overlays of Ogre unless its system listens to the scene.
-            Ogre::OverlaySystem* overlay_system = VGears::Application::getSingleton().GetOverlaySystem();
+            Ogre::OverlaySystem* overlay_system = VGears::ApplicationInterface::Get()->GetOverlaySystem();
             if (overlay_system != nullptr){
                 Root::getSingleton().getSceneManager("Scene")->addRenderQueueListener(overlay_system);
             }

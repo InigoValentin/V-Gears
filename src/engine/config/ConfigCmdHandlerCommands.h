@@ -24,8 +24,8 @@
 #include "common/Logger.h"
 #include "engine/xml/XmlMapFile.h"
 #include "engine/xml/XmlMapsFile.h"
-#include "app/GameState.h"
-#include "app/Application.h"
+#include "engine/GameState.h"
+#include "engine/ApplicationInterface.h"
 #include "ConfigCmdHandler.h"
 #include "ConfigVarHandler.h"
 
@@ -369,7 +369,7 @@ void CmdResolution(const Ogre::StringVector& params){
         );
         return;
     }
-    Ogre::RenderWindow* window = VGears::Application::getSingleton().getRenderWindow();
+    Ogre::RenderWindow* window = VGears::ApplicationInterface::Get()->getRenderWindow();
     if (params.size() >= 4){
         window->setFullscreen(
           Ogre::StringConverter::parseBool(params[3]), Ogre::StringConverter::parseInt(params[1]),
@@ -412,7 +412,7 @@ void CmdResolutionCompletition(Ogre::StringVector& complete_params){
  * @param[in] params Command parameters. Unused.
  */
 void CmdScreenshot(const Ogre::StringVector& params){
-    Ogre::RenderWindow* window = VGears::Application::getSingleton().getRenderWindow();
+    Ogre::RenderWindow* window = VGears::ApplicationInterface::Get()->getRenderWindow();
     Ogre::String ret = window->writeContentsToTimestampedFile("screenshot_", ".png");
     Console::getSingleton().AddTextToOutput("Screenshot " + ret + " saved.");
 }

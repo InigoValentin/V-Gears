@@ -16,7 +16,7 @@
 #pragma once
 
 #include "engine/ui/UiWidget.h"
-#include "XmlFile.h"
+#include "common/XmlFile.h"
 
 /**
  * Handles an XML font file.

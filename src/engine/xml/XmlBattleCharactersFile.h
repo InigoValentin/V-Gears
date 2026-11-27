@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "XmlFile.h"
+#include "common/XmlFile.h"
 
 /**
  * Handles battle character model list xml files.

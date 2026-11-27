@@ -21,7 +21,7 @@
 #include "engine/entity/Entity.h"
 #include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
-#include "modules/worldmap/WorldmapModule.h"
+#include "engine/WorldMapInterface.h"
 
 ConfigVar cv_debug_entity("debug_entity", "Draw entity debug info", "0");
 
@@ -149,11 +149,9 @@ void Entity::UpdateDebug(){
         if (debug > 1){
             Ogre::String move_state_string[] = {"NONE", "WALKMESH", "LINEAR", "JUMP"};
             DEBUG_DRAW.Text(entity_pos, 0, 24, Ogre::StringConverter::toString(entity_pos));
-            if (EntityManager::getSingleton().IsWorldModule()){
-                const int triangle_index
-                  = VGears::WorldmapModule::getSingleton().GetTerrainTriangleUnderEntity(
-                    name_.c_str()
-                  );
+            const VGears::WorldMapInterface* world_map = VGears::WorldMapInterface::Get();
+            if (EntityManager::getSingleton().IsWorldModule() && world_map != nullptr){
+                const int triangle_index = world_map->GetTerrainTriangleUnderEntity(name_.c_str());
                 DEBUG_DRAW.Text(
                   entity_pos, 0, 36,
                   "World map triangle: "
@@ -168,11 +166,9 @@ void Entity::UpdateDebug(){
                 );
             }
             DEBUG_DRAW.Text(entity_pos, 0, 48, "Move state: " + move_state_string[state_]);
-            if (EntityManager::getSingleton().IsWorldModule()){
+            if (EntityManager::getSingleton().IsWorldModule() && world_map != nullptr){
                 const Ogre::String terrain_name
-                  = VGears::WorldmapModule::getSingleton().GetTerrainTypeUnderEntity(
-                    name_.c_str()
-                  );
+                  = world_map->GetTerrainTypeUnderEntity(name_.c_str());
                 DEBUG_DRAW.Text(
                   entity_pos, 0, 60,
                   "Terrain: " + (terrain_name.empty() ? Ogre::String("UNKNOWN") : terrain_name)

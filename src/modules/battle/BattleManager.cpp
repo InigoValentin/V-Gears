@@ -28,7 +28,7 @@
 #include "common/FF7Character.h"
 #include "engine/audio/AudioManager.h"
 #include "modules/battle/BattleManager.h"
-#include "modules/worldmap/WorldmapModule.h"
+#include "engine/WorldMapInterface.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/ui/Console.h"
 #include "engine/ui/DialogsManager.h"
@@ -40,7 +40,7 @@
 #include "engine/script/ScriptManager.h"
 #include "engine/ui/TextHandler.h"
 #include "engine/ui/UiManager.h"
-#include "engine/xml/XmlFormationFile.h"
+#include "modules/battle/XmlFormationFile.h"
 
 /**
  * Battle manager singleton.
@@ -132,7 +132,8 @@ void BattleManager::StartBattle(const unsigned int id){
     }
     // Battles can start in the world map, which is hidden and stopped while the battle lasts.
     battle_from_world_ = EntityManager::getSingleton().IsWorldModule();
-    if (battle_from_world_) VGears::WorldmapModule::getSingleton().PauseForBattle();
+    if (battle_from_world_ && VGears::WorldMapInterface::Get() != nullptr)
+        VGears::WorldMapInterface::Get()->PauseForBattle();
     SetBattleModule();
     AudioManager::getSingleton().SetBattleModule();
     CameraManager::getSingleton().SetBattleModule();
@@ -203,7 +204,8 @@ void BattleManager::EndBattle(){
     UiManager::getSingleton().SetPreviousModule();
     if (battle_from_world_){
         battle_from_world_ = false;
-        VGears::WorldmapModule::getSingleton().ResumeAfterBattle();
+        if (VGears::WorldMapInterface::Get() != nullptr)
+            VGears::WorldMapInterface::Get()->ResumeAfterBattle();
     }
 }
 

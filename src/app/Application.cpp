@@ -24,7 +24,7 @@
 #include "app/Application.h"
 #include "common/DataDirectory.h"
 #include "common/OgrePlugins.h"
-#include "app/GameState.h"
+#include "engine/GameState.h"
 #include "formats/model/AFileManager.h"
 #include "formats/field/BackgroundFileManager.h"
 #include "formats/field/CameraMatrixFileManager.h"

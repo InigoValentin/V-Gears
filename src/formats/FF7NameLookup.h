@@ -17,7 +17,7 @@
 
 #include "common/TypeDefine.h"
 #include "common/StringUtil.h"
-#include "engine/xml/XmlFile.h"
+#include "common/XmlFile.h"
 
 // TODO: Move implementations to cpp file.
 

@@ -17,6 +17,7 @@
 
 #include <OgreSingleton.h>
 #include <OgreString.h>
+#include <vector>
 #include "engine/Event.h"
 #include "LuaIncludes.h"
 #include "engine/Manager.h"
@@ -186,9 +187,16 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
         };
 
         /**
-         * Constructor.
+         * Function that adds the bindings of a module to the Lua state.
          */
-        ScriptManager();
+        typedef void (*ModuleBinder)(lua_State* state);
+
+        /**
+         * Constructor.
+         *
+         * @param[in] module_binders Each one adds the bindings of a module before any script runs.
+         */
+        explicit ScriptManager(const std::vector<ModuleBinder>& module_binders = {});
 
         /**
          * Destructor.

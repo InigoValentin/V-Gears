@@ -19,7 +19,7 @@
 #include "engine/config/ConfigVar.h"
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
-#include "engine/xml/XmlEnemyFile.h"
+#include "modules/battle/XmlEnemyFile.h"
 
 Enemy::Enemy(const unsigned int id):
   id_(id),
