@@ -21,7 +21,7 @@
 #include <common/TypeDefine.h>
 #include "DiskImage.h"
 #include "common/File.h"
-#include "data/VGearsLGPArchive.h"
+#include "formats/lgp/VGearsLGPArchive.h"
 
 /**
  * The world map data installer.

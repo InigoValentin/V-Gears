@@ -17,7 +17,7 @@
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "engine/entity/Walkmesh.h"
-#include "map/VGearsWalkmeshFile.h"
+#include "formats/field/VGearsWalkmeshFile.h"
 
 ConfigVar cv_debug_walkmesh(
   "debug_walkmesh", "Draw walkmesh and walkmesh debug info", "false"

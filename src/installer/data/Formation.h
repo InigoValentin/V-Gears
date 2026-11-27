@@ -18,7 +18,7 @@
 
 #include <string>
 #include "common/TypeDefine.h"
-#include "data/GameData.h"
+#include "common/GameData.h"
 
 /**
  * An enemy formation

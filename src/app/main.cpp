@@ -42,9 +42,9 @@
 #include "engine/particles/ParticleSystemManager.h"
 #include "engine/ui/DialogsManager.h"
 #include "engine/ui/TextHandler.h"
-#include "data/VGearsLZSFLevelFileManager.h"
-#include "data/VGearsLGPArchiveFactory.h"
-#include "data/worldmap/WorldmapFileManager.h"
+#include "formats/field/VGearsLZSFLevelFileManager.h"
+#include "formats/lgp/VGearsLGPArchiveFactory.h"
+#include "formats/worldmap/WorldmapFileManager.h"
 #include "modules/worldmap/WorldmapModule.h"
 
 /**

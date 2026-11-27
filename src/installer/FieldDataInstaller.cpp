@@ -25,11 +25,11 @@
 #include "ModelMaterials.h"
 #include "TexFile.h"
 #include "common/File.h"
-#include "data/VGearsMapListFile.h"
-#include "data/VGearsLZSFLevelFileManager.h"
-#include "data/VGearsHRCFileManager.h"
-#include "data/VGearsLGPArchive.h"
-#include "data/VGearsAFileManager.h"
+#include "formats/field/VGearsMapListFile.h"
+#include "formats/field/VGearsLZSFLevelFileManager.h"
+#include "formats/model/VGearsHRCFileManager.h"
+#include "formats/lgp/VGearsLGPArchive.h"
+#include "formats/model/VGearsAFileManager.h"
 
 float FieldDataInstaller::LINE_SCALE_FACTOR(0.0078124970964f);
 

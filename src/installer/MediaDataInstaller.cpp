@@ -30,8 +30,8 @@
 #include "InstallLog.h"
 #include "MovieCamera.h"
 #include "SfxDump.h"
-#include "data/VGearsLGPArchive.h"
-#include "data/VGearsTexFile.h"
+#include "formats/lgp/VGearsLGPArchive.h"
+#include "formats/texture/VGearsTexFile.h"
 #include "TexFile.h"
 #include "WindowFonts.h"
 

@@ -22,7 +22,7 @@
 #include <memory>
 #include "DiskImage.h"
 #include "KernelDataInstaller.h"
-#include "common/FinalFantasy7/FF7NameLookup.h"
+#include "formats/FF7NameLookup.h"
 #include <boost/algorithm/string/replace.hpp>
 
 KernelDataInstaller::KernelDataInstaller(DiskImage& disk_image):

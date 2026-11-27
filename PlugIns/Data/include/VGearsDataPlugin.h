@@ -17,12 +17,12 @@
 
 #include <Ogre/OgrePlugin.h>
 
-#include "data/VGearsBackgroundFileManager.h"
-#include "data/VGearsPaletteFileManager.h"
-#include "data/VGearsPFileManager.h"
-#include "data/VGearsHRCFileManager.h"
-#include "data/VGearsRSDFileManager.h"
-#include "data/VGearsTexCodec.h"
+#include "formats/field/VGearsBackgroundFileManager.h"
+#include "formats/field/VGearsPaletteFileManager.h"
+#include "formats/model/VGearsPFileManager.h"
+#include "formats/model/VGearsHRCFileManager.h"
+#include "formats/model/VGearsRSDFileManager.h"
+#include "formats/texture/VGearsTexCodec.h"
 
 namespace VGears {
 

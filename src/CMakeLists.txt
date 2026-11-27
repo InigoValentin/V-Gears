@@ -590,7 +590,7 @@ set(VGEARS_SOURCE_FILES
     app/VGearsGameState.cpp
     common/File.cpp
     common/FileSystem.cpp
-    common/FinalFantasy7/FF7NameLookup.cpp
+    formats/FF7NameLookup.cpp
     common/LzsFile.cpp
     common/TypeDefine.cpp
     common/DataDirectory.cpp
@@ -682,60 +682,60 @@ set(VGEARS_SOURCE_FILES
     engine/xml/XmlTextFile.cpp
     engine/xml/XmlTextsFile.cpp
     engine/xml/XmlWalkmeshFile.cpp
-    data/VGearsAFile.cpp
-    data/VGearsAFileManager.cpp
-    data/VGearsAFileSerializer.cpp
-    data/VGearsBackgroundFile.cpp
-    data/VGearsBackgroundFileManager.cpp
-    data/VGearsBackgroundFileSerializer.cpp
-    data/VGearsCameraMatrixFile.cpp
-    data/VGearsCameraMatrixFileManager.cpp
-    data/VGearsCameraMatrixFileSerializer.cpp
-    data/VGearsFLevelBackground2DLoader.cpp
-    data/VGearsFLevelFile.cpp
-    data/VGearsFLevelFileSerializer.cpp
-    data/VGearsFLevelTextureLoader.cpp
-    data/VGearsHRCFile.cpp
-    data/VGearsHRCFileManager.cpp
-    data/VGearsHRCFileSerializer.cpp
-    data/VGearsHRCMeshLoader.cpp
-    data/VGearsHRCSkeletonLoader.cpp
-    data/VGearsLGPArchive.cpp
-    data/VGearsLGPArchiveFactory.cpp
-    data/VGearsLGPArchiveSerializer.cpp
-    data/VGearsLZSDataStream.cpp
-    data/VGearsLZSFLevelFile.cpp
-    data/VGearsLZSFLevelFileManager.cpp
-    data/VGearsMapListFile.cpp
-    data/VGearsPaletteFile.cpp
-    data/VGearsPaletteFileManager.cpp
-    data/VGearsPaletteFileSerializer.cpp
-    data/VGearsPFile.cpp
-    data/VGearsPFileManager.cpp
-    data/VGearsPFileSerializer.cpp
-    data/VGearsRSDFile.cpp
-    data/VGearsRSDFileManager.cpp
-    data/VGearsRSDFileSerializer.cpp
-    data/VGearsSerializer.cpp
-    data/VGearsTexCodec.cpp
-    data/VGearsTexFile.cpp
-    data/VGearsTriggersFile.cpp
-    data/VGearsXMLSerializer.cpp
-    data/FinalFantasy7/FF7ModelListFile.cpp
-    data/FinalFantasy7/FF7ModelListFileManager.cpp
-    data/FinalFantasy7/FF7ModelListFileSerializer.cpp
-    data/worldmap/WorldmapFile.cpp
-    data/worldmap/WorldmapFileManager.cpp
-    data/worldmap/WorldmapFileSerializer.cpp
-    data/worldmap/TxzFile.cpp
-    data/worldmap/TxzFileSerializer.cpp
-    map/VGearsBackground2DFile.cpp
-    map/VGearsBackground2DFileManager.cpp
-    map/VGearsBackground2DFileXMLSerializer.cpp
-    map/VGearsWalkmeshFile.cpp
-    map/VGearsWalkmeshFileManager.cpp
-    map/VGearsWalkmeshFileXMLSerializer.cpp
-    map/FinalFantasy7/FF7WalkmeshFileSerializer.cpp
+    formats/model/VGearsAFile.cpp
+    formats/model/VGearsAFileManager.cpp
+    formats/model/VGearsAFileSerializer.cpp
+    formats/field/VGearsBackgroundFile.cpp
+    formats/field/VGearsBackgroundFileManager.cpp
+    formats/field/VGearsBackgroundFileSerializer.cpp
+    formats/field/VGearsCameraMatrixFile.cpp
+    formats/field/VGearsCameraMatrixFileManager.cpp
+    formats/field/VGearsCameraMatrixFileSerializer.cpp
+    formats/field/VGearsFLevelBackground2DLoader.cpp
+    formats/field/VGearsFLevelFile.cpp
+    formats/field/VGearsFLevelFileSerializer.cpp
+    formats/field/VGearsFLevelTextureLoader.cpp
+    formats/model/VGearsHRCFile.cpp
+    formats/model/VGearsHRCFileManager.cpp
+    formats/model/VGearsHRCFileSerializer.cpp
+    formats/model/VGearsHRCMeshLoader.cpp
+    formats/model/VGearsHRCSkeletonLoader.cpp
+    formats/lgp/VGearsLGPArchive.cpp
+    formats/lgp/VGearsLGPArchiveFactory.cpp
+    formats/lgp/VGearsLGPArchiveSerializer.cpp
+    formats/VGearsLZSDataStream.cpp
+    formats/field/VGearsLZSFLevelFile.cpp
+    formats/field/VGearsLZSFLevelFileManager.cpp
+    formats/field/VGearsMapListFile.cpp
+    formats/field/VGearsPaletteFile.cpp
+    formats/field/VGearsPaletteFileManager.cpp
+    formats/field/VGearsPaletteFileSerializer.cpp
+    formats/model/VGearsPFile.cpp
+    formats/model/VGearsPFileManager.cpp
+    formats/model/VGearsPFileSerializer.cpp
+    formats/model/VGearsRSDFile.cpp
+    formats/model/VGearsRSDFileManager.cpp
+    formats/model/VGearsRSDFileSerializer.cpp
+    formats/VGearsSerializer.cpp
+    formats/texture/VGearsTexCodec.cpp
+    formats/texture/VGearsTexFile.cpp
+    formats/field/VGearsTriggersFile.cpp
+    formats/VGearsXMLSerializer.cpp
+    formats/model/FF7ModelListFile.cpp
+    formats/model/FF7ModelListFileManager.cpp
+    formats/model/FF7ModelListFileSerializer.cpp
+    formats/worldmap/WorldmapFile.cpp
+    formats/worldmap/WorldmapFileManager.cpp
+    formats/worldmap/WorldmapFileSerializer.cpp
+    formats/worldmap/TxzFile.cpp
+    formats/worldmap/TxzFileSerializer.cpp
+    formats/field/VGearsBackground2DFile.cpp
+    formats/field/VGearsBackground2DFileManager.cpp
+    formats/field/VGearsBackground2DFileXMLSerializer.cpp
+    formats/field/VGearsWalkmeshFile.cpp
+    formats/field/VGearsWalkmeshFileManager.cpp
+    formats/field/VGearsWalkmeshFileXMLSerializer.cpp
+    formats/field/FF7WalkmeshFileSerializer.cpp
     modules/worldmap/WorldmapModule.cpp
 )
 endif()

@@ -28,7 +28,7 @@ THE SOFTWARE.
 
 #include <Ogre/OgreDataStream.h>
 
-#include "data/VGearsTexFile.h"
+#include "formats/texture/VGearsTexFile.h"
 
 #define BOOST_TEST_MODULE VGearsTexFile
 #include <boost/test/unit_test.hpp>

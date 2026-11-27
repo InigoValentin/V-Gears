@@ -18,7 +18,7 @@
 #include <set>
 #include <string>
 #include <Ogre.h>
-#include "common/FinalFantasy7/FF7NameLookup.h"
+#include "formats/FF7NameLookup.h"
 
 std::string ModelsAndAnimationsDb::NormalizeAnimationName(const std::string& name){
     Ogre::String base_name;

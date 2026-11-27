@@ -36,13 +36,13 @@
 #include "ExeEffectMeshes.h"
 #include "ModelMaterials.h"
 #include "TexFile.h"
-#include "data/VGearsHRCFileManager.h"
-#include "data/VGearsAFileManager.h"
+#include "formats/model/VGearsHRCFileManager.h"
+#include "formats/model/VGearsAFileManager.h"
 #include "data/AbFile.h"
 #include "data/DaFile.h"
 #include "data/FF7Data.h"
 #include "common/VGearsStringUtil.h"
-#include "common/FinalFantasy7/FF7NameLookup.h"
+#include "formats/FF7NameLookup.h"
 
 BattleDataInstaller::BattleDataInstaller(
   const DiskImage& disk_image, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr

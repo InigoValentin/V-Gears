@@ -19,8 +19,8 @@
 #include "engine/script/ScriptManager.h"
 #include "engine/xml/XmlBackground2DFile.h"
 #include "engine/xml/XmlMapFile.h"
-#include "map/VGearsBackground2DFileManager.h"
-#include "map/VGearsWalkmeshFileManager.h"
+#include "formats/field/VGearsBackground2DFileManager.h"
+#include "formats/field/VGearsWalkmeshFileManager.h"
 #include "engine/ui/TextHandler.h"
 
 XmlMapFile::XmlMapFile(const Ogre::String& file): XmlFile(file){}

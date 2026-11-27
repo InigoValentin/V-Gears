@@ -18,7 +18,7 @@
 #include <OgreString.h>
 #include <Ogre.h>
 #include <vector>
-#include "map/VGearsTile.h"
+#include "formats/field/VGearsTile.h"
 
 class Background2D;
 

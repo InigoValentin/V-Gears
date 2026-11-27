@@ -19,7 +19,7 @@
 #include <string>
 #include <OgreMesh.h>
 #include <tinyxml.h>
-#include "data/VGearsFLevelFile.h"
+#include "formats/field/VGearsFLevelFile.h"
 #include "DiskImage.h"
 #include "ScopedLgp.h"
 #include "SpawnPointDb.h"
@@ -27,7 +27,7 @@
 #include "FieldTextWriter.h"
 #include "decompiler/field/FieldScriptFormatter.h"
 #include "decompiler/field/FieldDecompiler.h"
-#include "common/FinalFantasy7/FF7NameLookup.h"
+#include "formats/FF7NameLookup.h"
 
 typedef std::vector<std::string> MapList;
 
