@@ -18,8 +18,8 @@
 #include <OgreMaterialManager.h>
 #include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
-#include "core/Entity.h"
-#include "core/EntityManager.h"
+#include "engine/entity/Entity.h"
+#include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
 #include "modules/worldmap/WorldmapModule.h"
 

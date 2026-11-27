@@ -16,7 +16,7 @@
 #include "core/Background2D.h"
 #include "core/Background2DAnimation.h"
 #include "core/CameraManager.h"
-#include "core/EntityManager.h"
+#include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
 #include "core/XmlBackground2DFile.h"
 

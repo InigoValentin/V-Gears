@@ -33,7 +33,7 @@
 #include "core/Console.h"
 #include "core/DialogsManager.h"
 #include "core/Enemy.h"
-#include "core/EntityManager.h"
+#include "engine/entity/EntityManager.h"
 #include "engine/config/ConfigVar.h"
 #include "core/InputManager.h"
 #include "common/Logger.h"

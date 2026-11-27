@@ -19,7 +19,7 @@
 #include <OgreRoot.h>
 #include <OgreStringConverter.h>
 #include "core/Console.h"
-#include "core/EntityManager.h"
+#include "engine/entity/EntityManager.h"
 #include "core/ScriptManager.h"
 #include "common/Logger.h"
 #include "core/XmlMapFile.h"

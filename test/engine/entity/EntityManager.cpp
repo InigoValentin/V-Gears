@@ -14,7 +14,7 @@
  */
 
 #include <boost/test/unit_test.hpp>
-#include "core/EntityManager.h"
+#include "engine/entity/EntityManager.h"
 
 BOOST_AUTO_TEST_CASE(TestEntityManagerInteractionPicksTheEntityTheCharacterFaces){
     // The maximum angle is 90 degrees, and no candidate yet.

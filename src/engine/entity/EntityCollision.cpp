@@ -14,7 +14,7 @@
  */
 
 #include <OgreHardwareBufferManager.h>
-#include "core/EntityCollision.h"
+#include "engine/entity/EntityCollision.h"
 
 EntityCollision::EntityCollision(){
     mRenderOp.vertexData = new Ogre::VertexData();

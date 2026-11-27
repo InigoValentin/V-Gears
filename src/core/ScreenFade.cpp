@@ -18,7 +18,7 @@
 #include <OgreRoot.h>
 #include <OgreTechnique.h>
 #include "core/CameraManager.h"
-#include "core/EntityManager.h"
+#include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
 #include "core/ScreenFade.h"
 

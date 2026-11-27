@@ -16,7 +16,7 @@
 #include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "common/Logger.h"
-#include "core/Walkmesh.h"
+#include "engine/entity/Walkmesh.h"
 #include "map/VGearsWalkmeshFile.h"
 
 ConfigVar cv_debug_walkmesh(

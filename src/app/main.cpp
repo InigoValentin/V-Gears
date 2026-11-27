@@ -31,7 +31,7 @@
 #include "engine/config/ConfigVarHandler.h"
 #include "core/Console.h"
 #include "core/DebugDraw.h"
-#include "core/EntityManager.h"
+#include "engine/entity/EntityManager.h"
 #include "core/GameFrameListener.h"
 #include "core/InputManager.h"
 #include "common/Logger.h"

@@ -27,8 +27,8 @@
 #include <OgreRoot.h>
 #include <OgreTextureManager.h>
 #include <OgreHardwarePixelBuffer.h>
-#include "core/EntityModel.h"
-#include "core/EntityManager.h"
+#include "engine/entity/EntityModel.h"
+#include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
 #include "core/Timer.h"
 

@@ -620,13 +620,13 @@ set(VGEARS_SOURCE_FILES
     core/DebugDraw.cpp
     core/DialogsManager.cpp
     core/Enemy.cpp
-    core/EntityCollision.cpp
-    core/Entity.cpp
-    core/EntityDirection.cpp
-    core/EntityManager.cpp
-    core/EntityModel.cpp
-    core/EntityPoint.cpp
-    core/EntityTrigger.cpp
+    engine/entity/EntityCollision.cpp
+    engine/entity/Entity.cpp
+    engine/entity/EntityDirection.cpp
+    engine/entity/EntityManager.cpp
+    engine/entity/EntityModel.cpp
+    engine/entity/EntityPoint.cpp
+    engine/entity/EntityTrigger.cpp
     core/GameFrameListener.cpp
     core/InputManager.cpp
     core/Manager.cpp
@@ -660,7 +660,7 @@ set(VGEARS_SOURCE_FILES
     core/UiTextArea.cpp
     core/UiWidget.cpp
     common/Utilites.cpp
-    core/Walkmesh.cpp
+    engine/entity/Walkmesh.cpp
     core/WorldMapManager.cpp
     core/XmlAttackFile.cpp
     core/XmlBackground2DFile.cpp

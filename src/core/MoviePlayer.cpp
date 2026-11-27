@@ -27,7 +27,7 @@
 #include <OgreTextureManager.h>
 #include "engine/audio/AudioManager.h"
 #include "core/CameraManager.h"
-#include "core/EntityManager.h"
+#include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
 #include "core/MoviePlayer.h"
 

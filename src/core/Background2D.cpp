@@ -24,7 +24,7 @@
 #include <algorithm>
 #include "core/Background2D.h"
 #include "core/CameraManager.h"
-#include "core/EntityManager.h"
+#include "engine/entity/EntityManager.h"
 #include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "common/Logger.h"

@@ -23,7 +23,7 @@
 #include "map/VGearsBackground2DFile.h"
 #include "Background2DAnimation.h"
 #include "BackgroundPalette.h"
-#include "Entity.h"
+#include "engine/entity/Entity.h"
 #include "ScriptManager.h"
 
 /**

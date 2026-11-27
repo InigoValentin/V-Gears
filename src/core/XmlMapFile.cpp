@@ -14,7 +14,7 @@
  */
 
 #include "engine/audio/AudioManager.h"
-#include "core/EntityManager.h"
+#include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/XmlBackground2DFile.h"

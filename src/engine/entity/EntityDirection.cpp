@@ -14,7 +14,7 @@
  */
 
 #include <OgreHardwareBufferManager.h>
-#include "core/EntityDirection.h"
+#include "engine/entity/EntityDirection.h"
 
 EntityDirection::EntityDirection(){
     mRenderOp.vertexData = new Ogre::VertexData();

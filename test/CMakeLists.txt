@@ -35,8 +35,8 @@ set(SOURCE_FILES
     core/MovieCameraFrame.cpp
     core/MovieState.cpp
     core/ScreenFadeState.cpp
-    core/EntityManager.cpp
-    core/EntityPoint.cpp
+    engine/entity/EntityManager.cpp
+    engine/entity/EntityPoint.cpp
     core/TextHandler.cpp
     installer/FieldDataInstaller.cpp
     installer/SfxDump.cpp

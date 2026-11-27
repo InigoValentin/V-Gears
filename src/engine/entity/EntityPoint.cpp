@@ -1,6 +1,6 @@
 #include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
-#include "core/EntityPoint.h"
+#include "engine/entity/EntityPoint.h"
 #include "core/ScriptManager.h"
 
 

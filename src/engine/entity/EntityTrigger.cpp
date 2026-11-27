@@ -14,8 +14,8 @@
  */
 
 #include "core/DebugDraw.h"
-#include "core/Entity.h"
-#include "core/EntityTrigger.h"
+#include "engine/entity/Entity.h"
+#include "engine/entity/EntityTrigger.h"
 #include "engine/config/ConfigVar.h"
 
 ConfigVar cv_debug_trigger(
