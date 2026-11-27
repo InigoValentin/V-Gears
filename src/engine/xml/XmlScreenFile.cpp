@@ -19,7 +19,7 @@
 #include "engine/ui/UiSprite.h"
 #include "engine/ui/UiTextArea.h"
 #include "engine/ui/UiWidget.h"
-#include "core/XmlScreenFile.h"
+#include "engine/xml/XmlScreenFile.h"
 #include "common/Utilites.h"
 #include "engine/ui/TextHandler.h"
 

@@ -29,8 +29,8 @@
 #include "core/Timer.h"
 #include "engine/ui/UiManager.h"
 #include "engine/ui/UiWidget.h"
-#include "core/XmlMapFile.h"
-#include "core/XmlMapsFile.h"
+#include "engine/xml/XmlMapFile.h"
+#include "engine/xml/XmlMapsFile.h"
 #include "engine/ui/DialogsManager.h"
 #include "engine/ui/TextHandler.h"
 

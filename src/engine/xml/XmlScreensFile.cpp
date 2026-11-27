@@ -14,9 +14,9 @@
  */
 
 #include "common/Logger.h"
-#include "core/XmlScreenFile.h"
-#include "core/XmlScreensFile.h"
-#include "core/XmlPrototypesFile.h"
+#include "engine/xml/XmlScreenFile.h"
+#include "engine/xml/XmlScreensFile.h"
+#include "engine/xml/XmlPrototypesFile.h"
 
 XmlScreensFile::XmlScreensFile(const Ogre::String& file): XmlFile(file){}
 

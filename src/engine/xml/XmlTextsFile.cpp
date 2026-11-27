@@ -14,8 +14,8 @@
  */
 
 #include "common/Logger.h"
-#include "core/XmlTextFile.h"
-#include "core/XmlTextsFile.h"
+#include "engine/xml/XmlTextFile.h"
+#include "engine/xml/XmlTextsFile.h"
 
 #include "engine/ui/TextHandler.h"
 

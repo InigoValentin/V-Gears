@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/XmlWalkmeshFile.h"
+#include "engine/xml/XmlWalkmeshFile.h"
 #include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
 #include "engine/entity/Walkmesh.h"

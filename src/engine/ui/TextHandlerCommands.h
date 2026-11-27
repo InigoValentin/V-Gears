@@ -16,7 +16,7 @@
 #include "engine/config/ConfigCmdHandler.h"
 #include "Console.h"
 #include "common/Logger.h"
-#include "core/XmlTextsFile.h"
+#include "engine/xml/XmlTextsFile.h"
 
 /**
  * Sets the language for texts.

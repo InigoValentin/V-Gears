@@ -17,7 +17,7 @@
 #include "common/Logger.h"
 #include "engine/ui/UiManager.h"
 #include "engine/ui/UiFont.h"
-#include "core/XmlFontFile.h"
+#include "engine/xml/XmlFontFile.h"
 
 
 XmlFontFile::XmlFontFile(const Ogre::String& file): XmlFile(file){}

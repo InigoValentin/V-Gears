@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/XmlAttackFile.h"
+#include "engine/xml/XmlAttackFile.h"
 #include "common/Logger.h"
 
 XmlAttackFile::XmlAttackFile(const Ogre::String& file): XmlFile(file){}

@@ -17,7 +17,7 @@
 
 #include "common/TypeDefine.h"
 #include "common/VGearsStringUtil.h"
-#include "core/XmlFile.h"
+#include "engine/xml/XmlFile.h"
 
 // TODO: Move implementations to cpp file.
 

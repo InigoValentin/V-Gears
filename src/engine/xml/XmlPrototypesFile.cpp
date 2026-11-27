@@ -13,31 +13,29 @@
  * GNU General Public License for more details.
  */
 
-#include "core/XmlBattleScenesFile.h"
 #include "common/Logger.h"
+#include "engine/ui/UiManager.h"
+#include "engine/xml/XmlPrototypesFile.h"
 
-XmlBattleScenesFile::XmlBattleScenesFile(const Ogre::String& file): XmlFile(file){
+XmlPrototypesFile::XmlPrototypesFile(const Ogre::String& file): XmlFile(file){}
 
+XmlPrototypesFile::~XmlPrototypesFile(){}
+
+void XmlPrototypesFile::LoadPrototypes(){
     TiXmlNode* node = file_.RootElement();
-    if (node == nullptr || node->ValueStr() != "scenes"){
-        LOG_ERROR(file_.ValueStr() + " is not a valid battle scenes file! No <scenes> in root.");
+    if (node == nullptr || node->ValueStr() != "prototypes"){
+        LOG_ERROR(
+          "UI Manager: " + file_.ValueStr()
+          + " is not a valid prototypes file! No <prototypes> in root."
+        );
         return;
     }
     node = node->FirstChild();
     while (node != nullptr){
-        if (node->ValueStr() != "scene"){
-            node = node->NextSibling();
-            continue;
+        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "prototype"){
+            Ogre::String name = GetString(node, "name");
+            UiManager::getSingleton().AddPrototype(name, node->Clone());
         }
-        BattleScene scene;
-        scene.id = GetInt(node, "id");
-        scene.model = GetString(node, "file");
-        scene.description = GetString(node, "description");
-        list_.push_back(scene);
         node = node->NextSibling();
     }
 }
-
-XmlBattleScenesFile::~XmlBattleScenesFile(){}
-
-std::vector<XmlBattleScenesFile::BattleScene> XmlBattleScenesFile::GetScenes(){return list_;}

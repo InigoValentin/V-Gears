@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/XmlBattleCharactersFile.h"
+#include "engine/xml/XmlBattleCharactersFile.h"
 #include "common/Logger.h"
 
 XmlBattleCharactersFile::XmlBattleCharactersFile(const Ogre::String& file): XmlFile(file){

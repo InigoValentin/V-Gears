@@ -18,7 +18,7 @@
 #include "engine/graphics/CameraManager.h"
 #include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
-#include "core/XmlBackground2DFile.h"
+#include "engine/xml/XmlBackground2DFile.h"
 
 XmlBackground2DFile::XmlBackground2DFile(const Ogre::String& file): XmlFile(file){}
 

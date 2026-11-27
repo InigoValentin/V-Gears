@@ -13,28 +13,31 @@
  * GNU General Public License for more details.
  */
 
-#include "engine/audio/AudioManager.h"
+#include "engine/xml/XmlBattleScenesFile.h"
 #include "common/Logger.h"
-#include "core/XmlSoundsFile.h"
 
-XmlSoundsFile::XmlSoundsFile(const Ogre::String& file): XmlFile(file){}
+XmlBattleScenesFile::XmlBattleScenesFile(const Ogre::String& file): XmlFile(file){
 
-XmlSoundsFile::~XmlSoundsFile(){}
-
-void XmlSoundsFile::LoadSounds(){
     TiXmlNode* node = file_.RootElement();
-    if (node == nullptr || node->ValueStr() != "sounds"){
-        LOG_ERROR(file_.ValueStr() + " is not a valid sounds file! No <sounds> in root.");
+    if (node == nullptr || node->ValueStr() != "scenes"){
+        LOG_ERROR(file_.ValueStr() + " is not a valid battle scenes file! No <scenes> in root.");
         return;
     }
     node = node->FirstChild();
     while (node != nullptr){
-        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "sound"){
-            AudioManager::Sound sound;
-            sound.name = GetString(node, "name");
-            sound.file = "./data/" + GetString(node, "file_name");
-            AudioManager::getSingleton().AddSound(sound);
+        if (node->ValueStr() != "scene"){
+            node = node->NextSibling();
+            continue;
         }
+        BattleScene scene;
+        scene.id = GetInt(node, "id");
+        scene.model = GetString(node, "file");
+        scene.description = GetString(node, "description");
+        list_.push_back(scene);
         node = node->NextSibling();
     }
 }
+
+XmlBattleScenesFile::~XmlBattleScenesFile(){}
+
+std::vector<XmlBattleScenesFile::BattleScene> XmlBattleScenesFile::GetScenes(){return list_;}

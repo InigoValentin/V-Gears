@@ -15,7 +15,7 @@
 
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
-#include "core/XmlScriptsFile.h"
+#include "engine/xml/XmlScriptsFile.h"
 
 XmlScriptsFile::XmlScriptsFile(const Ogre::String& file): XmlFile(file){}
 

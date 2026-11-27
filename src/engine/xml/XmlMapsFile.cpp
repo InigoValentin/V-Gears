@@ -14,7 +14,7 @@
  */
 
 #include "common/Logger.h"
-#include "core/XmlMapsFile.h"
+#include "engine/xml/XmlMapsFile.h"
 
 XmlMapsFile::XmlMapsFile(const Ogre::String& file): XmlFile(file){}
 

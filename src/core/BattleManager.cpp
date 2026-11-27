@@ -40,7 +40,7 @@
 #include "engine/script/ScriptManager.h"
 #include "engine/ui/TextHandler.h"
 #include "engine/ui/UiManager.h"
-#include "core/XmlFormationFile.h"
+#include "engine/xml/XmlFormationFile.h"
 
 /**
  * Battle manager singleton.

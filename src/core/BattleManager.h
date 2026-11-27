@@ -24,9 +24,9 @@
 #include "Enemy.h"
 #include "Event.h"
 #include "Manager.h"
-#include "core/XmlBattleCharactersFile.h"
-#include "core/XmlBattleScenesFile.h"
-#include "core/XmlAttackFile.h"
+#include "engine/xml/XmlBattleCharactersFile.h"
+#include "engine/xml/XmlBattleScenesFile.h"
+#include "engine/xml/XmlAttackFile.h"
 
 /**
  * The battle manager.

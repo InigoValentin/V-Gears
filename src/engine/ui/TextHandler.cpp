@@ -17,8 +17,8 @@
 
 #include <iostream>
 #include "engine/ui/TextHandlerCommands.h"
-#include "core/XmlTextsFile.h"
-#include "core/XmlTextFile.h"
+#include "engine/xml/XmlTextsFile.h"
+#include "engine/xml/XmlTextFile.h"
 
 /**
  * Text handler singleton.

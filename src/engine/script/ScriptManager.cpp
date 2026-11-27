@@ -22,7 +22,7 @@
 #include "engine/script/ScriptManagerCommands.h"
 #include "core/Timer.h"
 #include "common/Utilites.h"
-#include "core/XmlScriptsFile.h"
+#include "engine/xml/XmlScriptsFile.h"
 #include "LuaIncludes.h"
 
 ConfigVar cv_debug_script(

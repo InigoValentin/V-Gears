@@ -15,7 +15,7 @@
 
 #include "common/Logger.h"
 #include "engine/ui/UiManager.h"
-#include "core/XmlTextFile.h"
+#include "engine/xml/XmlTextFile.h"
 
 #include "engine/ui/TextHandler.h"
 

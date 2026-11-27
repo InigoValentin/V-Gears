@@ -15,7 +15,7 @@
 
 #include "engine/audio/AudioManager.h"
 #include "common/Logger.h"
-#include "core/XmlMusicsFile.h"
+#include "engine/xml/XmlMusicsFile.h"
 
 XmlMusicsFile::XmlMusicsFile(const Ogre::String& file): XmlFile(file){}
 

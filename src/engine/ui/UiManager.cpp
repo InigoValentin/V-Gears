@@ -24,10 +24,10 @@
 #include "engine/script/ScriptManager.h"
 #include "engine/ui/UiManager.h"
 #include "common/Utilites.h"
-#include "core/XmlFontsFile.h"
-#include "core/XmlPrototypesFile.h"
-#include "core/XmlScreensFile.h"
-#include "core/XmlTextsFile.h"
+#include "engine/xml/XmlFontsFile.h"
+#include "engine/xml/XmlPrototypesFile.h"
+#include "engine/xml/XmlScreensFile.h"
+#include "engine/xml/XmlTextsFile.h"
 #include "TextHandler.h"
 
 /**

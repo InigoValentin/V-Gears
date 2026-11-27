@@ -662,26 +662,26 @@ set(VGEARS_SOURCE_FILES
     common/Utilites.cpp
     engine/entity/Walkmesh.cpp
     core/WorldMapManager.cpp
-    core/XmlAttackFile.cpp
-    core/XmlBackground2DFile.cpp
-    core/XmlBattleCharactersFile.cpp
-    core/XmlBattleScenesFile.cpp
-    core/XmlEnemyFile.cpp
-    core/XmlFile.cpp
-    core/XmlFontFile.cpp
-    core/XmlFontsFile.cpp
-    core/XmlFormationFile.cpp
-    core/XmlMapFile.cpp
-    core/XmlMapsFile.cpp
-    core/XmlMusicsFile.cpp
-    core/XmlPrototypesFile.cpp
-    core/XmlScreenFile.cpp
-    core/XmlScreensFile.cpp
-    core/XmlScriptsFile.cpp
-    core/XmlSoundsFile.cpp
-    core/XmlTextFile.cpp
-    core/XmlTextsFile.cpp
-    core/XmlWalkmeshFile.cpp
+    engine/xml/XmlAttackFile.cpp
+    engine/xml/XmlBackground2DFile.cpp
+    engine/xml/XmlBattleCharactersFile.cpp
+    engine/xml/XmlBattleScenesFile.cpp
+    engine/xml/XmlEnemyFile.cpp
+    engine/xml/XmlFile.cpp
+    engine/xml/XmlFontFile.cpp
+    engine/xml/XmlFontsFile.cpp
+    engine/xml/XmlFormationFile.cpp
+    engine/xml/XmlMapFile.cpp
+    engine/xml/XmlMapsFile.cpp
+    engine/xml/XmlMusicsFile.cpp
+    engine/xml/XmlPrototypesFile.cpp
+    engine/xml/XmlScreenFile.cpp
+    engine/xml/XmlScreensFile.cpp
+    engine/xml/XmlScriptsFile.cpp
+    engine/xml/XmlSoundsFile.cpp
+    engine/xml/XmlTextFile.cpp
+    engine/xml/XmlTextsFile.cpp
+    engine/xml/XmlWalkmeshFile.cpp
     data/VGearsAFile.cpp
     data/VGearsAFileManager.cpp
     data/VGearsAFileSerializer.cpp

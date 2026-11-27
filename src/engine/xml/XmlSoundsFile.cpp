@@ -13,28 +13,27 @@
  * GNU General Public License for more details.
  */
 
+#include "engine/audio/AudioManager.h"
 #include "common/Logger.h"
-#include "engine/ui/UiManager.h"
-#include "core/XmlPrototypesFile.h"
+#include "engine/xml/XmlSoundsFile.h"
 
-XmlPrototypesFile::XmlPrototypesFile(const Ogre::String& file): XmlFile(file){}
+XmlSoundsFile::XmlSoundsFile(const Ogre::String& file): XmlFile(file){}
 
-XmlPrototypesFile::~XmlPrototypesFile(){}
+XmlSoundsFile::~XmlSoundsFile(){}
 
-void XmlPrototypesFile::LoadPrototypes(){
+void XmlSoundsFile::LoadSounds(){
     TiXmlNode* node = file_.RootElement();
-    if (node == nullptr || node->ValueStr() != "prototypes"){
-        LOG_ERROR(
-          "UI Manager: " + file_.ValueStr()
-          + " is not a valid prototypes file! No <prototypes> in root."
-        );
+    if (node == nullptr || node->ValueStr() != "sounds"){
+        LOG_ERROR(file_.ValueStr() + " is not a valid sounds file! No <sounds> in root.");
         return;
     }
     node = node->FirstChild();
     while (node != nullptr){
-        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "prototype"){
-            Ogre::String name = GetString(node, "name");
-            UiManager::getSingleton().AddPrototype(name, node->Clone());
+        if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "sound"){
+            AudioManager::Sound sound;
+            sound.name = GetString(node, "name");
+            sound.file = "./data/" + GetString(node, "file_name");
+            AudioManager::getSingleton().AddSound(sound);
         }
         node = node->NextSibling();
     }
