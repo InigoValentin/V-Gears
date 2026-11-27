@@ -1,6 +1,13 @@
 # Sources of this folder (see vgears_sources in src/CMakeLists.txt).
 vgears_sources(
-    WorldMapManager.cpp
     WorldmapBinds.cpp
+    WorldmapData.cpp
+    WorldmapEncounters.cpp
+    WorldmapEntities.cpp
     WorldmapModule.cpp
+    WorldmapSnow.cpp
+    WorldmapSubmarine.cpp
+    WorldmapTerrain.cpp
+    WorldmapTextures.cpp
+    WorldmapVehicles.cpp
 )

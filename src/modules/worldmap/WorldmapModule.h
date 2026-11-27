@@ -330,6 +330,14 @@ namespace VGears {
              */
             void UpdateFlight(EntityModel* entity, const Ogre::Real delta_time, const bool highwind);
 
+            /**
+             * Gets the name of a vehicle in the scripts (WorldMapSettings).
+             *
+             * @param[in] vehicle The vehicle.
+             * @return Its name, "walk" on foot.
+             */
+            static const char* GetVehicleScriptName(const VehicleType vehicle);
+
             void TriggerTriangleFunction(const TerrainTriangle& triangle);
             void LoadEncounters();
             void UpdateEncounters(const float delta_time, const TerrainTriangle& triangle);
