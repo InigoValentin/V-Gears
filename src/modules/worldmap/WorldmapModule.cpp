@@ -29,7 +29,6 @@
 #include "engine/ui/DialogsManager.h"
 #include "modules/worldmap/WorldmapConstants.h"
 #include "modules/worldmap/WorldmapData.h"
-#include "modules/worldmap/WorldmapSnow.h"
 #include "modules/worldmap/WorldmapTextures.h"
 
 /**
@@ -46,8 +45,6 @@ namespace VGears {
     static const float UNDERWATER_FOG_END = 6.0f;
 
     WorldmapModule::WorldmapModule():
-      scene_manager_(nullptr),
-      world_map_node_(nullptr),
       player_entity_(nullptr),
       highwind_entity_(nullptr),
       buggy_entity_(nullptr),
@@ -56,15 +53,11 @@ namespace VGears {
       tiny_bronco_entity_(nullptr),
       current_vehicle_(VehicleType::ON_FOOT),
       map_id_(-1),
-      grid_width_(9),
-      grid_height_(7),
       camera_yaw_(0),
       flight_active_(false),
       flight_entity_(nullptr),
       flight_heading_(0),
       flight_y_(0),
-      origin_x_(0),
-      origin_y_(0),
       player_height_offset_(0),
       active_function_mesh_index_(-1),
       active_function_id_(-1),
@@ -83,82 +76,89 @@ namespace VGears {
       dive_requested_(false),
       dive_position_(Ogre::Vector3::ZERO),
       dive_heading_(0),
-      encounter_frames_(0),
-      encounter_accumulator_(0),
-      encounter_last_battle_(-1),
-      encounters_locked_(false),
       paused_for_battle_(false)
     {}
 
     WorldmapModule::~WorldmapModule(){
       if (frame_listener_attached_) Root::getSingleton().removeFrameListener(this);
-      if (scene_manager_ != nullptr && world_map_node_ != nullptr){
-        scene_manager_->getRootSceneNode()->removeAndDestroyChild("WorldMapTerrain");
-      }
     }
 
     bool WorldmapModule::frameStarted(const Ogre::FrameEvent& event){
-      if (!initialized_ || player_entity_ == nullptr || paused_for_battle_) return true;
-      AnimateWorldMapTextures(event.timeSinceLastFrame);
+        if (!initialized_ || player_entity_ == nullptr || paused_for_battle_) return true;
+        const Ogre::Real delta_time = event.timeSinceLastFrame;
+        AnimateWorldMapTextures(delta_time);
 
-      // Diving or surfacing: the submarine moves by itself and the screen fades.
-      if (transition_stage_ != TransitionStage::NONE){
-        UpdateTransition(event.timeSinceLastFrame);
-        if (initialized_ && player_entity_ != nullptr){
-          UpdateVehicleAnimations(false);
-          UpdateCamera(event.timeSinceLastFrame, false);
+        // Diving or surfacing: the submarine moves by itself and the screen fades.
+        if (transition_stage_ != TransitionStage::NONE){
+            UpdateTransition(delta_time);
+            if (initialized_ && player_entity_ != nullptr){
+                UpdateVehicleAnimations(false);
+                UpdateCamera(delta_time, false);
+            }
+            return true;
         }
-        return true;
-      }
 
         ::Entity* active_entity = EntityManager::getSingleton().ScriptGetPlayerEntity();
-      if (active_entity == player_entity_){
-        current_vehicle_ = VehicleType::ON_FOOT;
-      }
-      else if (active_entity == chocobo_entity_){
-        current_vehicle_ = VehicleType::CHOCOBO;
-      }
-      else if (active_entity == buggy_entity_){
-        current_vehicle_ = VehicleType::BUGGY;
-      }
-      else if (active_entity == highwind_entity_){
-        current_vehicle_ = VehicleType::HIGHWIND;
-      }
-      else if (active_entity == submarine_entity_){
-        current_vehicle_ = VehicleType::SUBMARINE;
-      }
-      else if (active_entity == tiny_bronco_entity_){
-        current_vehicle_ = VehicleType::TINY_BRONCO;
-      }
-      else{
-        // An entity of a scripted scene (the Warship): the camera follows it and nothing else happens.
-        if (active_entity != nullptr){
-          UpdateCamera(event.timeSinceLastFrame, false);
+        if (!UpdateCurrentVehicle(active_entity)){
+            // An entity of a scripted scene (the Warship): the camera follows it and nothing else happens.
+            if (active_entity != nullptr) UpdateCamera(delta_time, false);
+            return true;
         }
-        return true;
-      }
-
-        // The music of the map (WorldMusic in world_music.lua): when the vehicle changes and every half second.
-        music_timer_ += event.timeSinceLastFrame;
-        if (music_timer_ >= 0.5f || music_vehicle_ != current_vehicle_){
-          music_timer_ = 0.0f;
-          music_vehicle_ = current_vehicle_;
-          const char* music_vehicle = "walk";
-          switch (current_vehicle_){
-            case VehicleType::CHOCOBO: music_vehicle = "chocobo"; break;
-            case VehicleType::BUGGY: music_vehicle = "buggy"; break;
-            case VehicleType::HIGHWIND: music_vehicle = "highwind"; break;
-            case VehicleType::SUBMARINE: music_vehicle = "submarine"; break;
-            case VehicleType::TINY_BRONCO: music_vehicle = "tiny_bronco"; break;
-            default: break;
-          }
-          ScriptManager::getSingleton().RunString(
-            "if WorldMusic then WorldMusic.update(" + std::to_string(map_id_) + ", \"" + music_vehicle + "\") end"
-          );
-        }
+        UpdateMusic(delta_time);
+        // The buttons can change the map: the entities are not valid after it.
+        if (HandleActionButtons(active_entity)) return true;
 
         const bool highwind_active = active_entity == highwind_entity_;
-      const bool vehicle_active = current_vehicle_ != VehicleType::ON_FOOT;
+        EntityModel* active_model = GetActiveModel(active_entity);
+
+        // Flying vehicles (the Highwind, and the submarine of WM2) have their own controls.
+        flight_active_ = highwind_active || (map_id_ == 1 && active_entity == player_entity_);
+        if (flight_active_){
+            UpdateFlight(active_model, delta_time, highwind_active);
+            UpdateVehicleAnimations(false);
+            UpdateCamera(delta_time, false);
+            return true;
+        }
+        flight_entity_ = nullptr;
+
+        UpdateCameraRotation(delta_time);
+        const bool is_walking = UpdateWalking(active_entity, active_model, delta_time);
+
+        // The submarine of WM2 has no walking animations.
+        if (current_vehicle_ == VehicleType::ON_FOOT && map_id_ != 1){
+            player_entity_->PlayAnimationContinue(is_walking ? "Walk" : "Idle");
+        }
+
+        UpdateVehicleAnimations(is_walking);
+        UpdateCamera(delta_time, false);
+        return true;
+    }
+
+    bool WorldmapModule::UpdateCurrentVehicle(const ::Entity* active_entity){
+        if (active_entity == player_entity_) current_vehicle_ = VehicleType::ON_FOOT;
+        else if (active_entity == chocobo_entity_) current_vehicle_ = VehicleType::CHOCOBO;
+        else if (active_entity == buggy_entity_) current_vehicle_ = VehicleType::BUGGY;
+        else if (active_entity == highwind_entity_) current_vehicle_ = VehicleType::HIGHWIND;
+        else if (active_entity == submarine_entity_) current_vehicle_ = VehicleType::SUBMARINE;
+        else if (active_entity == tiny_bronco_entity_) current_vehicle_ = VehicleType::TINY_BRONCO;
+        else return false;
+        return true;
+    }
+
+    void WorldmapModule::UpdateMusic(const Ogre::Real delta_time){
+        // The music of the map (WorldMusic in world_music.lua): when the vehicle changes and every half second.
+        music_timer_ += delta_time;
+        if (music_timer_ < 0.5f && music_vehicle_ == current_vehicle_) return;
+        music_timer_ = 0.0f;
+        music_vehicle_ = current_vehicle_;
+        ScriptManager::getSingleton().RunString(
+          "if WorldMusic then WorldMusic.update(" + std::to_string(map_id_) + ", \""
+          + GetVehicleScriptName(current_vehicle_) + "\") end"
+        );
+    }
+
+    bool WorldmapModule::HandleActionButtons(::Entity* active_entity){
+        const bool vehicle_active = current_vehicle_ != VehicleType::ON_FOOT;
         const bool cancel_pressed = InputManager::getSingleton().IsGameEventPressed("CANCEL");
         const bool cancel_edge = cancel_pressed && !cancel_was_pressed_;
         // The cancel button makes the submarine of WM2 go back to the surface.
@@ -167,7 +167,6 @@ namespace VGears {
           && !EntityManager::getSingleton().IsPlayerLocked()
         ){
             cancel_was_pressed_ = true;
-            // Changes the map: the entities are not valid after it.
             if (SurfaceToOverworld(submarine_entity_)) return true;
         }
         if (vehicle_active && cancel_pressed && !cancel_was_pressed_){
@@ -176,127 +175,93 @@ namespace VGears {
             );
         }
         cancel_was_pressed_ = cancel_pressed;
-        // The action button makes the submarine dive from WM0 to WM2.
+        // The action button places a pole in the snow map, and makes the submarine dive from WM0 to WM2.
         const bool confirm_pressed = InputManager::getSingleton().IsGameEventPressed("CONFIRM");
-        const bool dive_pressed = confirm_pressed && !confirm_was_pressed_;
+        const bool confirm_edge = confirm_pressed && !confirm_was_pressed_;
         confirm_was_pressed_ = confirm_pressed;
         if (
-          dive_pressed && map_id_ == 2 && active_entity == player_entity_
+          confirm_edge && map_id_ == 2 && active_entity == player_entity_
           && !EntityManager::getSingleton().IsPlayerLocked()
         ){
             PlaceSnowPole();
         }
         if (
-          dive_pressed && map_id_ == 0 && active_entity == submarine_entity_
+          confirm_edge && map_id_ == 0 && active_entity == submarine_entity_
           && !EntityManager::getSingleton().IsPlayerLocked()
         ){
-            // Changes the map: the entities are not valid after it.
             if (DiveToUnderwaterMap(submarine_entity_)) return true;
         }
-      EntityModel* active_model = active_entity == player_entity_ ? player_entity_
-        : (current_vehicle_ == VehicleType::CHOCOBO ? chocobo_entity_
-        : (current_vehicle_ == VehicleType::BUGGY ? buggy_entity_
-          : (highwind_active ? highwind_entity_
-            : (current_vehicle_ == VehicleType::SUBMARINE
-              ? submarine_entity_ : tiny_bronco_entity_))));
+        return false;
+    }
 
-        // Flying vehicles (the Highwind, and the submarine of WM2) have their own controls.
-        flight_active_ = highwind_active || (map_id_ == 1 && active_entity == player_entity_);
-        if (flight_active_){
-            UpdateFlight(active_model, event.timeSinceLastFrame, highwind_active);
-            UpdateVehicleAnimations(false);
-            UpdateCamera(event.timeSinceLastFrame, false);
-            return true;
-        }
-        flight_entity_ = nullptr;
-
-        // L1 and R1 rotate the camera around the active entity.
-        {
-            InputManager& camera_input = InputManager::getSingleton();
-            // The camera of the snow map (WM3) can't be moved by hand: it turns by itself.
-            if (map_id_ == 2) UpdateSnowCamera(event.timeSinceLastFrame);
-            else{
-                if (camera_input.IsGameEventPressed("L1")) camera_yaw_ -= CAMERA_ROTATION_SPEED * event.timeSinceLastFrame;
-                if (camera_input.IsGameEventPressed("R1")) camera_yaw_ += CAMERA_ROTATION_SPEED * event.timeSinceLastFrame;
-            }
-            if (camera_yaw_ > Ogre::Math::PI) camera_yaw_ -= Ogre::Math::TWO_PI;
-            else if (camera_yaw_ < -Ogre::Math::PI) camera_yaw_ += Ogre::Math::TWO_PI;
-        }
-
-        Ogre::Vector3 movement = Ogre::Vector3::ZERO;
-        // Scripts lock the player during events and transitions.
-        if (EntityManager::getSingleton().IsPlayerLocked()){
-            // Nothing: no movement.
-        }
-        else{
-            // The game events of the movement, so the keys of the controller settings are used.
-            InputManager& input = InputManager::getSingleton();
-            if (input.IsGameEventPressed("walk_left")) movement.x -= 1.0f;
-            if (input.IsGameEventPressed("walk_right")) movement.x += 1.0f;
-            if (input.IsGameEventPressed("walk_up")) movement.z -= 1.0f;
-            if (input.IsGameEventPressed("walk_down")) movement.z += 1.0f;
-        }
-        bool is_walking = false;
-        if (!movement.isZeroLength()){
-          movement.normalise();
-          // The movement is relative to the camera.
-          movement = Ogre::Quaternion(Ogre::Radian(camera_yaw_), Ogre::Vector3::UNIT_Y) * movement;
-            const Ogre::Vector3 current_position = active_entity->GetPosition();
-          const char* speed_name = "walk";
-          switch (current_vehicle_){
-            case VehicleType::CHOCOBO: speed_name = "chocobo"; break;
-            case VehicleType::BUGGY: speed_name = "buggy"; break;
-            case VehicleType::HIGHWIND: speed_name = "highwind"; break;
-            case VehicleType::SUBMARINE: speed_name = "submarine"; break;
-            case VehicleType::TINY_BRONCO: speed_name = "tiny_bronco"; break;
+    EntityModel* WorldmapModule::GetActiveModel(const ::Entity* active_entity) const{
+        if (active_entity == player_entity_) return player_entity_;
+        switch (current_vehicle_){
+            case VehicleType::CHOCOBO: return chocobo_entity_;
+            case VehicleType::BUGGY: return buggy_entity_;
             default: break;
-          }
-          const Ogre::Real speed = GetSpeed(
-            speed_name, From16BitFixedPoint(8182) * 0.45f * (vehicle_active ? 2.0f : 1.0f)
-          );
-          Ogre::Vector3 requested_position = current_position
-            + movement * speed * event.timeSinceLastFrame;
-          Ogre::Vector3 surface;
-          size_t triangle_index = 0;
-          if (FindWalkableSurface(requested_position, surface, false, true, nullptr,
-              &triangle_index)){
-                if (highwind_active){
-                    Ogre::Vector3 current_surface;
-                    if (FindWalkableSurface(current_position, current_surface, false, false)){
-                        surface.y += current_position.y - current_surface.y;
-                    }
-                }
-                else if (active_entity == player_entity_){
-                  surface.y += player_height_offset_;
-                }
-                if (!EntityManager::getSingleton().IsWorldPositionBlocked(
-                  active_entity, surface
-                )){
-                    active_entity->SetPosition(surface);
-                    const TerrainTriangle& triangle = terrain_triangles_[triangle_index];
-                    EnterTriangle(triangle);
-                    // There are no encounters underwater.
-                    if (current_vehicle_ == VehicleType::ON_FOOT && map_id_ != 1){
-                        UpdateEncounters(event.timeSinceLastFrame, triangle);
-                    }
-                    const Ogre::Vector3 model_forward(0.0f, 0.0f, 1.0f);
-                    const Ogre::Vector3 move_direction(movement.x, 0.0f, movement.z);
-                    const Ogre::Quaternion heading
-                      = model_forward.getRotationTo(move_direction, Ogre::Vector3::UNIT_Y);
-                    active_model->GetModel()->getParentSceneNode()
-                      ->getParentSceneNode()->setOrientation(heading);
-                    is_walking = true;
-                }
-          }
         }
+        if (active_entity == highwind_entity_) return highwind_entity_;
+        if (current_vehicle_ == VehicleType::SUBMARINE) return submarine_entity_;
+        return tiny_bronco_entity_;
+    }
 
-        // The submarine of WM2 has no walking animations.
-        if (!vehicle_active && map_id_ != 1){
-            player_entity_->PlayAnimationContinue(is_walking ? "Walk" : "Idle");
+    void WorldmapModule::UpdateCameraRotation(const Ogre::Real delta_time){
+        // The camera of the snow map (WM3) can't be moved by hand: it turns by itself.
+        if (map_id_ == 2) camera_yaw_ += snow_.UpdateCamera(delta_time);
+        else{
+            // L1 and R1 rotate the camera around the active entity.
+            InputManager& input = InputManager::getSingleton();
+            if (input.IsGameEventPressed("L1")) camera_yaw_ -= CAMERA_ROTATION_SPEED * delta_time;
+            if (input.IsGameEventPressed("R1")) camera_yaw_ += CAMERA_ROTATION_SPEED * delta_time;
         }
+        if (camera_yaw_ > Ogre::Math::PI) camera_yaw_ -= Ogre::Math::TWO_PI;
+        else if (camera_yaw_ < -Ogre::Math::PI) camera_yaw_ += Ogre::Math::TWO_PI;
+    }
 
-        UpdateVehicleAnimations(is_walking);
-        UpdateCamera(event.timeSinceLastFrame, false);
+    bool WorldmapModule::UpdateWalking(
+      ::Entity* active_entity, EntityModel* active_model, const Ogre::Real delta_time
+    ){
+        // Scripts lock the player during events and transitions.
+        if (EntityManager::getSingleton().IsPlayerLocked()) return false;
+        // The game events of the movement, so the keys of the controller settings are used.
+        Ogre::Vector3 movement = Ogre::Vector3::ZERO;
+        InputManager& input = InputManager::getSingleton();
+        if (input.IsGameEventPressed("walk_left")) movement.x -= 1.0f;
+        if (input.IsGameEventPressed("walk_right")) movement.x += 1.0f;
+        if (input.IsGameEventPressed("walk_up")) movement.z -= 1.0f;
+        if (input.IsGameEventPressed("walk_down")) movement.z += 1.0f;
+        if (movement.isZeroLength()) return false;
+        movement.normalise();
+        // The movement is relative to the camera.
+        movement = Ogre::Quaternion(Ogre::Radian(camera_yaw_), Ogre::Vector3::UNIT_Y) * movement;
+
+        const bool vehicle_active = current_vehicle_ != VehicleType::ON_FOOT;
+        const Ogre::Vector3 current_position = active_entity->GetPosition();
+        const Ogre::Real speed = GetSpeed(
+          GetVehicleScriptName(current_vehicle_), From16BitFixedPoint(8182) * 0.45f * (vehicle_active ? 2.0f : 1.0f)
+        );
+        const Ogre::Vector3 requested_position = current_position + movement * speed * delta_time;
+        Ogre::Vector3 surface;
+        size_t triangle_index = 0;
+        if (!FindWalkableSurface(requested_position, surface, false, true, nullptr, &triangle_index)) return false;
+        if (active_entity == highwind_entity_){
+            Ogre::Vector3 current_surface;
+            if (FindWalkableSurface(current_position, current_surface, false, false)){
+                surface.y += current_position.y - current_surface.y;
+            }
+        }
+        else if (active_entity == player_entity_) surface.y += player_height_offset_;
+        if (EntityManager::getSingleton().IsWorldPositionBlocked(active_entity, surface)) return false;
+        active_entity->SetPosition(surface);
+        const TerrainTriangle& triangle = terrain_.GetTriangles()[triangle_index];
+        EnterTriangle(triangle);
+        // There are no encounters underwater.
+        if (current_vehicle_ == VehicleType::ON_FOOT && map_id_ != 1) encounters_.Update(delta_time, triangle);
+        const Ogre::Vector3 model_forward(0.0f, 0.0f, 1.0f);
+        const Ogre::Vector3 move_direction(movement.x, 0.0f, movement.z);
+        const Ogre::Quaternion heading = model_forward.getRotationTo(move_direction, Ogre::Vector3::UNIT_Y);
+        active_model->GetModel()->getParentSceneNode()->getParentSceneNode()->setOrientation(heading);
         return true;
     }
 
@@ -343,16 +308,18 @@ namespace VGears {
 
     void WorldmapModule::PauseForBattle(){
         paused_for_battle_ = true;
-        if (world_map_node_ != nullptr) world_map_node_->setVisible(false);
+        terrain_.SetVisible(false);
     }
+
+    void WorldmapModule::SetEncountersLocked(const bool locked){encounters_.SetLocked(locked);}
 
     void WorldmapModule::ResumeAfterBattle(){
         paused_for_battle_ = false;
-        encounter_frames_ = 0;
+        encounters_.ResetTimer();
         // The battle had its own music: the one of the map starts again.
         music_timer_ = 1.0f;
         ScriptManager::getSingleton().RunString("if WorldMusic then WorldMusic.reset() end");
-        if (world_map_node_ != nullptr) world_map_node_->setVisible(true);
+        terrain_.SetVisible(true);
         if (player_entity_ != nullptr) UpdateCamera(0, true);
     }
 
@@ -397,16 +364,8 @@ namespace VGears {
       // The overworld is built again when the submarine surfaces: keep where everything was.
       if (map_id_ == 0) SaveOverworldSnapshot();
       Suspend();
-      if (world_map_node_ != nullptr && scene_manager_ != nullptr){
-        // Destroy the surfaces. The node is kept and reused.
-        while (world_map_node_->numAttachedObjects() > 0){
-          Ogre::MovableObject* object = world_map_node_->detachObject(static_cast<unsigned short>(0));
-          scene_manager_->destroyMovableObject(object);
-        }
-      }
-      terrain_triangles_.clear();
-      terrain_grid_.clear();
-      encounter_records_.clear();
+      terrain_.Clear();
+      encounters_.Clear();
       // The entities of the old map (player, vehicles, models and scripts).
       EntityManager::getSingleton().ClearWorld();
       initialized_ = false;
@@ -433,7 +392,7 @@ namespace VGears {
         if (frame_listener_attached_) return;
         EntityManager::getSingleton().SetWorldModule();
         DialogsManager::getSingleton().SetWorldModule();
-        world_map_node_->setVisible(true);
+        terrain_.SetVisible(true);
         // The music starts again (a field or a battle had its own).
         music_timer_ = 1.0f;
         ScriptManager::getSingleton().RunString("if WorldMusic then WorldMusic.reset() end");
@@ -444,14 +403,13 @@ namespace VGears {
       }
       map_id_ = map_id;
       camera_yaw_ = 0;
-      const MapLayout layout = GetMapLayout(map_id_);
-      grid_width_ = layout.width;
-      grid_height_ = layout.height;
-      origin_x_ = layout.origin_x;
-      origin_y_ = layout.origin_y;
       EntityManager::getSingleton().SetWorldModule();
       DialogsManager::getSingleton().SetWorldModule();
-      CreateWorldMap(Root::getSingleton().getSceneManager("Scene"));
+      terrain_.Load(Root::getSingleton().getSceneManager("Scene"), map_id_);
+      const Ogre::Vector3 center = terrain_.GetCenter();
+      Ogre::Camera* camera = CameraManager::getSingleton().GetCurrentCamera();
+      camera->setPosition(Ogre::Vector3(center.x, 80.0f, center.z + 90.0f));
+      camera->lookAt(Ogre::Vector3(center.x, 0.0f, center.z));
       // Underwater (WM2): everything fades to black with the distance to the camera.
       if (map_id_ == 1){
         Root::getSingleton().getSceneManager("Scene")->setFog(
@@ -460,16 +418,13 @@ namespace VGears {
       }
       else Root::getSingleton().getSceneManager("Scene")->setFog(Ogre::FOG_NONE);
       // Snow map (WM3): it always snows.
-      SetSnowOverlay(map_id_ == 2);
+      snow_.SetVisible(map_id_ == 2);
       // The music of the map starts in the first frame.
       music_timer_ = 1.0f;
       ScriptManager::getSingleton().RunString("if WorldMusic then WorldMusic.reset() end");
-      snow_poles_.clear();
-      snow_pole_counter_ = 0;
       // The button that was used to get here (a menu, a field) must not count as the first pole.
       confirm_was_pressed_ = InputManager::getSingleton().IsGameEventPressed("CONFIRM");
-      snow_camera_remaining_ = 0.0f;
-      snow_camera_timer_ = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_WAIT, SNOW_CAMERA_MAX_WAIT);
+      snow_.Reset();
       ScriptManager::getSingleton().RunFile(
         "game/world/scripts/wm" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id_]) + ".lua"
       );
@@ -490,7 +445,7 @@ namespace VGears {
       ScriptManager::getSingleton().RunString(
         "if WorldVM then WorldVM.place_models(" + std::to_string(map_id_) + ") end"
       );
-      LoadEncounters();
+      encounters_.Load();
       initialized_ = true;
       Root::getSingleton().addFrameListener(this);
       frame_listener_attached_ = true;
@@ -500,8 +455,8 @@ namespace VGears {
       if (!frame_listener_attached_) return;
       Root::getSingleton().removeFrameListener(this);
       frame_listener_attached_ = false;
-      if (world_map_node_ != nullptr) world_map_node_->setVisible(false);
-      SetSnowOverlay(false);
+      terrain_.SetVisible(false);
+      snow_.SetVisible(false);
       player_entity_ = nullptr;
       highwind_entity_ = nullptr;
       buggy_entity_ = nullptr;

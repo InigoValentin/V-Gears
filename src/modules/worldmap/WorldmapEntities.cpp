@@ -70,17 +70,13 @@ namespace VGears {
         else{
             // Spawn points of the other maps are unknown: use the walkable triangle closest to the
             // center of the map, or to the position where the submarine dived.
-            const Ogre::Real space = From16BitFixedPoint(8182);
-            const Ogre::Vector3 center = dive_requested_ ? dive_position_ : Ogre::Vector3(
-              space * (origin_x_ * 4.0f + grid_width_ * 2.0f), 0.0f,
-              space * (origin_y_ * 4.0f + grid_height_ * 2.0f)
-            );
+            const Ogre::Vector3 center = dive_requested_ ? dive_position_ : terrain_.GetCenter();
             Ogre::Real best_distance = std::numeric_limits<Ogre::Real>::max();
             // The exact position of the dive, if the submarine can be there.
             const bool exact_dive_position = dive_requested_
               && FindWalkableSurface(dive_position_, spawn_position, false, true);
             if (exact_dive_position) best_distance = 0;
-            else for (const TerrainTriangle& triangle : terrain_triangles_){
+            else for (const TerrainTriangle& triangle : terrain_.GetTriangles()){
                 const Ogre::Vector3 centroid
                   = (triangle.vertices[0] + triangle.vertices[1] + triangle.vertices[2]) / 3.0f;
                 if (map_id_ == 1 ? (UNDERWATER_HEIGHT_LIMIT_ENABLED
@@ -437,6 +433,15 @@ namespace VGears {
         const Ogre::Vector3 forward = orientation * Ogre::Vector3(0.0f, 0.0f, 1.0f);
         const float turns = std::atan2(forward.x, forward.z) / Ogre::Math::TWO_PI;
         return static_cast<int>(std::floor(turns * 256.0f + 0.5f)) & 255;
+    }
+
+    void WorldmapModule::PlaceSnowPole(){
+        if (player_entity_ == nullptr) return;
+        const Ogre::Vector3 position = player_entity_->GetPosition();
+        snow_.PlacePole([this, position](const std::string& name){
+            // The model and scale of the snow poles of the game (WorldMapModels: djc, 0x300).
+            AddWorldModelFromScript(name.c_str(), "djc", position.x, position.z, 0x300, 0, 0.0f, 0.0f, 0.0f);
+        });
     }
 
 } // namespace VGears

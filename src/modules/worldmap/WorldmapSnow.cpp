@@ -19,6 +19,7 @@
 #include <OgreException.h>
 #include <OgreLogManager.h>
 #include <OgreMaterialManager.h>
+#include <OgreMath.h>
 #include <OgreOverlaySystem.h>
 #include <OgreResourceGroupManager.h>
 #include <OgreRoot.h>
@@ -31,14 +32,19 @@
 #include <Overlay/OgrePanelOverlayElement.h>
 #include "engine/ApplicationInterface.h"
 #include "engine/entity/EntityManager.h"
-#include "engine/entity/EntityModel.h"
-#include "modules/worldmap/WorldmapModule.h"
 #include "modules/worldmap/WorldmapConstants.h"
 #include "modules/worldmap/WorldmapTextures.h"
 
 namespace VGears {
 
     using namespace Ogre;
+
+    /// Snow map (WM3): the camera turns by itself after this many seconds (random in the range) ...
+    static const float SNOW_CAMERA_MIN_WAIT = 6.0f;
+    static const float SNOW_CAMERA_MAX_WAIT = 12.0f;
+    /// ... by this many degrees (random in the range, to any side), at the speed of the manual rotation.
+    static const float SNOW_CAMERA_MIN_DEGREES = 30.0f;
+    static const float SNOW_CAMERA_MAX_DEGREES = 160.0f;
 
     /// Snow map (WM3): how many poles can exist at the same time.
     static const size_t SNOW_MAX_POLES = 4;
@@ -64,7 +70,7 @@ namespace VGears {
         // HIDDEN: {"snow5", 0.30f, -0.015f, 0.090f, 1.0f, 0.75f}
     };
 
-    void SetSnowOverlay(const bool visible){
+    void WorldmapSnow::SetVisible(const bool visible){
         Ogre::OverlayManager& manager = Ogre::OverlayManager::getSingleton();
         Ogre::Overlay* overlay = manager.getByName("WorldMapSnow");
         if (overlay == nullptr){
@@ -123,10 +129,17 @@ namespace VGears {
         );
     }
 
-    void WorldmapModule::UpdateSnowCamera(Ogre::Real delta_time){
+    void WorldmapSnow::Reset(){
+        snow_poles_.clear();
+        snow_pole_counter_ = 0;
+        snow_camera_remaining_ = 0.0f;
+        snow_camera_timer_ = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_WAIT, SNOW_CAMERA_MAX_WAIT);
+    }
+
+    float WorldmapSnow::UpdateCamera(const float delta_time){
       if (snow_camera_remaining_ == 0.0f){
         snow_camera_timer_ -= delta_time;
-        if (snow_camera_timer_ > 0.0f) return;
+        if (snow_camera_timer_ > 0.0f) return 0.0f;
         const float degrees = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_DEGREES, SNOW_CAMERA_MAX_DEGREES);
         const float direction = Ogre::Math::UnitRandom() < 0.5f ? -1.0f : 1.0f;
         snow_camera_remaining_ = direction * Ogre::Math::DegreesToRadians(degrees);
@@ -134,22 +147,19 @@ namespace VGears {
       }
       const float step = std::min(std::abs(snow_camera_remaining_), CAMERA_ROTATION_SPEED * delta_time);
       const float signed_step = snow_camera_remaining_ < 0.0f ? -step : step;
-      camera_yaw_ += signed_step;
       snow_camera_remaining_ -= signed_step;
       if (std::abs(snow_camera_remaining_) < 0.0001f) snow_camera_remaining_ = 0.0f;
+      return signed_step;
     }
 
-    void WorldmapModule::PlaceSnowPole(){
-      if (player_entity_ == nullptr) return;
+    void WorldmapSnow::PlacePole(const PoleCreator& create){
       // The oldest pole goes away when there is no room for another one.
       while (snow_poles_.size() >= SNOW_MAX_POLES){
         EntityManager::getSingleton().RemoveWorldMapEntity(snow_poles_.front());
         snow_poles_.pop_front();
       }
-      const Ogre::Vector3 position = player_entity_->GetPosition();
       const std::string name = "snowpole_" + std::to_string(snow_pole_counter_++);
-      // The model and scale of the snow poles of the game (WorldMapModels: djc, 0x300).
-      AddWorldModelFromScript(name.c_str(), "djc", position.x, position.z, 0x300, 0, 0.0f, 0.0f, 0.0f);
+      create(name);
       if (EntityManager::getSingleton().GetEntity("WorldMap" + name) != nullptr){
         snow_poles_.push_back("WorldMap" + name);
       }

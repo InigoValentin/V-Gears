@@ -22,13 +22,6 @@ namespace VGears {
     /// Rotation speed of the camera with L1 and R1, in radians per second.
     static const float CAMERA_ROTATION_SPEED = 1.5f;
 
-    /// Snow map (WM3): the camera turns by itself after this many seconds (random in the range) ...
-    static const float SNOW_CAMERA_MIN_WAIT = 6.0f;
-    static const float SNOW_CAMERA_MAX_WAIT = 12.0f;
-    /// ... by this many degrees (random in the range, to any side), at the speed of the manual rotation.
-    static const float SNOW_CAMERA_MIN_DEGREES = 30.0f;
-    static const float SNOW_CAMERA_MAX_DEGREES = 160.0f;
-
     /// Closest distance of the flying vehicles to the ground.
     static const float FLIGHT_MIN_CLEARANCE = 0.1f;
 

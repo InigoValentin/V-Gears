@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "modules/worldmap/WorldmapModule.h"
+#include "modules/worldmap/WorldmapEncounters.h"
 #include <algorithm>
 #include <cstdlib>
 #include <sstream>
@@ -21,10 +21,11 @@
 #include "common/Logger.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/script/ScriptManager.h"
+#include "modules/worldmap/WorldmapTerrain.h"
 
 namespace VGears {
 
-    void WorldmapModule::LoadEncounters(){
+    void WorldmapEncounters::Load(){
         encounter_records_.clear();
         TiXmlDocument document("./game/world/world_encounters.xml");
         if (!document.LoadFile()){
@@ -37,7 +38,7 @@ namespace VGears {
             .FirstChildElement("record").ToElement();
           record != nullptr; record = record->NextSiblingElement("record")
         ){
-            EncounterRecord data;
+            Record data;
             int enabled = 0;
             data.rate = 0;
             data.terrain = 0;
@@ -57,7 +58,7 @@ namespace VGears {
         LOG_TRIVIAL("World map encounters loaded: " + std::to_string(encounter_records_.size()));
     }
 
-    int WorldmapModule::RollEncounterBattle(const EncounterRecord& record) const{
+    int WorldmapEncounters::RollBattle(const Record& record) const{
         // Same order as the original game: the special battles first, then the standard ones. The
         // chance of a word is its probability out of 64, as the roll is a 16 bit value and the
         // probability sits in the 6 highest bits.
@@ -93,7 +94,7 @@ namespace VGears {
         return battle;
     }
 
-    void WorldmapModule::UpdateEncounters(const float delta_time, const TerrainTriangle& triangle){
+    void WorldmapEncounters::Update(const float delta_time, const TerrainTriangle& triangle){
         if (encounters_locked_ || encounter_records_.size() < 64) return;
         // The original game checks every 16 frames of walking, at 30 frames per second.
         encounter_frames_ += delta_time * 30.0f;
@@ -112,7 +113,7 @@ namespace VGears {
                 break;
             }
         }
-        const EncounterRecord& record = encounter_records_[region * 4 + group];
+        const Record& record = encounter_records_[region * 4 + group];
 
         // The accumulator grows on every check, so the chance gets higher until a battle starts.
         const float multiplier = EntityManager::getSingleton().GetEncounterMultiplier();
@@ -130,13 +131,17 @@ namespace VGears {
         }
         if (check >= (encounter_accumulator_ >> 8) || !record.enabled) return;
         encounter_accumulator_ = 0;
-        const int battle = RollEncounterBattle(record);
+        const int battle = RollBattle(record);
         if (battle < 0) return;
         encounter_last_battle_ = battle;
         LOG_TRIVIAL("World random encounter: battle " + std::to_string(battle));
         ScriptManager::getSingleton().RunString("Encounter.start(" + std::to_string(battle) + ")");
     }
 
-    void WorldmapModule::SetEncountersLocked(const bool locked){encounters_locked_ = locked;}
+    void WorldmapEncounters::Clear(){encounter_records_.clear();}
+
+    void WorldmapEncounters::SetLocked(const bool locked){encounters_locked_ = locked;}
+
+    void WorldmapEncounters::ResetTimer(){encounter_frames_ = 0;}
 
 } // namespace VGears

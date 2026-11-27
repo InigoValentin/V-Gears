@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "modules/worldmap/WorldmapModule.h"
+#include "modules/worldmap/WorldmapTerrain.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -22,12 +22,8 @@
 #include <OgreException.h>
 #include <OgreLogManager.h>
 #include <OgreManualObject.h>
-#include <OgreRoot.h>
 #include <OgreSceneManager.h>
-#include "engine/entity/EntityManager.h"
-#include "engine/graphics/CameraManager.h"
-#include "engine/script/ScriptManager.h"
-#include "modules/worldmap/WorldmapConstants.h"
+#include <OgreSceneNode.h>
 #include "modules/worldmap/WorldmapData.h"
 #include "modules/worldmap/WorldmapTextures.h"
 
@@ -35,13 +31,41 @@ namespace VGears {
 
     using namespace Ogre;
 
-    /**
-     * Width in meshes of the grid that the world map scripts use to index meshes (mesh_y * 36 +
-     * mesh_x). It is the same in every map, regardless of the size of the map.
-     */
-    static const int WORLD_MAP_SCRIPT_MESH_STRIDE = 36;
+    WorldmapTerrain::WorldmapTerrain(){}
 
-    void WorldmapModule::CreateWorldMap(SceneManager* scene_manager){
+    WorldmapTerrain::~WorldmapTerrain(){
+        if (scene_manager_ != nullptr && world_map_node_ != nullptr){
+            scene_manager_->getRootSceneNode()->removeAndDestroyChild("WorldMapTerrain");
+        }
+    }
+
+    void WorldmapTerrain::Clear(){
+        if (world_map_node_ != nullptr && scene_manager_ != nullptr){
+            // Destroy the surfaces. The node is kept and reused.
+            while (world_map_node_->numAttachedObjects() > 0){
+                Ogre::MovableObject* object = world_map_node_->detachObject(static_cast<unsigned short>(0));
+                scene_manager_->destroyMovableObject(object);
+            }
+        }
+        triangles_.clear();
+        terrain_grid_.clear();
+    }
+
+    void WorldmapTerrain::SetVisible(const bool visible){
+        if (world_map_node_ != nullptr) world_map_node_->setVisible(visible);
+    }
+
+    const std::vector<TerrainTriangle>& WorldmapTerrain::GetTriangles() const{return triangles_;}
+
+    Ogre::Vector3 WorldmapTerrain::GetCenter() const{
+        const float space = From16BitFixedPoint(8182);
+        return Ogre::Vector3(
+          space * (origin_x_ * 4.0f + grid_width_ * 2.0f), 0.0f,
+          space * (origin_y_ * 4.0f + grid_height_ * 2.0f)
+        );
+    }
+
+    void WorldmapTerrain::Load(SceneManager* scene_manager, const int map_id){
       scene_manager_ = scene_manager;
       // The node is kept when a map is replaced.
       if (world_map_node_ == nullptr){
@@ -49,16 +73,21 @@ namespace VGears {
           ->createChildSceneNode("WorldMapTerrain");
       }
       world_map_node_->setVisible(true);
+      const MapLayout layout = GetMapLayout(map_id);
+      grid_width_ = layout.width;
+      grid_height_ = layout.height;
+      origin_x_ = layout.origin_x;
+      origin_y_ = layout.origin_y;
         std::vector<VGears::WorldmapFileSerializer::Block> blocks
-          = LoadWorldMap("WM" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id_]) + ".MAP");
-        if (GetTextureIdOffset(map_id_) != 0){
+          = LoadWorldMap("WM" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id]) + ".MAP");
+        if (GetTextureIdOffset(map_id) != 0){
           for (auto& block : blocks) for (auto& mesh : block.meshes) for (auto& triangle : mesh.triangles){
-            triangle.TextureInfo += GetTextureIdOffset(map_id_);
+            triangle.TextureInfo += GetTextureIdOffset(map_id);
           }
         }
         const size_t texture_count = WORLD_MAP_TEXTURE_COUNT;
         // WM0 has extra blocks after the 9x7 grid: the alternate shapes of the story progress.
-        const size_t base_block_count = map_id_ == 0
+        const size_t base_block_count = map_id == 0
           ? std::min(blocks.size(), size_t(63)) : blocks.size();
         const float space = From16BitFixedPoint(8182);
         std::map<uint16, ManualObject*> texture_objects;
@@ -107,7 +136,7 @@ namespace VGears {
                     terrain_triangle.mesh_y = static_cast<int>(map_y * 4 + mesh_y);
                     // The 5 lower bits of the location are the region of the random encounters.
                     terrain_triangle.region = std::min<int>(triangle.Location & 0x1F, 15);
-                    terrain_triangles_.push_back(terrain_triangle);
+                    triangles_.push_back(terrain_triangle);
 
                     if (unavailable_texture_ids.find(triangle.TextureInfo)
                       != unavailable_texture_ids.end()){
@@ -189,23 +218,17 @@ namespace VGears {
             world_map_node_->attachObject(texture_object.second);
         }
 
-        BuildTerrainIndex();
-
-        const float map_center_x = space * (origin_x_ * 4.0f + grid_width_ * 2.0f);
-        const float map_center_z = space * (origin_y_ * 4.0f + grid_height_ * 2.0f);
-        Ogre::Camera* camera = CameraManager::getSingleton().GetCurrentCamera();
-        camera->setPosition(Ogre::Vector3(map_center_x, 80.0f, map_center_z + 90.0f));
-        camera->lookAt(Ogre::Vector3(map_center_x, 0.0f, map_center_z));
+        BuildIndex();
     }
 
-    void WorldmapModule::BuildTerrainIndex(){
+    void WorldmapTerrain::BuildIndex(){
         terrain_grid_.clear();
         terrain_grid_columns_ = 0;
         terrain_grid_rows_ = 0;
-        if (terrain_triangles_.empty()) return;
+        if (triangles_.empty()) return;
         float min_x = std::numeric_limits<float>::max(), min_z = min_x;
         float max_x = -min_x, max_z = -min_x;
-        for (const TerrainTriangle& triangle : terrain_triangles_){
+        for (const TerrainTriangle& triangle : triangles_){
             for (const Ogre::Vector3& vertex : triangle.vertices){
                 min_x = std::min(min_x, vertex.x); max_x = std::max(max_x, vertex.x);
                 min_z = std::min(min_z, vertex.z); max_z = std::max(max_z, vertex.z);
@@ -220,8 +243,8 @@ namespace VGears {
         terrain_grid_.resize(static_cast<size_t>(terrain_grid_columns_) * terrain_grid_rows_);
         // The tolerance of the search (a point a little outside of the edge still counts).
         const float margin = 0.01f;
-        for (size_t i = 0; i < terrain_triangles_.size(); ++i){
-            const TerrainTriangle& triangle = terrain_triangles_[i];
+        for (size_t i = 0; i < triangles_.size(); ++i){
+            const TerrainTriangle& triangle = triangles_[i];
             float t_min_x = triangle.vertices[0].x, t_max_x = t_min_x;
             float t_min_z = triangle.vertices[0].z, t_max_z = t_min_z;
             for (const Ogre::Vector3& vertex : triangle.vertices){
@@ -241,31 +264,31 @@ namespace VGears {
         size_t entries = 0;
         for (const auto& cell : terrain_grid_) entries += cell.size();
         LogManager::getSingleton().logMessage(
-          "World map terrain index: " + std::to_string(terrain_triangles_.size()) + " triangles in "
+          "World map terrain index: " + std::to_string(triangles_.size()) + " triangles in "
           + std::to_string(terrain_grid_columns_) + "x" + std::to_string(terrain_grid_rows_) + " cells, "
           + std::to_string(entries) + " entries"
         );
     }
 
-    bool WorldmapModule::FindWalkableSurface(
+    bool WorldmapTerrain::FindSurface(
       const Ogre::Vector3& position, Ogre::Vector3& surface, bool grass_only,
-      bool require_walkable, uint8* walkability_type, size_t* triangle_index, bool use_index
+      const WalkableCheck& check, uint8* walkability_type, size_t* triangle_index
     ) const{
         bool found = false;
         Ogre::Real closest_height_distance = std::numeric_limits<Ogre::Real>::max();
         // Only the triangles of the cell of the position (the index is in ascending order, so the result
         // is the same as with all of them).
         const std::vector<uint32>* cell_triangles = nullptr;
-        if (use_index && !terrain_grid_.empty()){
+        if (!terrain_grid_.empty()){
             const int column = static_cast<int>(std::floor((position.x - terrain_grid_min_x_) / terrain_grid_cell_));
             const int row = static_cast<int>(std::floor((position.z - terrain_grid_min_z_) / terrain_grid_cell_));
             if (column < 0 || row < 0 || column >= terrain_grid_columns_ || row >= terrain_grid_rows_) return false;
             cell_triangles = &terrain_grid_[static_cast<size_t>(row) * terrain_grid_columns_ + column];
         }
-        const size_t candidate_count = cell_triangles != nullptr ? cell_triangles->size() : terrain_triangles_.size();
+        const size_t candidate_count = cell_triangles != nullptr ? cell_triangles->size() : triangles_.size();
         for (size_t candidate = 0; candidate < candidate_count; ++candidate){
             const size_t i = cell_triangles != nullptr ? (*cell_triangles)[candidate] : candidate;
-            const TerrainTriangle& triangle = terrain_triangles_[i];
+            const TerrainTriangle& triangle = triangles_[i];
             if (grass_only
               && triangle.walkability_type != VGears::WorldmapFileSerializer::GRASS){
                 continue;
@@ -293,108 +316,12 @@ namespace VGears {
             const Ogre::Real height_distance = Ogre::Math::Abs(height - position.y);
             if (height_distance >= closest_height_distance) continue;
             closest_height_distance = height_distance;
-            found = !require_walkable || (map_id_ == 1
-              // Underwater: every terrain type is allowed, but there is a height limit.
-              ? (!UNDERWATER_HEIGHT_LIMIT_ENABLED
-                || height + FLIGHT_MIN_CLEARANCE <= UNDERWATER_MAX_HEIGHT)
-              : IsActiveTerrainAllowed(triangle.walkability_type));
+            found = !check || check(triangle, height);
             surface = Ogre::Vector3(position.x, height, position.z);
             if (walkability_type != nullptr) *walkability_type = triangle.walkability_type;
             if (triangle_index != nullptr) *triangle_index = i;
         }
         return found;
     }
-
-    void WorldmapModule::ClearVehicleTerrains(){
-        active_vehicle_terrain_types_.clear();
-    }
-
-    void WorldmapModule::AddVehicleTerrain(const char* terrain_name){
-        if (terrain_name == nullptr) return;
-        const auto terrain = GetWorldMapTerrainTypes().find(terrain_name);
-        if (terrain == GetWorldMapTerrainTypes().end()){
-            LogManager::getSingleton().logMessage(
-              "Unknown world-map vehicle terrain '" + Ogre::String(terrain_name) + "'."
-            );
-            return;
-        }
-        if (std::find(
-              active_vehicle_terrain_types_.begin(), active_vehicle_terrain_types_.end(),
-              terrain->second
-            ) == active_vehicle_terrain_types_.end()){
-            active_vehicle_terrain_types_.push_back(terrain->second);
-        }
-    }
-
-    bool WorldmapModule::IsActiveTerrainAllowed(uint8 walkability_type) const{
-        if (current_vehicle_ == VehicleType::ON_FOOT){
-            return IsFootWalkable(walkability_type);
-        }
-        return std::find(
-          active_vehicle_terrain_types_.begin(), active_vehicle_terrain_types_.end(),
-          walkability_type
-        ) != active_vehicle_terrain_types_.end();
-    }
-
-    void WorldmapModule::EnterTriangle(const TerrainTriangle& triangle){
-        const int mesh_index = triangle.mesh_y * WORLD_MAP_SCRIPT_MESH_STRIDE + triangle.mesh_x;
-        if (triangle.function_id >= 3){
-            if (mesh_index != active_function_mesh_index_
-              || triangle.function_id != active_function_id_){
-                TriggerTriangleFunction(triangle);
-            }
-            active_function_mesh_index_ = mesh_index;
-            active_function_id_ = triangle.function_id;
-        }
-        else{
-            active_function_mesh_index_ = -1;
-            active_function_id_ = -1;
-        }
-    }
-
-    void WorldmapModule::TriggerTriangleFunction(const TerrainTriangle& triangle){
-        ScriptEntity* world_map_script
-          = ScriptManager::getSingleton().GetScriptEntityByName(
-              ScriptManager::SYSTEM, "WorldMap"
-            );
-        if (world_map_script == nullptr) return;
-
-        const int mesh_index = triangle.mesh_y * WORLD_MAP_SCRIPT_MESH_STRIDE + triangle.mesh_x;
-        // What the function can know about who entered the triangle (see WorldVM.can_enter).
-        ScriptManager::getSingleton().RunString(
-          std::string("System.WorldMap.vehicle = \"") + GetVehicleScriptName(current_vehicle_)
-          + "\"; System.WorldMap.landing = " + (landing_trigger_ ? "true" : "false")
-        );
-        ScriptManager::getSingleton().ScriptRequest(
-          world_map_script, "on_triangle_enter", 1,
-          std::to_string(mesh_index), std::to_string(triangle.function_id - 3), false, false
-        );
-    }
-
-      Ogre::String WorldmapModule::GetTerrainTypeUnderEntity(const char* entity_name) const{
-        if (entity_name == nullptr) return "";
-        const ::Entity* entity = EntityManager::getSingleton().GetEntity(entity_name);
-        if (entity == nullptr) return "";
-
-        Ogre::Vector3 surface;
-        uint8 walkability_type = 0;
-        if (!FindWalkableSurface(entity->GetPosition(), surface, false, false, &walkability_type)){
-          return "";
-        }
-        return GetWorldMapTerrainName(walkability_type);
-      }
-
-      int WorldmapModule::GetTerrainTriangleUnderEntity(const char* entity_name) const{
-        if (entity_name == nullptr) return -1;
-        const ::Entity* entity = EntityManager::getSingleton().GetEntity(entity_name);
-        if (entity == nullptr) return -1;
-
-        Ogre::Vector3 surface;
-        size_t triangle_index = 0;
-        if (!FindWalkableSurface(entity->GetPosition(), surface, false, false, nullptr, &triangle_index)){
-          return -1;
-        }
-        return static_cast<int>(triangle_index);
-      }
 
 } // namespace VGears

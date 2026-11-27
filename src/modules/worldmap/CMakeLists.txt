@@ -9,5 +9,6 @@ vgears_sources(
     WorldmapSubmarine.cpp
     WorldmapTerrain.cpp
     WorldmapTextures.cpp
+    WorldmapTriggers.cpp
     WorldmapVehicles.cpp
 )

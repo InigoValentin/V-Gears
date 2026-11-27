@@ -15,6 +15,7 @@
 
 #include "modules/worldmap/WorldmapModule.h"
 #include <algorithm>
+#include <OgreLogManager.h>
 #include <OgreEntity.h>
 #include <OgreSceneNode.h>
 #include "engine/entity/EntityManager.h"
@@ -26,6 +27,37 @@
 namespace VGears {
 
     using namespace Ogre;
+
+    void WorldmapModule::ClearVehicleTerrains(){
+        active_vehicle_terrain_types_.clear();
+    }
+
+    void WorldmapModule::AddVehicleTerrain(const char* terrain_name){
+        if (terrain_name == nullptr) return;
+        const auto terrain = GetWorldMapTerrainTypes().find(terrain_name);
+        if (terrain == GetWorldMapTerrainTypes().end()){
+            LogManager::getSingleton().logMessage(
+              "Unknown world-map vehicle terrain '" + Ogre::String(terrain_name) + "'."
+            );
+            return;
+        }
+        if (std::find(
+              active_vehicle_terrain_types_.begin(), active_vehicle_terrain_types_.end(),
+              terrain->second
+            ) == active_vehicle_terrain_types_.end()){
+            active_vehicle_terrain_types_.push_back(terrain->second);
+        }
+    }
+
+    bool WorldmapModule::IsActiveTerrainAllowed(uint8 walkability_type) const{
+        if (current_vehicle_ == VehicleType::ON_FOOT){
+            return IsFootWalkable(walkability_type);
+        }
+        return std::find(
+          active_vehicle_terrain_types_.begin(), active_vehicle_terrain_types_.end(),
+          walkability_type
+        ) != active_vehicle_terrain_types_.end();
+    }
 
     /// Turning speed of the flying vehicles, in radians per second.
     static const float FLIGHT_TURN_SPEED = 1.5f;
@@ -156,7 +188,7 @@ namespace VGears {
         if (EntityManager::getSingleton().IsWorldPositionBlocked(entity, new_position)) return;
         flight_y_ = new_y;
         entity->SetPosition(new_position);
-        if (forward) EnterTriangle(terrain_triangles_[triangle_index]);
+        if (forward) EnterTriangle(terrain_.GetTriangles()[triangle_index]);
     }
 
     /// Name of a vehicle in the scripts (WorldMapSettings).
@@ -220,8 +252,8 @@ namespace VGears {
             size_t landing_triangle = 0;
             if (FindWalkableSurface(vehicle_position, ground, false, false, &landing_terrain, &landing_triangle)
               && landing_terrain == VGears::WorldmapFileSerializer::NORTHERND_CAVE
-              && terrain_triangles_[landing_triangle].function_id >= 3){
-              landing_after_unboard_ = &terrain_triangles_[landing_triangle];
+              && terrain_.GetTriangles()[landing_triangle].function_id >= 3){
+              landing_after_unboard_ = &terrain_.GetTriangles()[landing_triangle];
             }
           }
           player_entity_->SetPosition(surface);
