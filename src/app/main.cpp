@@ -36,7 +36,7 @@
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "core/SavemapHandler.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "core/Timer.h"
 #include "core/UiManager.h"
 #include "core/particles/ParticleSystemManager.h"

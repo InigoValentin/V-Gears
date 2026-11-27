@@ -24,7 +24,7 @@
 #include "engine/entity/EntityManager.h"
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "core/Timer.h"
 #include "core/UiManager.h"
 #include "core/DialogsManager.h"

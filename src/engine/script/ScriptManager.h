@@ -17,9 +17,9 @@
 
 #include <OgreSingleton.h>
 #include <OgreString.h>
-#include "Event.h"
+#include "core/Event.h"
 #include "LuaIncludes.h"
-#include "Manager.h"
+#include "core/Manager.h"
 
 class Entity;
 

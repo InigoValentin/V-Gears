@@ -21,7 +21,7 @@
 #include <OgreString.h>
 #include "EntityCollision.h"
 #include "EntityDirection.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 
 /**
  * Action types.

@@ -1,7 +1,7 @@
 #include "engine/config/ConfigVar.h"
 #include "engine/graphics/DebugDraw.h"
 #include "engine/entity/EntityPoint.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 
 
 ConfigVar cv_debug_point("debug_point", "Draw point debug info", "false");

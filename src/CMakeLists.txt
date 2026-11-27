@@ -650,7 +650,7 @@ set(VGEARS_SOURCE_FILES
     core/particles/renderer/ParticleEntityRendererDictionary.cpp
     core/Savemap.cpp
     core/SavemapHandler.cpp
-    core/ScriptManager.cpp
+    engine/script/ScriptManager.cpp
     core/TextHandler.cpp
     core/Timer.cpp
     core/UiAnimation.cpp

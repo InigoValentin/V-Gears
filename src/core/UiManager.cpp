@@ -21,7 +21,7 @@
 #include <algorithm>
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "core/UiManager.h"
 #include "common/Utilites.h"
 #include "core/XmlFontsFile.h"

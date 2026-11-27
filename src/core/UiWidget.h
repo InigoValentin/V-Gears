@@ -19,7 +19,7 @@
 #include <OgreString.h>
 #include <Ogre.h>
 #include <vector>
-#include "ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "UiAnimation.h"
 
 /**

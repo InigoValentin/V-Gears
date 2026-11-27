@@ -20,7 +20,7 @@
 #include <OgreStringConverter.h>
 #include "core/Console.h"
 #include "engine/entity/EntityManager.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "common/Logger.h"
 #include "core/XmlMapFile.h"
 #include "core/XmlMapsFile.h"

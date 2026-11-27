@@ -37,7 +37,7 @@
 #include "engine/config/ConfigVar.h"
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "core/TextHandler.h"
 #include "core/UiManager.h"
 #include "core/XmlFormationFile.h"

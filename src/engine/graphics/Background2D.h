@@ -24,7 +24,7 @@
 #include "Background2DAnimation.h"
 #include "BackgroundPalette.h"
 #include "engine/entity/Entity.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 
 /**
  * A field background

@@ -18,7 +18,7 @@
 #include <map>
 #include <tuple>
 #include <OgreString.h>
-#include "ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 
 /**
  * Any enemy in a battle.

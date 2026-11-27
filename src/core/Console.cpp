@@ -19,7 +19,7 @@
 #include "core/Console.h"
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "core/Timer.h"
 #include "common/Utilites.h"
 #include "engine/config/ConfigCmdHandler.h"

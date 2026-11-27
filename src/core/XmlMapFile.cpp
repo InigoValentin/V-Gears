@@ -16,7 +16,7 @@
 #include "engine/audio/AudioManager.h"
 #include "engine/entity/EntityManager.h"
 #include "common/Logger.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "core/XmlBackground2DFile.h"
 #include "core/XmlMapFile.h"
 #include "map/VGearsBackground2DFileManager.h"

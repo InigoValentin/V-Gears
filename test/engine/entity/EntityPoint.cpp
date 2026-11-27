@@ -14,7 +14,7 @@
  */
 
 #include <boost/test/unit_test.hpp>
-#include "LuaIncludes.h"
+#include "engine/script/LuaIncludes.h"
 #include "engine/entity/EntityPoint.h"
 
 BOOST_AUTO_TEST_CASE(TestEntityPoint){

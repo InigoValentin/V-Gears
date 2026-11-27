@@ -53,7 +53,7 @@
 #include "engine/entity/EntityManager.h"
 #include "engine/entity/EntityModel.h"
 #include "core/DialogsManager.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "data/worldmap/WorldmapFile.h"
 #include "data/worldmap/WorldmapFileManager.h"
 #include "data/worldmap/WorldmapFileSerializer.h"

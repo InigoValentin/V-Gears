@@ -14,7 +14,7 @@
  */
 
 #include "common/Logger.h"
-#include "core/ScriptManager.h"
+#include "engine/script/ScriptManager.h"
 #include "core/UiManager.h"
 #include "core/UiSprite.h"
 #include "core/UiTextArea.h"
