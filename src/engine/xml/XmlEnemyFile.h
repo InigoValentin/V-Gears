@@ -16,7 +16,7 @@
 #pragma once
 
 #include "XmlFile.h"
-#include "core/Enemy.h"
+#include "modules/battle/Enemy.h"
 
 /**
  * Handles formation files.

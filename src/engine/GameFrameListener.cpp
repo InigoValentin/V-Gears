@@ -15,7 +15,7 @@
 
 #include <OgreStringConverter.h>
 #include "app/VGearsGameState.h"
-#include "core/BattleManager.h"
+#include "modules/battle/BattleManager.h"
 #include "engine/GameFrameListener.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/config/ConfigVar.h"

@@ -15,7 +15,7 @@
 
 #include <OgreSceneNode.h>
 #include <OgreMaterialManager.h>
-#include "core/Enemy.h"
+#include "modules/battle/Enemy.h"
 #include "engine/config/ConfigVar.h"
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"

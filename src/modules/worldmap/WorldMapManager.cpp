@@ -21,8 +21,8 @@
 #include <OgreViewport.h>
 #include "common/FF7Character.h"
 #include "engine/audio/AudioManager.h"
-#include "core/WorldMapManager.h"
-#include "core/WorldMapManager.h"
+#include "modules/worldmap/WorldMapManager.h"
+#include "modules/worldmap/WorldMapManager.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/ui/Console.h"
 #include "engine/ui/DialogsManager.h"

@@ -24,7 +24,7 @@
 #include "VGearsGameState.h"
 #include "app/VGearsApplication.h"
 #include "engine/audio/AudioManager.h"
-#include "core/BattleManager.h"
+#include "modules/battle/BattleManager.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/config/ConfigCmdHandler.h"
 #include "engine/config/ConfigFile.h"

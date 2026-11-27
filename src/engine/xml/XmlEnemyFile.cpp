@@ -14,7 +14,7 @@
  */
 
 #include "engine/xml/XmlEnemyFile.h"
-#include "core/Enemy.h"
+#include "modules/battle/Enemy.h"
 #include "common/Logger.h"
 
 XmlEnemyFile::XmlEnemyFile(const Ogre::String& file): XmlFile(file){}

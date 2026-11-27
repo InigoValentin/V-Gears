@@ -609,7 +609,7 @@ set(VGEARS_SOURCE_FILES
     engine/graphics/MoviePlayer.cpp
     engine/graphics/MovieState.cpp
     engine/graphics/ScreenFadeState.cpp
-    core/BattleManager.cpp
+    modules/battle/BattleManager.cpp
     engine/graphics/CameraManager.cpp
     engine/config/ConfigCmd.cpp
     engine/config/ConfigCmdHandler.cpp
@@ -619,7 +619,7 @@ set(VGEARS_SOURCE_FILES
     engine/ui/Console.cpp
     engine/graphics/DebugDraw.cpp
     engine/ui/DialogsManager.cpp
-    core/Enemy.cpp
+    modules/battle/Enemy.cpp
     engine/entity/EntityCollision.cpp
     engine/entity/Entity.cpp
     engine/entity/EntityDirection.cpp
@@ -661,7 +661,7 @@ set(VGEARS_SOURCE_FILES
     engine/ui/UiWidget.cpp
     common/Utilites.cpp
     engine/entity/Walkmesh.cpp
-    core/WorldMapManager.cpp
+    modules/worldmap/WorldMapManager.cpp
     engine/xml/XmlAttackFile.cpp
     engine/xml/XmlBackground2DFile.cpp
     engine/xml/XmlBattleCharactersFile.cpp
