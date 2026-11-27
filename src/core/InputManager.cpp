@@ -20,7 +20,7 @@
 #include "common/Logger.h"
 #include "core/Timer.h"
 #include "core/Manager.h"
-#include "ConfigCmdHandler.h"
+#include "engine/config/ConfigCmdHandler.h"
 
 /**
  * Input manager singleton.

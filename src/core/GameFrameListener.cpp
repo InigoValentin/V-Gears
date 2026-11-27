@@ -18,7 +18,7 @@
 #include "core/BattleManager.h"
 #include "core/GameFrameListener.h"
 #include "core/CameraManager.h"
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 #include "core/Console.h"
 #include "core/DebugDraw.h"
 #include "core/EntityManager.h"

@@ -611,11 +611,11 @@ set(VGEARS_SOURCE_FILES
     core/ScreenFadeState.cpp
     core/BattleManager.cpp
     core/CameraManager.cpp
-    core/ConfigCmd.cpp
-    core/ConfigCmdHandler.cpp
-    core/ConfigFile.cpp
-    core/ConfigVar.cpp
-    core/ConfigVarHandler.cpp
+    engine/config/ConfigCmd.cpp
+    engine/config/ConfigCmdHandler.cpp
+    engine/config/ConfigFile.cpp
+    engine/config/ConfigVar.cpp
+    engine/config/ConfigVarHandler.cpp
     core/Console.cpp
     core/DebugDraw.cpp
     core/DialogsManager.cpp

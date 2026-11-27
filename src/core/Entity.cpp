@@ -16,7 +16,7 @@
 #include <cmath>
 #include <OgreSceneNode.h>
 #include <OgreMaterialManager.h>
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "core/Entity.h"
 #include "core/EntityManager.h"

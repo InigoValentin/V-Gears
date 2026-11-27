@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "common/Logger.h"
 #include "core/Walkmesh.h"

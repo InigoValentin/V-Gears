@@ -22,7 +22,7 @@
 #include <OgreRoot.h>
 #include <OgreViewport.h>
 #include "core/CameraManager.h"
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "core/EntityManager.h"
 #include "core/EntityModel.h"

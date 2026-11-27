@@ -21,7 +21,7 @@
 #include "core/CameraManager.h"
 #include "core/CameraManagerCommands.h"
 #include "app/VGearsApplication.h"
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 #include "core/InputManager.h"
 #include "common/Logger.h"
 

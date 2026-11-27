@@ -34,7 +34,7 @@
 #include "core/DialogsManager.h"
 #include "core/Enemy.h"
 #include "core/EntityManager.h"
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 #include "core/InputManager.h"
 #include "common/Logger.h"
 #include "core/ScriptManager.h"

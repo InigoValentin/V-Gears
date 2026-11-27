@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "ConfigCmdHandler.h"
+#include "engine/config/ConfigCmdHandler.h"
 #include "Console.h"
 #include "common/Logger.h"
 #include "XmlTextsFile.h"

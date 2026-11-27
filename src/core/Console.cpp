@@ -22,8 +22,8 @@
 #include "core/ScriptManager.h"
 #include "core/Timer.h"
 #include "common/Utilites.h"
-#include "ConfigCmdHandler.h"
-#include "ConfigVarHandler.h"
+#include "engine/config/ConfigCmdHandler.h"
+#include "engine/config/ConfigVarHandler.h"
 
 /**
  * Console singleton

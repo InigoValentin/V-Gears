@@ -25,7 +25,7 @@
 #include "core/Background2D.h"
 #include "core/CameraManager.h"
 #include "core/EntityManager.h"
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "common/Logger.h"
 #include "core/Timer.h"

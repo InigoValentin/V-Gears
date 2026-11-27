@@ -1,4 +1,4 @@
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "core/EntityPoint.h"
 #include "core/ScriptManager.h"

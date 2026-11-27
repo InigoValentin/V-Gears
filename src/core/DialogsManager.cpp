@@ -14,7 +14,7 @@
  */
 
 #include "core/DialogsManager.h"
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 #include "core/DebugDraw.h"
 #include "common/Logger.h"
 #include "TextHandler.h"

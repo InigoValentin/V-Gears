@@ -15,8 +15,8 @@
 
 #include <OgreStringConverter.h>
 
-#include "ConfigCmdHandler.h"
-#include "ConfigVarHandler.h"
+#include "engine/config/ConfigCmdHandler.h"
+#include "engine/config/ConfigVarHandler.h"
 #include "Console.h"
 #include "common/Logger.h"
 #include "common/Utilites.h"

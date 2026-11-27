@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <OgreStringConverter.h>
 #include "common/Assert.h"
-#include "core/ConfigVar.h"
+#include "engine/config/ConfigVar.h"
 
 ConfigVar* ConfigVar::static_config_var_list_ = nullptr;
 

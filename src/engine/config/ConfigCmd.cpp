@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/ConfigCmd.h"
+#include "engine/config/ConfigCmd.h"
 
 ConfigCmd::ConfigCmd(
   const Ogre::String& name, const Ogre::String& description,

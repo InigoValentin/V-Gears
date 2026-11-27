@@ -18,12 +18,12 @@
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>
 #include <OgreStringConverter.h>
-#include "Console.h"
-#include "EntityManager.h"
-#include "ScriptManager.h"
+#include "core/Console.h"
+#include "core/EntityManager.h"
+#include "core/ScriptManager.h"
 #include "common/Logger.h"
-#include "XmlMapFile.h"
-#include "XmlMapsFile.h"
+#include "core/XmlMapFile.h"
+#include "core/XmlMapsFile.h"
 #include "app/VGearsGameState.h"
 #include "app/VGearsApplication.h"
 #include "ConfigCmdHandler.h"
