@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/XmlMapsFile.h"
 
 XmlMapsFile::XmlMapsFile(const Ogre::String& file): XmlFile(file){}

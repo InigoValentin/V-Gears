@@ -14,7 +14,7 @@
  */
 
 #include "core/XmlAttackFile.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 XmlAttackFile::XmlAttackFile(const Ogre::String& file): XmlFile(file){}
 

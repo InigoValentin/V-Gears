@@ -15,7 +15,7 @@
 
 #include "ConfigCmdHandler.h"
 
-#include "core/Assert.h"
+#include "common/Assert.h"
 #include "ConfigCmdHandlerCommands.h"
 
 /**

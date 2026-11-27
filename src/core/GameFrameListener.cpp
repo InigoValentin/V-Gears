@@ -14,7 +14,7 @@
  */
 
 #include <OgreStringConverter.h>
-#include "VGearsGameState.h"
+#include "app/VGearsGameState.h"
 #include "core/BattleManager.h"
 #include "core/GameFrameListener.h"
 #include "core/CameraManager.h"
@@ -23,7 +23,7 @@
 #include "core/DebugDraw.h"
 #include "core/EntityManager.h"
 #include "core/InputManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"
 #include "core/UiManager.h"

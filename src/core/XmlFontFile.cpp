@@ -14,7 +14,7 @@
  */
 
 #include <iostream>
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/UiManager.h"
 #include "core/UiFont.h"
 #include "core/XmlFontFile.h"

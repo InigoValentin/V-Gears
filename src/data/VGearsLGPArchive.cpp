@@ -19,7 +19,7 @@
 #include "data/VGearsLGPArchive.h"
 #include "common/VGearsStringUtil.h"
 #include "data/VGearsLGPArchiveSerializer.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 namespace VGears{
 

@@ -16,12 +16,12 @@
 #include <algorithm>
 #include "core/ConfigVar.h"
 #include "core/DebugDraw.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/ScriptManagerBinds.h"
 #include "core/ScriptManagerCommands.h"
 #include "core/Timer.h"
-#include "core/Utilites.h"
+#include "common/Utilites.h"
 #include "core/XmlScriptsFile.h"
 #include "LuaIncludes.h"
 

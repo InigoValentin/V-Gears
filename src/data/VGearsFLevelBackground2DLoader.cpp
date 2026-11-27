@@ -16,7 +16,7 @@
 #include "data/VGearsFLevelBackground2DLoader.h"
 #include "data/VGearsFLevelFile.h"
 #include "map/VGearsBackground2DFile.h"
-#include "FF7Common.h"
+#include "common/FF7Common.h"
 
 namespace VGears{
 

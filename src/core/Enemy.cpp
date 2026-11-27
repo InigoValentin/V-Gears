@@ -18,7 +18,7 @@
 #include "core/Enemy.h"
 #include "core/ConfigVar.h"
 #include "core/DebugDraw.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/XmlEnemyFile.h"
 
 Enemy::Enemy(const unsigned int id):

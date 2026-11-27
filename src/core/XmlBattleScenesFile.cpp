@@ -14,7 +14,7 @@
  */
 
 #include "core/XmlBattleScenesFile.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 XmlBattleScenesFile::XmlBattleScenesFile(const Ogre::String& file): XmlFile(file){
 

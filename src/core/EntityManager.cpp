@@ -27,7 +27,7 @@
 #include "core/EntityManager.h"
 #include "core/EntityModel.h"
 #include "core/InputManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"
 #include "core/DialogsManager.h"

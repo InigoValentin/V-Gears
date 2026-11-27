@@ -16,7 +16,7 @@
 #pragma once
 
 #include <OgreResourceManager.h>
-#include "VGearsPrerequisites.h"
+#include "common/VGearsPrerequisites.h"
 #include "VGearsBackgroundFile.h"
 
 namespace VGears{

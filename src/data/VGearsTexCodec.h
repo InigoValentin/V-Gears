@@ -17,7 +17,7 @@
 
 #include <OgreImageCodec.h>
 #include <OgreCodec.h>
-#include "VGearsPrerequisites.h"
+#include "common/VGearsPrerequisites.h"
 
 namespace VGears{
 

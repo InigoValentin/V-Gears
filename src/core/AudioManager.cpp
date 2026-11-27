@@ -24,7 +24,7 @@
 #include "core/Event.h"
 #include "core/XmlMusicsFile.h"
 #include "core/XmlSoundsFile.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 /**
  * Audio manager singleton.

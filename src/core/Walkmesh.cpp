@@ -15,7 +15,7 @@
 
 #include "core/ConfigVar.h"
 #include "core/DebugDraw.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/Walkmesh.h"
 #include "map/VGearsWalkmeshFile.h"
 

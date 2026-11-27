@@ -16,7 +16,7 @@
 #include <Ogre.h>
 #include "core/Background2DAnimation.h"
 #include "core/Background2D.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 Background2DAnimation::Background2DAnimation(
   const Ogre::String& name, Background2D* background, const int tile_index):

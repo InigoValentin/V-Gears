@@ -584,10 +584,10 @@ endif()
 
 # Source files for libvgears and v-gears.
 set(VGEARS_SOURCE_FILES
-    main.cpp
-    FF7Character.cpp
-    FF7Common.cpp
-    VGearsGameState.cpp
+    app/main.cpp
+    common/FF7Character.cpp
+    common/FF7Common.cpp
+    app/VGearsGameState.cpp
     common/File.cpp
     common/FileSystem.cpp
     common/FinalFantasy7/FF7NameLookup.cpp
@@ -596,7 +596,7 @@ set(VGEARS_SOURCE_FILES
     common/DataDirectory.cpp
     common/InstallStamp.cpp
     common/OgrePlugins.cpp
-    common/VGearsApplication.cpp
+    app/VGearsApplication.cpp
     common/VGearsManualObject.cpp
     common/VGearsResource.cpp
     common/VGearsStringUtil.cpp
@@ -659,7 +659,7 @@ set(VGEARS_SOURCE_FILES
     core/UiSprite.cpp
     core/UiTextArea.cpp
     core/UiWidget.cpp
-    core/Utilites.cpp
+    common/Utilites.cpp
     core/Walkmesh.cpp
     core/WorldMapManager.cpp
     core/XmlAttackFile.cpp

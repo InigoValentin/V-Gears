@@ -16,7 +16,7 @@
 #include <iostream>
 #include <OgreRoot.h>
 #include "Manager.h"
-#include "Logger.h"
+#include "common/Logger.h"
 
 
 Manager::Manager(): module_(Module::FIELD), prev_module_(Module::FIELD), paused_(false){}

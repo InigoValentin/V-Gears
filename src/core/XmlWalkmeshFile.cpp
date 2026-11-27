@@ -15,7 +15,7 @@
 
 #include "core/XmlWalkmeshFile.h"
 #include "core/EntityManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/Walkmesh.h"
 
 XmlWalkmeshFile::XmlWalkmeshFile(const Ogre::String& file): XmlFile(file){}

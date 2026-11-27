@@ -13,14 +13,14 @@
  * GNU General Public License for more details.
  */
 
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/UiManager.h"
 #include "core/UiSprite.h"
 #include "core/UiTextArea.h"
 #include "core/UiWidget.h"
 #include "core/XmlScreenFile.h"
-#include "core/Utilites.h"
+#include "common/Utilites.h"
 #include "TextHandler.h"
 
 XmlScreenFile::XmlScreenFile(const Ogre::String& file): XmlFile(file){}

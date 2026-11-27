@@ -14,8 +14,8 @@
  */
 
 #include "core/ConfigFile.h"
-#include "core/Logger.h"
-#include "core/Utilites.h"
+#include "common/Logger.h"
+#include "common/Utilites.h"
 #include "ConfigCmdHandler.h"
 
 void ConfigFile::Execute(const Ogre::String& name){

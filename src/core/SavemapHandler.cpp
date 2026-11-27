@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 #include "core/SavemapHandler.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 /**
  * Savemap handler singleton.

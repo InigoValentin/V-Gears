@@ -21,7 +21,7 @@
 #include "core/DebugDraw.h"
 #include "core/CameraManager.h"
 #include "core/DebugDraw.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/UiTextArea.h"
 
 /**

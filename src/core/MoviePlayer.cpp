@@ -28,7 +28,7 @@
 #include "core/AudioManager.h"
 #include "core/CameraManager.h"
 #include "core/EntityManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/MoviePlayer.h"
 
 namespace{

@@ -15,7 +15,7 @@
 
 #include "ConfigCmdHandler.h"
 #include "Console.h"
-#include "Logger.h"
+#include "common/Logger.h"
 #include "XmlTextsFile.h"
 
 /**

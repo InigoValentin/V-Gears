@@ -17,7 +17,7 @@
 #include <OgreHardwareBufferManager.h>
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/UiSprite.h"
 
 

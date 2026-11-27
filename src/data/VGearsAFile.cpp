@@ -19,7 +19,7 @@
 #include <OgreKeyFrame.h>
 #include "data/VGearsAFile.h"
 #include "data/VGearsAFileSerializer.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 namespace VGears{
 

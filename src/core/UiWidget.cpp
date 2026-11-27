@@ -17,11 +17,11 @@
 #include <OgreMath.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
-#include "common/VGearsApplication.h"
+#include "app/VGearsApplication.h"
 #include "core/ConfigVar.h"
 #include "core/CameraManager.h"
 #include "core/DebugDraw.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"
 #include "core/UiWidget.h"

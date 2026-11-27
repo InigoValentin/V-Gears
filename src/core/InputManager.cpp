@@ -17,7 +17,7 @@
 #include "core/Console.h"
 #include "core/InputManager.h"
 #include "core/InputManagerCommands.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/Timer.h"
 #include "core/Manager.h"
 #include "ConfigCmdHandler.h"

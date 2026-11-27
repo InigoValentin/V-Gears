@@ -15,7 +15,7 @@
 
 #include "core/XmlFormationFile.h"
 #include "core/BattleManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 XmlFormationFile::XmlFormationFile(const Ogre::String& file): XmlFile(file){}
 

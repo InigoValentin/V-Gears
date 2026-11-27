@@ -20,10 +20,10 @@
 #include <cctype>
 #include <algorithm>
 #include "core/DebugDraw.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/UiManager.h"
-#include "core/Utilites.h"
+#include "common/Utilites.h"
 #include "core/XmlFontsFile.h"
 #include "core/XmlPrototypesFile.h"
 #include "core/XmlScreensFile.h"

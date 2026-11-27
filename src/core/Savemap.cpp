@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <tinyxml.h>
 #include "core/Savemap.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/XmlFile.h"
 #include "common/TypeDefine.h"
 

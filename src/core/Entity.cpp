@@ -20,7 +20,7 @@
 #include "core/DebugDraw.h"
 #include "core/Entity.h"
 #include "core/EntityManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "modules/worldmap/WorldmapModule.h"
 
 ConfigVar cv_debug_entity("debug_entity", "Draw entity debug info", "0");

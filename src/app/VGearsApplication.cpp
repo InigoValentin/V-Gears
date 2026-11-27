@@ -21,7 +21,7 @@
 #include <OgreArchiveManager.h>
 #include <OgreLogManager.h>
 #include <OgreConfigDialog.h>
-#include "common/VGearsApplication.h"
+#include "app/VGearsApplication.h"
 #include "common/DataDirectory.h"
 #include "common/OgrePlugins.h"
 #include "VGearsGameState.h"

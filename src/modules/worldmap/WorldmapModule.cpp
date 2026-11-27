@@ -40,7 +40,7 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreLogManager.h>
 #include <OgreTextureManager.h>
-#include "common/VGearsApplication.h"
+#include "app/VGearsApplication.h"
 #include <Overlay/OgreOverlay.h>
 #include <Overlay/OgreOverlayContainer.h>
 #include <Overlay/OgreOverlayManager.h>
@@ -49,7 +49,7 @@
 #include <OgreResourceGroupManager.h>
 #include "data/VGearsTexFile.h"
 #include "core/InputManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/EntityManager.h"
 #include "core/EntityModel.h"
 #include "core/DialogsManager.h"

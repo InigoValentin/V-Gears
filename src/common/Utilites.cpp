@@ -14,7 +14,7 @@
  */
 
 #include <OgreStringConverter.h>
-#include "core/Utilites.h"
+#include "common/Utilites.h"
 
 bool GetBool(TiXmlNode* node, const Ogre::String& tag, bool def){
     bool ret = def;

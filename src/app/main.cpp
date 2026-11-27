@@ -22,7 +22,7 @@
 #include <Overlay/OgreFontManager.h>
 #include <OIS/OIS.h>
 #include "VGearsGameState.h"
-#include "common/VGearsApplication.h"
+#include "app/VGearsApplication.h"
 #include "core/AudioManager.h"
 #include "core/BattleManager.h"
 #include "core/CameraManager.h"
@@ -34,7 +34,7 @@
 #include "core/EntityManager.h"
 #include "core/GameFrameListener.h"
 #include "core/InputManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/SavemapHandler.h"
 #include "core/ScriptManager.h"
 #include "core/Timer.h"

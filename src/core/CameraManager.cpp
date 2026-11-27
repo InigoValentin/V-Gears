@@ -20,10 +20,10 @@
 #include <OIS/OIS.h>
 #include "core/CameraManager.h"
 #include "core/CameraManagerCommands.h"
-#include "common/VGearsApplication.h"
+#include "app/VGearsApplication.h"
 #include "core/ConfigVar.h"
 #include "core/InputManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 ConfigVar cv_cam_speed("camera_speed", "Camera speed", "0.02");
 

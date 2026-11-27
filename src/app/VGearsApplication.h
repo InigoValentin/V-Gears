@@ -22,7 +22,7 @@
 #include <OgreControllerManager.h>
 #include <OgreTextureManager.h>
 #include <memory>
-#include "TypeDefine.h"
+#include "common/TypeDefine.h"
 
 namespace VGears{
 

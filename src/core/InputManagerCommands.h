@@ -18,8 +18,8 @@
 #include "ConfigCmdHandler.h"
 #include "ConfigVarHandler.h"
 #include "Console.h"
-#include "Logger.h"
-#include "Utilites.h"
+#include "common/Logger.h"
+#include "common/Utilites.h"
 
 /**
  * Parses a list of keys to retrieve their keycodes.

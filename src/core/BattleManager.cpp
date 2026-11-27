@@ -25,7 +25,7 @@
 #include <OgreTextureManager.h>
 #include <OgreResourceGroupManager.h>
 #include <OgreViewport.h>
-#include "FF7Character.h"
+#include "common/FF7Character.h"
 #include "core/AudioManager.h"
 #include "core/BattleManager.h"
 #include "modules/worldmap/WorldmapModule.h"
@@ -36,7 +36,7 @@
 #include "core/EntityManager.h"
 #include "core/ConfigVar.h"
 #include "core/InputManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/ScriptManager.h"
 #include "core/TextHandler.h"
 #include "core/UiManager.h"

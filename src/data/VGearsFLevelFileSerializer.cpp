@@ -16,7 +16,7 @@
 #include <OgreLogManager.h>
 #include <OgreException.h>
 #include "data/VGearsFLevelFileSerializer.h"
-#include "FF7Common.h"
+#include "common/FF7Common.h"
 #include "common/VGearsStringUtil.h"
 #include "data/VGearsBackgroundFileManager.h"
 #include "data/VGearsBackgroundFileSerializer.h"

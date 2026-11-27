@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/XmlTextFile.h"
 #include "core/XmlTextsFile.h"
 

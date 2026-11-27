@@ -19,7 +19,7 @@
 #include <OgreTechnique.h>
 #include "core/CameraManager.h"
 #include "core/EntityManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/ScreenFade.h"
 
 namespace{

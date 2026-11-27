@@ -27,7 +27,7 @@
 #include "core/EntityManager.h"
 #include "core/ConfigVar.h"
 #include "core/DebugDraw.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/Timer.h"
 
 ConfigVar cv_debug_background2d("debug_background2d", "Draw background debug info", "false");

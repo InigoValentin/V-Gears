@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "common/VGearsApplication.h"
+#include "app/VGearsApplication.h"
 #include "common/OgreBase.h"
 
 namespace VGears{

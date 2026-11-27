@@ -14,7 +14,7 @@
  */
 
 #include "common/LzsFile.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 LzsFile::LzsFile(const Ogre::String& file): File(file){
     ExtractLzs();

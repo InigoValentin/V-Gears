@@ -24,8 +24,8 @@
 #include "data/VGearsFLevelTextureLoader.h"
 #include "data/VGearsHRCFileManager.h"
 #include "map/VGearsBackground2DFileManager.h"
-#include "FF7Common.h"
-#include "core/Logger.h"
+#include "common/FF7Common.h"
+#include "common/Logger.h"
 
 namespace VGears{
 

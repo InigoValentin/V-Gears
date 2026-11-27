@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/UiFont.h"
 
 UiFont::UiFont(const Ogre::String& name, const Ogre::String& language):

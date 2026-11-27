@@ -14,7 +14,7 @@
  */
 
 #include "core/AudioManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/XmlSoundsFile.h"
 
 XmlSoundsFile::XmlSoundsFile(const Ogre::String& file): XmlFile(file){}

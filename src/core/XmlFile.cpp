@@ -14,7 +14,7 @@
  */
 
 #include <OgreStringConverter.h>
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/XmlFile.h"
 
 XmlFile::XmlFile(const Ogre::String& file): file_(file){

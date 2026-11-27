@@ -23,12 +23,12 @@
 #include <OgreHardwareBufferManager.h>
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/UiManager.h"
 #include "core/UiTextArea.h"
 #include "core/Timer.h"
 #include "core/UiSprite.h"
-#include "core/Utilites.h"
+#include "common/Utilites.h"
 #include "TextHandler.h"
 
 UiTextArea::UiTextArea(const Ogre::String& name): UiWidget(name){

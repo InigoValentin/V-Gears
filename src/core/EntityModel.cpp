@@ -29,7 +29,7 @@
 #include <OgreHardwarePixelBuffer.h>
 #include "core/EntityModel.h"
 #include "core/EntityManager.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 #include "core/Timer.h"
 
 EntityModel::EntityModel(
