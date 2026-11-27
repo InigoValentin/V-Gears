@@ -18,7 +18,7 @@
 #include <OgreSingleton.h>
 #include <boost/thread.hpp>
 #include <vorbis/vorbisfile.h>
-#include "Manager.h"
+#include "core/Manager.h"
 
 // Include OpenAL
 #if defined(__WIN32__) || defined(_WIN32)

@@ -20,7 +20,7 @@
 #include <OgreRoot.h>
 #include <OgreViewport.h>
 #include "common/FF7Character.h"
-#include "core/AudioManager.h"
+#include "engine/audio/AudioManager.h"
 #include "core/WorldMapManager.h"
 #include "core/WorldMapManager.h"
 #include "core/CameraManager.h"

@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/AudioManager.h"
+#include "engine/audio/AudioManager.h"
 #include "core/EntityManager.h"
 #include "common/Logger.h"
 #include "core/ScriptManager.h"

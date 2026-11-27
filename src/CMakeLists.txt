@@ -600,7 +600,7 @@ set(VGEARS_SOURCE_FILES
     common/VGearsManualObject.cpp
     common/VGearsResource.cpp
     common/VGearsStringUtil.cpp
-    core/AudioManager.cpp
+    engine/audio/AudioManager.cpp
     core/Background2DAnimation.cpp
     core/Background2D.cpp
     core/BackgroundPalette.cpp

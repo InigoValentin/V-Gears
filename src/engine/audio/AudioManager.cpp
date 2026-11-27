@@ -20,7 +20,7 @@
 #include <boost/thread.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include "core/AudioManager.h"
+#include "engine/audio/AudioManager.h"
 #include "core/Event.h"
 #include "core/XmlMusicsFile.h"
 #include "core/XmlSoundsFile.h"

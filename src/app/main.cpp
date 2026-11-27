@@ -23,7 +23,7 @@
 #include <OIS/OIS.h>
 #include "VGearsGameState.h"
 #include "app/VGearsApplication.h"
-#include "core/AudioManager.h"
+#include "engine/audio/AudioManager.h"
 #include "core/BattleManager.h"
 #include "core/CameraManager.h"
 #include "core/ConfigCmdHandler.h"
