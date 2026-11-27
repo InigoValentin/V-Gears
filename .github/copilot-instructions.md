@@ -20,7 +20,7 @@ V-Gears is a free, cross-platform reimplementation of the Final Fantasy VII engi
 - `src/third_party/sol/` — vendored sol2 single header. Do not restyle, modernize, or refactor it.
 - LuaJIT is a system dependency.
 - `test/` — Boost.Test suite mirroring `src/` paths; sources are listed manually in `test/CMakeLists.txt`.
-- `data/` — runtime configuration only (Ogre plugins/resources cfgs). Not game data.
+- `data/` — the files shipped with the game, copied to the installation directory: the Ogre plugins/resources cfgs, `engine/` (scripts, screens in `ui/`, fonts, texts, shaders, metadata) and `defaults/`. Not game data: the installer writes that to `game/` in the installation directory.
 - `doc/` — all guides. The original binary formats are documented in the header comments of the parsers and in [the FF7 wiki at wiki.ffrtt.ru](https://wiki.ffrtt.ru/index.php/FF7).
 - `_OLD/` — legacy q-gears code kept for reference. Do not modify or reuse without asking.
 

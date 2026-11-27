@@ -75,7 +75,7 @@ class WorldInstaller{
         bool ProcessMap();
 
         /**
-         * Exports the random encounters of the world map to gamedata/world_encounters.xml.
+         * Exports the random encounters of the world map to world/world_encounters.xml.
          *
          * @param[in] archive_file World map archive file.
          * @param[in] entry Entry of ENC_W.BIN in the archive.
@@ -88,6 +88,11 @@ class WorldInstaller{
                     const std::vector<std::string>& converted_fields,
                     std::string& error_message
                 );
+
+        /**
+         * Copies the textures of the world map archive to "world/textures". The game uses them for the terrain.
+         */
+        void ExtractTextures();
 
         //void ReadMapFile(std::string file_name);
 

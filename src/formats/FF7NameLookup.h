@@ -476,7 +476,7 @@ namespace VGears{
              * @return The game metadata.
              */
             static FF7Metadata& Data(){
-                static FF7Metadata data("field_models_and_animation_metadata.xml");
+                static FF7Metadata data("engine/metadata/field_models_and_animation_metadata.xml");
                 return data;
             }
     };

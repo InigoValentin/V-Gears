@@ -22,18 +22,18 @@
  * Where the installer puts things.
  *
  * The installation directory is also the working directory of the game, which reads its data from
- * "<dir>/data/..." and its intermediate world map files from "<dir>/temp/world_models".
+ * "<dir>/engine" and "<dir>/game". "<dir>/temp" is only used while installing.
  *
  * Every path is relative to the installation directory unless stated otherwise.
  */
 namespace InstallLayout{
 
     /**
-     * Gets the directory with the game data.
+     * Gets the directory with the data converted from the original game.
      *
      * @param[in] root Installation directory, ending with '/'.
      */
-    std::string DataDir(const std::string& root);
+    std::string GameDir(const std::string& root);
 
     /**
      * Gets the directory with the intermediate files.
@@ -43,24 +43,14 @@ namespace InstallLayout{
     std::string TempDir(const std::string& root);
 
     /**
-     * Directories created inside the data directory.
+     * Directories created inside the game directory.
      */
-    const std::vector<std::string>& DataSubdirs();
+    const std::vector<std::string>& GameSubdirs();
 
     /**
      * Directories created inside the temp directory.
      */
     const std::vector<std::string>& TempSubdirs();
-
-    /**
-     * Temp directories that the game itself needs, so they are not removed when cleaning up.
-     */
-    const std::vector<std::string>& KeptTempSubdirs();
-
-    /**
-     * Temp directories that are removed when cleaning up.
-     */
-    std::vector<std::string> RemovableTempSubdirs();
 
     /**
      * Gets the directory where the installation disk is extracted.
@@ -72,10 +62,10 @@ namespace InstallLayout{
     std::string OriginalDataDir(const std::string& root);
 
     /**
-     * Directories of the game data (in <installation directory>/data) that a clean installation keeps: the
-     * configuration of the game, and the videos, which come from the game disks, not from the install disk.
+     * Directories of the game data (in <installation directory>/game) that a clean installation keeps: the videos,
+     * which come from the game disks, not from the install disk.
      */
-    const std::vector<std::string>& CleanInstallKeptDataDirs();
+    const std::vector<std::string>& CleanInstallKeptGameDirs();
 
     /**
      * Tells if a directory is a V-Gears installation: it has the configuration files the installer copies.
@@ -103,10 +93,11 @@ namespace InstallLayout{
     /**
      * Deletes what a previous installation wrote, so a new one starts from nothing.
      *
-     * It removes the extracted disk, the temporary files, the record of the installations (install.info) and the
-     * game data, except the directories in
-     * {@see CleanInstallKeptDataDirs}. The rest of the installation directory (saves, controls, the configuration
-     * files of V-Gears and Ogre, logs) is kept. A directory that is not an installation ({@see IsInstallation}) is
+     * It removes the extracted disk, the temporary files, the record of the installations (install.info), the
+     * files shipped with V-Gears ("engine" and "defaults"), the "data" directory of older versions, and the game
+     * data, except the directories in {@see CleanInstallKeptGameDirs}. The files of the player ("user"), the Ogre
+     * configuration and the logs are kept: the ones that older versions had elsewhere are moved first (see
+     * VGears::DataDirectory::MigrateLayout). A directory that is not an installation ({@see IsInstallation}) is
      * not touched.
      *
      * @param[in] root Installation directory, ending with '/'.

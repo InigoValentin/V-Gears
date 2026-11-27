@@ -160,10 +160,10 @@ namespace InstallSteps{
         if (copy_data){
             if (
               game_data_dir.isEmpty() || !QFile::exists(game_data_dir + "/plugins.cfg")
-              || !QDir(game_data_dir + "/data").exists()
+              || !QDir(game_data_dir + "/engine").exists()
             ){
                 result.errors << QObject::tr(
-                  "The V-Gears 'data' folder was not found (it must contain plugins.cfg and a data folder)."
+                  "The V-Gears 'data' folder was not found (it must contain plugins.cfg and an engine folder)."
                 );
             }
             else{
@@ -175,9 +175,12 @@ namespace InstallSteps{
             }
         }
         else{
-            if (!QFile::exists(output + "plugins.cfg") || !QFile::exists(output + "resources.cfg")){
+            if (
+              !QFile::exists(output + "plugins.cfg") || !QFile::exists(output + "resources.cfg")
+              || !QDir(output + "engine").exists()
+            ){
                 result.errors << QObject::tr(
-                  "The installation directory has no plugins.cfg and resources.cfg. Enable 'Copy V-Gears data files'."
+                  "The installation directory has no V-Gears files. Enable 'Copy V-Gears data files'."
                 );
             }
             else{
@@ -220,7 +223,7 @@ namespace InstallSteps{
             const QString& file = files[f];
             const QString relative = src_dir.relativeFilePath(file);
             const QString target = dst + "/" + relative;
-            if (relative.startsWith("data/config/") && QFile::exists(target)) continue;
+            if (VGears::DataDirectory::IsPlayerPath(relative.toStdString())) continue;
             QDir().mkpath(QFileInfo(target).absolutePath());
             if (QFile::exists(target)) QFile::remove(target);
             if (!QFile::copy(file, target)){
@@ -230,6 +233,32 @@ namespace InstallSteps{
         }
         if (progress) progress(100);
         return ok;
+    }
+
+    QString PrepareInstallation(const QString& output){
+        try{
+            VGears::DataDirectory::MigrateLayout(output.toStdString());
+            VGears::DataDirectory::PrepareDirectory(output.toStdString());
+        }
+        catch (const boost::filesystem::filesystem_error& e){
+            return QString::fromStdString(e.what());
+        }
+        return QString();
+    }
+
+    bool CopyGameFiles(const QString& game_data, const QString& output, const std::function<void(float)>& progress){
+        namespace fs = boost::filesystem;
+        boost::system::error_code ec;
+        // The files of older versions are moved first, so their configuration is not replaced by the default one.
+        if (!PrepareInstallation(output).isEmpty()) return false;
+        // The files shipped with V-Gears are replaced, so the ones that no longer exist don't stay.
+        if (!fs::equivalent(game_data.toStdString(), output.toStdString(), ec)){
+            for (const char* dir : {"engine", "defaults"}){
+                fs::remove_all(fs::path(output.toStdString()) / dir, ec);
+                if (ec) return false;
+            }
+        }
+        return CopyDirectory(game_data, output, progress) && PrepareInstallation(output).isEmpty();
     }
 
     float OverallProgress(Phase phase, float progress){

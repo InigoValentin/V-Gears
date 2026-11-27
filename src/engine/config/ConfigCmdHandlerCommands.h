@@ -294,7 +294,7 @@ void CmdMap(const Ogre::StringVector& params){
         return;
     }
     // The same as the map function of the scripts (the old list of maps, ./data/maps.xml, doesn't
-    // exist: the fields are in ./data/fields/_fields.xml).
+    // exist: the fields are in ./game/field/maps/_fields.xml).
     ScriptManager::getSingleton().RunString("map(\"" + params[1] + "\")");
 }
 
@@ -350,7 +350,7 @@ void CmdPhs(const Ogre::StringVector& params){
  * @param[in] complete_params The map names will be loaded here.
  */
 void CmdMapCompletion(Ogre::StringVector& complete_params){
-    XmlMapsFile xml("./data/fields/_fields.xml");
+    XmlMapsFile xml("./game/field/maps/_fields.xml");
     xml.GetMapNames(complete_params);
 }
 
@@ -413,7 +413,7 @@ void CmdResolutionCompletition(Ogre::StringVector& complete_params){
  */
 void CmdScreenshot(const Ogre::StringVector& params){
     Ogre::RenderWindow* window = VGears::ApplicationInterface::Get()->getRenderWindow();
-    Ogre::String ret = window->writeContentsToTimestampedFile("screenshot_", ".png");
+    Ogre::String ret = window->writeContentsToTimestampedFile("user/screenshots/screenshot_", ".png");
     Console::getSingleton().AddTextToOutput("Screenshot " + ret + " saved.");
 }
 

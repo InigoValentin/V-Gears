@@ -47,7 +47,7 @@
 BattleDataInstaller::BattleDataInstaller(
   const DiskImage& disk_image, const std::string output_dir, Ogre::ResourceGroupManager* res_mgr
 ):
-  disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "data/"),
+  disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "game/"),
   scene_bin_(*const_cast<DiskImage&>(disk_image).filePath("data/battle/scene.bin")), total_scenes_(0), next_scene_(0),
   res_mgr_(res_mgr)
 {}
@@ -272,7 +272,7 @@ unsigned int BattleDataInstaller::ProcessBattleModel(){
           output_dir_ + "temp/battle_models/" + battle_lgp_file_names_[next_model_to_process_] + ".tex"
         );
         TexFile tex(battle_lgp_files_[next_model_to_process_]);
-        std::string path = data_dir_ + "models/battle/";
+        std::string path = data_dir_ + "battle/models/";
         if (info.is_player){
             path += "characters/";
             // Add or update on character_data_
@@ -432,7 +432,7 @@ unsigned int BattleDataInstaller::ProcessSpellModel(){
         // add them to a particular model.
         magic_lgp_files_[next_model_to_process_].WriteFile(output_dir_ + "temp/spell_models/" + fname);
         TexFile tex(output_dir_ + "temp/spell_models/" + fname);
-        std::string path = data_dir_ + "models/battle/attacks/" + id + ".png";
+        std::string path = data_dir_ + "battle/models/attacks/" + id + ".png";
         // Many of these tex files are wrong and dummied out in the OG, so try/catch.
         try{
             tex.SavePng(path);
@@ -592,7 +592,7 @@ unsigned int BattleDataInstaller::ConvertBattleModel(){
             // Only the models of the party have the 74 scripts (the limits are the ones from 60 up). The other
             // ones (enemies and the rest of the models with scripts) have 32.
             AbFile ab(File(output_dir_ + "temp/battle_models/" + model.script), !info.is_player);
-            ab.GenerateScripts(model.id + "_" + info.name_normal, data_dir_ + "scripts/battle_models/");
+            ab.GenerateScripts(model.id + "_" + info.name_normal, data_dir_ + "battle/scripts/");
             if (!info.is_scene && "" != model.hrc){
                 WriteModelCamera(
                   File(output_dir_ + "temp/battle_models/" + model.script),
@@ -891,7 +891,7 @@ unsigned int BattleDataInstaller::ConvertEffectModel(){
         Ogre::MeshPtr mesh(Ogre::MeshManager::getSingleton().load(model.name + ".mesh", "FFVII"));
         ExportMesh("effects/", mesh);
         for (const std::string& texture : model.textures){
-            const std::string path = data_dir_ + "models/battle/effects/"
+            const std::string path = data_dir_ + "battle/models/effects/"
               + texture.substr(0, texture.size() - 4) + ".png";
             if (boost::filesystem::exists(path)) continue;
             // A texture that is not in magic.lgp is already reported.
@@ -918,9 +918,9 @@ unsigned int BattleDataInstaller::ConvertEffectModel(){
 }
 
 void BattleDataInstaller::WriteEffectModels(){
-    std::ofstream file(data_dir_ + "gamedata/effects.lua");
+    std::ofstream file(data_dir_ + "battle/effects/effects.lua");
     file << "-- Meshes of the battle effects, extracted from magic.lgp. Names are the folder of the effect\n"
-         << "-- and the original file, for example magic_faira_1. Meshes are in models/battle/effects.\n"
+         << "-- and the original file, for example magic_faira_1. Meshes are in game/battle/models/effects.\n"
          << "Game.EffectModels = {\n";
     for (const EffectModel& model : effect_models_){
         if (model.converted) file << "    \"" << model.name << "\",\n";
@@ -942,7 +942,7 @@ void BattleDataInstaller::WriteBattleCameras(){
         if (path != nullptr && BattleCameraScripts::ReadFile(*path, set)) sets[i] = set;
         else std::cerr << "[WARNING] Can't read " << name << "." << std::endl;
     }
-    std::ofstream file(data_dir_ + "gamedata/battle_cameras.lua");
+    std::ofstream file(data_dir_ + "battle/battle_cameras.lua");
     BattleCameraScripts::WriteLua(file, sets);
     // The ones of the start of the battles are in the executable.
     BattleCameraScripts::Set intro;
@@ -961,7 +961,7 @@ void BattleDataInstaller::WriteEffectMeshes(){
     if (exe_path == nullptr || !ExeEffectMeshes::Extract(*exe_path, meshes)){
         std::cerr << "[WARNING] Can't read the meshes of the effects from ff7.exe." << std::endl;
     }
-    std::ofstream file(data_dir_ + "gamedata/effect_meshes.lua");
+    std::ofstream file(data_dir_ + "battle/effects/effect_meshes.lua");
     ExeEffectMeshes::WriteLua(file, meshes);
 }
 
@@ -973,10 +973,10 @@ void BattleDataInstaller::WriteEffectCameras(){
     if (exe_path == nullptr || !ExeEffectCameras::Extract(*exe_path, scripts)){
         std::cerr << "[WARNING] Can't read the camera scripts of the effects from ff7.exe." << std::endl;
     }
-    std::ofstream file(data_dir_ + "gamedata/effect_cameras.lua");
+    std::ofstream file(data_dir_ + "battle/effects/effect_cameras.lua");
     file << "-- Camera scripts of the battle effects, read from ff7.exe. Game.EffectCameras[name] is a list\n"
          << "-- of 16 bit words, with the address of the script in the executable as the name (like\n"
-         << "-- 0x8ae268). See scripts/battle/effect_camera.lua for the format.\n"
+         << "-- 0x8ae268). See engine/scripts/battle/effect_camera.lua for the format.\n"
          << "Game.EffectCameras = Game.EffectCameras or {}\n";
     for (const auto& script : scripts){
         file << "Game.EffectCameras[\"0x" << std::hex << script.first << std::dec << "\"] = {";
@@ -993,28 +993,28 @@ void BattleDataInstaller::WriteEffectSprites(){
     // the layout below). They are written twice: all the quads one after the other (the first format,
     // used by the Cure effect) and the frames with their quads (effect_animations.lua).
     // Textures are converted too, with the name of the effect folder as a prefix (common_ for the
-    // archive root), to images/battle_fx, so they can be used as images of sprites.
+    // archive root), to battle/images/battle_fx, so they can be used as images of sprites.
     const std::string key_prefix = "ff7/data/battle/";
     auto key_of = [&](std::string folder){
         if (folder.empty()) return std::string("common");
         if (folder.compare(0, key_prefix.size(), key_prefix) == 0) folder = folder.substr(key_prefix.size());
         return EffectSafeName(folder);
     };
-    std::ofstream file(data_dir_ + "gamedata/effect_sprites.lua");
+    std::ofstream file(data_dir_ + "battle/effects/effect_sprites.lua");
     file << "-- Frames of the sprite files of magic.lgp. Game.EffectSprites[name] is a list of frames with\n"
          << "-- the position (u, v) and size (w, h) in the texture, in pixels, the offset to draw it\n"
          << "-- (ox, oy) and the flags. The names are the folder and the file, like common_iyashi.\n"
-         << "-- Textures are in images/battle_fx, like common_iyashi00.png.\n"
+         << "-- Textures are in game/battle/images/battle_fx, like common_iyashi00.png.\n"
          << "Game.EffectSprites = Game.EffectSprites or {}\n";
     // (The list has the quads of all the frames in order, with the position of the corner as ox, oy.)
-    std::ofstream animations(data_dir_ + "gamedata/effect_animations.lua");
+    std::ofstream animations(data_dir_ + "battle/effects/effect_animations.lua");
     animations << "-- Frames of the sprite files (.SPT) of magic.lgp. Game.EffectAnimations[name] is a list of frames and\n"
                << "-- every frame a list of quads: {x, y, u, v, w, h}, with the position of the corner and the size of the\n"
                << "-- quad in units of 8 of the effect, and the place in the texture in pixels. The names are the folder\n"
                << "-- and the file, like common_houden_2.\n"
                << "Game.EffectAnimations = Game.EffectAnimations or {}\n";
     const std::string dir = output_dir_ + "temp/effects/";
-    boost::filesystem::create_directories(data_dir_ + "images/battle_fx/");
+    boost::filesystem::create_directories(data_dir_ + "battle/images/battle_fx/");
     for (size_t f = 0; f < magic_lgp_files_.size(); f ++){
         const std::string& name = magic_lgp_file_names_[f];
         if (name.size() < 3) continue;
@@ -1023,7 +1023,7 @@ void BattleDataInstaller::WriteEffectSprites(){
         const std::string key = key_of(magic_lgp_file_folders_[f]);
         if (ext == "tex"){
             const std::string stem = EffectSafeName(EffectStem(name));
-            const std::string path = data_dir_ + "images/battle_fx/" + key + "_" + stem + ".png";
+            const std::string path = data_dir_ + "battle/images/battle_fx/" + key + "_" + stem + ".png";
             if (boost::filesystem::exists(path)) continue;
             try{
                 magic_lgp_files_[f].WriteFile(dir + key + "_" + stem + ".tex");
@@ -1388,12 +1388,12 @@ void BattleDataInstaller::WriteAttacks(){
     for (const auto& entry : attack_map_){
         std::unique_ptr<TiXmlElement> xml_attack(new TiXmlElement("attack"));
         xml_attack->SetAttribute("id", entry.first);
-        // The file name in the map has the gamedata/attack/ path.
+        // The file name in the map has the battle/attacks/ path.
         xml_attack->SetAttribute("file", entry.second.substr(entry.second.find_last_of('/') + 1));
         attacks->LinkEndChild(xml_attack.release());
     }
     index.LinkEndChild(attacks.release());
-    index.SaveFile(data_dir_ + "gamedata/attack/_index.xml");
+    index.SaveFile(data_dir_ + "battle/attacks/_index.xml");
 }
 
 void BattleDataInstaller::WriteFormations(){
@@ -1459,7 +1459,7 @@ void BattleDataInstaller::WriteFormations(){
         xml.LinkEndChild(container.release());
         std::string file_name = std::to_string(formation.id);
         while (file_name.length() < 4) file_name = "0" + file_name;
-        file_name = "gamedata/formation/" + file_name + ".xml";
+        file_name = "battle/formations/" + file_name + ".xml";
         xml.SaveFile(data_dir_ + file_name);
         formation_map_[formation.id] = file_name;
     }
@@ -1480,7 +1480,7 @@ void BattleDataInstaller::WriteCharacterData(){
         container->LinkEndChild(xml_character.release());
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(data_dir_ + "models/battle/characters.xml");
+    xml.SaveFile(data_dir_ + "battle/models/characters.xml");
 }
 
 void BattleDataInstaller::WriteSceneData(){
@@ -1494,11 +1494,11 @@ void BattleDataInstaller::WriteSceneData(){
         container->LinkEndChild(xml_scene.release());
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(data_dir_ + "models/battle/scenes.xml");
+    xml.SaveFile(data_dir_ + "battle/models/scenes.xml");
 }
 
 std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){
-    std::string file_name = "gamedata/enemy/";
+    std::string file_name = "battle/enemies/";
     std::string id = std::to_string(enemy.id);
     while (id.size() < 4) id = "0" + id;
     file_name += id + ".xml";
@@ -1506,7 +1506,7 @@ std::string BattleDataInstaller::BuildEnemyFileName(Enemy enemy){
 }
 
 std::string BattleDataInstaller::BuildAttackFileName(Attack attack){
-    std::string file_name = "gamedata/attack/";
+    std::string file_name = "battle/attacks/";
     std::string id = std::to_string(attack.id);
     while (id.size() < 4) id = "0" + id;
     file_name += (id + "_");
@@ -1548,10 +1548,10 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
     Ogre::SkeletonPtr skeleton(mesh->getSkeleton());
     Ogre::SkeletonSerializer skeleton_serializer;
     skeleton_serializer.exportSkeleton(
-      skeleton.get(), data_dir_ + "models/battle/" + outdir + base_mesh_name + ".skeleton"
+      skeleton.get(), data_dir_ + "battle/models/" + outdir + base_mesh_name + ".skeleton"
     );
     mesh->setSkeletonName(outdir + base_mesh_name + ".skeleton");
-    mesh_serializer.exportMesh(mesh.get(), data_dir_ + "models/battle/" + outdir + mesh->getName());
+    mesh_serializer.exportMesh(mesh.get(), data_dir_ + "battle/models/" + outdir + mesh->getName());
     Ogre::MaterialSerializer mat_ser;
     bool queued = false;
     std::set<std::string> textures;
@@ -1587,7 +1587,7 @@ void BattleDataInstaller::ExportMesh(const std::string outdir, const Ogre::MeshP
     }
     // Ogre throws if there is nothing to export (a mesh without geometry, or whose materials are already exported).
     if (queued)
-        mat_ser.exportQueued(data_dir_ + "models/battle/" + outdir + base_mesh_name + VGears::EXT_MATERIAL);
+        mat_ser.exportQueued(data_dir_ + "battle/models/" + outdir + base_mesh_name + VGears::EXT_MATERIAL);
 }
 
 void BattleDataInstaller::GenerateRsdFiles(BattleModel model, std::string path){
@@ -1638,7 +1638,7 @@ void BattleDataInstaller::WriteModelCamera(
     skeleton.SetOffset(12);
     const unsigned int bones = skeleton.readU32LE();
     if (bones == 0 || skeleton.GetFileSize() < 16 + bones * 12) return;
-    std::ofstream file(data_dir_ + "scripts/battle_models/" + model_name + "_camera.lua");
+    std::ofstream file(data_dir_ + "battle/scripts/" + model_name + "_camera.lua");
     if (!file) return;
     file << "-- Data of the model for the cameras of the battles. A point is the end of the bone with the\n"
       << "-- number of the point minus one (0 is the root).\n"

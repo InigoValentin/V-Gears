@@ -31,11 +31,11 @@ DataInstaller::DataInstaller(
   std::function<void(std::string, int, bool)> write_output_line
 )
 #ifdef _DEBUG
-  : application_("plugins_d.cfg", "resources_d.cfg", "install_d.log"),
+  : application_("plugins_d.cfg", "resources_d.cfg", "logs/ogre_d.log"),
 #else
-  : application_("plugins.cfg", "resources.cfg", "install.log"),
+  : application_("plugins.cfg", "resources.cfg", "logs/ogre.log"),
 #endif
-  disk_image_(disk_image), output_dir_(output_dir), data_dir_(InstallLayout::DataDir(output_dir)),
+  disk_image_(disk_image), output_dir_(output_dir), data_dir_(InstallLayout::GameDir(output_dir)),
   options_(options), write_output_line_(write_output_line)
 {
     // The installer only converts data, so it needs no render system, no window and no display.
@@ -43,7 +43,7 @@ DataInstaller::DataInstaller(
     Ogre::Log* default_log(Ogre::LogManager::getSingleton().getDefaultLog());
     assert( default_log );
     default_log->setLogDetail(Ogre::LL_LOW);
-    // Ogre's messages only go to its own log (install.log, see Application::initOgreHeadless). Most are expected
+    // Ogre's messages only go to its own log (logs/ogre.log, see Application::initOgreHeadless). Most are expected
     // while converting (meshes without a skeleton yet, materials without a render system), and in the terminal and
     // installer.log they hide the messages of the installer. The problems that V-Gears itself writes to that log
     // (LOG_ERROR and LOG_WARNING) are passed to the installation log.
@@ -252,73 +252,73 @@ float DataInstaller::Progress(){
             }
             write_output_line_("Parsing item and materia prices...", 2, true);
             kernel_installer_->ReadPrices();
-            kernel_installer_->WriteShops(data_dir_ + "gamedata/shops.lua");
+            kernel_installer_->WriteShops(data_dir_ + "kernel/shops.lua");
             installation_state_ = KERNEL_COMMANDS;
             return CalcProgress();
         case KERNEL_COMMANDS:
             write_output_line_("Extracting command data...", 2, true);
             kernel_installer_->ReadCommands();
-            kernel_installer_->WriteCommands(data_dir_ + "gamedata/commands.lua");
+            kernel_installer_->WriteCommands(data_dir_ + "kernel/commands.lua");
             installation_state_ = KERNEL_ATTACKS;
             return CalcProgress();
         case KERNEL_ATTACKS:
             write_output_line_("Extracting attack data...", 2, true);
             kernel_installer_->ReadAttacks();
-            kernel_installer_->WriteAttacks(data_dir_ + "gamedata/attacks.lua");
+            kernel_installer_->WriteAttacks(data_dir_ + "kernel/attacks.lua");
             installation_state_ = KERNEL_CHARACTERS;
             return CalcProgress();
         case KERNEL_CHARACTERS:
             write_output_line_("Extracting character data...", 2, true);
             kernel_installer_->ReadCharacters();
-            kernel_installer_->WriteCharacters(data_dir_ + "gamedata/characters.lua");
+            kernel_installer_->WriteCharacters(data_dir_ + "kernel/characters.lua");
             installation_state_ = KERNEL_ITEMS;
             return CalcProgress();
         case KERNEL_ITEMS:
             write_output_line_("Extracting item data...", 2, true);
             kernel_installer_->ReadItems();
-            kernel_installer_->WriteItems(data_dir_ + "gamedata/items.lua");
+            kernel_installer_->WriteItems(data_dir_ + "kernel/items.lua");
             installation_state_ = KERNEL_GROWTH;
             return CalcProgress();
         case KERNEL_GROWTH:
             write_output_line_("Extracting growth data...", 2, true);
             kernel_installer_->ReadGrowth();
-            kernel_installer_->WriteGrowth(data_dir_ + "gamedata/growth.lua");
+            kernel_installer_->WriteGrowth(data_dir_ + "kernel/growth.lua");
             installation_state_ = KERNEL_WEAPONS;
             return CalcProgress();
         case KERNEL_WEAPONS:
             write_output_line_("Extracting weapon data...", 2, true);
             kernel_installer_->ReadWeapons();
-            kernel_installer_->WriteWeapons(data_dir_ + "gamedata/weapons.lua");
+            kernel_installer_->WriteWeapons(data_dir_ + "kernel/weapons.lua");
             installation_state_ = KERNEL_ARMORS;
             return CalcProgress();
         case KERNEL_ARMORS:
             write_output_line_("Extracting armor data...", 2, true);
             kernel_installer_->ReadArmors();
-            kernel_installer_->WriteArmors(data_dir_ + "gamedata/armors.lua");
+            kernel_installer_->WriteArmors(data_dir_ + "kernel/armors.lua");
             installation_state_ = KERNEL_ACCESSORIES;
             return CalcProgress();
         case KERNEL_ACCESSORIES:
             write_output_line_("Extracting accessory data...", 2, true);
             kernel_installer_->ReadAccessories();
-            kernel_installer_->WriteAccessories(data_dir_ + "gamedata/accessories.lua");
+            kernel_installer_->WriteAccessories(data_dir_ + "kernel/accessories.lua");
             installation_state_ = KERNEL_MATERIA;
             return CalcProgress();
         case KERNEL_MATERIA:
             write_output_line_("Extracting materia data...", 2, true);
             kernel_installer_->ReadMateria();
-            kernel_installer_->WriteMateria(data_dir_ + "gamedata/materia.lua");
+            kernel_installer_->WriteMateria(data_dir_ + "kernel/materia.lua");
             installation_state_ = KERNEL_KEY_ITEMS;
             return CalcProgress();
         case KERNEL_KEY_ITEMS:
             write_output_line_("Extracting key item data...", 2, true);
             kernel_installer_->ReadKeyItems();
-            kernel_installer_->WriteKeyItems(data_dir_ + "gamedata/key_items.lua");
+            kernel_installer_->WriteKeyItems(data_dir_ + "kernel/key_items.lua");
             installation_state_ = KERNEL_SUMMON_NAMES;
             return CalcProgress();
         case KERNEL_SUMMON_NAMES:
             write_output_line_("Extracting summon attack names data...", 2, true);
             kernel_installer_->ReadSummonNames();
-            kernel_installer_->WriteSummonNames(data_dir_ + "gamedata/summons.lua");
+            kernel_installer_->WriteSummonNames(data_dir_ + "kernel/summons.lua");
             installation_state_ = KERNEL_SAVEMAP;
             return CalcProgress();
         case KERNEL_SAVEMAP:
@@ -329,7 +329,7 @@ float DataInstaller::Progress(){
                 if (exe_path) kernel_installer_->ReadRecruitRecords(*exe_path);
                 else write_output_line_("ff7.exe not found, Cait Sith and Vincent won't have their data.", 2, true);
             }
-            kernel_installer_->WriteInitialSaveMap(data_dir_ + "gamedata/initial_savemap.lua");
+            kernel_installer_->WriteInitialSaveMap(data_dir_ + "kernel/initial_savemap.lua");
             installation_state_ = MEDIA_IMAGES;
             return CalcProgress();
         case MEDIA_IMAGES:
@@ -590,31 +590,32 @@ void DataInstaller::UseModelParts(const std::string& temp_dir){
 }
 
 void DataInstaller::CreateDirectories(){
-    for (const std::string& dir : InstallLayout::DataSubdirs()) CreateDir(dir);
+    for (const std::string& dir : InstallLayout::GameSubdirs()) CreateDir(dir);
     CreateDir("temp", true);
     for (const std::string& dir : InstallLayout::TempSubdirs()) CreateDir("temp/" + dir, true);
 
     application_.ResMgr()->addResourceLocation(output_dir_ + "temp/char/", "FileSystem", "FFVII", true, true);
     application_.ResMgr()->addResourceLocation(output_dir_ + "temp/battle_models/", "FileSystem", "FFVII", true, true);
     application_.ResMgr()->addResourceLocation(output_dir_ + "temp/world_models/", "FileSystem", "FFVII", true, true);
-    application_.ResMgr()->addResourceLocation(data_dir_ + "models/", "FileSystem", "FFVII", true, true);
+    for (const char* dir : {"field/models/", "battle/models/", "world/models/"})
+        application_.ResMgr()->addResourceLocation(data_dir_ + dir, "FileSystem", "FFVII", true, true);
     application_.ResMgr()->addResourceLocation(
-      data_dir_ + "models/fields/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "field/models/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      data_dir_ + "models/battle/characters/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "battle/models/characters/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      data_dir_ + "models/battle/scenes/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "battle/models/scenes/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      data_dir_ + "models/battle/enemies/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "battle/models/enemies/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      data_dir_ + "models/battle/attacks/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "battle/models/attacks/", "FileSystem", "FFVIITextures", true, true
     );
     application_.ResMgr()->addResourceLocation(
-      data_dir_ + "models/world/", "FileSystem", "FFVIITextures", true, true
+      data_dir_ + "world/models/", "FileSystem", "FFVIITextures", true, true
     );
     const auto fields_lgp_path = disk_image_.filePath("data/field/flevel.lgp");
     if (!fields_lgp_path) throw std::runtime_error("Missing required file: data/field/flevel.lgp");
@@ -623,9 +624,7 @@ void DataInstaller::CreateDirectories(){
 
 void DataInstaller::RemoveOriginals(){
     boost::system::error_code ec;
-    // The game itself reads some of the temp directories, so only the rest are removed.
-    for (const std::string& dir : InstallLayout::RemovableTempSubdirs())
-        boost::filesystem::remove_all(InstallLayout::TempDir(output_dir_) + dir + "/", ec);
+    boost::filesystem::remove_all(InstallLayout::TempDir(output_dir_), ec);
     boost::filesystem::remove_all(InstallLayout::OriginalDataDir(output_dir_), ec);
 }
 

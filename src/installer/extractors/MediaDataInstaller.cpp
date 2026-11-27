@@ -40,7 +40,7 @@ int MediaDataInstaller::TOTAL_SOUNDS = 750;
 MediaDataInstaller::MediaDataInstaller(
   const DiskImage& disk_image, const std::string output_dir, const bool keep_originals
 ):
-  disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "data/"), keep_originals_(keep_originals),
+  disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "game/"), keep_originals_(keep_originals),
     window_(*disk_image_.filePath("data/kernel/WINDOW.BIN")),
     processed_sounds_(0),
     menu_(VGears::LGPArchive(*disk_image_.filePath("data/menu/menu_us.lgp"), "LGP")),
@@ -1118,14 +1118,14 @@ void MediaDataInstaller::InstallSprites(){
 
         // Save the TEX File
         std::fstream out;
-        out.open(data_dir_ + "images/" + f.file_name, std::ios::out);
+        out.open(data_dir_ + "ui/images/" + f.file_name, std::ios::out);
         menu.SetOffset(f.data_offset);
         for (int j = 0; j < f.data_size; j ++) out << menu.readU8();
         out.close();
 
         // Open the TEX file and save PNGs.
-        std::string img_dir = data_dir_ + "images/";
-        TexFile tex(data_dir_ + "images/" + f.file_name);
+        std::string img_dir = data_dir_ + "ui/images/";
+        TexFile tex(data_dir_ + "ui/images/" + f.file_name);
         if (f.file_name == "barre.tex")
             tex.SavePng(img_dir + "characters/1.png", 0, 0, 83, 95, 0);
         else if (f.file_name == "bins.tex")
@@ -1312,7 +1312,7 @@ void MediaDataInstaller::InstallSprites(){
         // TODO: Extract arena reels from coloa.tex, colob.tex and coloc.tex
 
         // Delete Tex file.
-        if (!keep_originals_) std::remove((data_dir_ + "images/" + f.file_name).c_str());
+        if (!keep_originals_) std::remove((data_dir_ + "ui/images/" + f.file_name).c_str());
     }
 }
 
@@ -1327,7 +1327,7 @@ bool MediaDataInstaller::InstallFonts(){
         tim.GetFileBuffer(buffer.data(), 0, buffer.size());
         if (!WindowFonts::ReadTim4(buffer.data(), buffer.size(), i == 0 ? window : text)) return false;
     }
-    const std::string font_dir = data_dir_ + "fonts/";
+    const std::string font_dir = data_dir_ + "ui/fonts/";
     WindowFonts::SavePng(WindowFonts::BuildTextFont(text), font_dir + "ffvii_en.png");
     WindowFonts::SavePng(WindowFonts::BuildMenuFont(window), font_dir + "ffvii_menu.png");
     WindowFonts::SavePng(WindowFonts::BuildDigitsFont(window), font_dir + "ffvii_digits.png");
@@ -1448,14 +1448,14 @@ bool MediaDataInstaller::InstallMusics(){
     File midi(*disk_image_.filePath("data/midi/midi.lgp"));
 
     std::fstream out;
-    out.open(data_dir_ + "audio/musics/" + std::to_string(index) + ".mid", std::ios::out);
+    out.open(data_dir_ + "audio/music/" + std::to_string(index) + ".mid", std::ios::out);
     midi.SetOffset(f.data_offset);
     for (int j = 0; j < f.data_size; j ++) out << midi.readU8();
     out.close();
 
     // Convert to ogg (TiMidity + FFMpeg).
-    const std::string midi_path = data_dir_ + "audio/musics/" + std::to_string(index) + ".mid";
-    const std::string ogg_path = data_dir_ + "audio/musics/" + std::to_string(index) + ".ogg";
+    const std::string midi_path = data_dir_ + "audio/music/" + std::to_string(index) + ".mid";
+    const std::string ogg_path = data_dir_ + "audio/music/" + std::to_string(index) + ".ogg";
     const bool keep = keep_originals_;
     if (ToolsReady(true)){
         // Converted in the background. The midi file is removed once it has been converted.
@@ -1471,7 +1471,7 @@ bool MediaDataInstaller::InstallMusics(){
     }
     // Without the programs the midi file is the only copy of the track, so it stays.
 
-    musics_.push_back("audio/musics/" + std::to_string(processed_musics_) + ".ogg");
+    musics_.push_back("audio/music/" + std::to_string(processed_musics_) + ".ogg");
     processed_musics_ ++;
     if (processed_musics_ == midi_.list(true, true)->size()) return true;
     else return false;
@@ -1505,7 +1505,7 @@ void MediaDataInstaller::InstallHQMusics(){
             continue;
         }
         const std::string wav = *wav_path;
-        const std::string ogg = data_dir_ + "audio/musics/" + std::to_string(index) + ".ogg";
+        const std::string ogg = data_dir_ + "audio/music/" + std::to_string(index) + ".ogg";
         RunConversion(
           "high quality music " + hq_music,
           [ffmpeg, wav, ogg](std::string* error){return ExternalTools::ConvertToOgg(ffmpeg, wav, ogg, error);}
@@ -1516,7 +1516,7 @@ void MediaDataInstaller::InstallHQMusics(){
     int last_id = 0;
     for (auto const& m : musics_map_) last_id = std::max(last_id, m.first);
     for (int id = static_cast<int>(musics_.size()); id <= last_id; ++ id)
-        musics_.push_back("audio/musics/" + std::to_string(id) + ".ogg");
+        musics_.push_back("audio/music/" + std::to_string(id) + ".ogg");
 }
 
 bool MediaDataInstaller::ToolsReady(bool need_timidity){
@@ -1621,7 +1621,7 @@ void MediaDataInstaller::WriteMusicsIndex(){
         }
     }
     xml.LinkEndChild(container.release());
-    xml.SaveFile(data_dir_ + "audio/musics/_musics.xml");
+    xml.SaveFile(data_dir_ + "audio/music/_musics.xml");
 }
 
 void MediaDataInstaller::InstallVideos(){

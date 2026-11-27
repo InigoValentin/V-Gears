@@ -100,6 +100,25 @@ namespace InstallSteps{
     VerifyPlugins PluginSearch();
 
     /**
+     * Moves the files of an older version to their places, and creates the directories of the installation and the
+     * configuration of the player if they are missing.
+     *
+     * @param[in] output Installation directory, ending with '/'.
+     * @return The error, or an empty string.
+     */
+    QString PrepareInstallation(const QString& output);
+
+    /**
+     * Copies the V-Gears files to an installation, replacing the "engine" and "defaults" directories.
+     *
+     * @param[in] game_data The V-Gears data folder.
+     * @param[in] output Installation directory, ending with '/'.
+     * @param[in] progress Receives the progress, from 0 to 100.
+     * @return False if something couldn't be copied.
+     */
+    bool CopyGameFiles(const QString& game_data, const QString& output, const std::function<void(float)>& progress);
+
+    /**
      * Recursively copies a directory, overwriting existing files.
      *
      * The configuration of the game (data/config) is only copied if it isn't there: the user may have changed it.

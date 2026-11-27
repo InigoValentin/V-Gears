@@ -279,7 +279,7 @@ namespace BattleCameraScripts{
             << "-- Game.BattleCameras[file].position[camera id * 3 + variant + 1] is the name of a script in\n"
             << "-- Game.BattleCameras[file].scripts (the bytes of the script), the same for .look (the point\n"
             << "-- the camera looks at). .victory_position[variant + 1] and .victory_look are the ones of the\n"
-            << "-- camera of the victory. See scripts/battle/battle_camera.lua for the format.\n"
+            << "-- camera of the victory. See engine/scripts/battle/battle_camera.lua for the format.\n"
             << "Game.BattleCameras = Game.BattleCameras or {}\n";
         for (const auto& item : sets){
             const Set& set = item.second;

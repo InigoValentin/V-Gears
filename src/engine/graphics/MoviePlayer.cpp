@@ -51,7 +51,7 @@ namespace{
 
     const char* const RESOURCE_GROUP = "FIELDS";
 
-    std::string MovieDirectory(const std::string& name){return "./data/video/" + name + "/";}
+    std::string MovieDirectory(const std::string& name){return "./game/video/" + name + "/";}
 
     std::string FramePath(const std::string& name, const int frame){
         char number[16];

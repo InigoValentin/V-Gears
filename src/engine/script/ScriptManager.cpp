@@ -60,8 +60,8 @@ ScriptManager::ScriptManager(const std::vector<ModuleBinder>& module_binders):
     for (ModuleBinder bind : module_binders) bind(lua_state_);
     InitCmd();
     // TODO: Use the one in data/ ?
-    RunFile("system/system.lua");
-    XmlScriptsFile scripts("./data/scripts/_scripts.xml");
+    RunFile("engine/system/system.lua");
+    XmlScriptsFile scripts("./engine/scripts/_scripts.xml");
     scripts.LoadScripts();
 }
 
@@ -429,7 +429,7 @@ float ScriptManager::EvaluateNumber(const Ogre::String& expression, const float 
 }
 
 void ScriptManager::RunFile(const Ogre::String& file){
-    if (luaL_dofile(lua_state_, ("./data/" + file).c_str()) == 1)
+    if (luaL_dofile(lua_state_, ("./" + file).c_str()) == 1)
         LOG_ERROR(Ogre::String(lua_tostring(lua_state_, -1)));
 }
 

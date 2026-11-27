@@ -38,8 +38,10 @@ namespace VGears{
          * be done again. The parts installed with an older version are reported as outdated.
          *
          * - 1: First version of the record.
+         * - 2: The converted data moved from "data" to "game".
+         * - 3: The converted data is grouped by game area, and the terrain textures of the world map are in "game".
          */
-        const int DATA_VERSION = 1;
+        const int DATA_VERSION = 3;
 
         /**
          * Name of the file, in the installation directory.

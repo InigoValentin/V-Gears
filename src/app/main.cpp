@@ -86,49 +86,58 @@ int main(int argc, char *argv[]){
 
         // Initialize resources.
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/system/", "FileSystem"
+          "./engine/system/", "FileSystem"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/audio/", "FileSystem", "AUDIO"
+          "./game/audio/", "FileSystem", "AUDIO"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/fields/", "FileSystem", "FIELDS", true
+          "./game/field/maps/", "FileSystem", "FIELDS", true
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/fonts/", "FileSystem", "FONTS"
+          "./engine/fonts/", "FileSystem", "FONTS"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/gamedata/", "FileSystem", "GAMEDATA"
+          "./game/ui/fonts/", "FileSystem", "FONTS"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/images/", "FileSystem", "IMAGES", true
+          "./game/kernel/", "FileSystem", "GAMEDATA"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/models/fields/", "FileSystem", "FIELD_MODELS"
+          "./engine/images/", "FileSystem", "IMAGES", true
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/models/world/", "FileSystem", "WORLD_MODELS", true
+          "./game/ui/images/", "FileSystem", "IMAGES", true
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/models/battle/", "FileSystem", "BATTLE_MODELS", true
+          "./game/battle/images/", "FileSystem", "IMAGES", true
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/screens/", "FileSystem", "SCREENS"
+          "./game/field/models/", "FileSystem", "FIELD_MODELS"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/scripts/", "FileSystem", "SCRIPTS"
+          "./game/world/models/", "FileSystem", "WORLD_MODELS", true
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/system/", "FileSystem", "SYSTEM"
+          "./game/battle/models/", "FileSystem", "BATTLE_MODELS", true
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/texts/", "FileSystem", "TEXTS"
+          "./engine/ui/", "FileSystem", "SCREENS"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./data/wm", "FileSystem", "WORLD_MAP"
+          "./engine/scripts/", "FileSystem", "SCRIPTS"
         );
         Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-          "./temp/world_models", "FileSystem", "WORLD_MAP"
+          "./engine/system/", "FileSystem", "SYSTEM"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./engine/texts/", "FileSystem", "TEXTS"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./game/world/maps/", "FileSystem", "WORLD_MAP"
+        );
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+          "./game/world/textures/", "FileSystem", "WORLD_MAP"
         );
         Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -166,14 +175,14 @@ int main(int argc, char *argv[]){
 
         // Execute the configuration file to locad values.
         ConfigFile config;
-        config.Execute("./data/config/config.cfg");
+        config.Execute("./user/config.cfg");
         input_manager->EnsureDefaultGameEvents();
         // The keys of the configuration file are the default ones.
         input_manager->SnapshotDefaultGameEvents();
         // Controller settings chosen by the player, if any. They replace the default keys.
         {
-            std::ifstream controls("./controls.cfg");
-            if (controls.good()) config.Execute("./controls.cfg");
+            std::ifstream controls("./user/controls.cfg");
+            if (controls.good()) config.Execute("./user/controls.cfg");
         }
 
         // Initialize UID and run it's scripts.

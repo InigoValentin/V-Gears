@@ -2342,7 +2342,7 @@ namespace VGears {
 
     void WorldmapModule::LoadEncounters(){
         encounter_records_.clear();
-        TiXmlDocument document("./data/gamedata/world_encounters.xml");
+        TiXmlDocument document("./game/world/world_encounters.xml");
         if (!document.LoadFile()){
             LOG_WARNING("World map encounters were not found. There will be no random battles.");
             return;
@@ -2585,7 +2585,7 @@ namespace VGears {
       snow_camera_remaining_ = 0.0f;
       snow_camera_timer_ = Ogre::Math::RangeRandom(SNOW_CAMERA_MIN_WAIT, SNOW_CAMERA_MAX_WAIT);
       ScriptManager::getSingleton().RunFile(
-        "scripts/worldmap/wm" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id_]) + ".lua"
+        "game/world/scripts/wm" + std::to_string(WORLD_MAP_FILE_NUMBERS[map_id_]) + ".lua"
       );
       // The debug spawn points, if debug_data.lua has them.
       spawn_overrides_.clear();

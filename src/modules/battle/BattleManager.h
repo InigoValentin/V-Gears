@@ -295,12 +295,12 @@ class BattleManager :
         /**
          * Adds a mesh of a visual effect to the battle scene.
          *
-         * The meshes come from the installer, in models/battle/effects. The entity can be moved,
+         * The meshes come from the installer, in game/battle/models/effects. The entity can be moved,
          * scaled and blended from the scripts, and should be removed with
          * {@see ScriptRemoveEffectModel} when the effect ends.
          *
          * @param[in] model Model name, without path or extension, like "magic_faira_1". A name
-         * with a folder, like "attacks/cyvadat" for a summon, is looked for in models/battle.
+         * with a folder, like "attacks/cyvadat" for a summon, is looked for in game/battle/models.
          * @param[in] x Position, X coordinate.
          * @param[in] y Position, Y coordinate.
          * @param[in] z Position, Z coordinate.

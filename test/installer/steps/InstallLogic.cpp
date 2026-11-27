@@ -73,47 +73,37 @@ namespace{
 
 BOOST_AUTO_TEST_SUITE(InstallLayoutTests)
 
-BOOST_AUTO_TEST_CASE(DataAndTempAreInsideTheInstallationDirectory){
-    BOOST_CHECK_EQUAL(InstallLayout::DataDir("/home/u/.v-gears/"), "/home/u/.v-gears/data/");
+BOOST_AUTO_TEST_CASE(GameAndTempAreInsideTheInstallationDirectory){
+    BOOST_CHECK_EQUAL(InstallLayout::GameDir("/home/u/.v-gears/"), "/home/u/.v-gears/game/");
     BOOST_CHECK_EQUAL(InstallLayout::TempDir("/home/u/.v-gears/"), "/home/u/.v-gears/temp/");
 }
 
-BOOST_AUTO_TEST_CASE(DataSubdirsAreRelativeAndUnique){
-    const auto& dirs = InstallLayout::DataSubdirs();
+BOOST_AUTO_TEST_CASE(GameSubdirsAreRelativeAndUnique){
+    const auto& dirs = InstallLayout::GameSubdirs();
     for (const std::string& dir : dirs){
         BOOST_CHECK_MESSAGE(!dir.empty() && dir[0] != '/', "not relative: " << dir);
-        BOOST_CHECK_MESSAGE(!StartsWith(dir, "data/") && !StartsWith(dir, "temp"), "wrong root: " << dir);
+        BOOST_CHECK_MESSAGE(!StartsWith(dir, "game/") && !StartsWith(dir, "temp"), "wrong root: " << dir);
         BOOST_CHECK_MESSAGE(std::count(dirs.begin(), dirs.end(), dir) == 1, "duplicated: " << dir);
     }
 }
 
 BOOST_AUTO_TEST_CASE(EveryDirectoryTheGameReadsIsCreated){
-    // The game reads "./data/<x>" and "./temp/<x>"; the installer must create them (or be able to write in them).
+    // The game reads "./engine/<x>", which is shipped with V-Gears, and "./game/<x>", which the installer must create.
     for (const std::string& resource : InstallLayout::GameResourceDirs()){
-        if (StartsWith(resource, "data/")){
+        if (StartsWith(resource, "engine/")){
+            BOOST_CHECK_MESSAGE(
+              fs::is_directory(fs::path(VGEARS_SOURCE_DIR) / "data" / resource), "not shipped: " << resource
+            );
+        }
+        else{
+            BOOST_REQUIRE_MESSAGE(StartsWith(resource, "game/"), "unexpected root: " << resource);
             const std::string dir = resource.substr(5);
             bool created = false;
-            for (const std::string& sub : InstallLayout::DataSubdirs())
+            for (const std::string& sub : InstallLayout::GameSubdirs())
                 created = created || sub == dir || StartsWith(sub, dir + "/");
             BOOST_CHECK_MESSAGE(created, "the installer doesn't create " << resource);
         }
-        else{
-            BOOST_REQUIRE_MESSAGE(StartsWith(resource, "temp/"), "unexpected root: " << resource);
-            BOOST_CHECK_MESSAGE(Contains(InstallLayout::TempSubdirs(), resource.substr(5)), "not created: " << resource);
-        }
     }
-}
-
-BOOST_AUTO_TEST_CASE(CleaningKeepsWhatTheGameNeeds){
-    const auto removable = InstallLayout::RemovableTempSubdirs();
-    BOOST_CHECK(!Contains(removable, "world_models"));
-    for (const std::string& kept : InstallLayout::KeptTempSubdirs()){
-        BOOST_CHECK(Contains(InstallLayout::TempSubdirs(), kept));
-        BOOST_CHECK(!Contains(removable, kept));
-    }
-    BOOST_CHECK_EQUAL(removable.size() + InstallLayout::KeptTempSubdirs().size(), InstallLayout::TempSubdirs().size());
-    // The game reads temp/world_models, so it must be a kept directory.
-    BOOST_CHECK(Contains(InstallLayout::KeptTempSubdirs(), "world_models"));
 }
 
 BOOST_AUTO_TEST_CASE(OldSettingsAreMigrated){
@@ -344,11 +334,11 @@ BOOST_AUTO_TEST_CASE(FilesOfTheDataFolderMustBeCopied){
     TempDir installation;
     TempDir reference;
     reference.Touch("plugins.cfg");
-    reference.Touch("data/scripts/a.lua");
+    reference.Touch("engine/scripts/a.lua");
     BOOST_CHECK(HasProblem(VerifyInstallation(installation.Root(), reference.Root()), "Copied data files"));
     installation.Touch("plugins.cfg");
     BOOST_CHECK(HasProblem(VerifyInstallation(installation.Root(), reference.Root()), "Copied data files"));
-    installation.Touch("data/scripts/a.lua");
+    installation.Touch("engine/scripts/a.lua");
     BOOST_CHECK(!HasProblem(VerifyInstallation(installation.Root(), reference.Root()), "Copied data files"));
     // Without a reference there is nothing to compare.
     BOOST_CHECK(!HasProblem(VerifyInstallation(installation.Root()), "Copied data files"));
@@ -356,7 +346,7 @@ BOOST_AUTO_TEST_CASE(FilesOfTheDataFolderMustBeCopied){
 
 BOOST_AUTO_TEST_CASE(CountsFilesInsteadOfJustLookingForOne){
     TempDir dir;
-    for (int i = 0; i < 3; ++ i) dir.Touch("data/fields/f" + std::to_string(i) + "/map.xml");
+    for (int i = 0; i < 3; ++ i) dir.Touch("game/field/maps/f" + std::to_string(i) + "/map.xml");
     // Three fields are not an installation of the fields.
     BOOST_CHECK(HasProblem(VerifyInstallation(dir.Root()), "Field maps"));
 }
@@ -690,34 +680,38 @@ BOOST_AUTO_TEST_CASE(CleanInstallationDeletesTheDataAndKeepsTheRest){
     TempDir dir;
     const std::string root = dir.Root();
     for (const char* file : {
-      "plugins.cfg", "resources.cfg", "v-gears.cfg", "controls.cfg", "installer.log", "save/0.xml",
-      "data/config/config.cfg", "data/video/opening/movie.xml", "data/fields/md1_1/map.xml",
-      "data/models/fields/aerisflowers.mesh", "data/audio/sounds/1.ogg", "data/scripts/x.lua",
-      "temp/char/cbba.rsd", "temp/world_models/a.p", "original_data/ff7/ff7.exe", "install.info"
+      "plugins.cfg", "resources.cfg", "v-gears.cfg", "logs/installer.log", "user/saves/0.xml", "user/config.cfg",
+      "game/video/opening/movie.xml", "game/field/maps/md1_1/map.xml", "game/field/models/aerisflowers.mesh",
+      "game/audio/sounds/1.ogg", "game/scripts/x.lua", "engine/scripts/x.lua", "defaults/config.cfg",
+      "temp/char/cbba.rsd", "temp/world_models/a.p", "original_data/ff7/ff7.exe", "install.info",
+      // The files of an older version.
+      "save/1.xml", "controls.cfg", "data/fields/md1_1/map.xml", "data/video/gold1/movie.xml"
     }) dir.Touch(file);
     const InstallLayout::CleanResult result = InstallLayout::CleanInstallation(root);
     BOOST_CHECK(result.errors.empty());
     BOOST_CHECK(result.removed > 0);
-    // Kept.
+    // Kept, the files of the older version in their new places.
     for (const char* file : {
-      "plugins.cfg", "resources.cfg", "v-gears.cfg", "controls.cfg", "installer.log", "save/0.xml",
-      "data/config/config.cfg", "data/video/opening/movie.xml"
+      "plugins.cfg", "resources.cfg", "v-gears.cfg", "logs/installer.log", "user/saves/0.xml", "user/saves/1.xml",
+      "user/controls.cfg", "user/config.cfg", "game/video/opening/movie.xml", "game/video/gold1/movie.xml"
     }) BOOST_CHECK_MESSAGE(fs::exists(dir.path / file), std::string("kept: ") + file);
     // Deleted.
-    for (const char* path : {"data/fields", "data/models", "data/audio", "data/scripts", "temp", "original_data", "install.info"})
-        BOOST_CHECK_MESSAGE(!fs::exists(dir.path / path), std::string("deleted: ") + path);
-    BOOST_CHECK(fs::is_directory(dir.path / "data"));
+    for (const char* path : {
+      "game/field", "game/battle", "game/audio", "game/scripts", "engine", "defaults", "data", "temp",
+      "original_data", "install.info"
+    }) BOOST_CHECK_MESSAGE(!fs::exists(dir.path / path), std::string("deleted: ") + path);
+    BOOST_CHECK(fs::is_directory(dir.path / "game"));
 }
 
 BOOST_AUTO_TEST_CASE(CleanInstallationDoesNotTouchOtherDirectories){
     // Without the configuration files it is not an installation, and nothing is deleted.
     TempDir dir;
-    dir.Touch("data/my_files/document.txt");
+    dir.Touch("game/my_files/document.txt");
     dir.Touch("temp/notes.txt");
     BOOST_CHECK(!InstallLayout::IsInstallation(dir.Root()));
     const InstallLayout::CleanResult result = InstallLayout::CleanInstallation(dir.Root());
     BOOST_CHECK_EQUAL(result.removed, 0u);
-    BOOST_CHECK(fs::exists(dir.path / "data/my_files/document.txt"));
+    BOOST_CHECK(fs::exists(dir.path / "game/my_files/document.txt"));
     BOOST_CHECK(fs::exists(dir.path / "temp/notes.txt"));
 }
 

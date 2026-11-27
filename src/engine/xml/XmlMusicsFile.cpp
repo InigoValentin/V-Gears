@@ -32,7 +32,7 @@ void XmlMusicsFile::LoadMusics(){
         if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "music"){
             AudioManager::Music music;
             music.name = GetString(node, "name");
-            music.file = "./data/" + GetString(node, "file_name");
+            music.file = "./game/" + GetString(node, "file_name");
             music.loop = GetFloat(node, "loop", -1);
             AudioManager::getSingleton().AddMusic(music);
         }

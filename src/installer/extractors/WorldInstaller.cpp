@@ -38,14 +38,14 @@
 #include "decompiler/DecompilerException.h"
 #include "decompiler/world/WorldEngine.h"
 
-std::string WorldInstaller::ELEMENT_MODELS_DIR("models/world/element");
+std::string WorldInstaller::ELEMENT_MODELS_DIR("world/models/element");
 
-std::string WorldInstaller::TERRAIN_MODELS_DIR("models/world/terrain");
+std::string WorldInstaller::TERRAIN_MODELS_DIR("world/models/terrain");
 
 WorldInstaller::WorldInstaller(
   const DiskImage& disk_image, const std::string output_dir,
   Ogre::ResourceGroupManager* res_mgr
-): disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "data/"), res_mgr_(res_mgr) {}
+): disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "game/"), res_mgr_(res_mgr) {}
 
 WorldInstaller::~WorldInstaller(){}
 
@@ -56,15 +56,33 @@ unsigned int WorldInstaller::Initialize(){
     wm_map_.push_back(File(*disk_image_.filePath("data/wm/WM2.MAP")));
     wm_map_.push_back(File(*disk_image_.filePath("data/wm/WM3.MAP")));
 
-    // The game reads the original map files at runtime (data/wm), so install a copy.
-    boost::filesystem::create_directories(data_dir_ + "wm/");
+    // The game reads the original map files at runtime (game/world/maps), so install a copy.
+    boost::filesystem::create_directories(data_dir_ + "world/maps/");
     for (const char* map : {"WM0.MAP", "WM2.MAP", "WM3.MAP"}){
         boost::filesystem::copy_file(
-          *disk_image_.filePath(std::string("data/wm/") + map), data_dir_ + "wm/" + map,
+          *disk_image_.filePath(std::string("data/wm/") + map), data_dir_ + "world/maps/" + map,
           boost::filesystem::copy_options::overwrite_existing
         );
     }
+    ExtractTextures();
     return wm_map_.size();
+}
+
+void WorldInstaller::ExtractTextures(){
+    boost::filesystem::create_directories(data_dir_ + "world/textures/");
+    const auto path = disk_image_.filePath("data/wm/world_us.lgp");
+    File world_file(*path);
+    VGears::LGPArchive world_lgp(*path, "LGP");
+    world_lgp.open(*path, true);
+    world_lgp.load();
+    for (const VGears::LGPArchive::FileEntry& entry : world_lgp.GetFiles()){
+        if (entry.data_offset + entry.data_size > world_file.GetFileSize()) continue;
+        std::string file_name = entry.file_name;
+        VGears::StringUtil::toLowerCase(file_name);
+        if (file_name.size() < 4 || file_name.compare(file_name.size() - 4, 4, ".tex") != 0) continue;
+        File texture(&world_file, entry.data_offset, entry.data_size);
+        texture.WriteFile(data_dir_ + "world/textures/" + file_name);
+    }
 }
 
 void WorldInstaller::GenerateMaterials(){
@@ -357,7 +375,7 @@ void WorldInstaller::GenerateMaterials(){
         Ogre::Technique* tech = mat->getTechnique(0);
         Ogre::Pass* pass = tech->getPass(0);
         pass->setDiffuse(0.7, 0.7, 0.7, 0.7);
-        mSer.exportMaterial(mat, data_dir_ + "models/world/" + t.name + ".material");
+        mSer.exportMaterial(mat, data_dir_ + "world/models/" + t.name + ".material");
     }
 }
 
@@ -365,7 +383,7 @@ void WorldInstaller::ProcessModels(){
     // Open world_us.lgp
     File world_file(*disk_image_.filePath("data/wm/world_us.lgp"));
     boost::filesystem::create_directories(output_dir_ + "temp/world_models/");
-    boost::filesystem::create_directories(data_dir_ + "models/world/");
+    boost::filesystem::create_directories(data_dir_ + "world/models/");
     VGears::LGPArchive world_lgp(*disk_image_.filePath("data/wm/world_us.lgp"), "LGP");
     world_lgp.open(*disk_image_.filePath("data/wm/world_us.lgp"), true);
     world_lgp.load();
@@ -422,7 +440,7 @@ void WorldInstaller::ProcessModels(){
                 }
                 break;
             }
-            ExportMesh(data_dir_ + "models/world/", mesh);
+            ExportMesh(data_dir_ + "world/models/", mesh);
             // Models can share a skeleton name with different bones (also with field models), so drop this one
             // (with its skeleton and mesh) before converting the next.
             VGears::HRCFileManager::GetSingleton().remove(file_name, "FFVII");
@@ -668,10 +686,10 @@ bool WorldInstaller::ProcessMap(){
     doc.LinkEndChild(xml.release());
     // TODO: Add models, entities...
     doc.SaveFile(
-      data_dir_ + "/world/" + std::to_string(processed_maps_) + "/world" + std::to_string(processed_maps_) + ".xml"
+      data_dir_ + "world/maps/" + std::to_string(processed_maps_) + "/world" + std::to_string(processed_maps_) + ".xml"
     );
     // Generate the walkmesh xml file
-    walkmesh.generate(data_dir_ + "/world/" + std::to_string(processed_maps_) + "/wm.xml");
+    walkmesh.generate(data_dir_ + "world/maps/" + std::to_string(processed_maps_) + "/wm.xml");
     // TODO: Generate other files: background, script, texts...
     // Ready for next map or next step.
     processed_maps_ ++;
@@ -706,7 +724,7 @@ void WorldInstaller::ExportEncounters(
       {0, 0, 1, 17}, {0, 9, 14, 17}, {0, 9, 25, 17}, {0, 10, 9, 17},
       {0, 9, 25, 17}, {0, 0, 8, 11}, {0, 0, 8, 0}, {0, 0, 1, 0}
     };
-    boost::filesystem::create_directories(data_dir_ + "/gamedata");
+    boost::filesystem::create_directories(data_dir_ + "world");
     TiXmlDocument doc;
     std::unique_ptr<TiXmlElement> root(new TiXmlElement("world_encounters"));
     for (unsigned int region = 0; region < 16; ++ region){
@@ -729,7 +747,7 @@ void WorldInstaller::ExportEncounters(
     }
     doc.LinkEndChild(new TiXmlDeclaration("1.0", "", ""));
     doc.LinkEndChild(root.release());
-    doc.SaveFile(data_dir_ + "/gamedata/world_encounters.xml");
+    doc.SaveFile(data_dir_ + "world/world_encounters.xml");
 }
 
 bool WorldInstaller::GenerateScripts(
@@ -804,7 +822,7 @@ bool WorldInstaller::GenerateScripts(
       field_table_data.data(), 0, field_table_entry->data_size
     );
 
-    const std::string script_directory = data_dir_ + "/scripts/worldmap";
+    const std::string script_directory = data_dir_ + "world/scripts";
     boost::filesystem::create_directories(script_directory);
     for (const VGears::LGPArchive::FileEntry* event_entry : event_entries){
         File event_file(&archive_file, event_entry->data_offset, event_entry->data_size);

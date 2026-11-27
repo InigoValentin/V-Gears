@@ -13,6 +13,7 @@
  * GNU General Public License for more details.
  */
 
+#include <boost/filesystem.hpp>
 #include "InstallLog.h"
 
 /**
@@ -82,6 +83,9 @@ void InstallLog::Open(const std::string& path, bool append){
     Close();
     std::lock_guard<std::mutex> lock(mutex_);
     path_ = path;
+    boost::system::error_code ec;
+    const boost::filesystem::path directory = boost::filesystem::path(path).parent_path();
+    if (!directory.empty()) boost::filesystem::create_directories(directory, ec);
     file_.open(path, std::ios::out | (append ? std::ios::app : std::ios::trunc));
     for (int i = 0; i < 3; ++ i){
         counts_[i] = 0;

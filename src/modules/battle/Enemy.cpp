@@ -301,7 +301,7 @@ int Enemy::ScriptGetCameraForAttack(const unsigned int index){
 void Enemy::ReadFromXml(){
     std::string filename = std::to_string(id_);
     while (filename.length() < 4) filename = "0" + filename;
-    filename = "./data/gamedata/enemy/" + filename + ".xml";
+    filename = "./game/battle/enemies/" + filename + ".xml";
     XmlEnemyFile(filename).LoadEnemy(*this);
 }
 

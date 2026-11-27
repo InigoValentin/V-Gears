@@ -54,8 +54,8 @@ namespace{
             const fs::path dir = root / name;
             Write(dir / "plugins.cfg", "template plugins");
             Write(dir / "resources.cfg", "template resources");
-            Write(dir / "data" / "config" / "config.cfg", "template config");
-            Write(dir / "data" / "scripts" / "menu" / "begin.lua", "template script");
+            Write(dir / "defaults" / "config.cfg", "template config");
+            Write(dir / "engine" / "scripts" / "menu" / "begin.lua", "template script");
             return dir;
         }
     };
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(IsDataDirectoryNeedsPluginsAndData){
     BOOST_CHECK(!dd::IsDataDirectory(box.root));
     box.Write(box.root / "plugins.cfg", "");
     BOOST_CHECK(!dd::IsDataDirectory(box.root));
-    fs::create_directories(box.root / "data");
+    fs::create_directories(box.root / "engine");
     BOOST_CHECK(dd::IsDataDirectory(box.root));
     BOOST_CHECK(!dd::IsDataDirectory(box.root / "missing"));
 }
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(DefaultDirectoryIsSeededFromTheFirstValidTemplate){
     BOOST_CHECK_EQUAL(r.copied_files, 4u);
     BOOST_CHECK(dd::IsDataDirectory(target));
     BOOST_CHECK_EQUAL(box.Read(target / "plugins.cfg"), "template plugins");
-    BOOST_CHECK_EQUAL(box.Read(target / "data" / "scripts" / "menu" / "begin.lua"), "template script");
+    BOOST_CHECK_EQUAL(box.Read(target / "engine" / "scripts" / "menu" / "begin.lua"), "template script");
 }
 
 BOOST_AUTO_TEST_CASE(SeedingKeepsExistingFiles){
@@ -126,16 +126,78 @@ BOOST_AUTO_TEST_CASE(SeedingKeepsExistingFiles){
     const fs::path source = box.MakeTemplate("template");
     // An installation where the installer extracted the game data but the configuration was not copied.
     const fs::path target = box.root / "install";
-    box.Write(target / "data" / "config" / "config.cfg", "user config");
-    box.Write(target / "data" / "fields" / "md1_1.xml", "game data");
+    box.Write(target / "user" / "config.cfg", "user config");
+    box.Write(target / "game" / "fields" / "md1_1.xml", "game data");
 
     const dd::Resolution r = dd::Resolve(target.string(), box.root, box.root / "default", {source});
     BOOST_CHECK_EQUAL(r.error, "");
     BOOST_CHECK(r.seeded);
-    BOOST_CHECK_EQUAL(r.copied_files, 3u);
-    BOOST_CHECK_EQUAL(box.Read(target / "data" / "config" / "config.cfg"), "user config");
-    BOOST_CHECK_EQUAL(box.Read(target / "data" / "fields" / "md1_1.xml"), "game data");
+    BOOST_CHECK_EQUAL(r.copied_files, 4u);
+    BOOST_CHECK_EQUAL(box.Read(target / "user" / "config.cfg"), "user config");
+    BOOST_CHECK_EQUAL(box.Read(target / "game" / "fields" / "md1_1.xml"), "game data");
     BOOST_CHECK_EQUAL(box.Read(target / "plugins.cfg"), "template plugins");
+}
+
+BOOST_AUTO_TEST_CASE(NewInstallationGetsTheConfigurationAndTheDirectoriesOfThePlayer){
+    Sandbox box;
+    const fs::path source = box.MakeTemplate("template");
+    // The template can have player files and logs if the game was run from it: they are not copied.
+    box.Write(source / "user" / "saves" / "0.xml", "template save");
+    box.Write(source / "logs" / "v-gears.log", "template log");
+    const fs::path target = box.root / ".v-gears";
+    const dd::Resolution r = dd::Resolve("", box.root / "elsewhere", target, {source});
+    BOOST_CHECK_EQUAL(r.error, "");
+    BOOST_CHECK_EQUAL(box.Read(target / "user" / "config.cfg"), "template config");
+    BOOST_CHECK(fs::is_directory(target / "user" / "screenshots"));
+    BOOST_CHECK(fs::is_directory(target / "logs"));
+    BOOST_CHECK(!fs::exists(target / "user" / "saves" / "0.xml"));
+    BOOST_CHECK(!fs::exists(target / "logs" / "v-gears.log"));
+}
+
+BOOST_AUTO_TEST_CASE(OldInstallationIsMigrated){
+    Sandbox box;
+    const fs::path source = box.MakeTemplate("template");
+    const fs::path target = box.root / "old";
+    box.Write(target / "plugins.cfg", "old plugins");
+    box.Write(target / "data" / "config" / "config.cfg", "old config");
+    box.Write(target / "data" / "video" / "opening" / "movie.xml", "movie");
+    box.Write(target / "save" / "0.xml", "save");
+    box.Write(target / "controls.cfg", "controls");
+    box.Write(target / "console_history.txt", "history");
+    box.Write(target / "screenshot_1.png", "image");
+
+    const dd::Resolution r = dd::Resolve(target.string(), box.root, box.root / "default", {source});
+    BOOST_CHECK_EQUAL(r.error, "");
+    BOOST_CHECK_EQUAL(r.migrated_files, 6u);
+    BOOST_CHECK(r.seeded);
+    BOOST_CHECK_EQUAL(box.Read(target / "user" / "config.cfg"), "old config");
+    BOOST_CHECK_EQUAL(box.Read(target / "user" / "saves" / "0.xml"), "save");
+    BOOST_CHECK_EQUAL(box.Read(target / "user" / "controls.cfg"), "controls");
+    BOOST_CHECK_EQUAL(box.Read(target / "user" / "console_history.txt"), "history");
+    BOOST_CHECK_EQUAL(box.Read(target / "user" / "screenshots" / "screenshot_1.png"), "image");
+    BOOST_CHECK_EQUAL(box.Read(target / "game" / "video" / "opening" / "movie.xml"), "movie");
+    BOOST_CHECK(!fs::exists(target / "save"));
+    BOOST_CHECK_EQUAL(box.Read(target / "plugins.cfg"), "old plugins");
+}
+
+BOOST_AUTO_TEST_CASE(MigrationNeverOverwrites){
+    Sandbox box;
+    const fs::path target = box.root / "install";
+    box.Write(target / "plugins.cfg", "plugins");
+    box.Write(target / "save" / "0.xml", "old save");
+    box.Write(target / "save" / "1.xml", "other save");
+    box.Write(target / "user" / "saves" / "0.xml", "new save");
+    BOOST_CHECK_EQUAL(dd::MigrateLayout(target), 1u);
+    BOOST_CHECK_EQUAL(box.Read(target / "user" / "saves" / "0.xml"), "new save");
+    BOOST_CHECK_EQUAL(box.Read(target / "user" / "saves" / "1.xml"), "other save");
+    BOOST_CHECK_EQUAL(box.Read(target / "save" / "0.xml"), "old save");
+}
+
+BOOST_AUTO_TEST_CASE(MigrationIgnoresOtherDirectories){
+    Sandbox box;
+    box.Write(box.root / "documents" / "save" / "0.xml", "not ours");
+    BOOST_CHECK_EQUAL(dd::MigrateLayout(box.root / "documents"), 0u);
+    BOOST_CHECK(fs::exists(box.root / "documents" / "save" / "0.xml"));
 }
 
 BOOST_AUTO_TEST_CASE(UnrelatedNonEmptyDirectoryIsNotFilled){

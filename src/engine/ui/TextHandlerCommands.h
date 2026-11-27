@@ -43,7 +43,7 @@ void CmdSetLanguage(const Ogre::StringVector& params){
  * @param[out] complete_params The list of languages will be saved here.
  */
 void CmdSetLanguageCompletition(Ogre::StringVector& complete_params){
-    XmlTextsFile texts( "./data/texts.xml" );
+    XmlTextsFile texts( "./engine/texts/_texts.xml" );
     texts.GetAvailableLanguages(complete_params);
 }
 

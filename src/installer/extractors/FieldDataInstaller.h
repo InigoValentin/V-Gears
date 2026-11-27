@@ -394,7 +394,7 @@ class FieldDataInstaller{
         void CollectSpawnAndScaleFactors(int field_index);
 
         /**
-         * Writes the coordinates of the exits to the world map (scripts/worldmap/world_arrivals.lua).
+         * Writes the coordinates of the exits to the world map (world/scripts/world_arrivals.lua).
          */
         void WriteWorldArrivals();
 

@@ -73,10 +73,10 @@ BattleManager::BattleManager(){
     scene_node_ = Ogre::Root::getSingleton().getSceneManager("Scene")
       ->getRootSceneNode()->createChildSceneNode("BattleManager");
     // Build scene model map.
-    scene_model_map_ = XmlBattleScenesFile("./data/models/battle/scenes.xml").GetScenes();
+    scene_model_map_ = XmlBattleScenesFile("./game/battle/models/scenes.xml").GetScenes();
     // Build character model map.
     character_model_map_
-      = XmlBattleCharactersFile("./data/models/battle/characters.xml").GetCharacters();
+      = XmlBattleCharactersFile("./game/battle/models/characters.xml").GetCharacters();
 }
 
 BattleManager::~BattleManager(){
@@ -150,7 +150,7 @@ void BattleManager::StartBattle(const unsigned int id){
     // Load the formation XML file (name is dddd.xml)
     std::string filename = std::to_string(formation_id_);
     while (filename.length() < 4) filename = "0" + filename;
-    filename = "./data/gamedata/formation/" + filename + ".xml";
+    filename = "./game/battle/formations/" + filename + ".xml";
     // This sets the data in the battle manager singleton.
     XmlFormationFile(filename).LoadFormation();
 
@@ -461,7 +461,7 @@ void BattleManager::SetLayout(const LAYOUT layout){
 
 bool BattleManager::HasAttackData(const int id){
     if (!attack_index_loaded_){
-        attack_index_ = XmlAttackFile::LoadIndex("./data/gamedata/attack/_index.xml");
+        attack_index_ = XmlAttackFile::LoadIndex("./game/battle/attacks/_index.xml");
         attack_index_loaded_ = true;
     }
     return attack_index_.find(id) != attack_index_.end();
@@ -471,7 +471,7 @@ const AttackData* BattleManager::GetAttackData(const int id){
     auto cached = attack_cache_.find(id);
     if (cached != attack_cache_.end()) return &cached->second;
     if (!attack_index_loaded_){
-        attack_index_ = XmlAttackFile::LoadIndex("./data/gamedata/attack/_index.xml");
+        attack_index_ = XmlAttackFile::LoadIndex("./game/battle/attacks/_index.xml");
         attack_index_loaded_ = true;
     }
     auto file = attack_index_.find(id);
@@ -480,7 +480,7 @@ const AttackData* BattleManager::GetAttackData(const int id){
         return nullptr;
     }
     AttackData data;
-    if (!XmlAttackFile("./data/gamedata/attack/" + file->second).LoadAttack(data)) return nullptr;
+    if (!XmlAttackFile("./game/battle/attacks/" + file->second).LoadAttack(data)) return nullptr;
     return &(attack_cache_[id] = data);
 }
 
@@ -674,7 +674,7 @@ void BattleManager::LoadParty(){
     party_entity_name_.assign(party.size(), "");
     party_animation_prefix_.assign(party.size(), "");
     party_model_name_.assign(party.size(), "");
-    // TODO: Read this from data/gamedata/characters.xml
+    // TODO: Read this from game/kernel/characters.lua
     for (int slot = 0; slot < members.size(); slot ++){
         const int index = members.at(slot);
         std::string name = "";

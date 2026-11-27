@@ -76,14 +76,14 @@ Console::~Console(){
 
 void Console::LoadHistory(){
     LOG_TRIVIAL("Loading console_history.txt ...");
-    std::ifstream file("console_history.txt");
+    std::ifstream file("user/console_history.txt");
     std::string historyLine;
     while (std::getline(file, historyLine)) AddToHistory(historyLine);
     std::reverse(history_.begin(), history_.end());
 }
 
 void Console::SaveHistory(){
-    std::ofstream file("console_history.txt");
+    std::ofstream file("user/console_history.txt");
     if (!file.is_open()){
         LOG_ERROR("Failed to open console_history.txt for writing");
         return;

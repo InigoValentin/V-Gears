@@ -148,31 +148,31 @@ class BattleDataInstaller{
         unsigned int ConvertEffectModel();
 
         /**
-         * Writes the list of the converted effect models to gamedata/effects.lua.
+         * Writes the list of the converted effect models to battle/effects/effects.lua.
          */
         void WriteEffectModels();
 
         /**
          * Converts the textures of the effects and writes the sprite frame lists to
-         * gamedata/effect_sprites.lua. Called by {@see WriteEffectModels}.
+         * battle/effects/effect_sprites.lua. Called by {@see WriteEffectModels}.
          */
         void WriteEffectSprites();
 
         /**
          * Reads the camera scripts of the battle effects from ff7.exe and writes them to
-         * gamedata/effect_cameras.lua. Called by {@see WriteEffectModels}.
+         * battle/effects/effect_cameras.lua. Called by {@see WriteEffectModels}.
          */
         void WriteEffectCameras();
 
         /**
          * Reads the camera scripts of the battles (camdat0-2.bin) and writes them to
-         * gamedata/battle_cameras.lua. Called by {@see WriteEffectModels}.
+         * battle/battle_cameras.lua. Called by {@see WriteEffectModels}.
          */
         void WriteBattleCameras();
 
         /**
          * Reads the meshes of the battle effects that are in the data of ff7.exe (the ground of Ifrit,
-         * the mountain of Ramuh...) and writes them to gamedata/effect_meshes.lua. Called by
+         * the mountain of Ramuh...) and writes them to battle/effects/effect_meshes.lua. Called by
          * {@see WriteEffectModels}.
          */
         void WriteEffectMeshes();

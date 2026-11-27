@@ -33,9 +33,9 @@
 
 float FieldDataInstaller::LINE_SCALE_FACTOR(0.0078124970964f);
 
-std::string FieldDataInstaller::FIELD_MODELS_DIR("models/fields");
+std::string FieldDataInstaller::FIELD_MODELS_DIR("field/models");
 
-std::string FieldDataInstaller::FIELD_MAPS_DIR("fields");
+std::string FieldDataInstaller::FIELD_MAPS_DIR("field/maps");
 
 int FieldDataInstaller::INACTIVE_GATEWAY_ID(32767);
 
@@ -305,7 +305,7 @@ FieldDataInstaller::FieldDataInstaller(
     const DiskImage& disk_image, const std::string output_dir,
     std::function<void(std::string)> log_output_line
 ):
-    disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "data/"),
+    disk_image_(disk_image), output_dir_(output_dir), data_dir_(output_dir + "game/"),
     write_output_line_(log_output_line)
 {}
 
@@ -385,8 +385,8 @@ void FieldDataInstaller::WriteWorldArrivals(){
         }
     }
     output += "}\n";
-    boost::filesystem::create_directories(data_dir_ + "scripts/worldmap");
-    std::ofstream file(data_dir_ + "scripts/worldmap/world_arrivals.lua");
+    boost::filesystem::create_directories(data_dir_ + "world/scripts");
+    std::ofstream file(data_dir_ + "world/scripts/world_arrivals.lua");
     file << output;
 }
 
@@ -441,7 +441,7 @@ void FieldDataInstaller::Write(int field_index){
 
 void FieldDataInstaller::WriteEnd(){
     doc_->LinkEndChild(element_.release());
-    doc_->SaveFile(data_dir_ + "/fields/_fields.xml");
+    doc_->SaveFile(data_dir_ + "/field/maps/_fields.xml");
 }
 
 std::vector<std::string> FieldDataInstaller::ConvertModelsInit(){

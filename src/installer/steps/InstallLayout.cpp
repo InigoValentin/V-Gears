@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <boost/filesystem.hpp>
+#include "common/DataDirectory.h"
 #include "common/InstallStamp.h"
 #include "InstallLayout.h"
 
@@ -36,8 +37,8 @@ namespace InstallLayout{
 
     std::string OriginalDataDir(const std::string& root){return root + "original_data/";}
 
-    const std::vector<std::string>& CleanInstallKeptDataDirs(){
-        static const std::vector<std::string> dirs = {"config", "video"};
+    const std::vector<std::string>& CleanInstallKeptGameDirs(){
+        static const std::vector<std::string> dirs = {"video"};
         return dirs;
     }
 
@@ -52,17 +53,27 @@ namespace InstallLayout{
         CleanResult result;
         if (!IsInstallation(root)) return result;
         boost::system::error_code ec;
-        if (fs::exists(OriginalDataDir(root), ec)) Remove(OriginalDataDir(root), result);
-        if (fs::exists(TempDir(root), ec)) Remove(TempDir(root), result);
+        // The saves, the configuration and the videos of an older version are moved out of the directories that
+        // are deleted. Nothing is deleted if that fails.
+        try{
+            VGears::DataDirectory::MigrateLayout(root);
+        }
+        catch (const fs::filesystem_error& e){
+            result.errors.push_back(e.what());
+            return result;
+        }
+        // "data" is where older versions had the files that are now in "engine" and "game".
+        for (const char* dir : {"original_data/", "temp/", "data/", "engine/", "defaults/"})
+            if (fs::exists(root + dir, ec)) Remove(root + dir, result);
         // The record of the installations describes what was just deleted.
         if (fs::exists(root + VGears::InstallStamp::FILE_NAME, ec)) Remove(root + VGears::InstallStamp::FILE_NAME, result);
-        const fs::path data(DataDir(root));
-        if (fs::is_directory(data, ec)){
-            const std::vector<std::string>& kept = CleanInstallKeptDataDirs();
+        const fs::path game(GameDir(root));
+        if (fs::is_directory(game, ec)){
+            const std::vector<std::string>& kept = CleanInstallKeptGameDirs();
             std::vector<fs::path> entries;
-            for (fs::directory_iterator it(data, ec), end; !ec && it != end; it.increment(ec))
+            for (fs::directory_iterator it(game, ec), end; !ec && it != end; it.increment(ec))
                 entries.push_back(it->path());
-            if (ec) result.errors.push_back(data.string() + ": " + ec.message());
+            if (ec) result.errors.push_back(game.string() + ": " + ec.message());
             for (const fs::path& entry : entries){
                 if (std::find(kept.begin(), kept.end(), entry.filename().string()) == kept.end())
                     Remove(entry, result);
@@ -71,18 +82,19 @@ namespace InstallLayout{
         return result;
     }
 
-    std::string DataDir(const std::string& root){return root + "data/";}
+    std::string GameDir(const std::string& root){return root + "game/";}
 
     std::string TempDir(const std::string& root){return root + "temp/";}
 
-    const std::vector<std::string>& DataSubdirs(){
+    const std::vector<std::string>& GameSubdirs(){
         static const std::vector<std::string> dirs = {
-          "audio/musics", "audio/sounds", "fields", "fonts", "gamedata", "gamedata/enemy", "gamedata/attack",
-          "gamedata/formation", "images/icons", "images/other", "images/characters", "images/fonts", "images/reels",
-          "images/window", "screens", "scripts", "scripts/battle_models", "system", "texts", "models/fields",
-          "models/battle/characters", "models/battle/scenes", "models/battle/enemies", "models/battle/attacks", "models/battle/effects",
-          "models/world/terrain/0", "models/world/terrain/1", "models/world/terrain/2", "models/world/elements",
-          "world/0", "world/1", "world/2", "wm"
+          "kernel", "field/maps", "field/models", "battle/enemies", "battle/attacks", "battle/formations",
+          "battle/effects", "battle/scripts", "battle/images", "battle/models/characters", "battle/models/scenes",
+          "battle/models/enemies", "battle/models/attacks", "battle/models/effects", "world/maps/0", "world/maps/1",
+          "world/maps/2", "world/textures", "world/scripts", "world/models/terrain/0", "world/models/terrain/1",
+          "world/models/terrain/2", "world/models/elements", "ui/images/icons", "ui/images/other",
+          "ui/images/characters", "ui/images/fonts", "ui/images/reels", "ui/images/window", "ui/fonts",
+          "audio/music", "audio/sounds"
         };
         return dirs;
     }
@@ -92,26 +104,12 @@ namespace InstallLayout{
         return dirs;
     }
 
-    const std::vector<std::string>& KeptTempSubdirs(){
-        static const std::vector<std::string> dirs = {"world_models"};
-        return dirs;
-    }
-
-    std::vector<std::string> RemovableTempSubdirs(){
-        std::vector<std::string> removable;
-        for (const std::string& dir : TempSubdirs()){
-            bool kept = false;
-            for (const std::string& k : KeptTempSubdirs()) kept = kept || (k == dir);
-            if (!kept) removable.push_back(dir);
-        }
-        return removable;
-    }
-
     const std::vector<std::string>& GameResourceDirs(){
         static const std::vector<std::string> dirs = {
-          "data/system", "data/audio", "data/fields", "data/fonts", "data/gamedata", "data/images", "data/models/fields",
-          "data/models/world", "data/models/battle", "data/screens", "data/scripts", "data/texts", "data/wm",
-          "temp/world_models"
+          "engine/system", "engine/fonts", "engine/images", "engine/ui", "engine/scripts", "engine/texts",
+          "game/kernel", "game/field/maps", "game/field/models", "game/battle/models", "game/battle/images",
+          "game/world/maps", "game/world/textures", "game/world/models", "game/ui/images", "game/ui/fonts",
+          "game/audio"
         };
         return dirs;
     }

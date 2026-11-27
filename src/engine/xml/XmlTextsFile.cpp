@@ -57,7 +57,7 @@ void XmlTextsFile::LoadTexts(){
                     if (node2->Type() == TiXmlNode::TINYXML_ELEMENT && node2->ValueStr() == "text"){
                         Ogre::String file = GetString(node2, "file");
                         if (file != ""){
-                            XmlTextFile text("./data/" + file);
+                            XmlTextFile text("./engine/" + file);
                             text.LoadTexts();
                         }
                         else LOG_ERROR("Empty filename in language " + language + ".");

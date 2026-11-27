@@ -32,7 +32,7 @@ void XmlSoundsFile::LoadSounds(){
         if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "sound"){
             AudioManager::Sound sound;
             sound.name = GetString(node, "name");
-            sound.file = "./data/" + GetString(node, "file_name");
+            sound.file = "./game/" + GetString(node, "file_name");
             AudioManager::getSingleton().AddSound(sound);
         }
         node = node->NextSibling();

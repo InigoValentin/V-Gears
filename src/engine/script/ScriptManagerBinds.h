@@ -58,15 +58,15 @@ void ScriptMap(const char* text){
     // The battle music and mode are set by the scripts of each field.
     AudioManager::getSingleton().ScriptSetBattleTrack(-1);
     if (VGears::BattleInterface::Get() != nullptr) VGears::BattleInterface::Get()->ScriptSetMode(0);
-    XmlMapsFile xml("./data/fields/_fields.xml");
+    XmlMapsFile xml("./game/field/maps/_fields.xml");
     Ogre::String file_name = xml.GetMapFileNameByName(text);
-    XmlMapFile xml_map("./data/fields/" + file_name);
+    XmlMapFile xml_map("./game/field/maps/" + file_name);
     xml_map.LoadMap();
 }
 
 void ScriptWorldMap(const int map, const unsigned int x, const unsigned int y){
     EntityManager::getSingleton().Clear();
-    XmlMapFile xml_map("./data/fields/wm" + std::to_string(map) + ".xml");
+    XmlMapFile xml_map("./game/field/maps/wm" + std::to_string(map) + ".xml");
     xml_map.LoadMap();
 }
 

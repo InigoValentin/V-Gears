@@ -246,7 +246,7 @@ namespace VGears{
         bfs::path self(argv[0]);
         const String self_stem(self.stem().string());
         const String config_filename(self_stem + EXT_CONFIG);
-        const String log_filename(self_stem + EXT_LOG);
+        const String log_filename("logs/" + self_stem + EXT_LOG);
 
 #ifdef  NDEBUG
         const String plugins_filename("plugins" + EXT_CONFIG);
@@ -326,11 +326,18 @@ namespace VGears{
             return false;
         }
         std::cout << "Data directory: " << data_directory.directory.string() << std::endl;
+        if (data_directory.migrated_files > 0){
+            std::cout << "Moved " << data_directory.migrated_files << " files and folders of an older version to "
+              "their new places." << std::endl;
+        }
         // The record of the installations says if the game data must be installed again.
         bool recorded = false;
         for (const std::string& problem : InstallStamp::Problems(data_directory.directory, &recorded))
             std::cout << "Warning: " << problem << std::endl;
-        if (!recorded && bfs::exists(data_directory.directory / "data" / "fields" / "_fields.xml", ec)){
+        if (
+          !recorded && (bfs::exists(data_directory.directory / "game" / "field" / "maps" / "_fields.xml", ec)
+          || bfs::exists(data_directory.directory / "data" / "fields" / "_fields.xml", ec))
+        ){
             std::cout << "Warning: the game data was installed by an older version of v-gears-installer, and may be "
               "outdated. Install it again with v-gears-installer." << std::endl;
         }

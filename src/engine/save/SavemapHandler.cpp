@@ -26,7 +26,7 @@ template<>SavemapHandler *Ogre::Singleton<SavemapHandler>::msSingleton = nullptr
 
 int SavemapHandler::MAX_SAVE_SLOTS(15);
 
-std::string SavemapHandler::SAVE_PATH("save/");
+std::string SavemapHandler::SAVE_PATH("user/saves/");
 
 SavemapHandler::SavemapHandler(): current_savemap_(nullptr), savemaps_read_(false){}
 

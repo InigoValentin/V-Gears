@@ -135,7 +135,7 @@ void XmlMapFile::LoadMap(){
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "script"){
             Ogre::String file_name = GetString(node, "file_name");
-            if (file_name != "") ScriptManager::getSingleton().RunFile("fields/" + file_name);
+            if (file_name != "") ScriptManager::getSingleton().RunFile("game/field/maps/" + file_name);
         }
         else if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "tracks"){
             for (TiXmlNode* track = node->FirstChild(); track; track = track->NextSibling()){

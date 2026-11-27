@@ -33,7 +33,7 @@ void XmlScreensFile::LoadScreens(){
     node = node->FirstChild();
     while (node != nullptr){
         if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "prototype"){
-            XmlPrototypesFile prototypes("./data/" + GetString(node, "file_name"));
+            XmlPrototypesFile prototypes("./engine/" + GetString(node, "file_name"));
             prototypes.LoadPrototypes();
         }
         node = node->NextSibling();
@@ -42,7 +42,7 @@ void XmlScreensFile::LoadScreens(){
     node = node->FirstChild();
     while (node != NULL){
         if (node->Type() == TiXmlNode::TINYXML_ELEMENT && node->ValueStr() == "screen"){
-            XmlScreenFile screen("./data/" + GetString(node, "file_name"));
+            XmlScreenFile screen("./engine/" + GetString(node, "file_name"));
             screen.LoadScreen();
         }
         node = node->NextSibling();

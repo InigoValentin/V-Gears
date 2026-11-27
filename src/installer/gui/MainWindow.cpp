@@ -124,7 +124,7 @@ void MainWindow::OpenInstallLog(const QString& dir, bool append){
     // A new installation starts with an empty log window.
     if (!append) main_window_->data_log->clear();
     InstallLog& install_log = InstallLog::Get();
-    install_log.Open((dir + "installer.log").toStdString(), append);
+    install_log.Open((dir + "logs/installer.log").toStdString(), append);
     install_log.SetSink([this](InstallLog::Level level, const std::string& message){
         const QString text = QString::fromStdString(message).toHtmlEscaped();
         const QString color = level == InstallLog::ERROR_LEVEL ? "#c62828" : (level == InstallLog::WARNING ? "#e08600" : "");
@@ -341,7 +341,7 @@ void MainWindow::on_actionHelp_triggered(){
       "<li><b>Choose the installation directory</b>, for example <code>~/.v-gears</code>. It holds the "
       "configuration and the converted data, and it is where the game runs.</li>"
       "<li>Click <b>Install data</b>. The log shows the progress. Problems are shown in color and also written to "
-      "<code>installer.log</code> in the installation directory.</li>"
+      "<code>logs/installer.log</code> in the installation directory.</li>"
       "</ol>"
       "<h3>Options</h3>"
       "<p>Select <b>Show advanced options</b> to choose what to install. <b>What to install</b> offers ready-made "
@@ -356,7 +356,7 @@ void MainWindow::on_actionHelp_triggered(){
       "<h3>Videos</h3>"
       "<p>The videos are on the PC <i>game disks</i> 1, 2 and 3, not on the install disk. Select one of those "
       "disks as the ISO, with the same installation directory, and click <b>Install data</b>: only its videos are "
-      "extracted, to <code>data/video</code>. Repeat it for each disk. Videos that are already installed are "
+      "extracted, to <code>game/video</code>. Repeat it for each disk. Videos that are already installed are "
       "skipped.</p>"
       "<h3>FFmpeg and TiMidity</h3>"
       "<p>The sounds and the music are converted with <b>FFmpeg</b>, and the music also with <b>TiMidity</b>. "
@@ -465,7 +465,7 @@ void MainWindow::on_btn_data_run_clicked(){
     const bool clean = main_window_->chk_clean_install->checkState() == Qt::Checked;
     InstallSteps::PreflightResult preflight
       = InstallSteps::RunPreflight(disk_image_, output, copy_data, game_data, clean);
-    const bool fields_installed = !clean && QFile::exists(output + "data/fields/_fields.xml");
+    const bool fields_installed = !clean && QFile::exists(output + "game/field/maps/_fields.xml");
     for (const std::string& problem : InstallRules::Problems(CurrentOptions(), fields_installed))
         preflight.errors << QString::fromStdString(problem);
     if (!preflight.errors.isEmpty()){
@@ -549,8 +549,8 @@ void MainWindow::on_btn_data_run_clicked(){
         // Copy the V-Gears data files (scripts, screens, fonts...) to the installation directory.
         if (copy_data){
             main_window_->data_log->append(tr("Copying data files from %1...").arg(game_data));
-            // Everything in the folder goes to the installation directory, and its "data" subfolder to <dir>/data.
-            if (!InstallSteps::CopyDirectory(
+            // Everything in the folder goes to the installation directory.
+            if (!InstallSteps::CopyGameFiles(
               game_data, output, show_phase(InstallSteps::Phase::COPY, tr("Copying the V-Gears data files..."))
             )){
                 QMessageBox::critical(
@@ -561,7 +561,7 @@ void MainWindow::on_btn_data_run_clicked(){
             main_window_->data_log->append(tr("Data files copied."));
         }
         // The installer's Ogre setup loads plugins.cfg and resources.cfg from the working directory (and writes
-        // install.log there), so run from the installation directory. The plugins themselves are looked for in the
+        // logs/ogre.log there), so run from the installation directory. The plugins themselves are looked for in the
         // same places as the game does (see VGears::OgrePlugins::SearchDirectories).
         if (!QFile::exists(output + "plugins.cfg") || !QFile::exists(output + "resources.cfg")){
             QMessageBox::critical(
@@ -573,6 +573,13 @@ void MainWindow::on_btn_data_run_clicked(){
         }
         if (!QDir::setCurrent(output)){
             QMessageBox::critical(this, tr("Output error"), tr("Could not enter the installation directory."));
+            return;
+        }
+        const QString problem = InstallSteps::PrepareInstallation(output);
+        if (!problem.isEmpty()){
+            QMessageBox::critical(
+              this, tr("Output error"), tr("Could not prepare the installation directory:\n\n%1").arg(problem)
+            );
             return;
         }
         // Collect every message of the installation in one place: the log file, the log window and the summary.
@@ -658,6 +665,13 @@ void MainWindow::StartVideoExtraction(const QString& output){
         );
         return;
     }
+    const QString problem = InstallSteps::PrepareInstallation(output);
+    if (!problem.isEmpty()){
+        QMessageBox::critical(
+          this, tr("Output error"), tr("Could not prepare the installation directory:\n\n%1").arg(problem)
+        );
+        return;
+    }
     // The installation log of a previous run is kept.
     OpenInstallLog(output, true);
     // It doesn't use the installer (and its singletons), so it can be done again with another disk.
@@ -672,13 +686,13 @@ void MainWindow::StartVideoExtraction(const QString& output){
         std::string error;
         try{
             ok = disk_image_.extractVideos(
-              output.toStdString() + "data/",
+              output.toStdString() + "game/",
               [this](float progress){
                   QMetaObject::invokeMethod(this, [this, progress](){ShowProgress(progress);}, Qt::QueuedConnection);
               },
               [](const std::string& message){InstallLog::Get().Add(message);}, &extracted, &skipped
             );
-            if (ok) InstallSteps::ConvertMovies(output.toStdString() + "data/video/");
+            if (ok) InstallSteps::ConvertMovies(output.toStdString() + "game/video/");
         }
         catch (const std::exception& ex){
             error = ex.what();

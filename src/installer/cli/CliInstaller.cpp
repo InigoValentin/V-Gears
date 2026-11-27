@@ -330,7 +330,7 @@ namespace{
      * Opens the installation log in the installation directory, and shows its messages in the display.
      */
     void OpenInstallLog(const QString& output, bool append, ProgressDisplay& display){
-        InstallLog::Get().Open((output + "installer.log").toStdString(), append);
+        InstallLog::Get().Open((output + "logs/installer.log").toStdString(), append);
         display.Attach();
     }
 
@@ -420,6 +420,11 @@ namespace{
         }
         // The installation log of a previous run is kept.
         ProgressDisplay progress;
+        const QString problem = InstallSteps::PrepareInstallation(output);
+        if (!problem.isEmpty()){
+            PrintError("Could not prepare the installation directory: " + problem.toStdString());
+            return CliInstaller::EXIT_FAILED;
+        }
         OpenInstallLog(output, true, progress);
         InstallLog::Get().Add("Extracting the videos of " + disk_image.getId() + "...");
         int extracted = 0;
@@ -427,10 +432,10 @@ namespace{
         bool ok = false;
         try{
             ok = disk_image.extractVideos(
-              output.toStdString() + "data/", [&progress](float value){progress.SetProgress(value);},
+              output.toStdString() + "game/", [&progress](float value){progress.SetProgress(value);},
               [](const std::string& message){InstallLog::Get().Add(message);}, &extracted, &skipped
             );
-            if (ok) InstallSteps::ConvertMovies(output.toStdString() + "data/video/");
+            if (ok) InstallSteps::ConvertMovies(output.toStdString() + "game/video/");
         }
         catch (const std::exception& ex){
             InstallLog::Get().Add(std::string("[ERROR] Video extraction failed: ") + ex.what());
@@ -490,7 +495,7 @@ namespace{
         for (
           const std::string& problem
           : InstallRules::Problems(
-            options, !arguments.clean && QFile::exists(output + "data/fields/_fields.xml")
+            options, !arguments.clean && QFile::exists(output + "game/field/maps/_fields.xml")
           )
         ) preflight.errors << QString::fromStdString(problem);
         if (!preflight.errors.isEmpty()){
@@ -553,15 +558,17 @@ namespace{
         // Copy the V-Gears data files (scripts, screens, fonts...) to the installation directory.
         if (arguments.copy_data){
             progress.SetStatus("Copying the V-Gears data files...");
-            if (!InstallSteps::CopyDirectory(game_data, output, [&progress](float value){
+            if (!InstallSteps::CopyGameFiles(game_data, output, [&progress](float value){
                   progress.SetProgress(InstallSteps::OverallProgress(InstallSteps::Phase::COPY, value));
                 })) return fail("Failed to copy the V-Gears data files to the installation directory.");
         }
         // The installer's Ogre setup loads plugins.cfg and resources.cfg from the working directory (and writes
-        // install.log there), so run from the installation directory.
+        // logs/ogre.log there), so run from the installation directory.
         if (!QFile::exists(output + "plugins.cfg") || !QFile::exists(output + "resources.cfg"))
             return fail("The installation directory must contain plugins.cfg and resources.cfg. Don't use --no-copy-data.");
         if (!QDir::setCurrent(output)) return fail("Could not enter the installation directory.");
+        const QString problem = InstallSteps::PrepareInstallation(output);
+        if (!problem.isEmpty()) return fail("Could not prepare the installation directory: " + problem.toStdString());
 
         OpenInstallLog(output, false, progress);
         if (options.videos){
