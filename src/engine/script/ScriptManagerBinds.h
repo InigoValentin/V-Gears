@@ -16,7 +16,7 @@
 #include <iostream>
 
 #include "../modules/worldmap/WorldmapModule.h"
-#include "core/Console.h"
+#include "engine/ui/Console.h"
 #include "common/Logger.h"
 #include "engine/graphics/CameraManager.h"
 #include "core/Enemy.h"
@@ -27,12 +27,12 @@
 #include "engine/input/InputManager.h"
 #include "core/SavemapHandler.h"
 #include "core/Timer.h"
-#include "core/UiManager.h"
-#include "core/UiWidget.h"
+#include "engine/ui/UiManager.h"
+#include "engine/ui/UiWidget.h"
 #include "core/XmlMapFile.h"
 #include "core/XmlMapsFile.h"
-#include "core/DialogsManager.h"
-#include "core/TextHandler.h"
+#include "engine/ui/DialogsManager.h"
+#include "engine/ui/TextHandler.h"
 
 /**
  * Prints to the game console.

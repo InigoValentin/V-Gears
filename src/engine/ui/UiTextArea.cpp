@@ -24,10 +24,10 @@
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
 #include "common/Logger.h"
-#include "core/UiManager.h"
-#include "core/UiTextArea.h"
+#include "engine/ui/UiManager.h"
+#include "engine/ui/UiTextArea.h"
 #include "core/Timer.h"
-#include "core/UiSprite.h"
+#include "engine/ui/UiSprite.h"
 #include "common/Utilites.h"
 #include "TextHandler.h"
 

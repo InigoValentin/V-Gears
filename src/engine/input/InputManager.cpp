@@ -14,7 +14,7 @@
  */
 
 #include <algorithm>
-#include "core/Console.h"
+#include "engine/ui/Console.h"
 #include "engine/input/InputManager.h"
 #include "engine/input/InputManagerCommands.h"
 #include "common/Logger.h"

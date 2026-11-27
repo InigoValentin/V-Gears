@@ -14,10 +14,10 @@
  */
 
 #include "common/Logger.h"
-#include "core/UiManager.h"
+#include "engine/ui/UiManager.h"
 #include "core/XmlTextFile.h"
 
-#include "TextHandler.h"
+#include "engine/ui/TextHandler.h"
 
 XmlTextFile::XmlTextFile(const Ogre::String& file): XmlFile(file){}
 

@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/DialogsManager.h"
+#include "engine/ui/DialogsManager.h"
 #include "engine/config/ConfigVar.h"
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"

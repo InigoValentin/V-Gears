@@ -19,7 +19,7 @@
 #include <OgreSingleton.h>
 #include <OgreUTFString.h>
 #include <tinyxml.h>
-#include "Manager.h"
+#include "core/Manager.h"
 #include "UiFont.h"
 #include "UiWidget.h"
 

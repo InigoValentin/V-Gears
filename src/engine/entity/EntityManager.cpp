@@ -30,7 +30,7 @@
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
 #include "core/Timer.h"
-#include "core/DialogsManager.h"
+#include "engine/ui/DialogsManager.h"
 
 /**
  * Entity manager singleton.

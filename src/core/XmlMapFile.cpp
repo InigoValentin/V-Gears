@@ -21,7 +21,7 @@
 #include "core/XmlMapFile.h"
 #include "map/VGearsBackground2DFileManager.h"
 #include "map/VGearsWalkmeshFileManager.h"
-#include "TextHandler.h"
+#include "engine/ui/TextHandler.h"
 
 XmlMapFile::XmlMapFile(const Ogre::String& file): XmlFile(file){}
 

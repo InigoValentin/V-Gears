@@ -14,7 +14,7 @@
  */
 
 #include "engine/config/ConfigCmdHandler.h"
-#include "core/Console.h"
+#include "engine/ui/Console.h"
 
 /**
  * Runs a script string.

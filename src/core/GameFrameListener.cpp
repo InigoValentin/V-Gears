@@ -19,15 +19,15 @@
 #include "core/GameFrameListener.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/config/ConfigVar.h"
-#include "core/Console.h"
+#include "engine/ui/Console.h"
 #include "engine/graphics/DebugDraw.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
 #include "core/Timer.h"
-#include "core/UiManager.h"
-#include "core/DialogsManager.h"
+#include "engine/ui/UiManager.h"
+#include "engine/ui/DialogsManager.h"
 
 ConfigVar cv_debug_fps("debug_fps", "Debug FPS", "false");
 

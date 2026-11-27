@@ -16,7 +16,7 @@
 #include <OgreFontManager.h>
 #include <OgreRenderWindow.h>
 #include "app/VGearsApplication.h"
-#include "core/Console.h"
+#include "engine/ui/Console.h"
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"

@@ -18,7 +18,7 @@
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
 #include "common/Logger.h"
-#include "core/UiSprite.h"
+#include "engine/ui/UiSprite.h"
 
 
 UiSprite::UiSprite(const Ogre::String& name): UiWidget(name){Initialise();}

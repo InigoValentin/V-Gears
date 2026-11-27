@@ -15,8 +15,8 @@
 
 #include <iostream>
 #include "common/Logger.h"
-#include "core/UiManager.h"
-#include "core/UiFont.h"
+#include "engine/ui/UiManager.h"
+#include "engine/ui/UiFont.h"
 #include "core/XmlFontFile.h"
 
 

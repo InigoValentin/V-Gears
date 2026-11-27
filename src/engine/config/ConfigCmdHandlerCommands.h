@@ -18,7 +18,7 @@
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>
 #include <OgreStringConverter.h>
-#include "core/Console.h"
+#include "engine/ui/Console.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/script/ScriptManager.h"
 #include "common/Logger.h"

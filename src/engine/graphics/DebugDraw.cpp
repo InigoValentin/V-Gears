@@ -22,7 +22,7 @@
 #include "engine/graphics/CameraManager.h"
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
-#include "core/UiTextArea.h"
+#include "engine/ui/UiTextArea.h"
 
 /**
  * Debug drawer singleton.

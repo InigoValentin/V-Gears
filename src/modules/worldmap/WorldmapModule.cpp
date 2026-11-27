@@ -52,14 +52,14 @@
 #include "common/Logger.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/entity/EntityModel.h"
-#include "core/DialogsManager.h"
+#include "engine/ui/DialogsManager.h"
 #include "engine/script/ScriptManager.h"
 #include "data/worldmap/WorldmapFile.h"
 #include "data/worldmap/WorldmapFileManager.h"
 #include "data/worldmap/WorldmapFileSerializer.h"
 #include "engine/graphics/CameraManager.h"
-#include "core/UiManager.h"
-#include "core/UiWidget.h"
+#include "engine/ui/UiManager.h"
+#include "engine/ui/UiWidget.h"
 
 /**
  * World map module singleton.

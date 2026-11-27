@@ -14,7 +14,7 @@
  */
 
 #include "common/Logger.h"
-#include "core/UiFont.h"
+#include "engine/ui/UiFont.h"
 
 UiFont::UiFont(const Ogre::String& name, const Ogre::String& language):
   name_(name),

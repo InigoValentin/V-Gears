@@ -24,7 +24,7 @@
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
 #include "core/Timer.h"
-#include "core/UiWidget.h"
+#include "engine/ui/UiWidget.h"
 
 
 ConfigVar cv_debug_ui("debug_ui", "Draw ui debug info", "0");

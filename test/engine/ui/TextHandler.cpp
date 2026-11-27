@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "../../src/core/TextHandler.h"
+#include "engine/ui/TextHandler.h"
 
 #include <boost/test/unit_test.hpp>
 #include <tinyxml.h>

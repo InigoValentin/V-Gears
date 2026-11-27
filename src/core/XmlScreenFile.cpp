@@ -15,13 +15,13 @@
 
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
-#include "core/UiManager.h"
-#include "core/UiSprite.h"
-#include "core/UiTextArea.h"
-#include "core/UiWidget.h"
+#include "engine/ui/UiManager.h"
+#include "engine/ui/UiSprite.h"
+#include "engine/ui/UiTextArea.h"
+#include "engine/ui/UiWidget.h"
 #include "core/XmlScreenFile.h"
 #include "common/Utilites.h"
-#include "TextHandler.h"
+#include "engine/ui/TextHandler.h"
 
 XmlScreenFile::XmlScreenFile(const Ogre::String& file): XmlFile(file){}
 

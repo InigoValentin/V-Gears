@@ -616,9 +616,9 @@ set(VGEARS_SOURCE_FILES
     engine/config/ConfigFile.cpp
     engine/config/ConfigVar.cpp
     engine/config/ConfigVarHandler.cpp
-    core/Console.cpp
+    engine/ui/Console.cpp
     engine/graphics/DebugDraw.cpp
-    core/DialogsManager.cpp
+    engine/ui/DialogsManager.cpp
     core/Enemy.cpp
     engine/entity/EntityCollision.cpp
     engine/entity/Entity.cpp
@@ -651,14 +651,14 @@ set(VGEARS_SOURCE_FILES
     core/Savemap.cpp
     core/SavemapHandler.cpp
     engine/script/ScriptManager.cpp
-    core/TextHandler.cpp
+    engine/ui/TextHandler.cpp
     core/Timer.cpp
-    core/UiAnimation.cpp
-    core/UiFont.cpp
-    core/UiManager.cpp
-    core/UiSprite.cpp
-    core/UiTextArea.cpp
-    core/UiWidget.cpp
+    engine/ui/UiAnimation.cpp
+    engine/ui/UiFont.cpp
+    engine/ui/UiManager.cpp
+    engine/ui/UiSprite.cpp
+    engine/ui/UiTextArea.cpp
+    engine/ui/UiWidget.cpp
     common/Utilites.cpp
     engine/entity/Walkmesh.cpp
     core/WorldMapManager.cpp

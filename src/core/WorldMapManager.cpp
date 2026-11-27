@@ -24,15 +24,15 @@
 #include "core/WorldMapManager.h"
 #include "core/WorldMapManager.h"
 #include "engine/graphics/CameraManager.h"
-#include "core/Console.h"
-#include "core/DialogsManager.h"
+#include "engine/ui/Console.h"
+#include "engine/ui/DialogsManager.h"
 #include "engine/entity/EntityManager.h"
 #include "engine/config/ConfigVar.h"
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
-#include "core/TextHandler.h"
-#include "core/UiManager.h"
+#include "engine/ui/TextHandler.h"
+#include "engine/ui/UiManager.h"
 
 /**
  * World Map manager singleton.

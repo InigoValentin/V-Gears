@@ -16,7 +16,7 @@
 #include "TextHandler.h"
 
 #include <iostream>
-#include "core/TextHandlerCommands.h"
+#include "engine/ui/TextHandlerCommands.h"
 #include "core/XmlTextsFile.h"
 #include "core/XmlTextFile.h"
 

@@ -17,7 +17,7 @@
 #include "core/XmlTextFile.h"
 #include "core/XmlTextsFile.h"
 
-#include "TextHandler.h"
+#include "engine/ui/TextHandler.h"
 
 XmlTextsFile::XmlTextsFile(const Ogre::String& file): XmlFile(file){}
 

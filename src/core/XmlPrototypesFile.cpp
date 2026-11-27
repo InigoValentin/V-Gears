@@ -14,7 +14,7 @@
  */
 
 #include "common/Logger.h"
-#include "core/UiManager.h"
+#include "engine/ui/UiManager.h"
 #include "core/XmlPrototypesFile.h"
 
 XmlPrototypesFile::XmlPrototypesFile(const Ogre::String& file): XmlFile(file){}

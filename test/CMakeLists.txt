@@ -37,7 +37,7 @@ set(SOURCE_FILES
     engine/graphics/ScreenFadeState.cpp
     engine/entity/EntityManager.cpp
     engine/entity/EntityPoint.cpp
-    core/TextHandler.cpp
+    engine/ui/TextHandler.cpp
     installer/FieldDataInstaller.cpp
     installer/SfxDump.cpp
     installer/WindowFonts.cpp

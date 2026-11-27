@@ -22,7 +22,7 @@
 #include <OIS/OIS.h>
 #include <list>
 #include <vector>
-#include "Event.h"
+#include "core/Event.h"
 
 /**
  * The game console.

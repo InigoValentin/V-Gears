@@ -22,7 +22,7 @@
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
-#include "core/UiManager.h"
+#include "engine/ui/UiManager.h"
 #include "common/Utilites.h"
 #include "core/XmlFontsFile.h"
 #include "core/XmlPrototypesFile.h"

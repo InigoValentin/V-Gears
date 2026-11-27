@@ -14,8 +14,8 @@
  */
 
 #include <Ogre.h>
-#include "core/UiAnimation.h"
-#include "core/UiWidget.h"
+#include "engine/ui/UiAnimation.h"
+#include "engine/ui/UiWidget.h"
 
 UiAnimation::UiAnimation(const Ogre::String& name, UiWidget* widget):
   name_(name),
