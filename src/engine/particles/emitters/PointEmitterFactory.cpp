@@ -13,16 +13,27 @@
  * GNU General Public License for more details.
  */
 
-#include "core/particles/ParticleVisual.h"
 
-VisualParticle::VisualParticle(): Particle(){
-    particle_type_ = PT_VISUAL;
-    // Default is false, but visual particles are always emitted.
-    emittable_ = true;
-}
+#include "engine/particles/emitters/PointEmitterFactory.h"
 
-void VisualParticle::InitForExpiration(){
-    Particle::InitForExpiration();
-    if (additional_data != nullptr) additional_data->SetVisible(false);
-}
 
+PointEmitterFactory::PointEmitterFactory(){};
+
+/**
+ * Destructor.
+ */
+PointEmitterFactory::~PointEmitterFactory(){};
+
+/**
+ * Retrieves the emitter type.
+ *
+ * @return The emitter type (always "Point").
+ */
+Ogre::String PointEmitterFactory::GetEmitterType() const{return "Point";}
+
+/**
+ * Creates an emitter.
+ *
+ * @return A new {@see PointEmitter}.
+ */
+ParticleEmitter* PointEmitterFactory::CreateEmitter(){return CreateEmitter_<PointEmitter>();}

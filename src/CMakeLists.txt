@@ -630,24 +630,24 @@ set(VGEARS_SOURCE_FILES
     core/GameFrameListener.cpp
     engine/input/InputManager.cpp
     core/Manager.cpp
-    core/particles/Particle.cpp
-    core/particles/ParticleEmitter.cpp
-    core/particles/ParticleEmitterDictionary.cpp
-    core/particles/ParticleEmitterTranslator.cpp
-    core/particles/ParticleRenderer.cpp
-    core/particles/ParticleRendererTranslator.cpp
-    core/particles/ParticleSystem.cpp
-    core/particles/ParticleSystemFactory.cpp
-    core/particles/ParticleSystemManager.cpp
-    core/particles/ParticleSystemTranslator.cpp
-    core/particles/ParticleSystemTranslatorManager.cpp
-    core/particles/ParticleTechnique.cpp
-    core/particles/ParticleTechniqueTranslator.cpp
-    core/particles/ParticleVisual.cpp
-    core/particles/emitters/PointEmitter.cpp
-    core/particles/emitters/PointEmitterFactory.cpp
-    core/particles/renderer/ParticleEntityRenderer.cpp
-    core/particles/renderer/ParticleEntityRendererDictionary.cpp
+    engine/particles/Particle.cpp
+    engine/particles/ParticleEmitter.cpp
+    engine/particles/ParticleEmitterDictionary.cpp
+    engine/particles/ParticleEmitterTranslator.cpp
+    engine/particles/ParticleRenderer.cpp
+    engine/particles/ParticleRendererTranslator.cpp
+    engine/particles/ParticleSystem.cpp
+    engine/particles/ParticleSystemFactory.cpp
+    engine/particles/ParticleSystemManager.cpp
+    engine/particles/ParticleSystemTranslator.cpp
+    engine/particles/ParticleSystemTranslatorManager.cpp
+    engine/particles/ParticleTechnique.cpp
+    engine/particles/ParticleTechniqueTranslator.cpp
+    engine/particles/ParticleVisual.cpp
+    engine/particles/emitters/PointEmitter.cpp
+    engine/particles/emitters/PointEmitterFactory.cpp
+    engine/particles/renderer/ParticleEntityRenderer.cpp
+    engine/particles/renderer/ParticleEntityRendererDictionary.cpp
     core/Savemap.cpp
     core/SavemapHandler.cpp
     engine/script/ScriptManager.cpp

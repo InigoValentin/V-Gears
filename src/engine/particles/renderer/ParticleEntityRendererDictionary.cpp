@@ -13,10 +13,13 @@
  * GNU General Public License for more details.
  */
 
-#include "core/particles/emitters/PointEmitter.h"
+#include <OgreLogManager.h>
+#include "engine/particles/renderer/ParticleEntityRendererDictionary.h"
+#include "engine/particles/renderer/ParticleEntityRenderer.h"
 
-PointEmitter::PointEmitter():ParticleEmitter(){emitter_type_ = "Point";}
+namespace ParticleEntityRendererDictionary{
 
-void PointEmitter::CopyAttributesTo(ParticleEmitter* emitter){
-    ParticleEmitter::CopyAttributesTo(emitter);
+    void MeshName::doSet(void* target, const Ogre::String& val){
+        static_cast<ParticleEntityRenderer*>(target)->SetMeshName(val);
+    }
 }

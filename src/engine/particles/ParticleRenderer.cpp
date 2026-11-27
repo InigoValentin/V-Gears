@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/particles/ParticleRenderer.h"
+#include "engine/particles/ParticleRenderer.h"
 
 ParticleRenderer::ParticleRenderer():
     parent_technique_(nullptr),

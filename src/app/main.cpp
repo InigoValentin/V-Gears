@@ -39,7 +39,7 @@
 #include "engine/script/ScriptManager.h"
 #include "core/Timer.h"
 #include "engine/ui/UiManager.h"
-#include "core/particles/ParticleSystemManager.h"
+#include "engine/particles/ParticleSystemManager.h"
 #include "engine/ui/DialogsManager.h"
 #include "engine/ui/TextHandler.h"
 #include "data/VGearsLZSFLevelFileManager.h"

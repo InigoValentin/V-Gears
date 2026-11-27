@@ -14,8 +14,8 @@
  */
 
 #include <OgreLogManager.h>
-#include "core/particles/ParticleRendererTranslator.h"
-#include "core/particles/ParticleSystemManager.h"
+#include "engine/particles/ParticleRendererTranslator.h"
+#include "engine/particles/ParticleSystemManager.h"
 
 void ParticleRendererTranslator::translate(
   Ogre::ScriptCompiler *compiler, const Ogre::AbstractNodePtr &node

@@ -14,8 +14,8 @@
  */
 
 #include <OgreStringConverter.h>
-#include "core/particles/ParticleEmitterDictionary.h"
-#include "core/particles/ParticleEmitter.h"
+#include "engine/particles/ParticleEmitterDictionary.h"
+#include "engine/particles/ParticleEmitter.h"
 #include "common/Logger.h"
 #include "common/Utilites.h"
 

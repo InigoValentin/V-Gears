@@ -15,10 +15,10 @@
 
 #include <OgreLogManager.h>
 #include <OgreRoot.h>
-#include "core/particles/ParticleSystemManager.h"
-#include "core/particles/emitters/PointEmitterFactory.h"
-#include "core/particles/ParticleSystemFactory.h"
-#include "core/particles/renderer/ParticleEntityRendererFactory.h"
+#include "engine/particles/ParticleSystemManager.h"
+#include "engine/particles/emitters/PointEmitterFactory.h"
+#include "engine/particles/ParticleSystemFactory.h"
+#include "engine/particles/renderer/ParticleEntityRendererFactory.h"
 
 /**
  * PArticle manager singleton.

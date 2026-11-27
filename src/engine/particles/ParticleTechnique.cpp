@@ -15,9 +15,9 @@
 
 #include <OgreLogManager.h>
 #include <OgreStringConverter.h>
-#include "core/particles/ParticleTechnique.h"
-#include "core/particles/ParticleSystemManager.h"
-#include "core/particles/ParticleVisual.h"
+#include "engine/particles/ParticleTechnique.h"
+#include "engine/particles/ParticleSystemManager.h"
+#include "engine/particles/ParticleVisual.h"
 
 
 ParticleTechnique::ParticleTechnique():

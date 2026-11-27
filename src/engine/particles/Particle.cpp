@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "core/particles/Particle.h"
+#include "engine/particles/Particle.h"
 
 Particle::Particle():
     parent_emitter_(nullptr),

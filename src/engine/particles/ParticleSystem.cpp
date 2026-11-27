@@ -15,8 +15,8 @@
 
 #include <OgreLogManager.h>
 #include <OgreSceneNode.h>
-#include "core/particles/ParticleSystem.h"
-#include "core/particles/ParticleSystemManager.h"
+#include "engine/particles/ParticleSystem.h"
+#include "engine/particles/ParticleSystemManager.h"
 
 ParticleSystem::ParticleSystem(const Ogre::String& name): MovableObject(name){}
 

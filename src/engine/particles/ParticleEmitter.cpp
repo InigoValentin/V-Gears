@@ -16,8 +16,8 @@
 #include <OgreLogManager.h>
 #include <OgreString.h>
 #include <OgreStringConverter.h>
-#include "core/particles/ParticleEmitter.h"
-#include "core/particles/ParticleTechnique.h"
+#include "engine/particles/ParticleEmitter.h"
+#include "engine/particles/ParticleTechnique.h"
 
 ParticleEmitterDictionary::EmissionRate
   ParticleEmitter::emission_rate_dictionary_;

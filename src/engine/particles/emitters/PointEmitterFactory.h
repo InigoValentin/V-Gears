@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "core/particles/ParticleEmitterFactory.h"
+#include "engine/particles/ParticleEmitterFactory.h"
 #include "PointEmitter.h"
 
 /**

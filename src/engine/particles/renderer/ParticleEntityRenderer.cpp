@@ -15,10 +15,10 @@
 
 #include <OgreEntity.h>
 #include <OgreRoot.h>
-#include "core/particles/renderer/ParticleEntityRenderer.h"
-#include "core/particles/ParticleSystem.h"
-#include "core/particles/ParticleTechnique.h"
-#include "core/particles/ParticleVisual.h"
+#include "engine/particles/renderer/ParticleEntityRenderer.h"
+#include "engine/particles/ParticleSystem.h"
+#include "engine/particles/ParticleTechnique.h"
+#include "engine/particles/ParticleVisual.h"
 
 ParticleEntityRendererDictionary::MeshName
   ParticleEntityRenderer::mesh_name_dictionary_;

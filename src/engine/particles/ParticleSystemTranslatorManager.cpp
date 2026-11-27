@@ -14,7 +14,7 @@
  */
 
 #include <OgreLogManager.h>
-#include "core/particles/ParticleSystemTranslatorManager.h"
+#include "engine/particles/ParticleSystemTranslatorManager.h"
 
 size_t ParticleSystemTranslatorManager::getNumTranslators() const{
     // TODO: Calculate.

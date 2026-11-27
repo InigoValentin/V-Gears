@@ -13,9 +13,9 @@
  * GNU General Public License for more details.
  */
 
-#include "core/particles/ParticleSystemFactory.h"
-#include "core/particles/ParticleSystem.h"
-#include "core/particles/ParticleSystemManager.h"
+#include "engine/particles/ParticleSystemFactory.h"
+#include "engine/particles/ParticleSystem.h"
+#include "engine/particles/ParticleSystemManager.h"
 
 Ogre::String ParticleSystemFactory::FACTORY_TYPE_NAME = "VgearsParticleSystem";
 
