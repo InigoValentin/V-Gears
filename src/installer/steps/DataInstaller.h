@@ -19,7 +19,7 @@
 #include <vector>
 #include <iostream>
 #include <OgreLog.h>
-#include "app/VGearsApplication.h"
+#include "app/Application.h"
 #include "installer/formats/DiskImage.h"
 #include "installer/extractors/FieldDataInstaller.h"
 #include "installer/extractors/KernelDataInstaller.h"

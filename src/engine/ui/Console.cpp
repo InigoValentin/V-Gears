@@ -15,13 +15,13 @@
 
 #include <OgreFontManager.h>
 #include <OgreRenderWindow.h>
-#include "app/VGearsApplication.h"
+#include "app/Application.h"
 #include "engine/ui/Console.h"
 #include "engine/graphics/DebugDraw.h"
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
 #include "engine/Timer.h"
-#include "common/Utilites.h"
+#include "common/Utilities.h"
 #include "engine/config/ConfigCmdHandler.h"
 #include "engine/config/ConfigVarHandler.h"
 

@@ -17,7 +17,7 @@
 
 #include "FieldTextWriter.h"
 #include "installer/tables/Characters.h"
-#include "common/VGearsStringUtil.h"
+#include "common/StringUtil.h"
 
 
 

@@ -16,7 +16,7 @@
 #pragma once
 
 #include "common/TypeDefine.h"
-#include "formats/VGearsSerializer.h"
+#include "formats/Serializer.h"
 
 namespace VGears {
 

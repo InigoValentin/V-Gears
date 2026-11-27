@@ -30,8 +30,8 @@
 #include "installer/steps/InstallLog.h"
 #include "MovieCamera.h"
 #include "SfxDump.h"
-#include "formats/lgp/VGearsLGPArchive.h"
-#include "formats/texture/VGearsTexFile.h"
+#include "formats/lgp/LGPArchive.h"
+#include "formats/texture/TexFile.h"
 #include "installer/formats/TexFile.h"
 #include "WindowFonts.h"
 

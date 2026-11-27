@@ -14,7 +14,7 @@
  */
 
 #include "VGearsDataPlugin.h"
-#include "formats/texture/VGearsTexCodec.h"
+#include "formats/texture/TexCodec.h"
 
 using Ogre::String;
 

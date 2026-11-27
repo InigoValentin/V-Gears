@@ -16,8 +16,8 @@
 #pragma once
 
 #include "common/TypeDefine.h"
-#include "formats/VGearsSerializer.h"
-#include "formats/field/VGearsWalkmeshFile.h"
+#include "formats/Serializer.h"
+#include "formats/field/WalkmeshFile.h"
 
 namespace VGears{
 

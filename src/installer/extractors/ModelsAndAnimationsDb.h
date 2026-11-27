@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "common/VGearsStringUtil.h"
+#include "common/StringUtil.h"
 
 typedef std::map<std::string, std::set<std::string>> ModelAnimationMap;
 

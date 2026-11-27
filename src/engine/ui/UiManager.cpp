@@ -23,7 +23,7 @@
 #include "common/Logger.h"
 #include "engine/script/ScriptManager.h"
 #include "engine/ui/UiManager.h"
-#include "common/Utilites.h"
+#include "common/Utilities.h"
 #include "engine/xml/XmlFontsFile.h"
 #include "engine/xml/XmlPrototypesFile.h"
 #include "engine/xml/XmlScreensFile.h"

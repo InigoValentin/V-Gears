@@ -30,7 +30,7 @@ include_directories(
 # Test source files.
 set(SOURCE_FILES
     main.cpp
-    formats/model/VGearsAFile.cpp
+    formats/model/AFile.cpp
     formats/worldmap/MapFileSerializer.cpp
     engine/graphics/MovieCameraFrame.cpp
     engine/graphics/MovieState.cpp

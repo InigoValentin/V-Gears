@@ -28,14 +28,14 @@ set(INSTALLER_SOURCE_FILES
     extractors/ModelsAndAnimationsDb.cpp
     extractors/ScopedLgp.cpp
     formats/TexFile.cpp
-    support/VGearsUtility.cpp
+    support/Utility.cpp
     extractors/WindowFonts.cpp
     extractors/WorldInstaller.cpp
     formats/BinGZipFile.cpp
     support/DrawSkeleton.cpp
     support/Logger.cpp
     support/OgreBase.cpp
-    support/OgreGenUtilites.cpp
+    support/OgreGenUtilities.cpp
     support/Vram.cpp
     formats/AbFile.cpp
     formats/BattleSceneFile.cpp

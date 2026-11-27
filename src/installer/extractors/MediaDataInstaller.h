@@ -18,7 +18,7 @@
 #include <memory>
 #include <unordered_map>
 #include "installer/formats/DiskImage.h"
-#include "formats/lgp/VGearsLGPArchive.h"
+#include "formats/lgp/LGPArchive.h"
 #include "installer/formats/BinGZipFile.h"
 #include "installer/formats/TexFile.h"
 #include "installer/steps/ExternalTools.h"

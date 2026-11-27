@@ -19,7 +19,7 @@
 #include "engine/config/ConfigVarHandler.h"
 #include "engine/ui/Console.h"
 #include "common/Logger.h"
-#include "common/Utilites.h"
+#include "common/Utilities.h"
 
 /**
  * Parses a list of keys to retrieve their keycodes.

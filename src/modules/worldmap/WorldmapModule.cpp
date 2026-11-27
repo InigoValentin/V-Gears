@@ -40,14 +40,14 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreLogManager.h>
 #include <OgreTextureManager.h>
-#include "app/VGearsApplication.h"
+#include "app/Application.h"
 #include <Overlay/OgreOverlay.h>
 #include <Overlay/OgreOverlayContainer.h>
 #include <Overlay/OgreOverlayManager.h>
 #include <Overlay/OgrePanelOverlayElement.h>
 #include <OgreMaterialManager.h>
 #include <OgreResourceGroupManager.h>
-#include "formats/texture/VGearsTexFile.h"
+#include "formats/texture/TexFile.h"
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"
 #include "engine/entity/EntityManager.h"

@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "common/VGearsResource.h"
+#include "common/Resource.h"
 
 namespace VGears {
 

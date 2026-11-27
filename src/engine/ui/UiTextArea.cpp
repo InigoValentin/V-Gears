@@ -28,7 +28,7 @@
 #include "engine/ui/UiTextArea.h"
 #include "engine/Timer.h"
 #include "engine/ui/UiSprite.h"
-#include "common/Utilites.h"
+#include "common/Utilities.h"
 #include "TextHandler.h"
 
 UiTextArea::UiTextArea(const Ogre::String& name): UiWidget(name){

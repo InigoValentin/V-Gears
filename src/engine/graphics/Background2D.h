@@ -20,7 +20,7 @@
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreRenderQueueListener.h>
 #include <OgreRoot.h>
-#include "formats/field/VGearsBackground2DFile.h"
+#include "formats/field/Background2DFile.h"
 #include "Background2DAnimation.h"
 #include "BackgroundPalette.h"
 #include "engine/entity/Entity.h"

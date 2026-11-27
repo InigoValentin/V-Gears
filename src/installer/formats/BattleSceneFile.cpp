@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include "BattleSceneFile.h"
-#include "installer/support/VGearsUtility.h"
+#include "installer/support/Utility.h"
 #include "installer/tables/FF7Data.h"
 
 BattleSceneFile::BattleSceneFile(const unsigned int id, File file): id_(id){Read(file);}

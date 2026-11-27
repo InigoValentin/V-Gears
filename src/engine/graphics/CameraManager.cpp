@@ -20,7 +20,7 @@
 #include <OIS/OIS.h>
 #include "engine/graphics/CameraManager.h"
 #include "engine/graphics/CameraManagerCommands.h"
-#include "app/VGearsApplication.h"
+#include "app/Application.h"
 #include "engine/config/ConfigVar.h"
 #include "engine/input/InputManager.h"
 #include "common/Logger.h"

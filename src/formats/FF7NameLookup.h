@@ -16,7 +16,7 @@
 #pragma once
 
 #include "common/TypeDefine.h"
-#include "common/VGearsStringUtil.h"
+#include "common/StringUtil.h"
 #include "engine/xml/XmlFile.h"
 
 // TODO: Move implementations to cpp file.

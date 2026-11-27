@@ -19,10 +19,10 @@
 #include "InstallLayout.h"
 #include "InstallLog.h"
 #include "installer/formats/DiskImage.h"
-#include "formats/model/VGearsAFileManager.h"
-#include "formats/model/VGearsHRCFileManager.h"
-#include "formats/model/VGearsPFileManager.h"
-#include "formats/model/VGearsRSDFileManager.h"
+#include "formats/model/AFileManager.h"
+#include "formats/model/HRCFileManager.h"
+#include "formats/model/PFileManager.h"
+#include "formats/model/RSDFileManager.h"
 
 float DataInstaller::LINE_SCALE_FACTOR = 0.0078124970964f;
 

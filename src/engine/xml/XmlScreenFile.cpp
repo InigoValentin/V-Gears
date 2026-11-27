@@ -20,7 +20,7 @@
 #include "engine/ui/UiTextArea.h"
 #include "engine/ui/UiWidget.h"
 #include "engine/xml/XmlScreenFile.h"
-#include "common/Utilites.h"
+#include "common/Utilities.h"
 #include "engine/ui/TextHandler.h"
 
 XmlScreenFile::XmlScreenFile(const Ogre::String& file): XmlFile(file){}

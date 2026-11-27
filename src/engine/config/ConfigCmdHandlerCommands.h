@@ -24,8 +24,8 @@
 #include "common/Logger.h"
 #include "engine/xml/XmlMapFile.h"
 #include "engine/xml/XmlMapsFile.h"
-#include "app/VGearsGameState.h"
-#include "app/VGearsApplication.h"
+#include "app/GameState.h"
+#include "app/Application.h"
 #include "ConfigCmdHandler.h"
 #include "ConfigVarHandler.h"
 

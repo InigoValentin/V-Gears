@@ -17,7 +17,7 @@
 #include "engine/particles/ParticleEmitterDictionary.h"
 #include "engine/particles/ParticleEmitter.h"
 #include "common/Logger.h"
-#include "common/Utilites.h"
+#include "common/Utilities.h"
 
 namespace ParticleEmitterDictionary{
 

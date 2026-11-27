@@ -21,7 +21,7 @@
 #include "engine/script/ScriptManagerBinds.h"
 #include "engine/script/ScriptManagerCommands.h"
 #include "engine/Timer.h"
-#include "common/Utilites.h"
+#include "common/Utilities.h"
 #include "engine/xml/XmlScriptsFile.h"
 #include "LuaIncludes.h"
 

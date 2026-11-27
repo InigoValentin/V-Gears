@@ -36,12 +36,12 @@
 #include "installer/tables/ExeEffectMeshes.h"
 #include "installer/tables/ModelMaterials.h"
 #include "installer/formats/TexFile.h"
-#include "formats/model/VGearsHRCFileManager.h"
-#include "formats/model/VGearsAFileManager.h"
+#include "formats/model/HRCFileManager.h"
+#include "formats/model/AFileManager.h"
 #include "installer/formats/AbFile.h"
 #include "installer/formats/DaFile.h"
 #include "installer/tables/FF7Data.h"
-#include "common/VGearsStringUtil.h"
+#include "common/StringUtil.h"
 #include "formats/FF7NameLookup.h"
 
 BattleDataInstaller::BattleDataInstaller(

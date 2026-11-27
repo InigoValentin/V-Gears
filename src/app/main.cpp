@@ -21,8 +21,8 @@
 #include <Overlay/OgreOverlayManager.h>
 #include <Overlay/OgreFontManager.h>
 #include <OIS/OIS.h>
-#include "VGearsGameState.h"
-#include "app/VGearsApplication.h"
+#include "app/GameState.h"
+#include "app/Application.h"
 #include "engine/audio/AudioManager.h"
 #include "modules/battle/BattleManager.h"
 #include "engine/graphics/CameraManager.h"
@@ -42,8 +42,8 @@
 #include "engine/particles/ParticleSystemManager.h"
 #include "engine/ui/DialogsManager.h"
 #include "engine/ui/TextHandler.h"
-#include "formats/field/VGearsLZSFLevelFileManager.h"
-#include "formats/lgp/VGearsLGPArchiveFactory.h"
+#include "formats/field/LZSFLevelFileManager.h"
+#include "formats/lgp/LGPArchiveFactory.h"
 #include "formats/worldmap/WorldmapFileManager.h"
 #include "modules/worldmap/WorldmapModule.h"
 

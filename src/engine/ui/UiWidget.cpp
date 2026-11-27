@@ -17,7 +17,7 @@
 #include <OgreMath.h>
 #include <OgreRoot.h>
 #include <OgreViewport.h>
-#include "app/VGearsApplication.h"
+#include "app/Application.h"
 #include "engine/config/ConfigVar.h"
 #include "engine/graphics/CameraManager.h"
 #include "engine/graphics/DebugDraw.h"

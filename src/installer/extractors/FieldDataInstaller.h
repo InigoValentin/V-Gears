@@ -19,7 +19,7 @@
 #include <string>
 #include <OgreMesh.h>
 #include <tinyxml.h>
-#include "formats/field/VGearsFLevelFile.h"
+#include "formats/field/FLevelFile.h"
 #include "installer/formats/DiskImage.h"
 #include "ScopedLgp.h"
 #include "installer/tables/SpawnPointDb.h"

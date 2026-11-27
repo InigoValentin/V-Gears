@@ -22,7 +22,7 @@
 #include "installer/formats/BinGZipFile.h"
 #include "common/TypeDefine.h"
 #include "installer/formats/BattleSceneFile.h"
-#include "formats/lgp/VGearsLGPArchive.h"
+#include "formats/lgp/LGPArchive.h"
 
 /**
  * The battle data installer.

@@ -17,7 +17,7 @@
 
 #include <OgreResourceManager.h>
 #include "common/TypeDefine.h"
-#include "common/VGearsPrerequisites.h"
+#include "common/Prerequisites.h"
 
 namespace VGears {
 

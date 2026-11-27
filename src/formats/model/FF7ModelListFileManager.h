@@ -16,7 +16,7 @@
 #pragma once
 
 #include <OgreResourceManager.h>
-#include "common/VGearsPrerequisites.h"
+#include "common/Prerequisites.h"
 #include "FF7ModelListFile.h"
 
 namespace VGears{

@@ -16,7 +16,7 @@
 #pragma once
 
 #include <OgreColourValue.h>
-#include "common/VGearsResource.h"
+#include "common/Resource.h"
 
 namespace VGears{
 
