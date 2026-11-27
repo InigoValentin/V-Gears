@@ -2,15 +2,15 @@ set(V-Gears_SOURCE_DIR ../../src)
 
 # Define header and source files for the library.
 set(HEADER_FILES
-    ${V-Gears_SOURCE_DIR}/VGearsPrerequisites.h
-    ${V-Gears_SOURCE_DIR}/common/VGearsManualObject.h
-    ${V-Gears_SOURCE_DIR}/common/VGearsStringUtil.h
+    ${V-Gears_SOURCE_DIR}/common/Prerequisites.h
+    ${V-Gears_SOURCE_DIR}/common/ManualObject.h
+    ${V-Gears_SOURCE_DIR}/common/StringUtil.h
     ${V-Gears_SOURCE_DIR}/common/TypeDefine.h
     include/VGearsDataPlugin.h
 )
 set(SOURCE_FILES
-    ${V-Gears_SOURCE_DIR}/common/VGearsManualObject.cpp
-    ${V-Gears_SOURCE_DIR}/common/VGearsStringUtil.cpp
+    ${V-Gears_SOURCE_DIR}/common/ManualObject.cpp
+    ${V-Gears_SOURCE_DIR}/common/StringUtil.cpp
     ${V-Gears_SOURCE_DIR}/common/TypeDefine.cpp
     src/VGearsDataPlugin.cpp
     src/VGearsDataPluginDll.cpp

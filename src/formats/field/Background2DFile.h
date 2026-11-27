@@ -25,7 +25,7 @@ namespace VGears{
     /**
      * Handles 2D background files
      *
-     * @todo What's the difference with VGearsBackgroundFile.h?
+     * @todo What's the difference with BackgroundFile.h?
      */
     class Background2DFile : public Resource{
         public:

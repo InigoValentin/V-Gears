@@ -6,7 +6,7 @@ applyTo: "test/**"
 # V-Gears Testing Conventions
 
 - Tests use Boost.Test with dynamic linking (`BOOST_TEST_DYN_LINK`); the suite builds as the `v-gears-tests` target and is registered with CTest.
-- Test files mirror the path of the code under test (`test/data/VGearsLGPArchive.cpp` tests `src/formats/lgp/LGPArchive.cpp`). Follow this existing convention for placement.
+- Test files mirror the path of the code under test (`test/formats/model/AFile.cpp` tests `src/formats/model/AFile.cpp`). Follow this existing convention for placement.
 - Every new test source file must be added manually to `SOURCE_FILES` in [test/CMakeLists.txt](../../test/CMakeLists.txt) — there is no globbing.
 - RTTI (`dynamic_cast`, `typeid`) is allowed in tests even though production code avoids it.
 - Never use original game data in tests. Construct binary fixtures in-code (byte buffers, temp files) instead.

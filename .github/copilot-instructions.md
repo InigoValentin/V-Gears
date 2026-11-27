@@ -10,11 +10,12 @@ V-Gears is a free, cross-platform reimplementation of the Final Fantasy VII engi
 
 ## Architecture
 
-- `src/common/` — application base class and file utilities shared by all targets.
-- `src/core/` — engine runtime: audio, console, entities, walkmesh, UI, particles, savemap, `ScriptManager` (Lua bindings via sol2 and system LuaJIT).
-- `src/data/` — FF7 binary format parsers (LGP, LZS, HRC, TEX, field files, worldmap TXZ...). Most formats follow a triplet: `*File` (data), `*FileSerializer` (read/write), `*FileManager` (Ogre resource loading).
-- `src/installer/` — Qt data installer (`v-gears-installer`); includes the script `decompiler/` that converts field/world scripts into Lua and the SfxDump audio converter.
-- `src/map/`, `src/modules/`, `src/viewer/` — field map code, game modules (e.g. worldmap), and the model viewer.
+- `src/app/` — the game entry point, the application class and the game state.
+- `src/common/` — files, logger, strings, types and other utilities shared by all targets.
+- `src/formats/` — FF7 binary format parsers, by kind: `lgp/`, `field/`, `model/`, `texture/` and `worldmap/`. Most formats follow a triplet: `*File` (data), `*FileSerializer` (read/write), `*FileManager` (Ogre resource loading).
+- `src/engine/` — engine runtime, by subsystem: `audio/`, `config/`, `entity/`, `graphics/`, `input/`, `particles/`, `save/`, `script/` (`ScriptManager`, Lua bindings via sol2 and system LuaJIT), `ui/` and `xml/` (XML loaders).
+- `src/modules/` — game modules: `battle/` and `worldmap/`.
+- `src/installer/` — Qt data installer (`v-gears-installer`): `gui/`, `cli/`, `steps/` (the installation process), `extractors/` (game data conversion), `formats/`, `support/`, `tables/` (data tables) and `decompiler/` (converts field and world scripts into Lua).
 - `src/third_party/sol/` — vendored sol2 single header. Do not restyle, modernize, or refactor it.
 - LuaJIT is a system dependency.
 - `test/` — Boost.Test suite mirroring `src/` paths; sources are listed manually in `test/CMakeLists.txt`.

@@ -46,7 +46,7 @@ class DaFile{
          * Generates .a files from the da file.
          *
          * A file will be generated for each animation in the da file. See
-         * {@see VGearsAFile.h} for  more info about .a files. Files will be
+         * {@see AFile.h} for  more info about .a files. Files will be
          * created in the specified path, and will be named like the model id,
          * followed by an underscore, followed a two-digit animation index
          * (starting from 0) followed by the ".a extension". For example, if
