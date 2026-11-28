@@ -16,7 +16,7 @@ The engine looks for its data directory in this order, and changes into it:
 
 1. The directory given with `--data-dir`, for example `v-gears --data-dir ~/games/v-gears`.
 2. The directory in the `VGEARS_DATA_DIR` environment variable.
-3. The current directory, if it has the V-Gears files (`plugins.cfg` and a `data` folder).
+3. The current directory, if it has the V-Gears files (`plugins.cfg` and an `engine` folder).
 4. `~/.v-gears/` (`%USERPROFILE%\v-gears\` in Windows), the same default as the data installer.
 
 If the chosen directory doesn't have the V-Gears files yet, the engine copies them there from the `data/` folder of the repository (or from `share/v-gears` in an installed package; `VGEARS_TEMPLATE_DIR` overrides it). Files that are already there are never overwritten. The data of the original game still has to be added with the data installer.
@@ -25,7 +25,7 @@ The data installer also has a **Launch game** button, which starts the engine wi
 
 ## Controls
 
-The default bindings are in `config/config.cfg` of the installation directory, in the `bind_game_event` lines. The game reads them as events, so the menus, the field and the battles share them. They can be changed there.
+The default bindings are in `user/config.cfg` of the installation directory, in the `bind_game_event` lines. The game reads them as events, so the menus, the field and the battles share them. They can be changed there.
 
 |Key|Event|Action|
 |--|--|--|

@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 #include "common/FileSystem.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 unsigned int FileSystem::GetFileSize(const Ogre::String &path){
     FILE* file = fopen(path.c_str(), "rb");

@@ -4,93 +4,11 @@ find_package(ZLIB REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS Core REQUIRED)
 
-# Source files for the installer.
-set(INSTALLER_SOURCE_FILES
-    main.cpp
-    BattleDataInstaller.cpp
-    CliInstaller.cpp
-    DataInstaller.cpp
-    DiskImage.cpp
-    FieldDataInstaller.cpp
-    FieldTextWriter.cpp
-    InstallCommandLine.cpp
-    InstallLayout.cpp
-    InstallLog.cpp
-    InstallOptions.cpp
-    InstallSteps.cpp
-    ExternalTools.cpp
-    InstallVerifier.cpp
-    VideoFiles.cpp
-    MovieCamera.cpp
-    KernelDataInstaller.cpp
-    MainWindow.cpp
-    MediaDataInstaller.cpp
-    ModelsAndAnimationsDb.cpp
-    ScopedLgp.cpp
-    TexFile.cpp
-    VGearsUtility.cpp
-    WindowFonts.cpp
-    WorldInstaller.cpp
-    common/BinGZipFile.cpp
-    common/DrawSkeleton.cpp
-    common/Logger.cpp
-    common/OgreBase.cpp
-    common/OgreGenUtilites.cpp
-    common/Vram.cpp
-    data/AbFile.cpp
-    data/BattleSceneFile.cpp
-    data/DaFile.cpp
-    data/WorldMapWalkmesh.cpp
-    decompiler/CodeGenerator.cpp
-    decompiler/ControlFlow.cpp
-    decompiler/DecompilerException.cpp
-    decompiler/Disassembler.cpp
-    decompiler/Engine.cpp
-    decompiler/field/FieldCodeGenerator.cpp
-    decompiler/field/FieldDecompiler.cpp
-    decompiler/field/FieldDisassembler.cpp
-    decompiler/field/FieldEngine.cpp
-    decompiler/field/FieldScriptFormatter.cpp
-    decompiler/field/instruction/FieldBackgroundInstruction.cpp
-    decompiler/field/instruction/FieldCameraInstruction.cpp
-    decompiler/field/instruction/FieldCondJumpInstruction.cpp
-    decompiler/field/instruction/FieldControlFlowInstruction.cpp
-    decompiler/field/instruction/FieldMathInstruction.cpp
-    decompiler/field/instruction/FieldMediaInstruction.cpp
-    decompiler/field/instruction/FieldModelInstruction.cpp
-    decompiler/field/instruction/FieldModuleInstruction.cpp
-    decompiler/field/instruction/FieldNoOperationInstruction.cpp
-    decompiler/field/instruction/FieldPartyInstruction.cpp
-    decompiler/field/instruction/FieldUncategorizedInstruction.cpp
-    decompiler/field/instruction/FieldUncondJumpInstruction.cpp
-    decompiler/field/instruction/FieldWalkmeshInstruction.cpp
-    decompiler/field/instruction/FieldWindowInstruction.cpp
-    decompiler/Graph.cpp
-    decompiler/instruction/BinaryOpStackInstruction.cpp
-    decompiler/instruction/CondJumpInstruction.cpp
-    decompiler/instruction/Instruction.cpp
-    decompiler/instruction/KernelCallInstruction.cpp
-    decompiler/instruction/LoadInstruction.cpp
-    decompiler/instruction/StackInstruction.cpp
-    decompiler/instruction/StoreInstruction.cpp
-    decompiler/instruction/UncondJumpInstruction.cpp
-    decompiler/LuaLanguage.cpp
-    decompiler/ScriptFormatter.cpp
-    decompiler/Value.cpp
-    decompiler/world/instruction/WorldBinaryEqualStackInstruction.cpp
-    decompiler/world/instruction/WorldCondJumpInstruction.cpp
-    decompiler/world/instruction/WorldKernelCallInstruction.cpp
-    decompiler/world/instruction/WorldLoadBankInstruction.cpp
-    decompiler/world/instruction/WorldLoadInstruction.cpp
-    decompiler/world/instruction/WorldNoOutputInstruction.cpp
-    decompiler/world/instruction/WorldStackInstruction.cpp
-    decompiler/world/instruction/WorldStoreInstruction.cpp
-    decompiler/world/instruction/WorldSubStackInstruction.cpp
-    decompiler/world/instruction/WorldUncondJumpInstruction.cpp
-    decompiler/world/WorldCodeGenerator.cpp
-    decompiler/world/WorldDisassembler.cpp
-    decompiler/world/WorldEngine.cpp
-)
+# Source files for the installer: the ones its folders listed (see vgears_sources in src/CMakeLists.txt).
+get_property(INSTALLER_SOURCE_FILES GLOBAL PROPERTY VGEARS_SOURCES)
+list(FILTER INSTALLER_SOURCE_FILES INCLUDE REGEX "^installer/.*\\.cpp$")
+list(TRANSFORM INSTALLER_SOURCE_FILES REPLACE "^installer/" "")
+list(SORT INSTALLER_SOURCE_FILES)
 
 # Included directories for the installer.
 include_directories (
@@ -107,12 +25,12 @@ include_directories (
 
 
 # Generate QT UIs.
-set(v-gears-installer_UIS MainWindow.ui)
+set(v-gears-installer_UIS gui/MainWindow.ui)
 QT5_WRAP_UI(UIS ${v-gears-installer_UIS})
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-set(v-gears-installer_MOCS MainWindow.h)
+set(v-gears-installer_MOCS gui/MainWindow.h)
 QT5_WRAP_CPP(MOCS ${v-gears-installer_MOCS})
-set(v-gears-installer_RESOURCES installer_resources.qrc)
+set(v-gears-installer_RESOURCES gui/installer_resources.qrc)
 qt5_add_resources(RCC_SOURCES ${v-gears-installer_RESOURCES})
 
 

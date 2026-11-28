@@ -1,0 +1,20 @@
+# Sources of this folder (see vgears_sources in src/CMakeLists.txt).
+vgears_sources(
+    AFile.cpp
+    AFileManager.cpp
+    AFileSerializer.cpp
+    FF7ModelListFile.cpp
+    FF7ModelListFileManager.cpp
+    FF7ModelListFileSerializer.cpp
+    HRCFile.cpp
+    HRCFileManager.cpp
+    HRCFileSerializer.cpp
+    HRCMeshLoader.cpp
+    HRCSkeletonLoader.cpp
+    PFile.cpp
+    PFileManager.cpp
+    PFileSerializer.cpp
+    RSDFile.cpp
+    RSDFileManager.cpp
+    RSDFileSerializer.cpp
+)

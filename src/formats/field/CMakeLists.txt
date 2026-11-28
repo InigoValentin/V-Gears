@@ -1,0 +1,27 @@
+# Sources of this folder (see vgears_sources in src/CMakeLists.txt).
+vgears_sources(
+    Background2DFile.cpp
+    Background2DFileManager.cpp
+    Background2DFileXMLSerializer.cpp
+    BackgroundFile.cpp
+    BackgroundFileManager.cpp
+    BackgroundFileSerializer.cpp
+    CameraMatrixFile.cpp
+    CameraMatrixFileManager.cpp
+    CameraMatrixFileSerializer.cpp
+    FF7WalkmeshFileSerializer.cpp
+    FLevelBackground2DLoader.cpp
+    FLevelFile.cpp
+    FLevelFileSerializer.cpp
+    FLevelTextureLoader.cpp
+    LZSFLevelFile.cpp
+    LZSFLevelFileManager.cpp
+    MapListFile.cpp
+    PaletteFile.cpp
+    PaletteFileManager.cpp
+    PaletteFileSerializer.cpp
+    TriggersFile.cpp
+    WalkmeshFile.cpp
+    WalkmeshFileManager.cpp
+    WalkmeshFileXMLSerializer.cpp
+)

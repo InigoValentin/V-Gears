@@ -76,15 +76,33 @@ It is created if it doesn't exist. After an installation it has:
 
 | Path | What it is |
 |---|---|
-| `plugins.cfg`, `resources.cfg` | The configuration of V-Gears and Ogre. |
-| `data/` | The game data: the V-Gears files (scripts, screens, fonts...) and the converted game data. |
-| `data/config/config.cfg` | The configuration of the game (controls, options). An installation never replaces it if it exists. |
-| `data/video/` | The videos, if you extracted them. |
-| `save/` | The saved games, written by the game. |
-| `temp/world_models/` | World map data that the game reads. |
+| `plugins.cfg`, `resources.cfg` | The configuration of Ogre. |
+| `engine/` | The files that come with V-Gears: scripts, screens, fonts, texts... They are replaced on every installation, so changes made there are lost. |
+| `defaults/` | The initial game configuration. |
+| `game/` | The data converted from the original game, by area (see below). |
+| `game/video/` | The videos, if you extracted them. |
+| `user/config.cfg` | The configuration of the game. It is created from `defaults/` if it doesn't exist, and never replaced. |
+| `user/controls.cfg` | The controls chosen in the game. |
+| `user/saves/` | The saved games. |
+| `user/screenshots/` | The screenshots taken in the game. |
+| `logs/` | `v-gears.log` is the log of the game, `installer.log` the one of the last installation, and `ogre.log` the one of Ogre during it. |
 | `install.info` | The record of the installations: the parts installed, with which version of the installer, and whether the last installation finished. See [Verify an installation](#verify-an-installation). |
-| `installer.log` | The log of the last installation. |
-| `install.log` | The log of Ogre during the last installation. |
+
+The converted data in `game/` is grouped by the part of the game that uses it:
+
+| Folder | What it has |
+|---|---|
+| `kernel/` | Items, materia, characters, the initial savemap and the rest of the kernel data. |
+| `field/` | `maps/` and `models/`. |
+| `battle/` | `enemies/`, `attacks/`, `formations/`, `models/`, `effects/` (the data of the spell effects), `images/` (their textures) and `scripts/` (the scripts of the models). |
+| `world/` | `maps/`, `textures/` (the terrain), `models/`, `scripts/` and the encounters. |
+| `ui/` | `images/` and `fonts/`. |
+| `audio/` | `music/` and `sounds/`. |
+| `video/` | The videos. |
+
+### Installations made by older versions
+
+Older versions kept the files in other places. The game and the installer move them the first time they run: the saves, the controls, the game configuration, the console history and the screenshots to `user/`, and the videos to `game/video/`. Nothing is overwritten. The converted game data has to be installed again. The old `data/` folder is no longer used: delete it, or install with [Clean install](#clean-install), which does it.
 
 During the installation the installer also extracts the install disk to `original_data/`, and writes temporary files to `temp/`. They are deleted at the end, unless you keep them with [Preserve original data](#preserve-original-data).
 
@@ -236,29 +254,27 @@ Window: **Copy V-Gears data files** (on by default). Command line: on unless `--
 
 Copies the files that come with V-Gears (configuration, scripts, screens, fonts...) to the installation directory. They are taken from the `data/` folder of the repository, or `share/v-gears/` in an installed package. In the command line, `--data-dir` chooses another folder.
 
-The game configuration (`data/config/config.cfg`) is only copied if the installation doesn't have it yet, so your settings are kept. Without this option, the installation directory must already have the V-Gears files.
+The `engine/` and `defaults/` folders of the installation are replaced. Your files in `user/` are not touched: `user/config.cfg` is only created if it doesn't exist. Without this option, the installation directory must already have the V-Gears files.
 
 ### Clean install
 
 Window: **Clean install** (off by default). Command line: `--clean`.
 
-Before installing, deletes what a previous installation wrote: the converted game data in `data/`, the temporary files in `temp/` and the extracted disk in `original_data/`. A new installation then starts from nothing, without old files of parts you don't install this time.
+Before installing, deletes what a previous installation wrote: the converted game data in `game/`, the V-Gears files in `engine/` and `defaults/`, the temporary files in `temp/`, the extracted disk in `original_data/` and the `data/` folder of older versions. A new installation then starts from nothing, without old files of parts you don't install this time.
 
 It keeps:
 
-- The saved games (`save/`).
-- The controls (`controls.cfg`), the configuration of the game (`data/config/`) and the rest of the files in the root of the installation directory, such as `plugins.cfg` and the logs.
-- The videos (`data/video/`), because they come from the game disks and the install disk can't put them back.
+- Your files in `user/`: saved games, controls, configuration and screenshots.
+- The logs, and the files in the root of the installation directory, such as `plugins.cfg`.
+- The videos (`game/video/`), because they come from the game disks and the install disk can't put them back.
 
-It needs **Copy V-Gears data files**, because the V-Gears files in `data/` are deleted too. It only deletes in a directory that is a V-Gears installation (it has `plugins.cfg` and `resources.cfg`). The window asks before deleting anything.
+It needs **Copy V-Gears data files**, because the V-Gears files are deleted too. It only deletes in a directory that is a V-Gears installation (it has `plugins.cfg` and `resources.cfg`). The window asks before deleting anything.
 
 ### Preserve original data
 
 Window: **Preserve original data** (off by default). Command line: `--keep-originals`.
 
 To convert the game, the installer extracts the install disk and some original files: the WAV sound effects, the MIDI music, the TEX images and the temporary files of the models. V-Gears doesn't use them, so they are deleted when the installation is complete. This option keeps them, for example to study the original files. It uses about 1 GB more.
-
-The temporary files of the world map (`temp/world_models/`) are always kept, because the game reads them.
 
 ## Extract the videos
 
@@ -267,11 +283,11 @@ The videos are not on the install disk, but on the PC game disks 1, 2 and 3. To 
 - In the window, select the disk's ISO and click **Install data**.
 - In the command line, run `v-gears-installer --iso FF7DISC1.iso` (and the same for the other two disks).
 
-The installer detects a game disk, extracts only its videos to `data/video/` and doesn't touch anything else. Several disks have the same videos, so those already installed are skipped. The options don't apply to a game disk, and `--clean` can't be used with one.
+The installer detects a game disk, extracts only its videos to `game/video/` and doesn't touch anything else. Several disks have the same videos, so those already installed are skipped. The options don't apply to a game disk, and `--clean` can't be used with one.
 
 The engine can't decode the original AVI files (Duck TrueMotion 2 codec), so the installer uses FFmpeg to convert each video to a folder of JPEG frames, an `.ogg` sound track (if the video has sound) and a `movie.xml` with the frame count and the frame rate. The videos that carry camera data for the field background also get a `camera.cam` file. The engine's movie player draws the frames and plays the sound. FFmpeg is therefore needed to install the videos.
 
-<!-- TODO(review): confirm the exact output layout under data/video/ (folder per movie, file names) after a fresh install, and which movies play in game. -->
+<!-- TODO(review): confirm the exact output layout under game/video/ (folder per movie, file names) after a fresh install, and which movies play in game. -->
 
 ## Battle data
 
@@ -297,7 +313,7 @@ The game checks the same record when it starts, and writes a warning if the data
 
 - **The installation can't start.** The installer lists what is wrong. The most common problems are an ISO that isn't the PC install disk, a directory without enough free space, and missing Ogre plugins.
 - **The sounds or the music are missing.** FFmpeg or TiMidity were not found or didn't work. Install them and run the installer again with only the sound effects and the music.
-- **Warnings and errors in the log.** Some fields and models are skipped by known limitations of the converter, and some original files are dummies. A few dozen warnings and errors are normal. The full log is in `installer.log`, and the log of Ogre in `install.log`.
+- **Warnings and errors in the log.** Some fields and models are skipped by known limitations of the converter, and some original files are dummies. A few dozen warnings and errors are normal. The full log is in `logs/installer.log`, and the log of Ogre in `logs/ogre.log`.
 - **Old or wrong files after reinstalling.** Install again with **Clean install** (`--clean`).
 - **The game says the data must be installed again.** The last installation didn't finish, or some parts were installed by an older installer. Run `v-gears-installer --verify` to see which, and install them again.
 

@@ -10,15 +10,17 @@ V-Gears is a free, cross-platform reimplementation of the Final Fantasy VII engi
 
 ## Architecture
 
-- `src/common/` — application base class and file utilities shared by all targets.
-- `src/core/` — engine runtime: audio, console, entities, walkmesh, UI, particles, savemap, `ScriptManager` (Lua bindings via sol2 and system LuaJIT).
-- `src/data/` — FF7 binary format parsers (LGP, LZS, HRC, TEX, field files, worldmap TXZ...). Most formats follow a triplet: `*File` (data), `*FileSerializer` (read/write), `*FileManager` (Ogre resource loading).
-- `src/installer/` — Qt data installer (`v-gears-installer`); includes the script `decompiler/` that converts field/world scripts into Lua and the SfxDump audio converter.
-- `src/map/`, `src/modules/`, `src/viewer/` — field map code, game modules (e.g. worldmap), and the model viewer.
+- `src/app/` — the game entry point, the application class and the game loop.
+- `src/common/` — files, logger, strings, types and other utilities shared by all targets.
+- `src/formats/` — FF7 binary format parsers, by kind: `lgp/`, `field/`, `model/`, `texture/` and `worldmap/`. Most formats follow a triplet: `*File` (data), `*FileSerializer` (read/write), `*FileManager` (Ogre resource loading).
+- `src/engine/` — engine runtime, by subsystem: `audio/`, `config/`, `entity/`, `graphics/`, `input/`, `particles/`, `save/`, `script/` (`ScriptManager`, Lua bindings via sol2 and system LuaJIT), `ui/` and `xml/` (XML loaders).
+- `src/modules/` — game modules: `battle/` and `worldmap/`.
+- Layers, from low to high: `common/`, `formats/`, `engine/`, `modules/`, `app/`. A layer never includes a higher one: the engine reaches the application and the modules through its interfaces (`engine/*Interface.h`), and each module binds itself to Lua (`*Binds.cpp`).
+- `src/installer/` — Qt data installer (`v-gears-installer`): `gui/`, `cli/`, `steps/` (the installation process), `extractors/` (game data conversion), `formats/`, `support/`, `tables/` (data tables) and `decompiler/` (converts field and world scripts into Lua).
 - `src/third_party/sol/` — vendored sol2 single header. Do not restyle, modernize, or refactor it.
 - LuaJIT is a system dependency.
-- `test/` — Boost.Test suite mirroring `src/` paths; sources are listed manually in `test/CMakeLists.txt`.
-- `data/` — runtime configuration only (Ogre plugins/resources cfgs). Not game data.
+- `test/` — Boost.Test suite mirroring `src/` paths; each folder of `src/` and `test/` lists its sources by hand in its `CMakeLists.txt`.
+- `data/` — the files shipped with the game, copied to the installation directory: the Ogre plugins/resources cfgs, `engine/` (scripts, screens in `ui/`, fonts, texts, shaders, metadata) and `defaults/`. Not game data: the installer writes that to `game/` in the installation directory.
 - `doc/` — all guides. The original binary formats are documented in the header comments of the parsers and in [the FF7 wiki at wiki.ffrtt.ru](https://wiki.ffrtt.ru/index.php/FF7).
 - `_OLD/` — legacy q-gears code kept for reference. Do not modify or reuse without asking.
 

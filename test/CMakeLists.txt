@@ -27,220 +27,34 @@ include_directories(
 )
 
 
-# Test source files.
-set(SOURCE_FILES
-    main.cpp
-    VGearsGameState.cpp
-    FF7Character.cpp
-    FF7Common.cpp
-    data/VGearsAFile.cpp
-    data/VGearsAFileManager.cpp
-    data/VGearsAFileSerializer.cpp
-    data/VGearsBackgroundFile.cpp
-    data/VGearsBackgroundFileManager.cpp
-    data/VGearsBackgroundFileSerializer.cpp
-    data/VGearsCameraMatrixFile.cpp
-    data/VGearsCameraMatrixFileManager.cpp
-    data/VGearsCameraMatrixFileSerializer.cpp
-    data/VGearsFLevelBackground2DLoader.cpp
-    data/VGearsFLevelFile.cpp
-    data/VGearsFLevelFileSerializer.cpp
-    data/VGearsFLevelTextureLoader.cpp
-    data/VGearsHRCFile.cpp
-    data/VGearsHRCFileManager.cpp
-    data/VGearsHRCFileSerializer.cpp
-    data/VGearsHRCMeshLoader.cpp
-    data/VGearsHRCSkeletonLoader.cpp
-    data/VGearsLGPArchive.cpp
-    data/VGearsLGPArchiveFactory.cpp
-    data/VGearsLGPArchiveSerializer.cpp
-    data/VGearsLZSDataStream.cpp
-    data/VGearsLZSFLevelFile.cpp
-    data/VGearsLZSFLevelFileManager.cpp
-    data/VGearsMapListFile.cpp
-    data/VGearsPaletteFile.cpp
-    data/VGearsPaletteFileManager.cpp
-    data/VGearsPaletteFileSerializer.cpp
-    data/VGearsPFile.cpp
-    data/VGearsPFileManager.cpp
-    data/VGearsPFileSerializer.cpp
-    data/VGearsRSDFile.cpp
-    data/VGearsRSDFileManager.cpp
-    data/VGearsRSDFileSerializer.cpp
-    data/VGearsSerializer.cpp
-    data/VGearsTexCodec.cpp
-    data/VGearsTexFile.cpp
-    data/VGearsTriggersFile.cpp
-    data/VGearsXMLSerializer.cpp
-    data/FinalFantasy7/FF7ModelListFileManager.cpp
-    data/FinalFantasy7/FF7ModelListFileSerializer.cpp
-    data/FinalFantasy7/FF7ModelListFile.cpp
-    data/worldmap/MapFile.cpp
-    data/worldmap/MapFileManager.cpp
-    data/worldmap/MapFileSerializer.cpp
-    data/worldmap/TxzFile.cpp
-    data/worldmap/TxzFileSerializer.cpp
-    common/Application.cpp
-    common/File.cpp
-    common/FileSystem.cpp
-    common/LzsFile.cpp
-    common/VGearsManualObject.cpp
-    common/VGearsResource.cpp
-    common/VGearsStringUtil.cpp
-    core/AudioManager.cpp
-    core/Background2D.cpp
-    core/Background2DAnimation.cpp
-    core/MovieCameraFrame.cpp
-    core/MovieState.cpp
-    core/ScreenFadeState.cpp
-    core/CameraManager.cpp
-    core/ConfigCmd.cpp
-    core/ConfigCmdHandler.cpp
-    core/ConfigFile.cpp
-    core/ConfigVar.cpp
-    core/ConfigVarHandler.cpp
-    core/Console.cpp
-    core/DebugDraw.cpp
-    core/DialogsManager.cpp
-    core/Entity.cpp
-    core/EntityCollision.cpp
-    core/EntityDirection.cpp
-    core/EntityManager.cpp
-    core/EntityModel.cpp
-    core/EntityPoint.cpp
-    core/EntityTrigger.cpp
-    core/GameFrameListener.cpp
-    core/InputManager.cpp
-    core/Savemap.cpp
-    core/SavemapHandler.cpp
-    core/ScriptManager.cpp
-    core/TextHandler.cpp
-    core/Timer.cpp
-    core/UiAnimation.cpp
-    core/UiFont.cpp
-    core/UiManager.cpp
-    core/UiSprite.cpp
-    core/UiTextArea.cpp
-    core/UiWidget.cpp
-    core/Utilites.cpp
-    core/Walkmesh.cpp
-    core/XmlBackground2DFile.cpp
-    core/XmlFile.cpp
-    core/XmlFontFile.cpp
-    core/XmlFontsFile.cpp
-    core/XmlMapFile.cpp
-    core/XmlMapsFile.cpp
-    core/XmlMusicsFile.cpp
-    core/XmlPrototypesFile.cpp
-    core/XmlScreensFile.cpp
-    core/XmlSoundsFile.cpp
-    core/XmlTextFile.cpp
-    core/XmlTextsFile.cpp
-    core/XmlScreenFile.cpp
-    core/XmlScriptsFile.cpp
-    core/XmlWalkmeshFile.cpp
-    core/particles/Particle.cpp
-    core/particles/ParticleEmitter.cpp
-    core/particles/ParticleEmitterDictionary.cpp
-    core/particles/ParticleEmitterTranslator.cpp
-    core/particles/ParticleRenderer.cpp
-    core/particles/ParticleRendererTranslator.cpp
-    core/particles/ParticleSystem.cpp
-    core/particles/ParticleSystemFactory.cpp
-    core/particles/ParticleSystemManager.cpp
-    core/particles/ParticleSystemTranslator.cpp
-    core/particles/ParticleSystemTranslatorManager.cpp
-    core/particles/ParticleTechniqueTranslator.cpp
-    core/particles/ParticleTechnique.cpp
-    core/particles/ParticleVisual.cpp
-    core/particles/emitters/PointEmitter.cpp
-    core/particles/emitters/PointEmitterFactory.cpp
-    core/particles/renderer/ParticleEntityRenderer.cpp
-    core/particles/renderer/ParticleEntityRendererDictionary.cpp
-    installer/DataInstaller.cpp
-    installer/FieldDataInstaller.cpp
-    installer/FieldTextWriter.cpp
-    installer/KernelDataInstaller.cpp
-    installer/MainWindow.cpp
-    installer/MediaDataInstaller.cpp
-    installer/ModelsAndAnimationsDb.cpp
-    installer/ScopedLgp.cpp
-    installer/SfxDump.cpp
-    installer/TexFile.cpp
-    installer/VGearsUtility.cpp
-    installer/WindowFonts.cpp
-    installer/WorldInstaller.cpp
-    installer/common/BinGZipFile.cpp
-    installer/common/DrawSkeleton.cpp
-    installer/common/Logger.cpp
-    installer/common/OgreBase.cpp
-    installer/common/OgreGenUtilites.cpp
-    installer/common/Vram.cpp
-    installer/decompiler/CodeGenerator.cpp
-    installer/decompiler/ControlFlow.cpp
-    installer/decompiler/DecompilerException.cpp
-    installer/decompiler/Disassembler.cpp
-    installer/decompiler/Engine.cpp
-    installer/decompiler/Graph.cpp
-    installer/decompiler/LuaLanguage.cpp
-    installer/decompiler/ScriptFormatter.cpp
-    installer/decompiler/Value.cpp
-    installer/decompiler/field/FieldCodeGenerator.cpp
-    installer/decompiler/field/FieldEngine.cpp
-    installer/decompiler/field/FieldDecompiler.cpp
-    installer/decompiler/field/FieldDisassembler.cpp
-    installer/decompiler/field/FieldScriptFormatter.cpp
-    installer/decompiler/field/instruction/FieldBackgroundInstruction.cpp
-    installer/decompiler/field/instruction/FieldCameraInstruction.cpp
-    installer/decompiler/field/instruction/FieldCondJumpInstruction.cpp
-    installer/decompiler/field/instruction/FieldControlFlowInstruction.cpp
-    installer/decompiler/field/instruction/FieldMathInstruction.cpp
-    installer/decompiler/field/instruction/FieldMediaInstruction.cpp
-    installer/decompiler/field/instruction/FieldModelInstruction.cpp
-    installer/decompiler/field/instruction/FieldModuleInstruction.cpp
-    installer/decompiler/field/instruction/FieldNoOperationInstruction.cpp
-    installer/decompiler/field/instruction/FieldPartyInstruction.cpp
-    installer/decompiler/field/instruction/FieldUncategorizedInstruction.cpp
-    installer/decompiler/field/instruction/FieldUncondJumpInstruction.cpp
-    installer/decompiler/field/instruction/FieldWalkmeshInstruction.cpp
-    installer/decompiler/field/instruction/FieldWindowInstruction.cpp
-    installer/decompiler/instruction/BinaryOpStackInstruction.cpp
-    installer/decompiler/instruction/CondJumpInstruction.cpp
-    installer/decompiler/instruction/Instruction.cpp
-    installer/decompiler/instruction/KernelCallInstruction.cpp
-    installer/decompiler/instruction/LoadInstruction.cpp
-    installer/decompiler/instruction/StackInstruction.cpp
-    installer/decompiler/instruction/StoreInstruction.cpp
-    installer/decompiler/instruction/UncondJumpInstruction.cpp
-    installer/decompiler/world/WorldDisassembler.cpp
-    installer/decompiler/world/WorldCodeGenerator.cpp
-    installer/decompiler/world/WorldEngine.cpp
-    installer/decompiler/world/instruction/WorldBinaryEqualStackInstruction.cpp
-    installer/decompiler/world/instruction/WorldCondJumpInstruction.cpp
-    installer/decompiler/world/instruction/WorldKernelCallInstruction.cpp
-    installer/decompiler/world/instruction/WorldLoadBankInstruction.cpp
-    installer/decompiler/world/instruction/WorldLoadInstruction.cpp
-    installer/decompiler/world/instruction/WorldNoOutputInstruction.cpp
-    installer/decompiler/world/instruction/WorldStackInstruction.cpp
-    installer/decompiler/world/instruction/WorldStoreInstruction.cpp
-    installer/decompiler/world/instruction/WorldSubStackInstruction.cpp
-    installer/decompiler/world/instruction/WorldUncondJumpInstruction.cpp
-    map/VGearsBackground2DFile.cpp
-    map/VGearsBackground2DFileManager.cpp
-    map/VGearsBackground2DFileXMLSerializer.cpp
-    map/VGearsMapFile.cpp
-    map/VGearsMapFileManager.cpp
-    map/VGearsMapFileXMLSerializer.cpp
-    map/VGearsWalkmeshFile.cpp
-    map/VGearsWalkmeshFileManager.cpp
-    map/VGearsWalkmeshFileXMLSerializer.cpp
-    map/FinalFantasy7/FF7WalkmeshFileSerializer.cpp
-    modules/worldmap/WorldMapModule.cpp
-)
+# Test source files. Each folder lists its own in its CMakeLists.txt, with one of these functions: vgears_tests for
+# the main test program, and vgears_installer_tests for the one of the installer logic.
+function(vgears_collect_tests property)
+    foreach(_source IN LISTS ARGN)
+        file(RELATIVE_PATH _path "${PROJECT_SOURCE_DIR}/test" "${CMAKE_CURRENT_SOURCE_DIR}/${_source}")
+        set_property(GLOBAL APPEND PROPERTY ${property} "${_path}")
+    endforeach()
+endfunction()
+function(vgears_tests)
+    vgears_collect_tests(VGEARS_TESTS ${ARGN})
+endfunction()
+function(vgears_installer_tests)
+    vgears_collect_tests(VGEARS_INSTALLER_TESTS ${ARGN})
+endfunction()
+
+add_subdirectory(common)
+add_subdirectory(engine)
+add_subdirectory(formats)
+add_subdirectory(installer)
+
+get_property(TEST_SOURCE_FILES GLOBAL PROPERTY VGEARS_TESTS)
+list(SORT TEST_SOURCE_FILES)
+get_property(INSTALLER_TEST_SOURCE_FILES GLOBAL PROPERTY VGEARS_INSTALLER_TESTS)
+list(SORT INSTALLER_TEST_SOURCE_FILES)
 
 
 # Generate tests
-add_executable(v-gears-tests ${SOURCE_FILES})
+add_executable(v-gears-tests main.cpp ${TEST_SOURCE_FILES})
 SET_PROPERTY(TARGET v-gears-tests PROPERTY FOLDER "build/v-gears-test")
 
 # Qt imported targets are directory-scoped: the ones created in src/ are not
@@ -273,22 +87,19 @@ add_test(NAME v-gears-tests COMMAND v-gears-tests)
 # Tests of the installer logic that doesn't need the rest of the engine (layout, option rules, verifier, log), and of
 # the data directory lookup shared by the game and the installer.
 add_executable(v-gears-installer-tests
-    common/DataDirectory.cpp
-    common/OgrePlugins.cpp
+    ${INSTALLER_TEST_SOURCE_FILES}
+    # The code under test, which is built again here so these tests don't need the whole engine.
     ${CMAKE_SOURCE_DIR}/src/common/DataDirectory.cpp
     ${CMAKE_SOURCE_DIR}/src/common/InstallStamp.cpp
     ${CMAKE_SOURCE_DIR}/src/common/OgrePlugins.cpp
-    installer/InstallLogic.cpp
-    installer/ExternalTools.cpp
-    installer/MovieCamera.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/MovieCamera.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/ExternalTools.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallCommandLine.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallLayout.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallLog.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallOptions.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/InstallVerifier.cpp
-    ${CMAKE_SOURCE_DIR}/src/installer/VideoFiles.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/extractors/MovieCamera.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/ExternalTools.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/cli/InstallCommandLine.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/InstallLayout.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/InstallLog.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/InstallOptions.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/InstallVerifier.cpp
+    ${CMAKE_SOURCE_DIR}/src/installer/steps/VideoFiles.cpp
 )
 SET_PROPERTY(TARGET v-gears-installer-tests PROPERTY FOLDER "build/v-gears-test")
 target_link_libraries(v-gears-installer-tests ${_test_qt_libs} ${Boost_LIBRARIES})

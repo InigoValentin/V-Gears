@@ -582,165 +582,6 @@ if(NOT OGRE_LIBRARIES MATCHES ".*OgreBites.*")
 endif()
 
 
-# Source files for libvgears and v-gears.
-set(VGEARS_SOURCE_FILES
-    main.cpp
-    FF7Character.cpp
-    FF7Common.cpp
-    VGearsGameState.cpp
-    common/File.cpp
-    common/FileSystem.cpp
-    common/FinalFantasy7/FF7NameLookup.cpp
-    common/LzsFile.cpp
-    common/TypeDefine.cpp
-    common/DataDirectory.cpp
-    common/InstallStamp.cpp
-    common/OgrePlugins.cpp
-    common/VGearsApplication.cpp
-    common/VGearsManualObject.cpp
-    common/VGearsResource.cpp
-    common/VGearsStringUtil.cpp
-    core/AudioManager.cpp
-    core/Background2DAnimation.cpp
-    core/Background2D.cpp
-    core/BackgroundPalette.cpp
-    core/ScreenFade.cpp
-    core/MovieCameraFrame.cpp
-    core/MoviePlayer.cpp
-    core/MovieState.cpp
-    core/ScreenFadeState.cpp
-    core/BattleManager.cpp
-    core/CameraManager.cpp
-    core/ConfigCmd.cpp
-    core/ConfigCmdHandler.cpp
-    core/ConfigFile.cpp
-    core/ConfigVar.cpp
-    core/ConfigVarHandler.cpp
-    core/Console.cpp
-    core/DebugDraw.cpp
-    core/DialogsManager.cpp
-    core/Enemy.cpp
-    core/EntityCollision.cpp
-    core/Entity.cpp
-    core/EntityDirection.cpp
-    core/EntityManager.cpp
-    core/EntityModel.cpp
-    core/EntityPoint.cpp
-    core/EntityTrigger.cpp
-    core/GameFrameListener.cpp
-    core/InputManager.cpp
-    core/Manager.cpp
-    core/particles/Particle.cpp
-    core/particles/ParticleEmitter.cpp
-    core/particles/ParticleEmitterDictionary.cpp
-    core/particles/ParticleEmitterTranslator.cpp
-    core/particles/ParticleRenderer.cpp
-    core/particles/ParticleRendererTranslator.cpp
-    core/particles/ParticleSystem.cpp
-    core/particles/ParticleSystemFactory.cpp
-    core/particles/ParticleSystemManager.cpp
-    core/particles/ParticleSystemTranslator.cpp
-    core/particles/ParticleSystemTranslatorManager.cpp
-    core/particles/ParticleTechnique.cpp
-    core/particles/ParticleTechniqueTranslator.cpp
-    core/particles/ParticleVisual.cpp
-    core/particles/emitters/PointEmitter.cpp
-    core/particles/emitters/PointEmitterFactory.cpp
-    core/particles/renderer/ParticleEntityRenderer.cpp
-    core/particles/renderer/ParticleEntityRendererDictionary.cpp
-    core/Savemap.cpp
-    core/SavemapHandler.cpp
-    core/ScriptManager.cpp
-    core/TextHandler.cpp
-    core/Timer.cpp
-    core/UiAnimation.cpp
-    core/UiFont.cpp
-    core/UiManager.cpp
-    core/UiSprite.cpp
-    core/UiTextArea.cpp
-    core/UiWidget.cpp
-    core/Utilites.cpp
-    core/Walkmesh.cpp
-    core/WorldMapManager.cpp
-    core/XmlAttackFile.cpp
-    core/XmlBackground2DFile.cpp
-    core/XmlBattleCharactersFile.cpp
-    core/XmlBattleScenesFile.cpp
-    core/XmlEnemyFile.cpp
-    core/XmlFile.cpp
-    core/XmlFontFile.cpp
-    core/XmlFontsFile.cpp
-    core/XmlFormationFile.cpp
-    core/XmlMapFile.cpp
-    core/XmlMapsFile.cpp
-    core/XmlMusicsFile.cpp
-    core/XmlPrototypesFile.cpp
-    core/XmlScreenFile.cpp
-    core/XmlScreensFile.cpp
-    core/XmlScriptsFile.cpp
-    core/XmlSoundsFile.cpp
-    core/XmlTextFile.cpp
-    core/XmlTextsFile.cpp
-    core/XmlWalkmeshFile.cpp
-    data/VGearsAFile.cpp
-    data/VGearsAFileManager.cpp
-    data/VGearsAFileSerializer.cpp
-    data/VGearsBackgroundFile.cpp
-    data/VGearsBackgroundFileManager.cpp
-    data/VGearsBackgroundFileSerializer.cpp
-    data/VGearsCameraMatrixFile.cpp
-    data/VGearsCameraMatrixFileManager.cpp
-    data/VGearsCameraMatrixFileSerializer.cpp
-    data/VGearsFLevelBackground2DLoader.cpp
-    data/VGearsFLevelFile.cpp
-    data/VGearsFLevelFileSerializer.cpp
-    data/VGearsFLevelTextureLoader.cpp
-    data/VGearsHRCFile.cpp
-    data/VGearsHRCFileManager.cpp
-    data/VGearsHRCFileSerializer.cpp
-    data/VGearsHRCMeshLoader.cpp
-    data/VGearsHRCSkeletonLoader.cpp
-    data/VGearsLGPArchive.cpp
-    data/VGearsLGPArchiveFactory.cpp
-    data/VGearsLGPArchiveSerializer.cpp
-    data/VGearsLZSDataStream.cpp
-    data/VGearsLZSFLevelFile.cpp
-    data/VGearsLZSFLevelFileManager.cpp
-    data/VGearsMapListFile.cpp
-    data/VGearsPaletteFile.cpp
-    data/VGearsPaletteFileManager.cpp
-    data/VGearsPaletteFileSerializer.cpp
-    data/VGearsPFile.cpp
-    data/VGearsPFileManager.cpp
-    data/VGearsPFileSerializer.cpp
-    data/VGearsRSDFile.cpp
-    data/VGearsRSDFileManager.cpp
-    data/VGearsRSDFileSerializer.cpp
-    data/VGearsSerializer.cpp
-    data/VGearsTexCodec.cpp
-    data/VGearsTexFile.cpp
-    data/VGearsTriggersFile.cpp
-    data/VGearsXMLSerializer.cpp
-    data/FinalFantasy7/FF7ModelListFile.cpp
-    data/FinalFantasy7/FF7ModelListFileManager.cpp
-    data/FinalFantasy7/FF7ModelListFileSerializer.cpp
-    data/worldmap/WorldmapFile.cpp
-    data/worldmap/WorldmapFileManager.cpp
-    data/worldmap/WorldmapFileSerializer.cpp
-    data/worldmap/TxzFile.cpp
-    data/worldmap/TxzFileSerializer.cpp
-    map/VGearsBackground2DFile.cpp
-    map/VGearsBackground2DFileManager.cpp
-    map/VGearsBackground2DFileXMLSerializer.cpp
-    map/VGearsMapFile.cpp
-    map/VGearsMapFileManager.cpp
-    map/VGearsMapFileXMLSerializer.cpp
-    map/VGearsWalkmeshFile.cpp
-    map/VGearsWalkmeshFileManager.cpp
-    map/VGearsWalkmeshFileXMLSerializer.cpp
-    map/FinalFantasy7/FF7WalkmeshFileSerializer.cpp
-    modules/worldmap/WorldmapModule.cpp
-)
 endif()
 
 # Compiler options.
@@ -772,12 +613,34 @@ endif()
 # Prefer target-level compile definitions and options below (kept conservative).
 
 
-# Generate libvgears.
-if(NOT VGEARS_SOURCE_FILES)
-    file(GLOB_RECURSE VGEARS_SOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
-    list(LENGTH VGEARS_SOURCE_FILES _vgears_auto_count)
-    message(STATUS "Auto-collected VGEARS_SOURCE_FILES count: ${_vgears_auto_count}")
-endif()
+# Source files. Each folder lists its own in its CMakeLists.txt, with this function. They are collected in a global
+# property, as paths relative to this directory.
+function(vgears_sources)
+    foreach(_source IN LISTS ARGN)
+        file(RELATIVE_PATH _path "${PROJECT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/${_source}")
+        set_property(GLOBAL APPEND PROPERTY VGEARS_SOURCES "${_path}")
+    endforeach()
+endfunction()
+
+add_subdirectory(app)
+add_subdirectory(common)
+add_subdirectory(engine)
+add_subdirectory(formats)
+add_subdirectory(modules)
+# The folders of the installer. Its target is defined later, in installer/CMakeLists.txt.
+add_subdirectory(installer/cli)
+add_subdirectory(installer/decompiler)
+add_subdirectory(installer/extractors)
+add_subdirectory(installer/formats)
+add_subdirectory(installer/gui)
+add_subdirectory(installer/steps)
+add_subdirectory(installer/support)
+vgears_sources(installer/main.cpp)
+
+# libvgears has every source, and the game all of them but the ones of the installer. The list is sorted, so the link
+# order doesn't depend on the order of the folders.
+get_property(VGEARS_SOURCE_FILES GLOBAL PROPERTY VGEARS_SOURCES)
+list(SORT VGEARS_SOURCE_FILES)
 
 # If installer is disabled, remove installer sources from the collected list
 if(NOT BUILD_INSTALLER)
@@ -807,7 +670,7 @@ endforeach()
 # libvgears. Some build order setups (unity/PCH/cotire) may attempt to
 # compile sources that include generated `ui_*.h` before uic runs, so add
 # an explicit custom command/target to generate the header.
-set(_ui_src "${CMAKE_CURRENT_SOURCE_DIR}/installer/MainWindow.ui")
+set(_ui_src "${CMAKE_CURRENT_SOURCE_DIR}/installer/gui/MainWindow.ui")
 # Place generated headers under the build tree parallel to the source dir
 # CMAKE_CURRENT_BINARY_DIR is <build>/src so append 'installer' (not
 # 'src/installer').
@@ -825,19 +688,6 @@ if(QT_UIC_EXECUTABLE AND EXISTS "${_ui_src}")
     set(_GENERATED_UI_TARGET generate_ui_files)
 endif()
 
-# Exclude unit tests under installer/decompiler/test from the main
-# library to avoid pulling test-only dependencies (gtest/gmock).
-set(_test_removed_count 0)
-foreach(_f IN LISTS VGEARS_SOURCE_FILES)
-    if(_f MATCHES "installer/decompiler/test/")
-        list(REMOVE_ITEM VGEARS_SOURCE_FILES ${_f})
-        math(EXPR _test_removed_count "${_test_removed_count} + 1")
-    endif()
-endforeach()
-if(_test_removed_count GREATER 0)
-    message(STATUS "Removed ${_test_removed_count} decompiler test source(s) from libvgears")
-endif()
-
 # Directory with the system's Ogre plugins (RenderSystem_GL, Codec_STBI...). V-Gears looks for the plugins listed in
 # plugins.cfg there after the data directory and the directory of the executable (see common/OgrePlugins.h).
 # Packagers can set it, for example -DVGEARS_OGRE_PLUGIN_DIR=/usr/lib/x86_64-linux-gnu/OGRE.
@@ -851,7 +701,7 @@ set(VGEARS_OGRE_PLUGIN_DIR "${_vgears_default_plugin_dir}" CACHE PATH "Directory
 message(STATUS "Ogre plugin directory: ${VGEARS_OGRE_PLUGIN_DIR}")
 
 add_library(libvgears STATIC ${VGEARS_SOURCE_FILES})
-target_sources(libvgears PRIVATE installer/SfxDump.c)
+target_sources(libvgears PRIVATE installer/extractors/SfxDump.c)
 # Ensure generated ui headers are created before compiling libvgears
 if(DEFINED _GENERATED_UI_TARGET)
     add_dependencies(libvgears ${_GENERATED_UI_TARGET})

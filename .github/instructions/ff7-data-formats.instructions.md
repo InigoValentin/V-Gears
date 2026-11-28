@@ -1,23 +1,23 @@
 ---
 description: "Use when working on FF7 binary format parsers, serializers, resource managers, LGP/LZS archives, the data installer, or the script decompiler. Covers the File/Serializer/Manager triplet pattern and known installer gotchas."
-applyTo: ["src/data/**", "src/installer/**", "test/data/**", "test/installer/**"]
+applyTo: ["src/formats/**", "src/installer/**", "test/formats/**", "test/installer/**"]
 ---
 
 # FF7 Data Formats and Installer
 
 ## Parser Triplet Pattern
 
-Most formats in `src/data/` follow this structure — mirror it when adding formats:
+Most formats in `src/formats/` follow this structure — mirror it when adding formats:
 
 - `XFile` — plain data container for the parsed format.
-- `XFileSerializer` — reads/writes the binary layout (derives from `VGearsSerializer`).
+- `XFileSerializer` — reads/writes the binary layout (derives from `Serializer` (`src/formats/Serializer.h`)).
 - `XFileManager` — Ogre `ResourceManager` integration (singleton + `Resource`).
 
-Format documentation lives in [the FF7 wiki at wiki.ffrtt.ru](https://wiki.ffrtt.ru/index.php/FF7) and in the header comments of the parsers. Check there and at existing similar parsers (e.g. `src/data/worldmap/TxzFile*`) before writing a new one.
+Format documentation lives in [the FF7 wiki at wiki.ffrtt.ru](https://wiki.ffrtt.ru/index.php/FF7) and in the header comments of the parsers. Check there and at existing similar parsers (e.g. `src/formats/worldmap/TxzFile*`) before writing a new one.
 
 ## Installer Gotchas (verified, don't regress)
 
-- World map HRC loads must create meshes via `HRCFile::GetMeshFileName()` (i.e. `NameLookup::model(splitBase(hrc_name)) + ".mesh"`). Do NOT use `FF7Data::GetWorldMapModelName()` — that friendly-name table can diverge from the actual Ogre mesh resource name and triggers `FileNotFoundException` (e.g. `barrier.mesh`).
+- World map HRC loads must create meshes via `HRCFile::GetMeshFileName()` (i.e. `NameLookup::model(splitBase(hrc_name)) + ".mesh"`). Do NOT use a friendly-name table for the mesh names: it can diverge from the actual Ogre mesh resource name and triggers `FileNotFoundException` (e.g. `barrier.mesh`).
 - `WorldInstaller::ExportMesh()` expects a directory prefix, not a full filename prefix.
 - The decompiler (`src/installer/decompiler/`) emits Lua — keep output close to [doc/STYLE-LUA.md](../../../doc/STYLE-LUA.md), but it is exempt from strict conformance.
 - The installer is Qt-based and handles copyrighted game data at runtime on the user's machine: never write code that copies extracted assets into the repo or build tree.

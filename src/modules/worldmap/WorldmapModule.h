@@ -18,12 +18,16 @@
 #include <OgreFrameListener.h>
 #include <OgreSingleton.h>
 #include <OgreVector3.h>
-#include <deque>
 #include <map>
 #include <set>
 #include <vector>
 #include "common/TypeDefine.h"
+#include "engine/WorldMapInterface.h"
+#include "modules/worldmap/WorldmapEncounters.h"
+#include "modules/worldmap/WorldmapSnow.h"
+#include "modules/worldmap/WorldmapTerrain.h"
 
+class Entity;
 class EntityModel;
 
 namespace VGears {
@@ -31,7 +35,8 @@ namespace VGears {
     /**
      * The world map module.
      */
-    class WorldmapModule : public Ogre::Singleton<WorldmapModule>, public Ogre::FrameListener{
+    class WorldmapModule :
+      public Ogre::Singleton<WorldmapModule>, public Ogre::FrameListener, public WorldMapInterface{
 
         public:
 
@@ -55,25 +60,25 @@ namespace VGears {
              * was already loaded, it is replaced.
              */
             void Init(const int map_id = 0);
-            void Suspend();
+            void Suspend() override;
 
             bool frameStarted(const Ogre::FrameEvent& event) override;
 
             void ClearVehicleTerrains();
             void AddVehicleTerrain(const char* terrain_name);
-            Ogre::String GetTerrainTypeUnderEntity(const char* entity_name) const;
-            int GetTerrainTriangleUnderEntity(const char* entity_name) const;
+            Ogre::String GetTerrainTypeUnderEntity(const char* entity_name) const override;
+            int GetTerrainTriangleUnderEntity(const char* entity_name) const override;
             bool UnboardVehicle(const char* vehicle_name);
 
             /**
              * Hides the world map and stops it while a battle is on.
              */
-            void PauseForBattle();
+            void PauseForBattle() override;
 
             /**
              * Shows the world map again after a battle.
              */
-            void ResumeAfterBattle();
+            void ResumeAfterBattle() override;
 
             /**
              * Prevents or allows random encounters (the SetBattleLock opcode).
@@ -82,16 +87,6 @@ namespace VGears {
              */
             void SetEncountersLocked(const bool locked);
 
-            /**
-             * Sets the orientation of the model of a world map entity, in degrees. It's the
-             * orientation of the model itself, so the heading of the entity is added to it. It is
-             * for finding the right orientation of a model.
-             *
-             * @param[in] entity_name Name of the entity, like "WorldMapHighwind".
-             * @param[in] x Rotation in X.
-             * @param[in] y Rotation in Y.
-             * @param[in] z Rotation in Z.
-             */
             /**
              * Moves the model of a world map entity up or down, in world units, without moving
              * the entity. It is for finding the right height of a model.
@@ -164,6 +159,16 @@ namespace VGears {
               const float rotation_z
             );
 
+            /**
+             * Sets the orientation of the model of a world map entity, in degrees. It's the
+             * orientation of the model itself, so the heading of the entity is added to it. It is
+             * for finding the right orientation of a model.
+             *
+             * @param[in] entity_name Name of the entity, like "WorldMapHighwind".
+             * @param[in] x Rotation in X.
+             * @param[in] y Rotation in Y.
+             * @param[in] z Rotation in Z.
+             */
             void SetModelOrientation(const char* entity_name, const float x, const float y, const float z);
             /// Turns a model of the scripts to a direction of the game (a full turn is 256).
             void SetModelHeading(const char* entity_name, const float direction);
@@ -171,29 +176,6 @@ namespace VGears {
             int GetModelHeading(const char* entity_name);
 
         private:
-
-            struct TerrainTriangle{
-                Ogre::Vector3 vertices[3];
-                uint8 walkability_type;
-                uint8 function_id;
-                int mesh_x;
-                int mesh_y;
-                /// Encounter region of the triangle, 0-15.
-                uint8 region;
-            };
-
-            /**
-             * Random encounters of a region and terrain group, from ENC_W.BIN.
-             */
-            struct EncounterRecord{
-                bool enabled;
-                /// Lower values mean more frequent encounters.
-                int rate;
-                /// Walkability type that selects this record.
-                int terrain;
-                /// Words 1-15 of the record: battle ID (10 bits) and probability (6 bits).
-                uint16 words[15];
-            };
 
             void DestroyWorldMap();
             /**
@@ -232,32 +214,74 @@ namespace VGears {
             /// Vehicles that the story hasn't given.
             std::set<Ogre::String> hidden_vehicles_;
 
-            void CreateWorldMap(Ogre::SceneManager* scene_manager);
             void CreatePlayer();
-                        void CreateCompanionModels();
-                        void AddWorldModel(
-                            const Ogre::String& name, const Ogre::String& mesh_name,
-                            const Ogre::Vector3& desired_position, Ogre::Real target_size,
-                            const Ogre::Quaternion& orientation,
-                            Ogre::Real collision_radius_scale = 1.0f,
-                            bool talkable = false,
-                            Ogre::Real explicit_scale = 0.0f
-                        );
+            void CreateCompanionModels();
+            void AddWorldModel(
+                const Ogre::String& name, const Ogre::String& mesh_name,
+                const Ogre::Vector3& desired_position, Ogre::Real target_size,
+                const Ogre::Quaternion& orientation,
+                Ogre::Real collision_radius_scale = 1.0f,
+                bool talkable = false,
+                Ogre::Real explicit_scale = 0.0f
+            );
             void UpdateCamera(Ogre::Real delta_time, bool snap_to_player);
-            /// Snow map (WM3): the camera turns by itself every few seconds.
-            void UpdateSnowCamera(Ogre::Real delta_time);
+
+            /**
+             * Sets the current vehicle from the entity that the player controls.
+             *
+             * @param[in] active_entity The entity that the player controls.
+             * @return False if it is not Cloud nor a vehicle (an entity of a scripted scene).
+             */
+            bool UpdateCurrentVehicle(const ::Entity* active_entity);
+
+            /**
+             * Tells the scripts the vehicle, so they play the music of the map.
+             *
+             * @param[in] delta_time Seconds since the last frame.
+             */
+            void UpdateMusic(const Ogre::Real delta_time);
+
+            /**
+             * Does what the cancel and action buttons do: unboard, surface, dive or place a snow pole.
+             *
+             * @param[in] active_entity The entity that the player controls.
+             * @return True if the map changed, so the entities are not valid anymore.
+             */
+            bool HandleActionButtons(::Entity* active_entity);
+
+            /**
+             * Gets the model of the entity that the player controls.
+             *
+             * @param[in] active_entity The entity that the player controls.
+             * @return Its model.
+             */
+            EntityModel* GetActiveModel(const ::Entity* active_entity) const;
+
+            /**
+             * Rotates the camera, with the buttons or by itself in the snow map.
+             *
+             * @param[in] delta_time Seconds since the last frame.
+             */
+            void UpdateCameraRotation(const Ogre::Real delta_time);
+
+            /**
+             * Moves the entity that the player controls over the ground, with the movement keys.
+             *
+             * @param[in] active_entity The entity that the player controls.
+             * @param[in] active_model Its model, which is turned to the direction of the movement.
+             * @param[in] delta_time Seconds since the last frame.
+             * @return True if it moved.
+             */
+            bool UpdateWalking(::Entity* active_entity, EntityModel* active_model, const Ogre::Real delta_time);
+
             /// Snow map (WM3): puts a pole where the player is (only 4 poles exist, the oldest goes away).
             void PlaceSnowPole();
             bool FindWalkableSurface(
                             const Ogre::Vector3& position, Ogre::Vector3& surface,
                             bool grass_only = false, bool require_walkable = true,
                             uint8* walkability_type = nullptr,
-                            size_t* triangle_index = nullptr,
-                            bool use_index = true
+                            size_t* triangle_index = nullptr
             ) const;
-            /// Groups the triangles of the terrain by the cell of a grid they touch, so the search of the
-            /// triangle under a position only checks a few of them.
-            void BuildTerrainIndex();
             bool IsActiveTerrainAllowed(uint8 walkability_type) const;
             /**
              * Runs the function of a triangle when it is entered, if it changed.
@@ -328,28 +352,24 @@ namespace VGears {
              */
             void UpdateFlight(EntityModel* entity, const Ogre::Real delta_time, const bool highwind);
 
-            void TriggerTriangleFunction(const TerrainTriangle& triangle);
-            void LoadEncounters();
-            void UpdateEncounters(const float delta_time, const TerrainTriangle& triangle);
-            int RollEncounterBattle(const EncounterRecord& record) const;
+            /**
+             * Gets the name of a vehicle in the scripts (WorldMapSettings).
+             *
+             * @param[in] vehicle The vehicle.
+             * @return Its name, "walk" on foot.
+             */
+            static const char* GetVehicleScriptName(const VehicleType vehicle);
 
-            std::vector<EncounterRecord> encounter_records_;
-            float encounter_frames_;
-            int encounter_accumulator_;
-            int encounter_last_battle_;
-            bool encounters_locked_;
+            void TriggerTriangleFunction(const TerrainTriangle& triangle);
+
+            /// Surfaces of the loaded map.
+            WorldmapTerrain terrain_;
+            /// Random battles.
+            WorldmapEncounters encounters_;
+            /// What is special in the snow map (WM3).
+            WorldmapSnow snow_;
             bool paused_for_battle_;
 
-            std::vector<TerrainTriangle> terrain_triangles_;
-            /// Indices of the triangles (ascending) that touch each cell of the grid, row by row.
-            std::vector<std::vector<uint32>> terrain_grid_;
-            float terrain_grid_min_x_ = 0.0f;
-            float terrain_grid_min_z_ = 0.0f;
-            float terrain_grid_cell_ = 1.0f;
-            int terrain_grid_columns_ = 0;
-            int terrain_grid_rows_ = 0;
-            Ogre::SceneManager* scene_manager_;
-            Ogre::SceneNode* world_map_node_;
             EntityModel* player_entity_;
             EntityModel* highwind_entity_;
             EntityModel* buggy_entity_;
@@ -363,9 +383,6 @@ namespace VGears {
             int active_function_id_;
             /// Loaded map ID, -1 if none.
             int map_id_;
-            /// Size of the map in blocks.
-            size_t grid_width_;
-            size_t grid_height_;
             /// Rotation of the camera around the active entity, in radians. Positive is to the right.
             float camera_yaw_;
             /// True while the active entity is a flying vehicle.
@@ -376,9 +393,6 @@ namespace VGears {
             float flight_heading_;
             /// Height of the vehicle.
             float flight_y_;
-            /// Position of the first block of the map in the 9x7 block grid of the world.
-            size_t origin_x_;
-            size_t origin_y_;
             bool initialized_;
             bool frame_listener_attached_;
             bool cancel_was_pressed_;
@@ -399,13 +413,6 @@ namespace VGears {
             };
             /// Cameras set by the scripts, by name (the ones that are not set use the default one).
             std::map<std::string, CameraSettings> camera_settings_;
-            /// Snow map: seconds until the next automatic turn of the camera.
-            float snow_camera_timer_ = 0.0f;
-            /// Snow map: radians left of the turn that is going on, with the sign of its direction.
-            float snow_camera_remaining_ = 0.0f;
-            /// Snow map: the poles that exist (names of the entities), the oldest first.
-            std::deque<std::string> snow_poles_;
-            unsigned int snow_pole_counter_ = 0;
             enum class TransitionStage{
                 /// No animation going on.
                 NONE,

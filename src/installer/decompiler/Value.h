@@ -20,7 +20,7 @@
 #include <ostream>
 #include <string>
 #include <boost/intrusive_ptr.hpp>
-#include "installer/common/scummsys.h"
+#include "installer/support/scummsys.h"
 #include "RefCounted.h"
 #include "Stack.h"
 #include "DecompilerException.h"
