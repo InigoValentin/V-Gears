@@ -40,8 +40,9 @@ namespace VGears{
          * - 1: First version of the record.
          * - 2: The converted data moved from "data" to "game".
          * - 3: The converted data is grouped by game area, and the terrain textures of the world map are in "game".
+         * - 4: The items that enemies drop or that can be stolen are right.
          */
-        const int DATA_VERSION = 3;
+        const int DATA_VERSION = 4;
 
         /**
          * Name of the file, in the installation directory.
