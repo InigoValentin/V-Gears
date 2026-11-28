@@ -128,7 +128,10 @@ void MainWindow::OpenInstallLog(const QString& dir, bool append){
     install_log.SetSink([this](InstallLog::Level level, const std::string& message){
         const QString text = QString::fromStdString(message).toHtmlEscaped();
         const QString color = level == InstallLog::ERROR_LEVEL ? "#c62828" : (level == InstallLog::WARNING ? "#e08600" : "");
-        const QString html = color.isEmpty() ? text : QString("<span style=\"color:%1\">%2</span>").arg(color, text);
+        // Every line is in a span: without tags, the window takes it as plain text and shows the
+        // escaped characters as they are written.
+        const QString style = color.isEmpty() ? "" : "; color:" + color;
+        const QString html = QString("<span style=\"white-space:pre-wrap%1\">%2</span>").arg(style, text);
         // The log can be written from any thread.
         QMetaObject::invokeMethod(this, [this, html](){main_window_->data_log->append(html);}, Qt::QueuedConnection);
     });
