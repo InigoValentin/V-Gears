@@ -364,11 +364,12 @@ namespace{
         enemy.row = data.row;
         for (int cover = 0; cover < 5; cover ++)
             enemy.cover[cover] = Has(data.cover_flags, 1u << cover) ? '1' : '0';
-        // TODO: These are always true: the comparisons are done before the bits are added.
-        enemy.visible = (data.flags == data.flags | 0x01);
-        enemy.direction = ((data.flags == data.flags | 0x02) ? 1 : 0);
-        enemy.targeteable = (data.flags == data.flags | 0x08);
-        enemy.main_script_active = (data.flags == data.flags | 0x10);
+        // All the bits are set for most enemies. The ones that join the battle later have them
+        // clear.
+        enemy.visible = Has(data.flags, 0x01);
+        enemy.direction = Has(data.flags, 0x02) ? 1 : 0;
+        enemy.targeteable = Has(data.flags, 0x08);
+        enemy.main_script_active = Has(data.flags, 0x10);
         return enemy;
     }
 

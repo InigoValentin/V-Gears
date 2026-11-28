@@ -145,3 +145,24 @@ The fonts are built by the installer from WINDOW.BIN (see `WindowFonts`) and dra
 The console command `/resolution <width> <height> [full screen]` leaves menus, fields, the world map and battles broken. Screenshots (`/screenshot`) work. It doesn't seem new: the resize functions (`CmdResolution`, `GameFrameListener::windowResized` and the `OnResize` of the managers and widgets) are the same as before the code reorganization, but it hasn't been compared in the game with an older build.
 
 To check, not verified: whether `windowResized` is called at all when the size is changed with `Ogre::RenderWindow::resize` or `setFullscreen`, and not by the window system. Several `OnResize` functions are also empty (battle, world map, dialogs).
+
+## Battle: the formation flags of the enemies are not applied
+
+Each enemy of a formation has the flags visible, targetable and main script active (`visible`, `targeteable` and
+`main_script_active` in the formation files). In the original data all of them are set for 2057 of the 2401 enemies,
+and the cleared ones are mostly enemies that join the battle later: Bizarro Sephiroth's parts, Mighty Grunt, Pyramid,
+the arms of the Guardian, etc. (199 invisible in 83 formations, 212 untargetable in 95 and 186 inactive in 85). The
+installer writes them, but the engine ignores them, so all the enemies are in the battle from the start.
+
+To apply them:
+
+- Hide the models of the invisible enemies when the battle starts, and mark them as hidden for the AI
+  (`combatant.hidden` in `battle_ui.lua`).
+- Leave the untargetable enemies out of the target selection.
+- Give no turns to the inactive enemies until a script activates them.
+
+Before that, check in the AI scripts of those formations how each hidden or inactive enemy is activated. This is not
+checked yet. A hidden enemy counts as alive (`is_defeated`), so a battle can't be won if the AI doesn't support what
+reveals it. The AI can already hide and reveal enemies (bit 14 of the status fields, `ai_write_actor`).
+
+The meaning of the `direction` flag (cleared for 95 enemies) is not verified, and the engine doesn't read it.

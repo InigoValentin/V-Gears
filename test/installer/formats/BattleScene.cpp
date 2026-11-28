@@ -106,6 +106,24 @@ BOOST_AUTO_TEST_CASE(TestBattleSceneFormations){
     BOOST_CHECK_EQUAL(std::string(formations[1].enemies[0].cover, 5), "10001");
 }
 
+BOOST_AUTO_TEST_CASE(TestBattleSceneFormationEnemyFlags){
+    auto scene = EmptyScene();
+    for (auto& formation : scene->formation) for (auto& enemy : formation) enemy.id = 0xFFFF;
+    // An enemy with all the flags, and one with only the direction.
+    scene->formation[0][0].id = 1;
+    scene->formation[0][0].flags = 0xFFFFFFFF;
+    scene->formation[0][1].id = 2;
+    scene->formation[0][1].flags = 0xFFFFFFE6;
+    const std::vector<Formation> formations = BattleSceneConverter::Formations(*scene);
+    BOOST_REQUIRE_EQUAL(formations[0].enemies.size(), 2u);
+    const Formation::Enemy& full = formations[0].enemies[0];
+    BOOST_CHECK(full.visible && full.targeteable && full.main_script_active);
+    BOOST_CHECK_EQUAL(full.direction, 1);
+    const Formation::Enemy& waiting = formations[0].enemies[1];
+    BOOST_CHECK(!waiting.visible && !waiting.targeteable && !waiting.main_script_active);
+    BOOST_CHECK_EQUAL(waiting.direction, 1);
+}
+
 BOOST_AUTO_TEST_CASE(TestBattleSceneAiScripts){
     // The block of the second enemy at 6 bytes from the AI section: two scripts after 32 bytes.
     std::vector<u8> bytes(0x0E80 + 6 + 32 + 6, 0xFF);

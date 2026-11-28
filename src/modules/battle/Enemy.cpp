@@ -45,6 +45,7 @@ Enemy::Enemy(const unsigned int id):
   pos_(Ogre::Vector3(0, 0, 0)),
   front_(false),
   visible_(false),
+  targeteable_(false),
   active_(false),
   cover_("00000")
 {
@@ -79,6 +80,7 @@ Enemy::Enemy(
   pos_(pos),
   front_(front),
   visible_(visible),
+  targeteable_(targeteable),
   active_(active),
   cover_(cover)
 {
