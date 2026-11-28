@@ -30,5 +30,9 @@ vgears_sources(
     SoundInstaller.cpp
     SpellModelInstaller.cpp
     WindowFonts.cpp
+    WorldArchive.cpp
+    WorldEncounterInstaller.cpp
     WorldInstaller.cpp
+    WorldModelInstaller.cpp
+    WorldScriptInstaller.cpp
 )

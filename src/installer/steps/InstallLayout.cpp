@@ -90,9 +90,8 @@ namespace InstallLayout{
         static const std::vector<std::string> dirs = {
           "kernel", "field/maps", "field/models", "battle/enemies", "battle/attacks", "battle/formations",
           "battle/effects", "battle/scripts", "battle/images", "battle/models/characters", "battle/models/scenes",
-          "battle/models/enemies", "battle/models/attacks", "battle/models/effects", "world/maps/0", "world/maps/1",
-          "world/maps/2", "world/textures", "world/scripts", "world/models/terrain/0", "world/models/terrain/1",
-          "world/models/terrain/2", "world/models/elements", "ui/images/icons", "ui/images/other",
+          "battle/models/enemies", "battle/models/attacks", "battle/models/effects", "world/maps", "world/textures",
+          "world/scripts", "world/models", "ui/images/icons", "ui/images/other",
           "ui/images/characters", "ui/images/fonts", "ui/images/reels", "ui/images/window", "ui/fonts",
           "audio/music", "audio/sounds"
         };
@@ -100,7 +99,7 @@ namespace InstallLayout{
     }
 
     const std::vector<std::string>& TempSubdirs(){
-        static const std::vector<std::string> dirs = {"char", "battle_models", "world_models", "spell_models", "effects", "wm"};
+        static const std::vector<std::string> dirs = {"char", "battle_models", "world_models", "spell_models", "effects"};
         return dirs;
     }
 

@@ -6,5 +6,4 @@ vgears_sources(
     DaFile.cpp
     DiskImage.cpp
     TexFile.cpp
-    WorldMapWalkmesh.cpp
 )

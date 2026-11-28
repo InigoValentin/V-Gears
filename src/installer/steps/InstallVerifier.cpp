@@ -215,7 +215,6 @@ VerifyResult VerifyInstallation(
     for (const char* file : {"triangle_triggers.lua", "vehicles.lua", "script_stubs.lua"})
         check.File(world, std::string("engine/scripts/world/") + file);
     check.File(world, "game/world/world_encounters.xml");
-    check.Files(world, "game/world/models/terrain/0", ".mesh", 1);
     check.Files(world, "game/world/textures", ".tex", 1);
 
     const std::string world_models = "World map models";

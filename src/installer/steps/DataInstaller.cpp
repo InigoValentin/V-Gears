@@ -83,7 +83,7 @@ const char* DataInstaller::StepGroup(int state){
     if (state >= FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT && state <= FIELD_WRITE_END)
         return "Field maps";
     if (state == WM_MODELS) return "World map models";
-    if (state >= WM_INIT && state <= WM_MAPS) return "World map";
+    if (state >= WM_INIT && state <= WM_SCRIPTS) return "World map";
     if (state >= MEDIA_MUSICS_INIT && state < FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT)
         return "Music";
     if (state >= MEDIA_SOUNDS_INIT && state < MEDIA_MUSICS_INIT) return "Sounds";
@@ -477,31 +477,26 @@ float DataInstaller::Progress(){
             }
             write_output_line_("Extracting world map data...", 2, true);
             UseModelParts("temp/world_models/");
-            substeps_ = world_installer_->Initialize();
+            world_installer_->InstallMaps();
+            substeps_ = 0;
             cur_substep_ = 0;
-            installation_state_ = WM_MATERIALS;
+            installation_state_ = WM_SCRIPTS;
             return CalcProgress();
-        case WM_MATERIALS:
-            world_installer_->GenerateMaterials();
-            installation_state_ = WM_MAPS;
-            return CalcProgress();
-        case WM_MAPS:
-            if (world_installer_->ProcessMap() == false) cur_substep_ ++;
-            else{
+        case WM_SCRIPTS:
+            {
                 std::string script_error;
-                                if (world_installer_->GenerateScripts(
-                                        field_installer_->GetMapList(), field_installer_->GetFieldScaleFactors(),
-                                        field_installer_->GetConvertedMapList(), script_error
-                                    )){
+                if (world_installer_->GenerateScripts(
+                  field_installer_->GetMapList(), field_installer_->GetFieldScaleFactors(),
+                  field_installer_->GetConvertedMapList(), script_error
+                )){
                     write_output_line_("Generated world-map scripts.", 2, true);
                 }
                 else{
                     write_output_line_("Could not generate world-map scripts: " + script_error, 2, true);
                 }
                 installation_state_ = WM_MODELS;
-                cur_substep_ = 0;
+                return CalcProgress();
             }
-            return CalcProgress();
         case WM_MODELS:
             if (!options_.wm_models) write_output_line_("Skipping world map model installation...", 2, true);
             else world_installer_->ProcessModels();

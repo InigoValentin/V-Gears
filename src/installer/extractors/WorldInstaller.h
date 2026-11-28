@@ -15,16 +15,22 @@
 
 #pragma once
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
-#include <common/TypeDefine.h>
+#include <OgreResourceGroupManager.h>
+#include "common/TypeDefine.h"
 #include "installer/formats/DiskImage.h"
-#include "common/File.h"
-#include "formats/lgp/LGPArchive.h"
+#include "WorldEncounterInstaller.h"
+#include "WorldModelInstaller.h"
+#include "WorldScriptInstaller.h"
 
 /**
  * The world map data installer.
+ *
+ * It copies the maps and their textures, which the game reads as they are. The rest of the work
+ * is done by {@see WorldScriptInstaller}, {@see WorldEncounterInstaller} and
+ * {@see WorldModelInstaller}.
  */
 class WorldInstaller{
 
@@ -47,284 +53,49 @@ class WorldInstaller{
         ~WorldInstaller();
 
         /**
-         * Initializes the installer.
-         *
-         * @return The number of maps to process.
+         * Copies the map files and the textures of the terrain.
          */
-        unsigned int Initialize();
+        void InstallMaps();
 
         /**
-         * Extracts and processes the models in data/wm/world_us.lgp
+         * Exports the scripts of the world maps and the random encounters.
+         *
+         * @param[in] field_names The names of the fields, by ID.
+         * @param[in] field_scale_factors The scale factors of the fields.
+         * @param[in] converted_fields The names of the installed fields.
+         * @param[out] error_message Why the scripts could not be written.
+         * @return True if the scripts were written.
+         */
+        bool GenerateScripts(
+          const std::vector<std::string>& field_names,
+          const std::map<u16, float>& field_scale_factors,
+          const std::vector<std::string>& converted_fields, std::string& error_message
+        );
+
+        /**
+         * Converts the models of the world map.
          */
         void ProcessModels();
-
-        /**
-         * Generates the materials needed for the world map.
-         *
-         * @todo Note that this function stil doesn't use the game data, and it
-         * has a lot of hardcoded things.
-         */
-        void GenerateMaterials();
-
-        /**
-         * Processes the next map to process.
-         *
-         * @return True if, once the map has been processed, all maps are
-         * processed. False if there are more maps to process.
-         */
-        bool ProcessMap();
-
-        /**
-         * Exports the random encounters of the world map to world/world_encounters.xml.
-         *
-         * @param[in] archive_file World map archive file.
-         * @param[in] entry Entry of ENC_W.BIN in the archive.
-         */
-        void ExportEncounters(File& archive_file, const VGears::LGPArchive::FileEntry& entry);
-
-                bool GenerateScripts(
-                    const std::vector<std::string>& field_names,
-                    const std::map<u16, float>& field_scale_factors,
-                    const std::vector<std::string>& converted_fields,
-                    std::string& error_message
-                );
-
-        /**
-         * Copies the textures of the world map archive to "world/textures". The game uses them for the terrain.
-         */
-        void ExtractTextures();
-
-        //void ReadMapFile(std::string file_name);
-
-        //void GenerateMap(std::string file_name, std::string output);
 
     private:
 
         /**
-         * UV coordinates for a vertex.
+         * Copies the map files to "world/maps".
          */
-        struct UVCoord{
-
-            /**
-             * U coordinate.
-             */
-            u8 u;
-
-            /**
-             * V coordinate.
-             */
-            u8 v;
-        };
+        void CopyMaps();
 
         /**
-         * Mesh triangle data.
+         * Copies the textures of the world map archive to "world/textures". The game uses them for
+         * the terrain.
          */
-        struct Triangle{
-
-            /**
-             * Index for each triangle vertex.
-             */
-            u8 vertex_index[3];
-
-            /**
-             * Walkability info.
-             *
-             * Shares byte with {@see function_id}, 5 bytes.
-             */
-            int walkability;
-
-            /**
-             * ID of the function triggered when entering the triangle.
-             *
-             * Shares byte with {@see walkability}, 3 bytes.
-             */
-            int function_id;
-
-            /**
-             * UV coordinates in texture for each vertex.
-             */
-            UVCoord vertex_coord[3];
-
-            /**
-             * Texture id.
-             *
-             * Shares bytes with {@see location_id}, 9 bytes.
-             */
-            u16 texture;
-
-            /**
-             * Location message ID.
-             *
-             * Shares bytes with {@see texture}, 7 bytes.
-             */
-            u16 location;
-        };
+        void ExtractTextures();
 
         /**
-         * Mesh vertex data.
+         * Finds the world map archive in the disk.
          *
-         * Can also be used for normal data.
+         * @return The path of the archive, or an empty string if it's not in the disk.
          */
-        struct Vertex{
-
-            /**
-             * X coordinate.
-             */
-            u16 x;
-
-            /**
-             * Y coordinate.
-             */
-            u16 y;
-
-            /**
-             * Z coordinate.
-             */
-            u16 z;
-
-            /**
-             * Unknown value, unused.
-             */
-            u16 unknown;
-        };
-
-        /**
-         * Mesh data.
-         */
-        struct Mesh{ // 0xB800 / 0x0F
-
-            /**
-             * Number of triangles in the mesh.
-             */
-            u16 triangle_count;
-
-            /**
-             * Number of vertices in the mesh.
-             */
-            u16 vertex_count;
-
-            /**
-             * Mesh triangle data.
-             *
-             * Size must equal {@see triangle_count}.
-             */
-            std::vector<Triangle> triangles;
-
-            /**
-             * Mesh vertex data.
-             *
-             * Size must equal {@see vertex_count}.
-             */
-            std::vector<Vertex> vertices;
-
-            /**
-             * Mesh normal data.
-             *
-             * Size must equal {@see vertex_count}.
-             */
-            std::vector<Vertex> normals;
-        };
-
-        /**
-         * Each block of a map.
-         *
-         * A block is always 0xB800 bytes and it's always composed of 16 meshes.
-         */
-        struct Block{ // 0xB800
-
-            /**
-             * Block meshes.
-             */
-            Mesh mesh[16];
-        };
-
-        /**
-         * A map.
-         *
-         * A map is defined in a WM*.MAP file. Divided in 0xB800 byte blocks.
-         */
-        struct Map{
-
-            /**
-             * Map blocks.
-             */
-            std::vector<Block> blocks;
-        };
-
-        /**
-         * World map texture.
-         */
-        struct Texture{
-
-            /**
-             * Texture ID.
-             */
-            int id;
-
-            /**
-             * Texture name.
-             */
-            std::string name;
-
-            /**
-             * Texture width.
-             */
-            int w;
-
-            /**
-             * Texture height.
-             */
-            int h;
-
-            /**
-             * U offset of the texture.
-             */
-            int u_offset;
-
-            /**
-             * V offset of the texture.
-             */
-            int v_offset;
-        };
-
-        /**
-         * Path to the world map elements models directory.
-         *
-         * Elements can be locations, playable characters, enemies,
-         * transportations... anything that it's not in itself part of the
-         * terrain.
-         */
-        static std::string ELEMENT_MODELS_DIR;
-
-        /**
-         * Path to the world map terrain models directory.
-         */
-        static std::string TERRAIN_MODELS_DIR;
-
-        /**
-         * Exports a mesh to a file.
-         *
-         * The file will have the mesh name.
-         *
-         * @param[in] outdir Path to the directory where the file will be saved.
-         * @param[in] mesh The mesh to export.
-         */
-        void ExportMesh(const std::string outdir, const Ogre::MeshPtr &mesh);
-
-        /**
-         * Pointer to the application resource manager.
-         */
-        Ogre::ResourceGroupManager* res_mgr_;
-
-        /**
-         * Each of the original WM*.MAP in the installation disk.
-         */
-        std::vector<File> wm_map_;
-
-        /**
-         * List with all the texture names
-         */
-        std::vector<Texture> texture_;
+        std::string ArchivePath();
 
         /**
          * The disk image to extract the PC game data from.
@@ -332,19 +103,22 @@ class WorldInstaller{
         DiskImage disk_image_;
 
         /**
-         * The path to the directory where to save the V-Gears data.
-         */
-        std::string output_dir_;
-
-        /**
-         * Directory where the game data is installed (<install dir>/data/).
+         * Directory where the game data is installed.
          */
         std::string data_dir_;
 
         /**
-         * Number of maps already processed.
+         * Writes the scripts of the maps.
          */
-        unsigned int processed_maps_;
+        WorldScriptInstaller script_installer_;
 
+        /**
+         * Writes the random encounters.
+         */
+        WorldEncounterInstaller encounter_installer_;
 
+        /**
+         * Converts the models.
+         */
+        WorldModelInstaller model_installer_;
 };

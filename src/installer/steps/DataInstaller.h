@@ -419,19 +419,14 @@ class DataInstaller{
             FIELD_CONVERT_MODELS,
 
             /**
-             * Prepares the installer for world map data installation.
+             * Copies the world maps and their textures.
              */
             WM_INIT,
 
             /**
-             * Generates the materials for the world map terrain.
+             * Step that writes the world map scripts and encounters.
              */
-            WM_MATERIALS,
-
-            /**
-             * Step that extracts world map terrain data.
-             */
-            WM_MAPS,
+            WM_SCRIPTS,
 
             /**
              * Step that extracts world map models.

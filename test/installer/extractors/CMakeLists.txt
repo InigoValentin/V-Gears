@@ -4,6 +4,7 @@ vgears_tests(
     KernelData.cpp
     SfxDump.cpp
     WindowFonts.cpp
+    WorldData.cpp
 )
 vgears_installer_tests(
     MovieCamera.cpp
