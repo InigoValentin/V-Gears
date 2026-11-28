@@ -1,0 +1,1169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>720</width>
+    <height>705</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>VGears Installer</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QWidget" name="tab_installer">
+       <property name="minimumSize">
+        <size>
+         <width>698</width>
+         <height>630</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QHBoxLayout" name="isoLocator">
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Final Fantasy VII ISO file: </string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="line_data_src"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_data_src">
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="help_data_src">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Path to a FFVII (PC version) ISO image.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset theme="dialog-information">
+              <normaloff>Workspace/Software/V-Gears/V-Gears-Installer/src</normaloff>Workspace/Software/V-Gears/V-Gears-Installer/src</iconset>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="isoInfo">
+          <property name="leftMargin">
+           <number>30</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="isoData">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="margin">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="isoError">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="output">
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>VGears installation directory:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="line_data_dst"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_data_dst">
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="help_data_dest">
+            <property name="toolTip">
+             <string>
+              &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;V-Gears data installation directory.&lt;/b&gt;&lt;br&gt;&lt;br&gt;The data will be installed to this location. Existing installations will be overwritten.&lt;/body&gt;&lt;/html&gt;
+             </string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset theme="dialog-information">
+              <normaloff>Workspace/Software/V-Gears/V-Gears-Installer/src</normaloff>Workspace/Software/V-Gears/V-Gears-Installer/src</iconset>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_estimate">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_tools">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="textInteractionFlags">
+           <set>Qt::LinksAccessibleByMouse</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chk_advanced_options">
+          <property name="text">
+           <string>Show advanced options</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="advancedOptions">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>680</width>
+            <height>210</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>210</height>
+           </size>
+          </property>
+          <property name="title">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+          <widget class="QLabel" name="label_preset">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>10</y>
+             <width>130</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="text">
+            <string>What to install</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QComboBox" name="combo_preset">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>8</y>
+             <width>410</width>
+             <height>24</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string>Ready-made sets of options. Choose Custom to pick the options by hand.</string>
+           </property>
+            <property name="toolTip">
+             <string>Ready-made sets of options. Changing an option by hand switches to Custom.</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Everything</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Field maps and models</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>World map only</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Battle data and models</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Media only (images, sounds, music, videos)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Custom</string>
+             </property>
+            </item>
+           </widget>
+          <widget class="QLabel" name="advancedLabelData">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>40</y>
+             <width>130</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="text">
+            <string>Data files</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_copy_data">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>40</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string>Copy the V-Gears data files (scripts, screens, fonts, config...) from the data/ folder to the installation directory.</string>
+           </property>
+           <property name="text">
+            <string>Copy V-Gears data files</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QLabel" name="advancedLabelBattle">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>60</y>
+             <width>130</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="text">
+            <string>Battle data</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="advancedLabelGame">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>80</y>
+             <width>130</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="text">
+            <string>Game data</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="advancedLabelMedia">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>100</y>
+             <width>130</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="text">
+            <string>Multimedia</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_sounds">
+           <property name="geometry">
+            <rect>
+             <x>360</x>
+             <y>100</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract sound effects.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Checked extracts sound effects; uncheck to reuse an existing installation. This can take a few minutes.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract sound effects</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_music">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>120</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract music tracks.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Checked extracts music; uncheck to reuse an existing installation. This can take a few minutes.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract music tracks</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QLabel" name="advancedLabelFields">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>140</y>
+             <width>130</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="text">
+            <string>Field Maps</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="advancedLabelWorld">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>160</y>
+             <width>130</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="text">
+            <string>World Map</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="advancedLabelOther">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>180</y>
+             <width>130</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <bold>true</bold>
+             <underline>true</underline>
+            </font>
+           </property>
+           <property name="text">
+            <string>Other</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_clean_install">
+           <property name="geometry">
+            <rect>
+             <x>360</x>
+             <y>180</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Delete the previous installation first.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Before installing, the data of a previous installation in the installation directory is deleted: the converted game data, the temporary files and the extracted disk. The saves, the controls, the game configuration and the videos are kept.&lt;br&gt;&lt;br&gt;It needs 'Copy V-Gears data files', since the V-Gears data files are deleted too.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Clean install</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_wm">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>160</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract world map data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs world map terrain and scripts. Uncheck to keep the existing world map data.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract world map data</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="tristate">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_images">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>100</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract images.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs UI images such as window decorations, menu icons, and character portraits.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract images</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_battle_data">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>60</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract battle data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs battle data such as enemies, attacks, and enemy formations.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract battle data</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_wm_models">
+           <property name="geometry">
+            <rect>
+             <x>360</x>
+             <y>160</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract world map 3D models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked converts and installs world map models and textures. Requires world map data.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract world map 3D models</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_keep_original">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>180</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Keep the original data after the installation.&lt;/b&gt;&lt;br&gt;&lt;br&gt;The installer extracts the install disk and some original data (WAV sounds, MIDI music, TEX images and temporary model files) to convert it. Without this option, all of it is deleted when the installation is complete.&lt;br&gt;&lt;br&gt;V-Gears never uses this data, so there is usually no need to check this.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Preserve original data</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_fields">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>140</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract field maps.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked converts and installs field maps and scripts. Required for world-map city entrances.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract field maps</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_kernel">
+           <property name="geometry">
+            <rect>
+             <x>150</x>
+             <y>80</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract game data.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs kernel data such as items, materia, and character information.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract game data</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_field_models">
+           <property name="geometry">
+            <rect>
+             <x>360</x>
+             <y>140</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract field 3D models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked converts and installs field models and textures. Requires field maps.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract field 3D models</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_videos">
+           <property name="geometry">
+            <rect>
+             <x>360</x>
+             <y>120</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract videos.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked installs FMV videos. This can take a few minutes.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract videos</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="chk_battle_models">
+           <property name="geometry">
+            <rect>
+             <x>360</x>
+             <y>60</y>
+             <width>200</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;b&gt;Extract battle models.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Checked converts and installs player, enemy, attack, and battle scene models.&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+            <property name="text">
+             <string>Extract battle models</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_data_run">
+          <property name="text">
+           <string>Install data</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="data_progress_bar">
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
+          <property name="textVisible">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_percent">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>10</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+            <italic>true</italic>
+           </font>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_progress">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>10</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+            <italic>true</italic>
+           </font>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>15</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Courier</family>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Installer log:</string>
+          </property>
+          <property name="margin">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="data_log">
+          <property name="font">
+           <font>
+            <family>Courier</family>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
+          </property>
+          <property name="undoRedoEnabled">
+           <bool>false</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="bottomButtons">
+      <item>
+       <widget class="QPushButton" name="btn_verify">
+        <property name="toolTip">
+         <string>Checks that the installation directory has everything the game needs.</string>
+        </property>
+        <property name="text">
+         <string>Verify install</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_launch">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Starts V-Gears. Enabled after a successful installation or verification.</string>
+        </property>
+        <property name="text">
+         <string>Launch game</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="bottomSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_close">
+        <property name="text">
+         <string>Close</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>720</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionABout"/>
+    <addaction name="actionHelp"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionABout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>line_data_src</tabstop>
+  <tabstop>btn_data_src</tabstop>
+  <tabstop>help_data_src</tabstop>
+  <tabstop>line_data_dst</tabstop>
+  <tabstop>btn_data_dst</tabstop>
+  <tabstop>help_data_dest</tabstop>
+  <tabstop>chk_advanced_options</tabstop>
+  <tabstop>chk_battle_data</tabstop>
+  <tabstop>chk_battle_models</tabstop>
+  <tabstop>chk_kernel</tabstop>
+  <tabstop>chk_images</tabstop>
+  <tabstop>chk_sounds</tabstop>
+  <tabstop>chk_music</tabstop>
+  <tabstop>chk_videos</tabstop>
+  <tabstop>chk_fields</tabstop>
+  <tabstop>chk_field_models</tabstop>
+  <tabstop>chk_wm</tabstop>
+  <tabstop>chk_wm_models</tabstop>
+  <tabstop>chk_keep_original</tabstop>
+  <tabstop>chk_clean_install</tabstop>
+  <tabstop>btn_data_run</tabstop>
+  <tabstop>data_log</tabstop>
+  <tabstop>line_vgears_exe</tabstop>
+  <tabstop>btn_vgears_exe</tabstop>
+  <tabstop>line_vgears_config</tabstop>
+  <tabstop>btn_vgears_config</tabstop>
+  <tabstop>btn_vgears_launch</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>66</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

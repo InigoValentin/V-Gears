@@ -17,72 +17,72 @@
 #include <string.h>
 #include "common/File.h"
 #include "common/FileSystem.h"
-#include "core/Logger.h"
+#include <algorithm>
+#include <cstring>
+#include "common/Logger.h"
 
-File::File(const Ogre::String& file):
-  file_name_(file),
-  buffer_(nullptr),
-  buffer_size_(0),
-  offset_(0)
-{
+File::File(){}
+
+File::File(const Ogre::String& file): file_name_(file){
     LOG_TRIVIAL("Loading file: " + file_name_ + "\n");
-    buffer_size_ = FileSystem::GetFileSize(file_name_);
-    buffer_ = static_cast<u8*>(malloc(sizeof(u8) * buffer_size_));
-    if (!FileSystem::ReadFile(file_name_, buffer_, 0, buffer_size_))
+    // Zeroed, so a file that can't be read is empty data, not whatever was in memory.
+    buffer_.assign(FileSystem::GetFileSize(file_name_), 0);
+    if (!buffer_.empty() && !FileSystem::ReadFile(file_name_, buffer_.data(), 0, buffer_.size()))
         LOG_TRIVIAL("Warning: " + file_name_ + " not found!\n");
 }
 
-File::File(const File* file, u32 offset, u32 length):
-  buffer_(nullptr), buffer_size_(length), offset_(offset)
-{
+File::File(const File* file, u32 offset, u32 length){
     assert(file != nullptr);
     file_name_ = file->GetFileName();
-    buffer_ = static_cast<u8*>(malloc(sizeof(u8) * buffer_size_));
-    file->GetFileBuffer(buffer_, offset_, buffer_size_);
+    // The fragment is a file of its own: it is read from its start.
+    buffer_.assign(length, 0);
+    if (length > 0) file->GetFileBuffer(buffer_.data(), offset, length);
 }
 
-File::File(const u8* buffer, u32 offset, u32 length):
-  file_name_("BUFFER"), buffer_(nullptr), buffer_size_(length), offset_(offset)
-{
+File::File(const u8* buffer, u32 offset, u32 length): file_name_("BUFFER"){
     assert(buffer != nullptr);
-    buffer_ = static_cast<u8*>(malloc(sizeof(u8) * buffer_size_));
-    memcpy(buffer_, buffer + offset, buffer_size_);
+    buffer_.assign(buffer + offset, buffer + offset + length);
 }
 
 File::File(const File* file){
     assert(file != nullptr);
-    buffer_size_ = file->GetFileSize();
-    file_name_   = file->GetFileName();
-    buffer_ = static_cast<u8*>(malloc(sizeof(u8) * buffer_size_));
-    file->GetFileBuffer(buffer_, 0, buffer_size_);
+    file_name_ = file->GetFileName();
+    buffer_ = file->buffer_;
 }
 
-File::~File(){/*free(buffer_);*/}
+File::~File(){}
 
 void File::WriteFile(const Ogre::String& file) const{
-    FileSystem::WriteNewFile(file, buffer_, buffer_size_);
+    FileSystem::WriteNewFile(file, buffer_.data(), static_cast<u32>(buffer_.size()));
 }
 
 const Ogre::String& File::GetFileName() const{return file_name_;}
 
-u32 File::GetFileSize() const{return buffer_size_;}
+u32 File::GetFileSize() const{return static_cast<u32>(buffer_.size());}
 
 void File::GetFileBuffer(u8* buffer, const u32 &start, const u32 &length) const{
-    memcpy(buffer, buffer_ + start, length);
+    // What is past the end of the file is read as zeros.
+    const u32 size = GetFileSize();
+    const u32 available = start < size ? std::min(length, size - start) : 0;
+    if (available > 0) memcpy(buffer, buffer_.data() + start, available);
+    if (available < length) memset(buffer + available, 0, length - available);
 }
 
-u8 File::GetU8(u32 offset) const{return *(buffer_ + offset);}
+// Many of the original files are read past their end by the parsers (truncated animations, headers of the
+// last entry of an archive...). Those bytes are read as zeros, instead of whatever is in memory after the file.
+
+u8 File::GetU8(u32 offset) const{return offset < buffer_.size() ? buffer_[offset] : 0;}
 
 u16 File::GetU16LE(u32 offset) const{
-    return (buffer_ + offset)[0] | ((buffer_ + offset)[1] << 8);
+    return GetU8(offset) | (GetU8(offset + 1) << 8);
 }
 
 u32 File::GetU32LE(u32 offset) const{
     return
-      (buffer_ + offset)[0]
-      | ((buffer_ + offset)[1] << 8)
-      | ((buffer_ + offset)[2] << 16)
-      | ((buffer_ + offset)[3] << 24);
+      static_cast<u32>(GetU8(offset))
+      | (static_cast<u32>(GetU8(offset + 1)) << 8)
+      | (static_cast<u32>(GetU8(offset + 2)) << 16)
+      | (static_cast<u32>(GetU8(offset + 3)) << 24);
 }
 
 u8 File::readU8(){
@@ -106,6 +106,6 @@ u32 File::readU32LE(){
 u32 File::GetCurrentOffset(){return offset_;}
 
 void File::SetOffset(u32 offset){
-    if (offset < buffer_size_) offset_ = offset;
-    else offset_ = buffer_size_ - 1;
+    if (offset < buffer_.size()) offset_ = offset;
+    else offset_ = buffer_.empty() ? 0 : GetFileSize() - 1;
 }

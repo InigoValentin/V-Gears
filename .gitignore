@@ -26,7 +26,16 @@ doc/FFVII/RAW/
 .directory
 v-gears-new*.png
 .vscode
-src/installer/MainWindow.ui.autosave
+src/installer/gui/MainWindow.ui.autosave
 
 # Generated from MainWindow.ui at build time.
 src/installer/ui_MainWindow.h
+
+# Old decompiler tests, not built. Kept locally only, some fixtures are game data.
+src/installer/decompiler/test/
+
+# Written by the game and the installer when they are run from the data folder.
+data/user/
+data/logs/
+data/game/
+data/temp/

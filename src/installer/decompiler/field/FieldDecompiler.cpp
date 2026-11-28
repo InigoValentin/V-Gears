@@ -41,9 +41,6 @@ FieldDecompiler::DecompiledScript FieldDecompiler::Decompile(
     // Create control flow group.
     auto control_flow = std::make_unique<ControlFlow>(insts, engine);
     control_flow->CreateGroups();
-    // Decompile/analyze
-    //Graph graph = controlFlow->analyze();
-    //engine.PostCFG(insts, graph);
     Graph graph;
     DecompiledScript ds;
     // Generate code and return it.

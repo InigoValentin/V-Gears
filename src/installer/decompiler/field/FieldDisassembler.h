@@ -365,13 +365,6 @@ class FieldDisassembler : public Disassembler{
         static InstructionRecord FLOW_OPCODES[];
 
         /**
-         * Generates a map of control flow instructions.
-         *
-         * @return A map of control flow instructions, by opcode name.
-         */
-        static std::map<std::string, const InstructionRecord*> FieldInstructions();
-
-        /**
          * Finds the ID of the character a function refers to.
          *
          * @param[in] start_addr The starting address of the function.

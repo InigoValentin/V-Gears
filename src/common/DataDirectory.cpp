@@ -58,6 +58,36 @@ namespace VGears{
             }
 
             /**
+             * Checks if a directory has the layout of older versions: plugins.cfg and a "data" subdirectory.
+             */
+            bool IsLegacyDataDirectory(const bfs::path& directory){
+                boost::system::error_code ec;
+                return bfs::is_regular_file(directory / "plugins.cfg", ec) && bfs::is_directory(directory / "data", ec);
+            }
+
+            /**
+             * Moves a file or a directory without overwriting anything. Directories that exist in both places are
+             * merged, and removed from the origin if they end up empty.
+             *
+             * @return The number of files and directories moved.
+             */
+            unsigned int MoveMissing(const bfs::path& from, const bfs::path& to){
+                if (!bfs::exists(from)) return 0;
+                if (!bfs::exists(to)){
+                    bfs::create_directories(to.parent_path());
+                    bfs::rename(from, to);
+                    return 1;
+                }
+                if (!bfs::is_directory(from) || !bfs::is_directory(to)) return 0;
+                std::vector<bfs::path> entries;
+                for (bfs::directory_iterator it(from), end; it != end; ++ it) entries.push_back(it->path());
+                unsigned int moved = 0;
+                for (const bfs::path& entry : entries) moved += MoveMissing(entry, to / entry.filename());
+                if (bfs::is_empty(from)) bfs::remove(from);
+                return moved;
+            }
+
+            /**
              * Gets the home directory of the user, or an empty path.
              */
             bfs::path HomeDirectory(){
@@ -77,7 +107,7 @@ namespace VGears{
 
         bool IsDataDirectory(const bfs::path& directory){
             boost::system::error_code ec;
-            return bfs::is_regular_file(directory / "plugins.cfg", ec) && bfs::is_directory(directory / "data", ec);
+            return bfs::is_regular_file(directory / "plugins.cfg", ec) && bfs::is_directory(directory / "engine", ec);
         }
 
         bfs::path DefaultDirectory(){
@@ -138,6 +168,7 @@ namespace VGears{
             for (bfs::recursive_directory_iterator it(from), end; it != end; ++ it){
                 const bfs::path relative = it->path().lexically_relative(from);
                 const bfs::path target = to / relative;
+                if (IsPlayerPath(relative)) continue;
                 if (bfs::is_directory(it->status())) bfs::create_directories(target);
                 else if (bfs::is_regular_file(it->status()) && !bfs::exists(target)){
                     bfs::create_directories(target.parent_path());
@@ -148,6 +179,43 @@ namespace VGears{
             return copied;
         }
 
+        bool IsPlayerPath(const bfs::path& relative){
+            if (relative.empty()) return false;
+            const std::string first = relative.begin()->string();
+            return first == "user" || first == "logs";
+        }
+
+        unsigned int MigrateLayout(const bfs::path& directory){
+            if (!bfs::is_regular_file(directory / "plugins.cfg")) return 0;
+            const bfs::path user = directory / "user";
+            unsigned int moved = 0;
+            moved += MoveMissing(directory / "save", user / "saves");
+            moved += MoveMissing(directory / "controls.cfg", user / "controls.cfg");
+            moved += MoveMissing(directory / "console_history.txt", user / "console_history.txt");
+            moved += MoveMissing(directory / "data" / "config" / "config.cfg", user / "config.cfg");
+            moved += MoveMissing(directory / "data" / "video", directory / "game" / "video");
+            std::vector<bfs::path> screenshots;
+            for (bfs::directory_iterator it(directory), end; it != end; ++ it){
+                const std::string name = it->path().filename().string();
+                if (name.compare(0, 11, "screenshot_") == 0 && it->path().extension() == ".png")
+                    screenshots.push_back(it->path());
+            }
+            for (const bfs::path& file : screenshots)
+                moved += MoveMissing(file, user / "screenshots" / file.filename());
+            return moved;
+        }
+
+        void PrepareDirectory(const bfs::path& directory){
+            for (const char* dir : {
+              "user/saves", "user/screenshots", "logs", "game/kernel", "game/field/maps", "game/field/models",
+              "game/battle/models", "game/battle/images", "game/world/maps", "game/world/textures", "game/world/models",
+              "game/ui/images", "game/ui/fonts", "game/audio"
+            }) bfs::create_directories(directory / dir);
+            const bfs::path defaults = directory / "defaults" / "config.cfg";
+            const bfs::path config = directory / "user" / "config.cfg";
+            if (bfs::exists(defaults) && !bfs::exists(config)) bfs::copy_file(defaults, config);
+        }
+
         Resolution Resolve(
           const std::string& requested, const bfs::path& current, const bfs::path& default_directory,
           const std::vector<bfs::path>& template_candidates
@@ -155,7 +223,7 @@ namespace VGears{
             Resolution result;
             bfs::path directory;
             if (!requested.empty()) directory = bfs::absolute(bfs::path(requested), current);
-            else if (IsDataDirectory(current)) directory = current;
+            else if (IsDataDirectory(current) || IsLegacyDataDirectory(current)) directory = current;
             else directory = default_directory;
             if (directory.empty()){
                 result.error = "The home directory can't be found. Use --data-dir or set "
@@ -164,8 +232,20 @@ namespace VGears{
             }
             directory = directory.lexically_normal();
 
+            try{
+                if (bfs::is_directory(directory)) result.migrated_files = MigrateLayout(directory);
+            }
+            catch (const bfs::filesystem_error& e){
+                result.error = "The files of an older version could not be moved in " + directory.string() + ": "
+                  + e.what();
+                return result;
+            }
+
             if (!IsDataDirectory(directory)){
-                if (IsNonEmptyDirectory(directory) && !bfs::is_directory(directory / "data")){
+                if (
+                  IsNonEmptyDirectory(directory) && !bfs::is_directory(directory / "engine")
+                  && !bfs::is_directory(directory / "game") && !bfs::is_directory(directory / "data")
+                ){
                     result.error = "The directory " + directory.string() + " is not empty and has no V-Gears files, "
                       "so they are not copied there. Choose an empty or V-Gears directory.";
                     return result;
@@ -174,7 +254,7 @@ namespace VGears{
                 if (source.empty()){
                     result.error = "The directory " + directory.string() + " has no V-Gears files, and the files "
                       "shipped with V-Gears were not found to copy them. Reinstall V-Gears, or set "
-                      + std::string(ENV_TEMPLATE_DIR) + " to the folder that contains plugins.cfg and data/.";
+                      + std::string(ENV_TEMPLATE_DIR) + " to the folder that contains plugins.cfg and engine/.";
                     return result;
                 }
                 try{
@@ -189,9 +269,16 @@ namespace VGears{
                 result.template_directory = source;
                 if (!IsDataDirectory(directory)){
                     result.error = "The V-Gears files were copied to " + directory.string()
-                      + ", but it's still missing plugins.cfg or the data folder.";
+                      + ", but it's still missing plugins.cfg or the engine folder.";
                     return result;
                 }
+            }
+            try{
+                PrepareDirectory(directory);
+            }
+            catch (const bfs::filesystem_error& e){
+                result.error = "The directories of " + directory.string() + " could not be prepared: " + e.what();
+                return result;
             }
             result.directory = directory;
             return result;

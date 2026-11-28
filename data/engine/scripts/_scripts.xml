@@ -1,0 +1,53 @@
+<scripts>
+    <script file="engine/scripts/core/config.lua" />
+    <script file="engine/scripts/core/data.lua" />
+    <script file="engine/scripts/battle/battle.lua" />
+    <script file="game/kernel/accessories.lua" />
+    <script file="game/kernel/armors.lua" />
+    <script file="game/kernel/attacks.lua" />
+    <script file="game/kernel/characters.lua" />
+    <script file="game/kernel/commands.lua" />
+    <script file="game/battle/battle_cameras.lua" />
+    <script file="game/battle/effects/effect_cameras.lua" />
+    <script file="game/battle/effects/effect_meshes.lua" />
+    <script file="game/battle/effects/effect_animations.lua" />
+    <script file="game/battle/effects/effect_sprites.lua" />
+    <script file="game/kernel/growth.lua" />
+    <script file="game/kernel/items.lua" />
+    <script file="game/kernel/key_items.lua" />
+    <script file="game/kernel/materia.lua" />
+    <script file="game/kernel/shops.lua" />
+    <script file="game/kernel/summons.lua" />
+    <script file="game/kernel/weapons.lua" />
+
+    <script file="engine/scripts/core/system.lua" />
+    <script file="engine/scripts/core/character_effects.lua" />
+    <script file="engine/scripts/core/character_abilities.lua" />
+    <script file="engine/scripts/core/save.lua" />
+
+    <!-- TODO: Don't always parse initial savemap when loading is implemented. -->
+    <script file="game/kernel/initial_savemap.lua" />
+
+    <script file="engine/scripts/field/field.lua" />
+    <script file="engine/scripts/world/triangle_triggers.lua" />
+    <script file="engine/scripts/world/vehicles.lua" />
+    <script file="engine/scripts/world/world_model_table.lua" />
+    <script file="engine/scripts/world/world_settings.lua" />
+    <script file="engine/scripts/world/world_music.lua" />
+    <script file="engine/scripts/world/world_vm.lua" />
+    <script file="engine/scripts/world/script_stubs.lua" />
+    <script file="engine/scripts/battle/battle_ai.lua" />
+    <script file="engine/scripts/battle/battle_ai_vm.lua" />
+    <script file="engine/scripts/battle/battle_camera.lua" />
+    <script file="engine/scripts/battle/effect_camera.lua" />
+    <script file="engine/scripts/battle/effect_mesh.lua" />
+    <script file="engine/scripts/battle/effect_sprite.lua" />
+    <script file="engine/scripts/menu/menu_helpers.lua" />
+    <script file="engine/scripts/menu/menu_lib.lua" />
+
+    <!-- TODO: Debugging pourposes only -->
+    <script file="engine/scripts/core/debug_data.lua" />
+
+    <system_script name="MapChanger" />
+    <system_script name="WorldMap" />
+</scripts>

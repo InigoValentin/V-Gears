@@ -14,7 +14,7 @@
  */
 
 #include "common/LzsFile.h"
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 LzsFile::LzsFile(const Ogre::String& file): File(file){
     ExtractLzs();
@@ -39,68 +39,47 @@ LzsFile::LzsFile(File* pFile): File(pFile){
 LzsFile::~LzsFile(){}
 
 void LzsFile::ExtractLzs(){
+    const u32 input_size = GetFileSize();
     u32 input_length = GetU32LE(0) + 4;
-    if (input_length != buffer_size_){
+    if (input_length != input_size){
         LOG_TRIVIAL("Warning: extract failed, this is not lzs!\n");
         return;
     }
-    u32 extract_size = (buffer_size_ + 255) & ~255;
-    u8* extractbuffer_ = static_cast<u8*>(malloc(extract_size));
-    unsigned int inputoffset_ = 4;
-    int outputoffset_ = 0;
+    std::vector<u8> output;
+    output.reserve((input_size + 255) & ~255);
+    unsigned int input_offset = 4;
     u8 control_byte = 0;
     u8 control_bit = 0;
-    while (inputoffset_ < buffer_size_){
+    while (input_offset < input_size){
         if (control_bit == 0){
-            control_byte = (static_cast<u8*>(buffer_))[inputoffset_ ++];
+            control_byte = GetU8(input_offset ++);
             control_bit = 8;
         }
-
-        if (control_byte & 1){
-            (static_cast<u8*>(extractbuffer_))[outputoffset_ ++] =
-              (static_cast<u8*>(buffer_))[inputoffset_ ++];
-            if (outputoffset_ == extract_size){
-                extract_size += 256;
-                extractbuffer_ = static_cast<u8*>(realloc(extractbuffer_, extract_size));
-            }
-        }
+        if (control_byte & 1) output.push_back(GetU8(input_offset ++));
         else{
-            u8 reference1 = (static_cast<u8*>(buffer_))[inputoffset_++];
-            u8 reference2 = (static_cast<u8*>(buffer_))[inputoffset_++];
-            u16 referenceoffset_ = reference1 | ((reference2 & 0xF0) << 4);
+            u8 reference1 = GetU8(input_offset ++);
+            u8 reference2 = GetU8(input_offset ++);
+            u16 reference_offset = reference1 | ((reference2 & 0xF0) << 4);
             u8 reference_length = (reference2 & 0xF) + 3;
-            int realoffset_
-              = outputoffset_ - ((outputoffset_ - 18 - referenceoffset_) & 0xFFF);
+            const int output_offset = static_cast<int>(output.size());
+            int real_offset = output_offset - ((output_offset - 18 - reference_offset) & 0xFFF);
             for (int j = 0; j < reference_length; ++ j){
-                if (realoffset_ < 0){
-                    (static_cast<u8*>(extractbuffer_))[outputoffset_++] = 0;
-                }
-                else{
-                    (static_cast<u8*>(extractbuffer_))[outputoffset_++] =
-                      (static_cast<u8*>(extractbuffer_))[realoffset_];
-                }
-                if (outputoffset_ == extract_size){
-                    extract_size += 256;
-                    extractbuffer_ =
-                      static_cast<u8*>(realloc(extractbuffer_, extract_size));
-                }
-                ++ realoffset_;
+                // Before the start of the data, or the byte that is being written: 0.
+                if (real_offset < 0 || real_offset >= static_cast<int>(output.size())) output.push_back(0);
+                else output.push_back(output[real_offset]);
+                ++ real_offset;
             }
         }
         control_byte >>= 1;
         control_bit --;
     }
-    free(buffer_);
-    // the real buffer size and mBufferSize will be a bit different
-    buffer_ = extractbuffer_;
-    buffer_size_ = outputoffset_;
+    buffer_ = std::move(output);
 }
 
 std::vector<VGears::uint8> LzsBuffer::Decompress(
   const std::vector<VGears::uint8>& buffer
 ){
+    if (buffer.empty()) return std::vector<VGears::uint8>();
     LzsFile tmp(static_cast<const u8*>(buffer.data()), 0, buffer.size());
-    std::vector<VGears::uint8> ret(tmp.buffer_size_);
-    ret.assign(tmp.buffer_, tmp.buffer_ + tmp.buffer_size_);
-    return ret;
+    return std::vector<VGears::uint8>(tmp.buffer_.begin(), tmp.buffer_.end());
 }

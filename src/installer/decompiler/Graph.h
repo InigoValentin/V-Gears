@@ -151,15 +151,6 @@ namespace boost {
             Name name;
     };
 
-    /**
-     * Creates an arrowhead property writer.
-     *
-     * @param[in] n The name of the attribute to use.
-     */
-    template <class Name> inline ArrowheadWriter<Name> MakeArrowheadWriter(Name n) {
-        return ArrowheadWriter<Name>(n);
-    }
-
 }
 
 typedef boost::property<boost::edge_attribute_t, IsJump> EdgeProperty;

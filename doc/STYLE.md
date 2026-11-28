@@ -35,6 +35,8 @@ Do not use non-standard extensions, such as GNU extensions. They are very specif
 
 Source files must have the extension `.cpp`.
 
+Each folder lists its source files in its own `CMakeLists.txt`, so every new file must be added there. See the [source layout](BUILD.md#source-layout "Source layout") for where it belongs.
+
 ## Header Files
 
 In general, every `.cpp` file should have an associated `.h` header file. There are some exceptions to this rule:
@@ -340,8 +342,7 @@ Filenames start with a capital letter and have a capital letter for each new wor
 * `ANiceLibrary.h`
 * `Utilities.cpp`
 
-For test files, use the same scheme, but with `test_` before the name:
-*   `test_MyUsefulClass.cpp`
+Test files have the same name as the file they test, in the same path under `test/`. For example, `test/formats/model/AFile.cpp` tests `src/formats/model/AFile.cpp`.
 
 C++ source files should end in `.cpp` and header files should end in `.h`. Files that rely on being textually included at specific points should end in `.inc`, but try to avoid them.
 
