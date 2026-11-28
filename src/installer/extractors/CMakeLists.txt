@@ -3,7 +3,14 @@ vgears_sources(
     BattleDataInstaller.cpp
     FieldDataInstaller.cpp
     FieldTextWriter.cpp
+    KernelAttacks.cpp
+    KernelCharacters.cpp
     KernelDataInstaller.cpp
+    KernelDataParts.cpp
+    KernelEquipment.cpp
+    KernelItems.cpp
+    KernelMateria.cpp
+    KernelTextList.cpp
     MediaDataInstaller.cpp
     ModelsAndAnimationsDb.cpp
     MovieCamera.cpp
