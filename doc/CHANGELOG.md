@@ -1,5 +1,60 @@
 # Changelog
 
+## Unreleased
+
+Changes since 0.4.0. Most of the work is in the data installer and in reorganizing the code, with the bugs found along the way.
+
+**The game data has to be installed again.**
+
+### Installer
+
+**Command line**
+- The installer also works from the command line (`v-gears-installer --iso <file>`), with presets and parts to choose what to install, `--verify` to check an installation, and exit statuses for scripts.
+- Installing doesn't need a display, a window or a graphics driver.
+- In a terminal it shows a single progress line, with the warnings and errors above it. Ctrl+C says that the installation didn't finish.
+
+**Installing**
+- Clean install works: it deletes the data of a previous installation and keeps your saves, settings and videos.
+- The installer keeps a record of the installation (`install.info`). The verifier and the game report unfinished installations and outdated data.
+- The extracted disk and the original files are deleted at the end, unless Preserve original data is selected, which is now off by default.
+- The progress covers the whole installation, including the extraction of the disk, and the window can install again without being closed.
+- Two installations of the same disk produce identical files.
+- A failed extraction of a file of the disk now fails the installation. Damaged disk images are handled safely.
+- The verifier looks for the Ogre plugins where the game looks for them.
+- Skipping the kernel data no longer skips the images and the fonts, and skipping the field models no longer says that the field maps were skipped.
+- Fixed crashes when no field had been converted or there were no field models, warnings about the language of the French releases, and the escaped characters in the log of the window.
+
+**Converted data**
+- Enemy attacks are no longer duplicated with broken animations.
+- Enemies drop and have the right items to steal: armors and accessories became other items.
+- Attacks that target all rows are read correctly, as are the formation flags of the enemies (the game doesn't apply them yet).
+- Each character is listed once in the character list, with its different models.
+- Fields are no longer skipped on purpose, and fields without texts are converted.
+- Fixed the textures of effect models, empty battle models, truncated animations and the garbage in some field tile images.
+- Fixed the third gateway and ladder arrows and the images of the "level" and "status" texts.
+
+### Installation directory
+- New layout: `engine/` (the files of V-Gears), `defaults/`, `game/` (converted game data, by area), `user/` (settings, controls, saves and screenshots) and `logs/`. Saves, settings and videos of older installations are moved to their new places.
+- The shipped files are replaced on every installation. Your settings are kept.
+- The Japanese and Russian languages are removed, as the font of the game can't show them.
+
+### Saving
+- Saving no longer keeps items, materia and data that were gone since the last save.
+- Saving to one slot no longer changes the others.
+- The key items, the learned enemy skills, the control key and the slot are read correctly.
+
+### Field and engine
+- Texts set by scripts are no longer cut after a tag.
+- Invalid texts no longer crash the game.
+- Fixed the scroll limits at the start of a field.
+- A map jump to a walkmesh triangle that doesn't exist uses the triangle under the position.
+
+### Code, build and documentation
+- The source code is organized by layer and subsystem, large classes and functions are split, and unused code is removed.
+- Each source folder has its own `CMakeLists.txt`.
+- Removed the data of the original game that was in the repository. The installer builds the fonts from the files of the game.
+- New tests, and a rewritten data installation guide.
+
 ## 0.4.0
 
 Changes since 0.3.5. Most of the work is in the battle and menu modules (rules, cameras, shops and materia), and in fixes from playing through the fields and the world map.

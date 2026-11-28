@@ -217,7 +217,7 @@ The window and the command line don't share settings: the command line doesn't u
 
 | Window option | Command line part | What it is | Needs |
 |---|---|---|---|
-| Extract game data | `kernel` | The kernel data: items, materia, characters, the initial savemap, the fonts. | |
+| Extract game data | `kernel` | The kernel data: items, materia, characters, the initial savemap. | |
 | Extract field maps | `fields` | The field maps, their scripts, backgrounds and texts. | |
 | Extract field 3D models | `field-models` | The models of the characters in the fields. | `fields` |
 | Extract world map data | `world-map` | The world map. | the field maps, installed now or before |
@@ -228,6 +228,8 @@ The window and the command line don't share settings: the command line doesn't u
 | Extract sound effects | `sounds` | The sound effects. | FFmpeg |
 | Extract music tracks | `music` | The music. | FFmpeg and TiMidity |
 | Extract videos | `videos` | The videos. They are not on the install disk: see [Extract the videos](#extract-the-videos). | FFmpeg |
+
+The fonts are not a part: they are built from the game files in every installation from the install disk, because the game can't show text without them.
 
 A part can't be chosen without what it needs. In the window its option is disabled, and in the command line `--with field-models` alone is an error. When a part is removed, the parts that need it are removed too.
 

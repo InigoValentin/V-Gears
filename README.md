@@ -71,13 +71,21 @@ The world map is playable, and it runs on the original world scripts, so it foll
 
 The installer turns your copy of the game into data that V-Gears can use. Point it to the ISO image of the PC install disk, choose a folder, and let it work. It converts the sounds, the music and the videos (with the help of FFmpeg and TiMidity; the videos come from the three game disks), and then it can verify the result and launch the game.
 
+It also works from the command line, without needing a display:
+
+```bash
+v-gears-installer --iso ff7install.iso
+```
+
+You can choose which parts to install, start again from a clean directory, and check an installation afterwards. The installer keeps a record of what it installed, so the game can warn you when some data has to be installed again.
+
 |**Installer**|**Advanced options**|
 |--|--|
 |[<img src="https://v-gears.inigovalentin.com/img/screenshot/installer.png" alt="Installer" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/installer.png "Installer")|[<img src="https://v-gears.inigovalentin.com/img/screenshot/installer_advanced.png" alt="Advanced options" width="250"/>](https://v-gears.inigovalentin.com/img/screenshot/installer_advanced.png "Advanced options")|
 
 ## Under the hood
 
-V-Gears is written in C++14, with [Ogre](https://www.ogre3d.org/ "Ogre") for the graphics and LuaJIT for the scripts. The original field and world scripts are decompiled into Lua during the installation, and the battles and menus are written in Lua too, so a lot of the game can be read and changed without recompiling.
+V-Gears is written in C++14, with [Ogre](https://www.ogre3d.org/ "Ogre") for the graphics and LuaJIT for the scripts. The original field and world scripts are decompiled into Lua during the installation, and the battles and menus are written in Lua too, so a lot of the game can be read and changed without recompiling. The [building guide](doc/BUILD.md#source-layout "Source layout") shows how the source code is organized.
 
 When the original behaviour isn't documented, it is worked out from the game itself: damage formulas, camera scripts, summon effects and more come from studying the original executable and data files.
 

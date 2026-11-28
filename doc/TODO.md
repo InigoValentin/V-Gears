@@ -11,7 +11,7 @@ Suspects:
 
 - The script scheduling in `ScriptManager::Update`: a script that yields with `wait(0)` now lets the
   next script of its entity run in the same cycle.
-- The priority of the talk script, `INTERACT_SCRIPT_PRIORITY` in `EntityManager.cpp`.
+- The priority of the talk script, `INTERACT_SCRIPT_PRIORITY` in `EntityTriggers.cpp`.
 - The durations of `WAIT` and `script:wait` that the installer converts (frames to seconds).
 
 First step: play the scene with log level 3 and look at the time between the `dialog_open` and
@@ -45,11 +45,11 @@ Not done yet (kernel data in ff7.exe, ids 170-176, see `get_special_limit` in `b
 
 ## World map: culling of the terrain geometry
 
-The terrain of WM0 is built as one `ManualObject` per texture for the whole map (`CreateWorldMap`), so
+The terrain of WM0 is built as one `ManualObject` per texture for the whole map (`WorldmapTerrain::Load`), so
 its bounding box is the whole map and Ogre never culls it: every frame draws all of its ~142,000
 triangles in ~320 batches, however little of it the camera sees. With the entity debug off it runs at
 about 110-140 fps in the tests. The search of the triangle under a position was the bigger problem and
-is solved (spatial grid, `BuildTerrainIndex`).
+is solved (spatial grid, `WorldmapTerrain::BuildIndex`).
 
 Not planned for now. If it is needed: build the geometry per block or mesh (one object per mesh and
 texture), so the frustum culling skips the ones that are out of view, and measure the number of batches
@@ -104,7 +104,7 @@ to the player, repeat) until the scene ends, which is intended: the way out is t
 and then to SOTCH. Their speed was measured (about 0.22 units/s against 0.7 of the player walking), so
 they should not catch a moving player, but the player has been trapped a couple of times in the game
 (probably surrounded by solid models). Left as is. If it is looked at again: check how the player
-collides with several solid NPCs that stop around it (`CheckSolidCollisions`).
+collides with several solid NPCs that stop around it (`WalkmeshMovement::CheckSolidCollisions`).
 
 ## Field: pillar_3, Ren not visible (to test)
 

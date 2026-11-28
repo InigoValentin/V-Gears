@@ -58,10 +58,30 @@ ctest --output-on-failure
 
 There are two test programs:
 
-- `v-gears-tests`, the tests of the engine and of the script decompiler. It links the engine library, so it takes a while to build the first time, and it needs the same dependencies as V-Gears.
-- `v-gears-installer-tests`, the tests of the installer logic (the option rules, the installation layout, the verifier, the log, the tool finder and the movie camera data) and of the data directory and Ogre plugin lookup. It doesn't need the rest of the engine, so it builds quickly.
+- `v-gears-tests`, the tests of the engine, the file formats, the data extractors of the installer and the script decompiler. It links the engine library, so it takes a while to build the first time, and it needs the same dependencies as V-Gears.
+- `v-gears-installer-tests`, the tests of the installer logic (the option rules, the command line, the installation layout and record, the clean installation, the verifier, the log, the external tools and the movie camera data) and of the data directory and Ogre plugin lookup. It doesn't need the rest of the engine, so it builds quickly.
 
 To build and run only one of them, pass just its name to `--target` and run it from the build directory, for example `./bin/v-gears-installer-tests`.
+
+## Source layout
+
+You don't need this to build V-Gears, only to change it.
+
+| Directory | What's in it |
+|--|--|
+| `src/app/` | The entry point of the game, the application and the game loop. |
+| `src/common/` | Files, logger, strings, types and other utilities used by all the programs. |
+| `src/formats/` | Readers and writers of the file formats, by kind: `lgp/`, `field/`, `model/`, `texture/` and `worldmap/`. |
+| `src/engine/` | The engine, by subsystem: `audio/`, `config/`, `entity/`, `graphics/`, `input/`, `particles/`, `save/`, `script/`, `ui/` and `xml/`. |
+| `src/modules/` | The game modules: `battle/` and `worldmap/`. |
+| `src/installer/` | The data installer: `gui/` (window), `cli/` (command line), `steps/` (installation process), `extractors/` (data conversion), `decompiler/` (field and world scripts to Lua), `formats/`, `support/` and `tables/`. |
+| `src/third_party/` | Code from other projects. |
+| `test/` | The tests, in the same layout as `src/`. |
+| `data/` | The files that come with V-Gears: Ogre configuration, `engine/` (scripts, screens, fonts, texts, shaders) and `defaults/` (initial game configuration). No data of the original game. |
+
+The directories of the first five rows go from the lowest layer to the highest: `common`, `formats`, `engine`, `modules` and `app`. A layer never includes headers of a higher one. The engine reaches the application and the modules through its interfaces (`src/engine/*Interface.h`).
+
+Sources are not found automatically. Each folder of `src/` and `test/` lists its files in its own `CMakeLists.txt`, so add new files there, and add a new folder with `add_subdirectory()`.
 
 ## Make packages (optional)
 
