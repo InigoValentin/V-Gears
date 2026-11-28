@@ -103,161 +103,127 @@ void Console::Input(const VGears::Event& event){
         if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE) SetToVisible();
         return;
     }
+    if (event.type == VGears::ET_MOUSE_SCROLL){
+        if (event.param1 > 0) ScrollUp();
+        else if (event.param1 < 0) ScrollDown();
+        return;
+    }
+    const bool pressed = event.type == VGears::ET_KEY_PRESS;
+    if (!pressed && event.type != VGears::ET_KEY_REPEAT_WAIT) return;
+    if (pressed && InputPress(static_cast<int>(event.param1))) return;
+    switch (static_cast<int>(event.param1)){
+        case OIS::KC_UP: PreviousHistoryLine(); break;
+        case OIS::KC_DOWN: NextHistoryLine(); break;
+        case OIS::KC_PGUP: ScrollUp(); break;
+        case OIS::KC_PGDOWN: ScrollDown(); break;
+        case OIS::KC_DELETE: DeleteAfterCursor(); break;
+        case OIS::KC_BACK: DeleteBeforeCursor(); break;
+        case OIS::KC_LEFT:
+            AcceptCompletion();
+            if (cursor_position_ > 0) -- cursor_position_;
+            break;
+        case OIS::KC_RIGHT:
+            AcceptCompletion();
+            if (cursor_position_ < input_line_.size()) ++ cursor_position_;
+            break;
+        default: InsertCharacter(TranslateNumpad(event));
+    }
+}
 
-    // Input command.
-    else if (
-      event.type == VGears::ET_KEY_PRESS && (
-        event.param1 == OIS::KC_RETURN || event.param1 == OIS::KC_NUMPADENTER
-      ) && input_line_.size()
-    ){
-        if (auto_completition_.size() > 0)
-            input_line_ += auto_completition_[auto_completition_line_];
-        AddTextToOutput(input_line_);
-        AddInputToHistory();
-        // Backslashed text are console commands, otherwise - script commands.
-        if ('\\' == input_line_[0] || '/' == input_line_[0]){
-            if (input_line_.size() > 1){
-                // Remove backslash.
-                input_line_.erase(0, 1);
-                ExecuteCommand(input_line_);
-            }
-        }
-        else ExecuteScript();
-        input_line_.clear();
-        cursor_position_ = 0;
-        ResetAutoCompletion();
-    }
-    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_TAB) CompleteInput();
-    // Remove console.
-    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_GRAVE) SetToHide();
-    // History up
-    else if (
-      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
-      && event.param1 == OIS::KC_UP
-    ){
-        if (history_line_cycle_index_ < (int)history_.size() - 1){
-            ++ history_line_cycle_index_;
-            SetInputLineFromHistory();
-        }
-    }
-    // History down
-    else if (
-      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
-      && event.param1 == OIS::KC_DOWN
-    ){
-        if (history_line_cycle_index_ > 0){
-            -- history_line_cycle_index_;
-            SetInputLineFromHistory();
-        }
-    }
-    // Scroll display to previous row.
-    else if (event.type == VGears::ET_MOUSE_SCROLL && event.param1 > 0){
-        if (display_line_ > 0) display_line_ -= 1;
-    }
-    // Scroll display to next row.
-    else if (event.type == VGears::ET_MOUSE_SCROLL && event.param1 < 0){
-        if (display_line_ < output_line_.size()) display_line_ += 1;
-    }
-    // Scroll display to previous row.
-    else if (
-      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
-      && event.param1 == OIS::KC_PGUP
-    ){
-        if (display_line_ > 0) display_line_ -= 1;
-    }
-    // Scroll display to next row.
-    else if (
-      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
-      && event.param1 == OIS::KC_PGDOWN
-    ){
-        if (display_line_ < output_line_.size()) display_line_ += 1;
-    }
-    // Delete character after cursor.
-    else if (
-      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
-      && event.param1 == OIS::KC_DELETE
-    ){
-        if (auto_completition_.size() > 0) ResetAutoCompletion();
-        else{
-            if (input_line_.size() > 0 && cursor_position_ < input_line_.size())
-                input_line_.erase(cursor_position_, 1);
-        }
-    }
-    // Delete character before cursor.
-    else if (
-      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
-      && event.param1 == OIS::KC_BACK
-    ){
-        if (auto_completition_.size() > 0) ResetAutoCompletion();
-        else{
-            if (cursor_position_ > 0){
-                input_line_.erase(cursor_position_ - 1, 1);
-                -- cursor_position_;
-            }
-        }
-    }
-    // Move cursor to left.
-    else if (
-      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
-      && event.param1 == OIS::KC_LEFT
-    ){
-        if (auto_completition_.size() > 0){
-            input_line_ += auto_completition_[auto_completition_line_];
+bool Console::InputPress(const int key){
+    switch (key){
+        case OIS::KC_RETURN:
+        case OIS::KC_NUMPADENTER:
+            if (input_line_.size() == 0) return false;
+            ExecuteInput();
+            return true;
+        case OIS::KC_TAB: CompleteInput(); return true;
+        // Remove console.
+        case OIS::KC_GRAVE: SetToHide(); return true;
+        case OIS::KC_ESCAPE:
+            input_line_.clear();
+            cursor_position_ = 0;
             ResetAutoCompletion();
-        }
-        if (cursor_position_ > 0) -- cursor_position_;
+            return true;
+        case OIS::KC_HOME:
+            AcceptCompletion();
+            cursor_position_ = 0;
+            return true;
+        case OIS::KC_END:
+            AcceptCompletion();
+            cursor_position_ = input_line_.size();
+            return true;
+        default: return false;
     }
-    // Move cursor to right.
-    else if (
-      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
-      && event.param1 == OIS::KC_RIGHT
-    ){
-        if (auto_completition_.size() > 0){
-            input_line_ += auto_completition_[auto_completition_line_];
-            ResetAutoCompletion();
-        }
-        if (cursor_position_ <  input_line_.size()) ++ cursor_position_;
-    }
-    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_ESCAPE){
-        input_line_.clear();
-        cursor_position_ = 0;
-        ResetAutoCompletion();
-    }
-    // Move cursor to start of string.
-    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_HOME){
-        cursor_position_ = 0;
-        if (auto_completition_.size() > 0){
-            input_line_ += auto_completition_[auto_completition_line_];
-            ResetAutoCompletion();
-        }
-    }
-    // Move cursor to end of string.
-    else if (event.type == VGears::ET_KEY_PRESS && event.param1 == OIS::KC_END){
-        if (auto_completition_.size() > 0){
-            input_line_ += auto_completition_[auto_completition_line_];
-            ResetAutoCompletion();
-        }
-        cursor_position_ = input_line_.size();
-    }
-    // Input Ascii character.
-    else if (
-      (event.type == VGears::ET_KEY_PRESS || event.type == VGears::ET_KEY_REPEAT_WAIT)
-      && input_line_.size() < line_width_
-    ){
-        char legalchars[]
-          = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
-            "~!@#$%^&*()-_=+?{[]}|\\;:'\"<>,./? ";
-        char txt = TranslateNumpad(event);
-        for (unsigned int c = 0; c < sizeof(legalchars) - 1; ++ c){
-            if (legalchars[c] == txt){
-                std::string::iterator i = input_line_.begin() + cursor_position_;
-                input_line_.insert(i, txt);
-                ++ cursor_position_;
-                ResetAutoCompletion();
-                break;
-            }
+}
+
+void Console::ExecuteInput(){
+    if (auto_completition_.size() > 0)
+        input_line_ += auto_completition_[auto_completition_line_];
+    AddTextToOutput(input_line_);
+    AddInputToHistory();
+    // Backslashed text are console commands, otherwise - script commands.
+    if ('\\' == input_line_[0] || '/' == input_line_[0]){
+        if (input_line_.size() > 1){
+            // Remove backslash.
+            input_line_.erase(0, 1);
+            ExecuteCommand(input_line_);
         }
     }
+    else ExecuteScript();
+    input_line_.clear();
+    cursor_position_ = 0;
+    ResetAutoCompletion();
+}
+
+void Console::AcceptCompletion(){
+    if (auto_completition_.size() == 0) return;
+    input_line_ += auto_completition_[auto_completition_line_];
+    ResetAutoCompletion();
+}
+
+void Console::PreviousHistoryLine(){
+    if (history_line_cycle_index_ >= static_cast<int>(history_.size()) - 1) return;
+    ++ history_line_cycle_index_;
+    SetInputLineFromHistory();
+}
+
+void Console::NextHistoryLine(){
+    if (history_line_cycle_index_ <= 0) return;
+    -- history_line_cycle_index_;
+    SetInputLineFromHistory();
+}
+
+void Console::ScrollUp(){
+    if (display_line_ > 0) display_line_ -= 1;
+}
+
+void Console::ScrollDown(){
+    if (display_line_ < output_line_.size()) display_line_ += 1;
+}
+
+void Console::DeleteAfterCursor(){
+    if (auto_completition_.size() > 0) ResetAutoCompletion();
+    else if (cursor_position_ < input_line_.size()) input_line_.erase(cursor_position_, 1);
+}
+
+void Console::DeleteBeforeCursor(){
+    if (auto_completition_.size() > 0) ResetAutoCompletion();
+    else if (cursor_position_ > 0){
+        input_line_.erase(cursor_position_ - 1, 1);
+        -- cursor_position_;
+    }
+}
+
+void Console::InsertCharacter(const char character){
+    static const std::string LEGAL_CHARACTERS
+      = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+        "~!@#$%^&*()-_=+?{[]}|\\;:'\"<>,./? ";
+    if (input_line_.size() >= line_width_) return;
+    if (LEGAL_CHARACTERS.find(character) == std::string::npos) return;
+    input_line_.insert(input_line_.begin() + cursor_position_, character);
+    ++ cursor_position_;
+    ResetAutoCompletion();
 }
 
 char Console::TranslateNumpad(const VGears::Event& event){

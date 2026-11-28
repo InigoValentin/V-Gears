@@ -119,264 +119,200 @@ void ScriptManager::Input(const VGears::Event& event){
 }
 
 void ScriptManager::Update(const ScriptManager::Type type){
-    // Remove the scripts that a request has replaced.
-    for (unsigned int i = 0; i < script_entity_.size(); ++ i){
-        if (script_entity_[i].type != type) continue;
-        for (size_t k = script_entity_[i].queue.size(); k --;){
-            if (script_entity_[i].queue[k].replaced) RemoveEntityScript(script_entity_[i], k);
-        }
-    }
-    // Resort all queue. This will give correct info for debug draw.
-    for (unsigned int i = 0; i < script_entity_.size(); ++ i){
-        if (script_entity_[i].type == type){
-            if (script_entity_[i].queue.size() > 0){
-                if (script_entity_[i].resort == true){
-                    std::stable_sort(
-                      script_entity_[i].queue.begin(),
-                      script_entity_[i].queue.end(), priority_queue_compare
-                    );
-                    script_entity_[i].resort = false;
-                }
-            }
-        }
-    }
-
-    // Draw debug before update. This way it will be possible to see
-    // scripts that run once
-    int debug = cv_debug_script.GetI();
-    if (debug != 0){
-        DEBUG_DRAW.SetTextAlignment(DEBUG_DRAW.LEFT);
-        DEBUG_DRAW.SetScreenSpace(true);
-        int y = 34;
-
-        for (unsigned int i = 0; i < 3; ++ i){
-            if ((debug & (1 << i)) != 0){
-                DEBUG_DRAW.SetColour(Ogre::ColourValue(0.8f, 0.8f, 0.0f, 1.0f));
-                DEBUG_DRAW.Text(
-                  10.0f, static_cast<float>(y), "Script \"" + script_entity_type[i] + "\" entity:"
-                );
-                y += 16;
-
-                for (unsigned int j = 0; j < script_entity_.size(); ++ j){
-                    if (script_entity_[j].type == i){
-                        Ogre::String text = script_entity_[j].name;
-                        unsigned int queue_size = script_entity_[j].queue.size();
-                        if (queue_size > 0){
-                            text += ": ";
-                            DEBUG_DRAW.SetColour(Ogre::ColourValue(0.8f, 0.8f, 0.0f, 1.0f));
-                        }
-                        else DEBUG_DRAW.SetColour(Ogre::ColourValue(0.5, 0.5, 0.5, 1));
-                        for (unsigned int k = 0; k < queue_size; ++ k){
-                            if (k > 0) text += ", ";
-                            text +=
-                              "("
-                              + Ogre::StringConverter::toString(script_entity_[j].queue[k].priority)
-                              + ")" + script_entity_[j].queue[k].function;
-
-                            if (script_entity_[j].queue[k].wait == true){
-                                if (script_entity_[j].queue[k].seconds_to_wait != 0){
-                                    text +=
-                                      ":wait("+ Ogre::StringConverter::toString(
-                                        script_entity_[j].queue[k].seconds_to_wait
-                                      ) + ")";
-                                }
-                            }
-                        }
-                        DEBUG_DRAW.Text(20.0f, static_cast<float>(y), text);
-                        y += 16;
-                    }
-                }
-            }
-        }
-    }
-
+    RemoveReplacedScripts(type);
+    SortQueues(type);
+    // The debug information is drawn before the scripts run, so the ones that run once are seen.
+    DrawDebugQueues();
     // Before updating entities, call on_update on the system timer.
     RunString("Timer.update()");
+    for (size_t entity = 0; entity < script_entity_.size(); ++ entity){
+        if (script_entity_[entity].type == type) RunEntityScripts(entity);
+    }
+}
 
-    for (unsigned int i = 0; i < script_entity_.size(); ++ i){
-        if (script_entity_[i].type == type){
-            // One script of an entity is run each cycle, the first in the queue. If it yields
-            // without waiting for anything, as the ones that loop for ever, or until a flag
-            // changes, do, it doesn't take the cycle of the rest: the next one is run too. In the
-            // original game the scripts of an entity that have different priorities all run.
-            for (size_t script_index = 0; script_index < script_entity_[i].queue.size(); ++ script_index){
-                bool yielded = false;
-                current_script_id_.entity = script_entity_[i].name;
-                current_script_id_.function = script_entity_[i].queue[script_index].function;
-
-                if (script_entity_[i].queue[script_index].wait == false){
-                    if (script_entity_[i].queue[script_index].yield == false){
-                        LOG_TRIVIAL(
-                          "[SCRIPT] Start script \"" + current_script_id_.function
-                          + "\" for entity \"" + current_script_id_.entity + "\"."
-                        );
-
-                        for (const ScriptId& waiting : script_entity_[i].queue[script_index].paused_scripts_start)
-                            ContinueScriptExecution(waiting);
-                        script_entity_[i].queue[script_index].paused_scripts_start.clear();
-                        sol::object table = GetTableByEntityName(
-                          type, current_script_id_.entity,
-                          script_entity_[i].queue[script_index].state
-                        );
-                        sol::object function;
-                        if (table.get_type() == sol::type::table)
-                            function = table.as<sol::table>()[current_script_id_.function];
-                        if (
-                          table.get_type() == sol::type::table
-                          && function.get_type() == sol::type::function
-                        ){
-                            int ret = 0;
-                            lua_State* thread = script_entity_[i].queue[script_index].state;
-                            sol::coroutine coroutine(thread, sol::function(function));
-                            auto result = coroutine(
-                              table, script_entity_[i].queue[script_index].argument1,
-                              script_entity_[i].queue[script_index].argument2,
-                              script_entity_[i].queue[script_index].argument3
-                            );
-                            if (result.valid()){
-                                // The coroutine yields with the bound function
-                                // return value on top of the thread stack; a
-                                // completed script leaves its return value there.
-                                if (lua_gettop(thread) > 0 && lua_isnumber(thread, -1))
-                                    ret = static_cast<int>(lua_tointeger(thread, -1));
-                                lua_settop(thread, 0);
-                            }
-                            else{
-                                sol::error error = result;
-                                std::string msg = "LUA error in entity " + script_entity_[i].name
-                                  + " (" + current_script_id_.entity + ") " + " in function "
-                                  + script_entity_[i].queue[script_index].function + " ("
-                                  + current_script_id_.function + ")";
-                                if (lua_tostring(thread, -1) != nullptr){
-                                    msg = msg + ". Details: " + std::string(
-                                      lua_tostring(thread, -1)
-                                    );
-                                }
-                                msg = msg + ". Exception: " + error.what();
-                                LOG_ERROR(msg);
-                                lua_settop(thread, 0);
-                            }
-
-                            if (ret == 0){
-                                LOG_TRIVIAL(
-                                  "[SCRIPT] Script \"" + current_script_id_.function
-                                  + "\" for entity \"" + current_script_id_.entity + "\" finished."
-                                );
-                                if (script_entity_[i].queue[script_index].function != "on_update")
-                                    RemoveEntityScript(script_entity_[i], script_index);
-                            }
-                            else if (ret == 1){
-                                LOG_TRIVIAL(
-                                  "[SCRIPT] Script \"" + current_script_id_.function
-                                  + "\" for entity \"" + current_script_id_.entity
-                                  + "\" not paused and will be continued next cycle."
-                                );
-                                script_entity_[i].queue[script_index].yield = true;
-                                yielded = true;
-                            }
-                            else{
-                                LOG_TRIVIAL(
-                                  "[SCRIPT] Script \"" + current_script_id_.function
-                                  + "\" for entity \"" + current_script_id_.entity
-                                  + "\" not finished yet."
-                                );
-                                script_entity_[i].queue[script_index].yield = true;
-                                script_entity_[i].queue[script_index].wait = true;
-                            }
-                        }
-                        else{
-                            LOG_WARNING(
-                              "Script \"" + current_script_id_.function + "\" for entity \""
-                              + current_script_id_.entity + "\" doesn't exist."
-                            );
-                            RemoveEntityScript(script_entity_[i], script_index);
-                        }
-                    }
-                    else{
-                        LOG_TRIVIAL(
-                          "[SCRIPT] Continue function \"" + current_script_id_.function
-                          + "\" for entity \"" + current_script_id_.entity + "\"."
-                        );
-
-                        int ret = 0;
-                        lua_State* thread = script_entity_[i].queue[script_index].state;
-                        // sol.hpp bundles a compat53 shim: on LuaJIT this maps
-                        // to the native 2-argument lua_resume.
-                        int status = lua_resume(thread, nullptr, 0);
-                        if (status == LUA_YIELD || status == 0){
-                            if (lua_gettop(thread) > 0 && lua_isnumber(thread, -1))
-                                ret = static_cast<int>(lua_tointeger(thread, -1));
-                            lua_settop(thread, 0);
-                        }
-                        else{
-                            const char* error = lua_tostring(thread, -1);
-                            LOG_WARNING(
-                              Ogre::String(error != nullptr ? error : "unknown lua error")
-                            );
-                            lua_settop(thread, 0);
-                        }
-
-                        if (ret == 0){ // Finished.
-                            LOG_TRIVIAL(
-                              "[SCRIPT] Script \"" + current_script_id_.function
-                              + "\" for entity \"" + current_script_id_.entity + "\" finished."
-                            );
-
-                            // Stop yield for on_update.
-                            script_entity_[i].queue[script_index].yield = false;
-
-                            if (script_entity_[i].queue[script_index].function != "on_update")
-                                RemoveEntityScript(script_entity_[i], script_index);
-                        }
-                        else if (ret == 1){
-                            LOG_TRIVIAL(
-                              "[SCRIPT] Script \"" + current_script_id_.function
-                              + "\" for entity \"" + current_script_id_.entity
-                              + "\" not paused and will be continued next cycle."
-                            );
-                            yielded = true;
-                        }
-                        else{
-                            LOG_TRIVIAL(
-                              "[SCRIPT] Script \"" + current_script_id_.function
-                              + "\" for entity \"" + current_script_id_.entity
-                              + "\" not finished yet."
-                            );
-                            script_entity_[i].queue[script_index].wait = true;
-                        }
-                    }
-                }
-                else if (script_entity_[i].queue[script_index].seconds_to_wait > 0){
-                    script_entity_[i].queue[script_index].seconds_to_wait
-                      -= Timer::getSingleton().GetGameTimeDelta();
-                    script_entity_[i].queue[script_index].seconds_to_wait
-                      = (script_entity_[i].queue[script_index].seconds_to_wait < 0)
-                        ? 0 : script_entity_[i].queue[script_index].seconds_to_wait;
-
-                    if (script_entity_[i].queue[script_index].seconds_to_wait == 0)
-                        script_entity_[i].queue[script_index].wait = false;
-                }
-            
-                if (!yielded){
-                    // The scripts of an entity don't wait for each other in the original game. If
-                    // the first one is waiting (for another script to end, for example) and a
-                    // script that someone waits to start (request_start_sync) is queued behind
-                    // it, that script has to start, or the two would wait for each other forever
-                    // (the lines of mrkt3 do this with Aerith).
-                    bool start_waited_script = false;
-                    for (size_t next = script_index + 1; next < script_entity_[i].queue.size(); ++ next){
-                        const QueueScript& queued = script_entity_[i].queue[next];
-                        if (!queued.yield && !queued.wait && !queued.paused_scripts_start.empty()){
-                            script_index = next - 1;
-                            start_waited_script = true;
-                            break;
-                        }
-                    }
-                    if (!start_waited_script) break;
-                }
-            }
+void ScriptManager::RemoveReplacedScripts(const Type type){
+    for (ScriptEntity& entity : script_entity_){
+        if (entity.type != type) continue;
+        for (size_t k = entity.queue.size(); k --;){
+            if (entity.queue[k].replaced) RemoveEntityScript(entity, k);
         }
     }
+}
+
+void ScriptManager::SortQueues(const Type type){
+    for (ScriptEntity& entity : script_entity_){
+        if (entity.type != type || entity.queue.empty() || !entity.resort) continue;
+        std::stable_sort(entity.queue.begin(), entity.queue.end(), priority_queue_compare);
+        entity.resort = false;
+    }
+}
+
+void ScriptManager::DrawDebugQueues() const{
+    const int debug = cv_debug_script.GetI();
+    if (debug == 0) return;
+    DEBUG_DRAW.SetTextAlignment(DEBUG_DRAW.LEFT);
+    DEBUG_DRAW.SetScreenSpace(true);
+    int y = 34;
+    // The bits of the variable are the types of entities to show.
+    for (unsigned int type = 0; type < 3; ++ type){
+        if ((debug & (1 << type)) == 0) continue;
+        DEBUG_DRAW.SetColour(Ogre::ColourValue(0.8f, 0.8f, 0.0f, 1.0f));
+        DEBUG_DRAW.Text(
+          10.0f, static_cast<float>(y), "Script \"" + script_entity_type[type] + "\" entity:"
+        );
+        y += 16;
+        for (const ScriptEntity& entity : script_entity_){
+            if (entity.type != type) continue;
+            if (entity.queue.empty()) DEBUG_DRAW.SetColour(Ogre::ColourValue(0.5, 0.5, 0.5, 1));
+            else DEBUG_DRAW.SetColour(Ogre::ColourValue(0.8f, 0.8f, 0.0f, 1.0f));
+            DEBUG_DRAW.Text(20.0f, static_cast<float>(y), DescribeQueue(entity));
+            y += 16;
+        }
+    }
+}
+
+Ogre::String ScriptManager::DescribeQueue(const ScriptEntity& entity){
+    Ogre::String text = entity.name;
+    for (size_t k = 0; k < entity.queue.size(); ++ k){
+        const QueueScript& script = entity.queue[k];
+        text += (k == 0) ? ": " : ", ";
+        text += "(" + Ogre::StringConverter::toString(script.priority) + ")" + script.function;
+        if (script.wait && script.seconds_to_wait != 0)
+            text += ":wait(" + Ogre::StringConverter::toString(script.seconds_to_wait) + ")";
+    }
+    return text;
+}
+
+void ScriptManager::RunEntityScripts(const size_t entity){
+    // One script of an entity is run each cycle, the first in the queue. If it yields without
+    // waiting for anything, as the ones that loop for ever, or until a flag changes, do, it
+    // doesn't take the cycle of the rest: the next one is run too. In the original game the
+    // scripts of an entity that have different priorities all run.
+    // Scripts can add entities and scripts while they run: no references to them are kept.
+    for (size_t index = 0; index < script_entity_[entity].queue.size(); ++ index){
+        current_script_id_.entity = script_entity_[entity].name;
+        current_script_id_.function = script_entity_[entity].queue[index].function;
+        bool yielded = false;
+        if (script_entity_[entity].queue[index].wait) CountDownWait(entity, index);
+        else if (script_entity_[entity].queue[index].yield) yielded = ResumeScript(entity, index);
+        else yielded = StartScript(entity, index);
+        if (!yielded && !SkipToWaitedScript(script_entity_[entity], index)) break;
+    }
+}
+
+bool ScriptManager::StartScript(const size_t entity, const size_t index){
+    LOG_TRIVIAL("[SCRIPT] Start " + CurrentScriptDescription() + ".");
+    for (const ScriptId& waiting : script_entity_[entity].queue[index].paused_scripts_start)
+        ContinueScriptExecution(waiting);
+    script_entity_[entity].queue[index].paused_scripts_start.clear();
+    const sol::object table = GetTableByEntityName(
+      script_entity_[entity].type, current_script_id_.entity,
+      script_entity_[entity].queue[index].state
+    );
+    sol::object function;
+    if (table.get_type() == sol::type::table)
+        function = table.as<sol::table>()[current_script_id_.function];
+    if (table.get_type() != sol::type::table || function.get_type() != sol::type::function){
+        LOG_WARNING(
+          "Script \"" + current_script_id_.function + "\" for entity \""
+          + current_script_id_.entity + "\" doesn't exist."
+        );
+        RemoveEntityScript(script_entity_[entity], index);
+        return false;
+    }
+    const QueueScript& script = script_entity_[entity].queue[index];
+    lua_State* thread = script.state;
+    sol::coroutine coroutine(thread, sol::function(function));
+    auto result = coroutine(table, script.argument1, script.argument2, script.argument3);
+    int returned = 0;
+    if (result.valid()) returned = TakeReturnValue(thread);
+    else{
+        const sol::error error = result;
+        std::string message = "LUA error in entity " + current_script_id_.entity
+          + " in function " + current_script_id_.function;
+        if (lua_tostring(thread, -1) != nullptr)
+            message += ". Details: " + std::string(lua_tostring(thread, -1));
+        message += std::string(". Exception: ") + error.what();
+        LOG_ERROR(message);
+        lua_settop(thread, 0);
+    }
+    return HandleReturnValue(entity, index, returned);
+}
+
+bool ScriptManager::ResumeScript(const size_t entity, const size_t index){
+    LOG_TRIVIAL("[SCRIPT] Continue " + CurrentScriptDescription() + ".");
+    lua_State* thread = script_entity_[entity].queue[index].state;
+    // sol.hpp bundles a compat53 shim: on LuaJIT this maps to the native 2-argument lua_resume.
+    const int status = lua_resume(thread, nullptr, 0);
+    int returned = 0;
+    if (status == LUA_YIELD || status == 0) returned = TakeReturnValue(thread);
+    else{
+        const char* error = lua_tostring(thread, -1);
+        LOG_WARNING(Ogre::String(error != nullptr ? error : "unknown lua error"));
+        lua_settop(thread, 0);
+    }
+    return HandleReturnValue(entity, index, returned);
+}
+
+int ScriptManager::TakeReturnValue(lua_State* thread){
+    // The coroutine yields with the bound function return value on top of the thread stack; a
+    // completed script leaves its return value there.
+    int value = 0;
+    if (lua_gettop(thread) > 0 && lua_isnumber(thread, -1))
+        value = static_cast<int>(lua_tointeger(thread, -1));
+    lua_settop(thread, 0);
+    return value;
+}
+
+bool ScriptManager::HandleReturnValue(const size_t entity, const size_t index, const int value){
+    QueueScript& script = script_entity_[entity].queue[index];
+    if (value == 0){
+        LOG_TRIVIAL("[SCRIPT] Finished " + CurrentScriptDescription() + ".");
+        // The on_update scripts stay, and start again.
+        script.yield = false;
+        if (script.function != "on_update") RemoveEntityScript(script_entity_[entity], index);
+        return false;
+    }
+    script.yield = true;
+    if (value == 1){
+        LOG_TRIVIAL(
+          "[SCRIPT] Not paused, will be continued next cycle: " + CurrentScriptDescription() + "."
+        );
+        return true;
+    }
+    LOG_TRIVIAL("[SCRIPT] Not finished yet: " + CurrentScriptDescription() + ".");
+    script.wait = true;
+    return false;
+}
+
+void ScriptManager::CountDownWait(const size_t entity, const size_t index){
+    QueueScript& script = script_entity_[entity].queue[index];
+    // Scripts that wait for something other than time are woken by it.
+    if (script.seconds_to_wait <= 0) return;
+    script.seconds_to_wait = std::max(
+      script.seconds_to_wait - Timer::getSingleton().GetGameTimeDelta(), 0.0f
+    );
+    if (script.seconds_to_wait == 0) script.wait = false;
+}
+
+bool ScriptManager::SkipToWaitedScript(const ScriptEntity& entity, size_t& index){
+    // The scripts of an entity don't wait for each other in the original game. If the first one is
+    // waiting (for another script to end, for example) and a script that someone waits to start
+    // (request_start_sync) is queued behind it, that script has to start, or the two would wait
+    // for each other forever (the lines of mrkt3 do this with Aerith).
+    for (size_t next = index + 1; next < entity.queue.size(); ++ next){
+        const QueueScript& queued = entity.queue[next];
+        if (!queued.yield && !queued.wait && !queued.paused_scripts_start.empty()){
+            index = next - 1;
+            return true;
+        }
+    }
+    return false;
+}
+
+Ogre::String ScriptManager::CurrentScriptDescription() const{
+    return "script \"" + current_script_id_.function + "\" for entity \""
+      + current_script_id_.entity + "\"";
 }
 
 void ScriptManager::UpdateDebug(){}

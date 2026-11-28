@@ -167,6 +167,62 @@ class Console : public Ogre::Singleton<Console>, public Ogre::LogListener{
         char TranslateNumpad(const VGears::Event& event);
 
         /**
+         * Does what a key does when it is pressed, but not while it is held.
+         *
+         * @param[in] key The key.
+         * @return False if the key does nothing when pressed.
+         */
+        bool InputPress(const int key);
+
+        /**
+         * Runs the input line, as a console command if it starts with a slash or a backslash and as a
+         * script otherwise.
+         */
+        void ExecuteInput();
+
+        /**
+         * Adds the suggested completion, if there is one, to the input line.
+         */
+        void AcceptCompletion();
+
+        /**
+         * Shows the previous line of the history.
+         */
+        void PreviousHistoryLine();
+
+        /**
+         * Shows the next line of the history.
+         */
+        void NextHistoryLine();
+
+        /**
+         * Scrolls the output a line up.
+         */
+        void ScrollUp();
+
+        /**
+         * Scrolls the output a line down.
+         */
+        void ScrollDown();
+
+        /**
+         * Deletes the character after the cursor, or the suggested completion.
+         */
+        void DeleteAfterCursor();
+
+        /**
+         * Deletes the character before the cursor, or the suggested completion.
+         */
+        void DeleteBeforeCursor();
+
+        /**
+         * Writes a character at the cursor, if it can be written and there is room.
+         *
+         * @param[in] character The character.
+         */
+        void InsertCharacter(const char character);
+
+        /**
          * The console width.
          */
         int console_width_;

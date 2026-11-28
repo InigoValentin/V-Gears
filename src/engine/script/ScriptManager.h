@@ -473,6 +473,98 @@ class ScriptManager : public Manager, public Ogre::Singleton<ScriptManager>{
         void UpdateWorld() override;
 
         /**
+         * Removes the scripts that a request has replaced.
+         *
+         * @param[in] type Type of the entities.
+         */
+        void RemoveReplacedScripts(const Type type);
+
+        /**
+         * Sorts the queues of scripts that have changed, by priority.
+         *
+         * @param[in] type Type of the entities.
+         */
+        void SortQueues(const Type type);
+
+        /**
+         * Draws the queues of the entities, if the debug variable asks for it.
+         */
+        void DrawDebugQueues() const;
+
+        /**
+         * Describes the queue of an entity: its scripts, their priorities and waits.
+         *
+         * @param[in] entity The entity.
+         */
+        static Ogre::String DescribeQueue(const ScriptEntity& entity);
+
+        /**
+         * Runs the scripts of an entity that have to run this cycle.
+         *
+         * @param[in] entity Index of the entity.
+         */
+        void RunEntityScripts(const size_t entity);
+
+        /**
+         * Starts a script.
+         *
+         * @param[in] entity Index of the entity.
+         * @param[in] index Position of the script in the queue.
+         * @return True if the next script of the queue can run too.
+         */
+        bool StartScript(const size_t entity, const size_t index);
+
+        /**
+         * Continues a script that yielded.
+         *
+         * @param[in] entity Index of the entity.
+         * @param[in] index Position of the script in the queue.
+         * @return True if the next script of the queue can run too.
+         */
+        bool ResumeScript(const size_t entity, const size_t index);
+
+        /**
+         * Takes the value a script left on the stack of its thread, and empties it.
+         *
+         * @param[in] thread The thread of the script.
+         * @return The value, or 0 if there is none.
+         */
+        static int TakeReturnValue(lua_State* thread);
+
+        /**
+         * Updates a script that has run according to what it returned: 0 if it finished, 1 to continue
+         * in the next cycle and any other value if it waits for something.
+         *
+         * @param[in] entity Index of the entity.
+         * @param[in] index Position of the script in the queue.
+         * @param[in] value The value.
+         * @return True if the next script of the queue can run too.
+         */
+        bool HandleReturnValue(const size_t entity, const size_t index, const int value);
+
+        /**
+         * Counts down the time a script waits.
+         *
+         * @param[in] entity Index of the entity.
+         * @param[in] index Position of the script in the queue.
+         */
+        void CountDownWait(const size_t entity, const size_t index);
+
+        /**
+         * Looks for a script, later in a queue, that another script waits to start.
+         *
+         * @param[in] entity The entity.
+         * @param[in,out] index Position in the queue. Left just before the script found.
+         * @return True if there is one.
+         */
+        static bool SkipToWaitedScript(const ScriptEntity& entity, size_t& index);
+
+        /**
+         * Retrieves the names of the running script and of its entity, for the log.
+         */
+        Ogre::String CurrentScriptDescription() const;
+
+        /**
          * Lua state.
          */
         lua_State* lua_state_;

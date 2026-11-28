@@ -24,6 +24,7 @@
 #include <vector>
 #include "installer/steps/DataInstaller.h"
 #include "installer/formats/DiskImage.h"
+#include "installer/steps/InstallSteps.h"
 #include "installer/steps/ExternalTools.h"
 
 class QCheckBox;
@@ -166,6 +167,71 @@ class MainWindow : public QMainWindow{
          * @param[in] append True to keep what a previous run wrote to the log file.
          */
         void OpenInstallLog(const QString& dir, bool append);
+
+        /**
+         * Finds the V-Gears data folder to copy, asking for it if it can't be found.
+         *
+         * @param[out] game_data The folder.
+         * @return False if the user did not choose one.
+         */
+        bool FindDataToCopy(QString& game_data);
+
+        /**
+         * Checks that the installation can start, telling the problems and asking about the warnings.
+         *
+         * @param[in] output The installation directory.
+         * @param[in] copy_data If the V-Gears data files are copied.
+         * @param[in] game_data The folder with the data files.
+         * @param[in] clean If the previous installation is deleted.
+         * @return True if the installation can go on.
+         */
+        bool CheckInstallation(
+          const QString& output, const bool copy_data, const QString& game_data, const bool clean
+        );
+
+        /**
+         * Deletes the installation in a directory, if there is one, after asking.
+         *
+         * @param[in] output The installation directory.
+         * @return True if the installation can go on.
+         */
+        bool DeletePreviousInstallation(const QString& output);
+
+        /**
+         * Creates a function that shows the progress of a part of the installation.
+         *
+         * @param[in] phase The part.
+         * @param[in] text Description of what is done.
+         * @return Function that takes the progress of the part.
+         */
+        std::function<void(float)> ShowPhase(const InstallSteps::Phase phase, const QString& text);
+
+        /**
+         * Extracts the install disk and checks that it has the files that are needed.
+         *
+         * @param[in] output The installation directory.
+         * @return True if the installation can go on.
+         */
+        bool ExtractDisk(const QString& output);
+
+        /**
+         * Copies the data files to the installation directory and prepares it.
+         *
+         * @param[in] output The installation directory.
+         * @param[in] copy_data If the V-Gears data files are copied.
+         * @param[in] game_data The folder with the data files.
+         * @return True if the installation can go on.
+         */
+        bool PrepareInstallationDir(
+          const QString& output, const bool copy_data, const QString& game_data
+        );
+
+        /**
+         * Starts the conversion of the data, which goes on after this returns.
+         *
+         * @param[in] output The installation directory.
+         */
+        void StartConversion(const QString& output);
 
         /**
          * Extracts the videos of the selected game disk, in the worker thread.
