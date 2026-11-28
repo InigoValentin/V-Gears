@@ -8,5 +8,7 @@ vgears_sources(
     UiManager.cpp
     UiSprite.cpp
     UiTextArea.cpp
+    UiTextLayout.cpp
+    UiTextParser.cpp
     UiWidget.cpp
 )

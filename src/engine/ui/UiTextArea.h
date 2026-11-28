@@ -22,9 +22,9 @@
 #include <tinyxml.h>
 
 #include "UiFont.h"
+#include "UiTextChar.h"
+#include "UiTextLayout.h"
 #include "UiWidget.h"
-
-class UiSprite;
 
 /**
  * The textarea state.
@@ -65,76 +65,6 @@ enum TextState{
      * The text is changing pages.
      */
     TS_NEXT_PAGE,
-};
-
-/**
- * A character in a text.
- */
-struct TextChar{
-    TextChar():
-      char_code(0),
-      colour(Ogre::ColourValue::White),
-      skip(false),
-      variable(""),
-      variable_len(0),
-      pause_ok(false),
-      pause_time(0.0f),
-      next_page(false),
-      sprite(NULL),
-      sprite_y(0)
-    {}
-
-    /**
-     * The character code.
-     *
-     * Normal character code, no FF7 code tables.
-     */
-    int char_code;
-
-    /**
-     * Color for the character.
-     */
-    Ogre::ColourValue colour;
-
-    /**
-     * Indicates if the character is to be actually printed.
-     */
-    bool skip;
-
-    /**
-     * If the character is a variable, the variable name.
-     */
-    Ogre::String variable;
-
-    /**
-     * If the character is a variable, the variable length.
-     */
-    unsigned int variable_len;
-
-    /**
-     * Indicates if the OK button has been pressed during a text pause.
-     */
-    bool pause_ok;
-
-    /**
-     * For pause characters, the time.
-     */
-    float pause_time;
-
-    /**
-     * Indicates if the character is a new page character.
-     */
-    bool next_page;
-
-    /**
-     * If the character is a symbol or an image, this is the sprite.
-     */
-    UiSprite* sprite;
-
-    /**
-     * If the character is a symbol or an image, this is the Y position.
-     */
-    float sprite_y;
 };
 
 /**
@@ -383,41 +313,84 @@ class UiTextArea : public UiWidget{
     private:
 
         /**
-         * Retrieves the text width.
-         *
-         * @return The text width, in pixels.
+         * Writes the time of the game timer in its variable, if it changed.
          */
-        float GetTextWidth() const;
+        void UpdateTimer();
 
         /**
-         * Prepares text from a XML node.
-         *
-         * Not to be used to set text dinamically from scripts repatedly (i.e. for menus). It can
-         * produce memory leaks, and it's slower. Use {@see SetTextFromNode} for that.
-         *
-         * @param[in] node The XML node to get the text from.
-         * @param[in] colour The text colour.
+         * Prints more of the text.
          */
-        void PrepareTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colour);
+        void UpdateShowText();
 
         /**
-         * Prepares text from a XML node.
-         *
-         * Use this when setting text dinamically from scripts, instead of
-         * {@see PrepareTextFromNode}.
-         *
-         * @param[in] node The XML node to get the text from.
-         * @param[in] colour The text colour.
+         * Scrolls the text.
          */
-        void SetTextFromNode(TiXmlNode* node, const Ogre::ColourValue& colour);
+        void UpdateScrollText();
 
         /**
-         * Prepares text from a string.
-         *
-         * @param[in] text The text to prepare.
-         * @param[in] colour The text colour.
+         * Waits the time of a pause.
          */
-        void PrepareTextFromText(const Ogre::UTFString& text, const Ogre::ColourValue& colour);
+        void UpdatePauseTime();
+
+        /**
+         * Goes on printing the text after a pause or a scroll.
+         */
+        void ContinueText();
+
+        /**
+         * Starts scrolling a line, to show the text that did not fit.
+         */
+        void ScrollOneLine();
+
+        /**
+         * Removes the current page and starts printing the next one.
+         */
+        void ShowNextPage();
+
+        /**
+         * Reads the markup of a text, adds its characters and starts showing it.
+         *
+         * @param[in] node The text.
+         */
+        void ShowText(TiXmlNode* node);
+
+        /**
+         * Creates the sprite of an image of a text.
+         *
+         * @param[in] name Name of the image, from the "TextAreaSprite" prototype.
+         * @param[out] character The sprite and its position are set in it.
+         * @return False if there is no such image.
+         */
+        bool CreateImage(const Ogre::String& name, TextChar& character);
+
+        /**
+         * Stops the printing of the text at a pause or a page break.
+         *
+         * @param[in] index Index of a character of the text.
+         * @return True if the character is one of those.
+         */
+        bool StopAtCommand(const unsigned int index);
+
+        /**
+         * Puts the sprite of a character in its place and shows it.
+         *
+         * @param[in] character The character.
+         * @param[in,out] layout Layout of the text.
+         */
+        void PlaceSprite(const TextChar& character, UiTextLayout& layout);
+
+        /**
+         * Writes the vertices of a character.
+         *
+         * @param[in,out] vertices Where to write them. It is moved past them.
+         * @param[in] box Where the character goes.
+         * @param[in] data The character in the font.
+         * @param[in] colour Colour of the character.
+         */
+        void WriteCharacter(
+          float*& vertices, const UiTextLayout::Box& box, const UiCharData& data,
+          const Ogre::ColourValue& colour
+        );
 
         /**
          * Constructor.
