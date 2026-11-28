@@ -1,7 +1,9 @@
 # Sources of this folder (see vgears_sources in src/CMakeLists.txt).
 vgears_sources(
     AbFile.cpp
+    BattleSceneConverter.cpp
     BattleSceneFile.cpp
+    BattleSceneReader.cpp
     BinGZipFile.cpp
     DaFile.cpp
     DiskExtractor.cpp

@@ -103,7 +103,7 @@ unsigned int BattleSceneInstaller::ProcessScene(){
         next_scene_ ++;
         return next_scene_;
     }
-    BattleSceneFile scene(next_scene_, *scene_file);
+    BattleSceneFile scene(*scene_file);
     scenes_.push_back(scene);
     // Add new enemies to the list.
     std::vector<Enemy> enemies = scene.GetEnemies();
