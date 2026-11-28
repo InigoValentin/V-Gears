@@ -18,8 +18,15 @@
 #include <memory>
 #include <string>
 
+namespace DiskReleases{
+    struct Release;
+}
+
 /**
- * Information about a Final Fantasy VII disk image.
+ * An image of a disk of the game.
+ *
+ * The work is done by {@see DiskIdentifier}, {@see DiskExtractor}, {@see DiskVideoExtractor} and
+ * {@see DiskPaths}.
  */
 struct DiskImage{
 
@@ -210,6 +217,14 @@ struct DiskImage{
         std::unique_ptr<std::string> filePath(std::string file_path);
 
     private:
+
+        /**
+         * Sets the data of the disk that was identified.
+         *
+         * @param[in] release The disk.
+         * @param[in] image_path Path of the image.
+         */
+        void SetRelease(const DiskReleases::Release& release, const std::string& image_path);
 
         /**
          * The path to the image file.
