@@ -166,3 +166,19 @@ checked yet. A hidden enemy counts as alive (`is_defeated`), so a battle can't b
 reveals it. The AI can already hide and reveal enemies (bit 14 of the status fields, `ai_write_actor`).
 
 The meaning of the `direction` flag (cleared for 95 enemies) is not verified, and the engine doesn't read it.
+
+## Field: replaying a background animation can leave scripts waiting forever
+
+`Background2D::PlayAnimation` removes the entry of an animation that is already playing, with the list of the scripts
+that wait for it (`animation_sync`), and doesn't let them continue. Replaying an animation that a script waits for
+would leave that script stopped.
+
+Found by reading the code. No case is known in the game: no use of these functions was found in the installer or in
+the engine scripts. The fix is to continue the waiting scripts, or to move them to the new entry.
+
+## Saving: the game time and the countdown are not saved
+
+The savemap reads and writes both, but `save.lua` doesn't pass the real values: it saves a fixed game time
+(`set_game_time(123456)`) and a countdown of 0 (`set_countdown_time(0)`), and loading ignores them (the two TODOs in
+the load function). A game saved while a countdown runs loses it. The countdown is in the system timer
+(`timer:set_timer` and `timer:get_timer`).
