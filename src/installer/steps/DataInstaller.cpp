@@ -84,9 +84,8 @@ const char* DataInstaller::StepGroup(int state){
         return "Field maps";
     if (state == WM_MODELS) return "World map models";
     if (state >= WM_INIT && state <= WM_MAPS) return "World map";
-    if (state >= MEDIA_VIDEOS && state < FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT)
-        return "Videos";
-    if (state >= MEDIA_MUSICS_INIT && state < MEDIA_VIDEOS) return "Music";
+    if (state >= MEDIA_MUSICS_INIT && state < FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT)
+        return "Music";
     if (state >= MEDIA_SOUNDS_INIT && state < MEDIA_MUSICS_INIT) return "Sounds";
     if (state == MEDIA_IMAGES) return "Images";
     if (state >= KERNEL_PRICES && state < MEDIA_IMAGES) return "Kernel data";
@@ -247,7 +246,7 @@ float DataInstaller::Progress(){
             // Skip kernel data if option is set.
             if (!options_.kernel){
                 write_output_line_("Skipping kernel data installation...", 2, true);
-                installation_state_ = MEDIA_SOUNDS_INIT;
+                installation_state_ = MEDIA_IMAGES;
                 return CalcProgress();
             }
             write_output_line_("Parsing item and materia prices...", 2, true);
@@ -391,17 +390,6 @@ float DataInstaller::Progress(){
             return CalcProgress();
         case MEDIA_MUSICS_INDEX:
             // The index is written when the conversions, which run in the background, have finished.
-            installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
-            return CalcProgress();
-        case MEDIA_VIDEOS:
-            // Skip videos if option is set.
-            if (!options_.videos){
-                write_output_line_("Skipping video installation...", 2, true);
-                installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
-                return CalcProgress();
-            }
-            write_output_line_("Extracting videos...", 2, true);
-            media_installer_->InstallVideos();
             installation_state_ = FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT;
             return CalcProgress();
         case FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT:

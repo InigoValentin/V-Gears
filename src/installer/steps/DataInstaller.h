@@ -378,11 +378,6 @@ class DataInstaller{
             MEDIA_MUSICS_INDEX,
 
             /**
-             * Copies the FMV videos.
-             */
-            MEDIA_VIDEOS,
-
-            /**
              * Initializer for {@see SPAWN_POINTS_AND_SCALE_FACTORS}.
              */
             FIELD_SPAWN_POINTS_AND_SCALE_FACTORS_INIT,

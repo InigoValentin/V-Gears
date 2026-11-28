@@ -15,20 +15,19 @@
 
 #pragma once
 
-#include <memory>
-#include <unordered_map>
+#include <string>
+#include "installer/extractors/MediaConverter.h"
+#include "installer/extractors/MediaImageInstaller.h"
+#include "installer/extractors/MusicInstaller.h"
+#include "installer/extractors/SoundInstaller.h"
 #include "installer/formats/DiskImage.h"
-#include "formats/lgp/LGPArchive.h"
-#include "installer/formats/BinGZipFile.h"
-#include "installer/formats/TexFile.h"
-#include "installer/steps/ExternalTools.h"
-#include "installer/steps/TaskPool.h"
 
 /**
  * The media data installer.
+ *
+ * It has an installer for the images, the sounds and the music, and passes the calls on to them.
  */
 class MediaDataInstaller{
-
 
     public:
 
@@ -45,11 +44,6 @@ class MediaDataInstaller{
          * Destructor.
          */
         ~MediaDataInstaller();
-
-        /**
-         * Populates the audio name maps.
-         */
-        void PopulateMaps();
 
         /**
          * Extracts all images contained in the menu LGP file and installs them.
@@ -122,130 +116,30 @@ class MediaDataInstaller{
          */
         void WriteMusicsIndex();
 
-        /**
-         * Copies the FMV videos.
-         */
-        void InstallVideos();
-
     private:
 
-        /**
-         * Runs a conversion in the background.
-         *
-         * A failed conversion is logged as a warning.
-         *
-         * @param[in] description What is being converted, for the log.
-         * @param[in] job Does the conversion. Returns false, and sets the error, if it fails.
-         * @param[in] on_success Called, in the background thread, if the conversion succeeds.
-         */
-        void RunConversion(
-          const std::string& description, std::function<bool(std::string*)> job,
-          std::function<void()> on_success = nullptr
-        );
-
-        /**
-         * Finds the conversion programs the first time it is called, and reports what is missing.
-         *
-         * @param[in] need_timidity True if TiMidity is needed too (the music).
-         * @return True if the programs are usable.
-         */
-        bool ToolsReady(bool need_timidity);
-
-        /**
-         * FFmpeg and TiMidity, found by {@see ToolsReady}.
-         */
-        ExternalTools::Tool ffmpeg_tool_;
-        ExternalTools::Tool timidity_tool_;
-        bool tools_resolved_ = false;
-
-        /**
-         * Threads that run the conversions. Created when the first conversion starts.
-         */
-        std::unique_ptr<TaskPool> conversions_;
-
-        /**
-         * Number of sound files to extract.
-         */
-        static int TOTAL_SOUNDS;
-		
         /**
          * The disk image to read the original data from.
          */
         DiskImage disk_image_;
 
         /**
-         * The path to the directory where to save the V-Gears data.
+         * Runs the audio conversions. Declared before the installers that use it.
          */
-        std::string output_dir_;
+        MediaConverter converter_;
 
         /**
-         * Directory where the game data is installed (<install dir>/data/).
+         * Images and fonts.
          */
-        std::string data_dir_;
+        MediaImageInstaller images_;
 
         /**
-         * The menu.lgp file.
+         * Sound effects.
          */
-        VGears::LGPArchive menu_;
+        SoundInstaller sounds_;
 
         /**
-         * The WINDOW.BIN file.
+         * Music.
          */
-        BinGZipFile window_;
-
-        /**
-         * Number of sounds already processed.
-         */
-        int processed_sounds_;
-
-        /**
-         * Map for sound files with descriptive names.
-         */
-        std::unordered_map<int, std::string> sound_map_;
-
-        /**
-         * Map for sound files with human readable descriptions.
-         */
-        std::unordered_map<int, std::string> sound_description_;
-
-        /**
-         * Sound data for each entry to write to the XML file
-         */
-        std::vector<std::string> sounds_;
-
-        /**
-         * Video files to copy
-         */
-        std::vector<std::string> videos_;
-
-        /**
-         * The midi.lgp file.
-         */
-        VGears::LGPArchive midi_;
-
-        /**
-         * Number of music tracks already processed.
-         */
-        int processed_musics_;
-
-        /**
-         * Number of video files already processed.
-         */
-        int processed_videos_;
-
-        /**
-         * Map for music files with descriptive names.
-         */
-        std::unordered_map<int, std::string> musics_map_;
-
-        /**
-         * Sound data for each entry to write to the XML file
-         */
-        std::vector<std::string> musics_;
-
-        /**
-         * If true, orginal files will not be deleted after conversion.
-         */
-        bool keep_originals_;
-
+        MusicInstaller music_;
 };

@@ -16,10 +16,14 @@ vgears_sources(
     KernelItems.cpp
     KernelMateria.cpp
     KernelTextList.cpp
+    MediaConverter.cpp
     MediaDataInstaller.cpp
+    MediaImageInstaller.cpp
     ModelsAndAnimationsDb.cpp
     MovieCamera.cpp
+    MusicInstaller.cpp
     ScopedLgp.cpp
+    SoundInstaller.cpp
     SpellModelInstaller.cpp
     WindowFonts.cpp
     WorldInstaller.cpp
