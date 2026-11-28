@@ -33,20 +33,6 @@ class WorldCodeGenerator : public CodeGenerator{
         WorldCodeGenerator(Engine *engine, std::ostream &output);
 
         /**
-         * Finds the first function call.
-         *
-         * @return A pointer to the first call instruction.
-         */
-        const InstPtr FindFirstCall();
-
-        /**
-         * Finds the last function call.
-         *
-         * @return A pointer to the last call instruction.
-         */
-        const InstPtr FindLastCall();
-
-        /**
          * Processes special metadata in an instruction.
          *
          * @param[in] inst The instruction to process.

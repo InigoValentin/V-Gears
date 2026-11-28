@@ -120,38 +120,7 @@ std::unique_ptr<CodeGenerator> FieldEngine::GetCodeGenerator(const InstVec& inst
     return std::make_unique<FieldCodeGenerator>(this, insts, output, formatter_);
 }
 
-void FieldEngine::PostCFG(InstVec& insts, Graph graph){
-    // In FF7 some scripts ends with an infinite loop to "keep it alive"
-    // in V-Gears this isn't required so they can be removed.
-    //RemoveTrailingInfiniteLoops(insts, graph);
-
-    // This could generate bad code, but it always seems to follow that pattern that if the last
-    // instruction is an uncond jump back into the script then it simply nests all of those blocks
-    // in an infinite loop.
-    //MarkInfiniteLoopGroups(insts, graph);
-
-    // Scripts end with a "return". This isn't required so strip them out.
-    //RemoveExtraneousReturnStatements(insts, graph);
-}
-
 bool FieldEngine::UsePureGrouping() const{return false;}
-
-std::map<std::string, int> FieldEngine::GetEntities() const{
-    std::map<std::string, int> r;
-    for (auto& f : functions){
-        const Function& func = f.second;
-        FunctionMetaData meta(func.metadata);
-        auto it = r.find(meta.GetEntityName());
-        if (it != std::end(r)){
-            // Try to find a function in this entity has that has a char id.
-            // don't overwrite a valid char id with a "blank" one.
-            if (it->second == -1) it->second = meta.GetCharacterId();
-        }
-        // TODO: Don't add line entities here:
-        else r[meta.GetEntityName()] = meta.GetCharacterId();
-    }
-    return r;
-}
 
 std::vector<FieldDecompiler::FieldEntity> FieldEngine::GetEntityList() const{
     std::vector<FieldDecompiler::FieldEntity> entities;
@@ -264,72 +233,4 @@ const FieldEngine::Entity& FieldEngine::EntityByIndex(size_t index) const{
 float FieldEngine::GetScaleFactor() const {return scale_factor_;}
 
 const std::string& FieldEngine::GetScriptName() const {return script_name_;}
-
-void FieldEngine::RemoveExtraneousReturnStatements(InstVec& insts, Graph graph){
-    for (auto& f : functions){
-        Function& func = f.second;
-        for (auto it = insts.begin(); it != insts.end(); it ++){
-            // Is it the last instruction in the function, and is it a return statement?
-            if ((*it)->GetAddress() == func.end_addr){
-                if ((*it)->GetOpcode() == OPCODES::RET){
-                    // Set new end address to be before the NOP.
-                    func.end_addr = (*(it - 1))->GetAddress();
-                    func.num_instructions --;
-                    Instruction* nop = new FieldNoOperationInstruction();
-                    nop->SetOpcode(OPCODES::NOP);
-                    nop->SetAddress((*it)->GetAddress());
-                    (*it).reset(nop);
-                    break;
-                }
-            }
-        }
-    }
-}
-
-void FieldEngine::RemoveTrailingInfiniteLoops(InstVec& insts, Graph graph){
-    for (auto& f : functions){
-        Function& func = f.second;
-        for (auto it = insts.begin(); it != insts.end(); it ++){
-            // Is it the last instruction in the function, a jump, and a jumping to itself?
-            if ((*it)->GetAddress() == func.end_addr){
-                if ((*it)->IsJump() && (*it)->GetDestAddress() == (*it)->GetAddress()){
-                    // Set new end address to be before the NOP
-                    func.end_addr = (*(it - 1))->GetAddress();
-                    func.num_instructions --;
-                    Instruction* nop = new FieldNoOperationInstruction();
-                    nop->SetOpcode(OPCODES::NOP);
-                    nop->SetAddress((*it)->GetAddress());
-                    (*it).reset(nop);
-                    break;
-                }
-            }
-        }
-    }
-}
-
-void FieldEngine::MarkInfiniteLoopGroups(InstVec& insts, Graph graph){
-    for (auto& f : functions){
-        Function& func = f.second;
-        for (auto it = insts.begin(); it != insts.end(); it ++){
-            if ((*it)->GetAddress() == func.end_addr){
-                // Note: This is a "best effort heuristic", so quite a few loops will
-                // still end up as goto's. This could potentially generate invalid code too.
-                if ((*it)->IsUncondJump()){
-                    // Then assume its an infinite do { } while(true)
-                    // loop that wraps part of the script.
-                    VertexRange vr = boost::vertices(graph);
-                    for (VertexIterator v = vr.first; v != vr.second; ++ v){
-                        GroupPtr gr = GET(*v);
-                        if ((*gr->start)->GetAddress() == func.end_addr){
-                            // Then assume its an infinite do { } while(true) loop
-                            // that wraps part of the script.
-                            gr->type = GROUP_TYPE_DO_WHILE;
-                        }
-                    }
-                }
-                break;
-            }
-        }
-    }
-}
 

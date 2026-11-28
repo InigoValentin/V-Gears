@@ -63,16 +63,6 @@ class ControlFlow {
          */
         void CreateGroups();
 
-        /**
-         * Performs control flow analysis.
-         *
-         * The constructs are detected in the following order: do-while,
-         * while, break, continue, if/else.
-         *
-         * @returns The control flow graph after analysis.
-         */
-        const Graph& Analyze();
-
     private:
 
         /**
@@ -133,75 +123,6 @@ class ControlFlow {
          * @param[in] level The stack level when g is reached.
          */
         void SetStackLevel(GraphVertex graph, int level);
-
-        /**
-         * Merged groups that are part of the same short-circuited condition.
-         */
-        void DetectShortCircuit();
-
-        /**
-         * Detects while blocks.
-         *
-         * Do-while detection must be completed before running this method.
-         */
-        void DetectWhile();
-
-        /**
-         * Detects do-while blocks.
-         */
-        void DetectDoWhile();
-
-        /**
-         * Detects break statements.
-         *
-         * Do-while and while detection must be completed before running this
-         * method.
-         */
-        void DetectBreak();
-
-        /**
-         * Detects continue statements.
-         *
-         * Do-while and while detection must be completed before running this
-         * method.
-         */
-        void DetectContinue();
-
-        /**
-         * Checks if a candidate break/continue goes to the closest loop.
-         *
-         * @param[in] group The group containing the candidate break/continue.
-         * @param[in] condition_group The group containing the respective loop
-         * condition.
-         * @returns True if the validation succeeded, false if it did not.
-         */
-        bool ValidateBreakOrContinue(GroupPtr group, GroupPtr condition_group);
-
-        /**
-         * Detects if blocks.
-         *
-         * Must be performed after break and continue detection.
-         */
-        void DetectIf();
-
-        /**
-         * Detects else blocks.
-         *
-         * Must be performed after if detection.
-         */
-        void DetectElse();
-
-        /**
-         * Checks if a candidate else block will cross block boundaries.
-         *
-         * @param[in] if_group The group containing the if this else candidate
-         * is associated with.
-         * @param[in] start The group containing the start of the else.
-         * @param[in] end The group immediately after the group ending the
-         * else.
-         * @returns True if the validation succeeded, false if it did not.
-         */
-        bool ValidateElseBlock(GroupPtr if_group, GroupPtr start, GroupPtr end);
 
 };
 

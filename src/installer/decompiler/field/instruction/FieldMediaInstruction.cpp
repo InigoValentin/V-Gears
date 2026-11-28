@@ -58,30 +58,6 @@ void FieldMediaInstruction::ProcessInst(
     }
 }
 
-void FieldMediaInstruction::ProcessAKAO2(CodeGenerator* code_gen){
-    FieldCodeGenerator* cg = static_cast<FieldCodeGenerator*>(code_gen);
-    const auto& param1 = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[0]->GetUnsigned(), params_[7]->GetUnsigned()
-    );
-    const auto& param2 = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[1]->GetUnsigned(), params_[8]->GetUnsigned()
-    );
-    const auto& param3 = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[2]->GetUnsigned(), params_[9]->GetUnsigned()
-    );
-    const auto& param4 = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[3]->GetUnsigned(), params_[10]->GetUnsigned()
-    );
-    const auto& param5 = FieldCodeGenerator::FormatValueOrVariable(
-      cg->GetFormatter(), params_[5]->GetUnsigned(), params_[11]->GetUnsigned()
-    );
-    auto op = params_[6]->GetUnsigned();
-    code_gen->AddOutputLine((
-      boost::format("-- music:execute_akao(0x%6$02x, %1%, %2%, %3%, %4%, %5%)")
-      % param1 % param2 % param3 % param4 % param5 % op
-    ).str());
-}
-
 void FieldMediaInstruction::ProcessBMUSC(CodeGenerator* code_gen){
     // Battle music: one of the music tracks of the field, used by the battles of the field.
     code_gen->AddOutputLine(

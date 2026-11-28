@@ -19,7 +19,7 @@
 #include "common/FileSystem.h"
 #include <algorithm>
 #include <cstring>
-#include "core/Logger.h"
+#include "common/Logger.h"
 
 File::File(){}
 

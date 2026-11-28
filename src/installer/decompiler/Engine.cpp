@@ -21,12 +21,6 @@ std::unique_ptr<Disassembler> Engine::GetDisassembler(
     throw NotImplementedException();
 }
 
-void Engine::PostCFG(InstVec& insts, Graph graph){}
-
-bool Engine::SupportsCodeFlow() const{return true;}
-
-bool Engine::SupportsCodeGen() const{return true;}
-
 void Engine::GetVariants(std::vector<std::string>& variants) const{};
 
 bool Engine::UsePureGrouping() const{return false;}

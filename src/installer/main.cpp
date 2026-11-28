@@ -23,9 +23,9 @@
 #include <windows.h>
 #endif
 
-#include "CliInstaller.h"
-#include "InstallCommandLine.h"
-#include "MainWindow.h"
+#include "installer/cli/CliInstaller.h"
+#include "installer/cli/InstallCommandLine.h"
+#include "installer/gui/MainWindow.h"
 
 /**
  * Connects the standard streams to the console the installer was started from.

@@ -26,21 +26,11 @@ void Disassembler::Open(std::vector<unsigned char> data){
     stream_ = std::make_unique<BinaryReader>(std::move(data));
 }
 
-void Disassembler::DoDumpDisassembly(std::ostream &output){
-    InstIterator inst;
-    for (inst = insts_.begin(); inst != insts_.end(); ++ inst) output << *inst << "\n";
-}
-
 void Disassembler::Disassemble() {
     if (insts_.empty()) {
         stream_->Seek(0);
         DoDisassemble();
     }
-}
-
-void Disassembler::DumpDisassembly(std::ostream &output){
-    Disassemble();
-    DoDumpDisassembly(output);
 }
 
 /**

@@ -118,16 +118,6 @@ class WorldEngine : public Engine{
         ) override;
 
         /**
-         * Post-processing actions to apply to the scripts.
-         *
-         * It actually does nothing. CFG stands for control flow group.
-         *
-         * @param[in] insts Instruction list.
-         * @param[in] graph Code graph.
-         */
-        virtual void PostCFG(InstVec &insts, Graph graph) override;
-
-        /**
          * Retrieves the variants.
          *
          * @todo Variants of what? What is this supposed to do?

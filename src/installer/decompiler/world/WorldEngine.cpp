@@ -55,19 +55,6 @@ std::unique_ptr<CodeGenerator> WorldEngine::GetCodeGenerator(
     return std::make_unique<WorldCodeGenerator>(this, output);
 }
 
-void WorldEngine::PostCFG(InstVec&, Graph graph){
-    /*
-    VertexRange vr = boost::vertices(graph);
-    for (VertexIterator v = vr.first; v != vr.second; ++ v){
-        GroupPtr gr = GET(*v);
-        // If this group is the last instruction and its an unconditional jump
-        if ((*gr->_start)->_address == insts.back()->_address && insts.back()->IsUncondJump()){
-            // Then assume its an infinite do { } while(true) loop that wraps part of the script
-            gr->_type = kDoWhileCondGroupType;
-        }
-    }*/
-}
-
 void WorldEngine::GetVariants(std::vector<std::string>&) const{}
 
 bool WorldEngine::UsePureGrouping() const {return false;}

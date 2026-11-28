@@ -47,12 +47,6 @@ std::string LuaLanguage::WhileHeader(bool before_expr){
     return ") do";
 }
 
-const std::string LuaLanguage::FunctionCallArgumentSeperator(){return ",";}
-
-const std::string LuaLanguage::FunctionCallBegin(){return "(";}
-
-const std::string LuaLanguage::FunctionCallEnd(){return ")";}
-
 std::string LuaLanguage::Label(uint32 addr){
     std::stringstream s;
     s << boost::format("::label_0x%X::") % addr;

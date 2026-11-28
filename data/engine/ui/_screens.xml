@@ -1,0 +1,41 @@
+<ui>
+    <!-- Main prototypes -->
+    <prototype file_name="ui/prototypes.xml" />
+
+    <!-- Dialogs, under the menus: a message that stays open while a menu is used must not hide it. -->
+    <prototype file_name="ui/dialog/prototypes.xml" />
+    <screen file_name="ui/dialog/dialog.xml" />
+
+    <!-- Menu screens -->
+    <screen file_name="ui/begin_menu/begin_menu.xml" />
+    <prototype file_name="ui/main_menu/prototypes.xml" />
+    <screen file_name="ui/main_menu/main_menu.xml" />
+    <screen file_name="ui/pause_menu/pause_menu.xml" />
+    <screen file_name="ui/item_menu/item_menu.xml" />
+    <screen file_name="ui/equip_menu/equip_menu.xml" />
+    <screen file_name="ui/materia_menu/materia_menu.xml" />
+    <screen file_name="ui/status_menu/status_menu.xml" />
+    <screen file_name="ui/magic_menu/magic_menu.xml" />
+    <screen file_name="ui/limit_menu/limit_menu.xml" />
+    <screen file_name="ui/quit_menu/quit_menu.xml" />
+    <screen file_name="ui/phs_menu/phs_menu.xml" />
+    <screen file_name="ui/config_menu/config_menu.xml" />
+    <screen file_name="ui/name_menu/name_menu.xml" />
+    <screen file_name="ui/save_menu/save_menu.xml" />
+    <screen file_name="ui/shop_menu/shop_menu.xml" />
+    <screen file_name="ui/exchange_menu/exchange_menu.xml" />
+    <prototype file_name="ui/save_menu/prototypes.xml" />
+    <!-- Battle UI -->
+    <prototype file_name="ui/battle/prototypes.xml" />
+    <screen file_name="ui/battle/battle.xml" />
+    <screen file_name="ui/battle/battle_fx.xml" />
+
+    <!-- Game over screen -->
+    <screen file_name="ui/game_over/game_over.xml" />
+
+    <!-- Fade effect for map changer -->
+    <screen file_name="ui/fade/fade.xml" />
+
+    <!-- Prototypes for textarea sprites -->
+    <prototype file_name="ui/textarea.xml" />
+</ui>

@@ -1,0 +1,38 @@
+# Sources of this folder (see vgears_sources in src/CMakeLists.txt).
+vgears_sources(
+    BattleDataInstaller.cpp
+    BattleEffectInstaller.cpp
+    BattleMeshExporter.cpp
+    BattleModelInstaller.cpp
+    BattleModelTools.cpp
+    BattleSceneInstaller.cpp
+    FieldBackgroundInstaller.cpp
+    FieldDataInstaller.cpp
+    FieldMapWriter.cpp
+    FieldModelInstaller.cpp
+    FieldScriptInstaller.cpp
+    FieldTextWriter.cpp
+    KernelAttacks.cpp
+    KernelCharacters.cpp
+    KernelDataInstaller.cpp
+    KernelDataParts.cpp
+    KernelEquipment.cpp
+    KernelItems.cpp
+    KernelMateria.cpp
+    KernelTextList.cpp
+    MediaConverter.cpp
+    MediaDataInstaller.cpp
+    MediaImageInstaller.cpp
+    ModelsAndAnimationsDb.cpp
+    MovieCamera.cpp
+    MusicInstaller.cpp
+    ScopedLgp.cpp
+    SoundInstaller.cpp
+    SpellModelInstaller.cpp
+    WindowFonts.cpp
+    WorldArchive.cpp
+    WorldEncounterInstaller.cpp
+    WorldInstaller.cpp
+    WorldModelInstaller.cpp
+    WorldScriptInstaller.cpp
+)

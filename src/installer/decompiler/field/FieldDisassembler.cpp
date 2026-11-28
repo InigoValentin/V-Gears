@@ -35,7 +35,7 @@
 #include "instruction/FieldUncondJumpInstruction.h"
 #include "instruction/FieldWalkmeshInstruction.h"
 #include "instruction/FieldWindowInstruction.h"
-#include "common/Lzs.h"
+#include "installer/formats/Lzs.h"
 
 
 const int FieldDisassembler::MAGIC(0x0502);
@@ -354,15 +354,6 @@ FieldDisassembler::InstructionRecord FieldDisassembler::FLOW_OPCODES[] ={
     {1, OPCODES::NOP, "NOP", "", FieldNoOperationInstruction::Create},
     {1, OPCODES::IFUB, "IFUB", "NNBBBL", FieldNoOperationInstruction::Create}
 };
-
-std::map<std::string, const FieldDisassembler::InstructionRecord*>
-  FieldDisassembler::FieldInstructions(){
-    // Convert the array to a map that we can query on by opcode name.
-    std::map<std::string, const InstructionRecord*> name_to_instruction_records;
-    for (size_t i = 0; i < boost::size(FLOW_OPCODES); i ++)
-        name_to_instruction_records[FLOW_OPCODES[i].opcode_name] = &FLOW_OPCODES[i];
-    return name_to_instruction_records;
-}
 
 bool FieldDisassembler::ReadOpCodesToPositionOrReturn(
   size_t end_pos, std::vector<float>& point_a, std::vector<float>& point_b

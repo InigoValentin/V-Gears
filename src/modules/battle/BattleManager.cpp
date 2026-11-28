@@ -1,0 +1,758 @@
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <cmath>
+#include <OgreEntity.h>
+#include <OgreMaterialManager.h>
+#include <OgreRoot.h>
+#include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
+#include <OgreTextureManager.h>
+#include <OgreResourceGroupManager.h>
+#include <OgreViewport.h>
+#include "common/FF7Character.h"
+#include "engine/audio/AudioManager.h"
+#include "modules/battle/BattleManager.h"
+#include "engine/WorldMapInterface.h"
+#include "engine/graphics/CameraManager.h"
+#include "engine/ui/Console.h"
+#include "engine/ui/DialogsManager.h"
+#include "modules/battle/Enemy.h"
+#include "engine/entity/EntityManager.h"
+#include "engine/config/ConfigVar.h"
+#include "engine/input/InputManager.h"
+#include "common/Logger.h"
+#include "engine/script/ScriptManager.h"
+#include "engine/ui/TextHandler.h"
+#include "engine/ui/UiManager.h"
+#include "modules/battle/XmlFormationFile.h"
+
+/**
+ * Battle manager singleton.
+ */
+template<>BattleManager *Ogre::Singleton<BattleManager>::msSingleton = nullptr;
+
+ConfigVar cv_debug_battle_grid("debug_battle_grid", "Draw debug battle grid", "false");
+ConfigVar cv_debug_battle_axis("debug_battle_axis", "Draw debug battle axis", "false");
+
+const float BattleManager::ENEMY_SCALE = 1.0f / 255.0f;
+
+const float BattleManager::ATTACK_SCALE = 0.0032f;
+
+const float BattleManager::PARTY_SCALE = 1.0f / 255.0f;
+
+const float BattleManager::PARTY_Y = 5.0f;
+
+const float BattleManager::SIDE_DISTANCE = 14.0f;
+
+// Model rotations, in degrees. Party members face the enemies at 0 degrees, and enemies face the
+// party at 180. Left and right are seen from the battle camera. If the models face the wrong
+// direction in side or pincer attacks, swap these two.
+const int BattleManager::FACING_TO_ENEMIES = 0;
+const int BattleManager::FACING_TO_PARTY = 180;
+const int BattleManager::FACING_TO_RIGHT = 90;
+const int BattleManager::FACING_TO_LEFT = -90;
+
+BattleManager::BattleManager(){
+    LOG_TRIVIAL("BattleManager created.");
+    scene_node_ = Ogre::Root::getSingleton().getSceneManager("Scene")
+      ->getRootSceneNode()->createChildSceneNode("BattleManager");
+    // Build scene model map.
+    scene_model_map_ = XmlBattleScenesFile("./game/battle/models/scenes.xml").GetScenes();
+    // Build character model map.
+    character_model_map_
+      = XmlBattleCharactersFile("./game/battle/models/characters.xml").GetCharacters();
+}
+
+BattleManager::~BattleManager(){
+    Clear();
+    Ogre::Root::getSingleton().getSceneManager("Scene")->getRootSceneNode()->removeAndDestroyChild(
+      "BattleManager"
+    );
+    LOG_TRIVIAL("BattleManager destroyed.");
+}
+
+void BattleManager::Input(const VGears::Event& event){}
+
+void BattleManager::UpdateDebug(){}
+
+void BattleManager::OnResize(){}
+
+void BattleManager::ClearField(){
+    LOG_TRIVIAL("Called empty method BattleManager::ClearField()");
+}
+
+void BattleManager::ClearBattle(){
+    ClearDynamicMeshes();
+    formation_id_ = -1;
+    next_formation_id_ = -1;
+    // TODO location_ = null;
+    camera_.clear();
+    initial_camera_ = 0;
+    intro_camera_ = -1;
+    layout_ = LAYOUT::NORMAL;
+    escape_difficulty_ = 0.0f;
+    arena_battle_ = false;
+    show_victory_pose_ = true;
+    show_spoils_ = true;
+    preemptive_ = true;
+    money_ = 0;
+    spoil_.clear();
+    enemies_.clear();
+    enemy_entity_name_.clear();
+    party_entity_name_.clear();
+    party_animation_prefix_.clear();
+    party_model_name_.clear();
+    // TODO party_.clear();
+}
+
+void BattleManager::ClearWorld(){
+    LOG_TRIVIAL("Called empty method BattleManager::ClearWorld()");
+}
+
+void BattleManager::StartBattle(const unsigned int id){
+    if (module_ == Module::BATTLE){
+        LOG_ERROR("Started battle in BattleManager, but the manager was already in battle mode.");
+        return;
+    }
+    // Battles can start in the world map, which is hidden and stopped while the battle lasts.
+    battle_from_world_ = EntityManager::getSingleton().IsWorldModule();
+    if (battle_from_world_ && VGears::WorldMapInterface::Get() != nullptr)
+        VGears::WorldMapInterface::Get()->PauseForBattle();
+    SetBattleModule();
+    AudioManager::getSingleton().SetBattleModule();
+    CameraManager::getSingleton().SetBattleModule();
+    DialogsManager::getSingleton().SetBattleModule();
+    EntityManager::getSingleton().SetBattleModule();
+    // The entities of the field must not be seen in the battle.
+    EntityManager::getSingleton().HideFieldEntities();
+    EntityManager::getSingleton().GetBackground2D()->Hide();
+    InputManager::getSingleton().SetBattleModule();
+    ScriptManager::getSingleton().SetBattleModule();
+    UiManager::getSingleton().SetBattleModule();
+    SetFormationId(id);
+
+    // Load the formation XML file (name is dddd.xml)
+    std::string filename = std::to_string(formation_id_);
+    while (filename.length() < 4) filename = "0" + filename;
+    filename = "./game/battle/formations/" + filename + ".xml";
+    // This sets the data in the battle manager singleton.
+    XmlFormationFile(filename).LoadFormation();
+
+
+    // TODO: Music
+    if (camera_.size() == 0)
+        LOG_ERROR("Unable to start battle camera. No cameras defined in the BattleManager.");
+    else if (initial_camera_ > camera_.size()){
+        LOG_ERROR(
+          "Unable to set initial battle camera. Default camera is set to "
+          + std::to_string(initial_camera_) + " but only " + std::to_string(camera_.size())
+          + " cameras are defined in the CameraManager. Defaulting to first camera.");
+        CameraManager::getSingleton().StartBattleCamera(
+          camera_.at(0).location, camera_.at(0).orientation
+        );
+    }
+    else
+        CameraManager::getSingleton().StartBattleCamera(
+          camera_.at(initial_camera_).location, camera_.at(initial_camera_).orientation
+        );
+    LoadParty();
+    LogCamera("Battle camera at the start of the battle");
+    // Something could change the camera right after the battle starts (it seems to happen in some
+    // battles started from field scripts), so it's set again in a few frames.
+    camera_check_frames_ = 3;
+    //EndBattle();// TODO: Debug
+}
+
+void BattleManager::EndBattle(){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Ended battle in BattleManager, but the manager was not in battle mode.");
+        return;
+    }
+    SetPreviousModule();
+    ClearBattle();
+    CameraManager::getSingleton().EndBattleCamera();
+
+    // Stop the battle music, and let the music of the field continue.
+    AudioManager::getSingleton().EndBattleMusic();
+    AudioManager::getSingleton().SetPreviousModule();
+    CameraManager::getSingleton().SetPreviousModule();
+    DialogsManager::getSingleton().SetPreviousModule();
+    ScriptManager::getSingleton().ClearBattle();
+    EntityManager::getSingleton().ClearBattle();
+    EntityManager::getSingleton().GetBackground2D()->Show();
+    EntityManager::getSingleton().ShowFieldEntities();
+    EntityManager::getSingleton().SetPreviousModule();
+    InputManager::getSingleton().SetPreviousModule();
+    ScriptManager::getSingleton().ClearBattle();
+    ScriptManager::getSingleton().SetPreviousModule();
+    UiManager::getSingleton().SetPreviousModule();
+    if (battle_from_world_){
+        battle_from_world_ = false;
+        if (VGears::WorldMapInterface::Get() != nullptr)
+            VGears::WorldMapInterface::Get()->ResumeAfterBattle();
+    }
+}
+
+std::vector<Enemy> BattleManager::GetEnemies() const{return enemies_;}
+
+void BattleManager::AddEnemy(
+  const unsigned int id, const Ogre::Vector3 pos, const bool front, const bool visible,
+  const bool targeteable, const bool active, const std::string cover
+){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR(
+          "Tried to add an enemy to the BattleManager, but the manager was not in battle mode."
+        );
+        return;
+    }
+    Enemy enemy(id, pos, front, visible, targeteable, active, cover);
+    Ogre::Vector3 position = enemy.GetPos();
+    const unsigned int index = enemies_.size();
+    // Enemy positions come from the formation: in normal battles they are on the negative Y side,
+    // facing the party. In back attacks they are on the positive Y side, with the party mirrored
+    // to the negative one. In pincer attacks they are on both sides, with the party in the middle.
+    int rotation = FACING_TO_PARTY;
+    switch (layout_){
+        case LAYOUT::PREEMPTIVE:
+            // Enemies are caught off guard, facing away from the party.
+            rotation = FACING_TO_ENEMIES;
+            break;
+        case LAYOUT::BACK_ATTACK:
+            // Enemies on the party's usual side, facing the other way.
+            rotation = FACING_TO_ENEMIES;
+            break;
+        case LAYOUT::PINCER_ATTACK:
+            // Enemies on both sides of the party, facing the center.
+            rotation = (position.y > 0 ? FACING_TO_ENEMIES : FACING_TO_PARTY);
+            break;
+        case LAYOUT::SIDE_ATTACK:
+            // Enemies stay in the middle, facing in a random direction.
+            rotation = (std::rand() % 2 == 0 ? FACING_TO_LEFT : FACING_TO_RIGHT);
+            break;
+        default:
+            break;
+    }
+    enemies_.push_back(enemy);
+    const std::string entity_name = enemy.GetName() + "_" + std::to_string(index);
+    enemy_entity_name_.push_back(entity_name);
+    EntityManager::getSingleton().AddEntity(
+      entity_name, "enemies/" + enemy.GetModel() + ".mesh", position, Ogre::Degree(1),
+      Ogre::Vector3(ENEMY_SCALE, ENEMY_SCALE, ENEMY_SCALE), Ogre::Quaternion(1, 1, 0, 0), id
+    );
+    EntityManager::getSingleton().GetEntity(entity_name)->SetRotation(Ogre::Degree(rotation));
+}
+
+unsigned int BattleManager::ScriptGetEnemyCount() const{return enemies_.size();}
+
+Enemy* BattleManager::ScriptGetEnemy(const unsigned int index){
+    if (index >= enemies_.size()) return nullptr;
+    return &enemies_[index];
+}
+
+void BattleManager::AddAttackModel(
+  const unsigned int id, const std::string model, const Ogre::Vector3 pos,
+  const Ogre::Degree orientation, const std::string animation
+){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR(
+          "Tried to add an attack model to the BattleManager,"
+          + " but the manager was not in battle mode."
+        );
+        return;
+    }
+    //Enemy* enemy = new Enemy(id, pos, front, visible, targeteable, active, cover);
+    //enemies_.push_back(*enemy);
+    EntityManager::getSingleton().AddEntity(
+      model + "_" + std::to_string(id), "attacks/" + model + ".mesh", pos, orientation,
+      Ogre::Vector3(ENEMY_SCALE, ENEMY_SCALE, ENEMY_SCALE), Ogre::Quaternion(1, 1, 0, 0), id
+    );
+    EntityManager::getSingleton().GetEntity(model + "_" + std::to_string(id))
+      ->SetRotation(orientation);
+    EntityManager::getSingleton().GetEntity(model + "_" + std::to_string(id))
+      ->ScriptSetDefaultAnimation(animation.c_str());
+}
+
+void BattleManager::ScriptAddAttackModel(
+  const unsigned int id, const char* model, const float x, const float y, const float z,
+  const int orientation, const char* animation
+){
+    AddAttackModel(
+      id, std::string(model), Ogre::Vector3(x, y, z),
+      Ogre::Degree(orientation), std::string(animation)
+    );
+}
+
+std::string BattleManager::ScriptAddEffectModel(
+  const char* model, const float x, const float y, const float z, const float scale
+){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to add an effect model, but the BattleManager is not in battle mode.");
+        return "";
+    }
+    // Names with a folder (like attacks/cyvadat for a summon) are used as they are.
+    const std::string mesh = std::string(model).find('/') != std::string::npos
+      ? std::string(model) + ".mesh" : "effects/" + std::string(model) + ".mesh";
+    if (!Ogre::ResourceGroupManager::getSingleton().resourceExists("BATTLE_MODELS", mesh)){
+        LOG_WARNING("Effect model '" + mesh + "' doesn't exist, reinstall the battle data.");
+        return "";
+    }
+    std::string clean_name = model;
+    for (char& c : clean_name) if (c == '/') c = '_';
+    const std::string name = "fx_" + clean_name + "_" + std::to_string(next_effect_id_ ++);
+    const float s = ATTACK_SCALE * scale;
+    EntityManager::getSingleton().AddEntity(
+      name, mesh, Ogre::Vector3(x, y, z), Ogre::Degree(0), Ogre::Vector3(s, s, s),
+      Ogre::Quaternion(1, 1, 0, 0), -1
+    );
+    // Effect meshes have no animations, and battle entities look for "xx_00" by default.
+    Entity* entity = EntityManager::getSingleton().GetEntity(name);
+    if (entity != nullptr){
+        entity->ScriptSetDefaultAnimation("Idle");
+        // There are lots of them, they would fill the debug text of the screen.
+        entity->SetDebugHidden(true);
+    }
+    return name;
+}
+
+void BattleManager::ScriptRemoveEffectModel(const char* name){
+    EntityManager::getSingleton().RemoveBattleEntity(name);
+}
+
+std::string BattleManager::ScriptCreateDynamicMesh(const char* texture, const int blend){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to create a dynamic mesh, but the BattleManager is not in battle mode.");
+        return "";
+    }
+    Ogre::SceneManager* scene = Ogre::Root::getSingleton().getSceneManager("Scene");
+    const std::string name = "dyn_mesh_" + std::to_string(next_effect_id_ ++);
+    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(name, "BATTLE_MODELS");
+    Ogre::Pass* pass = material->getTechnique(0)->getPass(0);
+    pass->setLightingEnabled(false);
+    pass->setCullingMode(Ogre::CULL_NONE);
+    switch (blend){
+        case 1:
+            pass->setSceneBlending(Ogre::SBT_ADD);
+            pass->setDepthWriteEnabled(false);
+            break;
+        case 2:
+            pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+            pass->setDepthWriteEnabled(false);
+            break;
+        default:
+            pass->setSceneBlending(Ogre::SBT_REPLACE);
+            pass->setDepthWriteEnabled(true);
+    }
+    const std::string image = texture;
+    if (!image.empty()){
+        // The image can be in the battle models or in the images of the UI.
+        std::string group = "";
+        if (Ogre::ResourceGroupManager::getSingleton().resourceExists("BATTLE_MODELS", image)) group = "BATTLE_MODELS";
+        else if (Ogre::ResourceGroupManager::getSingleton().resourceExists("IMAGES", image)) group = "IMAGES";
+        if (group.empty()){
+            LOG_WARNING("Image '" + image + "' of a dynamic mesh doesn't exist.");
+        }
+        else{
+            Ogre::TextureUnitState* unit = pass->createTextureUnitState();
+            unit->setTexture(Ogre::TextureManager::getSingleton().load(image, group));
+            unit->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
+        }
+    }
+    DynamicMesh mesh;
+    mesh.object = scene->createManualObject(name);
+    mesh.object->setDynamic(true);
+    mesh.material = name;
+    scene->getRootSceneNode()->createChildSceneNode(name)->attachObject(mesh.object);
+    dynamic_meshes_[name] = mesh;
+    return name;
+}
+
+void BattleManager::ScriptSetDynamicMesh(const char* name, std::vector<float> vertices){
+    auto found = dynamic_meshes_.find(name);
+    if (found == dynamic_meshes_.end()) return;
+    DynamicMesh& mesh = found->second;
+    size_t count = vertices.size() / 9;
+    count -= count % 3;
+    if (count == 0){
+        if (mesh.filled){
+            mesh.object->clear();
+            mesh.filled = false;
+        }
+        return;
+    }
+    if (mesh.filled) mesh.object->beginUpdate(0);
+    else mesh.object->begin(mesh.material, Ogre::RenderOperation::OT_TRIANGLE_LIST, "BATTLE_MODELS");
+    for (size_t i = 0; i < count; ++ i){
+        const float* v = &vertices[9 * i];
+        mesh.object->position(v[0], v[1], v[2]);
+        mesh.object->textureCoord(v[3], v[4]);
+        mesh.object->colour(v[5], v[6], v[7], v[8]);
+    }
+    mesh.object->end();
+    mesh.filled = true;
+}
+
+void BattleManager::ScriptRemoveDynamicMesh(const char* name){
+    auto found = dynamic_meshes_.find(name);
+    if (found == dynamic_meshes_.end()) return;
+    Ogre::SceneManager* scene = Ogre::Root::getSingleton().getSceneManager("Scene");
+    scene->getRootSceneNode()->removeAndDestroyChild(found->first);
+    scene->destroyManualObject(found->second.object);
+    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().getByName(found->second.material, "BATTLE_MODELS");
+    if (material != nullptr) Ogre::MaterialManager::getSingleton().remove(material);
+    dynamic_meshes_.erase(found);
+}
+
+void BattleManager::ClearDynamicMeshes(){
+    while (!dynamic_meshes_.empty()) ScriptRemoveDynamicMesh(dynamic_meshes_.begin()->first.c_str());
+}
+
+void BattleManager::ScriptSetCameraPosition(
+  const float x, const float y, const float z,
+  const float look_x, const float look_y, const float look_z
+){
+    if (module_ != Module::BATTLE) return;
+    CameraManager::getSingleton().SetBattleCameraUpright(
+      Ogre::Vector3(x, y, z), Ogre::Vector3(look_x, look_y, look_z)
+    );
+}
+
+void BattleManager::AddCamera(
+  const unsigned int id, const Ogre::Vector3 pos, const Ogre::Vector3 dir
+){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR(
+          "Tried to add a camera to the BattleManager, but the manager was not in battle mode."
+        );
+        return;
+    }
+    BattleCamera camera;
+    camera.id = id;
+    camera.location = pos;
+    camera.orientation = dir;
+    camera_.push_back(camera);
+}
+
+void BattleManager::SetLayout(const LAYOUT layout){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set a layout the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    if (layout == LAYOUT::UNKNOWN_0 || layout == LAYOUT::UNKNOWN_1) layout_ = LAYOUT::NORMAL;
+    else layout_ = layout;
+    // The field script can make the battle a preemptive attack (BTLMD, flag 0x04).
+    if ((battle_mode_ & 0x04) != 0 && layout_ == LAYOUT::NORMAL) layout_ = LAYOUT::PREEMPTIVE;
+}
+
+bool BattleManager::HasAttackData(const int id){
+    if (!attack_index_loaded_){
+        attack_index_ = XmlAttackFile::LoadIndex("./game/battle/attacks/_index.xml");
+        attack_index_loaded_ = true;
+    }
+    return attack_index_.find(id) != attack_index_.end();
+}
+
+const AttackData* BattleManager::GetAttackData(const int id){
+    auto cached = attack_cache_.find(id);
+    if (cached != attack_cache_.end()) return &cached->second;
+    if (!attack_index_loaded_){
+        attack_index_ = XmlAttackFile::LoadIndex("./game/battle/attacks/_index.xml");
+        attack_index_loaded_ = true;
+    }
+    auto file = attack_index_.find(id);
+    if (file == attack_index_.end()){
+        LOG_ERROR("No attack data for attack " + std::to_string(id));
+        return nullptr;
+    }
+    AttackData data;
+    if (!XmlAttackFile("./game/battle/attacks/" + file->second).LoadAttack(data)) return nullptr;
+    return &(attack_cache_[id] = data);
+}
+
+int BattleManager::ScriptGetLayout() const{return static_cast<int>(layout_);}
+
+int BattleManager::GetNextFormationId() const{return next_formation_id_;}
+
+void BattleManager::ScriptSetMode(const int mode){battle_mode_ = mode;}
+
+int BattleManager::GetMode() const{return battle_mode_;}
+
+int BattleManager::GetFormationId() const{return formation_id_;}
+
+float BattleManager::GetEscapeDifficulty() const{return escape_difficulty_;}
+
+bool BattleManager::IsPreemptiveAllowed() const{return preemptive_;}
+
+void BattleManager::SetPreemptiveDisabled(const bool disabled){preemptive_ = !disabled;}
+
+bool BattleManager::ShowVictoryPose() const{return show_victory_pose_;}
+
+bool BattleManager::ShowSpoils() const{return show_spoils_;}
+
+std::string BattleManager::ScriptGetEnemyEntityName(const unsigned int index) const{
+    if (index >= enemy_entity_name_.size()) return "";
+    return enemy_entity_name_[index];
+}
+
+std::string BattleManager::ScriptGetPartyEntityName(const unsigned int index) const{
+    if (index >= party_entity_name_.size()) return "";
+    return party_entity_name_[index];
+}
+
+std::string BattleManager::ScriptGetPartyModelName(const unsigned int index) const{
+    if (index >= party_model_name_.size()) return "";
+    return party_model_name_[index];
+}
+
+std::string BattleManager::ScriptGetPartyAnimationPrefix(const unsigned int index) const{
+    if (index >= party_animation_prefix_.size()) return "";
+    return party_animation_prefix_[index];
+}
+
+void BattleManager::ScriptSetEnemyVisible(const unsigned int index, const bool visible){
+    if (index >= enemy_entity_name_.size()) return;
+    Entity* entity = EntityManager::getSingleton().GetEntity(enemy_entity_name_[index]);
+    if (entity != nullptr) entity->SetVisible(visible);
+}
+
+void BattleManager::SetFormationId(const int id){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set formation int the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    if (id < 0) formation_id_ = -1;
+    else formation_id_ = id;
+}
+
+void BattleManager::SetNextFormationId(const int id){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set next formation in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    if (id < 0) next_formation_id_ = -1;
+    else next_formation_id_ = id;
+}
+
+void BattleManager::SetEscapeability(const float difficulty){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set escapability in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    if (difficulty < 0.0f || difficulty > 1.0f) escape_difficulty_ = -1.0f;
+    else escape_difficulty_ = difficulty;
+}
+
+void BattleManager::SetSkipVictoryPose(const bool skip){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set pose mode in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    show_victory_pose_ = !skip;
+}
+
+void BattleManager::SetSkipSpoils(const bool skip){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set spoils mode in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    show_spoils_ = !skip;
+}
+
+void BattleManager::SetLocation(const int id, const Ogre::String name){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set a location in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    std::string model = "";
+    for (XmlBattleScenesFile::BattleScene scene : scene_model_map_){
+        if (scene.id == id){
+            model = "scenes/" + scene.model;
+            break;
+        }
+    }
+    if (model == ""){
+        LOG_ERROR("No 3D model assigned to battle location " + std::to_string(id));
+        return;
+    }
+    EntityManager::getSingleton().SetBackground3D(name, model);
+}
+
+void BattleManager::SetArenaBattle(const bool arena){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set arena info in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    arena_battle_ = arena;
+}
+
+int BattleManager::ScriptSetCamera(const int index){
+    if (index >= 0 && index < static_cast<int>(camera_.size())){
+        CameraManager::getSingleton().SetBattleCamera(
+          camera_.at(index).location, camera_.at(index).orientation
+        );
+        LOG_TRIVIAL(
+          "Battle camera " + std::to_string(index) + ": position ("
+          + std::to_string(camera_.at(index).location.x) + ", "
+          + std::to_string(camera_.at(index).location.y) + ", "
+          + std::to_string(camera_.at(index).location.z) + "), looking at ("
+          + std::to_string(camera_.at(index).orientation.x) + ", "
+          + std::to_string(camera_.at(index).orientation.y) + ", "
+          + std::to_string(camera_.at(index).orientation.z) + ")"
+        );
+    }
+    return camera_.size();
+}
+
+std::tuple<float, float, float, float, float, float> BattleManager::ScriptGetCamera(const int index){
+    if (index < 0 || index >= static_cast<int>(camera_.size())){
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    }
+    const BattleCamera& camera = camera_.at(index);
+    return std::make_tuple(
+      camera.location.x, camera.location.y, camera.location.z,
+      camera.orientation.x, camera.orientation.y, camera.orientation.z
+    );
+}
+
+void BattleManager::SetInitialCamera(const unsigned int id){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set the camera in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    initial_camera_ = id;
+}
+
+void BattleManager::SetIntroCamera(const int id){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to set the camera in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    intro_camera_ = id;
+}
+
+int BattleManager::ScriptGetIntroCamera() const{return intro_camera_;}
+
+void BattleManager::LoadParty(){
+    if (module_ != Module::BATTLE){
+        LOG_ERROR("Tried to load party in the BattleManager, but it's not in battle mode.");
+        return;
+    }
+    std::vector<int> party = TextHandler::getSingleton().GetParty();
+    // Party members actually in the battle, in party order.
+    std::vector<int> members {};
+    for (int i = 0; i < party.size(); i ++) if (party.at(i) != -1) members.push_back(i);
+
+    // Center of the enemies, used when the party surrounds them.
+    float enemy_center_x = 0.0f;
+    float enemy_center_y = -10.0f;
+    if (enemies_.size() > 0){
+        enemy_center_x = 0.0f;
+        enemy_center_y = 0.0f;
+        for (Enemy& enemy : enemies_){
+            enemy_center_x += enemy.GetPos().x;
+            enemy_center_y += enemy.GetPos().y;
+        }
+        enemy_center_x /= enemies_.size();
+        enemy_center_y /= enemies_.size();
+    }
+
+    party_entity_name_.assign(party.size(), "");
+    party_animation_prefix_.assign(party.size(), "");
+    party_model_name_.assign(party.size(), "");
+    // TODO: Read this from game/kernel/characters.lua
+    for (int slot = 0; slot < members.size(); slot ++){
+        const int index = members.at(slot);
+        std::string name = "";
+        std::string model = "";
+        for (XmlBattleCharactersFile::BattleCharacter character : character_model_map_){
+            if (character.id == party.at(index)){
+                model = "characters/" + character.models.at(0).model;
+                name = "party_" + character.models.at(0).name;
+                break;
+            }
+        }
+        if (model == ""){
+            LOG_ERROR("No 3D model assigned to battle character " + std::to_string(party.at(index)));
+            return;
+        }
+        const float line_x = (slot - (members.size() - 1) / 2.0f) * PARTY_SPACING;
+        Ogre::Vector3 position(line_x, PARTY_Y, 0);
+        int rotation = FACING_TO_ENEMIES;
+        switch (layout_){
+            case LAYOUT::BACK_ATTACK:
+                // Enemies come from behind: the party is on the other side of the field, facing
+                // away from them.
+                position.y = -PARTY_Y;
+                break;
+            case LAYOUT::SIDE_ATTACK:
+                // Party members alternate on both sides of the enemies, facing the center.
+                position.x = enemy_center_x + (slot % 2 == 0 ? -1 : 1) * SIDE_DISTANCE;
+                position.y = enemy_center_y - 2 * (slot / 2);
+                rotation = (slot % 2 == 0 ? FACING_TO_RIGHT : FACING_TO_LEFT);
+                break;
+            case LAYOUT::PINCER_ATTACK:
+                // Party in the middle, between the two enemy groups, facing one of them.
+                position.y = 0;
+                rotation = (std::rand() % 2 == 0 ? FACING_TO_ENEMIES : FACING_TO_PARTY);
+                break;
+            default:
+                break;
+        }
+        EntityManager::getSingleton().AddEntity(
+          name, model, position, Ogre::Degree(0),
+          Ogre::Vector3(PARTY_SCALE, PARTY_SCALE, PARTY_SCALE),
+          Ogre::Quaternion(1, 1, 0, 0), 100 + slot
+        );
+        EntityManager::getSingleton().GetEntity(name)->SetRotation(Ogre::Degree(rotation));
+        party_entity_name_[index] = name;
+        {
+            std::string base = model.substr(model.find_last_of("/\\") + 1);
+            party_model_name_[index] = base.substr(0, base.find_last_of('.'));
+        }
+        party_animation_prefix_[index] = model.substr(model.find_last_of("/\\") + 1).substr(0, 2);
+    }
+}
+
+void BattleManager::UpdateField(){}
+
+void BattleManager::LogCamera(const std::string& title) const{
+    Ogre::Camera* camera = CameraManager::getSingleton().GetCurrentCamera();
+    if (camera == nullptr) return;
+    const Ogre::Vector3 position = camera->getPosition();
+    const Ogre::Vector3 direction = camera->getDirection();
+    LOG_TRIVIAL(
+      title + ": position (" + std::to_string(position.x) + ", " + std::to_string(position.y) + ", "
+      + std::to_string(position.z) + "), direction (" + std::to_string(direction.x) + ", "
+      + std::to_string(direction.y) + ", " + std::to_string(direction.z) + "), fov "
+      + std::to_string(camera->getFOVy().valueDegrees()) + " degrees"
+    );
+}
+
+void BattleManager::UpdateBattle(){
+    if (camera_check_frames_ > 0){
+        camera_check_frames_ --;
+        if (camera_check_frames_ == 0 && camera_.size() > 0){
+            LogCamera("Battle camera three frames after the start");
+            ScriptSetCamera(initial_camera_ < camera_.size() ? initial_camera_ : 0);
+            LogCamera("Battle camera set again");
+        }
+    }
+    ScriptManager::getSingleton().RunString("UiContainer.BattleUi:tick()");
+}
+
+void BattleManager::UpdateWorld(){}

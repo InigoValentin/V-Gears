@@ -1,0 +1,820 @@
+/*
+ * Copyright (C) 2022 The V-Gears Team
+ *
+ * This file is part of V-Gears
+ *
+ * V-Gears is free software: you can redistribute it and/or modify it under
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 3.0 (GPLv3) of the License.
+ *
+ * V-Gears is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#pragma once
+
+#include <chrono>
+#include <utility>
+#include <vector>
+#include <OgreSingleton.h>
+#include "engine/graphics/Background2D.h"
+#include "Entity.h"
+#include "EntityPoint.h"
+#include "EntityTrigger.h"
+#include "EntityTriggers.h"
+#include "FieldEncounters.h"
+#include "engine/Event.h"
+#include "engine/Manager.h"
+#include "engine/graphics/MoviePlayer.h"
+#include "engine/graphics/ScreenFade.h"
+#include "Walkmesh.h"
+#include "WalkmeshMovement.h"
+
+class EntityModel;
+
+/**
+ * The entity manager.
+ */
+class EntityManager : public Manager, public Ogre::Singleton<EntityManager>{
+
+    public:
+
+        /**
+         * Constructor.
+         */
+        EntityManager();
+
+        /**
+         * Destructor.
+         */
+        virtual ~EntityManager();
+
+        /**
+         * Handles an input event.
+         *
+         * @param[in] event Event to handle.
+         */
+        void Input(const VGears::Event& event) override;
+
+        /**
+         * Updates the entities in the manager with debug information.
+         *
+         * It's automatically called from {@see Update}.
+         */
+        void UpdateDebug() override;
+
+        /**
+         * Handles resizing events
+         */
+        void OnResize() override;
+
+        /**
+         * Clears all field information in the entity manager.
+         *
+         * It clears the background, the walkmesh, any pending actions and all the field entities.
+         */
+        void ClearField() override;
+
+        /**
+         * Clears all battle information in the entity manager.
+         *
+         * It clears any pending actions and all the battle entities.
+         */
+        void ClearBattle() override;
+
+        /**
+         * Removes a battle entity, for example one made for a visual effect.
+         *
+         * If the manager is not in the battle module, or the entity doesn't exist, it will do
+         * nothing.
+         *
+         * @param[in] name Entity name.
+         */
+        void RemoveBattleEntity(const Ogre::String& name);
+
+        /**
+         * Removes a world map entity (like a pole that was added while playing).
+         *
+         * If the manager is not in the world module, or the entity doesn't exist, it will do nothing.
+         *
+         * @param[in] name Entity name.
+         */
+        void RemoveWorldMapEntity(const Ogre::String& name);
+
+        /**
+         * Clears all world map information in the entity manager.
+         *
+         * It clears the background, the walkmesh, any pending actions and all the world entities.
+         */
+        void ClearWorld() override;
+
+        /**
+         * Retrieves the walkmesh.
+         *
+         * @return The walkmesh.
+         */
+        Walkmesh* GetWalkmesh();
+
+        /**
+         * Checks a proposed world-map position against managed solid entities.
+         *
+         * @param[in] moving_entity Entity being moved.
+         * @param[in] position Proposed base position in world-map coordinates.
+         * @return True if the entity would overlap another solid entity.
+         */
+        bool IsWorldPositionBlocked(
+          const Entity* moving_entity, const Ogre::Vector3& position
+        ) const;
+
+        /**
+         * Retrieves the 2D background.
+         *
+         * @return The 2D background.
+         */
+        Background2D* GetBackground2D();
+
+        /**
+         * Retrieves the coloured fade of the screen.
+         *
+         * @return The screen fade.
+         */
+        ScreenFade* GetScreenFade();
+
+        /**
+         * Retrieves the movie player.
+         *
+         * @return The movie player.
+         */
+        MoviePlayer* GetMoviePlayer();
+
+        /**
+         * Adds an entity to the manager.
+         *
+         * The entity will be added to the EntityManager current module entity list.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] position Entity position.
+         * @param[in] direction Entity face direction.
+         * @param[in] index Index of the entity on the manager.
+         */
+        void AddEntity(
+          const Ogre::String& name, const Ogre::String& file_name,
+          const Ogre::Vector3& position, const Ogre::Degree& direction, int index
+        );
+
+        /**
+         * Adds a field entity to the manager.
+         *
+         * The entity will be added to the EntityManager current module entity list.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] position Entity position.
+         * @param[in] rotation Entity face direction.
+         * @param[in] scale Entity scale.
+         * @param[in] root_orientation Entity orientation. Unused for battle and world map entities.
+         * @param[in] index Index of the entity on the manager.
+         */
+        void AddEntity(
+          const Ogre::String& name, const Ogre::String& file_name,
+          const Ogre::Vector3& position, const Ogre::Degree& rotation,
+          const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, const int index
+        );
+
+        /**
+         * Adds a managed world-map entity using an explicit resource group.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Mesh resource name.
+         * @param[in] position Initial position.
+         * @param[in] rotation Initial rotation.
+         * @param[in] scale Initial scale.
+         * @param[in] resource_group Ogre resource group containing the mesh.
+         * @return The managed entity, or nullptr if the manager is not in world mode.
+         */
+        EntityModel* AddWorldMapEntity(
+          const Ogre::String& name, const Ogre::String& file_name,
+          const Ogre::Vector3& position, const Ogre::Degree& rotation,
+          const Ogre::Vector3& scale, const Ogre::String& resource_group
+        );
+
+        /**
+         * Adds an entity to the manager.
+         *
+         * Simplified version of {@see AddEntity}, to be called from Lua scripts.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] x X coordinate of the entity position in the map.
+         * @param[in] y Y coordinate of the entity position in the map.
+         * @param[in] z Z coordinate of the entity position in the map.
+         * @param[in] direction Entity face direction.
+         * @param[in] index Index of the entity on the manager.
+         */
+        void ScriptAddEntity(
+          const char* name, const char* file_name,
+          const float x, const float y, const float z, const float direction, int index
+        );
+
+        /**
+         * Adds an entity trigger to the manager.
+         *
+         * A trigger is a line that does something when approached or crossed. If the Battle manager
+         * is in battle mode, nothing will be done.
+         *
+         * @param[in] name Entity trigger name.
+         * @param[in] point1 One point of the trigger line.
+         * @param[in] point2 One point of the trigger line.
+         * @param[in] enabled True to enable the trigger, false to leave it disabled.
+         */
+        void AddEntityTrigger(
+          const Ogre::String& name, const Ogre::Vector3& point1,
+          const Ogre::Vector3& point2, const bool enabled
+        );
+
+        /**
+         * Adds an entity point to the manager.
+         *
+         * If the Battle manager is in battle mode, nothing will be done.
+         *
+         * @param[in] name Entity point name.
+         * @param[in] position Entity point position.
+         * @param[in] rotation The point orientation.
+         */
+        void AddEntityPoint(
+          const Ogre::String& name, const Ogre::Vector3& position, const float rotation
+        );
+
+        /**
+         * Adds an entity script to the manager.
+         *
+         * @param[in] name Entity script name.
+         */
+        void AddEntityScript(const Ogre::String& name);
+
+        /**
+         * Adds an entity script to the manager.
+         *
+         * @param[in] name Entity script name.
+         */
+        void ScriptAddEntityScript(const char* name);
+
+        /**
+         * Retrieves an entity by name.
+         *
+         * Only entities of the current active module will be searched.
+         *
+         * @param[in] name Name of the entity to retrieve.
+         * @return The entity by the specified name, or nullptr if there is no one.
+         */
+        Entity* GetEntity(const Ogre::String& name) const;
+
+        /**
+         * Retrieves an entity by it's index in the field.
+         *
+         * Only entities of the current active module will be searched.
+         *
+         * @param[in] id Index of the entity to retrieve.
+         * @return The entity with the ID, or nullptr if there is no one.
+         */
+        Entity* GetEntityFromIndex(const int id) const;
+
+        /**
+         * Retrieves an entity by it's assigned character ID.
+         *
+         * Only entities of the current active module will be searched.
+         *
+         * @param[in] id Character ID of the entity to retrieve.
+         * @return The entity assigned to the character, or nullptr if there is no one.
+         */
+        Entity* GetEntityFromCharacterId(const int id) const;
+
+        /**
+         * Retrieves an entity by name.
+         *
+         * Only entities of the current active module will be searched.
+         *
+         * @param[in] name Name of the entity to retrieve.
+         * @return The entity by the specified name, or nullptr if there is no one.
+         */
+        Entity* ScriptGetEntity(const char* name) const;
+
+        /**
+         * Retrieves an entity point by name.
+         *
+         * @param[in] name Name of the entity point to retrieve.
+         * @return The entity point by the specified name, or nullptr if there is no one or the
+         * manager is in battle mode.
+         */
+        EntityPoint* ScriptGetEntityPoint(const char* name) const;
+
+        /**
+         * Sets the playable entity.
+         *
+         * If no entities are found by name, no one will be assigned, the previous playable entity
+         * will remain so, and no warning will be issued. Also, if the EntityManager is in battle
+         * mode, nothing will be done.
+         *
+         * @param[in] name Name of the entity to make playable.
+         */
+        void ScriptSetPlayerEntity(const char* name);
+
+        void ScriptPlacePlayerAtFieldEntry(
+          const float x, const float y, const int triangle_id, const float direction
+        );
+
+        /**
+         * Retrieves the playable entity.
+         *
+         * @return The playable entity, or nullptr if it's not defined or the EntityManager is in
+         * battle mode.
+         */
+        Entity* ScriptGetPlayerEntity() const;
+
+        /**
+         * Unsets any playable entities.
+         *
+         * If the EntityManager is in battle mode, nothing will be done.
+         */
+        void ScriptUnsetPlayerEntity();
+
+        /**
+         * Locks or unlocks player control of the playable entity.
+         *
+         * If the EntityManager is in battle mode, nothing will be done.
+         *
+         * @param[in] lock True to lock, false to unlock.
+         */
+        void ScriptPlayerLock(const bool lock);
+
+        /**
+         * Sets if the player can slide along the walls (SLIP in the field scripts).
+         *
+         * When it is off, a move of the player that is blocked by a wall is not turned into a
+         * move along the wall. It is on by default and when a field is loaded.
+         *
+         * @param[in] slip True to let the player slide.
+         */
+        void ScriptSetPlayerSlip(const bool slip);
+
+        /**
+         * Retrieves the height of a point of a walkmesh triangle.
+         *
+         * @param[in] triangle The triangle.
+         * @param[in] x X coordinate of the point.
+         * @param[in] y Y coordinate of the point.
+         * @param[in] fallback Value returned if there is no such triangle.
+         * @return The height of the triangle at the point.
+         */
+        float GetTriangleHeight(int triangle, float x, float y, float fallback) const;
+
+        /**
+         * Sets if the player moves running by default.
+         *
+         * If true, the player runs unless the run key is held, which makes it walk. If false (the
+         * default), the player walks unless the run key is held. To be called from Lua scripts
+         * (movement setting of the config menu).
+         *
+         * @param[in] run True to run by default, false to walk by default.
+         */
+        void SetPlayerDefaultRun(const bool run);
+
+        /**
+         * Checks if the player movement is locked.
+         *
+         * @return True if it is locked.
+         */
+        bool IsPlayerLocked() const;
+
+        /**
+         * Sets the baseline rotation for the player controlled entity.
+         *
+         * If the EntityManager is in battle mode, nothing will be done.
+         *
+         * @param[in] rotation Baseline rotation.
+         * @todo Verify this description.
+         */
+        void SetPlayerMoveRotation(const Ogre::Radian rotation);
+
+        /**
+         * Gets the multiplier of the random encounter rate (the encounter_multiplier cvar).
+         *
+         * @return The multiplier. 0 prevents random encounters.
+         */
+        float GetEncounterMultiplier() const;
+
+        /**
+         * Checks if the random encounter checks are logged (the debug_encounters cvar).
+         *
+         * @return True if they are logged.
+         */
+        bool IsDebugEncounters() const;
+
+        /**
+         * Enables or disables random encounters in the field.
+         *
+         * @param[in] active True to enable encounters, false to deactivate them.
+         */
+        void SetRandomEncounters(bool active);
+
+        /**
+         * Removes the random encounter tables of the field.
+         */
+        void ClearEncounterTables();
+
+        /**
+         * Hides the entities of the field or world map, while a battle takes place.
+         *
+         * Only the visible ones are hidden. They are shown again with
+         * {@see ShowFieldEntities}.
+         */
+        void HideFieldEntities();
+
+        /**
+         * Shows the entities hidden by {@see HideFieldEntities}.
+         */
+        void ShowFieldEntities();
+
+        /**
+         * Adds a random encounter table to the field.
+         *
+         * @param[in] id Table ID (1 or 2).
+         * @param[in] rate Encounter rate, as in the original game (24 is very low, 240 is high).
+         * @param[in] battles Standard encounters, pairs of battle ID and probability (out of 64).
+         * @param[in] specials Special encounters, with the same format.
+         */
+        void AddEncounterTable(
+          const int id, const int rate, const std::vector<std::pair<int, int>>& battles,
+          const std::vector<std::pair<int, int>>& specials
+        );
+
+        /**
+         * Selects the encounter table to use.
+         *
+         * To be called from Lua scripts.
+         *
+         * @param[in] id Table ID (1 or 2). If it doesn't exist, no encounters happen.
+         */
+        void ScriptSetEncounterTable(const int id);
+
+        /**
+         * Picks the battle of a random encounter from the current encounter table.
+         *
+         * To be called from Lua scripts, also used by the engine.
+         *
+         * @return The battle ID, -1 if the field has no encounters.
+         */
+        int ScriptRollEncounterBattle() const;
+
+        /**
+         * Checks if a key is being pressed.
+         *
+         * @param[in] key_code The code of the key to test.
+         * @return True if the key is being pressed, false otherwise.
+         */
+        bool IsKeyOn(unsigned int key_code);
+
+        /**
+         * Checks if a key is not being pressed.
+         *
+         * @param[in] key_code The code of the key to test.
+         * @return False if the key is being pressed, true otherwise.
+         */
+        bool IsKeyOff(unsigned int key_code);
+
+        /**
+         * Checks if a script has asked for the Start button a moment ago.
+         *
+         * The scenes that use Start for their own ends (blin70_3, to end the choice of the party)
+         * ask for it every frame, so the pause menu must not open with the same press.
+         *
+         * @return True if a script is asking for the Start button.
+         */
+        bool IsStartKeyRead() const;
+
+        /**
+         * Moves the line of a line entity (SLINE).
+         *
+         * @param[in] name Name of the entity.
+         * @param[in] x1 First vertex of the line.
+         * @param[in] y1 First vertex of the line.
+         * @param[in] z1 First vertex of the line.
+         * @param[in] x2 Second vertex of the line.
+         * @param[in] y2 Second vertex of the line.
+         * @param[in] z2 Second vertex of the line.
+         */
+        void ScriptSetLine(
+          const char* name, const float x1, const float y1, const float z1, const float x2,
+          const float y2, const float z2
+        );
+
+        /**
+         * Assigns a character to an entity.
+         *
+         * Only entities of the currently active module can be assigned
+         *
+         * @param[in] entity_name The entity name.
+         * @param[in] char_id The character ID.
+         */
+        void SetEntityToCharacter(const char* entity_name, unsigned int char_id);
+
+        /**
+         * Sets the 3D model for the background.
+         *
+         * @param[in] name name for the background entity, for debugging purposes only.
+         * @param[in] file_name Path to the 3D model file.
+         */
+        void SetBackground3D(const Ogre::String& name, const Ogre::String& file_name);
+
+    private:
+
+        /**
+         * Scale factor for battle background models.
+         */
+        static const float SCENE_SCALE;
+
+        /**
+         * Entity ID for battle background entity.
+         */
+        static const unsigned int BATTLE_BACKGROUND_ID;
+
+        /**
+         * Entity ID for world map background entity.
+         */
+        static const unsigned int  WORLD_MAP_BACKGROUND_ID;
+
+        /**
+         * Updates the field entities in the manager.
+         */
+        void UpdateField() override;
+
+        /**
+         * Updates the battle entities in the manager.
+         */
+        void UpdateBattle() override;
+
+        /**
+         * Updates the world map entities in the manager.
+         */
+        void UpdateWorld() override;
+
+        /**
+         * Adds a field entity to the manager.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] position Entity position in the map.
+         * @param[in] rotation Entity face direction.
+         * @param[in] scale Entity scale.
+         * @param[in] root_orientation Map orientation. Unused for world map entities.
+         * @param[in] index Index of the entity on the map.
+         */
+        void AddFieldOrWorldMapEntity(
+          const Ogre::String& name, const Ogre::String& file_name,
+          const Ogre::Vector3& position, const Ogre::Degree& rotation,
+          const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, const int index
+        );
+
+        /**
+         * Adds a battle entity to the manager.
+         *
+         * If the manager is not in the battle module, it will do nothing.
+         *
+         * @param[in] name Entity name.
+         * @param[in] file_name Path to the entity model file.
+         * @param[in] position Entity position.
+         * @param[in] orientation Entity face direction.
+         * @param[in] scale Entity scale.
+         * @param[in] root_orientation The node orientation.
+         * @param[in] index Index of the entity.
+         */
+        void AddBattleEntity(
+          const Ogre::String& name, const Ogre::String& file_name,
+          const Ogre::Vector3& position, const Ogre::Degree& orientation,
+          const Ogre::Vector3& scale, const Ogre::Quaternion& root_orientation, const int index
+        );
+
+        /**
+         * Checks for entity triggers near a entity.
+         *
+         * If there are triggers, and the conditions are met, the appropriate trigger function will
+         * be added to the queue. This must be tested every time an entity moves. If the entity is
+         * not the playable character, is not solid or is locked, it will do nothing. If the manager
+         * is in battle mode, it will do nothing.
+         *
+         * @param[in] entity Entity to check for nearby triggers.
+         * @param[in] position The position of the entity.
+         */
+        void CheckTriggers(Entity* entity, const Ogre::Vector3& position);
+
+        /**
+         * Checks if an entity can be interacted.
+         *
+         * It checks if there are entities that can be interacted with from the players current
+         * position and orientation. If there are, the most appropriate one is selected and, if it
+         * has an on_interact script, it is run. If the manager is in battle mode, it will do
+         * nothing.
+         */
+        void CheckEntityInteract();
+
+        /**
+         * Moves the player entity according to the pressed directions.
+         */
+        void ApplyPlayerInput();
+
+        /**
+         * Updates the scroll, offset, turn and movement of an entity of a field.
+         *
+         * @param[in] entity The entity.
+         */
+        void UpdateFieldEntity(Entity* entity);
+
+        /**
+         * Updates an entity that is on the walkmesh: moves it and chooses its animation.
+         *
+         * @param[in] entity The entity.
+         */
+        void UpdateWalkingEntity(Entity* entity);
+
+        /**
+         * Updates an entity that is not moving.
+         *
+         * @param[in] entity The entity.
+         */
+        void UpdateStandingEntity(Entity* entity);
+
+        /**
+         * Retrieves the speed at which an entity walks.
+         *
+         * @param[in] entity The entity.
+         * @return The speed.
+         */
+        float GetWalkingSpeed(const Entity* entity) const;
+
+        /**
+         * Walks an entity for the time of this frame.
+         *
+         * Scripted moves are done in small steps, so a long frame doesn't make them miss their
+         * destination.
+         *
+         * @param[in] entity The entity.
+         * @param[in] speed The speed of the entity.
+         * @return True if the entity moved.
+         */
+        bool WalkEntity(Entity* entity, const float speed);
+
+        /**
+         * Calculates the next offset step for an entity.
+         *
+         * @param[in] entity The entity.
+         */
+        void SetNextOffsetStep(Entity* entity);
+
+        /**
+         * Calculates the next turn step for an entity
+         *
+         * @param[in] entity The entity.
+         */
+        void SetNextTurnStep(Entity* entity);
+
+        /**
+         * @todo Understand and document.
+         */
+        void SetNextScrollStep();
+
+        /**
+         * The map walkmesh.
+         */
+        Walkmesh walkmesh_;
+
+        /**
+         * The map background
+         */
+        Background2D background_2d_;
+
+        /**
+         * The movie player. It has to be created before the screen fade, which is drawn over it.
+         */
+        MoviePlayer movie_player_;
+
+        /**
+         * The coloured fade of the screen. It has to be created after the background, because the
+         * fade must be drawn over it.
+         */
+        ScreenFade screen_fade_;
+
+        /**
+         * The list of field or world entities.
+         */
+        std::vector<Entity*> entity_;
+
+        /**
+         * The list of battle entities.
+         */
+        std::vector<Entity*> battle_entity_;
+
+        /**
+         * A 3D background.
+         */
+        Entity* background_3d_;
+
+        /**
+         * The player controlled entity.
+         */
+        Entity* player_entity_;
+
+        /**
+         * The playable entity current movement indicator.
+         *
+         * Applies only for manual movement.
+         */
+        Ogre::Vector3 player_move_;
+
+        /**
+         * The playable entity current movement turn indicator.
+         *
+         * Applies only for manual movement.
+         */
+        Ogre::Radian player_move_rotation_;
+
+        /**
+         * Indicates if player control is locked.
+         */
+        bool player_lock_;
+
+        /**
+         * Indicates if the player slides along the walls (see ScriptSetPlayerSlip).
+         */
+        bool player_slip_ = true;
+
+        /**
+         * Indicates if the playable is being moved by running.
+         *
+         * Applies only for manual movement.
+         */
+        bool player_run_;
+        /// After entering a field from the world map, the walk keys that were held are ignored until
+        /// they are released, so the player starts standing still.
+        bool ignore_held_walk_ = false;
+        /// Last time that a script asked for the Start button.
+        std::chrono::steady_clock::time_point start_key_read_time_;
+
+        /**
+         * Indicates if the player runs by default, and the run key makes it walk instead.
+         */
+        bool player_default_run_ = false;
+
+        /**
+         * List of triggers.
+         */
+        std::vector<EntityTrigger*> entity_triggers_;
+
+        /**
+         * List of points.
+         */
+        std::vector<EntityPoint*> entity_points_;
+
+        /**
+         * List of scripts.
+         */
+        std::vector<Ogre::String> entity_scripts_;
+
+        /**
+         * Runs the scripts of lines, touches and talks.
+         */
+        EntityTriggers triggers_;
+
+        /**
+         * Random battles of the field.
+         */
+        FieldEncounters encounters_;
+
+        /**
+         * Moves the entities on the walkmesh.
+         */
+        WalkmeshMovement movement_;
+
+        /**
+         * The scene node.
+         */
+        Ogre::SceneNode* scene_node_;
+
+        /**
+         * @todo Understand and document.
+         */
+        Ogre::Entity* grid_;
+
+        /**
+         * @todo Understand and document.
+         */
+        Ogre::Entity* axis_;
+
+        /**
+         * Entities that were visible before a battle, hidden while it lasts.
+         */
+        std::vector<Entity*> entities_hidden_by_battle_;
+
+};

@@ -1,0 +1,258 @@
+<screen name="ExchangeMenu" script="engine/scripts/menu/exchange_menu.lua" visible="false">
+    <sprite name="Background" x="0" y="0" width="100%" height="100%" colour="0 0 0" visible="true"/>
+    <widget name="Container" width="40%" height="40%" x="0" y="0" align="left" valign="top" scale="2.5 2.5" visible="true">
+        <widget name="Info" x="0" y="0" width="100%" height="28" visible="true">
+            <prototype name="Window" />
+            <sprite name="Icon" image="icons/materia_1.png" x="10" y="6" width="16" height="16" visible="false"/>
+            <text_area name="Name" x="32" y="8" font="FFVIIFont" visible="false" />
+            <widget name="Stars" x="100%-190" y="7" width="90" height="16" visible="true">
+                <sprite name="Star1" image="icons/materia_star_1.png" x="0" y="0" width="15" height="15" visible="false"/>
+                <sprite name="Star2" image="icons/materia_star_1.png" x="16" y="0" width="15" height="15" visible="false"/>
+                <sprite name="Star3" image="icons/materia_star_1.png" x="32" y="0" width="15" height="15" visible="false"/>
+                <sprite name="Star4" image="icons/materia_star_1.png" x="48" y="0" width="15" height="15" visible="false"/>
+                <sprite name="Star5" image="icons/materia_star_1.png" x="64" y="0" width="15" height="15" visible="false"/>
+            </widget>
+        </widget>
+        <widget name="Help" x="0" y="28" width="100%" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Help" x="16" y="6" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Title" x="100%-86" y="0" width="86" height="24" visible="true">
+            <prototype name="Window" />
+            <text_area name="Title" x="16" y="6" text_name="MateriaMenuTitle" font="FFVIIFont" visible="true" />
+        </widget>
+        <widget name="Characters" x="0" y="52" width="66%" height="100%-52" visible="true">
+            <sprite name="ScrollBg" x="100%-10" y="2" width="8" height="100%-6" colour="0.2 0.2 0.2" alpha="0.8" visible="true"/>
+            <sprite name="Scroll" x="100%-9" y="3" width="6" height="18" colour="0.7 0.7 0.7" visible="true"/>
+            <widget name="Block1" x="0" y="0" width="100%-12" height="58" visible="false">
+                <prototype name="Window" />
+                <sprite name="Portrait" image="other/choco.png" x="8" y="12" width="26" height="29" visible="true"/>
+                <text_area name="Name" x="40" y="6" font="FFVIIFont" visible="true" />
+                <sprite name="WIcon" image="icons/item_weapon_0.png" x="40" y="22" width="14" height="14" visible="true"/>
+                <sprite name="AIcon" image="icons/item_armor.png" x="40" y="39" width="14" height="14" visible="true"/>
+                <sprite name="WSlot1" image="icons/materia_slot.png" x="70" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot2" image="icons/materia_slot.png" x="86" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot3" image="icons/materia_slot.png" x="102" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot4" image="icons/materia_slot.png" x="118" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot5" image="icons/materia_slot.png" x="134" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot6" image="icons/materia_slot.png" x="150" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot7" image="icons/materia_slot.png" x="166" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot8" image="icons/materia_slot.png" x="182" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WLink1" image="icons/materia_slot_link.png" x="81" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink2" image="icons/materia_slot_link.png" x="113" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink3" image="icons/materia_slot_link.png" x="145" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink4" image="icons/materia_slot_link.png" x="177" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WMat1" image="icons/materia_1.png" x="72" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat2" image="icons/materia_1.png" x="88" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat3" image="icons/materia_1.png" x="104" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat4" image="icons/materia_1.png" x="120" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat5" image="icons/materia_1.png" x="136" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat6" image="icons/materia_1.png" x="152" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat7" image="icons/materia_1.png" x="168" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat8" image="icons/materia_1.png" x="184" y="24" width="10" height="10" visible="false"/>
+                <sprite name="ASlot1" image="icons/materia_slot.png" x="70" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot2" image="icons/materia_slot.png" x="86" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot3" image="icons/materia_slot.png" x="102" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot4" image="icons/materia_slot.png" x="118" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot5" image="icons/materia_slot.png" x="134" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot6" image="icons/materia_slot.png" x="150" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot7" image="icons/materia_slot.png" x="166" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot8" image="icons/materia_slot.png" x="182" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ALink1" image="icons/materia_slot_link.png" x="81" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink2" image="icons/materia_slot_link.png" x="113" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink3" image="icons/materia_slot_link.png" x="145" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink4" image="icons/materia_slot_link.png" x="177" y="39" width="8" height="14" visible="false"/>
+                <sprite name="AMat1" image="icons/materia_1.png" x="72" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat2" image="icons/materia_1.png" x="88" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat3" image="icons/materia_1.png" x="104" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat4" image="icons/materia_1.png" x="120" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat5" image="icons/materia_1.png" x="136" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat6" image="icons/materia_1.png" x="152" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat7" image="icons/materia_1.png" x="168" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat8" image="icons/materia_1.png" x="184" y="41" width="10" height="10" visible="false"/>
+            </widget>
+            <widget name="Block2" x="0" y="58" width="100%-12" height="58" visible="false">
+                <prototype name="Window" />
+                <sprite name="Portrait" image="other/choco.png" x="8" y="12" width="26" height="29" visible="true"/>
+                <text_area name="Name" x="40" y="6" font="FFVIIFont" visible="true" />
+                <sprite name="WIcon" image="icons/item_weapon_0.png" x="40" y="22" width="14" height="14" visible="true"/>
+                <sprite name="AIcon" image="icons/item_armor.png" x="40" y="39" width="14" height="14" visible="true"/>
+                <sprite name="WSlot1" image="icons/materia_slot.png" x="70" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot2" image="icons/materia_slot.png" x="86" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot3" image="icons/materia_slot.png" x="102" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot4" image="icons/materia_slot.png" x="118" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot5" image="icons/materia_slot.png" x="134" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot6" image="icons/materia_slot.png" x="150" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot7" image="icons/materia_slot.png" x="166" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot8" image="icons/materia_slot.png" x="182" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WLink1" image="icons/materia_slot_link.png" x="81" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink2" image="icons/materia_slot_link.png" x="113" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink3" image="icons/materia_slot_link.png" x="145" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink4" image="icons/materia_slot_link.png" x="177" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WMat1" image="icons/materia_1.png" x="72" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat2" image="icons/materia_1.png" x="88" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat3" image="icons/materia_1.png" x="104" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat4" image="icons/materia_1.png" x="120" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat5" image="icons/materia_1.png" x="136" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat6" image="icons/materia_1.png" x="152" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat7" image="icons/materia_1.png" x="168" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat8" image="icons/materia_1.png" x="184" y="24" width="10" height="10" visible="false"/>
+                <sprite name="ASlot1" image="icons/materia_slot.png" x="70" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot2" image="icons/materia_slot.png" x="86" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot3" image="icons/materia_slot.png" x="102" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot4" image="icons/materia_slot.png" x="118" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot5" image="icons/materia_slot.png" x="134" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot6" image="icons/materia_slot.png" x="150" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot7" image="icons/materia_slot.png" x="166" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot8" image="icons/materia_slot.png" x="182" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ALink1" image="icons/materia_slot_link.png" x="81" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink2" image="icons/materia_slot_link.png" x="113" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink3" image="icons/materia_slot_link.png" x="145" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink4" image="icons/materia_slot_link.png" x="177" y="39" width="8" height="14" visible="false"/>
+                <sprite name="AMat1" image="icons/materia_1.png" x="72" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat2" image="icons/materia_1.png" x="88" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat3" image="icons/materia_1.png" x="104" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat4" image="icons/materia_1.png" x="120" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat5" image="icons/materia_1.png" x="136" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat6" image="icons/materia_1.png" x="152" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat7" image="icons/materia_1.png" x="168" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat8" image="icons/materia_1.png" x="184" y="41" width="10" height="10" visible="false"/>
+            </widget>
+            <widget name="Block3" x="0" y="116" width="100%-12" height="58" visible="false">
+                <prototype name="Window" />
+                <sprite name="Portrait" image="other/choco.png" x="8" y="12" width="26" height="29" visible="true"/>
+                <text_area name="Name" x="40" y="6" font="FFVIIFont" visible="true" />
+                <sprite name="WIcon" image="icons/item_weapon_0.png" x="40" y="22" width="14" height="14" visible="true"/>
+                <sprite name="AIcon" image="icons/item_armor.png" x="40" y="39" width="14" height="14" visible="true"/>
+                <sprite name="WSlot1" image="icons/materia_slot.png" x="70" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot2" image="icons/materia_slot.png" x="86" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot3" image="icons/materia_slot.png" x="102" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot4" image="icons/materia_slot.png" x="118" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot5" image="icons/materia_slot.png" x="134" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot6" image="icons/materia_slot.png" x="150" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot7" image="icons/materia_slot.png" x="166" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot8" image="icons/materia_slot.png" x="182" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WLink1" image="icons/materia_slot_link.png" x="81" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink2" image="icons/materia_slot_link.png" x="113" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink3" image="icons/materia_slot_link.png" x="145" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink4" image="icons/materia_slot_link.png" x="177" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WMat1" image="icons/materia_1.png" x="72" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat2" image="icons/materia_1.png" x="88" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat3" image="icons/materia_1.png" x="104" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat4" image="icons/materia_1.png" x="120" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat5" image="icons/materia_1.png" x="136" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat6" image="icons/materia_1.png" x="152" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat7" image="icons/materia_1.png" x="168" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat8" image="icons/materia_1.png" x="184" y="24" width="10" height="10" visible="false"/>
+                <sprite name="ASlot1" image="icons/materia_slot.png" x="70" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot2" image="icons/materia_slot.png" x="86" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot3" image="icons/materia_slot.png" x="102" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot4" image="icons/materia_slot.png" x="118" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot5" image="icons/materia_slot.png" x="134" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot6" image="icons/materia_slot.png" x="150" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot7" image="icons/materia_slot.png" x="166" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot8" image="icons/materia_slot.png" x="182" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ALink1" image="icons/materia_slot_link.png" x="81" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink2" image="icons/materia_slot_link.png" x="113" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink3" image="icons/materia_slot_link.png" x="145" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink4" image="icons/materia_slot_link.png" x="177" y="39" width="8" height="14" visible="false"/>
+                <sprite name="AMat1" image="icons/materia_1.png" x="72" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat2" image="icons/materia_1.png" x="88" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat3" image="icons/materia_1.png" x="104" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat4" image="icons/materia_1.png" x="120" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat5" image="icons/materia_1.png" x="136" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat6" image="icons/materia_1.png" x="152" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat7" image="icons/materia_1.png" x="168" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat8" image="icons/materia_1.png" x="184" y="41" width="10" height="10" visible="false"/>
+            </widget>
+            <widget name="Block4" x="0" y="174" width="100%-12" height="58" visible="false">
+                <prototype name="Window" />
+                <sprite name="Portrait" image="other/choco.png" x="8" y="12" width="26" height="29" visible="true"/>
+                <text_area name="Name" x="40" y="6" font="FFVIIFont" visible="true" />
+                <sprite name="WIcon" image="icons/item_weapon_0.png" x="40" y="22" width="14" height="14" visible="true"/>
+                <sprite name="AIcon" image="icons/item_armor.png" x="40" y="39" width="14" height="14" visible="true"/>
+                <sprite name="WSlot1" image="icons/materia_slot.png" x="70" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot2" image="icons/materia_slot.png" x="86" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot3" image="icons/materia_slot.png" x="102" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot4" image="icons/materia_slot.png" x="118" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot5" image="icons/materia_slot.png" x="134" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot6" image="icons/materia_slot.png" x="150" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot7" image="icons/materia_slot.png" x="166" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WSlot8" image="icons/materia_slot.png" x="182" y="22" width="14" height="14" visible="false"/>
+                <sprite name="WLink1" image="icons/materia_slot_link.png" x="81" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink2" image="icons/materia_slot_link.png" x="113" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink3" image="icons/materia_slot_link.png" x="145" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WLink4" image="icons/materia_slot_link.png" x="177" y="22" width="8" height="14" visible="false"/>
+                <sprite name="WMat1" image="icons/materia_1.png" x="72" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat2" image="icons/materia_1.png" x="88" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat3" image="icons/materia_1.png" x="104" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat4" image="icons/materia_1.png" x="120" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat5" image="icons/materia_1.png" x="136" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat6" image="icons/materia_1.png" x="152" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat7" image="icons/materia_1.png" x="168" y="24" width="10" height="10" visible="false"/>
+                <sprite name="WMat8" image="icons/materia_1.png" x="184" y="24" width="10" height="10" visible="false"/>
+                <sprite name="ASlot1" image="icons/materia_slot.png" x="70" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot2" image="icons/materia_slot.png" x="86" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot3" image="icons/materia_slot.png" x="102" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot4" image="icons/materia_slot.png" x="118" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot5" image="icons/materia_slot.png" x="134" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot6" image="icons/materia_slot.png" x="150" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot7" image="icons/materia_slot.png" x="166" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ASlot8" image="icons/materia_slot.png" x="182" y="39" width="14" height="14" visible="false"/>
+                <sprite name="ALink1" image="icons/materia_slot_link.png" x="81" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink2" image="icons/materia_slot_link.png" x="113" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink3" image="icons/materia_slot_link.png" x="145" y="39" width="8" height="14" visible="false"/>
+                <sprite name="ALink4" image="icons/materia_slot_link.png" x="177" y="39" width="8" height="14" visible="false"/>
+                <sprite name="AMat1" image="icons/materia_1.png" x="72" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat2" image="icons/materia_1.png" x="88" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat3" image="icons/materia_1.png" x="104" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat4" image="icons/materia_1.png" x="120" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat5" image="icons/materia_1.png" x="136" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat6" image="icons/materia_1.png" x="152" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat7" image="icons/materia_1.png" x="168" y="41" width="10" height="10" visible="false"/>
+                <sprite name="AMat8" image="icons/materia_1.png" x="184" y="41" width="10" height="10" visible="false"/>
+            </widget>
+            <sprite name="Cursor" image="icons/cursor.png" x="48" y="18" width="24" height="17" visible="false"/>
+            <sprite name="Held" image="icons/cursor.png" x="48" y="18" width="24" height="17" visible="false">
+                <animation name="Blink" length="0.4" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+            </sprite>
+        </widget>
+        <widget name="Inventory" x="66%" y="52" width="34%" height="100%-52" visible="true">
+            <prototype name="Window" />
+            <sprite name="ScrollBg" x="100%-12" y="2" width="10" height="100%-6" colour="0.2 0.2 0.2" alpha="0.8" visible="true"/>
+            <sprite name="Scroll" x="100%-11" y="3" width="8" height="18" colour="0.7 0.7 0.7" visible="true"/>
+            <sprite name="Icon1" image="icons/materia_1.png" x="8" y="7" width="12" height="12" visible="false"/>
+            <text_area name="Name1" x="24" y="6" font="FFVIIFont" visible="false" />
+            <sprite name="Icon2" image="icons/materia_1.png" x="8" y="23" width="12" height="12" visible="false"/>
+            <text_area name="Name2" x="24" y="22" font="FFVIIFont" visible="false" />
+            <sprite name="Icon3" image="icons/materia_1.png" x="8" y="39" width="12" height="12" visible="false"/>
+            <text_area name="Name3" x="24" y="38" font="FFVIIFont" visible="false" />
+            <sprite name="Icon4" image="icons/materia_1.png" x="8" y="55" width="12" height="12" visible="false"/>
+            <text_area name="Name4" x="24" y="54" font="FFVIIFont" visible="false" />
+            <sprite name="Icon5" image="icons/materia_1.png" x="8" y="71" width="12" height="12" visible="false"/>
+            <text_area name="Name5" x="24" y="70" font="FFVIIFont" visible="false" />
+            <sprite name="Icon6" image="icons/materia_1.png" x="8" y="87" width="12" height="12" visible="false"/>
+            <text_area name="Name6" x="24" y="86" font="FFVIIFont" visible="false" />
+            <sprite name="Icon7" image="icons/materia_1.png" x="8" y="103" width="12" height="12" visible="false"/>
+            <text_area name="Name7" x="24" y="102" font="FFVIIFont" visible="false" />
+            <sprite name="Icon8" image="icons/materia_1.png" x="8" y="119" width="12" height="12" visible="false"/>
+            <text_area name="Name8" x="24" y="118" font="FFVIIFont" visible="false" />
+            <sprite name="Icon9" image="icons/materia_1.png" x="8" y="135" width="12" height="12" visible="false"/>
+            <text_area name="Name9" x="24" y="134" font="FFVIIFont" visible="false" />
+            <sprite name="Icon10" image="icons/materia_1.png" x="8" y="151" width="12" height="12" visible="false"/>
+            <text_area name="Name10" x="24" y="150" font="FFVIIFont" visible="false" />
+            <sprite name="Icon11" image="icons/materia_1.png" x="8" y="167" width="12" height="12" visible="false"/>
+            <text_area name="Name11" x="24" y="166" font="FFVIIFont" visible="false" />
+            <sprite name="Icon12" image="icons/materia_1.png" x="8" y="183" width="12" height="12" visible="false"/>
+            <text_area name="Name12" x="24" y="182" font="FFVIIFont" visible="false" />
+            <sprite name="Icon13" image="icons/materia_1.png" x="8" y="199" width="12" height="12" visible="false"/>
+            <text_area name="Name13" x="24" y="198" font="FFVIIFont" visible="false" />
+            <sprite name="Icon14" image="icons/materia_1.png" x="8" y="215" width="12" height="12" visible="false"/>
+            <text_area name="Name14" x="24" y="214" font="FFVIIFont" visible="false" />
+            <sprite name="Cursor" image="icons/cursor.png" x="-8" y="5" width="24" height="17" visible="false"/>
+            <sprite name="Held" image="icons/cursor.png" x="-8" y="5" width="24" height="17" visible="false">
+                <animation name="Blink" length="0.4" alpha="0:1, 0.2:1, 0.21:0, 0.39:0, 0.4:1" />
+            </sprite>
+        </widget>
+    </widget>
+</screen>

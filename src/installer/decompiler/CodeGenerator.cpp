@@ -40,34 +40,6 @@ LuaLanguage& CodeGenerator::GetLanguage(){
     return *target_lang_;
 }
 
-void CodeGenerator::WriteFunctionCall(
-  std::string function_name, std::string param_format, const std::vector<ValuePtr>& params
-){
-    std::string func_call = function_name + target_lang_->FunctionCallBegin();
-    const char* format = param_format.c_str();
-    int param_index = 0;
-    while (*format){
-        bool skip_argument = false;
-        switch (*format){
-            case 'b': func_call += params[param_index]->GetUnsigned() ? "true" : "false"; break;
-            case 'n': func_call += std::to_string(params[param_index]->GetUnsigned()); break;
-            case 'f':
-                func_call += std::to_string(static_cast<float>(params[param_index]->GetUnsigned()) / 30.0f);
-                break;
-            case '_': skip_argument = true; break;// Ignore param
-            default: throw std::runtime_error("Unknown param type");
-        }
-        param_index ++;
-        format ++;
-        if (*format) {
-            // There is another param.
-            if (!skip_argument) func_call += target_lang_->FunctionCallArgumentSeperator() + " ";
-        }
-    }
-    func_call += target_lang_->FunctionCallEnd();
-    AddOutputLine(func_call);
-}
-
 void CodeGenerator::Generate(InstVec& insts, const Graph &graph){
     if (OutputOnlyRequiredLabels()){
         // Call twice, once where no output is generated but instructions are
@@ -89,12 +61,6 @@ void CodeGenerator::WriteTodo(std::string class_name, std::string instruction){
     AddOutputLine("-- UNIMPLMENTED INSTRUCTION: \"" + instruction + "\")");
 }
 
-void CodeGenerator::WriteAssignment(ValuePtr dst, ValuePtr src) {
-    std::stringstream s;
-    s << dst << " = " << src << target_lang_->LineTerminator();
-    AddOutputLine(s.str());
-}
-
 void CodeGenerator::AddArg(ValuePtr arg) {
     if (call_order_ == FIFO_ARGUMENT_ORDER) arg_list_.push_front(arg);
     else if (call_order_ == LIFO_ARGUMENT_ORDER) arg_list_.push_back(arg);
@@ -108,8 +74,6 @@ void CodeGenerator::ProcessSpecialMetadata(const InstPtr inst, char c, int) {
         break;
     }
 }
-
-ValueList CodeGenerator::GetArgList(){return arg_list_;}
 
 ARGUMENT_ORDER CodeGenerator::GetBinaryOrder(){return bin_order_;}
 
