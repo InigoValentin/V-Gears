@@ -13,12 +13,9 @@
  * GNU General Public License for more details.
  */
 
-#include <OgreHardwareBufferManager.h>
 #include <OgreLogManager.h>
-#include <OgreMaterialManager.h>
 #include <OgreException.h>
 #include <OgreViewport.h>
-#include <OgreTechnique.h>
 #include <OgreTextureManager.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <algorithm>
@@ -35,85 +32,27 @@ ConfigVar cv_show_background2d("show_background2d", "Draw background", "true");
 ConfigVar cv_background2d_manual("background2d_manual", "Manual 2d background scrolling", "false");
 
 Background2D::Background2D():
-  alpha_max_vertex_count_(0),
-  add_max_vertex_count_(0),
-  subtract_max_vertex_count_(0),
-  scroll_entity_(nullptr),
-  scroll_position_start_(Ogre::Vector2::ZERO),
-  scroll_position_end_(Ogre::Vector2::ZERO),
-  scroll_type_(Background2D::NONE),
-  scroll_seconds_(0),
-  scroll_current_seconds_(0),
-  scroll_target_entity_(nullptr),
-  scroll_follow_target_(false),
-  free_scroll_(false),
-  position_(Ogre::Vector2::ZERO),
-  position_real_(Ogre::Vector2::ZERO),
+  alpha_tiles_(VGears::B_ALPHA, "Background2DAlpha", MAX_TILES),
+  add_tiles_(VGears::B_ADD, "Background2DAdd", MAX_TILES),
+  subtract_tiles_(VGears::B_SUBTRACT, "Background2DSubtract", MAX_SUBTRACT_TILES),
+  scroll_([](const ScriptId& script){
+      ScriptManager::getSingleton().ContinueScriptExecution(script);
+  }),
   offset_(Ogre::Vector2::ZERO),
-  range_(Ogre::AxisAlignedBox::BOX_INFINITE),
+  position_real_(Ogre::Vector2::ZERO),
+  screen_scale_(1),
+  screen_proportion_(1, 1),
   virtual_screen_size_(320, 240) // FFVII original resolution
 {
     scene_manager_ = Ogre::Root::getSingleton().getSceneManager("Scene");
     render_system_ = Ogre::Root::getSingletonPtr()->getRenderSystem();
-    CreateVertexBuffers();
-    alpha_material_ = Ogre::MaterialManager::getSingleton().create("Background2DAlpha", "FIELDS");
-    Ogre::Pass* pass = alpha_material_->getTechnique(0)->getPass(0);
-    pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
-    pass->setCullingMode(Ogre::CULL_NONE);
-    pass->setDepthCheckEnabled(true);
-    pass->setDepthWriteEnabled(true);
-    pass->setLightingEnabled(false);
-    pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-    pass->setAlphaRejectFunction(Ogre::CMPF_GREATER);
-    pass->setAlphaRejectValue(0);
-    Ogre::TextureUnitState* tex = pass->createTextureUnitState();
-    tex->setTextureName("system/blank.png");
-    tex->setNumMipmaps(-1);
-    tex->setTextureFiltering(Ogre::TFO_NONE);
-    add_material = Ogre::MaterialManager::getSingleton().create("Background2DAdd", "FIELDS");
-    pass = add_material->getTechnique(0)->getPass(0);
-    pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
-    pass->setCullingMode(Ogre::CULL_NONE);
-    pass->setDepthCheckEnabled(true);
-    pass->setDepthWriteEnabled(true);
-    pass->setLightingEnabled(false);
-    // Additive tiles blend with what is behind. They don't write depth, or a tile in front (such as
-    // the light beams, at depth 0) would hide the additive tiles behind it, like the waterfall of
-    // eals_1.
-    pass->setDepthWriteEnabled(false);
-    pass->setSceneBlending(Ogre::SBT_ADD);
-    pass->setAlphaRejectFunction(Ogre::CMPF_GREATER);
-    pass->setAlphaRejectValue(0);
-    tex = pass->createTextureUnitState();
-    tex->setTextureName("system/blank.png");
-    tex->setNumMipmaps(-1);
-    tex->setTextureFiltering(Ogre::TFO_NONE);
-    subtract_material_ = Ogre::MaterialManager::getSingleton().create(
-      "Background2DSubtract", "FIELDS"
-    );
-    pass = subtract_material_->getTechnique(0)->getPass(0);
-    pass->setVertexColourTracking(Ogre::TVC_AMBIENT);
-    pass->setCullingMode(Ogre::CULL_NONE);
-    pass->setDepthCheckEnabled(true);
-    pass->setDepthWriteEnabled(true);
-    pass->setLightingEnabled(false);
-    pass->setSceneBlending(Ogre::SBT_ADD);
-    // Like the additive tiles, they don't write depth.
-    pass->setDepthWriteEnabled(false);
-    pass->setSceneBlendingOperation(Ogre::SBO_SUBTRACT);
-    pass->setAlphaRejectFunction(Ogre::CMPF_LESS);
-    pass->setAlphaRejectValue(0);
-    tex = pass->createTextureUnitState();
-    tex->setTextureName("system/blank.png");
-    tex->setNumMipmaps(-1);
-    tex->setTextureFiltering(Ogre::TFO_NONE);
+    ResetLayers();
     scene_manager_->addRenderQueueListener(this);
 }
 
 Background2D::~Background2D(){
     scene_manager_->removeRenderQueueListener(this);
     for (unsigned int i = 0; i < animations_.size(); ++ i) delete animations_[i];
-    DestroyVertexBuffers();
 }
 
 void Background2D::InputDebug(const VGears::Event& event){
@@ -131,53 +70,47 @@ void Background2D::Hide(){scene_manager_->removeRenderQueueListener(this);}
 void Background2D::Show(){scene_manager_->addRenderQueueListener(this);}
 
 void Background2D::Update(){
-    if (has_pending_scroll_){
-        has_pending_scroll_ = false;
-        SetScroll(pending_scroll_);
-    }
+    if (scroll_.ApplyPending()) applyScroll();
     UpdatePalette();
-    UpdateShake(Timer::getSingleton().GetGameTimeDelta());
+    const float delta = Timer::getSingleton().GetGameTimeDelta();
+    UpdateShake(delta);
     // The layers that scroll by themselves.
     for (int layer = 0; layer < LAYER_COUNT; ++ layer){
-        layer_scroll_offset_[layer][0] += layer_scroll_speed_[layer][0] * Timer::getSingleton().GetGameTimeDelta();
-        layer_scroll_offset_[layer][1] += layer_scroll_speed_[layer][1] * Timer::getSingleton().GetGameTimeDelta();
+        layer_scroll_offset_[layer][0] += layer_scroll_speed_[layer][0] * delta;
+        layer_scroll_offset_[layer][1] += layer_scroll_speed_[layer][1] * delta;
     }
-    for (unsigned int i = 0; i < animation_played_.size(); ++ i){
-        for (unsigned int j = 0; j < animations_.size(); ++ j){
-            if (animations_[j]->GetName() == animation_played_[i].name){
-                float delta_time = Timer::getSingleton().GetGameTimeDelta();
-                float time = animations_[j]->GetTime();
-                float end_time = animations_[j]->GetLength();
+    UpdateAnimations(delta);
+}
 
-                // If animation ended
-                if (time + delta_time >= end_time){
-                    // Set to last frame of animation.
-                    if (time != end_time) animations_[j]->SetTime(end_time);
-
-                    if (animation_played_[i].state == Background2DAnimation::ONCE){
-                        for (unsigned int k = 0; k < animation_played_[i].sync.size(); ++k){
-                            ScriptManager::getSingleton().ContinueScriptExecution(
-                              animation_played_[i].sync[k]
-                            );
-                        }
-                        animation_played_[i].sync.clear();
-                        // Mark to delete this way:
-                        animation_played_[i].name = "";
-                    }
-                    // In case of looped, sync with end:
-                    else animations_[j]->SetTime(time + delta_time - end_time);
+void Background2D::UpdateAnimations(const float delta){
+    for (AnimationPlayed& played : animation_played_){
+        for (Background2DAnimation* animation : animations_){
+            if (animation->GetName() != played.name) continue;
+            const float time = animation->GetTime();
+            const float end_time = animation->GetLength();
+            if (time + delta < end_time) animation->AddTime(delta);
+            else{
+                // Set to last frame of animation.
+                if (time != end_time) animation->SetTime(end_time);
+                if (played.state == Background2DAnimation::ONCE){
+                    for (const ScriptId& script : played.sync)
+                        ScriptManager::getSingleton().ContinueScriptExecution(script);
+                    played.sync.clear();
+                    // Mark to delete this way:
+                    played.name = "";
                 }
-                else animations_[j]->AddTime(delta_time);
+                // In case of looped, sync with end:
+                else animation->SetTime(time + delta - end_time);
             }
         }
     }
-
     // Remove stopped animations.
-    std::vector<AnimationPlayed>::iterator i = animation_played_.begin();
-    for(; i != animation_played_.end();){
-        if ((*i).name == "") i = animation_played_.erase(i);
-        else ++ i;
-    }
+    animation_played_.erase(
+      std::remove_if(
+        animation_played_.begin(), animation_played_.end(),
+        [](const AnimationPlayed& played){return played.name == "";}
+      ), animation_played_.end()
+    );
 }
 
 void Background2D::UpdateDebug(){
@@ -215,52 +148,29 @@ void Background2D::OnResize(){
 }
 
 void Background2D::WriteTilePosition(const Tile& tile){
-    Ogre::Vector2 top_left(static_cast<Ogre::Real>(tile.x), static_cast<Ogre::Real>(- tile.y));
-    Ogre::Vector2 top_right(
-      static_cast<Ogre::Real>(tile.x + tile.width), static_cast<Ogre::Real>(top_left.y)
-    );
-    Ogre::Vector2 bottom_right(
-      static_cast<Ogre::Real>(top_right.x), static_cast<Ogre::Real>(-(tile.y + tile.height))
-    );
-    Ogre::Vector2 bottom_left(
-      static_cast<Ogre::Real>(top_left.x), static_cast<Ogre::Real>(bottom_right.y)
-    );
-    virtualScreenToWorldSpace(top_left);
-    virtualScreenToWorldSpace(top_right);
-    virtualScreenToWorldSpace(bottom_right);
-    virtualScreenToWorldSpace(bottom_left);
+    BackgroundTileBuffer* buffer = BufferFor(tile.blending);
+    if (buffer == nullptr) return;
+    QuadWriter::Corners corners = TileCorners(tile);
     // A tile that is not drawn has all its corners in the same point.
-    if (!tile.visible){
-        top_right = top_left;
-        bottom_right = top_left;
-        bottom_left = top_left;
-    }
-    Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
-    if (tile.blending == VGears::B_ALPHA) vertex_buffer = alpha_vertex_buffer_;
-    else if (tile.blending == VGears::B_ADD) vertex_buffer = add_vertex_buffer_;
-    else if (tile.blending == VGears::B_SUBTRACT) vertex_buffer = subtract_vertex_buffer_;
-    else return;
-    float* write_iterator
-      = static_cast<float*>(vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
-    write_iterator += tile.start_vertex_index * TILE_VERTEX_INDEX_SIZE;
-    *write_iterator ++ = top_left.x;
-    *write_iterator ++ = top_left.y;
-    write_iterator += 7;
-    *write_iterator ++ = top_right.x;
-    *write_iterator ++ = top_right.y;
-    write_iterator += 7;
-    *write_iterator ++ = bottom_right.x;
-    *write_iterator ++ = bottom_right.y;
-    write_iterator += 7;
-    *write_iterator ++ = top_left.x;
-    *write_iterator ++ = top_left.y;
-    write_iterator += 7;
-    *write_iterator ++ = bottom_right.x;
-    *write_iterator ++ = bottom_right.y;
-    write_iterator += 7;
-    *write_iterator ++ = bottom_left.x;
-    *write_iterator ++ = bottom_left.y;
-    vertex_buffer->unlock();
+    if (!tile.visible) corners.fill(corners[0]);
+    buffer->SetPositions(tile.start_vertex_index, corners);
+}
+
+QuadWriter::Corners Background2D::TileCorners(const Tile& tile) const{
+    const Ogre::Real left = static_cast<Ogre::Real>(tile.x);
+    const Ogre::Real top = static_cast<Ogre::Real>(-tile.y);
+    const Ogre::Real right = static_cast<Ogre::Real>(tile.x + tile.width);
+    const Ogre::Real bottom = static_cast<Ogre::Real>(-(tile.y + tile.height));
+    QuadWriter::Corners corners{{{left, top}, {right, top}, {right, bottom}, {left, bottom}}};
+    for (Ogre::Vector2& corner : corners) virtualScreenToWorldSpace(corner);
+    return corners;
+}
+
+BackgroundTileBuffer* Background2D::BufferFor(const Blending blending){
+    if (blending == VGears::B_ALPHA) return &alpha_tiles_;
+    if (blending == VGears::B_ADD) return &add_tiles_;
+    if (blending == VGears::B_SUBTRACT) return &subtract_tiles_;
+    return nullptr;
 }
 
 bool Background2D::IsAreaStateOn(const int area, const int layers) const{
@@ -303,81 +213,10 @@ void Background2D::ScriptAreaOff(const int area, const int layer){
     RefreshArea(area);
 }
 
-namespace{
-    // Random factors the original game applies to each bounce of a shake.
-    const float SHAKE_FACTORS[] = {
-      -1.0f, 1.14f, -1.34f, 0.61f, -0.49f, 0.64f, -0.25f, 0.47f, -1.20f, -0.01f, 1.14f, -0.86f,
-      0.81f, -0.58f, 0.68f, -1.31f, 0.44f, -0.91f, 0.03f, -0.97f, 1.25f, -0.76f, 0.48f, -0.99f,
-      1.34f, -0.85f, 0.55f, -0.65f, 0.07f, -0.83f
-    };
-    const size_t SHAKE_FACTOR_COUNT = sizeof(SHAKE_FACTORS) / sizeof(SHAKE_FACTORS[0]);
-
-    // Frames per second the shake times are given in.
-    const float SHAKE_FRAMES_PER_SECOND = 30.0f;
-
-    // Pixels of the original screen.
-    const float ORIGINAL_SCREEN_WIDTH = 320.0f;
-
-    // Quadratic in and out easing.
-    float ShakeEase(const float t){return t < 0.5f ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);}
-}
-
-void Background2D::ShakeAxis::Configure(const float new_amplitude, const float new_seconds){
-    amplitude = new_amplitude;
-    seconds = std::max(new_seconds, 1.0f / SHAKE_FRAMES_PER_SECOND);
-    stopping = false;
-    if (!running){
-        running = true;
-        StartBounce();
-    }
-}
-
-void Background2D::ShakeAxis::Stop(const float seconds_to_center){
-    if (!running) return;
-    stopping = true;
-    stop_seconds = std::max(seconds_to_center, 1.0f / SHAKE_FRAMES_PER_SECOND);
-}
-
-void Background2D::ShakeAxis::StartBounce(){
-    from = value;
-    elapsed = 0;
-    if (stopping){
-        to = 0;
-        duration = stop_seconds;
-    }
-    else{
-        // Half the amplitude, times the random factor, is the distance in pixels.
-        to = amplitude / 2 * SHAKE_FACTORS[step % SHAKE_FACTOR_COUNT];
-        ++ step;
-        duration = seconds;
-    }
-}
-
-bool Background2D::ShakeAxis::Advance(const float delta){
-    if (!running) return false;
-    const float old_value = value;
-    elapsed += delta;
-    while (elapsed >= duration){
-        elapsed -= duration;
-        value = to;
-        if (stopping && to == 0){
-            // Back in the center: the shake is over.
-            *this = ShakeAxis();
-            return old_value != 0;
-        }
-        StartBounce();
-    }
-    value = from + (to - from) * ShakeEase(elapsed / duration);
-    return value != old_value;
-}
-
 void Background2D::UpdateShake(const float delta){
-    if (!shake_x_.running && !shake_y_.running) return;
-    const bool x_changed = shake_x_.Advance(delta);
-    const bool y_changed = shake_y_.Advance(delta);
-    if (!x_changed && !y_changed) return;
-    const float scale = virtual_screen_size_.x / ORIGINAL_SCREEN_WIDTH;
-    shake_offset_ = Ogre::Vector2(shake_x_.value * scale, shake_y_.value * scale);
+    if (!shake_.Update(delta)) return;
+    // The shake is in pixels of the original screen.
+    shake_offset_ = shake_.Offset() * (virtual_screen_size_.x / 320.0f);
     applyScroll();
 }
 
@@ -386,24 +225,8 @@ void Background2D::ScriptShake(
   const int y_frames
 ){
     LOG_TRIVIAL("Background2d shake type " + std::to_string(type) + ".");
-    const float x_seconds = x_frames / SHAKE_FRAMES_PER_SECOND;
-    const float y_seconds = y_frames / SHAKE_FRAMES_PER_SECOND;
-    switch (type){
-        case 0:
-            {
-                const float seconds = std::max(x_seconds, y_seconds);
-                shake_x_.Stop(seconds);
-                shake_y_.Stop(seconds);
-            }
-            break;
-        case 1: shake_x_.Configure(static_cast<float>(x_amplitude), x_seconds); break;
-        case 2: shake_y_.Configure(static_cast<float>(y_amplitude), y_seconds); break;
-        case 3:
-            shake_x_.Configure(static_cast<float>(x_amplitude), x_seconds);
-            shake_y_.Configure(static_cast<float>(y_amplitude), y_seconds);
-            break;
-        default: LOG_WARNING("Background2d shake type " + std::to_string(type) + " is unknown.");
-    }
+    if (!shake_.Set(type, x_amplitude, x_frames, y_amplitude, y_frames))
+        LOG_WARNING("Background2d shake type " + std::to_string(type) + " is unknown.");
 }
 
 void Background2D::ScriptAreaClear(const int area){
@@ -471,57 +294,41 @@ void Background2D::UpdatePalette(){
 }
 
 void Background2D::Clear(){
-    scroll_entity_ = nullptr;
-    scroll_position_start_ = Ogre::Vector2::ZERO;
-    scroll_position_end_ = Ogre::Vector2::ZERO;
-    scroll_seconds_ = 0;
-    scroll_current_seconds_ = 0;
-    scroll_target_entity_ = nullptr;
-    scroll_follow_target_ = false;
-    free_scroll_ = false;
-    has_pending_scroll_ = false;
-    position_ = Ogre::Vector2::ZERO;
+    scroll_.Clear();
     position_real_ = Ogre::Vector2::ZERO;
     offset_ = Ogre::Vector2::ZERO;
-    range_ = Ogre::AxisAlignedBox::BOX_INFINITE;
-    UnsetScroll();
-    for(unsigned int i = 0; i < animations_.size(); ++i) delete animations_[i];
+    for (Background2DAnimation* animation : animations_) delete animation;
     animations_.clear();
-    for(unsigned int i = 0; i < animation_played_.size(); ++ i)
-        for(unsigned int j = 0; j < animation_played_[i].sync.size(); ++j)
-            ScriptManager::getSingleton().ContinueScriptExecution(animation_played_[i].sync[j]);
+    for (const AnimationPlayed& played : animation_played_){
+        for (const ScriptId& script : played.sync)
+            ScriptManager::getSingleton().ContinueScriptExecution(script);
+    }
     animation_played_.clear();
     tiles_.clear();
     area_states_on_.clear();
     palette_.Clear();
     palette_image_loaded_ = false;
-    shake_x_ = ShakeAxis();
-    shake_y_ = ShakeAxis();
+    shake_ = BackgroundShake();
     shake_offset_ = Ogre::Vector2::ZERO;
-    DestroyVertexBuffers();
-    CreateVertexBuffers();
+    alpha_tiles_.Clear();
+    add_tiles_.Clear();
+    subtract_tiles_.Clear();
+    ResetLayers();
 }
 
-void Background2D::ScriptAutoScrollToEntity(Entity* entity){
-    scroll_entity_ = entity;
-    free_scroll_ = false;
-}
+void Background2D::ScriptAutoScrollToEntity(Entity* entity){scroll_.Follow(entity);}
 
-Entity* Background2D::GetAutoScrollEntity() const{return scroll_entity_;}
+Entity* Background2D::GetAutoScrollEntity() const{return scroll_.FollowedEntity();}
 
-bool Background2D::HasScrollControl() const{
-    return scroll_entity_ != nullptr || scroll_target_entity_ != nullptr || free_scroll_
-      || has_pending_scroll_;
-}
+bool Background2D::HasScrollControl() const{return scroll_.HasControl();}
 
 void Background2D::ScriptScrollToPlayer(const SCROLL_TYPE type, const float seconds){
     Entity* player = EntityManager::getSingleton().ScriptGetPlayerEntity();
     if (player == nullptr) return;
-    scroll_entity_ = nullptr;
     // The camera follows the player when the scroll ends, whatever the transition: scenes end with
     // SCRLC (scroll to the player) and give the control back without any other camera opcode, as
     // the first visit of mrkt2 does.
-    StartScroll(GetEntityScroll(player), type, seconds, player, true);
+    if (scroll_.ToEntity(player, GetEntityScroll(player), type, seconds)) applyScroll();
 }
 
 void Background2D::ScriptScrollToEntity(
@@ -531,13 +338,12 @@ void Background2D::ScriptScrollToEntity(
         LOG_WARNING("Background2d can't scroll to an entity that doesn't exist.");
         return;
     }
-    scroll_entity_ = nullptr;
-    StartScroll(GetEntityScroll(entity), type, seconds, entity, true);
+    if (scroll_.ToEntity(entity, GetEntityScroll(entity), type, seconds)) applyScroll();
 }
 
 void Background2D::UpdateScrollTarget(){
-    if (scroll_target_entity_ != nullptr)
-        scroll_position_end_ = ClampToRange(GetEntityScroll(scroll_target_entity_));
+    if (scroll_.TargetEntity() != nullptr)
+        scroll_.SetTargetPosition(GetEntityScroll(scroll_.TargetEntity()));
 }
 
 const Ogre::Vector2 Background2D::GetEntityScroll(const Entity* entity) const{
@@ -552,32 +358,6 @@ const Ogre::Vector2 Background2D::GetEntityScroll(const Entity* entity) const{
     ) / screen_scale_;
 }
 
-void Background2D::StartScroll(
-  const Ogre::Vector2& position, const SCROLL_TYPE type, const float seconds,
-  Entity* target_entity, const bool follow_target
-){
-    // A newer scroll replaces an instant one that has not been applied yet.
-    has_pending_scroll_ = false;
-    // Finish the previous scroll first, without following its target.
-    scroll_target_entity_ = nullptr;
-    scroll_follow_target_ = false;
-    UnsetScroll();
-    scroll_target_entity_ = target_entity;
-    scroll_follow_target_ = follow_target;
-    if (type == Background2D::NONE || seconds <= 0){
-        // The camera that goes to an entity is limited to the background.
-        if (target_entity != nullptr) free_scroll_ = false;
-        SetScroll(position);
-        UnsetScroll();
-        return;
-    }
-    scroll_position_start_ = position_;
-    scroll_position_end_ = (target_entity != nullptr) ? ClampToRange(position) : ClampScroll(position);
-    scroll_type_ = type;
-    scroll_seconds_ = seconds;
-    scroll_current_seconds_ = 0;
-}
-
 void Background2D::ScriptScrollToPosition(
   const float x, const float y, const SCROLL_TYPE type, const float seconds
 ){
@@ -585,34 +365,18 @@ void Background2D::ScriptScrollToPosition(
       "Background2d set scroll to position '"
       + Ogre::StringConverter::toString(Ogre::Vector2(x, y)) + "'."
     );
-    scroll_entity_ = nullptr;
-    free_scroll_ = true;
-    if (type == Background2D::NONE || seconds <= 0){
-        // The scripts set a position and then scroll from it to another one, in the same frame.
-        // The camera is only moved at the end of the frame, so if another scroll comes first the
-        // movement starts from where the camera was, and there is no jump.
-        // TODO: Some scenes still show a small camera jump (mds7pb_1, when the NPCs go down the
-        // pinball machine and when Marlene says "Papa"), and the camera stays fixed after them
-        // until the script scrolls to the player. How the original game handles it is not known.
-        scroll_target_entity_ = nullptr;
-        scroll_follow_target_ = false;
-        UnsetScroll();
-        pending_scroll_ = Ogre::Vector2(x, y);
-        has_pending_scroll_ = true;
-        return;
-    }
-    StartScroll(Ogre::Vector2(x, y), type, seconds, nullptr, false);
+    scroll_.ToPosition(Ogre::Vector2(x, y), type, seconds);
 }
 
 int Background2D::ScriptScrollSync(){
     // Nothing would ever wake the script up if there is no scroll to wait for.
-    if (scroll_type_ == Background2D::NONE) return 1;
+    if (scroll_.Type() == NONE) return 1;
     ScriptId script = ScriptManager::getSingleton().GetCurrentScriptId();
     LOG_TRIVIAL(
       "Wait Background2d scroll for function '"
       + script.function + "' in script entity '" + script.entity + "'."
     );
-    scroll_sync_.push_back(script);
+    scroll_.Wait(script);
     return -1;
 }
 
@@ -627,52 +391,25 @@ void Background2D::ScriptOffset(const float x, const float y){
     CameraManager::getSingleton().Set2DScroll(position_real_);
 }
 
-void Background2D::UnsetScroll(){
-    scroll_type_ = Background2D::NONE;
-    if (scroll_follow_target_){
-        scroll_entity_ = scroll_target_entity_;
-        free_scroll_ = false;
-    }
-    scroll_target_entity_ = nullptr;
-    scroll_follow_target_ = false;
-    for(unsigned int i = 0; i < scroll_sync_.size(); ++ i)
-        ScriptManager::getSingleton().ContinueScriptExecution(scroll_sync_[i]);
-    scroll_sync_.clear();
+void Background2D::UnsetScroll(){scroll_.Stop();}
+
+const Ogre::Vector2& Background2D::GetScrollPositionStart() const{return scroll_.Start();}
+
+const Ogre::Vector2& Background2D::GetScrollPositionEnd() const{return scroll_.End();}
+
+Background2D::SCROLL_TYPE Background2D::GetScrollType() const{return scroll_.Type();}
+
+float Background2D::GetScrollSeconds() const{return scroll_.Seconds();}
+
+void Background2D::SetScrollCurrentSeconds(const float seconds){
+    scroll_.SetCurrentSeconds(seconds);
 }
 
-const Ogre::Vector2& Background2D::GetScrollPositionStart() const{return scroll_position_start_;}
-
-const Ogre::Vector2& Background2D::GetScrollPositionEnd() const{return scroll_position_end_;}
-
-Background2D::SCROLL_TYPE Background2D::GetScrollType() const{return scroll_type_;}
-
-float Background2D::GetScrollSeconds() const{return scroll_seconds_;}
-
-void Background2D::SetScrollCurrentSeconds(const float seconds){scroll_current_seconds_ = seconds;}
-
-float Background2D::GetScrollCurrentSeconds() const{return scroll_current_seconds_;}
+float Background2D::GetScrollCurrentSeconds() const{return scroll_.CurrentSeconds();}
 
 void Background2D::SetScroll(const Ogre::Vector2& position){
-    position_ = ClampScroll(position);
+    scroll_.SetPosition(position);
     applyScroll();
-}
-
-const Ogre::Vector2 Background2D::ClampScroll(const Ogre::Vector2& position) const{
-    return free_scroll_ ? position : ClampToRange(position);
-}
-
-const Ogre::Vector2 Background2D::ClampToRange(const Ogre::Vector2& position) const{
-    Ogre::Vector2 clamped = position;
-    Ogre::Vector3 pos_3d(position.x, position.y, 0);
-    if (!range_.contains(pos_3d)){
-        Ogre::Vector3 max_3d(range_.getMaximum());
-        Ogre::Vector3 min_3d(range_.getMinimum());
-        Ogre::Vector2 max(max_3d.x, max_3d.y);
-        Ogre::Vector2 min(min_3d.x, min_3d.y);
-        clamped.makeCeil(min);
-        clamped.makeFloor(max);
-    }
-    return clamped;
 }
 
 void Background2D::applyScroll(){
@@ -684,7 +421,7 @@ void Background2D::applyScroll(){
     }
 }
 
-const Ogre::Vector2& Background2D::GetScroll() const{return position_;}
+const Ogre::Vector2& Background2D::GetScroll() const{return scroll_.Position();}
 
 const Ogre::Vector2 Background2D::GetScreenScroll() const{return GetScroll() * screen_scale_;}
 
@@ -692,15 +429,9 @@ void Background2D::SetImage(const Ogre::String& image){
     Ogre::LogManager::getSingleton().stream() << "Background2D::SetImage " << image;
     image_name_ = image;
     palette_image_loaded_ = false;
-    Ogre::Pass* pass = alpha_material_->getTechnique(0)->getPass(0);
-    Ogre::TextureUnitState* tex = pass->getTextureUnitState(0);
-    tex->setTextureName(image);
-    pass = add_material->getTechnique(0)->getPass(0);
-    tex = pass->getTextureUnitState(0);
-    tex->setTextureName(image);
-    pass = subtract_material_->getTechnique(0)->getPass(0);
-    tex = pass->getTextureUnitState(0);
-    tex->setTextureName(image);
+    alpha_tiles_.SetImage(image);
+    add_tiles_.SetImage(image);
+    subtract_tiles_.SetImage(image);
 }
 
 void Background2D::SetRange(const Ogre::Vector4& range){
@@ -710,20 +441,23 @@ void Background2D::SetRange(const Ogre::Vector4& range){
 void Background2D::SetRange(const int min_x, const int min_y, const int max_x, const int max_y){
     Ogre::LogManager::getSingleton().stream()
       << "Background2D::SetRange " << min_x << " " << min_y << " " << max_x << " " << max_y;
+    // The proportion of the screen is needed for the limits.
+    calculateScreenScale();
     Ogre::Vector2 half_virtual_screen_size(virtual_screen_size_ / 2);
     half_virtual_screen_size /= screen_proportion_;
     // The scroll is the opposite of the position of the center of the camera (the scripts give it
     // like that, and the scene is moved, not the camera), so the limits of the camera are the
     // opposite ones. It only shows in the fields whose range is not centered (nivl_b1): the
     // camera went beyond the background.
-    range_.setMaximum(
+    Ogre::AxisAlignedBox range;
+    range.setMaximum(
       -(min_x + half_virtual_screen_size.x), -(min_y + half_virtual_screen_size.y), 1
     );
-    range_.setMinimum(
+    range.setMinimum(
       -(max_x - half_virtual_screen_size.x), -(max_y - half_virtual_screen_size.y), 0
     );
-    Ogre::LogManager::getSingleton().stream() << "Background2D::SetRange " << range_;
-    calculateScreenScale();
+    scroll_.SetRange(range);
+    Ogre::LogManager::getSingleton().stream() << "Background2D::SetRange " << range;
 }
 
 float Background2D::TileDepthToBuffer(const float depth, const Ogre::Matrix4& projection){
@@ -791,140 +525,33 @@ void Background2D::AddTile(
   const float v1, const float u2, const float v2, const Blending blending, const int area,
   const int state, const int layer, const float intensity
 ){
-    Ogre::RenderOperation render_op;
-    Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
-    unsigned int max_vertex_count;
-    if (blending == VGears::B_ALPHA){
-        render_op = alpha_render_op_;
-        vertex_buffer = alpha_vertex_buffer_;
-        max_vertex_count = alpha_max_vertex_count_;
-    }
-    else if (blending == VGears::B_ADD){
-        render_op = add_render_op_;
-        vertex_buffer = add_vertex_buffer_;
-        max_vertex_count = add_max_vertex_count_;
-    }
-    else if (blending == VGears::B_SUBTRACT){
-        render_op = subtract_render_op_;
-        vertex_buffer = subtract_vertex_buffer_;
-        max_vertex_count = subtract_max_vertex_count_;
-    }
-    else{
+    BackgroundTileBuffer* buffer = BufferFor(blending);
+    if (buffer == nullptr){
         LOG_ERROR("Unknown blending type.");
         return;
     }
-    if (render_op.vertexData->vertexCount + TILE_VERTEX_COUNT > max_vertex_count){
+    if (buffer->IsFull()){
         LOG_ERROR(
           "Max number of tiles reached. Can't create more than "
-          + Ogre::StringConverter::toString(max_vertex_count / TILE_VERTEX_COUNT) + " tiles."
+          + Ogre::StringConverter::toString(buffer->MaxTiles()) + " tiles."
         );
         return;
-    }
-    // Keep where the tiles of each layer are in the buffer.
-    {
-        const int buffer = (blending == VGears::B_ALPHA) ? 0 : ((blending == VGears::B_ADD) ? 1 : 2);
-        const int clamped = (layer < 0) ? 0 : ((layer >= LAYER_COUNT) ? LAYER_COUNT - 1 : layer);
-        if (last_layer_[buffer] > clamped) layers_contiguous_[buffer] = false;
-        if (clamped > last_layer_[buffer]) last_layer_[buffer] = clamped;
-        LayerRange& range = layer_ranges_[buffer][clamped];
-        if (range.count == 0) range.first = render_op.vertexData->vertexCount;
-        range.count += TILE_VERTEX_COUNT;
     }
     Tile tile;
     tile.x = x;
     tile.y = y;
     tile.width = width;
     tile.height = height;
-    tile.start_vertex_index = render_op.vertexData->vertexCount;
     tile.blending = blending;
     tile.area = area;
     tile.state = state;
     tile.visible = (area == 0) || IsAreaStateOn(area, state);
-    //size_t index(tiles_.size());
+    tile.start_vertex_index = buffer->Add(
+      TileCorners(tile), {u1, v1, u2, v2}, depth, intensity, layer
+    );
     tiles_.push_back(tile);
-    Ogre::Vector2 top_left(static_cast<Ogre::Real>(x), static_cast<Ogre::Real>(-y));
-    Ogre::Vector2 top_right(
-      static_cast<Ogre::Real>(x + width), static_cast<Ogre::Real>(top_left.y)
-    );
-    Ogre::Vector2 bottom_right(
-      static_cast<Ogre::Real>(top_right.x), static_cast<Ogre::Real>(-(y + height))
-    );
-    Ogre::Vector2 bottom_left(top_left.x, bottom_right.y);
-    virtualScreenToWorldSpace(top_left);
-    virtualScreenToWorldSpace(top_right);
-    virtualScreenToWorldSpace(bottom_right);
-    virtualScreenToWorldSpace(bottom_left);
-    float new_x1 = top_left.x;
-    float new_y1 = top_left.y;
-    float new_x2 = top_right.x;
-    float new_y2 = top_right.y;
-    float new_x3 = bottom_right.x;
-    float new_y3 = bottom_right.y;
-    float new_x4 = bottom_left.x;
-    float new_y4 = bottom_left.y;
-    float* write_iterator
-      = static_cast<float*>(vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
-    write_iterator += render_op.vertexData->vertexCount * TILE_VERTEX_INDEX_SIZE;
-
-    // TODO: Can use WriteGlyph
-    *write_iterator ++ = new_x1;
-    *write_iterator ++ = new_y1;
-    *write_iterator ++ = depth;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = u1;
-    *write_iterator ++ = v1;
-    *write_iterator ++ = new_x2;
-    *write_iterator ++ = new_y2;
-    *write_iterator ++ = depth;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = u2;
-    *write_iterator ++ = v1;
-    *write_iterator ++ = new_x3;
-    *write_iterator ++ = new_y3;
-    *write_iterator ++ = depth;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = u2;
-    *write_iterator ++ = v2;
-    *write_iterator ++ = new_x1;
-    *write_iterator ++ = new_y1;
-    *write_iterator ++ = depth;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = u1;
-    *write_iterator ++ = v1;
-    *write_iterator ++ = new_x3;
-    *write_iterator ++ = new_y3;
-    *write_iterator ++ = depth;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = u2;
-    *write_iterator ++ = v2;
-    *write_iterator ++ = new_x4;
-    *write_iterator ++ = new_y4;
-    *write_iterator ++ = depth;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = intensity;
-    *write_iterator ++ = 1;
-    *write_iterator ++ = u1;
-    *write_iterator ++ = v2;
-    render_op.vertexData->vertexCount += TILE_VERTEX_COUNT;
-    vertex_buffer->unlock();
     // Tiles of an area that is off are written at their position, and then collapsed.
-    if (!tiles_.back().visible) WriteTilePosition(tiles_.back());
+    if (!tile.visible) WriteTilePosition(tile);
 }
 
 void Background2D::UpdateTileUV(
@@ -934,32 +561,8 @@ void Background2D::UpdateTileUV(
         LOG_ERROR("Tile with id " + Ogre::StringConverter::toString( tile_id ) + " doesn't exist.");
         return;
     }
-    Ogre::HardwareVertexBufferSharedPtr vertex_buffer;
-    if (tiles_[tile_id].blending == VGears::B_ALPHA) vertex_buffer = alpha_vertex_buffer_;
-    else if (tiles_[tile_id].blending == VGears::B_ADD) vertex_buffer = add_vertex_buffer_;
-    else if(tiles_[tile_id].blending == VGears::B_SUBTRACT) vertex_buffer = subtract_vertex_buffer_;
-    float* write_iterator
-      = static_cast<float*>(vertex_buffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
-    write_iterator += tiles_[tile_id].start_vertex_index * TILE_VERTEX_INDEX_SIZE;
-    write_iterator += 7;
-    *write_iterator ++ = u1;
-    *write_iterator ++ = v1;
-    write_iterator += 7;
-    *write_iterator ++ = u2;
-    *write_iterator ++ = v1;
-    write_iterator += 7;
-    *write_iterator ++ = u2;
-    *write_iterator ++ = v2;
-    write_iterator += 7;
-    *write_iterator ++ = u1;
-    *write_iterator ++ = v1;
-    write_iterator += 7;
-    *write_iterator ++ = u2;
-    *write_iterator ++ = v2;
-    write_iterator += 7;
-    *write_iterator ++ = u1;
-    *write_iterator ++ = v2;
-    vertex_buffer->unlock();
+    const Tile& tile = tiles_[tile_id];
+    BufferFor(tile.blending)->SetTexture(tile.start_vertex_index, {u1, v1, u2, v2});
 }
 
 void Background2D::AddAnimation(Background2DAnimation* animation){animations_.push_back(animation);}
@@ -1027,24 +630,14 @@ void Background2D::renderQueueEnded(
         Ogre::Viewport *viewport(CameraManager::getSingleton().getViewport());
         float width = static_cast<float>(viewport->getActualWidth());
         float height = static_cast<float>(viewport->getActualHeight());
-        Ogre::Matrix4 view;
-        view.makeTrans(Ogre::Vector3(position_real_.x / width, -position_real_.y / height, 0));
-        // TODO This is deprecated, but if not done , the background image disappears.
-        render_system_->_setViewMatrix(view);
-        rs_params->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view);
-        render_system_->applyFixedFunctionParams(rs_params, Ogre::GPV_GLOBAL);
-        RenderBuffer(0, alpha_render_op_, alpha_material_, rs_params, width, height);
-        RenderBuffer(1, add_render_op_, add_material, rs_params, width, height);
-        RenderBuffer(2, subtract_render_op_, subtract_material_, rs_params, width, height);
+        SetView(position_real_, rs_params, width, height);
+        RenderBuffer(alpha_tiles_, rs_params, width, height);
+        RenderBuffer(add_tiles_, rs_params, width, height);
+        RenderBuffer(subtract_tiles_, rs_params, width, height);
     }
 }
 
 void Background2D::ResetLayers(){
-    for (int buffer = 0; buffer < 3; ++ buffer){
-        for (int layer = 0; layer < LAYER_COUNT; ++ layer) layer_ranges_[buffer][layer] = LayerRange();
-        last_layer_[buffer] = -1;
-        layers_contiguous_[buffer] = true;
-    }
     for (int layer = 0; layer < LAYER_COUNT; ++ layer){
         layer_parallax_[layer][0] = layer_parallax_[layer][1] = 1.0f;
         layer_scroll_speed_[layer][0] = layer_scroll_speed_[layer][1] = 0.0f;
@@ -1079,25 +672,18 @@ void Background2D::ScriptSetLayerScroll(const int layer, const int x, const int 
 }
 
 void Background2D::RenderBuffer(
-  const int buffer, Ogre::RenderOperation& render_op, const Ogre::MaterialPtr& material,
-  Ogre::GpuProgramParametersPtr& rs_params, const float width, const float height
+  BackgroundTileBuffer& buffer, Ogre::GpuProgramParametersPtr& rs_params, const float width,
+  const float height
 ){
-    if (render_op.vertexData->vertexCount == 0) return;
-    const unsigned int total = render_op.vertexData->vertexCount;
-    const bool by_layer = layers_contiguous_[buffer] && HasLayerScroll();
-    if (!by_layer){
+    if (buffer.IsEmpty()) return;
+    if (!buffer.Layers().AreContiguous() || !HasLayerScroll()){
         // The view the layers of other buffers could have left.
-        Ogre::Matrix4 view;
-        view.makeTrans(Ogre::Vector3(position_real_.x / width, -position_real_.y / height, 0));
-        render_system_->_setViewMatrix(view);
-        rs_params->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view);
-        render_system_->applyFixedFunctionParams(rs_params, Ogre::GPV_GLOBAL);
-        scene_manager_->_setPass(material->getTechnique(0)->getPass(0), true, false);
-        render_system_->_render(render_op);
+        SetView(position_real_, rs_params, width, height);
+        buffer.Draw(*scene_manager_, *render_system_);
         return;
     }
     for (int layer = 0; layer < LAYER_COUNT; ++ layer){
-        const LayerRange& range = layer_ranges_[buffer][layer];
+        const BackgroundLayerRanges::Range& range = buffer.Layers().Of(layer);
         if (range.count == 0) continue;
         // The scroll of the background, changed by the parallax of the layer, plus the one it has
         // by itself. The scroll by itself is in pixels of the virtual screen.
@@ -1105,94 +691,26 @@ void Background2D::RenderBuffer(
           layer_scroll_offset_[layer][0] * screen_scale_,
           layer_scroll_offset_[layer][1] * screen_scale_
         );
-        Ogre::Matrix4 view;
-        view.makeTrans(Ogre::Vector3(
-          (position_real_.x * layer_parallax_[layer][0] + by_itself.x) / width,
-          -(position_real_.y * layer_parallax_[layer][1] + by_itself.y) / height, 0
-        ));
-        // TODO This is deprecated, but if not done , the background image disappears.
-        render_system_->_setViewMatrix(view);
-        rs_params->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view);
-        render_system_->applyFixedFunctionParams(rs_params, Ogre::GPV_GLOBAL);
-        scene_manager_->_setPass(material->getTechnique(0)->getPass(0), true, false);
-        render_op.vertexData->vertexStart = range.first;
-        render_op.vertexData->vertexCount = range.count;
-        render_system_->_render(render_op);
-        render_op.vertexData->vertexStart = 0;
-        render_op.vertexData->vertexCount = total;
+        SetView(
+          Ogre::Vector2(
+            position_real_.x * layer_parallax_[layer][0] + by_itself.x,
+            position_real_.y * layer_parallax_[layer][1] + by_itself.y
+          ), rs_params, width, height
+        );
+        buffer.Draw(*scene_manager_, *render_system_, range);
     }
 }
 
-void Background2D::CreateVertexBuffers(){
-    ResetLayers();
-    // Some fields have more than 1600 tiles that add their colour (the fire and the light of las0_2,
-    // clsin2_1 and ujunon4), and more than 2500 tiles in all.
-    alpha_max_vertex_count_ = 4096 * TILE_VERTEX_COUNT;
-    alpha_render_op_.vertexData = new Ogre::VertexData;
-    alpha_render_op_.vertexData->vertexStart = 0;
-    Ogre::VertexDeclaration* vertex_declaration = alpha_render_op_.vertexData->vertexDeclaration;
-    size_t offset = 0;
-    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
-    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
-    alpha_vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
-      vertex_declaration->getVertexSize(0), alpha_max_vertex_count_,
-      Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
-    );
-    alpha_render_op_.vertexData->vertexBufferBinding->setBinding(0, alpha_vertex_buffer_);
-    alpha_render_op_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
-    alpha_render_op_.useIndexes = false;
-    add_max_vertex_count_ = 4096 * TILE_VERTEX_COUNT;
-    add_render_op_.vertexData = new Ogre::VertexData;
-    add_render_op_.vertexData->vertexStart = 0;
-    vertex_declaration = add_render_op_.vertexData->vertexDeclaration;
-    offset = 0;
-    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
-    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
-    add_vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
-      vertex_declaration->getVertexSize(0), add_max_vertex_count_,
-      Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
-    );
-    add_render_op_.vertexData->vertexBufferBinding->setBinding(0, add_vertex_buffer_);
-    add_render_op_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
-    add_render_op_.useIndexes = false;
-    subtract_max_vertex_count_ = 2048 * TILE_VERTEX_COUNT;
-    subtract_render_op_.vertexData = new Ogre::VertexData;
-    subtract_render_op_.vertexData->vertexStart = 0;
-    vertex_declaration = subtract_render_op_.vertexData->vertexDeclaration;
-    offset = 0;
-    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
-    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
-    subtract_vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
-      vertex_declaration->getVertexSize(0), subtract_max_vertex_count_,
-      Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
-    );
-    subtract_render_op_.vertexData->vertexBufferBinding->setBinding(0, subtract_vertex_buffer_);
-    subtract_render_op_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
-    subtract_render_op_.useIndexes = false;
-}
-
-void Background2D::DestroyVertexBuffers(){
-    delete alpha_render_op_.vertexData;
-    alpha_render_op_.vertexData = 0;
-    alpha_vertex_buffer_.reset();
-    alpha_max_vertex_count_ = 0;
-    delete add_render_op_.vertexData;
-    add_render_op_.vertexData = 0;
-    add_vertex_buffer_.reset();
-    add_max_vertex_count_ = 0;
-    delete subtract_render_op_.vertexData;
-    subtract_render_op_.vertexData = 0;
-    subtract_vertex_buffer_.reset();
-    subtract_max_vertex_count_ = 0;
+void Background2D::SetView(
+  const Ogre::Vector2& position, Ogre::GpuProgramParametersPtr& rs_params, const float width,
+  const float height
+){
+    Ogre::Matrix4 view;
+    view.makeTrans(Ogre::Vector3(position.x / width, -position.y / height, 0));
+    // TODO This is deprecated, but if not done , the background image disappears.
+    render_system_->_setViewMatrix(view);
+    rs_params->setConstant(Ogre::GpuProgramParameters::ACT_VIEW_MATRIX, view);
+    render_system_->applyFixedFunctionParams(rs_params, Ogre::GPV_GLOBAL);
 }
 
 void Background2D::load(const VGears::Background2DFilePtr& background){

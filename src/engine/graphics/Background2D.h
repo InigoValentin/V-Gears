@@ -17,48 +17,25 @@
 
 #include <map>
 #include <set>
-#include <OgreHardwareVertexBuffer.h>
 #include <OgreRenderQueueListener.h>
 #include <OgreRoot.h>
 #include "formats/field/Background2DFile.h"
 #include "Background2DAnimation.h"
 #include "BackgroundPalette.h"
+#include "BackgroundScroll.h"
+#include "BackgroundShake.h"
+#include "BackgroundTileBuffer.h"
 #include "engine/entity/Entity.h"
 #include "engine/script/ScriptManager.h"
 
 /**
  * A field background
  */
-class Background2D : public Ogre::RenderQueueListener{
+class Background2D : public Ogre::RenderQueueListener, public BackgroundScrollTypes{
 
     public:
 
         typedef VGears::Blending  Blending;
-
-        /**
-         * How to scroll the background.
-         */
-        enum SCROLL_TYPE{
-
-            /**
-             * Don't scroll the background.
-             */
-            NONE,
-
-            /**
-             * Linearly scroll.
-             *
-             * May seem unnatural in scripted sequences, but it's OK for
-             * character tracking.
-             */
-            LINEAR,
-            /**
-             * Smooth (soft in, soft out) scroll.
-             *
-             * Best for scripted sequences.
-             */
-            SMOOTH
-        };
 
         /**
          * Constructor.
@@ -590,89 +567,6 @@ class Background2D : public Ogre::RenderQueueListener{
         bool IsAreaStateOn(const int area, const int layers) const;
 
         /**
-         * A chain of random bounces in one axis of the view.
-         */
-        struct ShakeAxis{
-
-            /**
-             * Amplitude of the next bounces, in original screen pixels.
-             */
-            float amplitude = 0;
-
-            /**
-             * Duration of the next bounces, in seconds.
-             */
-            float seconds = 0;
-
-            /**
-             * Whether the axis is moving.
-             */
-            bool running = false;
-
-            /**
-             * Whether the axis is going back to the center to stop.
-             */
-            bool stopping = false;
-
-            /**
-             * Duration of the movement back to the center, in seconds.
-             */
-            float stop_seconds = 0;
-
-            /**
-             * Position at the start of the current bounce.
-             */
-            float from = 0;
-
-            /**
-             * Position at the end of the current bounce.
-             */
-            float to = 0;
-
-            /**
-             * Duration of the current bounce, in seconds.
-             */
-            float duration = 0;
-
-            /**
-             * Time since the start of the current bounce, in seconds.
-             */
-            float elapsed = 0;
-
-            /**
-             * Index of the next random factor.
-             */
-            size_t step = 0;
-
-            /**
-             * Current position, in original screen pixels.
-             */
-            float value = 0;
-
-            /**
-             * Changes the bounces of the axis, and starts it if it is stopped.
-             */
-            void Configure(const float new_amplitude, const float new_seconds);
-
-            /**
-             * Makes the axis go back to the center and stop after the current bounce.
-             */
-            void Stop(const float seconds_to_center);
-
-            /**
-             * Moves the axis forward in time.
-             *
-             * @return True if the position changed.
-             */
-            bool Advance(const float delta);
-
-            /**
-             * Starts the next bounce.
-             */
-            void StartBounce();
-        };
-
-        /**
          * Moves the shake forward in time, and applies it to the view if it changed.
          *
          * @param[in] delta Seconds since the last frame.
@@ -725,35 +619,6 @@ class Background2D : public Ogre::RenderQueueListener{
         virtual void applyScroll();
 
         /**
-         * Starts a scroll, replacing the current one if there is any.
-         *
-         * A scroll without type or duration is applied immediately.
-         *
-         * @param[in] position Position to scroll to.
-         * @param[in] type Scroll type.
-         * @param[in] seconds Scroll duration.
-         * @param[in] target_entity Entity the scroll moves towards, or nullptr.
-         * @param[in] follow_target Keep following target_entity when the scroll ends.
-         */
-        void StartScroll(
-          const Ogre::Vector2& position, const SCROLL_TYPE type, const float seconds,
-          Entity* target_entity, const bool follow_target
-        );
-
-        /**
-         * Limits a scroll position to the background range.
-         *
-         * @param[in] position Position to limit.
-         * @return The position, inside the background range.
-         */
-        const Ogre::Vector2 ClampScroll(const Ogre::Vector2& position) const;
-
-        /**
-         * Limits a scroll position to the background range, always.
-         */
-        const Ogre::Vector2 ClampToRange(const Ogre::Vector2& position) const;
-
-        /**
          * Calculates the screen scale.
          *
          * The scale is calculated as the proportion between the viewport and
@@ -770,35 +635,98 @@ class Background2D : public Ogre::RenderQueueListener{
          */
         virtual void virtualScreenToWorldSpace(Ogre::Vector2 &pos) const;
 
-        /**
-         * Tile vertex properties.
-         */
-        enum{
-
-            /**
-             * Tile vertex count.
-             *
-             * @todo Understand and document.
-             */
-            TILE_VERTEX_COUNT = 6,
-
-            /**
-             * Tile vertex index size.
-             */
-            TILE_VERTEX_INDEX_SIZE = TILE_VERTEX_COUNT + 3
-        };
-
     private:
 
         /**
-         * Creates all vertex buffers.
+         * The number of layers of a background.
          */
-        void CreateVertexBuffers();
+        static const int LAYER_COUNT = BackgroundLayerRanges::LAYER_COUNT;
 
         /**
-         * Destroys all vertex buffers.
+         * Number of alpha and of add tiles that fit. Some fields have more than 1600 tiles that add
+         * their colour (the fire and the light of las0_2, clsin2_1 and ujunon4), and more than 2500
+         * tiles in all.
          */
-        void DestroyVertexBuffers();
+        static const unsigned int MAX_TILES = 4096;
+
+        /**
+         * Number of subtract tiles that fit.
+         */
+        static const unsigned int MAX_SUBTRACT_TILES = 2048;
+
+        /**
+         * The alpha blended tiles.
+         */
+        BackgroundTileBuffer alpha_tiles_;
+
+        /**
+         * The tiles that add their colour.
+         */
+        BackgroundTileBuffer add_tiles_;
+
+        /**
+         * The tiles that subtract their colour.
+         */
+        BackgroundTileBuffer subtract_tiles_;
+
+        /**
+         * The scroll of the view.
+         */
+        BackgroundScroll scroll_;
+
+        /**
+         * The shake of the view.
+         */
+        BackgroundShake shake_;
+
+        /**
+         * Retrieves the buffer of the tiles with a blending mode.
+         *
+         * @param[in] blending The blending mode.
+         * @return The buffer, or null if the mode is unknown.
+         */
+        BackgroundTileBuffer* BufferFor(const Blending blending);
+
+        /**
+         * Calculates where the corners of a tile are.
+         *
+         * @param[in] tile The tile.
+         * @return The corners, in world space.
+         */
+        QuadWriter::Corners TileCorners(const Tile& tile) const;
+
+        /**
+         * Moves forward the animations that are playing.
+         *
+         * @param[in] delta Seconds since the last frame.
+         */
+        void UpdateAnimations(const float delta);
+
+        /**
+         * Draws the tiles of a buffer, each layer scrolled as it has to be.
+         *
+         * @param[in,out] buffer Buffer to draw.
+         * @param[in] rs_params Parameters of the render system.
+         * @param[in] width Width of the viewport.
+         * @param[in] height Height of the viewport.
+         */
+        void RenderBuffer(
+          BackgroundTileBuffer& buffer, Ogre::GpuProgramParametersPtr& rs_params, const float width,
+          const float height
+        );
+
+        /**
+         * Moves the view the tiles are drawn with.
+         *
+         * @param[in] position Scroll of the view, in pixels of the screen.
+         * @param[in] rs_params Parameters of the render system.
+         * @param[in] width Width of the viewport.
+         * @param[in] height Height of the viewport.
+         */
+        void SetView(
+          const Ogre::Vector2& position, Ogre::GpuProgramParametersPtr& rs_params, const float width,
+          const float height
+        );
 
         /**
          * The scene manager.
@@ -846,16 +774,6 @@ class Background2D : public Ogre::RenderQueueListener{
         bool palette_image_loaded_ = false;
 
         /**
-         * The shake of the view in the X axis.
-         */
-        ShakeAxis shake_x_;
-
-        /**
-         * The shake of the view in the Y axis.
-         */
-        ShakeAxis shake_y_;
-
-        /**
          * The shake being applied to the scroll, in virtual screen units.
          */
         Ogre::Vector2 shake_offset_ = Ogre::Vector2::ZERO;
@@ -863,36 +781,6 @@ class Background2D : public Ogre::RenderQueueListener{
         /**
          * Alpha blending render operation.
          */
-        /**
-         * The number of layers of a background.
-         */
-        static const int LAYER_COUNT = 4;
-
-        /**
-         * Part of a vertex buffer that has the tiles of a layer.
-         */
-        struct LayerRange{
-            LayerRange(): first(0), count(0){}
-            unsigned int first;
-            unsigned int count;
-        };
-
-        /**
-         * The tiles of each layer in the buffers of alpha, add and subtract tiles. They are only
-         * used if the tiles of a layer are together, which is how the installer writes them.
-         */
-        LayerRange layer_ranges_[3][LAYER_COUNT];
-
-        /**
-         * The last layer a tile has been added to for each buffer.
-         */
-        int last_layer_[3];
-
-        /**
-         * If the tiles of the layers of each buffer are together, one layer after the other.
-         */
-        bool layers_contiguous_[3];
-
         /**
          * Scroll of each layer relative to the one of the background.
          */
@@ -917,149 +805,6 @@ class Background2D : public Ogre::RenderQueueListener{
          * If any layer is not scrolled as the background is.
          */
         bool HasLayerScroll() const;
-
-        /**
-         * Draws the tiles of a buffer, each layer scrolled as it has to be.
-         *
-         * @param[in] buffer Buffer to draw: 0 for alpha, 1 for add and 2 for subtract.
-         * @param[in,out] render_op What to draw.
-         * @param[in] material Material to draw it with.
-         * @param[in] rs_params Parameters of the render system.
-         * @param[in] width Width of the viewport.
-         * @param[in] height Height of the viewport.
-         */
-        void RenderBuffer(
-          const int buffer, Ogre::RenderOperation& render_op, const Ogre::MaterialPtr& material,
-          Ogre::GpuProgramParametersPtr& rs_params, const float width, const float height
-        );
-
-        Ogre::RenderOperation alpha_render_op_;
-
-        /**
-         * Alpha blending vertex buffer.
-         */
-        Ogre::HardwareVertexBufferSharedPtr alpha_vertex_buffer_;
-
-        /**
-         * Alpha blending max vertex count.
-         */
-        unsigned int alpha_max_vertex_count_;
-
-        /**
-         * Alpha blending material.
-         */
-        Ogre::MaterialPtr alpha_material_;
-
-        /**
-         * Add blending render operation.
-         */
-        Ogre::RenderOperation add_render_op_;
-
-        /**
-         * Add blending vertex buffer.
-         */
-        Ogre::HardwareVertexBufferSharedPtr add_vertex_buffer_;
-
-        /**
-         * Add blending max vertex count.
-         */
-        unsigned int add_max_vertex_count_;
-
-        /**
-         * Add blending material.
-         */
-        Ogre::MaterialPtr add_material;
-
-        /**
-         * Substract blending render operation.
-         */
-        Ogre::RenderOperation subtract_render_op_;
-
-        /**
-         * Substract blending vertex buffer.
-         */
-        Ogre::HardwareVertexBufferSharedPtr subtract_vertex_buffer_;
-
-        /**
-         * Substract blending max vertex count.
-         */
-        unsigned int subtract_max_vertex_count_;
-
-        /**
-         * Substract blending material.
-         */
-        Ogre::MaterialPtr subtract_material_;
-
-        /**
-         * The entity to keep track of with the scroll.
-         */
-        Entity* scroll_entity_;
-
-        /**
-         * Starting position of the current scroll action.
-         */
-        Ogre::Vector2 scroll_position_start_;
-
-        /**
-         * Final position of the current scroll action.
-         */
-        Ogre::Vector2 scroll_position_end_;
-
-        /**
-         * Type of the current scroll action.
-         */
-        SCROLL_TYPE scroll_type_;
-
-        /**
-         * Total duration of the current scroll action, in seconds
-         */
-        float scroll_seconds_;
-
-        /**
-         * Secund the currens scroll action has taken so far.
-         */
-        float scroll_current_seconds_;
-
-        /**
-         * Entity the current scroll action moves towards, or nullptr.
-         */
-        Entity* scroll_target_entity_;
-
-        /**
-         * Whether to keep following the target entity when the current scroll action ends.
-         */
-        bool scroll_follow_target_;
-
-        /**
-         * True while a script has moved the camera to a position. The original game doesn't limit
-         * those scrolls to the background, so a scene can show the empty space around it (the
-         * models of ealin_12 are moved there while the camera is away). The camera that follows
-         * an entity is always limited.
-         */
-        bool free_scroll_;
-
-        /**
-         * Position of an instant scroll that waits for the end of the frame.
-         *
-         * A script that sets a position and scrolls to another one in the same frame must see the
-         * scroll start where the camera was, not at the first position. See ScriptScrollToPosition.
-         */
-        Ogre::Vector2 pending_scroll_;
-
-        /**
-         * Whether there is an instant scroll waiting for the end of the frame.
-         */
-        bool has_pending_scroll_ = false;
-
-        /**
-         * @todo Document.
-         */
-        std::vector<ScriptId> scroll_sync_;
-
-        /**
-         * The current scroll position, virtual screen size.
-         */
-        Ogre::Vector2 position_;
 
         /**
          * The current background offset, virtual screen size.
@@ -1087,11 +832,6 @@ class Background2D : public Ogre::RenderQueueListener{
          * The size of the virtual screen.
          */
         Ogre::Vector2 virtual_screen_size_;
-
-        /**
-         * @todo Document.
-         */
-        Ogre::AxisAlignedBox range_;
 
         /**
          * State of an animation.

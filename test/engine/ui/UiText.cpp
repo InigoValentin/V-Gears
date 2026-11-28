@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(TestUiTextLayoutWrapsAndStopsAtTheBottom){
     BOOST_CHECK(!layout.Place(Glyph('d'), box));
 }
 
-BOOST_AUTO_TEST_CASE(TestUiTextLayoutWidthAndVertices){
+BOOST_AUTO_TEST_CASE(TestUiTextLayoutWidthAndCorners){
     const std::vector<TextChar> text = Parse("ab\nabc");
     BOOST_CHECK_EQUAL(UiTextLayout::TextWidth(text, Glyph), 30);
     const auto corners = UiTextLayout::ScreenCorners(
@@ -148,14 +148,4 @@ BOOST_AUTO_TEST_CASE(TestUiTextLayoutWidthAndVertices){
     BOOST_CHECK_CLOSE(corners[0].x, -0.8f, 0.001f);
     BOOST_CHECK_CLOSE(corners[0].y, 0.6f, 0.001f);
     BOOST_CHECK_CLOSE(corners[2].x, -0.4f, 0.001f);
-    std::vector<float> vertices(6 * UiTextLayout::VERTEX_SIZE);
-    float* end = vertices.data();
-    UiTextLayout::WriteQuad(end, corners, {0, 0.25f, 0.5f, 0.75f}, 3, Ogre::ColourValue(1, 0, 0));
-    BOOST_CHECK(end == vertices.data() + vertices.size());
-    // The last vertex is the bottom left one.
-    const float* last = &vertices[5 * UiTextLayout::VERTEX_SIZE];
-    BOOST_CHECK_EQUAL(last[0], corners[3].x);
-    BOOST_CHECK_EQUAL(last[2], 3);
-    BOOST_CHECK_EQUAL(last[7], 0);
-    BOOST_CHECK_EQUAL(last[8], 0.75f);
 }

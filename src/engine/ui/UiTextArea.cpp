@@ -540,11 +540,11 @@ void UiTextArea::WriteCharacter(
       static_cast<float>(data.x + data.width) / width,
       static_cast<float>(data.y + data.height) / height
     };
-    const std::array<Ogre::Vector2, 4> corners = UiTextLayout::ScreenCorners(
+    const QuadWriter::Corners corners = UiTextLayout::ScreenCorners(
       box, final_translate_, final_rotation_, Ogre::Vector2(screen_width_, screen_height_)
     );
-    UiTextLayout::WriteQuad(vertices, corners, texture, final_z_, colour);
-    render_operation_.vertexData->vertexCount += 6;
+    QuadWriter::Write(vertices, corners, texture, final_z_, colour);
+    render_operation_.vertexData->vertexCount += QuadWriter::VERTEX_COUNT;
 }
 
 void UiTextArea::GrowVertexBuffer(const unsigned int letters){
@@ -558,22 +558,9 @@ void UiTextArea::GrowVertexBuffer(const unsigned int letters){
 
 void UiTextArea::CreateVertexBuffer(const unsigned int letters){
     max_letters_ = letters;
-    render_operation_.vertexData = new Ogre::VertexData;
-    render_operation_.vertexData->vertexStart = 0;
-    Ogre::VertexDeclaration* vertex_declaration = render_operation_.vertexData->vertexDeclaration;
-    size_t offset = 0;
-    vertex_declaration->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE);
-    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT4);
-    vertex_declaration->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
-    vertex_buffer_ = Ogre::HardwareBufferManager::getSingletonPtr()->createVertexBuffer(
-      vertex_declaration->getVertexSize(0), max_letters_ * 6,
-      Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false
+    vertex_buffer_ = QuadWriter::CreateBuffer(
+      render_operation_, max_letters_ * QuadWriter::VERTEX_COUNT
     );
-    render_operation_.vertexData->vertexBufferBinding->setBinding(0, vertex_buffer_);
-    render_operation_.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
-    render_operation_.useIndexes = false;
 }
 
 void UiTextArea::DestroyVertexBuffer(){

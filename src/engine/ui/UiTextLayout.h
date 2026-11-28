@@ -15,16 +15,15 @@
 
 #pragma once
 
-#include <array>
 #include <functional>
 #include <vector>
-#include <OgreColourValue.h>
 #include <OgreVector2.h>
+#include "engine/graphics/QuadWriter.h"
 #include "UiFont.h"
 #include "UiTextChar.h"
 
 /**
- * Decides where the characters of a text area go, and writes their vertices.
+ * Decides where the characters of a text area go.
  *
  * Positions are relative to the position of the text area, in pixels of the screen. Sizes of the
  * fonts, paddings and images are for a screen 720 pixels high, and are scaled to the real one.
@@ -32,11 +31,6 @@
 class UiTextLayout{
 
     public:
-
-        /**
-         * Number of values of a vertex: position (3), colour (4) and texture coordinates (2).
-         */
-        static const int VERTEX_SIZE = 9;
 
         /**
          * Where a text area is, and its sizes.
@@ -71,20 +65,7 @@ class UiTextLayout{
         /**
          * The rectangle of a character.
          */
-        struct Box{
-
-            /** Left side. */
-            float left;
-
-            /** Top side. */
-            float top;
-
-            /** Right side. */
-            float right;
-
-            /** Bottom side. */
-            float bottom;
-        };
+        typedef QuadWriter::Rectangle Box;
 
         /**
          * Constructor. The first character goes at the beginning of the first line.
@@ -143,23 +124,9 @@ class UiTextLayout{
          * @param[in] screen Size of the screen.
          * @return The top left, top right, bottom right and bottom left corners.
          */
-        static std::array<Ogre::Vector2, 4> ScreenCorners(
+        static QuadWriter::Corners ScreenCorners(
           const Box& box, const Ogre::Vector2& translate, const float rotation,
           const Ogre::Vector2& screen
-        );
-
-        /**
-         * Writes the two triangles of a rectangle with a part of a texture.
-         *
-         * @param[in,out] vertices Where to write 6 vertices. It's moved past them.
-         * @param[in] corners Corners of the rectangle, as returned by {@see ScreenCorners}.
-         * @param[in] texture The part of the texture, in the 0 to 1 range.
-         * @param[in] depth Depth of the vertices.
-         * @param[in] colour Colour of the vertices.
-         */
-        static void WriteQuad(
-          float*& vertices, const std::array<Ogre::Vector2, 4>& corners, const Box& texture,
-          const float depth, const Ogre::ColourValue& colour
         );
 
     private:

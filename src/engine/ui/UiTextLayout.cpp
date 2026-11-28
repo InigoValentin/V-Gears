@@ -78,11 +78,11 @@ float UiTextLayout::TextWidth(
     return std::max(longest, width);
 }
 
-std::array<Ogre::Vector2, 4> UiTextLayout::ScreenCorners(
+QuadWriter::Corners UiTextLayout::ScreenCorners(
   const Box& box, const Ogre::Vector2& translate, const float rotation,
   const Ogre::Vector2& screen
 ){
-    std::array<Ogre::Vector2, 4> corners{{
+    QuadWriter::Corners corners{{
       {box.left, box.top}, {box.right, box.top}, {box.right, box.bottom}, {box.left, box.bottom}
     }};
     float cos = 1;
@@ -99,22 +99,6 @@ std::array<Ogre::Vector2, 4> UiTextLayout::ScreenCorners(
         corner.y = -((y / screen.y) * 2 - 1);
     }
     return corners;
-}
-
-void UiTextLayout::WriteQuad(
-  float*& vertices, const std::array<Ogre::Vector2, 4>& corners, const Box& texture,
-  const float depth, const Ogre::ColourValue& colour
-){
-    const std::array<Ogre::Vector2, 4> coordinates{{
-      {texture.left, texture.top}, {texture.right, texture.top},
-      {texture.right, texture.bottom}, {texture.left, texture.bottom}
-    }};
-    for (const int corner : {0, 1, 2, 0, 2, 3}){
-        for (const float value : {
-          corners[corner].x, corners[corner].y, depth, colour.r, colour.g, colour.b, colour.a,
-          coordinates[corner].x, coordinates[corner].y
-        }) *vertices ++ = value;
-    }
 }
 
 float UiTextLayout::ScaleX(const float size) const{
