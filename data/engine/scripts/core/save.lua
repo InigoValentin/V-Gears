@@ -13,6 +13,9 @@ end
 -- @param slot The slot to save at (0-15).
 -- @param force If false, exisiting game data will not be overwritten if control keys are different.
 save_game = function(slot, force)
+    -- Only the slots that have something are written below, so what the savemap had before has to
+    -- be removed: used items, unequipped materia...
+    savemap_manager:clear_contents()
     savemap_manager:set_control_key(ControlKey)
     -- Settings of the config menu, and the colours of the windows.
     UiContainer.ConfigMenu:save_settings()

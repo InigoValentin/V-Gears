@@ -18,11 +18,14 @@
 #include <map>
 #include <string>
 #include "common/TypeDefine.h"
+#include "engine/save/SavemapData.h"
+
+class TiXmlElement;
 
 /**
  * A savemap.
  */
-class Savemap{
+class Savemap : private SavemapData{
 
     public:
 
@@ -35,15 +38,6 @@ class Savemap{
          * Destructor.
          */
         ~Savemap();
-
-        /**
-         * Assignment operator.
-         *
-         * Copies a savemap into another, including control data.
-         *
-         * @param[in] to_copy The savemap to copy from.
-         */
-        void operator = (const Savemap &to_copy);
 
         /**
          * Reads the savemap data from a file.
@@ -333,6 +327,15 @@ class Savemap{
         void SetCharacterStatus(
           const unsigned int id, const unsigned int status, const bool inflicted
         );
+
+        /**
+         * Empties the items, the key items, the materia of the inventory and of the equipment of
+         * the characters, and the data banks.
+         *
+         * Used before filling a savemap that has been saved before: only the slots that have something
+         * are set again.
+         */
+        void ClearContents();
 
         /**
          * Sets data in a data bank.
@@ -828,334 +831,109 @@ class Savemap{
     private:
 
         /**
-         * Maximum number of characters.
-         */
-        static constexpr unsigned int MAX_CHARACTERS = 11;
-
-        /**
-         * Maximum number of inventory slots.
-         */
-        static constexpr unsigned int MAX_ITEM_SLOTS = 500;
-
-        /**
-         * Maximum number of inventory slots for key items.
-         */
-        static constexpr unsigned int MAX_KEY_ITEM_SLOTS = 100;
-
-        /**
-         * Maximum number of materia slots.
-         */
-        static constexpr unsigned int MAX_MATERIA_SLOTS = 500;
-
-        /**
-         * Maximum number of materia slots in the stash.
-         */
-        static constexpr unsigned int MAX_STASH_SLOTS = 500;
-
-        /**
-         * Maximum number of materia slots in a weapon or armor.
-         */
-        static constexpr unsigned int MAX_EQUIP_SLOTS = 10;
-
-        /**
-         * Maximum number of skills in an Enemy Skill materia.
-         */
-        static constexpr unsigned int MAX_ENEMY_SKILLS = 32;
-
-        /**
-         * Maximum limit level.
-         */
-        static constexpr unsigned int MAX_LIMIT_LEVELS = 4;
-
-        /**
-         * Maximum limit techniques per level.
-         */
-        static constexpr unsigned int MAX_LIMIT_TECHNIQUES = 4;
-
-        /**
-         * Level at which the limit level is full.
-         */
-        static constexpr unsigned int MAX_LIMIT_BAR = 254;
-
-        /**
-         * Maximum number of party member.
-         */
-        static constexpr unsigned int MAX_PARTY_MEMBERS = 3;
-
-        /**
-         * Number of data banks.
-         */
-        static constexpr unsigned int BANK_COUNT = 16;
-
-        /**
-         * Number of addresses in each data bank.
-         */
-        static constexpr unsigned int BANK_ADDRESS_COUNT = 256;
-
-        /**
-         * Max colour component value (they are stored in a byte).
-         */
-        static constexpr unsigned int MAX_COLOUR = 255;
-
-        /**
-         * Location information.
+         * Writes the colours of the windows.
          *
-         * Used for fields and world map.
+         * @param[in] parent The element to add them to.
          */
-        struct Location{
-
-            /**
-             * X coordinate.
-             */
-            float x;
-
-            /**
-             * Y coordinate.
-             */
-            float y;
-
-            /**
-             * Z coordinate.
-             *
-             * Usually unused.
-             */
-            float z;
-
-            /**
-             * Triangle in the walkmesh;
-             */
-            unsigned int triangle;
-
-            /**
-             * Facing direction.
-             */
-            unsigned int angle;
-
-            /**
-             * Current field map.
-             *
-             * If null or empty, it means the player is in in the world map.
-             */
-            std::string field;
-
-            /**
-             * Location name. Used for the saveslot.
-             */
-            std::string name;
-        };
+        void WriteWindowColours(TiXmlElement& parent) const;
 
         /**
-         * A materia structure.
+         * Writes the money, the game time and the countdown.
+         *
+         * @param[in] parent The element to add them to.
          */
-        struct Materia{
-
-            /**
-             * Materia ID.
-             */
-            int id;
-
-            /**
-             * Total AP in the materia.
-             */
-            unsigned int ap;
-
-            /**
-             * Indicates if the materia is an enemy skill materia.
-             */
-            bool enemy_skill;
-
-            /**
-             * Learned enemy skills (only for Enemy Skill materia).
-             */
-            bool enemy_skill_learned[MAX_ENEMY_SKILLS];
-        };
+        void WriteTimes(TiXmlElement& parent) const;
 
         /**
-         * Item structure.
+         * Writes where the player is.
+         *
+         * @param[in] parent The element to add them to.
          */
-        struct Item{
-
-            /**
-             * Item ID.
-             */
-            int id;
-
-            /**
-             * Item stock.
-             */
-            unsigned int quantity;
-        };
+        void WriteLocation(TiXmlElement& parent) const;
 
         /**
-         * A character entri in the savemap.
+         * Writes the party.
+         *
+         * @param[in] parent The element to add them to.
          */
-        struct Character{
+        void WriteParty(TiXmlElement& parent) const;
 
-            /**
-             * A character stat.
-             */
-            struct Stat{
+        /**
+         * Writes the items and the key items.
+         *
+         * @param[in] parent The element to add them to.
+         */
+        void WriteItems(TiXmlElement& parent) const;
 
-                /**
-                 * Stat base value.
-                 */
-                unsigned int base;
+        /**
+         * Writes the settings.
+         *
+         * @param[in] parent The element to add them to.
+         */
+        void WriteSettings(TiXmlElement& parent) const;
 
-                /**
-                 * For STR, VIT, DEX and LCK, it means the source bonus. For HP and MP, it means
-                 * the current values.
-                 */
-                unsigned int extra;
-            };
+        /**
+         * Writes the data of the scripts.
+         *
+         * @param[in] parent The element to add them to.
+         */
+        void WriteDataBanks(TiXmlElement& parent) const;
 
-            /**
-             * A weapon or armor.
-             */
-            struct Equipment{
+        /**
+         * Reads the colours of the windows.
+         *
+         * @param[in] element The element to read.
+         */
+        void ReadWindowColours(TiXmlElement& element);
 
-                /**
-                 * Item ID of the weapon or armor.
-                 */
-                u16 id;
+        /**
+         * Reads the settings.
+         *
+         * @param[in] element The element to read.
+         */
+        void ReadSettings(TiXmlElement& element);
 
-                /**
-                 * Materia in the weapon/armor.
-                 */
-                Materia materia[MAX_EQUIP_SLOTS];
-            };
+        /**
+         * Reads where the player is.
+         *
+         * @param[in] element The element to read.
+         */
+        void ReadLocation(TiXmlElement& element);
 
-            /**
-             * Character ID, sequential.
-             */
-            unsigned int id;
+        /**
+         * Reads the party.
+         *
+         * @param[in] element The element to read.
+         */
+        void ReadParty(TiXmlElement& element);
 
-            /**
-             * Character ID, can change with the history. -1 to not use.
-             */
-            int char_id;
+        /**
+         * Reads the items.
+         *
+         * @param[in] element The element to read.
+         */
+        void ReadItems(TiXmlElement& element);
 
-            /**
-             * Indicates if the character has been unlocked for the PHS.
-             */
-            bool enabled;
+        /**
+         * Reads the key items.
+         *
+         * @param[in] element The element to read.
+         */
+        void ReadKeyItems(TiXmlElement& element);
 
-            /**
-             * Indicates if the character is locked in or out of the PHS.
-             */
-            bool locked;
+        /**
+         * Reads the characters.
+         *
+         * @param[in] element The element to read.
+         */
+        void ReadCharacters(TiXmlElement& element);
 
-            /**
-             * Character name.
-             */
-            std::string name;
-
-            /**
-             * Character level.
-             */
-            unsigned int level;
-
-            /**
-             * Enemies killed by the character.
-             */
-            unsigned int kills;
-
-            /**
-             * Indicates if the character is in the back_row;
-             */
-            bool back_row;
-
-            /**
-             * Total experience.
-             */
-            unsigned int exp;
-
-            /**
-             * Experience required to reach next level.
-             */
-            unsigned int exp_to_next;
-
-            /**
-             * STR stat.
-             */
-            Stat str;
-
-            /**
-             * VIT stat.
-             */
-            Stat vit;
-
-            /**
-             * MAG stat.
-             */
-            Stat mag;
-
-            /**
-             * SPR stat.
-             */
-            Stat spr;
-
-            /**
-             * DEX stat.
-             */
-            Stat dex;
-
-            /**
-             * LCK stat.
-             */
-            Stat lck;
-
-            /**
-             * HP stat.
-             */
-            Stat hp;
-
-            /**
-             * MP stat.
-             */
-            Stat mp;
-
-            /**
-             * Current limit level.
-             */
-            unsigned int limit_level;
-
-            /**
-             * Current limit bar.
-             */
-            unsigned int limit_bar;
-
-            /**
-             * Learned limits.
-             *
-             * Grouped by level and technique.
-             */
-            bool limits_learned[MAX_LIMIT_LEVELS][MAX_LIMIT_TECHNIQUES];
-
-            /**
-             * Uses of techniques in each limit level.
-             */
-            unsigned int limit_uses[MAX_LIMIT_LEVELS];
-
-            /**
-             * Equipped weapon;
-             */
-            Equipment weapon;
-
-            /**
-             * Equipped weapon;
-             */
-            Equipment armor;
-
-            /**
-             * Equipped accessory ID. -1 if none equipped.
-             */
-            int accessory;
-
-            /**
-             * Current status list.
-             */
-            std::vector<u8> status;
-        };
+        /**
+         * Reads the data of the scripts.
+         *
+         * @param[in] element The element to read.
+         */
+        void ReadDataBanks(TiXmlElement& element);
 
         /**
          * Indicates if the savemap is empty or contains actual data.

@@ -2,4 +2,7 @@
 vgears_sources(
     Savemap.cpp
     SavemapHandler.cpp
+    SavemapRead.cpp
+    SavemapValues.cpp
+    SavemapWrite.cpp
 )

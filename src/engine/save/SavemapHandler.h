@@ -91,6 +91,15 @@ class SavemapHandler : public Ogre::Singleton<SavemapHandler>{
         void Release();
 
         /**
+         * Empties the items, the key items, the materia of the inventory and of the equipment of
+         * the characters, and the data banks.
+         *
+         * To be called before writing the game into the current savemap, as only the slots that have
+         * something are written.
+         */
+        void ClearContents();
+
+        /**
          * Pushes data to the current savemap memory banks.
          *
          * @param[in] bank The memory bank.

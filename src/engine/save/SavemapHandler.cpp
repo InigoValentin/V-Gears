@@ -52,7 +52,8 @@ bool SavemapHandler::Save(unsigned int slot, const bool force){
       && current_savemap_->GetControlKey() != saved_savemaps_[slot]->GetControlKey()
     ) return false;
     else{
-        saved_savemaps_[slot] = current_savemap_;
+        // The slot keeps a copy: the current savemap changes with the next save.
+        *saved_savemaps_[slot] = *current_savemap_;
         saved_savemaps_[slot]->Write(slot, SAVE_PATH + std::to_string(slot) + ".xml");
         return true;
     }
@@ -66,8 +67,9 @@ bool SavemapHandler::Save(Savemap savemap, unsigned int slot, bool force){
       && savemap.GetControlKey() != saved_savemaps_[slot]->GetControlKey()
     ) return false;
     else{
+        if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
         *current_savemap_ = savemap;
-        saved_savemaps_[slot] = current_savemap_;
+        *saved_savemaps_[slot] = savemap;
         saved_savemaps_[slot]->Write(slot, SAVE_PATH + std::to_string(slot) + ".xml");
         return true;
     }
@@ -87,6 +89,11 @@ void SavemapHandler::ReadSavemaps(){
         saved_savemaps_.push_back(savemap);
     }
     savemaps_read_ = true;
+}
+
+void SavemapHandler::ClearContents(){
+    if (current_savemap_ == nullptr) current_savemap_ = new Savemap();
+    current_savemap_->ClearContents();
 }
 
 void SavemapHandler::SetData(const unsigned int bank, const unsigned int address, const int value){

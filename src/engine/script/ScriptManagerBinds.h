@@ -285,6 +285,7 @@ void ScriptManager::InitBinds(){
       "release", &SavemapHandler::Release,
       "get_current_savemap", &SavemapHandler::GetCurrentSavemap,
       "get_savemap", &SavemapHandler::GetSavemap,
+      "clear_contents", &SavemapHandler::ClearContents,
       "set_data", &SavemapHandler::SetData,
       "set_control_key", &SavemapHandler::SetControlKey,
       "set_window_colours", &SavemapHandler::SetWindowColours,
