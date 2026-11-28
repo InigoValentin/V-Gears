@@ -1,6 +1,11 @@
 # Sources of this folder (see vgears_sources in src/CMakeLists.txt).
 vgears_sources(
     BattleDataInstaller.cpp
+    BattleEffectInstaller.cpp
+    BattleMeshExporter.cpp
+    BattleModelInstaller.cpp
+    BattleModelTools.cpp
+    BattleSceneInstaller.cpp
     FieldDataInstaller.cpp
     FieldTextWriter.cpp
     KernelAttacks.cpp
@@ -15,6 +20,7 @@ vgears_sources(
     ModelsAndAnimationsDb.cpp
     MovieCamera.cpp
     ScopedLgp.cpp
+    SpellModelInstaller.cpp
     WindowFonts.cpp
     WorldInstaller.cpp
 )
