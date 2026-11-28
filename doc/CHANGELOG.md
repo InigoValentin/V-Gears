@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
 Changes since 0.4.0. Most of the work is in the data installer and in reorganizing the code, with the bugs found along the way.
 
