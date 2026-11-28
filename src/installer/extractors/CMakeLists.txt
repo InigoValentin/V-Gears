@@ -6,7 +6,11 @@ vgears_sources(
     BattleModelInstaller.cpp
     BattleModelTools.cpp
     BattleSceneInstaller.cpp
+    FieldBackgroundInstaller.cpp
     FieldDataInstaller.cpp
+    FieldMapWriter.cpp
+    FieldModelInstaller.cpp
+    FieldScriptInstaller.cpp
     FieldTextWriter.cpp
     KernelAttacks.cpp
     KernelCharacters.cpp

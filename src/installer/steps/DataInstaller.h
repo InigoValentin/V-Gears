@@ -27,6 +27,7 @@
 #include "installer/extractors/BattleDataInstaller.h"
 #include "installer/extractors/WorldInstaller.h"
 #include "installer/extractors/ModelsAndAnimationsDb.h"
+#include "installer/extractors/ScopedLgp.h"
 
 /**
  * The data installer.
