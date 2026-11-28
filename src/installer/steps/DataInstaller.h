@@ -105,14 +105,6 @@ class DataInstaller{
         };
 
         /**
-         * The scale factor for line point coordinates.
-         *
-         * When a LINE opcode is found in the game scripts, the line points X
-         * and Y coordinates must be scaled down by this factor.
-         */
-        static float LINE_SCALE_FACTOR;
-
-        /**
          * Installer constructor
          *
          * @param[in] disk_image Disk image with the original data to parse.
@@ -448,6 +440,106 @@ class DataInstaller{
              */
             DONE = 100,
         };
+
+        /**
+         * Writes a message to the installation output.
+         *
+         * @param[in] message The message.
+         */
+        void Say(const std::string& message);
+
+        /**
+         * Skips a part of the installation.
+         *
+         * @param[in] part What is skipped.
+         * @param[in] next The step to go on with.
+         */
+        void Skip(const std::string& part, const InstallationSteps next);
+
+        /**
+         * Goes to a step that is done several times, from its first substep.
+         *
+         * @param[in] substeps Number of times.
+         * @param[in] next The step.
+         */
+        void Repeat(const int substeps, const InstallationSteps next);
+
+        /**
+         * Counts a substep as done.
+         *
+         * @return True if it was the last one.
+         */
+        bool NextSubstep();
+
+        /**
+         * Runs a step of the preparation: the folders and the installers of each part.
+         */
+        void PreparationStep();
+
+        /**
+         * Creates the installers of each part.
+         */
+        void CreateInstallers();
+
+        /**
+         * Runs a step of the battle data: scenes, attacks, enemies and formations.
+         */
+        void BattleDataStep();
+
+        /**
+         * Runs a step of the battle models.
+         */
+        void BattleModelStep();
+
+        /**
+         * Runs a step of the spell and effect models.
+         */
+        void SpellModelStep();
+
+        /**
+         * Runs a step of the kernel data.
+         */
+        void KernelStep();
+
+        /**
+         * Extracts the initial savemap, with the data of the characters that join later.
+         */
+        void WriteInitialSaveMap();
+
+        /**
+         * Installs the fonts and the images.
+         */
+        void ImageStep();
+
+        /**
+         * Runs a step of the sound effects.
+         */
+        void SoundStep();
+
+        /**
+         * Runs a step of the music.
+         */
+        void MusicStep();
+
+        /**
+         * Runs a step of the field maps.
+         */
+        void FieldStep();
+
+        /**
+         * Runs a step of the field models.
+         */
+        void FieldModelStep();
+
+        /**
+         * Runs a step of the world map.
+         */
+        void WorldStep();
+
+        /**
+         * Waits for the conversions, writes the audio indexes and removes the temporary files.
+         */
+        void CleanStep();
 
         /**
          * Current installation status.
